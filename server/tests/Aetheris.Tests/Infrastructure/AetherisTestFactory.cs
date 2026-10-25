@@ -4,6 +4,8 @@ using Aetheris.Host.Auth;
 using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
 using Aetheris.Host.Security;
+using Aetheris.World;
+using Aetheris.World.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -114,6 +116,9 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
                 // when a migration account is configured for the development database.
                 [DatabaseOptions.MigrationConnectionStringKey] = ConnectionString,
                 [ClientOrigins.ConfigurationKey + ":0"] = ClientOrigin,
+
+                // The world tests create the world themselves, on a cleared database.
+                [WorldStartup.GenerateOnStartupKey] = "false",
             });
         });
 
@@ -148,6 +153,7 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
         AetherisDbContext dbContext = scope.ServiceProvider.GetRequiredService<AetherisDbContext>();
 
         await dbContext.Database.MigrateAsync();
+        await WorldDatabase.MigrateAsync(ConnectionString);
 
         await ResetDatabaseAsync(scope.ServiceProvider);
     }

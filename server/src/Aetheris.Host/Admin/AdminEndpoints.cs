@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Security.Claims;
+using Aetheris.Core.Configuration;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Security;
 using Aetheris.Core.Time;
@@ -8,6 +9,7 @@ using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Security;
+using Aetheris.World.Api;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -118,6 +120,10 @@ public static class AdminEndpoints
         secured.MapGet("/audit", ReadAuditAsync)
             .WithName("admin.audit_read")
             .RequireAuthorization(SecurityPolicies.AdminSupport);
+
+        // The actions of the modules share the same group, so they get the second factor,
+        // the rate limit and the audit record like the actions above.
+        secured.MapWorldAdminEndpoints();
 
         return endpoints;
     }

@@ -15,6 +15,11 @@ public static class AdminRoles
     public const string ClaimType = "aetheris:admin_role";
 
     /// <summary>
+    /// The claim type that carries the identifier of the administrator account.
+    /// </summary>
+    public const string AdminIdClaimType = "aetheris:admin_id";
+
+    /// <summary>
     /// The main role: every right, including the time multiplier.
     /// </summary>
     public const string Owner = "owner";

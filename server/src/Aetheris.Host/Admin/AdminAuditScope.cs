@@ -1,3 +1,4 @@
+using Aetheris.Core.Admin;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Security;
@@ -9,7 +10,7 @@ namespace Aetheris.Host.Admin;
 /// What the current administrator action changed, filled by the action and written to the
 /// audit log by <see cref="AdminAuditFilter"/>.
 /// </summary>
-public sealed class AdminAuditScope
+public sealed class AdminAuditScope : IAdminAuditRecorder
 {
     private readonly List<Func<Task>> _afterCommit = [];
 
@@ -33,12 +34,7 @@ public sealed class AdminAuditScope
     /// </summary>
     public IReadOnlyList<Func<Task>> AfterCommit => _afterCommit;
 
-    /// <summary>
-    /// Records what the action changed.
-    /// </summary>
-    /// <param name="target">The changed object.</param>
-    /// <param name="oldValue">The value before the change.</param>
-    /// <param name="newValue">The value after the change.</param>
+    /// <inheritdoc />
     public void Record(string target, string? oldValue, string? newValue)
     {
         Target = target;
@@ -46,11 +42,7 @@ public sealed class AdminAuditScope
         NewValue = newValue;
     }
 
-    /// <summary>
-    /// Schedules work that may only run after the change is stored, for example applying a
-    /// new configuration value in memory.
-    /// </summary>
-    /// <param name="action">The work.</param>
+    /// <inheritdoc />
     public void OnCommitted(Func<Task> action)
     {
         ArgumentNullException.ThrowIfNull(action);

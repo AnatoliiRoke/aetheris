@@ -14,6 +14,7 @@
     <ProjectReference Include="..\Aetheris.Rating\Aetheris.Rating.csproj" />
     <ProjectReference Include="..\Aetheris.Chat\Aetheris.Chat.csproj" />
     <ProjectReference Include="..\Aetheris.Admin\Aetheris.Admin.csproj" />
+    <ProjectReference Include="..\Aetheris.World\Aetheris.World.csproj" />
   </ItemGroup>
 
   <ItemGroup>

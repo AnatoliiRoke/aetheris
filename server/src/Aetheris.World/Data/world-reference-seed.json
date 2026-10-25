@@ -1,0 +1,752 @@
+{
+  "resource_groups": [
+    {
+      "code": "extractable",
+      "name_key": "world.resource_group.extractable",
+      "allowed_on_planet": true
+    },
+    {
+      "code": "crystal",
+      "name_key": "world.resource_group.crystal",
+      "allowed_on_planet": true
+    },
+    {
+      "code": "fuel",
+      "name_key": "world.resource_group.fuel",
+      "allowed_on_planet": true
+    },
+    {
+      "code": "ether",
+      "name_key": "world.resource_group.ether",
+      "allowed_on_planet": false
+    }
+  ],
+  "resources": [
+    {
+      "code": "iron",
+      "group": "extractable",
+      "name_key": "world.resource.iron"
+    },
+    {
+      "code": "titanium",
+      "group": "extractable",
+      "name_key": "world.resource.titanium"
+    },
+    {
+      "code": "copper",
+      "group": "extractable",
+      "name_key": "world.resource.copper"
+    },
+    {
+      "code": "iridium",
+      "group": "extractable",
+      "name_key": "world.resource.iridium"
+    },
+    {
+      "code": "quartzite",
+      "group": "crystal",
+      "name_key": "world.resource.quartzite"
+    },
+    {
+      "code": "rubium",
+      "group": "crystal",
+      "name_key": "world.resource.rubium"
+    },
+    {
+      "code": "sapphirite",
+      "group": "crystal",
+      "name_key": "world.resource.sapphirite"
+    },
+    {
+      "code": "obsidian",
+      "group": "crystal",
+      "name_key": "world.resource.obsidian"
+    },
+    {
+      "code": "deuterium",
+      "group": "fuel",
+      "name_key": "world.resource.deuterium"
+    },
+    {
+      "code": "plasma",
+      "group": "fuel",
+      "name_key": "world.resource.plasma"
+    },
+    {
+      "code": "ether",
+      "group": "ether",
+      "name_key": "world.resource.ether"
+    }
+  ],
+  "object_types": [
+    {
+      "code": "yellow_dwarf",
+      "object_class": "star",
+      "name_key": "world.object_type.yellow_dwarf",
+      "is_colonizable": false,
+      "generation_weight": 50
+    },
+    {
+      "code": "red_dwarf",
+      "object_class": "star",
+      "name_key": "world.object_type.red_dwarf",
+      "is_colonizable": false,
+      "generation_weight": 30
+    },
+    {
+      "code": "white_dwarf",
+      "object_class": "star",
+      "name_key": "world.object_type.white_dwarf",
+      "is_colonizable": false,
+      "generation_weight": 10
+    },
+    {
+      "code": "blue_giant",
+      "object_class": "star",
+      "name_key": "world.object_type.blue_giant",
+      "is_colonizable": false,
+      "generation_weight": 10
+    },
+    {
+      "code": "terrestrial",
+      "object_class": "planet",
+      "name_key": "world.object_type.terrestrial",
+      "is_colonizable": true,
+      "generation_weight": 30
+    },
+    {
+      "code": "volcanic",
+      "object_class": "planet",
+      "name_key": "world.object_type.volcanic",
+      "is_colonizable": true,
+      "generation_weight": 15
+    },
+    {
+      "code": "ice",
+      "object_class": "planet",
+      "name_key": "world.object_type.ice",
+      "is_colonizable": true,
+      "generation_weight": 20
+    },
+    {
+      "code": "desert",
+      "object_class": "planet",
+      "name_key": "world.object_type.desert",
+      "is_colonizable": true,
+      "generation_weight": 20
+    },
+    {
+      "code": "ocean",
+      "object_class": "planet",
+      "name_key": "world.object_type.ocean",
+      "is_colonizable": true,
+      "generation_weight": 15
+    },
+    {
+      "code": "gas_giant",
+      "object_class": "gas_giant",
+      "name_key": "world.object_type.gas_giant",
+      "is_colonizable": false,
+      "generation_weight": 1
+    },
+    {
+      "code": "field_ordinary",
+      "object_class": "asteroid_field",
+      "name_key": "world.object_type.field_ordinary",
+      "is_colonizable": false,
+      "generation_weight": 80,
+      "mass_min": 500000,
+      "mass_max": 1500000
+    },
+    {
+      "code": "field_rich",
+      "object_class": "asteroid_field",
+      "name_key": "world.object_type.field_rich",
+      "is_colonizable": false,
+      "generation_weight": 20,
+      "mass_min": 300000,
+      "mass_max": 1000000
+    },
+    {
+      "code": "nebula_standard",
+      "object_class": "nebula",
+      "name_key": "world.object_type.nebula_standard",
+      "is_colonizable": false,
+      "generation_weight": 1
+    }
+  ],
+  "size_classes": [
+    {
+      "code": "small",
+      "name_key": "world.size.small",
+      "generation_weight": 40,
+      "size_min": 60,
+      "size_max": 89
+    },
+    {
+      "code": "medium",
+      "name_key": "world.size.medium",
+      "generation_weight": 40,
+      "size_min": 90,
+      "size_max": 119
+    },
+    {
+      "code": "large",
+      "name_key": "world.size.large",
+      "generation_weight": 20,
+      "size_min": 120,
+      "size_max": 150
+    }
+  ],
+  "rule_groups": [
+    {
+      "object_type": "terrestrial",
+      "code": "metals",
+      "min_picks": 2,
+      "max_picks": 4,
+      "extra_pick_probability": 0.5,
+      "rules": [
+        {
+          "resource": "iron",
+          "weight": 40,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "titanium",
+          "weight": 25,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "copper",
+          "weight": 25,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "iridium",
+          "weight": 10,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        }
+      ]
+    },
+    {
+      "object_type": "terrestrial",
+      "code": "crystals",
+      "min_picks": 1,
+      "max_picks": 2,
+      "extra_pick_probability": 0.05,
+      "rules": [
+        {
+          "resource": "quartzite",
+          "weight": 40,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "rubium",
+          "weight": 25,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "sapphirite",
+          "weight": 25,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "obsidian",
+          "weight": 10,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        }
+      ]
+    },
+    {
+      "object_type": "volcanic",
+      "code": "metals",
+      "min_picks": 2,
+      "max_picks": 4,
+      "extra_pick_probability": 0.5,
+      "rules": [
+        {
+          "resource": "iron",
+          "weight": 30,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "titanium",
+          "weight": 30,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "copper",
+          "weight": 15,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "iridium",
+          "weight": 25,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        }
+      ]
+    },
+    {
+      "object_type": "volcanic",
+      "code": "crystals",
+      "min_picks": 1,
+      "max_picks": 2,
+      "extra_pick_probability": 0.05,
+      "rules": [
+        {
+          "resource": "quartzite",
+          "weight": 15,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "rubium",
+          "weight": 40,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "sapphirite",
+          "weight": 10,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "obsidian",
+          "weight": 35,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        }
+      ]
+    },
+    {
+      "object_type": "ice",
+      "code": "metals",
+      "min_picks": 2,
+      "max_picks": 4,
+      "extra_pick_probability": 0.5,
+      "rules": [
+        {
+          "resource": "iron",
+          "weight": 30,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "titanium",
+          "weight": 20,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "copper",
+          "weight": 35,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "iridium",
+          "weight": 15,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        }
+      ]
+    },
+    {
+      "object_type": "ice",
+      "code": "crystals",
+      "min_picks": 1,
+      "max_picks": 2,
+      "extra_pick_probability": 0.05,
+      "rules": [
+        {
+          "resource": "quartzite",
+          "weight": 30,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "rubium",
+          "weight": 10,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "sapphirite",
+          "weight": 50,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "obsidian",
+          "weight": 10,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        }
+      ]
+    },
+    {
+      "object_type": "desert",
+      "code": "metals",
+      "min_picks": 2,
+      "max_picks": 4,
+      "extra_pick_probability": 0.5,
+      "rules": [
+        {
+          "resource": "iron",
+          "weight": 35,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "titanium",
+          "weight": 30,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "copper",
+          "weight": 25,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "iridium",
+          "weight": 10,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        }
+      ]
+    },
+    {
+      "object_type": "desert",
+      "code": "crystals",
+      "min_picks": 1,
+      "max_picks": 2,
+      "extra_pick_probability": 0.05,
+      "rules": [
+        {
+          "resource": "quartzite",
+          "weight": 45,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "rubium",
+          "weight": 25,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "sapphirite",
+          "weight": 10,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "obsidian",
+          "weight": 20,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        }
+      ]
+    },
+    {
+      "object_type": "ocean",
+      "code": "metals",
+      "min_picks": 2,
+      "max_picks": 4,
+      "extra_pick_probability": 0.5,
+      "rules": [
+        {
+          "resource": "iron",
+          "weight": 30,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "titanium",
+          "weight": 25,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "copper",
+          "weight": 35,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "iridium",
+          "weight": 10,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        }
+      ]
+    },
+    {
+      "object_type": "ocean",
+      "code": "crystals",
+      "min_picks": 1,
+      "max_picks": 2,
+      "extra_pick_probability": 0.05,
+      "rules": [
+        {
+          "resource": "quartzite",
+          "weight": 30,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "rubium",
+          "weight": 20,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "sapphirite",
+          "weight": 40,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        },
+        {
+          "resource": "obsidian",
+          "weight": 10,
+          "coefficient_min": 0.5,
+          "coefficient_max": 1.5
+        }
+      ]
+    },
+    {
+      "object_type": "ice",
+      "code": "fuel",
+      "min_picks": 0,
+      "max_picks": 1,
+      "extra_pick_probability": 0.5,
+      "rules": [
+        {
+          "resource": "deuterium",
+          "weight": 1,
+          "coefficient_min": 0.2,
+          "coefficient_max": 0.6
+        }
+      ]
+    },
+    {
+      "object_type": "gas_giant",
+      "code": "fuel",
+      "min_picks": 1,
+      "max_picks": 1,
+      "extra_pick_probability": 0,
+      "rules": [
+        {
+          "resource": "deuterium",
+          "weight": 80,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.6
+        },
+        {
+          "resource": "plasma",
+          "weight": 20,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.6
+        }
+      ]
+    },
+    {
+      "object_type": "field_ordinary",
+      "code": "metals",
+      "min_picks": 2,
+      "max_picks": 4,
+      "extra_pick_probability": 0.5,
+      "rules": [
+        {
+          "resource": "iron",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.3
+        },
+        {
+          "resource": "titanium",
+          "weight": 25,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.3
+        },
+        {
+          "resource": "copper",
+          "weight": 25,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.3
+        },
+        {
+          "resource": "iridium",
+          "weight": 10,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.3
+        }
+      ]
+    },
+    {
+      "object_type": "field_ordinary",
+      "code": "crystals",
+      "min_picks": 1,
+      "max_picks": 2,
+      "extra_pick_probability": 0.3,
+      "rules": [
+        {
+          "resource": "quartzite",
+          "weight": 30,
+          "coefficient_min": 0.02,
+          "coefficient_max": 0.06
+        },
+        {
+          "resource": "rubium",
+          "weight": 25,
+          "coefficient_min": 0.02,
+          "coefficient_max": 0.06
+        },
+        {
+          "resource": "sapphirite",
+          "weight": 25,
+          "coefficient_min": 0.02,
+          "coefficient_max": 0.06
+        },
+        {
+          "resource": "obsidian",
+          "weight": 20,
+          "coefficient_min": 0.02,
+          "coefficient_max": 0.06
+        }
+      ]
+    },
+    {
+      "object_type": "field_rich",
+      "code": "metals",
+      "min_picks": 2,
+      "max_picks": 4,
+      "extra_pick_probability": 0.5,
+      "rules": [
+        {
+          "resource": "iron",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "titanium",
+          "weight": 25,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "copper",
+          "weight": 25,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "iridium",
+          "weight": 10,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        }
+      ]
+    },
+    {
+      "object_type": "field_rich",
+      "code": "crystals",
+      "min_picks": 2,
+      "max_picks": 3,
+      "extra_pick_probability": 0.4,
+      "rules": [
+        {
+          "resource": "quartzite",
+          "weight": 30,
+          "coefficient_min": 0.04,
+          "coefficient_max": 0.1
+        },
+        {
+          "resource": "rubium",
+          "weight": 25,
+          "coefficient_min": 0.04,
+          "coefficient_max": 0.1
+        },
+        {
+          "resource": "sapphirite",
+          "weight": 25,
+          "coefficient_min": 0.04,
+          "coefficient_max": 0.1
+        },
+        {
+          "resource": "obsidian",
+          "weight": 20,
+          "coefficient_min": 0.04,
+          "coefficient_max": 0.1
+        }
+      ]
+    },
+    {
+      "object_type": "field_rich",
+      "code": "ether",
+      "min_picks": 0,
+      "max_picks": 1,
+      "extra_pick_probability": 0.05,
+      "rules": [
+        {
+          "resource": "ether",
+          "weight": 1,
+          "coefficient_min": 0.01,
+          "coefficient_max": 0.03
+        }
+      ]
+    },
+    {
+      "object_type": "nebula_standard",
+      "code": "fuel",
+      "min_picks": 1,
+      "max_picks": 2,
+      "extra_pick_probability": 0.3,
+      "rules": [
+        {
+          "resource": "deuterium",
+          "weight": 70,
+          "coefficient_min": 0.2,
+          "coefficient_max": 0.5
+        },
+        {
+          "resource": "plasma",
+          "weight": 30,
+          "coefficient_min": 0.2,
+          "coefficient_max": 0.5
+        }
+      ]
+    },
+    {
+      "object_type": "nebula_standard",
+      "code": "ether",
+      "min_picks": 0,
+      "max_picks": 1,
+      "extra_pick_probability": 0.1,
+      "rules": [
+        {
+          "resource": "ether",
+          "weight": 1,
+          "coefficient_min": 0.01,
+          "coefficient_max": 0.05
+        }
+      ]
+    }
+  ]
+}

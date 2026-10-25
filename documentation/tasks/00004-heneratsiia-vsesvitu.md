@@ -1,6 +1,6 @@
 # Задача 00004 — Первинна генерація всесвіту і правила його існування
 
-> **Статус:** ЗАТВЕРДЖЕНА автором 25.10.2026 (питання по світу закрито), до виконання (створено 25.10.2026). Виконується після 00001 і 00002 (є ядро, конфігурація в базі, безпека).
+> **Статус:** ВИКОНАНА 26.10.2026 (затверджена автором 25.10.2026, створено 25.10.2026); результат у розділі «Результат виконання». Виконується після 00001 і 00002 (є ядро, конфігурація в базі, безпека).
 > **Етап:** 1 (production/01). Це перша задача з ігровою логікою: світ, у якому надалі живуть планети, флоти й ринок.
 > **Документи:** [game-design/09 Світ і карта](../game-design/09-svit-ta-karta.md), [game-design/03 Розвиток планет](../game-design/03-rozvytok-planet.md), [game-design/02 Економіка](../game-design/02-ekonomika-ta-resursy.md), [game-design/13 Онбордінг](../game-design/13-onbordynh-novachka.md), [game-design/14 Баланс](../game-design/14-balans-i-formuly.md), [tech/03 Модель даних](../tech/03-model-danykh.md), [tech/07 Планувальник](../tech/07-planuvalnyk-podii.md)
 
@@ -121,3 +121,52 @@
 2. ❓ Форма сектора і метрика відстаней (прості координати чи реалістична «карта зірок»): стартово прості координати; реалізм потім.
 3. ❓ Чи робити відразу рендер простої карти світу для перевірки (лише для розробки) окремою маленькою задачею.
 4. 💡 Усі числа вище це стартові значення для симулятора, не рішення про баланс.
+
+## Результат виконання (26.10.2026)
+
+### Що зроблено
+- **Новий модуль `server/src/Aetheris.World`** зі своїм `WorldDbContext` і міграцією `InitialWorld`. Таблиці: `galaxy`, `sector`, `star_system`, `celestial_object`, `planet`, `deposit`, `asteroid_field`, `field_composition`, `nebula`, `nebula_composition`, `start_planet_allocation`, `world_generation_log`; довідники `resource_group`, `resource_type`, `celestial_object_type`, `planet_size_class`, `generation_rule_group`, `generation_rule`. Усі таблиці світу мають `sector_id`; зв'язки `*_id`, списки `*_ids` (у C# `DepositIds`, `CompositionIds`, у JSON `deposit_ids`). Стартові довідники лежать у `Data/world-reference-seed.json` (дані, не код) і пишуться лише в порожню базу.
+- **Чистий детермінований генератор** `SectorGenerator.Generate(seed, name, config)`: власний xoshiro256**, зерно сектора виводиться із зерна галактики; системи з мінімальною відстанню, 12 орбіт, 3–9 тіл на внутрішніх орбітах, газові гіганти не в кожній системі, поле на зовнішній орбіті або вільно в секторі, мінімум полів на сектор, одна туманність (`in_nebula`, множник радара, заборона стрибка). Родовища й склад полів за групами правил (`min_picks` / `max_picks` / `extra_pick_probability`), «один кристал, рідко два», етер лише в полях і туманностях. `WorldConfigValidator` перевіряє конфігурацію перед генерацією.
+- **Конфігурація:** 38 параметрів `world.*` з межами (`WorldConfigKeys`), додані в `ConfigSeed`; числа в коді генерації відсутні (AETHERIS001: 0 попереджень на всьому рішенні).
+- **Правила існування:** `AllocateStartPlanet` (команда `POST /api/v1/world/start-planet` через конвеєр 00002; advisory-блокування гравця, `FOR UPDATE SKIP LOCKED` системи й планети з очікуванням, коли всі кандидати зайняті; ліміт новачків на систему; новачки ближче один до одного); чиста функція видобутку `FieldExtraction.Extract` (приклад автора, порода, повний трюм, «хто встиг, той забрав») і `IWorldModule.ExtractFromFieldAsync` з блокуванням рядка поля; порожнє поле зникає (`depleted_at`), подія `world.field_respawn` у `scheduled_event` додає поля до мінімуму сектора; фіксований час переліту в системі; тривимірні відстані між системами в координатах галактики; власник планети для перевірки власності (`planet`).
+- **Видимість:** інтерфейс `IWorldVisibility` (місце підключення радара); заглушка `OwnBodiesVisibility` — новачок бачить лише свою планету, `world.visibility.reveal_all` відкриває мапу для розробки.
+- **API гравця** (`/api/v1/world`, політика гравця й ліміт команд): довідники, сектори, системи сектора, вміст системи, вільні планети. **Адмінка** (група `/api/admin` з TOTP, лімітом і `admin_audit_log`; плюс `world_generation_log`): новий сектор на околиці зі зерном або без, перегенерація сектора без власників, статистика сектора.
+- **Початковий запуск:** сервер застосовує міграції World, записує довідники, створює галактику і 3 сектори (перший для новачків); повторний запуск нічого не змінює.
+- **Ядро й хост (мінімально, для модуля):** `ConfigParameterDefinition` перенесено в `Aetheris.Core.Configuration`; нові інтерфейси ядра `IAdminAuditRecorder`, `IDatabaseSession` (модулі працюють на з'єднанні й у транзакції запиту), `IEventScheduler` / `IScheduledEventHandler`; у хості `EfDatabaseSession`, `EfEventScheduler`, `ScheduledEventRunner` (події строго за ігровим часом, кожна у своїй транзакції, `failed` при помилці обробника) і `ScheduledEventService` (опитування з інтервалом `scheduler.poll_seconds`).
+- README доповнено розділом «Світ: як працює генерація і як змінити параметри».
+
+### Тести
+Усього **143** (123 тести сервера, 20 аналізаторів), усі зелені; нових 34. Критерії розділу 3:
+1. Детермінованість — `The_same_seed_gives_the_same_sector`.
+2. Інваріанти на 100 зернах (FsCheck) — `The_invariants_hold_for_any_seed`, на збереженому світі — `The_stored_world_keeps_the_invariants`.
+3. Розподіли на ≥ 1000 планет (допуск 0,03) — `The_types_and_sizes_follow_the_configured_weights`.
+4. Параметр у базі змінює генерацію — `A_parameter_changed_in_the_database_changes_the_generation`, `A_changed_parameter_changes_the_result`; AETHERIS001 зелений.
+5. Перший і повторний запуск — `The_first_start_creates_the_world_and_a_repeated_start_changes_nothing`.
+6. Вичерпання поля, нове поле подією на прискореному годиннику — `A_depleted_field_disappears_and_a_new_one_appears_by_a_scheduled_event`.
+7. Розширення галактики адміном — `The_owner_adds_a_sector_at_the_edge_and_the_action_is_logged`, `A_new_sector_lies_at_the_edge`.
+8. Стартова планета і 100 паралельних викликів — `The_start_body_is_a_free_body_of_the_start_type`, `Parallel_newcomers_never_share_a_body`.
+9. Продуктивність — `A_full_sector_is_generated_fast_and_a_system_is_read_fast` (сектор зі 150 систем з записом у базу ≈ 0,6–0,7 с при бюджеті 2 с; читання системи в середньому до 20 мс).
+10. Адмін-команди лише з роллю і 2FA, журнали — `Adding_a_sector_needs_the_owner_role_and_the_second_factor`, `Only_an_empty_sector_is_generated_again`.
+11. Новий ресурс і кристал даними — `A_new_resource_added_as_data_reaches_the_world`, `A_new_resource_added_to_the_tables_reaches_the_stored_world`.
+12. 3D — `The_distance_is_three_dimensional`, `The_distance_between_systems_uses_the_third_axis`, `A_sector_with_depth_uses_the_third_axis`.
+13. Іменування — `The_world_schema_follows_the_naming_rule` (схема, навігації, DTO, JSON).
+14. `dotnet build -c Release`, `dotnet test -c Release`, `dotnet format --verify-no-changes --no-restore` чисті; README доповнено.
+
+`NoGameTermsTests` оновлено: слова світу дозволені лише в `src/Aetheris.World` і `tests/Aetheris.Tests/World` (тест `The_world_domain_is_allowed_only_in_the_world_module`), решта коду під забороною; у seed дозволені префікси `scheduler.` і `world.` (останні лише з `WorldConfigKeys`). `ModuleIsolationTests` охоплює модуль World.
+
+### Відхилення від задачі
+- Планети й газові гіганти лежать в одній таблиці `planet` (газовий гігант — тип класу `gas_giant` з `is_colonizable = false`), спільна таблиця `celestial_object` тримає тип, орбіту й координати всіх об'єктів; склад туманності в окремій `nebula_composition`.
+- Вичерпане поле не видаляється, а позначається `depleted_at` і не показується в читаннях (історія для журналу).
+- Планувальник мінімальний (опитування таблиці `scheduled_event`), без купи в пам'яті на сектор із tech/07: цього досить для подій світу; повний планувальник окремою задачею.
+- «Згенерувати сектор із зерном» і «розширити галактику» — одна адмін-команда з необов'язковим зерном.
+- Читання світу — GET-ендпоїнти з політикою гравця й лімітом команд (без ідентифікатора запиту); через конвеєр команд іде стартова планета.
+- Коли сектори новачків заповнені, стартова планета береться в будь-якому іншому секторі (не обов'язково саме на околиці).
+- Тест конкурентності запускає 100 викликів не більше ніж по 32 одночасно: локальний PostgreSQL приймає близько 100 клієнтів загалом.
+
+### Що лишилось
+- Радар (будівля, радіус за рівнем) замість `OwnBodiesVisibility`; маскування й сканер (етап 2).
+- Команди флотів і видобутку викличуть `ExtractFromFieldAsync`; станції на газових гігантах (зараз лише ліміт у конфігурації).
+- Повний планувальник за tech/07 (купа в пам'яті, пріоритети типів), панель подій в адмінці.
+- Автоматичне розширення галактики за порогом зайнятості; клієнтська карта.
+- Рідкісний випадок: коли вільних систем майже немає, два паралельні виклики стартової планети можуть зустрітися на взаємному очікуванні; PostgreSQL перерве один із них, клієнт повторить запит з новим ідентифікатором.
+

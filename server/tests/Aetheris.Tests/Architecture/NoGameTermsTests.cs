@@ -13,6 +13,9 @@ namespace Aetheris.Tests.Architecture;
 /// <c>security.*</c> parameters of the core mechanisms.
 /// The module stubs required by task 00001, section 2.1 keep their project names; only
 /// those names are allowed.
+/// The World module of task 00004 is the first module with game rules: the words of its
+/// domain (bodies, resources, crystals) are allowed in its own project and in its own tests
+/// only. Every other file, the core and the host included, stays under the ban.
 /// </remarks>
 public sealed partial class NoGameTermsTests
 {
@@ -31,9 +34,20 @@ public sealed partial class NoGameTermsTests
     };
 
     /// <summary>
-    /// The prefixes that a seeded parameter key may have.
+    /// The prefixes that a seeded parameter key may have: the neutral test parameters, the
+    /// parameters of the core mechanisms and those of the modules with their own definitions.
     /// </summary>
-    private static readonly string[] AllowedSeedPrefixes = ["test.", "security."];
+    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world."];
+
+    /// <summary>
+    /// The folders, relative to the server root, where the words of the world domain are
+    /// allowed: the World module and its tests.
+    /// </summary>
+    private static readonly string[] WorldDomainFolders =
+    [
+        Path.Combine("src", "Aetheris.World") + Path.DirectorySeparatorChar,
+        Path.Combine("tests", "Aetheris.Tests", "World") + Path.DirectorySeparatorChar,
+    ];
 
     /// <summary>
     /// The file types that are scanned.
@@ -70,10 +84,11 @@ public sealed partial class NoGameTermsTests
     }
 
     /// <summary>
-    /// The seed only holds neutral test parameters and the parameters of the core mechanisms.
+    /// The seed only holds neutral test parameters, the parameters of the core mechanisms and
+    /// the parameters that the World module defines itself.
     /// </summary>
     [Fact]
-    public void The_seed_holds_only_test_and_security_parameters()
+    public void The_seed_holds_only_core_and_module_parameters()
     {
         List<string> foreignKeys = ConfigSeed.GetParameters()
             .Select(parameter => parameter.Key)
@@ -81,6 +96,35 @@ public sealed partial class NoGameTermsTests
             .ToList();
 
         Assert.True(foreignKeys.Count == 0, $"Seed parameters outside the core: {string.Join(", ", foreignKeys)}.");
+
+        List<string> worldKeysOutsideModule = ConfigSeed.GetParameters()
+            .Select(parameter => parameter.Key)
+            .Where(key => key.StartsWith("world.", StringComparison.Ordinal))
+            .Except(Aetheris.World.Configuration.WorldConfigKeys.Definitions.Select(definition => definition.Key), StringComparer.Ordinal)
+            .ToList();
+
+        Assert.True(
+            worldKeysOutsideModule.Count == 0,
+            $"World parameters not defined by the World module: {string.Join(", ", worldKeysOutsideModule)}.");
+    }
+
+    /// <summary>
+    /// The words of the world domain are allowed in the World module and its tests only; the
+    /// core, the host and the other modules are still scanned.
+    /// </summary>
+    [Fact]
+    public void The_world_domain_is_allowed_only_in_the_world_module()
+    {
+        string serverRoot = FindServerRoot();
+
+        Assert.True(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.World", "Generation", "SectorGenerator.cs")));
+        Assert.True(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "tests", "Aetheris.Tests", "World", "SectorGeneratorTests.cs")));
+        Assert.False(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Host", "Program.cs")));
+        Assert.False(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Core", "Commands", "Command.cs")));
+        Assert.False(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Planets", "PlanetsModule.cs")));
+        Assert.Contains(
+            Path.Combine(serverRoot, "src", "Aetheris.Host", "Program.cs"),
+            EnumerateScannedFiles(serverRoot));
     }
 
     /// <summary>
@@ -111,7 +155,15 @@ public sealed partial class NoGameTermsTests
             .Where(file => ScannedExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
             .Where(file => !IsBuildOutput(file))
             .Where(file => !string.Equals(Path.GetFileName(file), self, StringComparison.Ordinal))
-            .Where(file => !string.Equals(Path.GetFileName(file), "appsettings.Local.json", StringComparison.Ordinal));
+            .Where(file => !string.Equals(Path.GetFileName(file), "appsettings.Local.json", StringComparison.Ordinal))
+            .Where(file => !IsWorldDomainFile(serverRoot, file));
+    }
+
+    private static bool IsWorldDomainFile(string serverRoot, string file)
+    {
+        string relative = Path.GetRelativePath(serverRoot, file);
+
+        return WorldDomainFolders.Any(folder => relative.StartsWith(folder, StringComparison.Ordinal));
     }
 
     private static bool IsBuildOutput(string file)

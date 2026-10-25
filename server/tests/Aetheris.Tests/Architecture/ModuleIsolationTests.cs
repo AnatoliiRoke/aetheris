@@ -24,6 +24,7 @@ public sealed class ModuleIsolationTests
         "Aetheris.Rating",
         "Aetheris.Chat",
         "Aetheris.Admin",
+        "Aetheris.World",
     ];
 
     private readonly AetherisTestFactory _factory;
@@ -51,6 +52,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Rating")]
     [InlineData("Aetheris.Chat")]
     [InlineData("Aetheris.Admin")]
+    [InlineData("Aetheris.World")]
     public void A_module_does_not_reference_another_module(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -79,6 +81,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Rating")]
     [InlineData("Aetheris.Chat")]
     [InlineData("Aetheris.Admin")]
+    [InlineData("Aetheris.World")]
     public void A_module_exposes_exactly_one_public_contract(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -107,6 +110,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Rating")]
     [InlineData("Aetheris.Chat")]
     [InlineData("Aetheris.Admin")]
+    [InlineData("Aetheris.World")]
     public void The_public_contract_follows_the_naming_convention(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -140,6 +144,7 @@ public sealed class ModuleIsolationTests
         Assert.NotNull(services.GetService<Aetheris.Rating.IRatingModule>());
         Assert.NotNull(services.GetService<Aetheris.Chat.IChatModule>());
         Assert.NotNull(services.GetService<Aetheris.Admin.IAdminModule>());
+        Assert.NotNull(services.GetService<Aetheris.World.IWorldModule>());
     }
 
     /// <summary>

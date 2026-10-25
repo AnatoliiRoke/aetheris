@@ -1,3 +1,5 @@
+using Aetheris.Core.Security;
+
 namespace Aetheris.Host.Security;
 
 /// <summary>
@@ -61,5 +63,5 @@ public static class AetherisClaims
     public const string Totp = "totp";
 
     /// <summary>The claim that carries the identifier of the administrator account.</summary>
-    public const string AdminId = "aetheris:admin_id";
+    public const string AdminId = AdminRoles.AdminIdClaimType;
 }

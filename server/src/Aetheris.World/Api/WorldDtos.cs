@@ -1,0 +1,199 @@
+using System.Text.Json;
+using Aetheris.World.Geometry;
+
+namespace Aetheris.World.Api;
+
+/// <summary>
+/// The JSON settings of the world API: snake_case names, so a list of references reads
+/// <c>deposit_ids</c> (documentation/tech/08, rule 3).
+/// </summary>
+public static class WorldJson
+{
+    /// <summary>
+    /// Gets the serializer settings.
+    /// </summary>
+    public static JsonSerializerOptions Options { get; } = new(JsonSerializerDefaults.Web)
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower,
+    };
+}
+
+/// <summary>What the first start created.</summary>
+/// <param name="ReferenceSeeded">Whether the reference tables were filled.</param>
+/// <param name="GalaxyCreated">Whether the galaxy was created.</param>
+/// <param name="CreatedSectorIds">The sectors that were created.</param>
+public sealed record WorldBootstrapResult(bool ReferenceSeeded, bool GalaxyCreated, IReadOnlyList<int> CreatedSectorIds);
+
+/// <summary>A generated sector.</summary>
+/// <param name="Id">The sector.</param>
+/// <param name="Name">The name.</param>
+/// <param name="Seed">The seed.</param>
+/// <param name="LayoutIndex">The index on the layout spiral.</param>
+/// <param name="IsNewbie">Whether newcomers start there.</param>
+/// <param name="Origin">The origin in the galaxy.</param>
+/// <param name="SystemCount">The number of star systems.</param>
+public sealed record SectorSummary(int Id, string Name, long Seed, int LayoutIndex, bool IsNewbie, Point3 Origin, int SystemCount);
+
+/// <summary>The statistics of a sector for the admin panel.</summary>
+/// <param name="SectorId">The sector.</param>
+/// <param name="Name">The name.</param>
+/// <param name="Seed">The seed.</param>
+/// <param name="IsNewbie">Whether newcomers start there.</param>
+/// <param name="SystemCount">The star systems.</param>
+/// <param name="ObjectCountsByType">The celestial objects by type code.</param>
+/// <param name="BodyCount">The bodies on orbits.</param>
+/// <param name="FreeColonizableCount">The bodies that a player may still take.</param>
+/// <param name="OwnedCount">The bodies with an owner.</param>
+/// <param name="FieldCount">The fields that exist.</param>
+/// <param name="FieldMass">The total mass of those fields.</param>
+/// <param name="NebulaCount">The nebulae.</param>
+public sealed record SectorStatistics(
+    int SectorId,
+    string Name,
+    long Seed,
+    bool IsNewbie,
+    int SystemCount,
+    IReadOnlyDictionary<string, int> ObjectCountsByType,
+    int BodyCount,
+    int FreeColonizableCount,
+    int OwnedCount,
+    int FieldCount,
+    long FieldMass,
+    int NebulaCount);
+
+/// <summary>The start body of a player.</summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="CelestialObjectId">Its celestial object.</param>
+/// <param name="SystemId">The star system.</param>
+/// <param name="SectorId">The sector.</param>
+/// <param name="AlreadyAllocated">Whether the player had it before this call.</param>
+public sealed record StartPlanetResult(long PlanetId, long CelestialObjectId, long SystemId, int SectorId, bool AlreadyAllocated);
+
+/// <summary>A sector as the client sees it.</summary>
+/// <param name="Id">The sector.</param>
+/// <param name="Name">The name.</param>
+/// <param name="X">The x coordinate of the origin.</param>
+/// <param name="Y">The y coordinate of the origin.</param>
+/// <param name="Z">The z coordinate of the origin.</param>
+/// <param name="IsNewbie">Whether newcomers start there.</param>
+public sealed record SectorDto(int Id, string Name, double X, double Y, double Z, bool IsNewbie);
+
+/// <summary>A star system as the client sees it.</summary>
+/// <param name="Id">The system.</param>
+/// <param name="SectorId">The sector.</param>
+/// <param name="Number">The number within the sector.</param>
+/// <param name="Name">The name.</param>
+/// <param name="X">The x coordinate within the sector.</param>
+/// <param name="Y">The y coordinate within the sector.</param>
+/// <param name="Z">The z coordinate within the sector.</param>
+/// <param name="InNebula">Whether the system lies inside a nebula.</param>
+public sealed record SystemDto(long Id, int SectorId, int Number, string Name, double X, double Y, double Z, bool InNebula);
+
+/// <summary>A celestial object as the client sees it.</summary>
+/// <param name="Id">The celestial object.</param>
+/// <param name="SectorId">The sector.</param>
+/// <param name="SystemId">The star system, if any.</param>
+/// <param name="ObjectTypeId">The type.</param>
+/// <param name="ObjectClass">The class of the type.</param>
+/// <param name="Orbit">The orbit, if any.</param>
+/// <param name="Name">The name.</param>
+/// <param name="X">The x coordinate within the sector.</param>
+/// <param name="Y">The y coordinate within the sector.</param>
+/// <param name="Z">The z coordinate within the sector.</param>
+/// <param name="PlanetId">The body row, for a planet or a gas giant.</param>
+/// <param name="SizeClassId">The size class of a body.</param>
+/// <param name="Size">The size of a body.</param>
+/// <param name="OwnerPlayerId">The owner of a body.</param>
+/// <param name="StationLimit">The largest number of stations, for a gas giant.</param>
+/// <param name="DepositIds">The deposits of a body.</param>
+/// <param name="AsteroidFieldId">The field row, for a field.</param>
+/// <param name="Mass">The mass that is left in a field.</param>
+/// <param name="NebulaId">The nebula row, for a nebula.</param>
+/// <param name="Radius">The radius of a nebula.</param>
+/// <param name="CompositionIds">The composition of a field or a nebula.</param>
+public sealed record ObjectDto(
+    long Id,
+    int SectorId,
+    long? SystemId,
+    int ObjectTypeId,
+    string ObjectClass,
+    int? Orbit,
+    string Name,
+    double X,
+    double Y,
+    double Z,
+    long? PlanetId,
+    int? SizeClassId,
+    int? Size,
+    string? OwnerPlayerId,
+    int? StationLimit,
+    IReadOnlyList<long> DepositIds,
+    long? AsteroidFieldId,
+    long? Mass,
+    long? NebulaId,
+    double? Radius,
+    IReadOnlyList<long> CompositionIds);
+
+/// <summary>A deposit of a body.</summary>
+/// <param name="Id">The deposit.</param>
+/// <param name="PlanetId">The body.</param>
+/// <param name="ResourceId">The resource.</param>
+/// <param name="Coefficient">The coefficient.</param>
+public sealed record DepositDto(long Id, long PlanetId, int ResourceId, decimal Coefficient);
+
+/// <summary>A share of the composition of a field or a nebula.</summary>
+/// <param name="Id">The share.</param>
+/// <param name="AsteroidFieldId">The field, if the share belongs to one.</param>
+/// <param name="NebulaId">The nebula, if the share belongs to one.</param>
+/// <param name="ResourceId">The resource.</param>
+/// <param name="Coefficient">The share, from 0 to 1.</param>
+public sealed record CompositionDto(long Id, long? AsteroidFieldId, long? NebulaId, int ResourceId, decimal Coefficient);
+
+/// <summary>The content of a star system.</summary>
+/// <param name="System">The system.</param>
+/// <param name="Objects">The visible objects.</param>
+/// <param name="Deposits">The deposits the objects name.</param>
+/// <param name="Compositions">The composition shares the objects name.</param>
+public sealed record SystemContentDto(
+    SystemDto System,
+    IReadOnlyList<ObjectDto> Objects,
+    IReadOnlyList<DepositDto> Deposits,
+    IReadOnlyList<CompositionDto> Compositions);
+
+/// <summary>A free body that a player may take.</summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="CelestialObjectId">Its celestial object.</param>
+/// <param name="SystemId">The star system.</param>
+/// <param name="SectorId">The sector.</param>
+/// <param name="ObjectTypeId">The type.</param>
+/// <param name="Orbit">The orbit.</param>
+/// <param name="Name">The name.</param>
+/// <param name="SizeClassId">The size class.</param>
+/// <param name="Size">The size.</param>
+public sealed record FreePlanetDto(
+    long PlanetId,
+    long CelestialObjectId,
+    long SystemId,
+    int SectorId,
+    int ObjectTypeId,
+    int? Orbit,
+    string Name,
+    int SizeClassId,
+    int Size);
+
+/// <summary>A row of a reference table, for the client to name the identifiers.</summary>
+/// <param name="Id">The identifier.</param>
+/// <param name="Code">The code.</param>
+/// <param name="NameKey">The localisation key.</param>
+/// <param name="GroupCode">The group or class code, if the table has one.</param>
+public sealed record ReferenceDto(int Id, string Code, string NameKey, string? GroupCode);
+
+/// <summary>The reference tables of the world.</summary>
+/// <param name="Resources">The resource types.</param>
+/// <param name="ObjectTypes">The object types.</param>
+/// <param name="SizeClasses">The size classes.</param>
+public sealed record WorldReferenceDto(
+    IReadOnlyList<ReferenceDto> Resources,
+    IReadOnlyList<ReferenceDto> ObjectTypes,
+    IReadOnlyList<ReferenceDto> SizeClasses);

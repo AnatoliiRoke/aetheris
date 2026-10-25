@@ -1,3 +1,4 @@
+using Aetheris.Core.Admin;
 using Aetheris.Core.Commands;
 using Aetheris.Core.Security;
 using Aetheris.Host.Admin;
@@ -97,6 +98,7 @@ public static class SecurityServiceCollectionExtensions
         services.AddSingleton<IAccountEmailSender, LoggingAccountEmailSender>();
         services.AddScoped<AdminAccountService>();
         services.AddScoped<AdminAuditScope>();
+        services.AddScoped<IAdminAuditRecorder>(serviceProvider => serviceProvider.GetRequiredService<AdminAuditScope>());
 
         return services;
     }

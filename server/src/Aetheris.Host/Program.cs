@@ -1,6 +1,8 @@
 using Aetheris.Admin;
 using Aetheris.Chat;
 using Aetheris.Core.Configuration;
+using Aetheris.Core.Data;
+using Aetheris.Core.Scheduling;
 using Aetheris.Core.Time;
 using Aetheris.Economy;
 using Aetheris.Fleet;
@@ -12,10 +14,14 @@ using Aetheris.Host.Data;
 using Aetheris.Host.Health;
 using Aetheris.Host.Observability;
 using Aetheris.Host.Realtime;
+using Aetheris.Host.Scheduling;
 using Aetheris.Host.Security;
 using Aetheris.Market;
 using Aetheris.Planets;
 using Aetheris.Rating;
+using Aetheris.World;
+using Aetheris.World.Api;
+using Aetheris.World.Data;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -105,6 +111,10 @@ string connectionString = DatabaseOptions.GetConnectionString(builder.Configurat
 builder.Services.AddDbContext<AetherisDbContext>(options =>
     AetherisDbContextSetup.Configure(options, connectionString));
 
+// The contexts of the modules work on the connection of the main context and join its
+// transaction, so a request commits as one.
+builder.Services.AddScoped<IDatabaseSession, EfDatabaseSession>();
+
 // ---------------------------------------------------------------------------------------------
 // Security: identity, policies, rate limits, command pipeline, admin panel (task 00002)
 // ---------------------------------------------------------------------------------------------
@@ -121,6 +131,13 @@ builder.Services.AddSingleton(_ =>
     return new GameClock(now, now);
 });
 builder.Services.AddSingleton<IGameClock>(sp => sp.GetRequiredService<GameClock>());
+
+// ---------------------------------------------------------------------------------------------
+// Event scheduler (documentation/tech/07)
+// ---------------------------------------------------------------------------------------------
+builder.Services.AddScoped<IEventScheduler, EfEventScheduler>();
+builder.Services.AddSingleton<ScheduledEventRunner>();
+builder.Services.AddHostedService<ScheduledEventService>();
 
 // ---------------------------------------------------------------------------------------------
 // Realtime
@@ -141,7 +158,7 @@ builder.Services.AddHealthChecks()
     .AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
 
 // ---------------------------------------------------------------------------------------------
-// Modules (stubs, no game logic yet)
+// Modules
 // ---------------------------------------------------------------------------------------------
 builder.Services.AddSingleton<IEconomyModule, EconomyModule>();
 builder.Services.AddSingleton<IPlanetsModule, PlanetsModule>();
@@ -150,6 +167,7 @@ builder.Services.AddSingleton<IMarketModule, MarketModule>();
 builder.Services.AddSingleton<IRatingModule, RatingModule>();
 builder.Services.AddSingleton<IChatModule, ChatModule>();
 builder.Services.AddSingleton<IAdminModule, AdminModule>();
+builder.Services.AddWorldModule();
 
 WebApplication app = builder.Build();
 
@@ -169,9 +187,11 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 
     startupLogger.LogInformation("Applying database migrations...");
 
+    AetherisDbContext mainContext = scope.ServiceProvider.GetRequiredService<AetherisDbContext>();
+
     if (migrationConnectionString is null)
     {
-        await scope.ServiceProvider.GetRequiredService<AetherisDbContext>().Database.MigrateAsync().ConfigureAwait(false);
+        await mainContext.Database.MigrateAsync().ConfigureAwait(false);
     }
     else
     {
@@ -181,6 +201,9 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
         await using AetherisDbContext migrationContext = new(migrationOptions.Options);
         await migrationContext.Database.MigrateAsync().ConfigureAwait(false);
     }
+
+    // Every module with its own tables applies its migrations the same way.
+    await WorldDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
 
@@ -192,6 +215,18 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     // The protection limits are read from the configuration, so it is loaded before the
     // first request instead of waiting for the background reload.
     await scope.ServiceProvider.GetRequiredService<ConfigReloader>().ReloadAsync().ConfigureAwait(false);
+
+    // The first start creates the galaxy and its initial sectors; a later start finds them
+    // and changes nothing (task 00004, section 2.6).
+    if (app.Configuration.GetValue(WorldStartup.GenerateOnStartupKey, true))
+    {
+        WorldBootstrapResult world = await scope.ServiceProvider.GetRequiredService<IWorldModule>().EnsureWorldAsync().ConfigureAwait(false);
+
+        startupLogger.LogInformation(
+            "World ready: galaxy created {GalaxyCreated}, new sectors {Sectors}.",
+            world.GalaxyCreated,
+            world.CreatedSectorIds.Count);
+    }
 }
 
 if (AdminCommandLine.IsCommand(args))
@@ -218,6 +253,7 @@ app.MapGet("/api/v1/ping", () => Results.Ok(new { status = "ok" }));
 
 app.MapAuthEndpoints();
 app.MapAdminEndpoints();
+app.MapWorldEndpoints();
 app.MapCommands();
 
 await app.RunAsync().ConfigureAwait(false);
