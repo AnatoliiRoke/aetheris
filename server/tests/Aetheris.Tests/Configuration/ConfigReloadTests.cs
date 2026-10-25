@@ -1,5 +1,6 @@
 using Aetheris.Core.Configuration;
 using Aetheris.Host.Configuration;
+using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Tests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -42,18 +43,18 @@ public sealed class ConfigReloadTests : IClassFixture<AetherisTestFactory>
         using IServiceScope scope = _factory.Services.CreateScope();
         AetherisDbContext dbContext = scope.ServiceProvider.GetRequiredService<AetherisDbContext>();
 
-        await SetParameterAsync(dbContext, "7").ConfigureAwait(false);
+        await SetParameterAsync(dbContext, "7");
 
         ConfigReloadService reloadService = scope.ServiceProvider.GetRequiredService<ConfigReloadService>();
-        await reloadService.ReloadAsync().ConfigureAwait(false);
+        await reloadService.ReloadAsync(TestContext.Current.CancellationToken);
 
         IGameConfig config = scope.ServiceProvider.GetRequiredService<IGameConfig>();
 
         Assert.Equal(7, config.GetInt64(ParameterKey));
 
-        await SetParameterAsync(dbContext, "9").ConfigureAwait(false);
+        await SetParameterAsync(dbContext, "9");
 
-        await reloadService.ReloadAsync().ConfigureAwait(false);
+        await reloadService.ReloadAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(9, config.GetInt64(ParameterKey));
     }
@@ -82,11 +83,11 @@ public sealed class ConfigReloadTests : IClassFixture<AetherisTestFactory>
         using IServiceScope scope = _factory.Services.CreateScope();
         AetherisDbContext dbContext = scope.ServiceProvider.GetRequiredService<AetherisDbContext>();
 
-        await SetParameterAsync(dbContext, "3").ConfigureAwait(false);
+        await SetParameterAsync(dbContext, "3");
 
         IConfigParameterStore store = scope.ServiceProvider.GetRequiredService<IConfigParameterStore>();
         IReadOnlyList<KeyValuePair<string, ConfigParameter>> values =
-            await store.ReadAllAsync().ConfigureAwait(false);
+            await store.ReadAllAsync(TestContext.Current.CancellationToken);
 
         ConfigParameter? parameter = values
             .Where(entry => entry.Key == ParameterKey)
@@ -101,7 +102,7 @@ public sealed class ConfigReloadTests : IClassFixture<AetherisTestFactory>
     {
         ConfigParameterEntity? existing = await dbContext.ConfigParameters
             .FirstOrDefaultAsync(parameter => parameter.Key == ParameterKey)
-            .ConfigureAwait(false);
+            ;
 
         if (existing is null)
         {
@@ -121,6 +122,6 @@ public sealed class ConfigReloadTests : IClassFixture<AetherisTestFactory>
             existing.UpdatedAt = DateTimeOffset.UtcNow;
         }
 
-        await dbContext.SaveChangesAsync().ConfigureAwait(false);
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 }

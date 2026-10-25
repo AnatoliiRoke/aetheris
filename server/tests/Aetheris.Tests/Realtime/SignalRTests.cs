@@ -1,7 +1,7 @@
 using Aetheris.Host.Realtime;
 using Aetheris.Tests.Infrastructure;
-using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aetheris.Tests.Realtime;
@@ -11,6 +11,7 @@ namespace Aetheris.Tests.Realtime;
 /// </summary>
 /// <remarks>
 /// This is acceptance criterion 5 of task 00001.
+/// The client connects through the in-memory test server, so no real port is used.
 /// </remarks>
 public sealed class SignalRTests : IClassFixture<AetherisTestFactory>
 {
@@ -36,32 +37,46 @@ public sealed class SignalRTests : IClassFixture<AetherisTestFactory>
     [Fact]
     public async Task A_client_receives_a_test_event_with_a_sequence_number()
     {
-        string hubUrl = _factory.Server.BaseAddress
-            ?? throw new InvalidOperationException("The test server has no base address.");
+        WebSocketClient webSocketClient = _factory.Server.CreateWebSocketClient();
 
         await using HubConnection connection = new HubConnectionBuilder()
-            .WithUrl(new Uri(hubUrl, GameHub.Route), options =>
-                options.Transports = HttpTransportType.WebSockets)
+            .WithUrl(new Uri(_factory.Server.BaseAddress, GameHub.Route), options =>
+            {
+                options.WebSocketFactory = async (_, cancellationToken) =>
+                {
+                    WebSocket socket = await webSocketClient.ConnectAsync(
+                        new Uri(_factory.Server.BaseAddress, GameHub.Route),
+                        cancellationToken);
+
+                    return socket;
+                };
+            })
             .Build();
 
-        await connection.StartAsync().ConfigureAwait(false);
+        await connection.StartAsync(TestContext.Current.CancellationToken);
 
         TaskCompletionSource<GameEventEnvelope> received = new(
             TaskCreationOptions.RunContinuationsAsynchronously);
 
-        await using IDisposable subscription = connection.On<GameEventEnvelope>(
+        using IDisposable subscription = connection.On<GameEventEnvelope>(
             GameEventPublisher.ReceiveMethod,
-            envelope => received.TrySetResult(envelope)).ConfigureAwait(false);
+            envelope => received.TrySetResult(envelope));
 
-        await connection.InvokeAsync("PublishTestEvent", "test_event", "{\"value\":1}").ConfigureAwait(false);
+        await connection.InvokeAsync(
+            "PublishTestEvent",
+            "test_event",
+            "{\"value\":1}",
+            TestContext.Current.CancellationToken);
 
-        Task completed = await Task.WhenAny(received.Task, Task.Delay(ReceiveTimeout)).ConfigureAwait(false);
+        Task completed = await Task.WhenAny(
+            received.Task,
+            Task.Delay(ReceiveTimeout, TestContext.Current.CancellationToken));
 
         Assert.True(
             completed == received.Task,
             $"No event was received within {ReceiveTimeout.TotalSeconds:0} seconds.");
 
-        GameEventEnvelope envelope = await received.Task.ConfigureAwait(false);
+        GameEventEnvelope envelope = await received.Task;
 
         Assert.True(envelope.Seq > 0, "The event sequence number must be positive.");
         Assert.Equal("test_event", envelope.Type);
@@ -71,9 +86,8 @@ public sealed class SignalRTests : IClassFixture<AetherisTestFactory>
     /// <summary>
     /// Two consecutive events receive strictly increasing sequence numbers.
     /// </summary>
-    /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task Event_sequence_numbers_increase()
+    public void Event_sequence_numbers_increase()
     {
         GameEventPublisher publisher = _factory.Services.GetRequiredService<GameEventPublisher>();
 

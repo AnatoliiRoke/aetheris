@@ -33,11 +33,11 @@ public sealed class HealthEndpointTests : IClassFixture<AetherisTestFactory>
     {
         using HttpClient client = _factory.CreateClient();
 
-        HttpResponseMessage response = await client.GetAsync("/health").ConfigureAwait(false);
+        HttpResponseMessage response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        string body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         Assert.Contains("Healthy", body, StringComparison.OrdinalIgnoreCase);
     }
@@ -51,9 +51,9 @@ public sealed class HealthEndpointTests : IClassFixture<AetherisTestFactory>
     {
         using HttpClient client = _factory.CreateClient();
 
-        HttpResponseMessage response = await client.GetAsync("/health").ConfigureAwait(false);
+        HttpResponseMessage response = await client.GetAsync("/health", TestContext.Current.CancellationToken);
 
-        string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        string body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         Assert.Contains("database", body, StringComparison.OrdinalIgnoreCase);
     }

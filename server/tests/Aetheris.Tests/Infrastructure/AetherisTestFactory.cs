@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Aetheris.Tests.Infrastructure;
 
@@ -73,21 +74,12 @@ public sealed class AetherisTestFactory : WebApplicationFactory<Program>, IAsync
     /// Creates the test database schema.
     /// </summary>
     /// <returns>A task that completes when the schema is ready.</returns>
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         using IServiceScope scope = Services.CreateScope();
         AetherisDbContext dbContext = scope.ServiceProvider.GetRequiredService<AetherisDbContext>();
 
-        await dbContext.Database.MigrateAsync().ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Cleans the test database between test runs.
-    /// </summary>
-    /// <returns>A task that completes when the database is clean.</returns>
-    public async Task DisposeAsync()
-    {
-        await base.DisposeAsync().ConfigureAwait(false);
+        await dbContext.Database.MigrateAsync();
     }
 
     private static void RemoveDatabaseRegistrations(IServiceCollection services)

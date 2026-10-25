@@ -14,6 +14,14 @@
   </PropertyGroup>
 
   <!--
+    The test project uses Microsoft.Testing.Platform (xunit v3). The .NET 10 SDK runs it
+    through the new `dotnet test` experience, enabled in global.json.
+  -->
+  <PropertyGroup>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+  </PropertyGroup>
+
+  <!--
     Magic-number analyzer (task 00001, section 2.4).
     Initially a warning only; it can be promoted to an error once the
     balance parameters are fully externalised.

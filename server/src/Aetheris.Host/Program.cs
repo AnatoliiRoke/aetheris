@@ -133,6 +133,7 @@ app.UseRouting();
 app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
 {
     Predicate = _ => true,
+    ResponseWriter = WriteHealthResponse,
 });
 
 app.MapHub<GameHub>(GameHub.Route);
@@ -140,6 +141,33 @@ app.MapHub<GameHub>(GameHub.Route);
 app.MapGet("/api/v1/ping", () => Results.Ok(new { status = "ok" }));
 
 app.Run();
+
+/// <summary>
+/// Writes the health report as JSON, including the state of every check.
+/// </summary>
+/// <param name="context">The health check context.</param>
+/// <param name="report">The health report.</param>
+/// <returns>A task that completes when the response has been written.</returns>
+static Task WriteHealthResponse(HttpContext context, HealthReport report)
+{
+    context.Response.ContentType = "application/json; charset=utf-8";
+
+    var payload = new
+    {
+        status = report.Status.ToString(),
+        totalDuration = report.TotalDuration.TotalMilliseconds,
+        checks = report.Entries.Select(entry => new
+        {
+            name = entry.Key,
+            status = entry.Value.Status.ToString(),
+            description = entry.Value.Description,
+            duration = entry.Value.Duration.TotalMilliseconds,
+            data = entry.Value.Data,
+        }),
+    };
+
+    return context.Response.WriteAsJsonAsync(payload);
+}
 
 /// <summary>
 /// Entry point marker, used by the integration test host.
