@@ -34,11 +34,16 @@ public static class SecurityServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">The application configuration.</param>
+    /// <param name="environment">The hosting environment.</param>
     /// <returns>The same collection.</returns>
-    public static IServiceCollection AddAetherisSecurity(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAetherisSecurity(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(environment);
 
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<SecuritySettings>();
@@ -54,8 +59,14 @@ public static class SecurityServiceCollectionExtensions
             options.HeaderName = AuthCookies.CsrfHeader;
             options.Cookie.Name = AuthCookies.Csrf;
             options.Cookie.HttpOnly = true;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             options.Cookie.SameSite = SameSiteMode.Strict;
+
+            // The anti-forgery service refuses to work over plain HTTP when its cookie must be
+            // secure. The development server runs on http://localhost, so there the cookie
+            // follows the request; everywhere else HTTPS is enforced and the cookie is secure.
+            options.Cookie.SecurePolicy = environment.IsDevelopment()
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
         });
 
         services.AddCors();

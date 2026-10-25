@@ -31,6 +31,12 @@ public sealed record ConfirmEmailRequest(string? UserId, string? Token);
 public sealed record ForgotPasswordRequest(string? Email);
 
 /// <summary>
+/// The request of a new confirmation e-mail.
+/// </summary>
+/// <param name="Email">The e-mail address.</param>
+public sealed record ResendConfirmationRequest(string? Email);
+
+/// <summary>
 /// The reset of a password.
 /// </summary>
 /// <param name="UserId">The account.</param>
@@ -138,6 +144,19 @@ public sealed class ForgotPasswordRequestValidator : AbstractValidator<ForgotPas
     /// <summary>Initializes a new instance of the <see cref="ForgotPasswordRequestValidator"/> class.</summary>
     /// <param name="settings">The security settings.</param>
     public ForgotPasswordRequestValidator(SecuritySettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        RuleFor(request => request.Email).AccountEmail(settings);
+    }
+}
+
+/// <summary>Validates <see cref="ResendConfirmationRequest"/>.</summary>
+public sealed class ResendConfirmationRequestValidator : AbstractValidator<ResendConfirmationRequest>
+{
+    /// <summary>Initializes a new instance of the <see cref="ResendConfirmationRequestValidator"/> class.</summary>
+    /// <param name="settings">The security settings.</param>
+    public ResendConfirmationRequestValidator(SecuritySettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
 

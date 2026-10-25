@@ -116,6 +116,51 @@ public sealed class SecurityHeadersTests
     }
 
     /// <summary>
+    /// The development server runs on plain HTTP; a signed-in player still gets an
+    /// anti-forgery token there and can send state-changing requests.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_csrf_token_works_over_plain_http_in_development()
+    {
+        TestAccount player = await TestAccounts.RegisterConfirmedAsync(_factory);
+        string session = await HubConnections.GetSessionCookieAsync(_factory, player);
+
+        // Browsers send secure cookies to http://localhost; the test client does not, so the
+        // cookies are passed by hand, as a browser would.
+        using HttpClient client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("http://localhost"),
+            HandleCookies = false,
+        });
+
+        using HttpRequestMessage csrfRequest = new(HttpMethod.Get, AuthEndpoints.Prefix + "/csrf");
+        csrfRequest.Headers.Add("Cookie", session);
+        HttpResponseMessage csrf = await client.SendAsync(csrfRequest, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, csrf.StatusCode);
+
+        string csrfCookie = csrf.Headers.GetValues("Set-Cookie")
+            .Select(cookie => cookie.Split(';')[0])
+            .Single(cookie => cookie.StartsWith(AuthCookies.Csrf + "=", StringComparison.Ordinal));
+        string token = System.Text.Json.JsonDocument
+            .Parse(await csrf.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
+            .RootElement.GetProperty("token").GetString()!;
+
+        using HttpRequestMessage command = new(HttpMethod.Post, EchoCommand.RoutePath)
+        {
+            Content = new StringContent("{\"message\":\"hello\"}", Encoding.UTF8, "application/json"),
+        };
+        command.Headers.Add("Cookie", $"{session}; {csrfCookie}");
+        command.Headers.Add(AuthCookies.CsrfHeader, token);
+        command.Headers.Add(AuthCookies.IdempotencyHeader, Guid.NewGuid().ToString());
+
+        HttpResponseMessage response = await client.SendAsync(command, TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    /// <summary>
     /// A body over the configured size is refused before it is read.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>

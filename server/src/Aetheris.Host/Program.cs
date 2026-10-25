@@ -109,7 +109,7 @@ builder.Services.AddDbContext<AetherisDbContext>(options =>
 // Security: identity, policies, rate limits, command pipeline, admin panel (task 00002)
 // ---------------------------------------------------------------------------------------------
 builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
-builder.Services.AddAetherisSecurity(builder.Configuration);
+builder.Services.AddAetherisSecurity(builder.Configuration, builder.Environment);
 
 // ---------------------------------------------------------------------------------------------
 // Game clock

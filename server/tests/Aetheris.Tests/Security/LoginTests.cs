@@ -269,6 +269,48 @@ public sealed class LoginTests
         Assert.Equal(GameErrorCodes.ValidationFailed, await TestAccounts.ReadErrorAsync(response));
     }
 
+    /// <summary>
+    /// A new confirmation e-mail goes only to an account that still waits for it, and the
+    /// answer is the same for every address.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_new_confirmation_email_is_sent_only_to_an_unconfirmed_account()
+    {
+        TestAccount unconfirmed = await TestAccounts.RegisterAsync(_factory);
+        TestAccount confirmed = await TestAccounts.RegisterConfirmedAsync(_factory);
+
+        using HttpClient client = _factory.CreateBrowserClient();
+
+        foreach (string email in new[] { unconfirmed.Email, confirmed.Email, TestAccounts.NewEmail() })
+        {
+            HttpResponseMessage response = await client.PostAsJsonAsync(
+                AuthEndpoints.Prefix + "/resend-confirmation",
+                new { email },
+                TestContext.Current.CancellationToken);
+
+            Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+        }
+
+        Assert.Equal(2, _factory.Emails.Sent.Count(email => email.Address == unconfirmed.Email && email.Kind == AccountEmailKinds.Confirmation));
+        Assert.Equal(1, _factory.Emails.Sent.Count(email => email.Address == confirmed.Email && email.Kind == AccountEmailKinds.Confirmation));
+    }
+
+    /// <summary>
+    /// The client learns from the server whether the Google sign-in is enabled; without
+    /// credentials it is not.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_providers_say_that_google_is_off_without_credentials()
+    {
+        using HttpClient client = _factory.CreateBrowserClient();
+
+        string body = await client.GetStringAsync(AuthEndpoints.Prefix + "/providers", TestContext.Current.CancellationToken);
+
+        Assert.Equal("{\"google\":false}", body);
+    }
+
     private static Task<HttpResponseMessage> LoginAsync(HttpClient client, string email, string password) =>
         client.PostAsJsonAsync(
             AuthEndpoints.Prefix + "/login",

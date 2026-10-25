@@ -45,6 +45,7 @@ public static class AuthEndpoints
 
         group.MapGet("/csrf", GetCsrfToken);
         group.MapPost("/register", RegisterAsync);
+        group.MapPost("/resend-confirmation", ResendConfirmationAsync);
         group.MapPost("/confirm-email", ConfirmEmailAsync);
         group.MapPost("/login", LoginAsync);
         group.MapPost("/refresh", RefreshAsync);
@@ -52,6 +53,7 @@ public static class AuthEndpoints
         group.MapPost("/forgot-password", ForgotPasswordAsync);
         group.MapPost("/reset-password", ResetPasswordAsync);
         group.MapGet("/me", GetMe).RequireAuthorization(SecurityPolicies.Player);
+        group.MapGet("/providers", GetProvidersAsync);
         group.MapGet("/google", StartGoogleAsync);
         group.MapGet("/google/complete", CompleteGoogleAsync);
 
@@ -102,6 +104,27 @@ public static class AuthEndpoints
             httpContext.RequestAborted);
 
         await securityLog.WriteAsync(SecurityEventTypes.AccountRegistered, httpContext, user.Id);
+
+        return Accepted();
+    }
+
+    private static async Task<IResult> ResendConfirmationAsync(
+        ResendConfirmationRequest request,
+        HttpContext httpContext,
+        UserManager<IdentityUser> userManager,
+        IAccountEmailSender emailSender)
+    {
+        IdentityUser? user = await userManager.FindByEmailAsync(request.Email!);
+
+        // Only an account that still waits for its confirmation gets an e-mail; the answer is
+        // the same in every case, so it does not tell which addresses are registered.
+        if (user is { EmailConfirmed: false })
+        {
+            string token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            await emailSender.SendAsync(
+                new AccountEmail(user.Id, user.Email!, AccountEmailKinds.Confirmation, token),
+                httpContext.RequestAborted);
+        }
 
         return Accepted();
     }
@@ -267,6 +290,13 @@ public static class AuthEndpoints
 
     private static IResult GetMe(ClaimsPrincipal principal) =>
         Results.Ok(new { userId = principal.GetPlayerId() });
+
+    private static async Task<IResult> GetProvidersAsync(IAuthenticationSchemeProvider schemes)
+    {
+        bool google = await schemes.GetSchemeAsync(GoogleDefaults.AuthenticationScheme) is not null;
+
+        return Results.Ok(new { google });
+    }
 
     private static async Task<IResult> StartGoogleAsync(
         string? returnUrl,
