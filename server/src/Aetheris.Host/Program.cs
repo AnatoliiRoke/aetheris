@@ -13,6 +13,7 @@ using Aetheris.Host.Health;
 using Aetheris.Host.Realtime;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
@@ -40,6 +41,7 @@ builder.Services.Configure<DatabaseOptions>(builder.Configuration.GetSection(Dat
 builder.Services.AddSingleton<GameConfig>();
 builder.Services.AddSingleton<IGameConfig>(sp => sp.GetRequiredService<GameConfig>());
 builder.Services.AddScoped<IConfigParameterStore, EfConfigParameterStore>();
+builder.Services.AddSingleton<ConfigReloader>();
 builder.Services.AddHostedService<ConfigReloadService>();
 
 // ---------------------------------------------------------------------------------------------

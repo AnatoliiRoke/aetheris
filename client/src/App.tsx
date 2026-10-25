@@ -1,122 +1,85 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useRef, useState } from 'react';
+import { GameRenderer } from './game/GameRenderer';
+import { serverConfig } from './config/server';
 
-function App() {
-  const [count, setCount] = useState(0)
+/**
+ * Root component.
+ *
+ * Task 00001 provides an empty canvas and a connection check; the game screens arrive with
+ * later tasks.
+ */
+export default function App() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [status, setStatus] = useState<'checking' | 'ok' | 'error'>('checking');
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const renderer = new GameRendererHolder(container);
+
+    void (async () => {
+      await renderer.create();
+    })();
+
+    return () => {
+      renderer.destroy();
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    void (async () => {
+      try {
+        const response = await fetch(`${serverConfig.apiBaseUrl}/health`, {
+          signal: controller.signal,
+        });
+
+        setStatus(response.ok ? 'ok' : 'error');
+      } catch {
+        if (!controller.signal.aborted) {
+          setStatus('error');
+        }
+      }
+    })();
+
+    return () => controller.abort();
+  }, []);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
+      <div ref={containerRef} className="app__canvas" />
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <header className="app__header">
+        <h1 className="app__title">AETHERIS</h1>
+        <span className={`app__status app__status--${status}`}>
+          {status === 'checking' ? 'підключення…' : status === 'ok' ? 'сервер доступний' : 'сервер недоступний'}
+        </span>
+      </header>
+    </div>
+  );
 }
 
-export default App
+/**
+ * Keeps the PixiJS renderer and its lifecycle together.
+ */
+class GameRendererHolder {
+  private renderer: GameRenderer | null = null;
+  private readonly container: HTMLElement;
+
+  constructor(container: HTMLElement) {
+    this.container = container;
+  }
+
+  async create(): Promise<void> {
+    this.renderer = await GameRenderer.create(this.container);
+  }
+
+  destroy(): void {
+    this.renderer?.destroy();
+    this.renderer = null;
+  }
+}

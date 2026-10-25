@@ -45,7 +45,7 @@ public sealed class ConfigReloadTests : IClassFixture<AetherisTestFactory>
 
         await SetParameterAsync(dbContext, "7");
 
-        ConfigReloadService reloadService = scope.ServiceProvider.GetRequiredService<ConfigReloadService>();
+        ConfigReloader reloadService = scope.ServiceProvider.GetRequiredService<ConfigReloader>();
         await reloadService.ReloadAsync(TestContext.Current.CancellationToken);
 
         IGameConfig config = scope.ServiceProvider.GetRequiredService<IGameConfig>();

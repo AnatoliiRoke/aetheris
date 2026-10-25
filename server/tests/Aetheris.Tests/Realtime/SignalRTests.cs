@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using Aetheris.Host.Realtime;
 using Aetheris.Tests.Infrastructure;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -11,7 +12,8 @@ namespace Aetheris.Tests.Realtime;
 /// </summary>
 /// <remarks>
 /// This is acceptance criterion 5 of task 00001.
-/// The client connects through the in-memory test server, so no real port is used.
+/// The client talks to the in-memory test server: HTTP requests go through the test
+/// server handler and the WebSocket through its WebSocket client, so no real port is used.
 /// </remarks>
 public sealed class SignalRTests : IClassFixture<AetherisTestFactory>
 {
@@ -42,6 +44,8 @@ public sealed class SignalRTests : IClassFixture<AetherisTestFactory>
         await using HubConnection connection = new HubConnectionBuilder()
             .WithUrl(new Uri(_factory.Server.BaseAddress, GameHub.Route), options =>
             {
+                options.HttpMessageHandlerFactory = _ => _factory.Server.CreateHandler();
+
                 options.WebSocketFactory = async (_, cancellationToken) =>
                 {
                     WebSocket socket = await webSocketClient.ConnectAsync(
