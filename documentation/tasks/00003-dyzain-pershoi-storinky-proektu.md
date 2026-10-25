@@ -73,28 +73,116 @@
 
 Правила: фон завжди темний; світлі плями лише для акценту й світіння; контраст тексту не нижчий за WCAG AA.
 
-## 5. Перелік 2D-малюнків і промпти для них (✅ вимога автора)
+## 5. Перелік 2D-малюнків і промпти (✅ вимога автора)
 
-У Design на місці кожного малюнка ставимо **заглушку з ідентифікатором** (`ART-01` ...). Малюнки генеруємо окремо за промптами нижче (англійською), потім підставляємо. Загальний суфікс для всіх: `painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark`.
+У Design на місці кожного малюнка стоїть заглушка з ідентифікатором. Малюнки генеруємо окремо: **кожен промпт нижче готовий, копіюється цілком, нічого дописувати не треба** (англійською, суфікс стилю вже всередині). Готові файли зберігаємо в `documentation/art-local/images/` під ідентифікатором (наприклад `ART-07.webp`).
 
-| ID | Де | Розмір | Промпт |
-|---|---|---|---|
-| ART-01 | Hero, фон | 1920×1000, широкий | `Epic wide space scene: a large ocean planet with a glowing atmosphere in the foreground left, a small fleet of sleek spaceships flying toward it, distant nebula in teal and violet, layered stars for parallax, empty space on the right for text` + суфікс |
-| ART-02 | Hero, шар зірок | 1920×1000, прозорий PNG | `Seamless transparent starfield layer, small and medium stars, very subtle colored dust` + суфікс |
-| ART-03 | Картка «Розвиток планет» | 480×320 | `A colony on a rocky planet seen from orbit: mining towers, domes, glowing lights on the night side` + суфікс |
-| ART-04 | Картка «Конструктор кораблів» | 480×320 | `A starship blueprint on a dark holographic table, ship hull with glowing module slots` + суфікс |
-| ART-05 | Картка «Ринок» | 480×320 | `A busy space trade station with cargo ships docking, crates and glowing signs without text` + суфікс |
-| ART-06 | Картка «Тактичні бої» | 480×320 | `Two small fleets exchanging laser fire in space, shield bubbles flashing, orange-red explosions` + суфікс |
-| ART-07 | Раса Террани | 400×500 | `Terran warship: gray metal hull with blue accents, angular naval silhouette, bridge and hull numbers, side view` + суфікс |
-| ART-08 | Раса Кварр | 400×500 | `Kvarr warship: crystalline faceted hull, hexagonal armor plates, amber and terracotta colors, fortress-like, side view` + суфікс |
-| ART-09 | Раса Сколар | 400×500 | `Skolar warship: sharp predatory asymmetric blades, red and black, aggressive raider, side view` + суфікс |
-| ART-10 | Раса Нексар | 400×500 | `Nexar warship: smooth geometric hull, glowing cyan lines and rings, white and cyan, high-tech, side view` + суфікс |
-| ART-11 | Скріншот 1–3 (заглушки) | 1280×720 | `Stylized game UI screenshot placeholder: top resource bar, planet cards, dark panels` (генерує Design як макет UI, не картинка) |
-| ART-12 | Планети для рейтингу й карток (6 типів) | 256×256, прозорі | `Round planet, [earth-like / volcanic / icy / desert / ocean / gas giant] with atmosphere glow, painted texture, transparent background` + суфікс |
-| ART-13 | Новини (мініатюри ×3) | 400×225 | `Abstract space scene for a news card: [update / event / patch notes], simple composition, one focal object` + суфікс |
-| ART-14 | Фон блоків і футера | 1920×600 | `Subtle dark nebula background with soft teal and violet clouds, very low contrast, suitable behind text` + суфікс |
-| ART-15 | Вхід/реєстрація (бічна картинка) | 600×800 | `Lone starship leaving an orbital station toward a bright planet at dawn, vertical composition` + суфікс |
-| ART-16 | Лого | SVG | Текстове «AETHERIS», без малюнка (тимчасово), Inter Bold, літерний інтервал +4% |
+**ART-01**: Hero, фон, 1920×1000
+```
+Epic wide space scene: a large ocean planet with a glowing atmosphere in the foreground left, a small fleet of sleek spaceships flying toward it, distant nebula in teal and violet, layered stars, empty space on the right for text. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-02**: Hero, шар зірок (прозорий PNG), 1920×1000
+```
+Seamless transparent starfield layer, small and medium stars, very subtle colored dust. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-03**: Картка «Розвиток планет», 480×320
+```
+A colony on a rocky planet seen from orbit: mining towers, domes, glowing lights on the night side. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-04**: Картка «Конструктор кораблів», 480×320
+```
+A starship blueprint on a dark holographic table, ship hull with glowing module slots. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-05**: Картка «Ринок», 480×320
+```
+A busy space trade station with cargo ships docking, crates and glowing signs without any text. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-06**: Картка «Тактичні бої», 480×320
+```
+Two small fleets exchanging laser fire in space, shield bubbles flashing, orange-red explosions. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-07**: Раса Террани, 400×500
+```
+Terran warship: gray metal hull with blue accents, angular naval silhouette, bridge and hull numbers, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-08**: Раса Кварр, 400×500
+```
+Kvarr warship: crystalline faceted hull, hexagonal armor plates, amber and terracotta colors, fortress-like, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-09**: Раса Сколар, 400×500
+```
+Skolar warship: sharp predatory asymmetric blades, red and black, aggressive raider, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-10**: Раса Нексар, 400×500
+```
+Nexar warship: smooth geometric hull, glowing cyan lines and rings, white and cyan, high-tech, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-12a**: Планета: земного типу, 256×256, прозорий фон
+```
+Round earth-like planet with oceans, green continents and white clouds, atmosphere glow, transparent background. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-12b**: Планета: вулканічна, 256×256, прозорий фон
+```
+Round volcanic planet with dark crust, glowing lava cracks and ash clouds, atmosphere glow, transparent background. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-12c**: Планета: крижана, 256×256, прозорий фон
+```
+Round icy planet with white and pale blue surface, frozen cracks, thin atmosphere glow, transparent background. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-12d**: Планета: пустельна, 256×256, прозорий фон
+```
+Round desert planet with orange and sand dunes, thin dusty atmosphere glow, transparent background. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-12e**: Планета: океанічна, 256×256, прозорий фон
+```
+Round ocean planet fully covered by deep blue water with swirling clouds, atmosphere glow, transparent background. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-12f**: Планета: газовий гігант, 256×256, прозорий фон
+```
+Round gas giant with colorful horizontal storm bands and a large vortex, faint rings, transparent background. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-13a**: Новини: мініатюра 1 (оновлення), 400×225
+```
+Abstract space scene for a game update news card: a glowing gear and a starship in orbit, simple composition, one focal object. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-13b**: Новини: мініатюра 2 (подія), 400×225
+```
+Abstract space scene for a game event news card: a comet passing a planet, simple composition, one focal object. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-13c**: Новини: мініатюра 3 (спільнота), 400×225
+```
+Abstract space scene for a community news card: several small ships flying together toward a bright star, simple composition. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-14**: Фон блоків і футера, 1920×600
+```
+Subtle dark nebula background with soft teal and violet clouds, very low contrast, suitable behind text. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-15**: Вхід/реєстрація, бічна картинка, 600×800
+```
+Lone starship leaving an orbital station toward a bright planet at dawn, vertical composition. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-11** (скріншоти гри) і **ART-16** (лого) не генеруються: скріншоти це макет інтерфейсу з Design, лого текстове «AETHERIS» шрифтом Inter Bold.
 
 ## 6. Промпт для Design (англійською, передати як є)
 
@@ -108,7 +196,7 @@ Visual style: painted 2D, beautiful and atmospheric. Dark UI only. Use these col
 Page structure, top to bottom: (1) header: logo, menu (About, Races, Ranking, News, Help), language switch UA/EN, buttons "Sign in" and "Play"; (2) hero: big space scene, headline, 1-2 sentences, primary button "Play for free", secondary "Sign in"; (3) "About the game": 4 cards with illustrations (planet development, ship constructor, market, tactical battles); (4) "Races": 4 cards with ship illustration, race color and mood; (5) "Screenshots": gallery of 4 frames; (6) "Ranking": top-10 players table (place, name, race, score) and a "Full ranking" button; (7) "News": 3 cards (date, title, excerpt, "Read more"); (8) FAQ accordion with 5-6 questions; (9) footer: language, terms, privacy policy, contacts, social links, version.
 Also design the auth screens: sign in (email, password, "Forgot password?", "Continue with Google"), sign up (email, password, display name, terms checkbox), an error state, and a "Check your email" screen.
 
-Illustrations: do NOT draw them. Put a labeled placeholder (ART-01 ... ART-16) with the correct size and aspect ratio wherever an illustration goes; I will supply the final painted images separately. Use this ID list: ART-01 hero background, ART-02 star layer, ART-03..06 the four "About" cards, ART-07..10 race ships, ART-11 screenshots, ART-12 planet icons, ART-13 news thumbnails, ART-14 section background, ART-15 auth side image, ART-16 logo.
+Illustrations: do NOT draw them. Put a labeled placeholder (ART-01 ... ART-16, with letter suffixes for ART-12 and ART-13) with the correct size and aspect ratio wherever an illustration goes; I will supply the final painted images separately. Use this ID list: ART-01 hero background, ART-02 star layer, ART-03..06 the four "About" cards, ART-07..10 race ships, ART-11 screenshots, ART-12a..f six planet types, ART-13a..c news thumbnails, ART-14 section background, ART-15 auth side image, ART-16 logo.
 
 Requirements: two layouts, desktop 1440-1920 px and mobile 360-430 px (hamburger menu, tap targets at least 44 px, no horizontal scroll); WCAG AA contrast; color is never the only carrier of information; UI copy in Ukrainian, short and clear for a newcomer, with an English variant of the menu and buttons; all data are made-up placeholders (player names, news), no real people or brands. Output a design-tokens table (colors, fonts, spacing, radii, shadows) and a list of components.
 ```
@@ -119,7 +207,7 @@ Requirements: two layouts, desktop 1440-1920 px and mobile 360-430 px (hamburger
 3. Експорт макетів (PNG) у `documentation/ui-art/design/`.
 4. Опис компонентів (картка, кнопка, таблиця рейтингу, картка новини, форма) у `documentation/ui-art/design/components.md`.
 5. Посилання на макет у `documentation/ui-art/design/README.md`.
-6. Остаточні малюнки ART-01…ART-15 (за промптами розділу 5) складаються в `documentation/art-local/images/`, назви файлів за ідентифікаторами.
+6. Остаточні малюнки ART-01…ART-15 (за промптами розділу 5; ART-12 і ART-13 з літерами) складаються в `documentation/art-local/images/`, назви файлів за ідентифікаторами.
 
 ## 8. Критерії приймання
 1. Усі блоки розділу 2 присутні на обох макетах.

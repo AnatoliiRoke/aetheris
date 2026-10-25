@@ -176,6 +176,30 @@ VALUES ('test.hello_multiplier', '2', 1, now(), 'seed');
 
 Зміна в базі підхоплюється без перезапуску та без перезбірки.
 
+### Поточні параметри кредитів
+
+Заведені 25.10.2026 за формулами `documentation/game-design/14-balans-i-formuly.md`:
+
+| Ключ | Значення | Що задає |
+|---|---|---|
+| `economy.credits.population_per_credit` | 10 | Жителів на 1 кредит/год (`кредити/год = населення / 10`) |
+| `economy.credits.starting_capital` | 1000 | Стартовий капітал гравця |
+| `economy.credits.fleet_upkeep_per_ship_hour` | 1 | Базова вартість утримання корабля за годину |
+| `economy.credits.flight_minimum_balance` | 0 | Мінімум кредитів, нижче якого флот не літає |
+
+```sql
+-- Змінити значення
+UPDATE config_parameter
+SET value = '15', version = version + 1, updated_at = now()
+WHERE key = 'economy.credits.population_per_credit';
+```
+
+Сервер підхопить зміну протягом 30 секунд. Перевірити без очікування:
+
+```bash
+psql -d aetheris_dev -c "SELECT key, value, version FROM config_parameter ORDER BY key;"
+```
+
 ---
 
 ## Змінні середовища
