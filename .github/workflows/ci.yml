@@ -57,7 +57,17 @@ jobs:
 
       - name: Build
         working-directory: server
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration Release --no-restore | tee build.log
+
+      # The magic-number rule AETHERIS001 is a warning for now (task 00001, section 2.4).
+      # Every finding is shown as an annotation on the pull request, so it is not lost in
+      # the build log.
+      - name: Report magic numbers
+        working-directory: server
+        run: |
+          grep -E 'warning AETHERIS001' build.log | sort -u | while read -r line; do
+            echo "::warning::$line"
+          done || true
 
       - name: Test
         working-directory: server

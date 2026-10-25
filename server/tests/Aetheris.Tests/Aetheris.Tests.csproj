@@ -4,6 +4,7 @@
     <RootNamespace>Aetheris.Tests</RootNamespace>
     <IsPackable>false</IsPackable>
     <OutputType>Exe</OutputType>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +29,6 @@
     <PackageReference Include="FsCheck" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
-    <PackageReference Include="Dapper" />
     <PackageReference Include="FluentValidation" />
   </ItemGroup>
 

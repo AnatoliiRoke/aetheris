@@ -16,6 +16,11 @@ namespace Aetheris.Host.Data;
 public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
 {
     /// <summary>
+    /// The suffix of the first duplicate constraint name.
+    /// </summary>
+    private const int FirstDuplicateSuffix = 2;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="AetherisDbContext"/> class.
     /// </summary>
     /// <param name="options">The database options.</param>
@@ -191,7 +196,9 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
         }
 
         string candidate = name;
-        int suffix = 2;
+
+        // The first duplicate gets the suffix 2, the next one 3 and so on.
+        int suffix = FirstDuplicateSuffix;
 
         while (!used.Add(candidate))
         {

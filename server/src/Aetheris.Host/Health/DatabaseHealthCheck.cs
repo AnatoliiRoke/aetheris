@@ -1,4 +1,3 @@
-using System.Data.Common;
 using Aetheris.Host.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -32,13 +31,16 @@ public sealed class DatabaseHealthCheck : IHealthCheck
 
         try
         {
-            await using DbConnection connection = _dbContext.Database.GetDbConnection();
-
-            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+            // The query goes through the context, so the connection is taken from the pool
+            // and returned to it. Taking the connection with GetDbConnection and disposing
+            // it would close a connection that the context still owns.
+            await _dbContext.Database
+                .ExecuteSqlRawAsync("SELECT 1", cancellationToken)
+                .ConfigureAwait(false);
 
             return HealthCheckResult.Healthy(
                 "Database connection is available.",
-                new Dictionary<string, object> { ["database"] = connection.Database });
+                new Dictionary<string, object> { ["database"] = _dbContext.Database.GetDbConnection().Database });
         }
         catch (Exception exception)
         {

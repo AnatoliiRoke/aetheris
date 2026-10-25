@@ -9,7 +9,12 @@ namespace Aetheris.Host.Configuration;
 /// </remarks>
 public sealed class ConfigReloadService : BackgroundService
 {
-    private static readonly TimeSpan ReloadInterval = TimeSpan.FromSeconds(30);
+    /// <summary>
+    /// The number of seconds between two reloads of the game configuration.
+    /// </summary>
+    private const int ReloadIntervalSeconds = 30;
+
+    private static readonly TimeSpan ReloadInterval = TimeSpan.FromSeconds(ReloadIntervalSeconds);
 
     private readonly ConfigReloader _reloader;
 
@@ -27,14 +32,15 @@ public sealed class ConfigReloadService : BackgroundService
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _reloader.ReloadAsync(stoppingToken);
+        await _reloader.ReloadAsync(stoppingToken).ConfigureAwait(false);
 
-        using Timer timer = new(
-            _ => _reloader.ReloadAsync(stoppingToken).GetAwaiter().GetResult(),
-            state: null,
-            dueTime: ReloadInterval,
-            period: ReloadInterval);
+        // PeriodicTimer waits asynchronously, so a slow database cannot block the loop and
+        // no reload notifications pile up.
+        using PeriodicTimer timer = new(ReloadInterval);
 
-        await Task.Delay(Timeout.InfiniteTimeSpan, stoppingToken);
+        while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
+        {
+            await _reloader.ReloadAsync(stoppingToken).ConfigureAwait(false);
+        }
     }
 }

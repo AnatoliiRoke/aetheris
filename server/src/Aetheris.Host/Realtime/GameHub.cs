@@ -14,16 +14,20 @@ public sealed class GameHub : Hub
     public const string Route = "/hubs/game";
 
     private readonly GameEventPublisher _publisher;
+    private readonly IHostEnvironment _environment;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GameHub"/> class.
     /// </summary>
     /// <param name="publisher">The event publisher.</param>
-    public GameHub(GameEventPublisher publisher)
+    /// <param name="environment">The host environment, used to switch off the test hook outside development.</param>
+    public GameHub(GameEventPublisher publisher, IHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(publisher);
+        ArgumentNullException.ThrowIfNull(environment);
 
         _publisher = publisher;
+        _environment = environment;
     }
 
     /// <summary>
@@ -43,8 +47,18 @@ public sealed class GameHub : Hub
     /// <param name="type">The event type.</param>
     /// <param name="payload">The JSON payload.</param>
     /// <returns>The published envelope, including its sequence number.</returns>
+    /// <remarks>
+    /// This is a test hook for acceptance criterion 5 of task 00001. It is switched off
+    /// outside development, because otherwise any connected client could generate events
+    /// with arbitrary sequence numbers and confuse the reconnect logic of other clients.
+    /// </remarks>
     public async Task<GameEventEnvelope> PublishTestEvent(string type = "test", string payload = "{}")
     {
+        if (!_environment.IsDevelopment())
+        {
+            throw new HubException("The test event hook is available in development only.");
+        }
+
         GameEventEnvelope envelope = _publisher.Enqueue(type, payload);
 
         await Clients.Caller.SendAsync(GameEventPublisher.ReceiveMethod, envelope).ConfigureAwait(false);

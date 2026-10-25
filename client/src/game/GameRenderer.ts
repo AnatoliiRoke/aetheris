@@ -44,11 +44,10 @@ export class GameRenderer {
   }
 
   /**
-   * Stops the render loop and detaches the canvas.
+   * Stops the render loop, detaches the window listener and destroys the canvas.
    */
   destroy(): void {
-    this.resizeHandler?.();
-    this.resizeHandler = null;
+    this.detachResizeHandling();
     this.app.destroy(true, { children: true });
   }
 
@@ -62,5 +61,19 @@ export class GameRenderer {
 
     window.addEventListener('resize', handleResize);
     this.resizeHandler = handleResize;
+  }
+
+  /**
+   * Removes the resize listener from the window.
+   *
+   * Without this the listener would keep a reference to the destroyed application, so
+   * every remount would leak one more listener and the next resize would call into a
+   * destroyed renderer.
+   */
+  private detachResizeHandling(): void {
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+      this.resizeHandler = null;
+    }
   }
 }

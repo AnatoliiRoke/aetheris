@@ -14,6 +14,15 @@
   </PropertyGroup>
 
   <!--
+    The magic-number rule AETHERIS001 points at the places to look, but it does not
+    break the build while the existing code is being cleaned up. The rule is raised to
+    an error once the balance code is complete.
+  -->
+  <PropertyGroup>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);AETHERIS001</WarningsNotAsErrors>
+  </PropertyGroup>
+
+  <!--
     The test project uses Microsoft.Testing.Platform (xunit v3). The .NET 10 SDK runs it
     through the new `dotnet test` experience, enabled in global.json.
   -->
@@ -22,12 +31,45 @@
   </PropertyGroup>
 
   <!--
-    Magic-number analyzer (task 00001, section 2.4).
-    Initially a warning only; it can be promoted to an error once the
-    balance parameters are fully externalised.
+    The magic-number rule AETHERIS001 is implemented by the Aetheris.Analyzers Roslyn
+    analyzer. It is referenced from here so that every project of the solution gets it
+    without repeating the reference in each project file.
+
+    The analyzer is passed to the compiler as an Analyzer item rather than as a project
+    reference, because a project reference would flow the analyzer's Roslyn packages
+    into every consuming project and clash with the versions of Entity Framework.
+    The BuildAetherisAnalyzers target builds the analyzer before the compile of the
+    project, which keeps the build order correct.
+
+    The analyzer project itself is excluded, because an analyzer cannot reference itself.
+    The test projects are excluded as well: the numbers in a test are the values of the
+    test, not the rules of the game, so the rule would only produce noise there.
   -->
   <PropertyGroup>
-    <MagicNumberAnalyzerSeverity>warning</MagicNumberAnalyzerSeverity>
+    <AetherisAnalyzerProject>$(MSBuildThisFileDirectory)analyzers\Aetheris.Analyzers\Aetheris.Analyzers.csproj</AetherisAnalyzerProject>
+    <AetherisAnalyzerOutputDirectory>$(MSBuildThisFileDirectory)analyzers\Aetheris.Analyzers\bin\</AetherisAnalyzerOutputDirectory>
   </PropertyGroup>
+
+  <!--
+    The condition is checked when the target runs and not while this file is read,
+    because IsTestProject is set by the Microsoft.NET.Test.Sdk props that are imported
+    after Directory.Build.props.
+  -->
+  <Target Name="BuildAetherisAnalyzers"
+          BeforeTargets="CoreCompile"
+          Condition="'$(MSBuildProjectName)' != 'Aetheris.Analyzers' AND '$(IsTestProject)' != 'true'">
+    <MSBuild Projects="$(AetherisAnalyzerProject)"
+             Properties="Configuration=$(Configuration)"
+             Targets="Build" />
+
+    <!--
+      The analyzer is picked up from the output folder of the configuration that was
+      just built. The configuration is not known while this file is read, so the path
+      cannot be built here.
+    -->
+    <ItemGroup>
+      <Analyzer Include="$(AetherisAnalyzerOutputDirectory)$(Configuration)\netstandard2.0\Aetheris.Analyzers.dll" />
+    </ItemGroup>
+  </Target>
 
 </Project>

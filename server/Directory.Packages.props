@@ -43,7 +43,22 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.20.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.20.1" />
     <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.20.1-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.20.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.20.1" />
     <PackageVersion Include="Sentry.AspNetCore" Version="6.12.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Roslyn analyzers">
+    <!--
+      The Roslyn version is pinned to the one that Microsoft.EntityFrameworkCore.Design
+      requires. A newer version would clash with it, because the central package
+      management applies the pinned version to the transitive dependencies as well.
+
+      Microsoft.CodeAnalysis.Analyzers has no 5.0.0 release, so the nearest one is used.
+    -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Label="Testing">

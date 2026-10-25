@@ -15,7 +15,8 @@ namespace Aetheris.Tests.Realtime;
 /// The client talks to the in-memory test server: HTTP requests go through the test
 /// server handler and the WebSocket through its WebSocket client, so no real port is used.
 /// </remarks>
-public sealed class SignalRTests : IClassFixture<AetherisTestFactory>
+[Collection(DatabaseCollection.Name)]
+public sealed class SignalRTests
 {
     private static readonly TimeSpan ReceiveTimeout = TimeSpan.FromSeconds(15);
 

@@ -9,7 +9,8 @@ namespace Aetheris.Tests.Health;
 /// <remarks>
 /// This is acceptance criterion 2 of task 00001.
 /// </remarks>
-public sealed class HealthEndpointTests : IClassFixture<AetherisTestFactory>
+[Collection(DatabaseCollection.Name)]
+public sealed class HealthEndpointTests
 {
     private readonly AetherisTestFactory _factory;
 

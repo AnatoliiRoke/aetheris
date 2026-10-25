@@ -12,5 +12,9 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Aetheris.Tests/Aetheris.Tests.csproj" />
+    <Project Path="tests/Aetheris.Analyzers.Tests/Aetheris.Analyzers.Tests.csproj" />
+  </Folder>
+  <Folder Name="/analyzers/">
+    <Project Path="analyzers/Aetheris.Analyzers/Aetheris.Analyzers.csproj" />
   </Folder>
 </Solution>

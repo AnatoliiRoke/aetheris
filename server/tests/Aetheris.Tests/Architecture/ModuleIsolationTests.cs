@@ -1,4 +1,5 @@
 using System.Reflection;
+using Aetheris.Tests.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aetheris.Tests.Architecture;
@@ -11,6 +12,7 @@ namespace Aetheris.Tests.Architecture;
 /// through public interfaces and never reach into the internals of another module.
 /// This is acceptance criterion 6 of task 00001.
 /// </remarks>
+[Collection(DatabaseCollection.Name)]
 public sealed class ModuleIsolationTests
 {
     private static readonly string[] ModuleNames =
@@ -23,6 +25,19 @@ public sealed class ModuleIsolationTests
         "Aetheris.Chat",
         "Aetheris.Admin",
     ];
+
+    private readonly AetherisTestFactory _factory;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModuleIsolationTests"/> class.
+    /// </summary>
+    /// <param name="factory">The test host factory, which builds the real host.</param>
+    public ModuleIsolationTests(AetherisTestFactory factory)
+    {
+        ArgumentNullException.ThrowIfNull(factory);
+
+        _factory = factory;
+    }
 
     /// <summary>
     /// No module references another module's assembly.
@@ -105,30 +120,41 @@ public sealed class ModuleIsolationTests
     }
 
     /// <summary>
-    /// The host registers every module exactly once.
+    /// The host registers every module, and the module can be resolved from the real
+    /// service provider.
     /// </summary>
+    /// <remarks>
+    /// This test resolves the modules from the container built by <c>Program.cs</c>. If a
+    /// registration is removed from the host, the test fails.
+    /// </remarks>
     [Fact]
     public void The_host_registers_every_module()
     {
-        IServiceCollection services = new ServiceCollection();
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
 
-        services.AddSingleton<Aetheris.Economy.IEconomyModule, Aetheris.Economy.EconomyModule>();
-        services.AddSingleton<Aetheris.Planets.IPlanetsModule, Aetheris.Planets.PlanetsModule>();
-        services.AddSingleton<Aetheris.Fleet.IFleetModule, Aetheris.Fleet.FleetModule>();
-        services.AddSingleton<Aetheris.Market.IMarketModule, Aetheris.Market.MarketModule>();
-        services.AddSingleton<Aetheris.Rating.IRatingModule, Aetheris.Rating.RatingModule>();
-        services.AddSingleton<Aetheris.Chat.IChatModule, Aetheris.Chat.ChatModule>();
-        services.AddSingleton<Aetheris.Admin.IAdminModule, Aetheris.Admin.AdminModule>();
+        Assert.NotNull(services.GetService<Aetheris.Economy.IEconomyModule>());
+        Assert.NotNull(services.GetService<Aetheris.Planets.IPlanetsModule>());
+        Assert.NotNull(services.GetService<Aetheris.Fleet.IFleetModule>());
+        Assert.NotNull(services.GetService<Aetheris.Market.IMarketModule>());
+        Assert.NotNull(services.GetService<Aetheris.Rating.IRatingModule>());
+        Assert.NotNull(services.GetService<Aetheris.Chat.IChatModule>());
+        Assert.NotNull(services.GetService<Aetheris.Admin.IAdminModule>());
+    }
 
-        using ServiceProvider provider = services.BuildServiceProvider();
+    /// <summary>
+    /// The modules are registered as singletons, so the same instance is returned every time.
+    /// </summary>
+    [Fact]
+    public void The_modules_are_registered_as_singletons()
+    {
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
 
-        Assert.NotNull(provider.GetRequiredService<Aetheris.Economy.IEconomyModule>());
-        Assert.NotNull(provider.GetRequiredService<Aetheris.Planets.IPlanetsModule>());
-        Assert.NotNull(provider.GetRequiredService<Aetheris.Fleet.IFleetModule>());
-        Assert.NotNull(provider.GetRequiredService<Aetheris.Market.IMarketModule>());
-        Assert.NotNull(provider.GetRequiredService<Aetheris.Rating.IRatingModule>());
-        Assert.NotNull(provider.GetRequiredService<Aetheris.Chat.IChatModule>());
-        Assert.NotNull(provider.GetRequiredService<Aetheris.Admin.IAdminModule>());
+        Aetheris.Economy.IEconomyModule first = services.GetRequiredService<Aetheris.Economy.IEconomyModule>();
+        Aetheris.Economy.IEconomyModule second = services.GetRequiredService<Aetheris.Economy.IEconomyModule>();
+
+        Assert.Same(first, second);
     }
 
     private static Assembly GetModuleAssembly(string moduleName)

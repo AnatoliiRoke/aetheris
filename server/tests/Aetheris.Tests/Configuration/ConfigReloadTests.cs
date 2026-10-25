@@ -15,7 +15,8 @@ namespace Aetheris.Tests.Configuration;
 /// <remarks>
 /// This is acceptance criterion 4 of task 00001.
 /// </remarks>
-public sealed class ConfigReloadTests : IClassFixture<AetherisTestFactory>
+[Collection(DatabaseCollection.Name)]
+public sealed class ConfigReloadTests
 {
     private const string ParameterKey = "test.hello_multiplier";
 

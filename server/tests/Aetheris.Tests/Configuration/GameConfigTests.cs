@@ -1,4 +1,4 @@
-﻿using Aetheris.Core.Configuration;
+using Aetheris.Core.Configuration;
 
 namespace Aetheris.Tests.Configuration;
 
