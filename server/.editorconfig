@@ -38,6 +38,14 @@ dotnet_style_qualification_for_event = false:suggestion
 dotnet_diagnostic.AETHERIS001.severity = warning
 dotnet_diagnostic.AETHERIS001.is_incremental = true
 
+# The parameterized SQL rule (task 00002, section 2.4)
+#
+# SQL text passed to a method that runs it as is must be a compile-time constant; the
+# values travel as parameters. The rule is an error from the start, so the CI build fails on
+# any concatenated or interpolated SQL text. It is implemented by the Aetheris.Analyzers
+# Roslyn analyzer as well.
+dotnet_diagnostic.AETHERIS002.severity = error
+
 dotnet_diagnostic.CA1502.severity = none
 
 # Naming rules for the public surface of the modules.

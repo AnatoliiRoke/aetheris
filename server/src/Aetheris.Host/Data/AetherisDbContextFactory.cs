@@ -26,12 +26,12 @@ public sealed class AetherisDbContextFactory : IDesignTimeDbContextFactory<Aethe
             .AddEnvironmentVariables()
             .Build();
 
-        string connectionString = DatabaseOptions.GetConnectionString(configuration);
+        // The design-time tools change the schema, so they prefer the migration account.
+        string connectionString = DatabaseOptions.GetMigrationConnectionString(configuration)
+            ?? DatabaseOptions.GetConnectionString(configuration);
 
         DbContextOptionsBuilder<AetherisDbContext> optionsBuilder = new();
-        optionsBuilder.UseNpgsql(
-            connectionString,
-            npgsql => npgsql.MigrationsAssembly(typeof(AetherisDbContext).Assembly.FullName));
+        AetherisDbContextSetup.Configure(optionsBuilder, connectionString);
 
         return new AetherisDbContext(optionsBuilder.Options);
     }

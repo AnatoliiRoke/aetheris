@@ -1,0 +1,11 @@
+# gitleaks configuration (task 00002, section 2.6).
+# The default rules apply. The allow list only covers values that are public by design.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public test values"
+regexes = [
+  # The throwaway password of the PostgreSQL service container of the CI workflow.
+  '''Username=postgres;Password=postgres''',
+]

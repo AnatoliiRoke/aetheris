@@ -4,16 +4,19 @@ using Aetheris.Core.Configuration;
 using Aetheris.Core.Time;
 using Aetheris.Economy;
 using Aetheris.Fleet;
+using Aetheris.Host.Admin;
+using Aetheris.Host.Auth;
+using Aetheris.Host.Commands;
 using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
 using Aetheris.Host.Health;
 using Aetheris.Host.Observability;
 using Aetheris.Host.Realtime;
+using Aetheris.Host.Security;
 using Aetheris.Market;
 using Aetheris.Planets;
 using Aetheris.Rating;
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
@@ -37,20 +40,17 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 const double SentryFullTraceSampleRate = 1.0;
 const double SentryReducedTraceSampleRate = 0.2;
 
-// The minimal length of a password of an administrator account.
-const int MinimumPasswordLength = 12;
-
-// The maximal size of a SignalR message, in bytes.
-const int MaximumSignalRMessageSize = 64 * 1024;
-
 // The local configuration file holds the database connection string and any local keys.
 // It is git-ignored and never committed (task 00001, section 2.3).
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
+// The masking enricher is the last one, so it also sees the properties added by the
+// enrichers before it (task 00002, section 2.7).
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
     .ReadFrom.Services(services)
     .Enrich.FromLogContext()
+    .Enrich.With<SensitiveDataMaskingEnricher>()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
     .WriteTo.Console());
@@ -103,47 +103,36 @@ builder.Services.AddHostedService<ConfigReloadService>();
 string connectionString = DatabaseOptions.GetConnectionString(builder.Configuration);
 
 builder.Services.AddDbContext<AetherisDbContext>(options =>
-    options.UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly(typeof(AetherisDbContext).Assembly.FullName)));
+    AetherisDbContextSetup.Configure(options, connectionString));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
-    {
-        options.Password.RequiredLength = MinimumPasswordLength;
-        options.Password.RequireDigit = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireNonAlphanumeric = true;
-        options.User.RequireUniqueEmail = true;
-        options.SignIn.RequireConfirmedEmail = true;
-    })
-    .AddEntityFrameworkStores<AetherisDbContext>()
-    .AddDefaultTokenProviders();
+// ---------------------------------------------------------------------------------------------
+// Security: identity, policies, rate limits, command pipeline, admin panel (task 00002)
+// ---------------------------------------------------------------------------------------------
+builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
+builder.Services.AddAetherisSecurity(builder.Configuration);
 
 // ---------------------------------------------------------------------------------------------
 // Game clock
 // ---------------------------------------------------------------------------------------------
-builder.Services.AddSingleton<IGameClock>(sp =>
+builder.Services.AddSingleton(_ =>
 {
     DateTimeOffset now = DateTimeOffset.UtcNow;
-    GameClock clock = new(now, now);
 
-    return clock;
+    return new GameClock(now, now);
 });
+builder.Services.AddSingleton<IGameClock>(sp => sp.GetRequiredService<GameClock>());
 
 // ---------------------------------------------------------------------------------------------
 // Realtime
 // ---------------------------------------------------------------------------------------------
 builder.Services.AddSingleton<GameEventPublisher>();
-builder.Services.AddSignalR(options =>
-    {
-        options.EnableDetailedErrors = builder.Environment.IsDevelopment();
-        options.MaximumReceiveMessageSize = MaximumSignalRMessageSize;
-    })
+builder.Services.AddSignalR(options => options.EnableDetailedErrors = builder.Environment.IsDevelopment())
     .AddMessagePackProtocol();
 
 // ---------------------------------------------------------------------------------------------
 // Validation
 // ---------------------------------------------------------------------------------------------
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: false);
 
 // ---------------------------------------------------------------------------------------------
 // Health checks
@@ -169,23 +158,49 @@ WebApplication app = builder.Build();
 // ---------------------------------------------------------------------------------------------
 await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 {
-    AetherisDbContext dbContext = scope.ServiceProvider.GetRequiredService<AetherisDbContext>();
     ILogger startupLogger = scope.ServiceProvider
         .GetRequiredService<ILoggerFactory>()
         .CreateLogger("Startup");
 
+    // The migrations may run under a separate database account with the right to change
+    // the schema, while the server itself runs with a minimal account (task 00002,
+    // section 2.4). Without a separate connection string the main one is used.
+    string? migrationConnectionString = DatabaseOptions.GetMigrationConnectionString(app.Configuration);
+
     startupLogger.LogInformation("Applying database migrations...");
-    await dbContext.Database.MigrateAsync().ConfigureAwait(false);
+
+    if (migrationConnectionString is null)
+    {
+        await scope.ServiceProvider.GetRequiredService<AetherisDbContext>().Database.MigrateAsync().ConfigureAwait(false);
+    }
+    else
+    {
+        DbContextOptionsBuilder<AetherisDbContext> migrationOptions = new();
+        AetherisDbContextSetup.Configure(migrationOptions, migrationConnectionString);
+
+        await using AetherisDbContext migrationContext = new(migrationOptions.Options);
+        await migrationContext.Database.MigrateAsync().ConfigureAwait(false);
+    }
+
     startupLogger.LogInformation("Database migrations applied.");
 
     // The configuration parameters are seeded after the migrations. The seed never overwrites an
     // existing value, so a database that was filled by hand keeps its settings.
     ConfigSeedService seedService = scope.ServiceProvider.GetRequiredService<ConfigSeedService>();
     await seedService.SeedAsync().ConfigureAwait(false);
+
+    // The protection limits are read from the configuration, so it is loaded before the
+    // first request instead of waiting for the background reload.
+    await scope.ServiceProvider.GetRequiredService<ConfigReloader>().ReloadAsync().ConfigureAwait(false);
+}
+
+if (AdminCommandLine.IsCommand(args))
+{
+    return await AdminCommandLine.RunAsync(app.Services, args).ConfigureAwait(false);
 }
 
 app.UseSerilogRequestLogging();
-app.UseRouting();
+app.UseAetherisSecurity();
 
 // Prometheus scraping endpoint. The metrics are collected by OpenTelemetry, this only
 // exposes them for a scraper.
@@ -201,7 +216,13 @@ app.MapHub<GameHub>(GameHub.Route);
 
 app.MapGet("/api/v1/ping", () => Results.Ok(new { status = "ok" }));
 
-app.Run();
+app.MapAuthEndpoints();
+app.MapAdminEndpoints();
+app.MapCommands();
+
+await app.RunAsync().ConfigureAwait(false);
+
+return 0;
 
 /// <summary>
 /// Writes the health report as JSON, including the state of every check.

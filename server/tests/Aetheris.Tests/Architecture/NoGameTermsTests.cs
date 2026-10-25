@@ -149,9 +149,11 @@ public sealed partial class NoGameTermsTests
 
     /// <summary>
     /// The names that are allowed although they contain a game word: the module stubs of
-    /// task 00001, section 2.1, and the OpenTelemetry API that describes the service.
+    /// task 00001, section 2.1, and framework names that are not ours: the OpenTelemetry
+    /// API that describes the service, MSBuild embedded files, a standard HTTP header and the
+    /// reflection API that reads embedded files.
     /// </summary>
-    [GeneratedRegex(@"\bI?(Economy|Planets|Fleet|Market|Rating|Chat|Admin)Module\b|Aetheris\.(Economy|Planets|Fleet|Market|Rating|Chat|Admin)\b|""(Economy|Planets|Fleet|Market|Rating|Chat|Admin)""|\b(Economy|Planets|Fleet|Market|Rating|Chat|Admin) module\b|OpenTelemetry\.Resources|ConfigureResource")]
+    [GeneratedRegex(@"\bI?(Economy|Planets|Fleet|Market|Rating|Chat|Admin)Module\b|Aetheris\.(Economy|Planets|Fleet|Market|Rating|Chat|Admin)\b|""(Economy|Planets|Fleet|Market|Rating|Chat|Admin)""|\b(Economy|Planets|Fleet|Market|Rating|Chat|Admin) module\b|OpenTelemetry\.Resources|ConfigureResource|EmbeddedResource|Cross-Origin-Resource-Policy|GetManifestResource(Names|Stream)")]
     private static partial Regex AllowedNames();
 
     [GeneratedRegex("[^A-Za-z]+")]

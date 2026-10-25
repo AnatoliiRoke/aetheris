@@ -1,5 +1,9 @@
+using Aetheris.Core.Commands;
+using Aetheris.Core.Security;
+using Aetheris.Host.Auth;
 using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
+using Aetheris.Host.Security;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
+using Serilog.Core;
 
 namespace Aetheris.Tests.Infrastructure;
 
@@ -18,7 +23,7 @@ namespace Aetheris.Tests.Infrastructure;
 /// environment variable or the git-ignored <c>appsettings.Local.json</c> file, so that the
 /// connection details are never stored in the repository (task 00001, section 2.3).
 /// </remarks>
-public sealed class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     /// <summary>
     /// The connection string used by the tests.
@@ -29,6 +34,40 @@ public sealed class AetherisTestFactory : WebApplicationFactory<Program>, IAsync
     /// one, so the tests can never touch the development data.
     /// </remarks>
     public static string ConnectionString { get; } = BuildTestConnectionString();
+
+    /// <summary>
+    /// The origin of the test client, the only origin allowed by CORS in the tests.
+    /// </summary>
+    public const string ClientOrigin = "https://client.test";
+
+    /// <summary>
+    /// The limits that the tests run with. The tests send many sign-in requests from one
+    /// address, so the rate limits are raised; the rate limit test lowers them again for
+    /// itself.
+    /// </summary>
+    private static readonly Dictionary<string, string> TestLimits = new(StringComparer.Ordinal)
+    {
+        [SecurityKeys.RateLimitPermits(RateLimitGroups.Ip)] = "100000",
+        [SecurityKeys.RateLimitPermits(RateLimitGroups.Auth)] = "10000",
+        [SecurityKeys.RateLimitPermits(RateLimitGroups.Command)] = "100000",
+        [SecurityKeys.RateLimitPermits(RateLimitGroups.Admin)] = "10000",
+        [SecurityKeys.AlertFailedSignInThreshold] = "100000",
+    };
+
+    /// <summary>
+    /// Gets the e-mails the server sent, so that the tests can read the tokens.
+    /// </summary>
+    public CapturingEmailSender Emails { get; } = new();
+
+    /// <summary>
+    /// Gets the log events the server wrote, so that the tests can check their content.
+    /// </summary>
+    public CapturingLogSink Logs { get; } = new();
+
+    /// <summary>
+    /// Gets the hosting environment of the test host.
+    /// </summary>
+    protected virtual string EnvironmentName => "Development";
 
     /// <summary>
     /// Gets the name of the test database.
@@ -62,7 +101,7 @@ public sealed class AetherisTestFactory : WebApplicationFactory<Program>, IAsync
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.UseEnvironment("Development");
+        builder.UseEnvironment(EnvironmentName);
 
         builder.ConfigureAppConfiguration((_, configuration) =>
         {
@@ -70,6 +109,11 @@ public sealed class AetherisTestFactory : WebApplicationFactory<Program>, IAsync
             {
                 ["Database:ConnectionString"] = ConnectionString,
                 ["ConnectionStrings:Default"] = ConnectionString,
+
+                // The migrations of the test host always go to the test database, even
+                // when a migration account is configured for the development database.
+                [DatabaseOptions.MigrationConnectionStringKey] = ConnectionString,
+                [ClientOrigins.ConfigurationKey + ":0"] = ClientOrigin,
             });
         });
 
@@ -78,10 +122,18 @@ public sealed class AetherisTestFactory : WebApplicationFactory<Program>, IAsync
             RemoveDatabaseRegistrations(services);
 
             services.AddDbContext<AetherisDbContext>(options =>
-                options.UseNpgsql(ConnectionString));
+                AetherisDbContextSetup.Configure(options, ConnectionString));
 
             // The background reload timer would compete with the tests for the database.
             services.RemoveAll<Microsoft.Extensions.Hosting.IHostedService>();
+
+            services.RemoveAll<IAccountEmailSender>();
+            services.AddSingleton<IAccountEmailSender>(Emails);
+            services.AddSingleton<ILogEventSink>(Logs);
+
+            // The example of a new protected request: one class and this one line
+            // (task 00002, acceptance criterion 10).
+            services.AddCommand<TestNoteCommand>();
         });
     }
 
@@ -114,8 +166,70 @@ public sealed class AetherisTestFactory : WebApplicationFactory<Program>, IAsync
 
         await ClearDatabaseAsync(dbContext);
         await services.GetRequiredService<ConfigSeedService>().SeedAsync();
+
+        foreach ((string key, string value) in TestLimits)
+        {
+            await SetParameterAsync(services, key, value, reload: false);
+        }
+
         await services.GetRequiredService<ConfigReloader>().ReloadAsync();
     }
+
+    /// <summary>
+    /// Writes a configuration parameter and, by default, reloads the configuration.
+    /// </summary>
+    /// <param name="services">The scoped service provider.</param>
+    /// <param name="key">The parameter key.</param>
+    /// <param name="value">The new value.</param>
+    /// <param name="reload">Whether to reload the configuration at once.</param>
+    /// <returns>The previous value, or <see langword="null"/> when the parameter did not exist.</returns>
+    public static async Task<string?> SetParameterAsync(IServiceProvider services, string key, string value, bool reload = true)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        AetherisDbContext dbContext = services.GetRequiredService<AetherisDbContext>();
+        ConfigParameterEntity? parameter = await dbContext.ConfigParameters.SingleOrDefaultAsync(entry => entry.Key == key);
+        string? previous = parameter?.Value;
+
+        if (parameter is null)
+        {
+            dbContext.ConfigParameters.Add(new ConfigParameterEntity
+            {
+                Key = key,
+                Value = value,
+                Version = 1,
+                UpdatedAt = DateTimeOffset.UtcNow,
+                UpdatedBy = "test",
+            });
+        }
+        else
+        {
+            parameter.Value = value;
+            parameter.Version++;
+            parameter.UpdatedAt = DateTimeOffset.UtcNow;
+        }
+
+        await dbContext.SaveChangesAsync();
+
+        if (reload)
+        {
+            await services.GetRequiredService<ConfigReloader>().ReloadAsync();
+        }
+
+        return previous;
+    }
+
+    /// <summary>
+    /// Creates a client that talks HTTPS to the test server and keeps cookies, like a browser.
+    /// </summary>
+    /// <returns>The client.</returns>
+    public HttpClient CreateBrowserClient() =>
+        CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("https://localhost"),
+            AllowAutoRedirect = false,
+            HandleCookies = true,
+        });
 
     /// <summary>
     /// Removes all rows from every table of the test database.

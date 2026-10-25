@@ -66,6 +66,9 @@ public sealed class TestDatabaseCleanupTests
                 parameter => parameter.Key == LeftoverKey,
                 TestContext.Current.CancellationToken),
             "The cleanup did not remove the leftover row.");
+
+        // The other tests of the collection share the database: give them back the seed.
+        await AetherisTestFactory.ResetDatabaseAsync(scope.ServiceProvider);
     }
 
     /// <summary>
@@ -90,5 +93,7 @@ public sealed class TestDatabaseCleanupTests
             .SingleAsync(TestContext.Current.CancellationToken);
 
         Assert.True(tables > 0, "The schema was dropped by the cleanup.");
+
+        await AetherisTestFactory.ResetDatabaseAsync(scope.ServiceProvider);
     }
 }

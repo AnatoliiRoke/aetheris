@@ -30,6 +30,30 @@ public static class DatabaseOptions
     public const string ConnectionStringName = "Default";
 
     /// <summary>
+    /// The configuration key of the optional connection string used for the migrations.
+    /// </summary>
+    /// <remarks>
+    /// Set it through the <c>Database__MigrationConnectionString</c> environment variable or
+    /// the git-ignored local file when the server runs with a database account that has no
+    /// right to change the schema.
+    /// </remarks>
+    public const string MigrationConnectionStringKey = "Database:MigrationConnectionString";
+
+    /// <summary>
+    /// Resolves the connection string of the migrations.
+    /// </summary>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The connection string, or <see langword="null"/> when the main one is used for the migrations too.</returns>
+    public static string? GetMigrationConnectionString(IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        string? value = configuration[MigrationConnectionStringKey];
+
+        return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    /// <summary>
     /// Resolves the effective connection string.
     /// </summary>
     /// <param name="configuration">The application configuration.</param>

@@ -1,0 +1,29 @@
+# Automatic dependency updates (task 00002, section 2.6).
+# Dependabot opens a pull request when a pinned version has a newer release or a known
+# vulnerability; the CI of the pull request checks the update.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /server
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      microsoft:
+        patterns:
+          - "Microsoft.*"
+          - "System.*"
+      opentelemetry:
+        patterns:
+          - "OpenTelemetry*"
+
+  - package-ecosystem: npm
+    directory: /client
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -1,8 +1,6 @@
-using System.Net.WebSockets;
 using Aetheris.Host.Realtime;
 using Aetheris.Tests.Infrastructure;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aetheris.Tests.Realtime;
@@ -12,8 +10,7 @@ namespace Aetheris.Tests.Realtime;
 /// </summary>
 /// <remarks>
 /// This is acceptance criterion 5 of task 00001.
-/// The client talks to the in-memory test server: HTTP requests go through the test
-/// server handler and the WebSocket through its WebSocket client, so no real port is used.
+/// The client talks to the in-memory test server through <see cref="HubConnections"/>.
 /// </remarks>
 [Collection(DatabaseCollection.Name)]
 public sealed class SignalRTests
@@ -40,23 +37,11 @@ public sealed class SignalRTests
     [Fact]
     public async Task A_client_receives_a_test_event_with_a_sequence_number()
     {
-        WebSocketClient webSocketClient = _factory.Server.CreateWebSocketClient();
+        // Since task 00002 only a signed-in player can connect.
+        TestAccount account = await TestAccounts.RegisterConfirmedAsync(_factory);
+        string cookie = await HubConnections.GetSessionCookieAsync(_factory, account);
 
-        await using HubConnection connection = new HubConnectionBuilder()
-            .WithUrl(new Uri(_factory.Server.BaseAddress, GameHub.Route), options =>
-            {
-                options.HttpMessageHandlerFactory = _ => _factory.Server.CreateHandler();
-
-                options.WebSocketFactory = async (_, cancellationToken) =>
-                {
-                    WebSocket socket = await webSocketClient.ConnectAsync(
-                        new Uri(_factory.Server.BaseAddress, GameHub.Route),
-                        cancellationToken);
-
-                    return socket;
-                };
-            })
-            .Build();
+        await using HubConnection connection = HubConnections.Create(_factory, cookie);
 
         await connection.StartAsync(TestContext.Current.CancellationToken);
 

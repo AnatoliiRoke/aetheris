@@ -8,6 +8,7 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|--------------------
+AETHERIS002 | Aetheris.Security | Error | RawSqlAnalyzer, [Documentation](https://github.com/AnatoliiRoke/aetheris/blob/main/documentation/tasks/00002-bazova-bezpeka-servera.md)
 
 ### Removed Rules
 

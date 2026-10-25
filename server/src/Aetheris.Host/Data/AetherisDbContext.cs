@@ -59,6 +59,26 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
     /// </summary>
     public DbSet<AdminAuditLogEntity> AdminAuditLogs => Set<AdminAuditLogEntity>();
 
+    /// <summary>
+    /// Gets the security journal table.
+    /// </summary>
+    public DbSet<SecurityEventEntity> SecurityEvents => Set<SecurityEventEntity>();
+
+    /// <summary>
+    /// Gets the table of executed request identifiers.
+    /// </summary>
+    public DbSet<RequestIdempotencyEntity> RequestIdempotency => Set<RequestIdempotencyEntity>();
+
+    /// <summary>
+    /// Gets the refresh tokens table.
+    /// </summary>
+    public DbSet<RefreshTokenEntity> RefreshTokens => Set<RefreshTokenEntity>();
+
+    /// <summary>
+    /// Gets the change journal table.
+    /// </summary>
+    public DbSet<ChangeJournalEntity> ChangeJournal => Set<ChangeJournalEntity>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -133,6 +153,59 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
             entity.Property(e => e.Action).HasMaxLength(256);
             entity.Property(e => e.Target).HasMaxLength(512);
             entity.HasIndex(e => e.At);
+        });
+
+        builder.Entity<SecurityEventEntity>(entity =>
+        {
+            entity.ToTable("security_event");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Type).HasMaxLength(64);
+            entity.Property(e => e.UserId).HasMaxLength(450);
+            entity.Property(e => e.IpAddress).HasMaxLength(64);
+            entity.Property(e => e.Detail).HasMaxLength(256);
+
+            // The alerts count recent events of one type.
+            entity.HasIndex(e => new { e.Type, e.At });
+            entity.HasIndex(e => e.UserId);
+        });
+
+        builder.Entity<RequestIdempotencyEntity>(entity =>
+        {
+            entity.ToTable("request_idempotency");
+            entity.HasKey(e => new { e.UserId, e.Key });
+            entity.Property(e => e.UserId).HasMaxLength(450);
+            entity.Property(e => e.Key).HasMaxLength(256);
+            entity.Property(e => e.Route).HasMaxLength(256);
+            entity.Property(e => e.RequestHash).HasMaxLength(64);
+
+            // The cleanup removes rows by age.
+            entity.HasIndex(e => e.CreatedAt);
+        });
+
+        builder.Entity<RefreshTokenEntity>(entity =>
+        {
+            entity.ToTable("refresh_token");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.UserId).HasMaxLength(450);
+            entity.Property(e => e.TokenHash).HasMaxLength(64);
+            entity.HasIndex(e => e.TokenHash).IsUnique();
+            entity.HasIndex(e => e.UserId);
+        });
+
+        builder.Entity<ChangeJournalEntity>(entity =>
+        {
+            entity.ToTable("change_journal");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.ActorId).HasMaxLength(450);
+            entity.Property(e => e.RequestId).HasMaxLength(256);
+            entity.Property(e => e.ObjectType).HasMaxLength(64);
+            entity.Property(e => e.ObjectId).HasMaxLength(450);
+            entity.Property(e => e.Field).HasMaxLength(128);
+            entity.Property(e => e.Reason).HasMaxLength(256);
+            entity.HasIndex(e => new { e.ObjectType, e.ObjectId, e.At });
         });
     }
 
