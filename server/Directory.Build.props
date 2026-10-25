@@ -1,0 +1,25 @@
+<Project>
+
+  <!-- Common settings for every project in the Aetheris solution. -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!--
+    Magic-number analyzer (task 00001, section 2.4).
+    Initially a warning only; it can be promoted to an error once the
+    balance parameters are fully externalised.
+  -->
+  <PropertyGroup>
+    <MagicNumberAnalyzerSeverity>warning</MagicNumberAnalyzerSeverity>
+  </PropertyGroup>
+
+</Project>

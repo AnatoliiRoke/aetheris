@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Aetheris.Admin/Aetheris.Admin.csproj" />
+    <Project Path="src/Aetheris.Chat/Aetheris.Chat.csproj" />
+    <Project Path="src/Aetheris.Core/Aetheris.Core.csproj" />
+    <Project Path="src/Aetheris.Economy/Aetheris.Economy.csproj" />
+    <Project Path="src/Aetheris.Fleet/Aetheris.Fleet.csproj" />
+    <Project Path="src/Aetheris.Host/Aetheris.Host.csproj" />
+    <Project Path="src/Aetheris.Market/Aetheris.Market.csproj" />
+    <Project Path="src/Aetheris.Planets/Aetheris.Planets.csproj" />
+    <Project Path="src/Aetheris.Rating/Aetheris.Rating.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Aetheris.Tests/Aetheris.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>Aetheris.Host</RootNamespace>
+    <UserSecretsId>aetheris-host</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
+    <ProjectReference Include="..\Aetheris.Economy\Aetheris.Economy.csproj" />
+    <ProjectReference Include="..\Aetheris.Planets\Aetheris.Planets.csproj" />
+    <ProjectReference Include="..\Aetheris.Fleet\Aetheris.Fleet.csproj" />
+    <ProjectReference Include="..\Aetheris.Market\Aetheris.Market.csproj" />
+    <ProjectReference Include="..\Aetheris.Rating\Aetheris.Rating.csproj" />
+    <ProjectReference Include="..\Aetheris.Chat\Aetheris.Chat.csproj" />
+    <ProjectReference Include="..\Aetheris.Admin\Aetheris.Admin.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" />
+    <PackageReference Include="MessagePack" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
+    <PackageReference Include="Sentry.AspNetCore" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  </ItemGroup>
+
+</Project>
