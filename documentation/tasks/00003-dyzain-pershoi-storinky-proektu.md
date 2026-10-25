@@ -182,7 +182,27 @@ Subtle dark nebula background with soft teal and violet clouds, very low contras
 Lone starship leaving an orbital station toward a bright planet at dawn, vertical composition. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
 ```
 
-**ART-11** (скріншоти гри) і **ART-16** (лого) не генеруються: скріншоти це макет інтерфейсу з Design, лого текстове «AETHERIS» шрифтом Inter Bold.
+**ART-11a**: Скріншот 1: огляд імперії, 1280×720
+```
+Screenshot mockup of a space strategy game, empire overview screen: top bar with resource icons and numbers, left menu, three planet cards with painted planets and progress bars, right panel with construction timers, dark sci-fi game interface, painted 2D style, deep navy background (#0B1020), semi-transparent dark panels with thin light borders, teal (#2EC4C4) accent, simple sans-serif font, 16:9, no real brand names, no watermark.
+```
+
+**ART-11b**: Скріншот 2: галактична карта, 1280×720
+```
+Screenshot mockup of a space strategy game, galaxy map screen: star systems as glowing nodes, fleet route lines with arrival times, fog of war, side panel with selected system info, dark sci-fi game interface, painted 2D style, deep navy background (#0B1020), semi-transparent dark panels with thin light borders, teal (#2EC4C4) accent, simple sans-serif font, 16:9, no real brand names, no watermark.
+```
+
+**ART-11c**: Скріншот 3: конструктор кораблів, 1280×720
+```
+Screenshot mockup of a space strategy game, ship constructor screen: a large painted starship hull in the center with glowing module slots, component list on the left, stats and energy bar on the right, dark sci-fi game interface, painted 2D style, deep navy background (#0B1020), semi-transparent dark panels with thin light borders, teal (#2EC4C4) accent, simple sans-serif font, 16:9, no real brand names, no watermark.
+```
+
+**ART-11d**: Скріншот 4: ринок, 1280×720
+```
+Screenshot mockup of a space strategy game, market screen: table of resource lots with prices and quantities, sell and buy buttons, small resource icons, price chart on the right, dark sci-fi game interface, painted 2D style, deep navy background (#0B1020), semi-transparent dark panels with thin light borders, teal (#2EC4C4) accent, simple sans-serif font, 16:9, no real brand names, no watermark.
+```
+
+**ART-16** (лого) не генерується: текстове «AETHERIS» шрифтом Inter Bold. Скріншоти ART-11 тимчасові: після появи справжнього клієнта їх замінюють реальними кадрами.
 
 ## 6. Промпт для Design (англійською, передати як є)
 
@@ -196,7 +216,7 @@ Visual style: painted 2D, beautiful and atmospheric. Dark UI only. Use these col
 Page structure, top to bottom: (1) header: logo, menu (About, Races, Ranking, News, Help), language switch UA/EN, buttons "Sign in" and "Play"; (2) hero: big space scene, headline, 1-2 sentences, primary button "Play for free", secondary "Sign in"; (3) "About the game": 4 cards with illustrations (planet development, ship constructor, market, tactical battles); (4) "Races": 4 cards with ship illustration, race color and mood; (5) "Screenshots": gallery of 4 frames; (6) "Ranking": top-10 players table (place, name, race, score) and a "Full ranking" button; (7) "News": 3 cards (date, title, excerpt, "Read more"); (8) FAQ accordion with 5-6 questions; (9) footer: language, terms, privacy policy, contacts, social links, version.
 Also design the auth screens: sign in (email, password, "Forgot password?", "Continue with Google"), sign up (email, password, display name, terms checkbox), an error state, and a "Check your email" screen.
 
-Illustrations: do NOT draw them. Put a labeled placeholder (ART-01 ... ART-16, with letter suffixes for ART-12 and ART-13) with the correct size and aspect ratio wherever an illustration goes; I will supply the final painted images separately. Use this ID list: ART-01 hero background, ART-02 star layer, ART-03..06 the four "About" cards, ART-07..10 race ships, ART-11 screenshots, ART-12a..f six planet types, ART-13a..c news thumbnails, ART-14 section background, ART-15 auth side image, ART-16 logo.
+Illustrations: do NOT draw them. Put a labeled placeholder (ART-01 ... ART-16, with letter suffixes for ART-12 and ART-13) with the correct size and aspect ratio wherever an illustration goes; I will supply the final painted images separately. Use this ID list: ART-01 hero background, ART-02 star layer, ART-03..06 the four "About" cards, ART-07..10 race ships, ART-11a..d four screenshots, ART-12a..f six planet types, ART-13a..c news thumbnails, ART-14 section background, ART-15 auth side image, ART-16 logo.
 
 Requirements: two layouts, desktop 1440-1920 px and mobile 360-430 px (hamburger menu, tap targets at least 44 px, no horizontal scroll); WCAG AA contrast; color is never the only carrier of information; UI copy in Ukrainian, short and clear for a newcomer, with an English variant of the menu and buttons; all data are made-up placeholders (player names, news), no real people or brands. Output a design-tokens table (colors, fonts, spacing, radii, shadows) and a list of components.
 ```
