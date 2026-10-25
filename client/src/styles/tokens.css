@@ -1,0 +1,65 @@
+/* AETHERIS — design tokens.
+   Ported from documentation/design/aetheris-web 1/assets/css/styles.css (task 00003). */
+
+:root {
+  /* Colors */
+  --bg-0: #070B16;
+  --bg-1: #0B1020;
+  --bg-2: #141B33;
+  --bg-3: #1C2544;
+  --border: rgba(160, 190, 255, 0.16);
+  --border-strong: rgba(160, 190, 255, 0.28);
+  --text-1: #E8EEFF;
+  --text-2: #9AA7C7;
+  --text-soft: #C3CCE4;
+  --accent: #2EC4C4;
+  --accent-hover: #4FDADA;
+  --on-accent: #070B16;
+  --danger: #FF6B3D;
+  --danger-text: #FF8A66;
+  --success: #4CD08A;
+  --warning: #F2C14E;
+
+  /* Races */
+  --race-terran: #6C8DB8;
+  --race-kvarr: #D08A4E;
+  --race-skolar: #D2443C;
+  --race-nexar: #7FE0EE;
+
+  /* Typography */
+  --font: "Inter", Roboto, system-ui, Arial, sans-serif;
+  --fs-h1: clamp(34px, calc(2.2vw + 25px), 56px);
+  --fs-h2: clamp(26px, calc(0.95vw + 22.3px), 36px);
+  --fs-h3: clamp(20px, calc(0.19vw + 19.26px), 22px);
+  --fs-body: 16px;
+  --fs-small: 13px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --gutter: clamp(16px, 2vw, 32px);
+  --section-y: clamp(64px, 6.7vw, 96px);
+  --container: 1280px;
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 12px;
+  --r-xl: 14px;
+  --r-full: 999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-cta: 0 8px 24px rgba(46, 196, 196, 0.25);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.5);
+
+  --header-h: 68px;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+}

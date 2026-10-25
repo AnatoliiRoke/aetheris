@@ -1,80 +1,28 @@
-:root {
-  --color-space: 100%;
-  --color-bg: #0b1020;
-  --color-bg-soft: #141b33;
-  --color-accent: #4dd0e1;
-  --color-text: #e6ecff;
-  --color-text-muted: #8f9ac0;
+/* AETHERIS — additions of the React port to the design styles.
+   Everything here uses the design tokens only. */
 
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+:root {
   color-scheme: dark;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  height: 100%;
+/* A section head nested in a row head keeps its own spacing off. */
+.section-head--flat {
   margin: 0;
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  overflow: hidden;
+/* A note under a disabled sign-in provider. */
+.auth__note {
+  margin-top: calc(var(--space-2) * -1);
+  text-align: center;
 }
 
-.app {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.app__canvas {
-  position: absolute;
-  inset: 0;
-}
-
-.app__canvas canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.app__header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  background: rgb(20 27 51 / 70%);
-  border-bottom: 1px solid rgb(230 236 255 / 10%);
-}
-
-.app__title {
-  margin: 0;
-  font-size: 1.1rem;
+/* Links inside alert texts stay readable on the tinted background. */
+.alert a {
   font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  text-decoration: underline;
 }
 
-.app__status {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
-.app__status--ok {
-  color: #6ee7a8;
-}
-
-.app__status--error {
-  color: #ff8a5c;
+/* The busy state of a submit button. */
+.btn[aria-busy='true'] {
+  cursor: progress;
 }

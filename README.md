@@ -139,7 +139,7 @@ dotnet run --project src/Aetheris.Host
 |---|---|
 | `GET /health` | Стан сервера й бази (JSON) |
 | `GET /api/v1/ping` | Проста перевірка живості |
-| `/api/v1/auth/...` | Реєстрація, підтвердження email, вхід, оновлення сесії, вихід, скидання пароля, Google |
+| `/api/v1/auth/...` | Реєстрація, повторний лист підтвердження, підтвердження email, вхід, оновлення сесії, вихід, скидання пароля, Google, `providers` (чи увімкнено Google) |
 | `POST /api/v1/test/echo` | Нейтральна тестова команда: показує весь конвеєр захисту |
 | `/api/admin/...` | Адмінка: вхід із TOTP, `ping`, зміна параметрів, коефіцієнт часу, журнал |
 | `/hubs/game` | SignalR-хаб ігрових подій (лише для гравця, що увійшов) |
@@ -395,17 +395,47 @@ services.AddOwnedObjectType<ThingOwnerResolver>(); // IOwnedObjectResolver з Ob
 
 ## Клієнт
 
+Публічний сайт за дизайном `documentation/design/aetheris-web 1` (задача 00003): лендинг і
+екрани акаунта. React + TypeScript + Vite, без бібліотек роутингу й локалізації.
+
 ```bash
+# термінал 1: сервер на http://localhost:5080
+cd server && dotnet run --project src/Aetheris.Host
+
+# термінал 2: клієнт на http://localhost:5173
 cd client
-npm install
+npm ci
 npm run dev
 ```
 
-Клієнт за замовчуванням звертається до `http://localhost:5080`. Переопределення:
+Vite пересилає `/api`, `/hubs` і `/health` на сервер (`vite.config.ts`, змінна
+`AETHERIS_SERVER_URL`), тому сторінка й API мають одне походження й cookie сесії лишаються
+своїми. Cookie сесії мають прапорець `Secure`: Chrome і Firefox приймають його на
+`http://localhost`; для Safari запускайте сервер із профілем `https`.
 
-```bash
-VITE_API_BASE_URL=http://localhost:5080 VITE_HUB_URL=http://localhost:5080/hubs/game npm run dev
-```
+| Адреса | Сторінка |
+|---|---|
+| `/` | Лендинг: шапка з UA/EN, hero, про гру, раси, скриншоти, топ-10, новини, FAQ, футер |
+| `/login` | Вхід; помилки пароля, блокування, непідтверджена пошта, ліміт спроб |
+| `/register` | Реєстрація з підказкою правил пароля й згодою з умовами |
+| `/forgot-password` | Запит посилання для нового пароля |
+| `/check-email` | «Перевір пошту» з повторним листом через 60 с |
+| `/confirm-email?userId=&token=` | Ціль посилання з листа підтвердження |
+| `/reset-password?userId=&token=` | Ціль посилання з листа скидання пароля |
+
+| Що | Де |
+|---|---|
+| Токени дизайну (CSS-змінні) | `src/styles/tokens.css`; решта стилів — `base`, `components`, `sections`, `auth` |
+| Тексти uk / en | `src/i18n/uk.ts`, `src/i18n/en.ts` (компілятор вимагає однакових ключів) |
+| Клієнт API | `src/api/http.ts`: cookie, `X-XSRF-TOKEN` з `/api/v1/auth/csrf`, `Idempotency-Key` для команд |
+| Рейтинг і новини | інтерфейс `src/api/contentApi.ts`, заглушка `src/api/mockContentApi.ts` до появи ендпоїнтів |
+| Арти | `src/assets/images` (лінива підвантажка), hero і зорі в `public/` (preload) |
+
+Перевірки: `npm run lint`, `npm test` (Vitest + Testing Library), `npm run build`.
+
+Змінні збірки: `VITE_API_BASE_URL` (за замовчуванням те саме походження), `VITE_HUB_URL`,
+`VITE_STUDIO_NAME`, `VITE_SUPPORT_EMAIL`. Для production статичний хостинг має віддавати
+`index.html` на всі невідомі шляхи (маршрути клієнта).
 
 ---
 
@@ -417,7 +447,7 @@ Workflow: `.github/workflows/ci.yml`. Три джоби:
 |---|---|
 | `secrets` | gitleaks сканує всю історію репозиторію (`.gitleaks.toml`) |
 | `server` | Збірка (з `AETHERIS002` як помилкою) -> анотації `AETHERIS001` -> тести на PostgreSQL 17 (служба GitHub Actions) -> `dotnet format --verify-no-changes` -> `dotnet list package --vulnerable` |
-| `client` | `npm ci` -> `npm audit --audit-level=high` -> `npm run lint` -> `npm run build` |
+| `client` | `npm ci` -> `npm audit --audit-level=high` -> `npm run lint` -> `npm test` -> `npm run build` |
 
 Dependabot (`.github/dependabot.yml`) щотижня перевіряє NuGet, npm і GitHub Actions.
 Версії зафіксовані: NuGet у `server/Directory.Packages.props`, npm — точні версії в
@@ -427,7 +457,7 @@ Dependabot (`.github/dependabot.yml`) щотижня перевіряє NuGet, n
 
 ```bash
 cd server && dotnet build --configuration Release && dotnet test --configuration Release && dotnet format --verify-no-changes
-cd client && npm run lint && npm run build
+cd client && npm run lint && npm test && npm run build
 ```
 
 > **Статус:** workflow готовий, але ще не відпрацював на GitHub — гілку не було запушено.

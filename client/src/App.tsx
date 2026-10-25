@@ -1,85 +1,70 @@
-import { useEffect, useRef, useState } from 'react';
-import { GameRenderer } from './game/GameRenderer';
-import { serverConfig } from './config/server';
+import { useMemo, type ReactNode } from 'react';
+import { createAuthApi } from './api/authApi';
+import { ApiContext, type Api } from './api/context';
+import { HttpClient } from './api/http';
+import { mockContentApi } from './api/mockContentApi';
+import { I18nProvider } from './i18n/I18nProvider';
+import { CheckEmailPage } from './pages/auth/CheckEmailPage';
+import { ConfirmEmailPage } from './pages/auth/ConfirmEmailPage';
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+import { LoginPage } from './pages/auth/LoginPage';
+import { RegisterPage } from './pages/auth/RegisterPage';
+import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
+import { LandingPage } from './pages/landing/LandingPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { routes } from './router/context';
+import { RouterProvider } from './router/Router';
+import { useRouter } from './router/useRouter';
+import { SessionProvider } from './session/SessionProvider';
+
+const pages: Record<string, () => ReactNode> = {
+  [routes.home]: () => <LandingPage />,
+  [routes.login]: () => <LoginPage />,
+  [routes.register]: () => <RegisterPage />,
+  [routes.forgotPassword]: () => <ForgotPasswordPage />,
+  [routes.checkEmail]: () => <CheckEmailPage />,
+  [routes.confirmEmail]: () => <ConfirmEmailPage />,
+  [routes.resetPassword]: () => <ResetPasswordPage />,
+};
 
 /**
- * Root component.
- *
- * Task 00001 provides an empty canvas and a connection check; the game screens arrive with
- * later tasks.
+ * Shows the page of the current address.
  */
-export default function App() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [status, setStatus] = useState<'checking' | 'ok' | 'error'>('checking');
+export function Pages() {
+  const { path } = useRouter();
+  const normalized = path.length > 1 ? path.replace(/\/+$/, '') : path;
+  const page = pages[normalized];
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) {
-      return;
-    }
+  return page ? page() : <NotFoundPage />;
+}
 
-    const renderer = new GameRendererHolder(container);
-
-    void (async () => {
-      await renderer.create();
-    })();
-
-    return () => {
-      renderer.destroy();
-    };
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    void (async () => {
-      try {
-        const response = await fetch(`${serverConfig.apiBaseUrl}/health`, {
-          signal: controller.signal,
-        });
-
-        setStatus(response.ok ? 'ok' : 'error');
-      } catch {
-        if (!controller.signal.aborted) {
-          setStatus('error');
-        }
-      }
-    })();
-
-    return () => controller.abort();
-  }, []);
-
+/**
+ * The providers of the site: language, server interfaces, session and routing.
+ *
+ * @param api The server interfaces; tests pass their own.
+ */
+export function AppProviders({ api, children }: { api: Api; children: ReactNode }) {
   return (
-    <div className="app">
-      <div ref={containerRef} className="app__canvas" />
-
-      <header className="app__header">
-        <h1 className="app__title">AETHERIS</h1>
-        <span className={`app__status app__status--${status}`}>
-          {status === 'checking' ? 'підключення…' : status === 'ok' ? 'сервер доступний' : 'сервер недоступний'}
-        </span>
-      </header>
-    </div>
+    <I18nProvider>
+      <ApiContext.Provider value={api}>
+        <SessionProvider>
+          <RouterProvider>{children}</RouterProvider>
+        </SessionProvider>
+      </ApiContext.Provider>
+    </I18nProvider>
   );
 }
 
 /**
- * Keeps the PixiJS renderer and its lifecycle together.
+ * The public site (task 00003): the landing page and the account screens. The game client
+ * (PixiJS, `src/game`) is added by a later task behind the sign-in.
  */
-class GameRendererHolder {
-  private renderer: GameRenderer | null = null;
-  private readonly container: HTMLElement;
+export default function App() {
+  const api = useMemo<Api>(() => ({ auth: createAuthApi(new HttpClient()), content: mockContentApi }), []);
 
-  constructor(container: HTMLElement) {
-    this.container = container;
-  }
-
-  async create(): Promise<void> {
-    this.renderer = await GameRenderer.create(this.container);
-  }
-
-  destroy(): void {
-    this.renderer?.destroy();
-    this.renderer = null;
-  }
+  return (
+    <AppProviders api={api}>
+      <Pages />
+    </AppProviders>
+  );
 }

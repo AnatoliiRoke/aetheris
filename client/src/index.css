@@ -1,18 +1,8 @@
-:root {
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-}
-
-body {
-  background: #0b1020;
-}
+/* AETHERIS — styles of the public site (task 00003).
+   The order follows the design: tokens → base → components → sections → auth → additions. */
+@import './styles/tokens.css';
+@import './styles/base.css';
+@import './styles/components.css';
+@import './styles/sections.css';
+@import './styles/auth.css';
+@import './App.css';
