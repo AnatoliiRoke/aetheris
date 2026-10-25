@@ -41,41 +41,98 @@
 ### 3.4. Дані на макеті
 Правдоподібні заглушки: рейтинг із 10 вигаданих імен, 3 новини, 4 скріншоти. Не реальні особи й не реальні бренди.
 
-## 4. Промпт для Design (передати як є)
+## 4. Шрифти й кольори (✅ вимога автора: шрифти прості, кольори темні)
+
+### 4.1. Шрифти
+Прості, читабельні, з кирилицею, безкоштовні (Google Fonts). Жодних декоративних і «стилізованих» шрифтів.
+
+| Роль | Шрифт | Запасні |
+|---|---|---|
+| Заголовки і кнопки | **Inter** (SemiBold 600 / Bold 700) | Roboto, system-ui, Arial |
+| Основний текст | **Inter** (Regular 400 / Medium 500) | Roboto, system-ui, Arial |
+| Числа, таймери, таблиця рейтингу | **Inter** з цифрами однакової ширини (`tabular-nums`) | Roboto Mono |
+
+Розміри (робочий стіл / телефон): H1 56 / 34, H2 36 / 26, H3 22 / 20, основний 16 / 16, дрібний 13 / 13; міжрядковий інтервал 1.5 для тексту, 1.2 для заголовків.
+
+### 4.2. Кольори (темні)
+| Токен | Колір | Де |
+|---|---|---|
+| `bg-0` | #070B16 | Найглибший фон сторінки |
+| `bg-1` | #0B1020 | Основний фон секцій |
+| `bg-2` | #141B33 | Картки, панелі |
+| `bg-3` | #1C2544 | Піднятий стан, поля вводу |
+| `border` | rgba(160,190,255,0.16) | Тонкі рамки |
+| `text-1` | #E8EEFF | Основний текст |
+| `text-2` | #9AA7C7 | Другорядний текст |
+| `accent` | #2EC4C4 | Основний акцент (бірюзовий), кнопка «Грати» |
+| `accent-hover` | #4FDADA | Наведення |
+| `danger` | #FF6B3D | Бойовий акцент, помилки |
+| `success` | #4CD08A | Успіх, союзники |
+| `warning` | #F2C14E | Нейтральне, попередження |
+| Раси | Террани #6C8DB8, Кварр #D08A4E, Сколар #D2443C, Нексар #7FE0EE | Картки рас |
+
+Правила: фон завжди темний; світлі плями лише для акценту й світіння; контраст тексту не нижчий за WCAG AA.
+
+## 5. Перелік 2D-малюнків і промпти для них (✅ вимога автора)
+
+У Design на місці кожного малюнка ставимо **заглушку з ідентифікатором** (`ART-01` ...). Малюнки генеруємо окремо за промптами нижче (англійською), потім підставляємо. Загальний суфікс для всіх: `painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark`.
+
+| ID | Де | Розмір | Промпт |
+|---|---|---|---|
+| ART-01 | Hero, фон | 1920×1000, широкий | `Epic wide space scene: a large ocean planet with a glowing atmosphere in the foreground left, a small fleet of sleek spaceships flying toward it, distant nebula in teal and violet, layered stars for parallax, empty space on the right for text` + суфікс |
+| ART-02 | Hero, шар зірок | 1920×1000, прозорий PNG | `Seamless transparent starfield layer, small and medium stars, very subtle colored dust` + суфікс |
+| ART-03 | Картка «Розвиток планет» | 480×320 | `A colony on a rocky planet seen from orbit: mining towers, domes, glowing lights on the night side` + суфікс |
+| ART-04 | Картка «Конструктор кораблів» | 480×320 | `A starship blueprint on a dark holographic table, ship hull with glowing module slots` + суфікс |
+| ART-05 | Картка «Ринок» | 480×320 | `A busy space trade station with cargo ships docking, crates and glowing signs without text` + суфікс |
+| ART-06 | Картка «Тактичні бої» | 480×320 | `Two small fleets exchanging laser fire in space, shield bubbles flashing, orange-red explosions` + суфікс |
+| ART-07 | Раса Террани | 400×500 | `Terran warship: gray metal hull with blue accents, angular naval silhouette, bridge and hull numbers, side view` + суфікс |
+| ART-08 | Раса Кварр | 400×500 | `Kvarr warship: crystalline faceted hull, hexagonal armor plates, amber and terracotta colors, fortress-like, side view` + суфікс |
+| ART-09 | Раса Сколар | 400×500 | `Skolar warship: sharp predatory asymmetric blades, red and black, aggressive raider, side view` + суфікс |
+| ART-10 | Раса Нексар | 400×500 | `Nexar warship: smooth geometric hull, glowing cyan lines and rings, white and cyan, high-tech, side view` + суфікс |
+| ART-11 | Скріншот 1–3 (заглушки) | 1280×720 | `Stylized game UI screenshot placeholder: top resource bar, planet cards, dark panels` (генерує Design як макет UI, не картинка) |
+| ART-12 | Планети для рейтингу й карток (6 типів) | 256×256, прозорі | `Round planet, [earth-like / volcanic / icy / desert / ocean / gas giant] with atmosphere glow, painted texture, transparent background` + суфікс |
+| ART-13 | Новини (мініатюри ×3) | 400×225 | `Abstract space scene for a news card: [update / event / patch notes], simple composition, one focal object` + суфікс |
+| ART-14 | Фон блоків і футера | 1920×600 | `Subtle dark nebula background with soft teal and violet clouds, very low contrast, suitable behind text` + суфікс |
+| ART-15 | Вхід/реєстрація (бічна картинка) | 600×800 | `Lone starship leaving an orbital station toward a bright planet at dawn, vertical composition` + суфікс |
+| ART-16 | Лого | SVG | Текстове «AETHERIS», без малюнка (тимчасово), Inter Bold, літерний інтервал +4% |
+
+## 6. Промпт для Design (англійською, передати як є)
 
 ```
-Створи дизайн ПЕРШОЇ ПУБЛІЧНОЇ СТОРІНКИ онлайн-гри «AETHERIS» (landing page + вхід/реєстрація). Це не ігровий екран, а сторінка, яку бачить людина до початку гри.
+Design the FIRST PUBLIC PAGE of an online browser game called "AETHERIS" (landing page + sign-in/sign-up). This is NOT an in-game screen; it is what a person sees before they start playing.
 
-Про гру: безкоштовна онлайн космічна стратегія у реальному часі, 2D, один спільний всесвіт. Гравець розвиває планети, видобуває ресурси, будує кораблі з компонентів і модулів, торгує з іншими гравцями на ринку, веде тактичні бої циклами по 5–10 хвилин. Чотири раси: Террани (сірий метал і синій, надійність), Кварр (бурштин і теракота, кристали й броня), Сколар (червоний і чорний, гострі агресивні форми), Нексар (білий і ціан, гладкі форми, світні лінії, технології). Тон легкий, із військовим відтінком.
+About the game: a free-to-play online 2D space strategy in real time, one shared universe. Players develop planets, mine resources, build spaceships from components and modules, trade with other players on a market, and fight turn-based tactical battles in cycles of 5-10 minutes. Four playable races: Terrans (gray metal and blue, reliable, military), Kvarr (amber and terracotta, crystals and armor), Skolar (red and black, sharp aggressive raiders), Nexar (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
 
-Стиль: мальований 2D (painted), красивий, атмосферний. Темний космічний фон (#0B1020–#141B33), напівпрозорі темні панелі з тонкими світлими рамками, основний акцент бірюзовий, бойовий акцент червоно-помаранчевий. Мальовані планети з атмосферним світінням, зоряні шари, м'який паралакс у hero. Шрифт без засічок із підтримкою кирилиці. Лого — текстове «AETHERIS».
+Visual style: painted 2D, beautiful and atmospheric. Dark UI only. Use these color tokens: bg-0 #070B16, bg-1 #0B1020, bg-2 #141B33, bg-3 #1C2544, border rgba(160,190,255,0.16), text-1 #E8EEFF, text-2 #9AA7C7, accent #2EC4C4 (hover #4FDADA), danger #FF6B3D, success #4CD08A, warning #F2C14E. Race colors: Terran #6C8DB8, Kvarr #D08A4E, Skolar #D2443C, Nexar #7FE0EE. Fonts: simple and plain only, no decorative fonts: Inter for everything (headings Inter SemiBold/Bold, body Inter Regular/Medium, numbers with tabular-nums; fallbacks Roboto, system-ui, Arial). Type scale desktop/mobile: H1 56/34, H2 36/26, H3 22/20, body 16/16, small 13/13. Logo: text "AETHERIS" in Inter Bold with +4% letter spacing.
 
-Блоки зверху вниз: 1) шапка: лого, меню (Про гру, Раси, Рейтинг, Новини, Довідка), перемикач мови UA/EN, кнопки «Увійти» і «Грати»; 2) hero: велика космічна сцена з планетою і флотом, заголовок, 1–2 речення опису, кнопка «Грати безкоштовно», вторинна «Увійти»; 3) «Про гру»: 4 картки з іконками (розвиток планет, конструктор кораблів, ринок, тактичні бої); 4) «Раси»: 4 картки з силуетом корабля, кольором і настроєм; 5) «Скріншоти»: галерея з 4 кадрів (заглушки); 6) «Рейтинг»: таблиця топ-10 гравців (місце, ім'я, раса, очки) і кнопка «Весь рейтинг»; 7) «Новини»: 3 картки (дата, заголовок, початок тексту); 8) «Часті питання»: акордеон з 5–6 питань; 9) футер: мова, умови, політика конфіденційності, контакти, соцмережі.
+Page structure, top to bottom: (1) header: logo, menu (About, Races, Ranking, News, Help), language switch UA/EN, buttons "Sign in" and "Play"; (2) hero: big space scene, headline, 1-2 sentences, primary button "Play for free", secondary "Sign in"; (3) "About the game": 4 cards with illustrations (planet development, ship constructor, market, tactical battles); (4) "Races": 4 cards with ship illustration, race color and mood; (5) "Screenshots": gallery of 4 frames; (6) "Ranking": top-10 players table (place, name, race, score) and a "Full ranking" button; (7) "News": 3 cards (date, title, excerpt, "Read more"); (8) FAQ accordion with 5-6 questions; (9) footer: language, terms, privacy policy, contacts, social links, version.
+Also design the auth screens: sign in (email, password, "Forgot password?", "Continue with Google"), sign up (email, password, display name, terms checkbox), an error state, and a "Check your email" screen.
 
-Також зроби екрани авторизації: вхід (email, пароль, «Забули пароль?», «Увійти через Google»), реєстрація (email, пароль, ім'я, галочка згоди з умовами), стан помилки, екран «Перевірте пошту».
+Illustrations: do NOT draw them. Put a labeled placeholder (ART-01 ... ART-16) with the correct size and aspect ratio wherever an illustration goes; I will supply the final painted images separately. Use this ID list: ART-01 hero background, ART-02 star layer, ART-03..06 the four "About" cards, ART-07..10 race ships, ART-11 screenshots, ART-12 planet icons, ART-13 news thumbnails, ART-14 section background, ART-15 auth side image, ART-16 logo.
 
-Вимоги: два макети, десктоп 1440–1920 px і телефон 360–430 px (меню-гамбургер, цілі натискання не менші за 44 px); контраст за WCAG AA; колір не єдиний носій інформації; тексти українською, коротко й зрозуміло для новачка. Дані — вигадані заглушки (імена гравців, новини). Виведи кольори, шрифти, відступи, радіуси й тіні як окрему таблицю токенів.
+Requirements: two layouts, desktop 1440-1920 px and mobile 360-430 px (hamburger menu, tap targets at least 44 px, no horizontal scroll); WCAG AA contrast; color is never the only carrier of information; UI copy in Ukrainian, short and clear for a newcomer, with an English variant of the menu and buttons; all data are made-up placeholders (player names, news), no real people or brands. Output a design-tokens table (colors, fonts, spacing, radii, shadows) and a list of components.
 ```
 
-## 5. Результат
+## 7. Результат
 1. Макет у Design: головна сторінка для робочого столу й телефону, екрани входу, реєстрації, помилки й «Перевірте пошту».
 2. Токени (кольори, шрифти, відступи, радіуси, тіні) у `documentation/ui-art/design/tokens.md`.
 3. Експорт макетів (PNG) у `documentation/ui-art/design/`.
 4. Опис компонентів (картка, кнопка, таблиця рейтингу, картка новини, форма) у `documentation/ui-art/design/components.md`.
 5. Посилання на макет у `documentation/ui-art/design/README.md`.
+6. Остаточні малюнки ART-01…ART-15 (за промптами розділу 5) складаються в `documentation/art-local/images/`, назви файлів за ідентифікаторами.
 
-## 6. Критерії приймання
+## 8. Критерії приймання
 1. Усі блоки розділу 2 присутні на обох макетах.
 2. Телефонний макет читається без горизонтального прокручування; цілі натискання не менші за 44 px.
 3. Контраст тексту проходить WCAG AA.
 4. Екрани авторизації охоплюють: вхід, Google, реєстрацію, помилку, «Забули пароль?», «Перевірте пошту».
 5. Токени таблицею вичерпні: клієнт будуємо з них.
-6. Автор схвалив стиль або записав правки (розділ 7).
+6. Автор схвалив стиль або записав правки (розділ 9).
 
-## 7. Правки автора
+## 9. Правки автора
 (порожньо, заповнюється після перегляду макета)
 
-## 8. Відкрито
+## 10. Відкрито
 1. ❓ Чи потрібна на старті сторінка «Про команду / контакти» і соцмережі.
 2. ❓ Лого й шрифт: тимчасові чи окрема задача на айдентику.
 3. ❓ Джерело графіки (ui-art/01 розділ 8): у макеті заглушки, остаточні картинки окремо.
