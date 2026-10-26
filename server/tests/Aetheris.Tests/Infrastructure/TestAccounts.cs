@@ -13,7 +13,8 @@ namespace Aetheris.Tests.Infrastructure;
 /// <param name="Email">The e-mail address.</param>
 /// <param name="Password">The password.</param>
 /// <param name="UserId">The account identifier.</param>
-public sealed record TestAccount(string Email, string Password, string UserId);
+/// <param name="Nickname">The nickname.</param>
+public sealed record TestAccount(string Email, string Password, string UserId, string Nickname = "");
 
 /// <summary>
 /// Helpers that drive the account flows the way the client does.
@@ -23,7 +24,7 @@ public static class TestAccounts
     /// <summary>
     /// A password that passes every rule of the seed.
     /// </summary>
-    public const string StrongPassword = "violet-harbor-lantern-42";
+    public const string StrongPassword = "Violet-harbor-lantern-42";
 
     /// <summary>
     /// The number of digits of an authenticator code.
@@ -42,6 +43,11 @@ public static class TestAccounts
     public static string NewEmail() => $"player-{Guid.NewGuid():N}@example.test";
 
     /// <summary>
+    /// Creates a unique nickname that passes the rules of the seed.
+    /// </summary>
+    /// <returns>The nickname.</returns>
+    public static string NewNickname() => "Pilot" + Guid.NewGuid().ToString("N")[..12];
+    /// <summary>
     /// Registers an account without confirming it.
     /// </summary>
     /// <param name="factory">The test host.</param>
@@ -50,19 +56,51 @@ public static class TestAccounts
     public static async Task<TestAccount> RegisterAsync(AetherisTestFactory factory, string? email = null)
     {
         string address = email ?? NewEmail();
+        string nickname = NewNickname();
 
         using HttpClient client = factory.CreateBrowserClient();
         HttpResponseMessage response = await client.PostAsJsonAsync(
             AuthEndpoints.Prefix + "/register",
-            new { email = address, password = StrongPassword },
+            RegistrationBody(address, nickname, StrongPassword),
             TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
 
         string userId = factory.Emails.Last(address, AccountEmailKinds.Confirmation).UserId;
 
-        return new TestAccount(address, StrongPassword, userId);
+        return new TestAccount(address, StrongPassword, userId, nickname);
     }
+
+    /// <summary>
+    /// Builds the body of a registration the way the client sends it.
+    /// </summary>
+    /// <param name="email">The e-mail address.</param>
+    /// <param name="nickname">The nickname.</param>
+    /// <param name="password">The password, also sent as its repetition.</param>
+    /// <returns>The body.</returns>
+    public static object RegistrationBody(string email, string nickname, string password) =>
+        new Dictionary<string, object?>
+        {
+            ["email"] = email,
+            ["nickname"] = nickname,
+            ["password"] = password,
+            ["password_confirmation"] = password,
+        };
+
+    /// <summary>
+    /// Builds the body of a sign-in the way the client sends it.
+    /// </summary>
+    /// <param name="login">The e-mail address or the nickname.</param>
+    /// <param name="password">The password.</param>
+    /// <param name="rememberMe">Whether the session outlives the browser.</param>
+    /// <returns>The body.</returns>
+    public static object LoginBody(string login, string password, bool rememberMe = false) =>
+        new Dictionary<string, object?>
+        {
+            ["login"] = login,
+            ["password"] = password,
+            ["remember_me"] = rememberMe,
+        };
 
     /// <summary>
     /// Registers and confirms an account.
@@ -96,7 +134,7 @@ public static class TestAccounts
     {
         HttpResponseMessage response = await client.PostAsJsonAsync(
             AuthEndpoints.Prefix + "/login",
-            new { email = account.Email, password = account.Password },
+            LoginBody(account.Email, account.Password),
             TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

@@ -54,6 +54,11 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
         [SecurityKeys.RateLimitPermits(RateLimitGroups.Command)] = "100000",
         [SecurityKeys.RateLimitPermits(RateLimitGroups.Admin)] = "10000",
         [SecurityKeys.AlertFailedSignInThreshold] = "100000",
+
+        // Every test request comes from the same address, so the limits of one address are
+        // raised as well; the tests of these limits lower them again for themselves.
+        [SecurityKeys.LoginIpMaxFailedAttempts] = "100000",
+        [SecurityKeys.RegistrationIpLimit] = "100000",
     };
 
     /// <summary>
@@ -139,6 +144,7 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
             // The example of a new protected request: one class and this one line
             // (task 00002, acceptance criterion 10).
             services.AddCommand<TestNoteCommand>();
+            services.AddCommand<TestGameActionCommand>();
         });
     }
 

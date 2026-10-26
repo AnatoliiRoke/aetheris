@@ -41,6 +41,12 @@ public sealed class SecuritySettings
     /// <summary>Gets the smallest number of different characters in a password.</summary>
     public int PasswordMinUniqueCharacters => ReadInt32(SecurityKeys.PasswordMinUniqueCharacters);
 
+    /// <summary>Gets a value indicating whether a password must contain a digit.</summary>
+    public bool PasswordRequireDigit => ReadInt32(SecurityKeys.PasswordRequireDigit) != 0;
+
+    /// <summary>Gets a value indicating whether a password must contain an upper-case letter.</summary>
+    public bool PasswordRequireUppercase => ReadInt32(SecurityKeys.PasswordRequireUppercase) != 0;
+
     /// <summary>Gets the PBKDF2 iterations of the password hash.</summary>
     public int PasswordHashIterations => ReadInt32(SecurityKeys.PasswordHashIterations);
 
@@ -53,6 +59,9 @@ public sealed class SecuritySettings
     /// <summary>Gets the failed sign-ins in a row before the account is locked.</summary>
     public int LoginMaxFailedAttempts => ReadInt32(SecurityKeys.LoginMaxFailedAttempts);
 
+    /// <summary>Gets the failed sign-ins in a row from one IP address before it is locked.</summary>
+    public int LoginIpMaxFailedAttempts => ReadInt32(SecurityKeys.LoginIpMaxFailedAttempts);
+
     /// <summary>Gets how long a locked account stays locked.</summary>
     public TimeSpan LoginLockout => TimeSpan.FromMinutes(Read(SecurityKeys.LoginLockoutMinutes));
 
@@ -61,6 +70,48 @@ public sealed class SecuritySettings
 
     /// <summary>Gets the lifetime of the refresh token.</summary>
     public TimeSpan SessionRefreshLifetime => TimeSpan.FromDays(Read(SecurityKeys.SessionRefreshDays));
+
+    /// <summary>Gets the lifetime of a session with "remember me".</summary>
+    public TimeSpan SessionRememberLifetime => TimeSpan.FromDays(Read(SecurityKeys.SessionRememberDays));
+
+    /// <summary>Gets how often the session cookie is checked against the account.</summary>
+    public TimeSpan SessionStampCheckInterval => TimeSpan.FromSeconds(Read(SecurityKeys.SessionStampCheckSeconds));
+
+    /// <summary>Gets the smallest nickname length.</summary>
+    public int NicknameMinLength => ReadInt32(SecurityKeys.NicknameMinLength);
+
+    /// <summary>Gets the largest nickname length.</summary>
+    public int NicknameMaxLength => ReadInt32(SecurityKeys.NicknameMaxLength);
+
+    /// <summary>Gets the time between two changes of the nickname.</summary>
+    public TimeSpan NicknameChangeInterval => TimeSpan.FromDays(Read(SecurityKeys.NicknameChangeIntervalDays));
+
+    /// <summary>Gets the lifetime of the e-mail confirmation link.</summary>
+    public TimeSpan ConfirmationLifetime => TimeSpan.FromHours(Read(SecurityKeys.ConfirmationLifetimeHours));
+
+    /// <summary>Gets the smallest pause between two confirmation e-mails.</summary>
+    public TimeSpan ConfirmationResendInterval => TimeSpan.FromMinutes(Read(SecurityKeys.ConfirmationResendMinutes));
+
+    /// <summary>Gets the lifetime of the password reset link.</summary>
+    public TimeSpan ResetLifetime => TimeSpan.FromMinutes(Read(SecurityKeys.ResetLifetimeMinutes));
+
+    /// <summary>Gets how long an account without a confirmed e-mail address lives.</summary>
+    public TimeSpan UnconfirmedLifetime => TimeSpan.FromDays(Read(SecurityKeys.UnconfirmedLifetimeDays));
+
+    /// <summary>Gets the delay of a requested account deletion.</summary>
+    public TimeSpan DeletionDelay => TimeSpan.FromDays(Read(SecurityKeys.DeletionDelayDays));
+
+    /// <summary>Gets the registrations from one IP address within the window.</summary>
+    public int RegistrationIpLimit => ReadInt32(SecurityKeys.RegistrationIpLimit);
+
+    /// <summary>Gets the window of the registration limit.</summary>
+    public TimeSpan RegistrationIpWindow => TimeSpan.FromHours(Read(SecurityKeys.RegistrationIpWindowHours));
+
+    /// <summary>Gets a value indicating whether the captcha is asked on suspicion.</summary>
+    public bool CaptchaEnabled => ReadInt32(SecurityKeys.CaptchaEnabled) != 0;
+
+    /// <summary>Gets the registrations from one IP address within the window after which the captcha is asked.</summary>
+    public int CaptchaAfterRegistrations => ReadInt32(SecurityKeys.CaptchaAfterRegistrations);
 
     /// <summary>Gets the lifetime of the administrator session.</summary>
     public TimeSpan AdminSessionLifetime => TimeSpan.FromMinutes(Read(SecurityKeys.AdminSessionMinutes));

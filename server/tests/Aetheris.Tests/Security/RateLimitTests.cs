@@ -58,7 +58,7 @@ public sealed class RateLimitTests
             {
                 HttpResponseMessage response = await client.PostAsJsonAsync(
                     AuthEndpoints.Prefix + "/login",
-                    new { email = TestAccounts.NewEmail(), password = TestAccounts.StrongPassword },
+                    TestAccounts.LoginBody(TestAccounts.NewEmail(), TestAccounts.StrongPassword),
                     TestContext.Current.CancellationToken);
 
                 statuses.Add(response.StatusCode);

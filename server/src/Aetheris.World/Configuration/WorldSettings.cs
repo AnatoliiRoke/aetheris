@@ -105,6 +105,15 @@ public sealed record WorldSettings
     /// <summary>Gets the largest number of newcomers in one star system.</summary>
     public int MaxNewbiesPerSystem { get; init; }
 
+    /// <summary>Gets the smallest length of the name of a home body.</summary>
+    public int HomeNameMinLength { get; init; }
+
+    /// <summary>Gets the largest length of the name of a home body.</summary>
+    public int HomeNameMaxLength { get; init; }
+
+    /// <summary>Gets the capacity of the storage of a new home body, per resource.</summary>
+    public long StartStorageCapacity { get; init; }
+
     /// <summary>Gets a value indicating whether every player sees the whole map.</summary>
     public bool RevealAll { get; init; }
 
@@ -156,6 +165,9 @@ public sealed record WorldSettings
             InSystemTravelTime = TimeSpan.FromSeconds(ReadDouble(config, WorldConfigKeys.InSystemTravelSeconds)),
             StartPlanetTypeCode = ReadText(config, WorldConfigKeys.StartPlanetTypeCode),
             MaxNewbiesPerSystem = ReadInt32(config, WorldConfigKeys.MaxNewbiesPerSystem),
+            HomeNameMinLength = ReadInt32(config, WorldConfigKeys.HomeNameMinLength),
+            HomeNameMaxLength = ReadInt32(config, WorldConfigKeys.HomeNameMaxLength),
+            StartStorageCapacity = ReadInt64(config, WorldConfigKeys.StartStorageCapacity),
             RevealAll = ReadBoolean(config, WorldConfigKeys.RevealAll),
             FreeBodiesPageSize = ReadInt32(config, WorldConfigKeys.FreeBodiesPageSize),
             Names = new WorldNameTemplates(

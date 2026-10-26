@@ -53,6 +53,46 @@ namespace Aetheris.Host.Data.Migrations
                     b.ToTable("config_parameter", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.AccountAccessLogEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("At")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("at");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("ip_address");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_account_access_log");
+
+                    b.HasIndex("UserId", "At");
+
+                    b.HasIndex("IpAddress", "Kind", "At");
+
+                    b.ToTable("account_access_log", (string)null);
+                });
+
             modelBuilder.Entity("Aetheris.Host.Data.Entities.AdminAccountEntity", b =>
                 {
                     b.Property<string>("Id")
@@ -139,6 +179,18 @@ namespace Aetheris.Host.Data.Migrations
                     b.HasIndex("At");
 
                     b.ToTable("admin_audit_log", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.BlockedEmailDomainEntity", b =>
+                {
+                    b.Property<string>("Domain")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("domain");
+
+                    b.HasKey("Domain");
+
+                    b.ToTable("blocked_email_domain", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Host.Data.Entities.ChangeJournalEntity", b =>
@@ -277,6 +329,38 @@ namespace Aetheris.Host.Data.Migrations
                     b.ToTable("player_event", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.PlayerProfileEntity", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("user_id");
+
+                    b.Property<DateTimeOffset?>("ConfirmationSentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmation_sent_at");
+
+                    b.Property<DateTimeOffset?>("DeletionDueAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deletion_due_at");
+
+                    b.Property<DateTimeOffset?>("DeletionRequestedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deletion_requested_at");
+
+                    b.Property<DateTimeOffset?>("NicknameChangedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("nickname_changed_at");
+
+                    b.Property<DateTimeOffset>("RegisteredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("registered_at");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("player_profile", (string)null);
+                });
+
             modelBuilder.Entity("Aetheris.Host.Data.Entities.RefreshTokenEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -293,6 +377,10 @@ namespace Aetheris.Host.Data.Migrations
                     b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires_at");
+
+                    b.Property<bool>("IsPersistent")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_persistent");
 
                     b.Property<DateTimeOffset?>("RevokedAt")
                         .HasColumnType("timestamp with time zone")
@@ -362,6 +450,24 @@ namespace Aetheris.Host.Data.Migrations
                     b.HasIndex("CreatedAt");
 
                     b.ToTable("request_idempotency", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.RestrictedWordEntity", b =>
+                {
+                    b.Property<string>("Word")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("word");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("kind");
+
+                    b.HasKey("Word");
+
+                    b.ToTable("restricted_word", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Host.Data.Entities.ScheduledEventEntity", b =>
@@ -465,6 +571,56 @@ namespace Aetheris.Host.Data.Migrations
                     b.HasIndex("Type", "At");
 
                     b.ToTable("security_event", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.SignInAttemptEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("At")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("at");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("ip_address");
+
+                    b.Property<string>("LoginHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("login_hash");
+
+                    b.Property<bool>("Succeeded")
+                        .HasColumnType("boolean")
+                        .HasColumnName("succeeded");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sign_in_attempts");
+
+                    b.HasIndex("IpAddress", "At");
+
+                    b.HasIndex("LoginHash", "At");
+
+                    b.ToTable("sign_in_attempt", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.UnconfirmedAllowedActionEntity", b =>
+                {
+                    b.Property<string>("ActionCode")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("action_code");
+
+                    b.HasKey("ActionCode");
+
+                    b.ToTable("unconfirmed_allowed_action", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -709,6 +865,15 @@ namespace Aetheris.Host.Data.Migrations
                         .HasName("pk_asp_net_user_tokens");
 
                     b.ToTable("asp_net_user_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.PlayerProfileEntity", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithOne()
+                        .HasForeignKey("Aetheris.Host.Data.Entities.PlayerProfileEntity", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

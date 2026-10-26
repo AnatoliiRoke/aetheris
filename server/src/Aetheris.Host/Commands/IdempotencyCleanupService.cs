@@ -50,10 +50,20 @@ public sealed class IdempotencyCleanupService : BackgroundService
         await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
         AetherisDbContext dbContext = scope.ServiceProvider.GetRequiredService<AetherisDbContext>();
 
-        return await dbContext.RequestIdempotency
+        int removed = await dbContext.RequestIdempotency
             .Where(entry => entry.CreatedAt < threshold)
             .ExecuteDeleteAsync(cancellationToken)
             .ConfigureAwait(false);
+
+        // The sign-in attempts only count within the lockout window (task 00006).
+        DateTimeOffset attemptThreshold = _timeProvider.GetUtcNow() - _settings.LoginLockout;
+
+        removed += await dbContext.SignInAttempts
+            .Where(entry => entry.At < attemptThreshold)
+            .ExecuteDeleteAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return removed;
     }
 
     /// <inheritdoc />

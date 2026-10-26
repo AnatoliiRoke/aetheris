@@ -477,6 +477,11 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("celestial_object_id");
 
+                    b.Property<string>("Name")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name");
+
                     b.Property<string>("OwnerPlayerId")
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)")
@@ -561,6 +566,173 @@ namespace Aetheris.World.Data.Migrations
                         .HasDatabaseName("ix_planet_size_class_code");
 
                     b.ToTable("planet_size_class", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.PlanetStorageEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount");
+
+                    b.Property<long>("PlanetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("planet_id");
+
+                    b.Property<int>("ResourceTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_type_id");
+
+                    b.Property<int>("SectorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("sector_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_planet_storage");
+
+                    b.HasIndex("ResourceTypeId")
+                        .HasDatabaseName("ix_planet_storage_resource_type_id");
+
+                    b.HasIndex("SectorId")
+                        .HasDatabaseName("ix_planet_storage_sector_id");
+
+                    b.HasIndex("PlanetId", "ResourceTypeId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_planet_storage_planet_id_resource_type_id");
+
+                    b.ToTable("planet_storage", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_planet_storage_amount", "amount >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.PlayerCivilizationEntity", b =>
+                {
+                    b.Property<string>("PlayerId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("player_id");
+
+                    b.Property<DateTimeOffset>("FoundedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("founded_at");
+
+                    b.Property<long>("PlanetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("planet_id");
+
+                    b.Property<int>("RaceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("race_id");
+
+                    b.Property<int>("SectorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("sector_id");
+
+                    b.HasKey("PlayerId")
+                        .HasName("pk_player_civilization");
+
+                    b.HasIndex("PlanetId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_player_civilization_planet_id");
+
+                    b.HasIndex("RaceId")
+                        .HasDatabaseName("ix_player_civilization_race_id");
+
+                    b.HasIndex("SectorId")
+                        .HasDatabaseName("ix_player_civilization_sector_id");
+
+                    b.ToTable("player_civilization", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.RaceEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("NameKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name_key");
+
+                    b.Property<int?>("PreferredObjectTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("preferred_object_type_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<int>("StartBuildingLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("start_building_level");
+
+                    b.Property<int?>("StartBuildingTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("start_building_type_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_race");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_race_code");
+
+                    b.HasIndex("PreferredObjectTypeId")
+                        .HasDatabaseName("ix_race_preferred_object_type_id");
+
+                    b.ToTable("race", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.RaceStartResourceEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount");
+
+                    b.Property<int>("RaceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("race_id");
+
+                    b.Property<int>("ResourceTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_type_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_race_start_resource");
+
+                    b.HasIndex("ResourceTypeId")
+                        .HasDatabaseName("ix_race_start_resource_resource_type_id");
+
+                    b.HasIndex("RaceId", "ResourceTypeId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_race_start_resource_race_id_resource_type_id");
+
+                    b.ToTable("race_start_resource", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.World.Data.Entities.ResourceGroupEntity", b =>
@@ -747,6 +919,37 @@ namespace Aetheris.World.Data.Migrations
                         .HasDatabaseName("ix_star_system_sector_id_x_y");
 
                     b.ToTable("star_system", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.StartBuildingGrantEntity", b =>
+                {
+                    b.Property<long>("PlanetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("planet_id");
+
+                    b.Property<int>("BuildingTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("building_type_id");
+
+                    b.Property<DateTimeOffset>("GrantedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("granted_at");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
+
+                    b.Property<int>("SectorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("sector_id");
+
+                    b.HasKey("PlanetId")
+                        .HasName("pk_start_building_grant");
+
+                    b.HasIndex("SectorId")
+                        .HasDatabaseName("ix_start_building_grant_sector_id");
+
+                    b.ToTable("start_building_grant", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.World.Data.Entities.StartPlanetAllocationEntity", b =>
@@ -991,6 +1194,66 @@ namespace Aetheris.World.Data.Migrations
                     b.Navigation("CelestialObject");
                 });
 
+            modelBuilder.Entity("Aetheris.World.Data.Entities.PlanetStorageEntity", b =>
+                {
+                    b.HasOne("Aetheris.World.Data.Entities.PlanetEntity", null)
+                        .WithMany()
+                        .HasForeignKey("PlanetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_planet_storage_planet_planet_id");
+
+                    b.HasOne("Aetheris.World.Data.Entities.ResourceTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ResourceTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_planet_storage_resource_type_resource_type_id");
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.PlayerCivilizationEntity", b =>
+                {
+                    b.HasOne("Aetheris.World.Data.Entities.PlanetEntity", null)
+                        .WithMany()
+                        .HasForeignKey("PlanetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_player_civilization_planet_planet_id");
+
+                    b.HasOne("Aetheris.World.Data.Entities.RaceEntity", null)
+                        .WithMany()
+                        .HasForeignKey("RaceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_player_civilization_race_race_id");
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.RaceEntity", b =>
+                {
+                    b.HasOne("Aetheris.World.Data.Entities.CelestialObjectTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("PreferredObjectTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_race_celestial_object_type_preferred_object_type_id");
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.RaceStartResourceEntity", b =>
+                {
+                    b.HasOne("Aetheris.World.Data.Entities.RaceEntity", null)
+                        .WithMany("StartResourceIds")
+                        .HasForeignKey("RaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_race_start_resource_race_race_id");
+
+                    b.HasOne("Aetheris.World.Data.Entities.ResourceTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ResourceTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_race_start_resource_resource_type_resource_type_id");
+                });
+
             modelBuilder.Entity("Aetheris.World.Data.Entities.ResourceTypeEntity", b =>
                 {
                     b.HasOne("Aetheris.World.Data.Entities.ResourceGroupEntity", null)
@@ -1021,6 +1284,16 @@ namespace Aetheris.World.Data.Migrations
                         .HasConstraintName("fk_star_system_sector_sector_id");
                 });
 
+            modelBuilder.Entity("Aetheris.World.Data.Entities.StartBuildingGrantEntity", b =>
+                {
+                    b.HasOne("Aetheris.World.Data.Entities.PlanetEntity", null)
+                        .WithMany()
+                        .HasForeignKey("PlanetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_start_building_grant_planet_planet_id");
+                });
+
             modelBuilder.Entity("Aetheris.World.Data.Entities.StartPlanetAllocationEntity", b =>
                 {
                     b.HasOne("Aetheris.World.Data.Entities.PlanetEntity", null)
@@ -1049,6 +1322,11 @@ namespace Aetheris.World.Data.Migrations
             modelBuilder.Entity("Aetheris.World.Data.Entities.PlanetEntity", b =>
                 {
                     b.Navigation("DepositIds");
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.RaceEntity", b =>
+                {
+                    b.Navigation("StartResourceIds");
                 });
 
             modelBuilder.Entity("Aetheris.World.Data.Entities.StarSystemEntity", b =>

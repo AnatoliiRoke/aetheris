@@ -24,7 +24,7 @@ public static class WorldServiceCollectionExtensions
     /// <returns>The same collection.</returns>
     /// <remarks>
     /// The host provides <see cref="IDatabaseSession"/>, <see cref="IEventScheduler"/>,
-    /// the game configuration and the game clock.
+    /// <see cref="Core.Text.ITextModeration"/>, the game configuration and the game clock.
     /// </remarks>
     public static IServiceCollection AddWorldModule(this IServiceCollection services)
     {
@@ -37,13 +37,15 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<WorldReferenceRepository>();
         services.AddScoped<WorldGenerationService>();
         services.AddScoped<StartPlanetAllocator>();
+        services.AddScoped<CivilizationService>();
+        services.AddScoped<IStartBuildingPlacer, PendingStartBuildingPlacer>();
         services.AddScoped<FieldService>();
         services.AddScoped<WorldQueryService>();
         services.AddScoped<IWorldVisibility, OwnBodiesVisibility>();
         services.AddScoped<IWorldModule, WorldModule>();
         services.AddScoped<IScheduledEventHandler, FieldRespawnHandler>();
 
-        services.AddCommand<AllocateStartPlanetCommand>();
+        services.AddCommand<FoundCivilizationCommand>();
         services.AddOwnedObjectType<PlanetOwnerResolver>();
 
         return services;

@@ -79,22 +79,31 @@ public sealed class SignInChecker
     }
 
     /// <summary>
-    /// Checks the e-mail address and the password.
+    /// Checks the e-mail address or the nickname, and the password.
     /// </summary>
-    /// <param name="email">The e-mail address.</param>
+    /// <param name="login">The e-mail address or the nickname; a nickname never contains <c>@</c>.</param>
     /// <param name="password">The password.</param>
     /// <param name="httpContext">The request, used for the security journal.</param>
     /// <param name="failureEventType">The security event written for a failure.</param>
+    /// <param name="requireConfirmedEmail">Whether an account without a confirmed e-mail address is refused.</param>
     /// <returns>The result of the check.</returns>
+    /// <remarks>
+    /// A player signs in before the confirmation and only gets the actions allowed without it
+    /// (task 00006, decision 2); an administrator always needs a confirmed address.
+    /// </remarks>
     public async Task<SignInCheckResult> CheckAsync(
-        string email,
+        string login,
         string password,
         HttpContext httpContext,
-        string failureEventType)
+        string failureEventType,
+        bool requireConfirmedEmail = true)
     {
+        ArgumentNullException.ThrowIfNull(login);
         ArgumentNullException.ThrowIfNull(httpContext);
 
-        IdentityUser? user = await _userManager.FindByEmailAsync(email).ConfigureAwait(false);
+        IdentityUser? user = login.Contains('@', StringComparison.Ordinal)
+            ? await _userManager.FindByEmailAsync(login).ConfigureAwait(false)
+            : await _userManager.FindByNameAsync(login).ConfigureAwait(false);
 
         if (user is null)
         {
@@ -118,7 +127,7 @@ public sealed class SignInChecker
             return new SignInCheckResult(SignInOutcome.InvalidCredentials, user);
         }
 
-        if (!user.EmailConfirmed)
+        if (requireConfirmedEmail && !user.EmailConfirmed)
         {
             await _securityLog.WriteAsync(failureEventType, httpContext, user.Id, "email_not_confirmed").ConfigureAwait(false);
 

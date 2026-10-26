@@ -39,6 +39,10 @@ public sealed class ConfigSeedService
     /// <returns>The number of parameters that were inserted.</returns>
     public async Task<int> SeedAsync(CancellationToken cancellationToken = default)
     {
+        // The lists of the account rules are seeded with the parameters, so a fresh database
+        // and a cleared test database get both (task 00006).
+        await AccountListsSeed.SeedAsync(_dbContext, cancellationToken).ConfigureAwait(false);
+
         IReadOnlyList<(string Key, string Value)> parameters = ConfigSeed.GetParameters();
 
         List<string> existingKeys = await _dbContext.ConfigParameters

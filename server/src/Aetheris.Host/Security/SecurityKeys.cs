@@ -19,6 +19,12 @@ public static class SecurityKeys
     /// <summary>The smallest number of different characters in a password.</summary>
     public const string PasswordMinUniqueCharacters = "security.password.min_unique_chars";
 
+    /// <summary>Whether a password must contain a digit: 1 or 0.</summary>
+    public const string PasswordRequireDigit = "security.password.require_digit";
+
+    /// <summary>Whether a password must contain an upper-case letter: 1 or 0.</summary>
+    public const string PasswordRequireUppercase = "security.password.require_uppercase";
+
     /// <summary>The PBKDF2 iterations of the password hash.</summary>
     public const string PasswordHashIterations = "security.password.hash_iterations";
 
@@ -31,6 +37,9 @@ public static class SecurityKeys
     /// <summary>The failed sign-ins in a row before the account is locked.</summary>
     public const string LoginMaxFailedAttempts = "security.login.max_failed_attempts";
 
+    /// <summary>The failed sign-ins in a row from one IP address before it is locked.</summary>
+    public const string LoginIpMaxFailedAttempts = "security.login.ip_max_failed_attempts";
+
     /// <summary>How long a locked account stays locked, in minutes.</summary>
     public const string LoginLockoutMinutes = "security.login.lockout_minutes";
 
@@ -39,6 +48,48 @@ public static class SecurityKeys
 
     /// <summary>The lifetime of the refresh token, in days.</summary>
     public const string SessionRefreshDays = "security.session.refresh_days";
+
+    /// <summary>The lifetime of a session with "remember me", in days.</summary>
+    public const string SessionRememberDays = "security.session.remember_days";
+
+    /// <summary>How often the session cookie is checked against the account, in seconds.</summary>
+    public const string SessionStampCheckSeconds = "security.session.stamp_check_seconds";
+
+    /// <summary>The smallest nickname length.</summary>
+    public const string NicknameMinLength = "security.account.nickname_min_length";
+
+    /// <summary>The largest nickname length.</summary>
+    public const string NicknameMaxLength = "security.account.nickname_max_length";
+
+    /// <summary>The days between two changes of the nickname.</summary>
+    public const string NicknameChangeIntervalDays = "security.account.nickname_change_days";
+
+    /// <summary>The lifetime of the e-mail confirmation link, in hours.</summary>
+    public const string ConfirmationLifetimeHours = "security.account.confirmation_hours";
+
+    /// <summary>The smallest pause between two confirmation e-mails, in minutes.</summary>
+    public const string ConfirmationResendMinutes = "security.account.confirmation_resend_minutes";
+
+    /// <summary>The lifetime of the password reset link, in minutes.</summary>
+    public const string ResetLifetimeMinutes = "security.account.reset_minutes";
+
+    /// <summary>How long an account without a confirmed e-mail address lives, in days.</summary>
+    public const string UnconfirmedLifetimeDays = "security.account.unconfirmed_days";
+
+    /// <summary>The delay of a requested account deletion, in days.</summary>
+    public const string DeletionDelayDays = "security.account.deletion_days";
+
+    /// <summary>The registrations from one IP address within the window.</summary>
+    public const string RegistrationIpLimit = "security.registration.ip_limit";
+
+    /// <summary>The window of the registration limit, in hours.</summary>
+    public const string RegistrationIpWindowHours = "security.registration.ip_window_hours";
+
+    /// <summary>Whether the captcha is asked on suspicion: 1 or 0.</summary>
+    public const string CaptchaEnabled = "security.registration.captcha_enabled";
+
+    /// <summary>The registrations from one IP address within the window after which the captcha is asked.</summary>
+    public const string CaptchaAfterRegistrations = "security.registration.captcha_after";
 
     /// <summary>The lifetime of the administrator session, in minutes.</summary>
     public const string AdminSessionMinutes = "security.admin.session_minutes";

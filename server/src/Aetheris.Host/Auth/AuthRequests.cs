@@ -1,21 +1,34 @@
+using System.Text.Json.Serialization;
 using Aetheris.Host.Security;
 using FluentValidation;
 
 namespace Aetheris.Host.Auth;
 
 /// <summary>
-/// The registration of a new account.
+/// The registration of a new account (task 00006, decision 1).
 /// </summary>
 /// <param name="Email">The e-mail address.</param>
+/// <param name="Nickname">The nickname.</param>
 /// <param name="Password">The password.</param>
-public sealed record RegisterRequest(string? Email, string? Password);
+/// <param name="PasswordConfirmation">The password, repeated.</param>
+/// <param name="CaptchaToken">The answer of the captcha, when the server asked for it.</param>
+public sealed record RegisterRequest(
+    string? Email,
+    string? Nickname,
+    string? Password,
+    [property: JsonPropertyName("password_confirmation")] string? PasswordConfirmation,
+    [property: JsonPropertyName("captcha_token")] string? CaptchaToken = null);
 
 /// <summary>
-/// The sign-in of a player.
+/// The sign-in of a player (task 00006, decision 4).
 /// </summary>
-/// <param name="Email">The e-mail address.</param>
+/// <param name="Login">The e-mail address or the nickname.</param>
 /// <param name="Password">The password.</param>
-public sealed record LoginRequest(string? Email, string? Password);
+/// <param name="RememberMe">Whether the session outlives the browser.</param>
+public sealed record LoginRequest(
+    string? Login,
+    string? Password,
+    [property: JsonPropertyName("remember_me")] bool RememberMe = false);
 
 /// <summary>
 /// The confirmation of an e-mail address.
@@ -106,7 +119,10 @@ public sealed class RegisterRequestValidator : AbstractValidator<RegisterRequest
         ArgumentNullException.ThrowIfNull(settings);
 
         RuleFor(request => request.Email).AccountEmail(settings);
+        RuleFor(request => request.Nickname).NotEmpty();
         RuleFor(request => request.Password).AccountPassword(settings);
+        RuleFor(request => request.PasswordConfirmation).NotEmpty();
+        RuleFor(request => request.CaptchaToken).MaximumLength(settings.TokenMaxLength);
     }
 }
 
@@ -119,7 +135,7 @@ public sealed class LoginRequestValidator : AbstractValidator<LoginRequest>
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        RuleFor(request => request.Email).NotEmpty().MaximumLength(settings.EmailMaxLength);
+        RuleFor(request => request.Login).NotEmpty().MaximumLength(settings.EmailMaxLength);
         RuleFor(request => request.Password).AccountPassword(settings);
     }
 }

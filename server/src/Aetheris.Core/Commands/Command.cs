@@ -22,6 +22,23 @@ public interface ICommandDefinition
     /// Gets the rate limit group, one of <see cref="RateLimitGroups"/>.
     /// </summary>
     string RateLimitGroup { get; }
+
+    /// <summary>
+    /// Gets the action code of the command, for example <c>account.settings</c>.
+    /// </summary>
+    /// <remarks>
+    /// An account whose e-mail address is not confirmed yet may only run the commands whose
+    /// action code is listed in the database (task 00006, decision 2). Every command declares
+    /// its code; a command without one does not compile, and the architecture test checks
+    /// the format of every registered code.
+    /// </remarks>
+    string ActionCode { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the player must have finished the first step of the
+    /// game (the onboarding) before the command runs.
+    /// </summary>
+    bool RequiresOnboarding { get; }
 }
 
 /// <summary>
@@ -34,7 +51,9 @@ public interface ICommandDefinition
 /// This is the single pipeline of the server for state-changing requests
 /// (task 00002, section 1a). A command declares what it needs and the host enforces it, in
 /// this order: authentication and the <see cref="Policy"/>, the
-/// <see cref="RateLimitGroup"/>, the size limit of the body, the validation rules from
+/// <see cref="RateLimitGroup"/>, the account gate (a confirmed e-mail address unless the
+/// <see cref="ActionCode"/> is allowed without one, and the finished onboarding when
+/// <see cref="RequiresOnboarding"/> is set), the size limit of the body, the validation rules from
 /// <see cref="DefineRules"/>, the ownership of the <see cref="GetTarget"/> object, and the
 /// request identifier that makes a repeated request a no-op. <see cref="ExecuteAsync"/>
 /// runs inside a database transaction.
@@ -55,6 +74,12 @@ public abstract class Command<TRequest, TResponse> : ICommandDefinition
 
     /// <inheritdoc />
     public virtual string RateLimitGroup => RateLimitGroups.Command;
+
+    /// <inheritdoc />
+    public abstract string ActionCode { get; }
+
+    /// <inheritdoc />
+    public virtual bool RequiresOnboarding => true;
 
     /// <summary>
     /// Declares the validation rules of the request.

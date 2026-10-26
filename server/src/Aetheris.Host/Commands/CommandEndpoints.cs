@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Aetheris.Core.Commands;
 using Aetheris.Core.Errors;
+using Aetheris.Host.Auth;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Security;
@@ -20,7 +21,7 @@ namespace Aetheris.Host.Commands;
 /// </summary>
 /// <remarks>
 /// The order of the checks: authentication and the policy, the rate limit group (both on
-/// the endpoint), the request identifier, the body size, the validation rules, the
+/// the endpoint), the account gate (<see cref="AccountGate"/>), the request identifier, the body size, the validation rules, the
 /// ownership of the target object, and finally the execution inside a transaction that
 /// also stores the request identifier and the response. A second request with the same
 /// identifier waits for the first one and gets its stored response.
@@ -86,6 +87,18 @@ public static partial class CommandEndpoints
             return;
         }
 
+        TCommand command = services.GetRequiredService<TCommand>();
+
+        // The account gate comes right after the authentication: an unconfirmed address or an
+        // unfinished onboarding stops the command before anything else is read (task 00006).
+        string? gateError = await services.GetRequiredService<AccountGate>().CheckAsync(playerId, command, cancellationToken);
+
+        if (gateError is not null)
+        {
+            await ApiErrors.WriteAsync(httpContext, StatusCodes.Status403Forbidden, gateError);
+            return;
+        }
+
         string requestId = httpContext.Request.Headers[AuthCookies.IdempotencyHeader].ToString();
 
         if (requestId.Length == 0
@@ -117,8 +130,6 @@ public static partial class CommandEndpoints
             }));
             return;
         }
-
-        TCommand command = services.GetRequiredService<TCommand>();
 
         InlineValidator<TRequest> validator = new();
         command.DefineRules(validator);

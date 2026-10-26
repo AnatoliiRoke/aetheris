@@ -13,6 +13,7 @@ public sealed class WorldModule : IWorldModule
 {
     private readonly WorldGenerationService _generation;
     private readonly StartPlanetAllocator _allocator;
+    private readonly CivilizationService _civilizations;
     private readonly FieldService _fields;
     private readonly WorldQueryService _queries;
     private readonly IGameConfig _config;
@@ -22,24 +23,28 @@ public sealed class WorldModule : IWorldModule
     /// </summary>
     /// <param name="generation">The generation service.</param>
     /// <param name="allocator">The start body allocator.</param>
+    /// <param name="civilizations">The civilization service.</param>
     /// <param name="fields">The field service.</param>
     /// <param name="queries">The read service.</param>
     /// <param name="config">The game configuration.</param>
     public WorldModule(
         WorldGenerationService generation,
         StartPlanetAllocator allocator,
+        CivilizationService civilizations,
         FieldService fields,
         WorldQueryService queries,
         IGameConfig config)
     {
         ArgumentNullException.ThrowIfNull(generation);
         ArgumentNullException.ThrowIfNull(allocator);
+        ArgumentNullException.ThrowIfNull(civilizations);
         ArgumentNullException.ThrowIfNull(fields);
         ArgumentNullException.ThrowIfNull(queries);
         ArgumentNullException.ThrowIfNull(config);
 
         _generation = generation;
         _allocator = allocator;
+        _civilizations = civilizations;
         _fields = fields;
         _queries = queries;
         _config = config;
@@ -69,7 +74,15 @@ public sealed class WorldModule : IWorldModule
 
     /// <inheritdoc />
     public Task<StartPlanetResult> AllocateStartPlanetAsync(string playerId, CancellationToken cancellationToken = default) =>
-        _allocator.AllocateAsync(playerId, cancellationToken);
+        _allocator.AllocateAsync(playerId, null, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<CivilizationSummary?> GetCivilizationAsync(string playerId, CancellationToken cancellationToken = default) =>
+        _civilizations.GetAsync(playerId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task ReleasePlayerAsync(string playerId, CancellationToken cancellationToken = default) =>
+        _civilizations.ReleaseAsync(playerId, cancellationToken);
 
     /// <inheritdoc />
     public Task<ExtractionResult> ExtractFromFieldAsync(long fieldId, long processingMass, long freeHold, CancellationToken cancellationToken = default) =>

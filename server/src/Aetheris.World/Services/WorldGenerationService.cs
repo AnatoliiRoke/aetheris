@@ -73,6 +73,7 @@ public sealed class WorldGenerationService
             async () =>
             {
                 bool seeded = await WorldReferenceSeed.SeedAsync(_dbContext, cancellationToken).ConfigureAwait(false);
+                seeded |= await WorldReferenceSeed.SeedRacesAsync(_dbContext, cancellationToken).ConfigureAwait(false);
 
                 if (seeded)
                 {

@@ -58,16 +58,35 @@ public sealed class StartPlanetAllocator
     /// Allocates the start body of a player.
     /// </summary>
     /// <param name="playerId">The player.</param>
+    /// <param name="preferredObjectTypeId">
+    /// The body type the race of the player prefers (task 00006, decision 9). A free body of
+    /// this type is taken first; without one, the start type of the configuration.
+    /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The start body.</returns>
-    public Task<StartPlanetResult> AllocateAsync(string playerId, CancellationToken cancellationToken)
+    public Task<StartPlanetResult> AllocateAsync(string playerId, int? preferredObjectTypeId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        return _unitOfWork.RunAsync(() => AllocateInTransactionAsync(playerId, cancellationToken), cancellationToken);
+        return _unitOfWork.RunAsync(() => AllocateInTransactionAsync(playerId, preferredObjectTypeId, cancellationToken), cancellationToken);
     }
 
-    private async Task<StartPlanetResult> AllocateInTransactionAsync(string playerId, CancellationToken cancellationToken)
+    /// <summary>
+    /// Allocates the start body inside a unit of work that the caller already runs, for a
+    /// larger change of the world such as the civilization step.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="preferredObjectTypeId">The preferred body type, if any.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The start body.</returns>
+    public Task<StartPlanetResult> AllocateInTransactionAsync(string playerId, int? preferredObjectTypeId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        return AllocateCoreAsync(playerId, preferredObjectTypeId, cancellationToken);
+    }
+
+    private async Task<StartPlanetResult> AllocateCoreAsync(string playerId, int? preferredObjectTypeId, CancellationToken cancellationToken)
     {
         WorldSettings settings = _reference.Settings;
 
@@ -94,9 +113,19 @@ public sealed class StartPlanetAllocator
             .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false)
             ?? throw new GameException(WorldErrorCodes.StartTypeUnknown, $"The start type '{settings.StartPlanetTypeCode}' is not a colonizable type.");
 
-        foreach (bool newbieSectors in new[] { true, false })
+        List<int> typeIds = [startTypeId];
+
+        if (preferredObjectTypeId is { } preferred
+            && preferred != startTypeId
+            && await _dbContext.ObjectTypes.AsNoTracking()
+                .AnyAsync(type => type.Id == preferred && type.IsColonizable, cancellationToken).ConfigureAwait(false))
         {
-            PlanetEntity? planet = await TakePlanetAsync(newbieSectors, startTypeId, settings.MaxNewbiesPerSystem, cancellationToken)
+            typeIds.Insert(0, preferred);
+        }
+
+        foreach ((int typeId, bool newbieSectors) in typeIds.SelectMany(typeId => new[] { (typeId, true), (typeId, false) }))
+        {
+            PlanetEntity? planet = await TakePlanetAsync(newbieSectors, typeId, settings.MaxNewbiesPerSystem, cancellationToken)
                 .ConfigureAwait(false);
 
             if (planet is null)

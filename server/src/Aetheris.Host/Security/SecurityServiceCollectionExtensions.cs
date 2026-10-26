@@ -1,6 +1,8 @@
 using Aetheris.Core.Admin;
 using Aetheris.Core.Commands;
+using Aetheris.Core.Scheduling;
 using Aetheris.Core.Security;
+using Aetheris.Core.Text;
 using Aetheris.Host.Admin;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Commands;
@@ -95,7 +97,36 @@ public static class SecurityServiceCollectionExtensions
         services.AddScoped<SignInChecker>();
         services.AddScoped<RefreshTokenService>();
         services.AddScoped<SessionIssuer>();
-        services.AddSingleton<IAccountEmailSender, LoggingAccountEmailSender>();
+        services.AddScoped<SignInThrottle>();
+        services.AddScoped<NicknameRules>();
+        services.AddScoped<ITextModeration, TextModeration>();
+        services.AddScoped<ConfirmationMailer>();
+        services.AddScoped<RegistrationService>();
+        services.AddScoped<AccountLifecycle>();
+        services.AddScoped<AccountGate>();
+        services.AddSingleton<ICaptchaVerifier, UnconfiguredCaptchaVerifier>();
+        services.AddScoped<IScheduledEventHandler, UnconfirmedAccountExpiryHandler>();
+        services.AddScoped<IScheduledEventHandler, AccountDeletionHandler>();
+        services.AddHttpContextAccessor();
+
+        // The account settings of task 00006 go through the command pipeline.
+        services.AddCommand<ResendConfirmationCommand>();
+        services.AddCommand<ChangePasswordCommand>();
+        services.AddCommand<ChangeNicknameCommand>();
+        services.AddCommand<SignOutEverywhereCommand>();
+        services.AddCommand<DeleteAccountCommand>();
+
+        // The development server writes the account e-mails into a local mailbox folder, so
+        // the links can be opened by hand; elsewhere the placeholder logs them until the mail
+        // delivery task.
+        if (environment.IsDevelopment())
+        {
+            services.AddSingleton<IAccountEmailSender, DevelopmentMailboxEmailSender>();
+        }
+        else
+        {
+            services.AddSingleton<IAccountEmailSender, LoggingAccountEmailSender>();
+        }
         services.AddScoped<AdminAccountService>();
         services.AddScoped<AdminAuditScope>();
         services.AddScoped<IAdminAuditRecorder>(serviceProvider => serviceProvider.GetRequiredService<AdminAuditScope>());
@@ -158,11 +189,26 @@ public static class SecurityServiceCollectionExtensions
                 options.Lockout.MaxFailedAccessAttempts = int.MaxValue;
                 options.Lockout.AllowedForNewUsers = true;
                 options.User.RequireUniqueEmail = true;
-                options.SignIn.RequireConfirmedEmail = true;
+
+                // The user name is the nickname; its characters are checked by NicknameRules
+                // against the rule of the author, so Identity's own list is switched off.
+                options.User.AllowedUserNameCharacters = string.Empty;
+
+                // A player signs in before the confirmation; the command gate limits what the
+                // account may do until then (task 00006, decision 2).
+                options.SignIn.RequireConfirmedEmail = false;
+                options.Tokens.EmailConfirmationTokenProvider = ConfirmationTokenProvider.ProviderName;
+                options.Tokens.PasswordResetTokenProvider = ResetTokenProvider.ProviderName;
             })
             .AddEntityFrameworkStores<AetherisDbContext>()
             .AddDefaultTokenProviders()
+            .AddTokenProvider<ConfirmationTokenProvider>(ConfirmationTokenProvider.ProviderName)
+            .AddTokenProvider<ResetTokenProvider>(ResetTokenProvider.ProviderName)
             .AddPasswordValidator<ConfigPasswordValidator>();
+
+        services.AddSingleton<IConfigureOptions<ConfirmationTokenProviderOptions>, ConfigureAccountTokens>();
+        services.AddSingleton<IConfigureOptions<ResetTokenProviderOptions>, ConfigureAccountTokens>();
+        services.AddSingleton<IConfigureOptions<SecurityStampValidatorOptions>, ConfigureStampCheck>();
 
         services.ConfigureApplicationCookie(options =>
         {
@@ -300,6 +346,20 @@ public static class SecurityServiceCollectionExtensions
         }
 
         public void Configure(HubOptions options) => options.MaximumReceiveMessageSize = _settings.SignalRMaxMessageBytes;
+    }
+
+    private sealed class ConfigureStampCheck : IConfigureOptions<SecurityStampValidatorOptions>
+    {
+        private readonly SecuritySettings _settings;
+
+        public ConfigureStampCheck(SecuritySettings settings)
+        {
+            _settings = settings;
+        }
+
+        // A changed password, a sign-out everywhere or a deletion request renew the security
+        // stamp; the session cookies of the account stop working at the next check.
+        public void Configure(SecurityStampValidatorOptions options) => options.ValidationInterval = _settings.SessionStampCheckInterval;
     }
 
     private sealed class ConfigurePasswordHasher : IConfigureOptions<PasswordHasherOptions>

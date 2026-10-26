@@ -79,6 +79,36 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
     /// </summary>
     public DbSet<ChangeJournalEntity> ChangeJournal => Set<ChangeJournalEntity>();
 
+    /// <summary>
+    /// Gets the player profiles table.
+    /// </summary>
+    public DbSet<PlayerProfileEntity> PlayerProfiles => Set<PlayerProfileEntity>();
+
+    /// <summary>
+    /// Gets the journal of registrations and sign-ins.
+    /// </summary>
+    public DbSet<AccountAccessLogEntity> AccountAccessLog => Set<AccountAccessLogEntity>();
+
+    /// <summary>
+    /// Gets the sign-in attempts table.
+    /// </summary>
+    public DbSet<SignInAttemptEntity> SignInAttempts => Set<SignInAttemptEntity>();
+
+    /// <summary>
+    /// Gets the blocked e-mail domains table.
+    /// </summary>
+    public DbSet<BlockedEmailDomainEntity> BlockedEmailDomains => Set<BlockedEmailDomainEntity>();
+
+    /// <summary>
+    /// Gets the restricted words table.
+    /// </summary>
+    public DbSet<RestrictedWordEntity> RestrictedWords => Set<RestrictedWordEntity>();
+
+    /// <summary>
+    /// Gets the action codes allowed before the e-mail confirmation.
+    /// </summary>
+    public DbSet<UnconfirmedAllowedActionEntity> UnconfirmedAllowedActions => Set<UnconfirmedAllowedActionEntity>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -192,6 +222,62 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
             entity.Property(e => e.TokenHash).HasMaxLength(64);
             entity.HasIndex(e => e.TokenHash).IsUnique();
             entity.HasIndex(e => e.UserId);
+        });
+
+        builder.Entity<PlayerProfileEntity>(entity =>
+        {
+            entity.ToTable("player_profile");
+            entity.HasKey(e => e.UserId);
+            entity.Property(e => e.UserId).HasMaxLength(450);
+            entity.HasOne<IdentityUser>().WithOne().HasForeignKey<PlayerProfileEntity>(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<AccountAccessLogEntity>(entity =>
+        {
+            entity.ToTable("account_access_log");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.UserId).HasMaxLength(450);
+            entity.Property(e => e.Kind).HasMaxLength(32);
+            entity.Property(e => e.IpAddress).HasMaxLength(64);
+
+            // The registration limit counts the entries of one address; the admin panel reads
+            // the entries of one account.
+            entity.HasIndex(e => new { e.IpAddress, e.Kind, e.At });
+            entity.HasIndex(e => new { e.UserId, e.At });
+        });
+
+        builder.Entity<SignInAttemptEntity>(entity =>
+        {
+            entity.ToTable("sign_in_attempt");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.LoginHash).HasMaxLength(64);
+            entity.Property(e => e.IpAddress).HasMaxLength(64);
+            entity.HasIndex(e => new { e.LoginHash, e.At });
+            entity.HasIndex(e => new { e.IpAddress, e.At });
+        });
+
+        builder.Entity<BlockedEmailDomainEntity>(entity =>
+        {
+            entity.ToTable("blocked_email_domain");
+            entity.HasKey(e => e.Domain);
+            entity.Property(e => e.Domain).HasMaxLength(256);
+        });
+
+        builder.Entity<RestrictedWordEntity>(entity =>
+        {
+            entity.ToTable("restricted_word");
+            entity.HasKey(e => e.Word);
+            entity.Property(e => e.Word).HasMaxLength(64);
+            entity.Property(e => e.Kind).HasMaxLength(32);
+        });
+
+        builder.Entity<UnconfirmedAllowedActionEntity>(entity =>
+        {
+            entity.ToTable("unconfirmed_allowed_action");
+            entity.HasKey(e => e.ActionCode);
+            entity.Property(e => e.ActionCode).HasMaxLength(128);
         });
 
         builder.Entity<ChangeJournalEntity>(entity =>

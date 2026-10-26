@@ -748,5 +748,127 @@
         }
       ]
     }
+  ],
+  "races": [
+    {
+      "code": "terran",
+      "name_key": "races.terran.name",
+      "sort_order": 1,
+      "preferred_object_type": "terrestrial",
+      "start_building_type_id": null,
+      "start_building_level": 1,
+      "start_resources": [
+        {
+          "resource": "iron",
+          "amount": 1000
+        },
+        {
+          "resource": "titanium",
+          "amount": 600
+        },
+        {
+          "resource": "copper",
+          "amount": 600
+        },
+        {
+          "resource": "quartzite",
+          "amount": 200
+        },
+        {
+          "resource": "deuterium",
+          "amount": 300
+        }
+      ]
+    },
+    {
+      "code": "kvarr",
+      "name_key": "races.kvarr.name",
+      "sort_order": 2,
+      "preferred_object_type": "volcanic",
+      "start_building_type_id": null,
+      "start_building_level": 1,
+      "start_resources": [
+        {
+          "resource": "iron",
+          "amount": 1000
+        },
+        {
+          "resource": "titanium",
+          "amount": 600
+        },
+        {
+          "resource": "copper",
+          "amount": 600
+        },
+        {
+          "resource": "quartzite",
+          "amount": 200
+        },
+        {
+          "resource": "deuterium",
+          "amount": 300
+        }
+      ]
+    },
+    {
+      "code": "skolar",
+      "name_key": "races.skolar.name",
+      "sort_order": 3,
+      "preferred_object_type": "desert",
+      "start_building_type_id": null,
+      "start_building_level": 1,
+      "start_resources": [
+        {
+          "resource": "iron",
+          "amount": 1000
+        },
+        {
+          "resource": "titanium",
+          "amount": 600
+        },
+        {
+          "resource": "copper",
+          "amount": 600
+        },
+        {
+          "resource": "quartzite",
+          "amount": 200
+        },
+        {
+          "resource": "deuterium",
+          "amount": 300
+        }
+      ]
+    },
+    {
+      "code": "nexar",
+      "name_key": "races.nexar.name",
+      "sort_order": 4,
+      "preferred_object_type": "ice",
+      "start_building_type_id": null,
+      "start_building_level": 1,
+      "start_resources": [
+        {
+          "resource": "iron",
+          "amount": 1000
+        },
+        {
+          "resource": "titanium",
+          "amount": 600
+        },
+        {
+          "resource": "copper",
+          "amount": 600
+        },
+        {
+          "resource": "quartzite",
+          "amount": 200
+        },
+        {
+          "resource": "deuterium",
+          "amount": 300
+        }
+      ]
+    }
   ]
 }

@@ -129,19 +129,19 @@ public sealed class LoginTests
     }
 
     /// <summary>
-    /// The right password of an account whose e-mail address is not confirmed does not sign in.
+    /// The right password of an account whose e-mail address is not confirmed signs in: task
+    /// 00006, decision 2, replaced the refusal of task 00002 with the limits of the account gate.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task An_unconfirmed_email_address_does_not_sign_in()
+    public async Task An_unconfirmed_email_address_signs_in()
     {
         TestAccount account = await TestAccounts.RegisterAsync(_factory);
 
         using HttpClient client = _factory.CreateBrowserClient();
         HttpResponseMessage response = await LoginAsync(client, account.Email, account.Password);
 
-        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-        Assert.Equal(GameErrorCodes.EmailNotConfirmed, await TestAccounts.ReadErrorAsync(response));
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     /// <summary>
@@ -157,7 +157,7 @@ public sealed class LoginTests
         using HttpClient client = _factory.CreateBrowserClient();
         HttpResponseMessage response = await client.PostAsJsonAsync(
             AuthEndpoints.Prefix + "/register",
-            new { email = account.Email, password = TestAccounts.StrongPassword },
+            TestAccounts.RegistrationBody(account.Email, TestAccounts.NewNickname(), TestAccounts.StrongPassword),
             TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
@@ -179,7 +179,7 @@ public sealed class LoginTests
         using HttpClient client = _factory.CreateBrowserClient();
         HttpResponseMessage response = await client.PostAsJsonAsync(
             AuthEndpoints.Prefix + "/register",
-            new { email = TestAccounts.NewEmail(), password },
+            TestAccounts.RegistrationBody(TestAccounts.NewEmail(), TestAccounts.NewNickname(), password),
             TestContext.Current.CancellationToken);
 
         string body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
@@ -230,7 +230,7 @@ public sealed class LoginTests
     public async Task A_password_reset_replaces_the_password()
     {
         TestAccount account = await TestAccounts.RegisterConfirmedAsync(_factory);
-        const string newPassword = "amber-meadow-compass-58";
+        const string newPassword = "Amber-meadow-compass-58";
 
         using HttpClient client = _factory.CreateBrowserClient();
 
@@ -277,19 +277,31 @@ public sealed class LoginTests
     [Fact]
     public async Task A_new_confirmation_email_is_sent_only_to_an_unconfirmed_account()
     {
+        // The pause between two confirmation e-mails (task 00006) is switched off here; its
+        // own test is in the account tests.
+        using IServiceScope scope = _factory.Services.CreateScope();
+        string? previousPause = await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, SecurityKeys.ConfirmationResendMinutes, "0");
+
         TestAccount unconfirmed = await TestAccounts.RegisterAsync(_factory);
         TestAccount confirmed = await TestAccounts.RegisterConfirmedAsync(_factory);
 
         using HttpClient client = _factory.CreateBrowserClient();
 
-        foreach (string email in new[] { unconfirmed.Email, confirmed.Email, TestAccounts.NewEmail() })
+        try
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync(
-                AuthEndpoints.Prefix + "/resend-confirmation",
-                new { email },
-                TestContext.Current.CancellationToken);
+            foreach (string email in new[] { unconfirmed.Email, confirmed.Email, TestAccounts.NewEmail() })
+            {
+                HttpResponseMessage response = await client.PostAsJsonAsync(
+                    AuthEndpoints.Prefix + "/resend-confirmation",
+                    new { email },
+                    TestContext.Current.CancellationToken);
 
-            Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+                Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+            }
+        }
+        finally
+        {
+            await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, SecurityKeys.ConfirmationResendMinutes, previousPause!);
         }
 
         Assert.Equal(2, _factory.Emails.Sent.Count(email => email.Address == unconfirmed.Email && email.Kind == AccountEmailKinds.Confirmation));
@@ -314,7 +326,7 @@ public sealed class LoginTests
     private static Task<HttpResponseMessage> LoginAsync(HttpClient client, string email, string password) =>
         client.PostAsJsonAsync(
             AuthEndpoints.Prefix + "/login",
-            new { email, password },
+            TestAccounts.LoginBody(email, password),
             TestContext.Current.CancellationToken);
 
     private static async Task<HttpResponseMessage> RefreshAsync(HttpClient client, string refreshToken)

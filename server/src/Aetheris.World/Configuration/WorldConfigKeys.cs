@@ -118,6 +118,15 @@ public static class WorldConfigKeys
     /// <summary>The name template of a star system.</summary>
     public const string SystemNameTemplate = "world.naming.system_template";
 
+    /// <summary>The smallest length of the name a player gives the home body.</summary>
+    public const string HomeNameMinLength = "world.civilization.home_name_min_length";
+
+    /// <summary>The largest length of the name a player gives the home body.</summary>
+    public const string HomeNameMaxLength = "world.civilization.home_name_max_length";
+
+    /// <summary>The capacity of the storage of a new home body, per resource.</summary>
+    public const string StartStorageCapacity = "world.civilization.start_storage_capacity";
+
     /// <summary>The name template of a body on an orbit.</summary>
     public const string BodyNameTemplate = "world.naming.body_template";
 
@@ -165,6 +174,9 @@ public static class WorldConfigKeys
         new(MaxNewbiesPerSystem, "3", "1", "100", "Largest number of newcomers who start in one star system."),
         new(RevealAll, "false", null, null, "Development switch: every player sees the whole map."),
         new(FreeBodiesPageSize, "100", "1", "10000", "Largest number of free bodies returned at once."),
+        new(HomeNameMinLength, "3", "1", "64", "Smallest length of the name a player gives the home body."),
+        new(HomeNameMaxLength, "20", "1", "64", "Largest length of the name a player gives the home body."),
+        new(StartStorageCapacity, "10000", "0", "1000000000", "Capacity of the storage of a new home body, per resource; the start resources never exceed it."),
         new(SectorNameTemplate, "S{index}", null, null, "Name template of a sector: {index}."),
         new(SystemNameTemplate, "{sector}-{number}", null, null, "Name template of a star system: {sector}, {number}."),
         new(BodyNameTemplate, "{system}-{orbit}", null, null, "Name template of a body: {system}, {orbit}."),

@@ -36,6 +36,12 @@ public sealed class RefreshTokenEntity
     public DateTimeOffset ExpiresAt { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the session was started with "remember me":
+    /// the cookie then outlives the browser and the token lives longer.
+    /// </summary>
+    public bool IsPersistent { get; set; }
+
+    /// <summary>
     /// Gets or sets the UTC timestamp when the token was revoked, if it was.
     /// </summary>
     public DateTimeOffset? RevokedAt { get; set; }

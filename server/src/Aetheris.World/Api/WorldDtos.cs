@@ -197,3 +197,32 @@ public sealed record WorldReferenceDto(
     IReadOnlyList<ReferenceDto> Resources,
     IReadOnlyList<ReferenceDto> ObjectTypes,
     IReadOnlyList<ReferenceDto> SizeClasses);
+
+/// <summary>A race the client offers at the first step of the game.</summary>
+/// <param name="Id">The race.</param>
+/// <param name="Code">The stable code.</param>
+/// <param name="NameKey">The localisation key of the name.</param>
+/// <param name="PreferredObjectTypeId">The preferred start body type, if any.</param>
+public sealed record RaceDto(int Id, string Code, string NameKey, int? PreferredObjectTypeId);
+
+/// <summary>The civilization of a player.</summary>
+/// <param name="RaceId">The race.</param>
+/// <param name="RaceCode">The code of the race.</param>
+/// <param name="PlanetId">The home body.</param>
+/// <param name="PlanetName">The name the player gave the home body.</param>
+/// <param name="SystemId">The star system of the home body.</param>
+/// <param name="SectorId">The sector of the home body.</param>
+/// <param name="FoundedAt">The moment of creation.</param>
+public sealed record CivilizationSummary(
+    [property: System.Text.Json.Serialization.JsonPropertyName("race_id")] int RaceId,
+    [property: System.Text.Json.Serialization.JsonPropertyName("race_code")] string RaceCode,
+    [property: System.Text.Json.Serialization.JsonPropertyName("planet_id")] long PlanetId,
+    [property: System.Text.Json.Serialization.JsonPropertyName("planet_name")] string? PlanetName,
+    [property: System.Text.Json.Serialization.JsonPropertyName("system_id")] long SystemId,
+    [property: System.Text.Json.Serialization.JsonPropertyName("sector_id")] int SectorId,
+    [property: System.Text.Json.Serialization.JsonPropertyName("founded_at")] DateTimeOffset FoundedAt);
+
+/// <summary>The amount of a resource in the storage of a body.</summary>
+/// <param name="ResourceTypeId">The resource.</param>
+/// <param name="Amount">The amount.</param>
+public sealed record StorageItemDto(int ResourceTypeId, long Amount);

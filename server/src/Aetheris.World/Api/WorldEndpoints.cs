@@ -50,6 +50,25 @@ public static class WorldEndpoints
             .RequireAuthorization(SecurityPolicies.Player)
             .RequireRateLimiting(RateLimitGroups.Command);
 
+        world.MapGet("/races", async (CivilizationService civilizations, CancellationToken cancellationToken) =>
+            Results.Json(await civilizations.GetRacesAsync(cancellationToken).ConfigureAwait(false), WorldJson.Options));
+
+        world.MapGet("/civilization", async (ClaimsPrincipal user, CivilizationService civilizations, CancellationToken cancellationToken) =>
+        {
+            CivilizationSummary? civilization = await civilizations.GetAsync(PlayerId(user), cancellationToken).ConfigureAwait(false);
+
+            return civilization is null ? Error(StatusCodes.Status404NotFound, GameErrorCodes.NotFound) : Results.Json(civilization, WorldJson.Options);
+        });
+
+        world.MapGet("/civilization/storage", async (ClaimsPrincipal user, CivilizationService civilizations, CancellationToken cancellationToken) =>
+        {
+            CivilizationSummary? civilization = await civilizations.GetAsync(PlayerId(user), cancellationToken).ConfigureAwait(false);
+
+            return civilization is null
+                ? Error(StatusCodes.Status404NotFound, GameErrorCodes.NotFound)
+                : Results.Json(await civilizations.GetStorageAsync(civilization.PlanetId, cancellationToken).ConfigureAwait(false), WorldJson.Options);
+        });
+
         world.MapGet("/reference", async (WorldQueryService queries, CancellationToken cancellationToken) =>
             Results.Json(await queries.GetReferenceAsync(cancellationToken).ConfigureAwait(false), WorldJson.Options));
 

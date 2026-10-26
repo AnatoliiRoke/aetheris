@@ -124,6 +124,7 @@ public static class AdminEndpoints
         // The actions of the modules share the same group, so they get the second factor,
         // the rate limit and the audit record like the actions above.
         secured.MapWorldAdminEndpoints();
+        secured.MapPlayerAdminEndpoints();
 
         return endpoints;
     }

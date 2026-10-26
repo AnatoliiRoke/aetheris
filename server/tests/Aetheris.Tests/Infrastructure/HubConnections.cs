@@ -35,7 +35,7 @@ public static class HubConnections
 
         HttpResponseMessage response = await client.PostAsJsonAsync(
             AuthEndpoints.Prefix + "/login",
-            new { email = account.Email, password = account.Password },
+            TestAccounts.LoginBody(account.Email, account.Password),
             TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

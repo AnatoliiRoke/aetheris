@@ -44,7 +44,7 @@ public sealed class LogScrubbingTests
 
         await client.PostAsJsonAsync(
             AuthEndpoints.Prefix + "/login",
-            new { email = account.Email, password = "a-wrong-password-for-logs" },
+            TestAccounts.LoginBody(account.Email, "a-wrong-password-for-logs"),
             TestContext.Current.CancellationToken);
         await TestAccounts.SignInAsync(client, account);
         await client.PostAsJsonAsync(

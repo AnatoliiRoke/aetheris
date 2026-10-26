@@ -39,6 +39,13 @@ public sealed class EchoCommand : Command<EchoCommand.Request, EchoCommand.Respo
     public override string Route => RoutePath;
 
     /// <inheritdoc />
+    public override string ActionCode => "test.echo";
+
+    /// <inheritdoc />
+    /// <remarks>The neutral example of the core needs no finished onboarding.</remarks>
+    public override bool RequiresOnboarding => false;
+
+    /// <inheritdoc />
     public override void DefineRules(AbstractValidator<Request> rules)
     {
         ArgumentNullException.ThrowIfNull(rules);

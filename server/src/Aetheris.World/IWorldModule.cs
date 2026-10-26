@@ -68,6 +68,24 @@ public interface IWorldModule
     Task<StartPlanetResult> AllocateStartPlanetAsync(string playerId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the civilization of a player: the race and the home body chosen at the first step
+    /// of the game (task 00006, decision 9).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The civilization, or <see langword="null"/> when the player has not created one yet.</returns>
+    Task<CivilizationSummary?> GetCivilizationAsync(string playerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Releases everything a player holds in the world, when the account is deleted: the
+    /// bodies become free again.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the player is released.</returns>
+    Task ReleasePlayerAsync(string playerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Processes one cycle on an asteroid field.
     /// </summary>
     /// <param name="fieldId">The field.</param>

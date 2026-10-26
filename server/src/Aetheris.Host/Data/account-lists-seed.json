@@ -1,0 +1,49 @@
+{
+  "unconfirmed_allowed_actions": [
+    "account.settings",
+    "civilization.setup"
+  ],
+  "blocked_email_domains": [
+    "10minutemail.com",
+    "dispostable.com",
+    "fakeinbox.com",
+    "getnada.com",
+    "guerrillamail.com",
+    "mailinator.com",
+    "maildrop.cc",
+    "mintemail.com",
+    "sharklasers.com",
+    "temp-mail.org",
+    "tempmail.com",
+    "throwawaymail.com",
+    "trashmail.com",
+    "yopmail.com"
+  ],
+  "restricted_words": [
+    { "word": "admin", "kind": "reserved" },
+    { "word": "administrator", "kind": "reserved" },
+    { "word": "moderator", "kind": "reserved" },
+    { "word": "support", "kind": "reserved" },
+    { "word": "aetheris", "kind": "reserved" },
+    { "word": "system", "kind": "reserved" },
+    { "word": "адмін", "kind": "reserved" },
+    { "word": "адміністратор", "kind": "reserved" },
+    { "word": "модератор", "kind": "reserved" },
+    { "word": "підтримка", "kind": "reserved" },
+    { "word": "fuck", "kind": "offensive" },
+    { "word": "shit", "kind": "offensive" },
+    { "word": "bitch", "kind": "offensive" },
+    { "word": "cunt", "kind": "offensive" },
+    { "word": "nigger", "kind": "offensive" },
+    { "word": "хуй", "kind": "offensive" },
+    { "word": "пизд", "kind": "offensive" },
+    { "word": "блять", "kind": "offensive" },
+    { "word": "бляд", "kind": "offensive" },
+    { "word": "єбан", "kind": "offensive" },
+    { "word": "ебан", "kind": "offensive" },
+    { "word": "сука", "kind": "offensive" },
+    { "word": "мудак", "kind": "offensive" },
+    { "word": "підор", "kind": "offensive" },
+    { "word": "пидор", "kind": "offensive" }
+  ]
+}

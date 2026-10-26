@@ -10,6 +10,7 @@ using Aetheris.World.Api;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;
 using Aetheris.World.Generation;
+using Aetheris.World.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -173,7 +174,9 @@ public sealed class WorldApiTests
         using HttpClient client = _factory.CreateBrowserClient();
         await TestAccounts.SignInAsync(client, await TestAccounts.RegisterConfirmedAsync(_factory));
 
-        HttpResponseMessage start = await TestAccounts.SendCommandAsync(client, AllocateStartPlanetCommand.RoutePath, new { }, "start-1");
+        // Since task 00006 the start body comes with the civilization step.
+        int raceId = await CivilizationTestData.FirstRaceIdAsync(client);
+        HttpResponseMessage start = await CivilizationTestData.FoundAsync(client, raceId, "Nova Prima", "start-1");
         Assert.Equal(HttpStatusCode.OK, start.StatusCode);
 
         using JsonDocument result = JsonDocument.Parse(await start.Content.ReadAsStringAsync(Token));
@@ -181,10 +184,9 @@ public sealed class WorldApiTests
         long systemId = result.RootElement.GetProperty("system_id").GetInt64();
         int sectorId = result.RootElement.GetProperty("sector_id").GetInt32();
 
-        HttpResponseMessage repeated = await TestAccounts.SendCommandAsync(client, AllocateStartPlanetCommand.RoutePath, new { }, "start-2");
-        using JsonDocument again = JsonDocument.Parse(await repeated.Content.ReadAsStringAsync(Token));
-        Assert.Equal(planetId, again.RootElement.GetProperty("planet_id").GetInt64());
-        Assert.True(again.RootElement.GetProperty("already_allocated").GetBoolean());
+        HttpResponseMessage repeated = await CivilizationTestData.FoundAsync(client, raceId, "Nova Prima", "start-2");
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, repeated.StatusCode);
+        Assert.Equal(WorldErrorCodes.CivilizationExists, await TestAccounts.ReadErrorAsync(repeated));
 
         using JsonDocument sectors = JsonDocument.Parse(await client.GetStringAsync(WorldEndpoints.Prefix + "/sectors", Token));
         using JsonDocument systems = JsonDocument.Parse(await client.GetStringAsync(WorldEndpoints.Prefix + $"/sectors/{sectorId}/systems", Token));

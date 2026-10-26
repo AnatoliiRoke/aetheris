@@ -68,6 +68,12 @@ public sealed class WorldDbContext : DbContext
     /// <summary>Gets the generation rules.</summary>
     public DbSet<GenerationRuleEntity> Rules => Set<GenerationRuleEntity>();
 
+    /// <summary>Gets the races.</summary>
+    public DbSet<RaceEntity> Races => Set<RaceEntity>();
+
+    /// <summary>Gets the start resources of the races.</summary>
+    public DbSet<RaceStartResourceEntity> RaceStartResources => Set<RaceStartResourceEntity>();
+
     /// <summary>Gets the galaxies.</summary>
     public DbSet<GalaxyEntity> Galaxies => Set<GalaxyEntity>();
 
@@ -100,6 +106,15 @@ public sealed class WorldDbContext : DbContext
 
     /// <summary>Gets the start allocations.</summary>
     public DbSet<StartPlanetAllocationEntity> StartAllocations => Set<StartPlanetAllocationEntity>();
+
+    /// <summary>Gets the civilizations of the players.</summary>
+    public DbSet<PlayerCivilizationEntity> Civilizations => Set<PlayerCivilizationEntity>();
+
+    /// <summary>Gets the storage of the bodies.</summary>
+    public DbSet<PlanetStorageEntity> Storage => Set<PlanetStorageEntity>();
+
+    /// <summary>Gets the start buildings waiting for the buildings module.</summary>
+    public DbSet<StartBuildingGrantEntity> StartBuildingGrants => Set<StartBuildingGrantEntity>();
 
     /// <summary>Gets the generation log.</summary>
     public DbSet<WorldGenerationLogEntity> GenerationLog => Set<WorldGenerationLogEntity>();
@@ -167,6 +182,23 @@ public sealed class WorldDbContext : DbContext
             entity.HasIndex(e => new { e.RuleGroupId, e.ResourceId }).IsUnique();
             entity.HasOne<ResourceTypeEntity>().WithMany().HasForeignKey(e => e.ResourceId).OnDelete(DeleteBehavior.Restrict);
         });
+
+        modelBuilder.Entity<RaceEntity>(entity =>
+        {
+            entity.ToTable("race");
+            entity.Property(e => e.Code).HasMaxLength(CodeLength);
+            entity.Property(e => e.NameKey).HasMaxLength(NameLength);
+            entity.HasIndex(e => e.Code).IsUnique();
+            entity.HasOne<CelestialObjectTypeEntity>().WithMany().HasForeignKey(e => e.PreferredObjectTypeId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(e => e.StartResourceIds).WithOne().HasForeignKey(resource => resource.RaceId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RaceStartResourceEntity>(entity =>
+        {
+            entity.ToTable("race_start_resource");
+            entity.HasIndex(e => new { e.RaceId, e.ResourceTypeId }).IsUnique();
+            entity.HasOne<ResourceTypeEntity>().WithMany().HasForeignKey(e => e.ResourceTypeId).OnDelete(DeleteBehavior.Restrict);
+        });
     }
 
     private static void ConfigureWorldTables(ModelBuilder modelBuilder)
@@ -213,6 +245,7 @@ public sealed class WorldDbContext : DbContext
         {
             entity.ToTable("planet");
             entity.Property(e => e.OwnerPlayerId).HasMaxLength(PlayerIdLength);
+            entity.Property(e => e.Name).HasMaxLength(NameLength);
 
             // The free bodies of a sector, and the bodies of a player.
             entity.HasIndex(e => new { e.SectorId, e.OwnerPlayerId });
@@ -280,6 +313,35 @@ public sealed class WorldDbContext : DbContext
             entity.HasKey(e => e.PlayerId);
             entity.Property(e => e.PlayerId).HasMaxLength(PlayerIdLength);
             entity.HasIndex(e => e.PlanetId).IsUnique();
+            entity.HasIndex(e => e.SectorId);
+            entity.HasOne<PlanetEntity>().WithMany().HasForeignKey(e => e.PlanetId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PlayerCivilizationEntity>(entity =>
+        {
+            entity.ToTable("player_civilization");
+            entity.HasKey(e => e.PlayerId);
+            entity.Property(e => e.PlayerId).HasMaxLength(PlayerIdLength);
+            entity.HasIndex(e => e.PlanetId).IsUnique();
+            entity.HasIndex(e => e.SectorId);
+            entity.HasOne<RaceEntity>().WithMany().HasForeignKey(e => e.RaceId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<PlanetEntity>().WithMany().HasForeignKey(e => e.PlanetId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PlanetStorageEntity>(entity =>
+        {
+            entity.ToTable("planet_storage");
+            entity.HasIndex(e => new { e.PlanetId, e.ResourceTypeId }).IsUnique();
+            entity.HasIndex(e => e.SectorId);
+            entity.HasOne<PlanetEntity>().WithMany().HasForeignKey(e => e.PlanetId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<ResourceTypeEntity>().WithMany().HasForeignKey(e => e.ResourceTypeId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(table => table.HasCheckConstraint("ck_planet_storage_amount", "amount >= 0"));
+        });
+
+        modelBuilder.Entity<StartBuildingGrantEntity>(entity =>
+        {
+            entity.ToTable("start_building_grant");
+            entity.HasKey(e => e.PlanetId);
             entity.HasIndex(e => e.SectorId);
             entity.HasOne<PlanetEntity>().WithMany().HasForeignKey(e => e.PlanetId).OnDelete(DeleteBehavior.Cascade);
         });

@@ -155,6 +155,9 @@ public sealed class PlanetEntity
     /// <summary>Gets or sets the owning player, or <see langword="null"/> for a free body.</summary>
     public string? OwnerPlayerId { get; set; }
 
+    /// <summary>Gets or sets the name the owner gave the body, or <see langword="null"/>.</summary>
+    public string? Name { get; set; }
+
     /// <summary>Gets or sets the celestial object.</summary>
     public CelestialObjectEntity? CelestialObject { get; set; }
 
@@ -331,4 +334,76 @@ public sealed class WorldGenerationLogEntity
 
     /// <summary>Gets or sets the moment of the action.</summary>
     public DateTimeOffset At { get; set; }
+}
+
+/// <summary>
+/// The civilization of a player: the race and the home body chosen at the first step of
+/// the game (task 00006, decision 9). A player has one, and the race does not change.
+/// </summary>
+public sealed class PlayerCivilizationEntity
+{
+    /// <summary>Gets or sets the player, the primary key.</summary>
+    public string PlayerId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the race.</summary>
+    public int RaceId { get; set; }
+
+    /// <summary>Gets or sets the home body.</summary>
+    public long PlanetId { get; set; }
+
+    /// <summary>Gets or sets the sector of the home body.</summary>
+    public int SectorId { get; set; }
+
+    /// <summary>Gets or sets the moment of creation.</summary>
+    public DateTimeOffset FoundedAt { get; set; }
+}
+
+/// <summary>
+/// The amount of one resource in the storage of a body.
+/// </summary>
+/// <remarks>
+/// The start package is written here (task 00006, decision 11). The production and the
+/// lazy amounts of documentation/tech/01, section 3.1, arrive with the economy.
+/// </remarks>
+public sealed class PlanetStorageEntity
+{
+    /// <summary>Gets or sets the primary key.</summary>
+    public long Id { get; set; }
+
+    /// <summary>Gets or sets the sector.</summary>
+    public int SectorId { get; set; }
+
+    /// <summary>Gets or sets the body.</summary>
+    public long PlanetId { get; set; }
+
+    /// <summary>Gets or sets the resource.</summary>
+    public int ResourceTypeId { get; set; }
+
+    /// <summary>Gets or sets the amount; never negative.</summary>
+    public long Amount { get; set; }
+}
+
+/// <summary>
+/// The start building of a new civilization, waiting for the buildings module to place it.
+/// </summary>
+/// <remarks>
+/// This is the default of the extension point <see cref="Services.IStartBuildingPlacer"/>:
+/// until the buildings module exists, the grant is kept here, so the building is not lost.
+/// </remarks>
+public sealed class StartBuildingGrantEntity
+{
+    /// <summary>Gets or sets the body, the primary key.</summary>
+    public long PlanetId { get; set; }
+
+    /// <summary>Gets or sets the sector.</summary>
+    public int SectorId { get; set; }
+
+    /// <summary>Gets or sets the building type.</summary>
+    public int BuildingTypeId { get; set; }
+
+    /// <summary>Gets or sets the level.</summary>
+    public int Level { get; set; }
+
+    /// <summary>Gets or sets the moment of the grant.</summary>
+    public DateTimeOffset GrantedAt { get; set; }
 }

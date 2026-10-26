@@ -41,6 +41,12 @@ public sealed class TestNoteCommand : Command<TestNoteCommand.Request, TestNoteC
     public override string Route => RoutePath;
 
     /// <inheritdoc />
+    public override string ActionCode => "test.note";
+
+    /// <inheritdoc />
+    public override bool RequiresOnboarding => false;
+
+    /// <inheritdoc />
     public override void DefineRules(AbstractValidator<Request> rules)
     {
         rules.RuleFor(request => request.PlayerId).NotEmpty();

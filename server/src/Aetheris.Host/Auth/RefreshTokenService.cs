@@ -15,7 +15,8 @@ namespace Aetheris.Host.Auth;
 /// <param name="NewToken">The new refresh token, or <see langword="null"/> when the token is not valid.</param>
 /// <param name="ExpiresAt">The expiry of the new token.</param>
 /// <param name="Reused">Whether a revoked token was presented again.</param>
-public sealed record RefreshResult(string? UserId, string? NewToken, DateTimeOffset ExpiresAt, bool Reused);
+/// <param name="IsPersistent">Whether the session was started with "remember me".</param>
+public sealed record RefreshResult(string? UserId, string? NewToken, DateTimeOffset ExpiresAt, bool Reused, bool IsPersistent = false);
 
 /// <summary>
 /// Issues, rotates and revokes refresh tokens (task 00002, section 2.1).
@@ -56,15 +57,21 @@ public sealed class RefreshTokenService
     /// Issues a new token.
     /// </summary>
     /// <param name="userId">The account.</param>
+    /// <param name="persistent">Whether the session was started with "remember me".</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The token and its expiry.</returns>
-    public async Task<(string Token, DateTimeOffset ExpiresAt)> IssueAsync(string userId, CancellationToken cancellationToken)
+    /// <remarks>
+    /// A session with "remember me" lives <c>security.session.remember_days</c>; any other
+    /// lives <c>security.session.refresh_days</c> on the server, and its cookie ends with the
+    /// browser.
+    /// </remarks>
+    public async Task<(string Token, DateTimeOffset ExpiresAt)> IssueAsync(string userId, bool persistent, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(userId);
 
         string token = WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(TokenBytes));
         DateTimeOffset now = _timeProvider.GetUtcNow();
-        DateTimeOffset expiresAt = now + _settings.SessionRefreshLifetime;
+        DateTimeOffset expiresAt = now + (persistent ? _settings.SessionRememberLifetime : _settings.SessionRefreshLifetime);
 
         _dbContext.RefreshTokens.Add(new RefreshTokenEntity
         {
@@ -72,6 +79,7 @@ public sealed class RefreshTokenService
             TokenHash = Hash(token),
             CreatedAt = now,
             ExpiresAt = expiresAt,
+            IsPersistent = persistent,
         });
 
         await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -117,9 +125,26 @@ public sealed class RefreshTokenService
         await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         (string newToken, DateTimeOffset expiresAt) =
-            await IssueAsync(stored.UserId, cancellationToken).ConfigureAwait(false);
+            await IssueAsync(stored.UserId, stored.IsPersistent, cancellationToken).ConfigureAwait(false);
 
-        return new RefreshResult(stored.UserId, newToken, expiresAt, Reused: false);
+        return new RefreshResult(stored.UserId, newToken, expiresAt, Reused: false, stored.IsPersistent);
+    }
+
+    /// <summary>
+    /// Tells whether the session of a token was started with "remember me".
+    /// </summary>
+    /// <param name="token">The token.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> for a session with "remember me".</returns>
+    public Task<bool> IsPersistentAsync(string token, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(token);
+
+        string hash = Hash(token);
+
+        return _dbContext.RefreshTokens
+            .AsNoTracking()
+            .AnyAsync(entry => entry.TokenHash == hash && entry.IsPersistent, cancellationToken);
     }
 
     /// <summary>

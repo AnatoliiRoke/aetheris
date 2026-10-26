@@ -9,10 +9,9 @@ namespace Aetheris.Host.Auth;
 /// common passwords (task 00002, section 2.1).
 /// </summary>
 /// <remarks>
-/// The rules follow the current guidance for passwords: a minimal length, a maximal length,
-/// enough different characters, not a common password and not the e-mail address. There
-/// are no composition rules, because they make passwords harder to remember without making
-/// them harder to guess.
+/// The rules: a minimal length, a maximal length, enough different characters, a digit and
+/// an upper-case letter (each one a switch in the database, task 00006, decision 6), not a
+/// common password and not the e-mail address.
 /// </remarks>
 public sealed class ConfigPasswordValidator : IPasswordValidator<IdentityUser>
 {
@@ -24,6 +23,12 @@ public sealed class ConfigPasswordValidator : IPasswordValidator<IdentityUser>
 
     /// <summary>The error code of a password with too few different characters.</summary>
     public const string TooFewUniqueCharacters = "password_too_few_unique_chars";
+
+    /// <summary>The error code of a password without a digit.</summary>
+    public const string NoDigit = "password_no_digit";
+
+    /// <summary>The error code of a password without an upper-case letter.</summary>
+    public const string NoUppercase = "password_no_uppercase";
 
     /// <summary>The error code of a common password.</summary>
     public const string Common = "password_too_common";
@@ -67,6 +72,16 @@ public sealed class ConfigPasswordValidator : IPasswordValidator<IdentityUser>
         if (value.Distinct().Count() < _settings.PasswordMinUniqueCharacters)
         {
             errors.Add(Error(TooFewUniqueCharacters));
+        }
+
+        if (_settings.PasswordRequireDigit && !value.Any(char.IsDigit))
+        {
+            errors.Add(Error(NoDigit));
+        }
+
+        if (_settings.PasswordRequireUppercase && !value.Any(char.IsUpper))
+        {
+            errors.Add(Error(NoUppercase));
         }
 
         if (CommonPasswords.Value.Contains(value))

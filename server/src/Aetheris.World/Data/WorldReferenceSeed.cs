@@ -123,6 +123,58 @@ public static class WorldReferenceSeed
 
         return true;
     }
+
+    /// <summary>
+    /// Writes the starting races when the race table is empty.
+    /// </summary>
+    /// <param name="dbContext">The world context.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when the races were written.</returns>
+    /// <remarks>
+    /// The races came with task 00006, after the other reference tables, so a database that
+    /// already has its resources still gets its races. Like the rest of the seed, it never
+    /// overwrites what was changed later.
+    /// </remarks>
+    public static async Task<bool> SeedRacesAsync(WorldDbContext dbContext, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(dbContext);
+
+        if (await dbContext.Races.AnyAsync(cancellationToken).ConfigureAwait(false))
+        {
+            return false;
+        }
+
+        ReferenceSeedData seed = Load();
+
+        Dictionary<string, int> resourceIds = await dbContext.ResourceTypes.AsNoTracking()
+            .ToDictionaryAsync(resource => resource.Code, resource => resource.Id, StringComparer.Ordinal, cancellationToken)
+            .ConfigureAwait(false);
+        Dictionary<string, int> typeIds = await dbContext.ObjectTypes.AsNoTracking()
+            .ToDictionaryAsync(type => type.Code, type => type.Id, StringComparer.Ordinal, cancellationToken)
+            .ConfigureAwait(false);
+
+        dbContext.Races.AddRange((seed.Races ?? []).Select(race => new RaceEntity
+        {
+            Code = race.Code,
+            NameKey = race.NameKey,
+            SortOrder = race.SortOrder,
+            PreferredObjectTypeId = race.PreferredObjectType is null ? null : typeIds[race.PreferredObjectType],
+            StartBuildingTypeId = race.StartBuildingTypeId,
+            StartBuildingLevel = race.StartBuildingLevel,
+            StartResourceIds =
+            [
+                .. race.StartResources.Select(resource => new RaceStartResourceEntity
+                {
+                    ResourceTypeId = resourceIds[resource.Resource],
+                    Amount = resource.Amount,
+                }),
+            ],
+        }));
+
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return true;
+    }
 }
 
 /// <summary>The starting data of the reference tables.</summary>
@@ -131,12 +183,36 @@ public static class WorldReferenceSeed
 /// <param name="ObjectTypes">The object types.</param>
 /// <param name="SizeClasses">The size classes.</param>
 /// <param name="RuleGroups">The generation rule groups.</param>
+/// <param name="Races">The races with their start packages.</param>
 public sealed record ReferenceSeedData(
     IReadOnlyList<SeedResourceGroup> ResourceGroups,
     IReadOnlyList<SeedResource> Resources,
     IReadOnlyList<SeedObjectType> ObjectTypes,
     IReadOnlyList<SeedSizeClass> SizeClasses,
-    IReadOnlyList<SeedRuleGroup> RuleGroups);
+    IReadOnlyList<SeedRuleGroup> RuleGroups,
+    IReadOnlyList<SeedRace>? Races = null);
+
+/// <summary>A race of the starting data.</summary>
+/// <param name="Code">The code.</param>
+/// <param name="NameKey">The localisation key.</param>
+/// <param name="SortOrder">The order in the list.</param>
+/// <param name="PreferredObjectType">The code of the preferred start body type, if any.</param>
+/// <param name="StartBuildingTypeId">The start building type, if the buildings module has one.</param>
+/// <param name="StartBuildingLevel">The level of the start building.</param>
+/// <param name="StartResources">The start resources.</param>
+public sealed record SeedRace(
+    string Code,
+    string NameKey,
+    int SortOrder,
+    string? PreferredObjectType,
+    int? StartBuildingTypeId,
+    int StartBuildingLevel,
+    IReadOnlyList<SeedRaceResource> StartResources);
+
+/// <summary>A start resource of a race in the starting data.</summary>
+/// <param name="Resource">The code of the resource.</param>
+/// <param name="Amount">The amount.</param>
+public sealed record SeedRaceResource(string Resource, long Amount);
 
 /// <summary>A resource group of the starting data.</summary>
 /// <param name="Code">The code.</param>

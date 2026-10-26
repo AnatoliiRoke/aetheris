@@ -1,11 +1,15 @@
 using System.Security.Claims;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Security;
+using Aetheris.Host.Data;
+using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Security;
+using Aetheris.World;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Aetheris.Host.Auth;
 
@@ -24,6 +28,16 @@ public static class AuthEndpoints
     /// The route prefix of the account endpoints.
     /// </summary>
     public const string Prefix = "/api/v1/auth";
+
+    /// <summary>
+    /// The error code of an address that registered too many accounts recently.
+    /// </summary>
+    public const string RegistrationLimitReached = "registration_limit_reached";
+
+    /// <summary>
+    /// The error code of a registration that needs the captcha.
+    /// </summary>
+    public const string CaptchaRequired = "captcha_required";
 
     /// <summary>
     /// The claim of the Google sign-in that confirms the e-mail address.
@@ -52,7 +66,7 @@ public static class AuthEndpoints
         group.MapPost("/logout", LogoutAsync).RequireAuthorization(SecurityPolicies.Player);
         group.MapPost("/forgot-password", ForgotPasswordAsync);
         group.MapPost("/reset-password", ResetPasswordAsync);
-        group.MapGet("/me", GetMe).RequireAuthorization(SecurityPolicies.Player);
+        group.MapGet("/me", GetMeAsync).RequireAuthorization(SecurityPolicies.Player);
         group.MapGet("/providers", GetProvidersAsync);
         group.MapGet("/google", StartGoogleAsync);
         group.MapGet("/google/complete", CompleteGoogleAsync);
@@ -70,60 +84,49 @@ public static class AuthEndpoints
     private static async Task<IResult> RegisterAsync(
         RegisterRequest request,
         HttpContext httpContext,
-        UserManager<IdentityUser> userManager,
-        IAccountEmailSender emailSender,
+        RegistrationService registration,
         SecurityEventLog securityLog)
     {
-        string email = request.Email!;
-        IdentityUser user = new() { UserName = email, Email = email };
-
-        // The password is checked before the address, so a weak password gets the same
-        // answer for a new and for a registered address.
-        List<IdentityError> passwordErrors = await ValidatePasswordAsync(userManager, user, request.Password!);
-
-        if (passwordErrors.Count > 0)
-        {
-            return PasswordErrors(passwordErrors, nameof(RegisterRequest.Password));
-        }
-
-        if (await userManager.FindByEmailAsync(email) is not null)
-        {
-            return Accepted();
-        }
-
-        IdentityResult created = await userManager.CreateAsync(user, request.Password!);
-
-        if (!created.Succeeded)
-        {
-            return PasswordErrors([.. created.Errors], nameof(RegisterRequest.Password));
-        }
-
-        string token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-        await emailSender.SendAsync(
-            new AccountEmail(user.Id, email, AccountEmailKinds.Confirmation, token),
+        RegistrationResult result = await registration.RegisterAsync(
+            request,
+            httpContext.Connection.RemoteIpAddress?.ToString(),
             httpContext.RequestAborted);
 
-        await securityLog.WriteAsync(SecurityEventTypes.AccountRegistered, httpContext, user.Id);
+        switch (result.Outcome)
+        {
+            case RegistrationOutcome.Invalid:
+                return ApiErrors.Validation(result.Errors);
+
+            case RegistrationOutcome.LimitReached:
+                await securityLog.WriteAsync(SecurityEventTypes.RateLimitExceeded, httpContext, null, "registration_ip_limit");
+                return ApiErrors.Result(StatusCodes.Status429TooManyRequests, RegistrationLimitReached);
+
+            case RegistrationOutcome.CaptchaRequired:
+                return ApiErrors.Result(StatusCodes.Status400BadRequest, CaptchaRequired);
+        }
+
+        if (result.UserId is not null)
+        {
+            await securityLog.WriteAsync(SecurityEventTypes.AccountRegistered, httpContext, result.UserId);
+        }
 
         return Accepted();
     }
 
     private static async Task<IResult> ResendConfirmationAsync(
         ResendConfirmationRequest request,
-        HttpContext httpContext,
         UserManager<IdentityUser> userManager,
-        IAccountEmailSender emailSender)
+        ConfirmationMailer mailer,
+        HttpContext httpContext)
     {
         IdentityUser? user = await userManager.FindByEmailAsync(request.Email!);
 
-        // Only an account that still waits for its confirmation gets an e-mail; the answer is
-        // the same in every case, so it does not tell which addresses are registered.
+        // Only an account that still waits for its confirmation gets an e-mail, and not more
+        // often than the configured pause; the answer is the same in every case, so it does not
+        // tell which addresses are registered.
         if (user is { EmailConfirmed: false })
         {
-            string token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            await emailSender.SendAsync(
-                new AccountEmail(user.Id, user.Email!, AccountEmailKinds.Confirmation, token),
-                httpContext.RequestAborted);
+            await mailer.SendAsync(user, httpContext.RequestAborted);
         }
 
         return Accepted();
@@ -137,7 +140,10 @@ public static class AuthEndpoints
     {
         IdentityUser? user = await userManager.FindByIdAsync(request.UserId!);
 
-        if (user is null || !(await userManager.ConfirmEmailAsync(user, request.Token!)).Succeeded)
+        // The link works once: an address that is already confirmed refuses it again.
+        if (user is null
+            || user.EmailConfirmed
+            || !(await userManager.ConfirmEmailAsync(user, request.Token!)).Succeeded)
         {
             return ApiErrors.Result(StatusCodes.Status400BadRequest, GameErrorCodes.InvalidToken);
         }
@@ -151,34 +157,63 @@ public static class AuthEndpoints
         LoginRequest request,
         HttpContext httpContext,
         SignInChecker checker,
+        SignInThrottle throttle,
         SessionIssuer sessions,
+        AccountLifecycle lifecycle,
+        AetherisDbContext dbContext,
+        TimeProvider timeProvider,
         SecurityEventLog securityLog)
     {
+        string login = request.Login!.Trim();
+        string? ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+        CancellationToken cancellationToken = httpContext.RequestAborted;
+
+        // The lockout by the typed name and by the address answers the same for a registered
+        // and an unknown name (task 00006, decision 4).
+        if (await throttle.IsLockedAsync(login, ipAddress, cancellationToken))
+        {
+            await securityLog.WriteAsync(SecurityEventTypes.SignInFailed, httpContext, null, "throttled");
+
+            return ApiErrors.Result(StatusCodes.Status403Forbidden, GameErrorCodes.AccountLocked);
+        }
+
         SignInCheckResult result = await checker.CheckAsync(
-            request.Email!,
+            login,
             request.Password!,
             httpContext,
-            SecurityEventTypes.SignInFailed);
+            SecurityEventTypes.SignInFailed,
+            requireConfirmedEmail: false);
 
-        switch (result.Outcome)
+        if (result.Outcome != SignInOutcome.Succeeded)
         {
-            case SignInOutcome.LockedOut:
-                return ApiErrors.Result(StatusCodes.Status403Forbidden, GameErrorCodes.AccountLocked);
+            await throttle.RecordAsync(login, ipAddress, succeeded: false, cancellationToken);
 
-            case SignInOutcome.EmailNotConfirmed:
-                return ApiErrors.Result(StatusCodes.Status403Forbidden, GameErrorCodes.EmailNotConfirmed);
-
-            case SignInOutcome.InvalidCredentials:
-                return ApiErrors.Result(StatusCodes.Status401Unauthorized, GameErrorCodes.InvalidCredentials);
+            return result.Outcome == SignInOutcome.LockedOut
+                ? ApiErrors.Result(StatusCodes.Status403Forbidden, GameErrorCodes.AccountLocked)
+                : ApiErrors.Result(StatusCodes.Status401Unauthorized, GameErrorCodes.InvalidCredentials);
         }
 
         IdentityUser user = result.User!;
 
+        await throttle.RecordAsync(login, ipAddress, succeeded: true, cancellationToken);
         await checker.ResetFailuresAsync(user);
-        await sessions.StartAsync(httpContext, user);
-        await securityLog.WriteAsync(SecurityEventTypes.SignInSucceeded, httpContext, user.Id);
 
-        return Results.Ok(new { userId = user.Id });
+        // A sign-in within the delay of a requested deletion cancels it (task 00006, decision 10).
+        bool deletionCancelled = await lifecycle.CancelDeletionAsync(user.Id, cancellationToken);
+
+        dbContext.AccountAccessLog.Add(new AccountAccessLogEntity
+        {
+            UserId = user.Id,
+            Kind = AccountAccessKinds.SignIn,
+            IpAddress = ipAddress,
+            At = timeProvider.GetUtcNow(),
+        });
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        await sessions.StartAsync(httpContext, user, request.RememberMe);
+        await securityLog.WriteAsync(SecurityEventTypes.SignInSucceeded, httpContext, user.Id, deletionCancelled ? "deletion_cancelled" : null);
+
+        return Results.Ok(new { user_id = user.Id, deletion_cancelled = deletionCancelled });
     }
 
     private static async Task<IResult> RefreshAsync(
@@ -209,7 +244,7 @@ public static class AuthEndpoints
             return ApiErrors.Result(StatusCodes.Status401Unauthorized, GameErrorCodes.InvalidToken);
         }
 
-        await sessions.ContinueAsync(httpContext, user, result.NewToken, result.ExpiresAt);
+        await sessions.ContinueAsync(httpContext, user, result.NewToken, result.ExpiresAt, result.IsPersistent);
         await securityLog.WriteAsync(SecurityEventTypes.SessionRefreshed, httpContext, user.Id);
 
         return Results.Ok(new { userId = user.Id });
@@ -288,8 +323,36 @@ public static class AuthEndpoints
         return Results.Ok(new { status = "changed" });
     }
 
-    private static IResult GetMe(ClaimsPrincipal principal) =>
-        Results.Ok(new { userId = principal.GetPlayerId() });
+    private static async Task<IResult> GetMeAsync(
+        ClaimsPrincipal principal,
+        UserManager<IdentityUser> userManager,
+        AetherisDbContext dbContext,
+        IWorldModule world,
+        HttpContext httpContext)
+    {
+        string? userId = principal.GetPlayerId();
+        IdentityUser? user = userId is null ? null : await userManager.FindByIdAsync(userId);
+
+        if (user is null)
+        {
+            return ApiErrors.Result(StatusCodes.Status401Unauthorized, GameErrorCodes.NotAuthenticated);
+        }
+
+        CancellationToken cancellationToken = httpContext.RequestAborted;
+        PlayerProfileEntity? profile = await dbContext.PlayerProfiles.AsNoTracking()
+            .SingleOrDefaultAsync(entry => entry.UserId == user.Id, cancellationToken);
+
+        // The account sees its own address; other players never get it (task 00006, decision 7).
+        return Results.Ok(new
+        {
+            user_id = user.Id,
+            nickname = user.UserName,
+            email = user.Email,
+            email_confirmed = user.EmailConfirmed,
+            nickname_changed_at = profile?.NicknameChangedAt,
+            civilization = await world.GetCivilizationAsync(user.Id, cancellationToken),
+        });
+    }
 
     private static async Task<IResult> GetProvidersAsync(IAuthenticationSchemeProvider schemes)
     {

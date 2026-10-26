@@ -43,16 +43,17 @@ public sealed class SessionIssuer
     /// </summary>
     /// <param name="httpContext">The request.</param>
     /// <param name="user">The account.</param>
+    /// <param name="persistent">Whether the session outlives the browser ("remember me").</param>
     /// <returns>A task that completes when the cookies are set.</returns>
-    public async Task StartAsync(HttpContext httpContext, IdentityUser user)
+    public async Task StartAsync(HttpContext httpContext, IdentityUser user, bool persistent = false)
     {
         ArgumentNullException.ThrowIfNull(httpContext);
         ArgumentNullException.ThrowIfNull(user);
 
         (string token, DateTimeOffset expiresAt) =
-            await _refreshTokens.IssueAsync(user.Id, httpContext.RequestAborted).ConfigureAwait(false);
+            await _refreshTokens.IssueAsync(user.Id, persistent, httpContext.RequestAborted).ConfigureAwait(false);
 
-        await ContinueAsync(httpContext, user, token, expiresAt).ConfigureAwait(false);
+        await ContinueAsync(httpContext, user, token, expiresAt, persistent).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -62,12 +63,18 @@ public sealed class SessionIssuer
     /// <param name="user">The account.</param>
     /// <param name="refreshToken">The new refresh token.</param>
     /// <param name="refreshExpiresAt">The expiry of the refresh token.</param>
+    /// <param name="persistent">Whether the refresh cookie outlives the browser.</param>
     /// <returns>A task that completes when the cookies are set.</returns>
+    /// <remarks>
+    /// Without "remember me" the refresh cookie is a session cookie: the browser drops it when
+    /// it closes, and the session ends (task 00006, decision 4).
+    /// </remarks>
     public async Task ContinueAsync(
         HttpContext httpContext,
         IdentityUser user,
         string refreshToken,
-        DateTimeOffset refreshExpiresAt)
+        DateTimeOffset refreshExpiresAt,
+        bool persistent)
     {
         ArgumentNullException.ThrowIfNull(httpContext);
         ArgumentNullException.ThrowIfNull(user);
@@ -88,7 +95,7 @@ public sealed class SessionIssuer
             Secure = true,
             SameSite = SameSiteMode.Strict,
             Path = AuthCookies.RefreshPath,
-            Expires = refreshExpiresAt,
+            Expires = persistent ? refreshExpiresAt : null,
             IsEssential = true,
         });
     }
