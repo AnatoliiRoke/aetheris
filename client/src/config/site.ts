@@ -27,9 +27,21 @@ export const siteConfig = {
   nicknameMinLength: 3,
   nicknameMaxLength: 20,
 
+  /**
+   * The characters of a nickname; it mirrors `security.account.nickname_characters`
+   * (listed as they are, `a-z` is a range, a dash at the end is the dash itself).
+   */
+  nicknameCharacters: 'A-Za-z\u0400-\u04FF0-9 _-',
+
   /** The length of the name of the home planet; it mirrors `world.civilization.home_name_*`. */
   planetNameMinLength: 3,
   planetNameMaxLength: 20,
+
+  /**
+   * The characters of the name of the home planet, with the plain and the typographic
+   * apostrophe; it mirrors `world.civilization.home_name_characters`.
+   */
+  planetNameCharacters: "A-Za-z\u0400-\u04FF0-9 _'\u2019-",
 
   /** Seconds before the confirmation email can be requested again (`security.account.confirmation_resend_minutes`). */
   resendCooldownSeconds: 300,

@@ -132,11 +132,32 @@ export function passwordProblems(password: string): MessageKey[] {
   return problems;
 }
 
+const dashCode = '-'.codePointAt(0);
+
 /**
- * Latin and Cyrillic letters, digits, the space, the underscore and the dash: the rule of a
- * nickname and of a planet name.
+ * Checks that a text has only the characters of a definition in the format of the server:
+ * characters listed as they are, two characters joined by `-` are a range, a `-` at the start
+ * or at the end is the dash itself.
  */
-const visibleNamePattern = /^[A-Za-z\u0400-\u04FF0-9 _-]+$/;
+export function hasOnlyAllowedCharacters(text: string, definition: string): boolean {
+  const characters = Array.from(definition, (character) => character.codePointAt(0) ?? 0);
+  const ranges: Array<[number, number]> = [];
+
+  for (let i = 0; i < characters.length; i++) {
+    const lastIndex = i + 2;
+
+    if (lastIndex < characters.length && characters[i + 1] === dashCode) {
+      ranges.push([characters[i], characters[lastIndex]]);
+      i = lastIndex;
+    } else {
+      ranges.push([characters[i], characters[i]]);
+    }
+  }
+
+  const symbols = Array.from(text, (character) => character.codePointAt(0) ?? 0);
+
+  return symbols.length > 0 && symbols.every((code) => ranges.some(([first, last]) => code >= first && code <= last));
+}
 
 /**
  * The nickname rules the client checks before sending; the server checks them again and
@@ -153,7 +174,7 @@ export function nicknameProblems(nickname: string): MessageKey[] {
     return ['error.nickname_too_long'];
   }
 
-  return visibleNamePattern.test(value) ? [] : ['error.nickname_invalid_characters'];
+  return hasOnlyAllowedCharacters(value, siteConfig.nicknameCharacters) ? [] : ['error.nickname_invalid_characters'];
 }
 
 /**
@@ -170,7 +191,7 @@ export function planetNameProblems(name: string): MessageKey[] {
     return ['error.planet_name_too_long'];
   }
 
-  return visibleNamePattern.test(value) ? [] : ['error.planet_name_invalid_characters'];
+  return hasOnlyAllowedCharacters(value, siteConfig.planetNameCharacters) ? [] : ['error.planet_name_invalid_characters'];
 }
 
 /**

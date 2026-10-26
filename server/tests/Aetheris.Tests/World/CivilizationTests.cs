@@ -238,6 +238,8 @@ public sealed class CivilizationTests
     [InlineData("Ab", WorldErrorCodes.HomeNameTooShort)]
     [InlineData("Planet<script>", WorldErrorCodes.HomeNameInvalidCharacters)]
     [InlineData("Shitty Rock", WorldErrorCodes.HomeNameRestricted)]
+    [InlineData("Sh'itty Rock", WorldErrorCodes.HomeNameRestricted)]
+    [InlineData("Кам\"яна", WorldErrorCodes.HomeNameInvalidCharacters)]
     public async Task The_home_name_follows_the_rules(string name, string expectedCode)
     {
         await WorldTestData.ResetWorldAsync(_factory);
@@ -250,6 +252,65 @@ public sealed class CivilizationTests
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal(GameErrorCodes.ValidationFailed, await TestAccounts.ReadErrorAsync(response));
         Assert.Contains(expectedCode, await AccountTestSupport.FieldErrorsAsync(response, "planet_name"));
+    }
+
+    /// <summary>
+    /// The name of the home body may contain the apostrophe, the plain one and the typographic
+    /// one; the name is stored and returned exactly as it was typed, also when it looks like
+    /// a piece of SQL.
+    /// </summary>
+    /// <param name="name">The name.</param>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Theory]
+    [InlineData("Кам'яна")]
+    [InlineData("Кам’яна")]
+    [InlineData("O'Brien' --")]
+    public async Task The_home_name_may_contain_an_apostrophe(string name)
+    {
+        await WorldTestData.ResetWorldAsync(_factory);
+
+        using HttpClient client = _factory.CreateBrowserClient();
+        await TestAccounts.SignInAsync(client, await TestAccounts.RegisterConfirmedAsync(_factory));
+
+        HttpResponseMessage response = await CivilizationTestData.FoundAsync(client, await CivilizationTestData.FirstRaceIdAsync(client), name, "apostrophe-1");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync(Token));
+        long planetId = body.RootElement.GetProperty("planet_id").GetInt64();
+        Assert.Equal(name, body.RootElement.GetProperty("planet_name").GetString());
+
+        using IServiceScope scope = _factory.Services.CreateScope();
+        WorldDbContext world = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
+
+        Assert.Equal(name, await world.Planets.AsNoTracking().Where(entry => entry.Id == planetId).Select(entry => entry.Name).SingleAsync(Token));
+    }
+
+    /// <summary>
+    /// The allowed characters of the name come from the database: without the apostrophe in
+    /// the definition the same name is refused at once, without a rebuild.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_home_name_characters_come_from_the_database()
+    {
+        await WorldTestData.ResetWorldAsync(_factory, new Dictionary<string, string>
+        {
+            [WorldConfigKeys.HomeNameCharacters] = "A-Za-zЀ-ӿ0-9 _-",
+        });
+
+        using HttpClient client = _factory.CreateBrowserClient();
+        await TestAccounts.SignInAsync(client, await TestAccounts.RegisterConfirmedAsync(_factory));
+        int raceId = await CivilizationTestData.FirstRaceIdAsync(client);
+
+        HttpResponseMessage refused = await CivilizationTestData.FoundAsync(client, raceId, "Кам'яна", "chars-1");
+        Assert.Equal(HttpStatusCode.BadRequest, refused.StatusCode);
+        Assert.Contains(WorldErrorCodes.HomeNameInvalidCharacters, await AccountTestSupport.FieldErrorsAsync(refused, "planet_name"));
+
+        using IServiceScope scope = _factory.Services.CreateScope();
+        await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, WorldConfigKeys.HomeNameCharacters, "A-Za-zЀ-ӿ0-9 _'-");
+
+        HttpResponseMessage accepted = await CivilizationTestData.FoundAsync(client, raceId, "Кам'яна", "chars-2");
+        Assert.Equal(HttpStatusCode.OK, accepted.StatusCode);
     }
 
     /// <summary>

@@ -247,7 +247,7 @@ export const en: Messages = {
   'error.nickname_taken': 'This nickname is already taken.',
   'error.planet_name_too_short': 'The name is too short: at least {min} characters.',
   'error.planet_name_too_long': 'The name is too long: at most {max} characters.',
-  'error.planet_name_invalid_characters': 'A name may contain only letters, digits, space, _ and -.',
+  'error.planet_name_invalid_characters': "A name may contain only letters, digits, space, _, - and an apostrophe.",
   'error.planet_name_restricted': 'This name cannot be used. Choose another one.',
   'error.raceRequired': 'Choose a race.',
   'error.registrationLimit.title': 'Too many registrations',

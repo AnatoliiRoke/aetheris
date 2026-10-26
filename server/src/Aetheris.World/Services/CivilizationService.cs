@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Text;
 using Aetheris.World.Api;
@@ -25,7 +24,7 @@ namespace Aetheris.World.Services;
 /// building of the race goes to <see cref="IStartBuildingPlacer"/>.
 /// </para>
 /// </remarks>
-public sealed partial class CivilizationService
+public sealed class CivilizationService
 {
     private readonly WorldDbContext _dbContext;
     private readonly WorldUnitOfWork _unitOfWork;
@@ -220,7 +219,7 @@ public sealed partial class CivilizationService
             errors.Add(WorldErrorCodes.HomeNameTooLong);
         }
 
-        if (homeName.Length > 0 && !AllowedPattern().IsMatch(homeName))
+        if (homeName.Length > 0 && !settings.HomeNameCharacters.IsMatch(homeName))
         {
             errors.Add(WorldErrorCodes.HomeNameInvalidCharacters);
         }
@@ -277,10 +276,4 @@ public sealed partial class CivilizationService
 
         return true;
     }
-
-    /// <summary>
-    /// Latin and Cyrillic letters, digits, the space, the underscore and the dash, as for a nickname.
-    /// </summary>
-    [GeneratedRegex("^[A-Za-zЀ-ӿ0-9 _-]+$")]
-    private static partial Regex AllowedPattern();
 }

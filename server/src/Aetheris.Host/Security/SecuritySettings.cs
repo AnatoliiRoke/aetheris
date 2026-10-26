@@ -1,4 +1,5 @@
 using Aetheris.Core.Configuration;
+using Aetheris.Core.Text;
 using Aetheris.Host.Data;
 
 namespace Aetheris.Host.Security;
@@ -83,6 +84,9 @@ public sealed class SecuritySettings
     /// <summary>Gets the largest nickname length.</summary>
     public int NicknameMaxLength => ReadInt32(SecurityKeys.NicknameMaxLength);
 
+    /// <summary>Gets the characters a nickname may contain.</summary>
+    public AllowedCharacters NicknameCharacters => AllowedCharacters.Parse(ReadText(SecurityKeys.NicknameCharacters));
+
     /// <summary>Gets the time between two changes of the nickname.</summary>
     public TimeSpan NicknameChangeInterval => TimeSpan.FromDays(Read(SecurityKeys.NicknameChangeIntervalDays));
 
@@ -165,6 +169,14 @@ public sealed class SecuritySettings
     }
 
     private int ReadInt32(string key) => (int)Read(key);
+
+    private string ReadText(string key)
+    {
+        ConfigParameterDefinition definition = ConfigSeed.Find(key)
+            ?? throw new InvalidOperationException($"The parameter '{key}' has no definition in the seed.");
+
+        return _config.GetRaw(key) ?? definition.DefaultValue;
+    }
 
     private double Read(string key)
     {

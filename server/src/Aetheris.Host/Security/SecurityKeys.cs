@@ -61,6 +61,9 @@ public static class SecurityKeys
     /// <summary>The largest nickname length.</summary>
     public const string NicknameMaxLength = "security.account.nickname_max_length";
 
+    /// <summary>The characters a nickname may contain, as an <see cref="Core.Text.AllowedCharacters"/> definition.</summary>
+    public const string NicknameCharacters = "security.account.nickname_characters";
+
     /// <summary>The days between two changes of the nickname.</summary>
     public const string NicknameChangeIntervalDays = "security.account.nickname_change_days";
 

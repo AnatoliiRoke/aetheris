@@ -133,6 +133,8 @@ public sealed class RegistrationTests
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Theory]
     [InlineData("Bad!Name", NicknameRules.InvalidCharacters)]
+    [InlineData("Kam'yana", NicknameRules.InvalidCharacters)]
+    [InlineData("Кам’яна", NicknameRules.InvalidCharacters)]
     [InlineData("Admin_Bob", NicknameRules.Restricted)]
     [InlineData("AdminBob", NicknameRules.Restricted)]
     [InlineData("xx-FUCK-xx", NicknameRules.Restricted)]
@@ -152,6 +154,32 @@ public sealed class RegistrationTests
         string suffix = Guid.NewGuid().ToString("N")[..4];
 
         await AssertNicknameAsync($"Їжак_{suffix} Ok-1", string.Empty);
+    }
+
+    /// <summary>
+    /// The allowed characters of a nickname come from the database: a definition with the
+    /// apostrophe accepts it at once, without a rebuild.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_nickname_characters_come_from_the_database()
+    {
+        string nickname = "O'Neil" + Guid.NewGuid().ToString("N")[..6];
+
+        await AssertNicknameAsync(nickname, NicknameRules.InvalidCharacters);
+
+        using IServiceScope scope = _factory.Services.CreateScope();
+        string? previous = await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, SecurityKeys.NicknameCharacters, "A-Za-z0-9'");
+
+        try
+        {
+            await AssertNicknameAsync(nickname, string.Empty);
+            await AssertNicknameAsync("Їжак" + Guid.NewGuid().ToString("N")[..6], NicknameRules.InvalidCharacters);
+        }
+        finally
+        {
+            await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, SecurityKeys.NicknameCharacters, previous!);
+        }
     }
 
     /// <summary>

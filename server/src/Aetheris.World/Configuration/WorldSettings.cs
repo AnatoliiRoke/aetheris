@@ -1,5 +1,6 @@
 using System.Globalization;
 using Aetheris.Core.Configuration;
+using Aetheris.Core.Text;
 
 namespace Aetheris.World.Configuration;
 
@@ -111,6 +112,9 @@ public sealed record WorldSettings
     /// <summary>Gets the largest length of the name of a home body.</summary>
     public int HomeNameMaxLength { get; init; }
 
+    /// <summary>Gets the characters the name of a home body may contain.</summary>
+    public AllowedCharacters HomeNameCharacters { get; init; } = AllowedCharacters.Parse(null);
+
     /// <summary>Gets the capacity of the storage of a new home body, per resource.</summary>
     public long StartStorageCapacity { get; init; }
 
@@ -167,6 +171,7 @@ public sealed record WorldSettings
             MaxNewbiesPerSystem = ReadInt32(config, WorldConfigKeys.MaxNewbiesPerSystem),
             HomeNameMinLength = ReadInt32(config, WorldConfigKeys.HomeNameMinLength),
             HomeNameMaxLength = ReadInt32(config, WorldConfigKeys.HomeNameMaxLength),
+            HomeNameCharacters = AllowedCharacters.Parse(ReadText(config, WorldConfigKeys.HomeNameCharacters)),
             StartStorageCapacity = ReadInt64(config, WorldConfigKeys.StartStorageCapacity),
             RevealAll = ReadBoolean(config, WorldConfigKeys.RevealAll),
             FreeBodiesPageSize = ReadInt32(config, WorldConfigKeys.FreeBodiesPageSize),

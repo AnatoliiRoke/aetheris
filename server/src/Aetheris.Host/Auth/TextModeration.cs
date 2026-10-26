@@ -1,3 +1,4 @@
+using System.Text;
 using Aetheris.Core.Text;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
@@ -12,7 +13,9 @@ namespace Aetheris.Host.Auth;
 /// <remarks>
 /// <para>
 /// The name is compared in lower case and without its separators, so that
-/// <c>B-a_d W o r d</c> is found like <c>badword</c>.
+/// <c>B-a_d W o r d</c> is found like <c>badword</c>. Every character that is not a letter or
+/// a digit is a separator, so an apostrophe inside a name (<c>B'adword</c>) hides nothing,
+/// whatever characters the database allows.
 /// </para>
 /// <para>
 /// An offensive word is refused anywhere in the name. A reserved word, such as the name of the
@@ -23,8 +26,6 @@ namespace Aetheris.Host.Auth;
 /// </remarks>
 public sealed class TextModeration : ITextModeration
 {
-    private static readonly char[] Separators = [' ', '_', '-'];
-
     private readonly AetherisDbContext _dbContext;
 
     /// <summary>
@@ -45,7 +46,7 @@ public sealed class TextModeration : ITextModeration
 
         string lower = text.ToLowerInvariant();
         string compact = Compact(lower);
-        string[] parts = lower.Split(Separators, StringSplitOptions.RemoveEmptyEntries);
+        string[] parts = [.. SplitBySeparators(lower)];
 
         List<RestrictedWordEntity> words = await _dbContext.RestrictedWords
             .AsNoTracking()
@@ -74,5 +75,28 @@ public sealed class TextModeration : ITextModeration
         return true;
     }
 
-    private static string Compact(string value) => string.Concat(value.Where(character => !Separators.Contains(character)));
+    private static string Compact(string value) => string.Concat(value.Where(char.IsLetterOrDigit));
+
+    private static IEnumerable<string> SplitBySeparators(string value)
+    {
+        StringBuilder part = new();
+
+        foreach (char character in value)
+        {
+            if (char.IsLetterOrDigit(character))
+            {
+                part.Append(character);
+            }
+            else if (part.Length > 0)
+            {
+                yield return part.ToString();
+                part.Clear();
+            }
+        }
+
+        if (part.Length > 0)
+        {
+            yield return part.ToString();
+        }
+    }
 }

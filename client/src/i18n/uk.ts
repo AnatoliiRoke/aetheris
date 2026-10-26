@@ -245,7 +245,7 @@ export const uk = {
   'error.nickname_taken': 'Цей нік уже зайнятий.',
   'error.planet_name_too_short': 'Назва закоротка: потрібно щонайменше {min} символи.',
   'error.planet_name_too_long': 'Назва задовга: не більше {max} символів.',
-  'error.planet_name_invalid_characters': 'У назві можна лише літери, цифри, пробіл, _ і -.',
+  'error.planet_name_invalid_characters': 'У назві можна лише літери, цифри, пробіл, _, - та апостроф.',
   'error.planet_name_restricted': 'Таку назву не можна використати. Обери іншу.',
   'error.raceRequired': 'Обери расу.',
   'error.registrationLimit.title': 'Забагато реєстрацій',

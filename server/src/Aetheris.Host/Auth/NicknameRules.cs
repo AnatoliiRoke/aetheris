@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Aetheris.Core.Text;
 using Aetheris.Host.Security;
 using Microsoft.AspNetCore.Identity;
@@ -9,12 +8,13 @@ namespace Aetheris.Host.Auth;
 /// The rules of a nickname (task 00006, decision 7).
 /// </summary>
 /// <remarks>
-/// The length limits come from the database. The allowed characters are the rule of the
-/// author: Latin and Cyrillic letters, digits, the space, <c>_</c> and <c>-</c>. The name
+/// The length limits and the allowed characters come from the database
+/// (<c>security.account.nickname_characters</c>): by default Latin and Cyrillic letters,
+/// digits, the space, <c>_</c> and <c>-</c>, without the apostrophe. The name
 /// is unique without regard to case, because it is the Identity user name, compared through
 /// its normalized form.
 /// </remarks>
-public sealed partial class NicknameRules
+public sealed class NicknameRules
 {
     /// <summary>The error code of a too short nickname.</summary>
     public const string TooShort = "nickname_too_short";
@@ -82,7 +82,7 @@ public sealed partial class NicknameRules
             errors.Add(TooLong);
         }
 
-        if (nickname.Length > 0 && !AllowedPattern().IsMatch(nickname))
+        if (nickname.Length > 0 && !_settings.NicknameCharacters.IsMatch(nickname))
         {
             errors.Add(InvalidCharacters);
         }
@@ -107,10 +107,4 @@ public sealed partial class NicknameRules
 
         return errors;
     }
-
-    /// <summary>
-    /// Latin and Cyrillic letters, digits, the space, the underscore and the dash.
-    /// </summary>
-    [GeneratedRegex("^[A-Za-zЀ-ӿ0-9 _-]+$")]
-    private static partial Regex AllowedPattern();
 }

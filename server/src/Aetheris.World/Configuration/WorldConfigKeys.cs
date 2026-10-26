@@ -124,6 +124,9 @@ public static class WorldConfigKeys
     /// <summary>The largest length of the name a player gives the home body.</summary>
     public const string HomeNameMaxLength = "world.civilization.home_name_max_length";
 
+    /// <summary>The characters the name of the home body may contain, as an <see cref="Core.Text.AllowedCharacters"/> definition.</summary>
+    public const string HomeNameCharacters = "world.civilization.home_name_characters";
+
     /// <summary>The capacity of the storage of a new home body, per resource.</summary>
     public const string StartStorageCapacity = "world.civilization.start_storage_capacity";
 
@@ -176,6 +179,7 @@ public static class WorldConfigKeys
         new(FreeBodiesPageSize, "100", "1", "10000", "Largest number of free bodies returned at once."),
         new(HomeNameMinLength, "3", "1", "64", "Smallest length of the name a player gives the home body."),
         new(HomeNameMaxLength, "20", "1", "64", "Largest length of the name a player gives the home body."),
+        new(HomeNameCharacters, "A-Za-zЀ-ӿ0-9 _'’-", null, null, "Characters the name of the home body may contain: listed as they are, a-z is a range, a dash at the end is the dash itself."),
         new(StartStorageCapacity, "10000", "0", "1000000000", "Capacity of the storage of a new home body, per resource; the start resources never exceed it."),
         new(SectorNameTemplate, "S{index}", null, null, "Name template of a sector: {index}."),
         new(SystemNameTemplate, "{sector}-{number}", null, null, "Name template of a star system: {sector}, {number}."),
