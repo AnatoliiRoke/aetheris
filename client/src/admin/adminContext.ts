@@ -48,6 +48,8 @@ const errorKeys: Record<string, AdminMessageKey> = {
   world_generation_running: 'admin.error.generationRunning',
   world_generation_too_large: 'admin.error.generationTooLarge',
   world_rule_set_unknown: 'admin.error.ruleSetUnknown',
+  world_version_conflict: 'admin.edit.conflict',
+  world_config_invalid: 'admin.error.configInvalid',
   network_error: 'admin.error.network',
 };
 

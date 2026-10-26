@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { Fragment, useEffect, useState, type FormEvent, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 import { Alert } from '../components/Alert';
 import type { Page, Row, TableName, TableQuery } from './adminApi';
 import { errorKey, useAdmin } from './adminContext';
@@ -11,6 +11,8 @@ export interface Column<T extends Row> {
   label: AdminMessageKey;
   /** The sort column of the server, when the column can be sorted. */
   sort?: string;
+  /** An explanation of the column, shown when the pointer rests on the header. */
+  hint?: AdminMessageKey;
   render?: (row: T) => ReactNode;
 }
 
@@ -34,6 +36,10 @@ interface DataTableProps<T extends Row> {
   rowKey?: (row: T) => string;
   /** Changes when the table must load again. */
   reloadKey?: number;
+  /** Opens the card of a row: a click on the row or Enter on it (task 00009, decision 2). */
+  onRowClick?: (row: T) => void;
+  /** The text of the button that opens the card, for the keyboard and the screen readers. */
+  rowLabel?: (row: T) => string;
 }
 
 /**
@@ -49,6 +55,8 @@ export function DataTable<T extends Row>({
   expanded,
   rowKey = (row) => String(row['id']),
   reloadKey = 0,
+  onRowClick,
+  rowLabel,
 }: DataTableProps<T>) {
   const { t } = useAdminText();
   const { api, onError } = useAdmin();
@@ -156,6 +164,7 @@ export function DataTable<T extends Row>({
                 <th
                   key={column.key}
                   scope="col"
+                  title={column.hint ? t(column.hint) : undefined}
                   aria-sort={column.sort && query.sort === column.sort ? (query.direction === 'desc' ? 'descending' : 'ascending') : undefined}
                 >
                   {column.sort ? (
@@ -183,7 +192,13 @@ export function DataTable<T extends Row>({
 
               return (
                 <Fragment key={key}>
-                  <tr>
+                  <tr
+                    className={onRowClick ? 'admin-table__row--open' : undefined}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    aria-label={onRowClick && rowLabel ? rowLabel(row) : undefined}
+                    onClick={onRowClick ? (event) => openFromClick(event, () => onRowClick(row)) : undefined}
+                    onKeyDown={onRowClick ? (event) => openFromKey(event, () => onRowClick(row)) : undefined}
+                  >
                     {columns.map((column) => (
                       <td key={column.key}>{column.render ? column.render(row) : displayValue(row[column.key])}</td>
                     ))}
@@ -229,6 +244,24 @@ export function DataTable<T extends Row>({
       </nav>
     </section>
   );
+}
+
+/**
+ * Opens a card from a click on a row, but not from a click on a link or a button inside it.
+ */
+function openFromClick(event: MouseEvent<HTMLTableRowElement>, open: () => void) {
+  if (event.target instanceof Element && event.target.closest('a, button, input, select')) {
+    return;
+  }
+
+  open();
+}
+
+function openFromKey(event: KeyboardEvent<HTMLTableRowElement>, open: () => void) {
+  if (event.key === 'Enter' && event.target === event.currentTarget) {
+    event.preventDefault();
+    open();
+  }
 }
 
 /**

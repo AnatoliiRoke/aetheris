@@ -4,7 +4,7 @@ import type { ClockInfo, ConfigChange, ConfigParameter, Page, Row } from '../adm
 import { errorKey, fieldErrors, useAdmin } from '../adminContext';
 import { DataTable, type Column, type Filter } from '../DataTable';
 import type { AdminMessageKey } from '../i18n/uk';
-import { formatMoment, useAdminText } from '../i18n/useAdminText';
+import { formatMoment, useAdminText, useConfigDescription } from '../i18n/useAdminText';
 
 /**
  * The configuration parameters (task 00007, decision 7): the table with the search, the
@@ -14,6 +14,7 @@ import { formatMoment, useAdminText } from '../i18n/useAdminText';
  */
 export function ConfigScreen() {
   const { t, language } = useAdminText();
+  const description = useConfigDescription();
   const [reloadKey, setReloadKey] = useState(0);
   const reloadTable = () => setReloadKey((value) => value + 1);
 
@@ -23,7 +24,7 @@ export function ConfigScreen() {
     { key: 'type', label: 'admin.col.type', render: (row) => t(typeKey(row['type'] as ConfigParameter['type'])) },
     { key: 'minimum', label: 'admin.col.minimum' },
     { key: 'maximum', label: 'admin.col.maximum' },
-    { key: 'description', label: 'admin.col.description' },
+    { key: 'description', label: 'admin.col.description', render: (row) => description(String(row['key']), String(row['description'] ?? '')) },
     { key: 'read_only', label: 'admin.col.readOnly' },
     { key: 'updated_by', label: 'admin.col.updatedBy' },
     { key: 'updated_at', label: 'admin.col.updatedAt', sort: 'updated_at', render: (row) => formatMoment(row['updated_at'] as string, language) },

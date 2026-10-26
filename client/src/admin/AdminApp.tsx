@@ -12,6 +12,7 @@ import type { AdminMessageKey } from './i18n/uk';
 import { useAdminText } from './i18n/useAdminText';
 import { ConfigScreen } from './screens/ConfigScreen';
 import { GenerationScreen } from './screens/GenerationScreen';
+import { ObjectTypesScreen, RulesScreen } from './screens/ReferenceScreens';
 import { AuditScreen, RunsScreen } from './screens/RunsAndAudit';
 import { FieldsScreen, ObjectsScreen, SectorsScreen, SystemsScreen } from './screens/WorldTables';
 import './admin.css';
@@ -33,6 +34,8 @@ const screens: Screen[] = [
   { path: adminRoutes.systems, label: 'admin.nav.systems', permission: 'admin.world_systems_read', render: () => <SystemsScreen /> },
   { path: adminRoutes.objects, label: 'admin.nav.objects', permission: 'admin.world_objects_read', render: () => <ObjectsScreen /> },
   { path: adminRoutes.fields, label: 'admin.nav.fields', permission: 'admin.world_fields_read', render: () => <FieldsScreen /> },
+  { path: adminRoutes.objectTypes, label: 'admin.nav.objectTypes', permission: 'admin.world_object_types_read', render: () => <ObjectTypesScreen /> },
+  { path: adminRoutes.rules, label: 'admin.nav.rules', permission: 'admin.world_generation_rules_read', render: () => <RulesScreen /> },
   { path: adminRoutes.config, label: 'admin.nav.config', permission: 'admin.config_read', render: () => <ConfigScreen /> },
   { path: adminRoutes.audit, label: 'admin.nav.audit', permission: 'admin.audit_read', render: () => <AuditScreen /> },
 ];

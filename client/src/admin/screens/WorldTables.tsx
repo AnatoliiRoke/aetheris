@@ -1,19 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from '../../router/Router';
 import { useRouter } from '../../router/useRouter';
-import type { Row, WorldReference } from '../adminApi';
-import { useAdmin } from '../adminContext';
+import type { Row, Share } from '../adminApi';
 import { adminRoutes } from '../adminRoutes';
 import { DataTable, type Column, type Filter } from '../DataTable';
+import { WorldName } from '../EditParts';
 import type { AdminMessageKey } from '../i18n/uk';
+import { formatNumber, useAdminText, useWorldName } from '../i18n/useAdminText';
 import { classLabel } from '../labels';
-import { useAdminText } from '../i18n/useAdminText';
-
-interface Share {
-  resource_id: number;
-  resource_code: string;
-  coefficient: number;
-}
+import { useReference } from '../useReference';
+import { BodyCardDialog, FieldCardDialog, SystemCardDialog } from './ObjectCards';
 
 /**
  * The filters of a table read from the address, for the links between the tables.
@@ -34,50 +30,56 @@ function useYesNo(): { value: string; label: string }[] {
 }
 
 /**
- * The reference tables of the world, for the filters of the type.
- */
-function useReference(): WorldReference | null {
-  const { api, onError } = useAdmin();
-  const [reference, setReference] = useState<WorldReference | null>(null);
-
-  useEffect(() => {
-    let active = true;
-
-    api.reference().then(
-      (answer) => {
-        if (active) {
-          setReference(answer);
-        }
-      },
-      (failure: unknown) => onError(failure),
-    );
-
-    return () => {
-      active = false;
-    };
-  }, [api, onError]);
-
-  return reference;
-}
-
-/**
- * The resources of a body or a field: a deposit shows its coefficient, a field its share in
- * per cent.
+ * The resources of a body or a field by their names, the code in the tooltip (task 00009,
+ * decisions 9 and 10): a field shows its shares in per cent and the empty rock, a body the
+ * richness multiplier of every deposit.
  */
 function Shares({ shares, percent }: { shares: Share[]; percent: boolean }) {
+  const { t, language } = useAdminText();
+  const name = useWorldName();
+
   if (shares.length === 0) {
     return <>—</>;
   }
 
+  const total = shares.reduce((sum, share) => sum + Number(share.coefficient), 0);
+
   return (
     <ul className="admin-shares">
       {shares.map((share) => (
-        <li key={share.resource_id}>
-          {share.resource_code} {percent ? `${(Number(share.coefficient) * 100).toFixed(1)}%` : `×${Number(share.coefficient).toFixed(3)}`}
+        <li key={share.resource_id} title={share.resource_code}>
+          {name(share.resource_name_key, share.resource_code)}{' '}
+          {percent ? `${formatNumber(Number(share.coefficient) * 100, language, 1)}%` : `×${formatNumber(Number(share.coefficient), language, 3)}`}
         </li>
       ))}
+      {percent ? <li className="hint">{t('admin.card.rock', { percent: formatNumber(Math.max(0, 100 - total * 100), language, 1) })}</li> : null}
     </ul>
   );
+}
+
+/** The x, y and z columns of a table (task 00009, decision 1). */
+function coordinateColumns(language: 'uk' | 'en'): Column<Row>[] {
+  return (['x', 'y', 'z'] as const).map((axis) => ({
+    key: axis,
+    label: `admin.col.${axis}` as AdminMessageKey,
+    render: (row: Row) => formatNumber(Number(row[axis]), language, 2),
+  }));
+}
+
+/**
+ * Opens the card of a row and reloads the table after a change.
+ */
+function useCardOf() {
+  const [openId, setOpenId] = useState<number | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  return {
+    openId,
+    open: (row: Row) => setOpenId(Number(row['id'])),
+    close: () => setOpenId(null),
+    reloadKey,
+    changed: () => setReloadKey((value) => value + 1),
+  };
 }
 
 function ScreenTitle({ title, lead }: { title: AdminMessageKey; lead: AdminMessageKey }) {
@@ -141,8 +143,10 @@ export function SectorsScreen() {
  * The star systems.
  */
 export function SystemsScreen() {
-  const { t } = useAdminText();
+  const { t, language } = useAdminText();
   const yesNo = useYesNo();
+  const reference = useReference();
+  const card = useCardOf();
   const initialFilters = useQueryFilters(['sector_id']);
 
   const columns: Column<Row>[] = [
@@ -150,10 +154,11 @@ export function SystemsScreen() {
     { key: 'name', label: 'admin.col.name', sort: 'name' },
     { key: 'sector_name', label: 'admin.col.sector' },
     { key: 'number', label: 'admin.col.number', sort: 'number' },
+    ...coordinateColumns(language),
     {
-      key: 'position',
-      label: 'admin.col.position',
-      render: (row) => `${Number(row['x']).toFixed(1)}, ${Number(row['y']).toFixed(1)}, ${Number(row['z']).toFixed(1)}`,
+      key: 'star_type_name_key',
+      label: 'admin.col.starType',
+      render: (row) => <WorldName nameKey={row['star_type_name_key'] as string | null} code={row['star_type_code'] as string | null} />,
     },
     { key: 'in_nebula', label: 'admin.col.inNebula' },
     { key: 'newbie_count', label: 'admin.col.newbies' },
@@ -179,7 +184,18 @@ export function SystemsScreen() {
   return (
     <>
       <ScreenTitle title="admin.systems.title" lead="admin.systems.lead" />
-      <DataTable key={JSON.stringify(initialFilters)} table="systems" caption="admin.systems.title" columns={columns} filters={filters} initialFilters={initialFilters} />
+      <DataTable
+        key={JSON.stringify(initialFilters)}
+        table="systems"
+        caption="admin.systems.title"
+        columns={columns}
+        filters={filters}
+        initialFilters={initialFilters}
+        reloadKey={card.reloadKey}
+        onRowClick={card.open}
+        rowLabel={(row) => t('admin.card.open', { name: String(row['name']) })}
+      />
+      {card.openId !== null ? <SystemCardDialog systemId={card.openId} reference={reference} onClose={card.close} onSaved={card.changed} /> : null}
     </>
   );
 }
@@ -188,22 +204,38 @@ export function SystemsScreen() {
  * The bodies: the planets and the gas giants with their deposits.
  */
 export function ObjectsScreen() {
-  const { t } = useAdminText();
+  const { t, language } = useAdminText();
+  const name = useWorldName();
   const yesNo = useYesNo();
   const reference = useReference();
+  const card = useCardOf();
   const initialFilters = useQueryFilters(['sector_id', 'system_id']);
 
   const columns: Column<Row>[] = [
     { key: 'id', label: 'admin.col.id', sort: 'id' },
     { key: 'name', label: 'admin.col.name', sort: 'name' },
     { key: 'object_class', label: 'admin.col.class', render: (row) => classLabel(t, String(row['object_class'])) },
-    { key: 'object_type_code', label: 'admin.col.type' },
+    {
+      key: 'object_type_code',
+      label: 'admin.col.type',
+      render: (row) => <WorldName nameKey={row['object_type_name_key'] as string} code={row['object_type_code'] as string} />,
+    },
     { key: 'system_name', label: 'admin.col.system' },
     { key: 'orbit', label: 'admin.col.orbit', sort: 'orbit' },
-    { key: 'size_class_code', label: 'admin.col.sizeClass' },
+    ...coordinateColumns(language),
+    {
+      key: 'size_class_code',
+      label: 'admin.col.sizeClass',
+      render: (row) => <WorldName nameKey={row['size_class_name_key'] as string} code={row['size_class_code'] as string} />,
+    },
     { key: 'size', label: 'admin.col.size', sort: 'size' },
     { key: 'owner_player_id', label: 'admin.col.owner' },
-    { key: 'deposit_ids', label: 'admin.col.deposits', render: (row) => <Shares shares={row['deposit_ids'] as Share[]} percent={false} /> },
+    {
+      key: 'deposit_ids',
+      label: 'admin.col.depositMultiplier',
+      hint: 'admin.card.multiplierHint',
+      render: (row) => <Shares shares={row['deposit_ids'] as Share[]} percent={false} />,
+    },
   ];
 
   const filters: Filter[] = [
@@ -219,7 +251,7 @@ export function ObjectsScreen() {
       label: 'admin.col.type',
       options: (reference?.object_types ?? [])
         .filter((type) => type.group_code === 'planet' || type.group_code === 'gas_giant')
-        .map((type) => ({ value: String(type.id), label: type.code })),
+        .map((type) => ({ value: String(type.id), label: name(type.name_key, type.code) })),
     },
     { name: 'owned', label: 'admin.col.owned', options: yesNo },
   ];
@@ -227,7 +259,18 @@ export function ObjectsScreen() {
   return (
     <>
       <ScreenTitle title="admin.objects.title" lead="admin.objects.lead" />
-      <DataTable key={JSON.stringify(initialFilters)} table="objects" caption="admin.objects.title" columns={columns} filters={filters} initialFilters={initialFilters} />
+      <DataTable
+        key={JSON.stringify(initialFilters)}
+        table="objects"
+        caption="admin.objects.title"
+        columns={columns}
+        filters={filters}
+        initialFilters={initialFilters}
+        reloadKey={card.reloadKey}
+        onRowClick={card.open}
+        rowLabel={(row) => t('admin.card.open', { name: String(row['name']) })}
+      />
+      {card.openId !== null ? <BodyCardDialog planetId={card.openId} reference={reference} onClose={card.close} onSaved={card.changed} /> : null}
     </>
   );
 }
@@ -238,14 +281,21 @@ export function ObjectsScreen() {
 export function FieldsScreen() {
   const { t, language } = useAdminText();
   const yesNo = useYesNo();
+  const reference = useReference();
+  const card = useCardOf();
   const initialFilters = useQueryFilters(['sector_id', 'system_id']);
 
   const columns: Column<Row>[] = [
     { key: 'id', label: 'admin.col.id', sort: 'id' },
     { key: 'name', label: 'admin.col.name', sort: 'name' },
-    { key: 'object_type_code', label: 'admin.col.type' },
+    {
+      key: 'object_type_code',
+      label: 'admin.col.type',
+      render: (row) => <WorldName nameKey={row['object_type_name_key'] as string} code={row['object_type_code'] as string} />,
+    },
     { key: 'sector_id', label: 'admin.col.sectorId' },
     { key: 'system_name', label: 'admin.col.system', render: (row) => (row['system_name'] ? String(row['system_name']) : t('admin.fields.free')) },
+    ...coordinateColumns(language),
     { key: 'initial_mass', label: 'admin.col.initialMass' },
     { key: 'mass', label: 'admin.col.mass', sort: 'mass' },
     {
@@ -266,7 +316,18 @@ export function FieldsScreen() {
   return (
     <>
       <ScreenTitle title="admin.fields.title" lead="admin.fields.lead" />
-      <DataTable key={JSON.stringify(initialFilters)} table="fields" caption="admin.fields.title" columns={columns} filters={filters} initialFilters={initialFilters} />
+      <DataTable
+        key={JSON.stringify(initialFilters)}
+        table="fields"
+        caption="admin.fields.title"
+        columns={columns}
+        filters={filters}
+        initialFilters={initialFilters}
+        reloadKey={card.reloadKey}
+        onRowClick={card.open}
+        rowLabel={(row) => t('admin.card.open', { name: String(row['name']) })}
+      />
+      {card.openId !== null ? <FieldCardDialog fieldId={card.openId} reference={reference} onClose={card.close} onSaved={card.changed} /> : null}
     </>
   );
 }

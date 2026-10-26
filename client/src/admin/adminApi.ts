@@ -143,12 +143,222 @@ export interface WorldReference {
 /** A row of any admin table. */
 export type Row = Record<string, unknown>;
 
+/** A resource with its coefficient: a share of a field or the richness multiplier of a deposit. */
+export interface Share {
+  resource_id: number;
+  resource_code: string;
+  resource_name_key: string;
+  coefficient: number;
+}
+
+/** A resource with its coefficient as the admin panel sends it. */
+export interface ShareInput {
+  resource_id: number;
+  coefficient: number;
+}
+
+/** The card of an asteroid field (task 00009). */
+export interface FieldCard {
+  id: number;
+  version: number;
+  celestial_object_id: number;
+  name: string;
+  object_type_id: number;
+  object_type_code: string;
+  object_type_name_key: string;
+  sector_id: number;
+  system_id: number | null;
+  system_name: string | null;
+  x: number;
+  y: number;
+  z: number;
+  initial_mass: number;
+  mass: number;
+  depleted_at: string | null;
+  composition_ids: Share[];
+  bounds: { max_composition_share: number; sector_size: number; sector_depth: number };
+}
+
+/** The new state of a field. */
+export interface FieldUpdate {
+  version: number;
+  reason: string;
+  name: string;
+  object_type_id: number;
+  x: number;
+  y: number;
+  z: number;
+  mass: number;
+  initial_mass: number;
+  depleted: boolean;
+  composition_ids: ShareInput[];
+}
+
+/** A size class with its range. */
+export interface SizeClass {
+  id: number;
+  code: string;
+  name_key: string;
+  size_min: number;
+  size_max: number;
+}
+
+/** The card of a body: a planet or a gas giant. */
+export interface BodyCard {
+  id: number;
+  version: number;
+  celestial_object_id: number;
+  name: string;
+  owner_name: string | null;
+  owner_player_id: string | null;
+  object_type_id: number;
+  object_type_code: string;
+  object_type_name_key: string;
+  object_class: string;
+  sector_id: number;
+  system_id: number;
+  system_name: string;
+  orbit: number | null;
+  x: number;
+  y: number;
+  z: number;
+  size_class_id: number;
+  size_class_code: string;
+  size_class_name_key: string;
+  size: number;
+  deposit_ids: Share[];
+  bounds: {
+    orbit_min: number;
+    orbit_max: number;
+    taken_orbit_ids: { orbit: number; name: string }[];
+    deposit_coefficient_min: number;
+    deposit_coefficient_max: number;
+    allowed_resource_ids: number[];
+    size_class_ids: SizeClass[];
+  };
+}
+
+/** The new state of a body; the owner is not part of it. */
+export interface BodyUpdate {
+  version: number;
+  reason: string;
+  name: string;
+  object_type_id: number;
+  size_class_id: number;
+  size: number;
+  orbit: number;
+  deposit_ids: ShareInput[];
+}
+
+/** The card of a star system. */
+export interface SystemCard {
+  id: number;
+  version: number;
+  sector_id: number;
+  sector_name: string;
+  number: number;
+  name: string;
+  x: number;
+  y: number;
+  z: number;
+  in_nebula: boolean;
+  star_type_id: number | null;
+  star_type_code: string | null;
+  star_type_name_key: string | null;
+  bounds: { sector_size: number; sector_depth: number };
+}
+
+/** The new state of a star system. */
+export interface SystemUpdate {
+  version: number;
+  reason: string;
+  name: string;
+  x: number;
+  y: number;
+  z: number;
+  star_type_id: number;
+}
+
+/** A row of the object types. */
+export interface ObjectTypeRow {
+  id: number;
+  version: number;
+  code: string;
+  name_key: string;
+  object_class: string;
+  generation_weight: number;
+  mass_min: number | null;
+  mass_max: number | null;
+  is_colonizable: boolean;
+  object_count: number;
+}
+
+/** The new values of an object type. */
+export interface ObjectTypeUpdate {
+  version: number;
+  reason: string;
+  generation_weight: number;
+  mass_min: number | null;
+  mass_max: number | null;
+  is_colonizable: boolean;
+}
+
+/** A row of the composition rules: one rule with its group. */
+export interface RuleRow {
+  id: number;
+  version: number;
+  rule_group_id: number;
+  rule_group_version: number;
+  rule_group_code: string;
+  object_type_id: number;
+  object_type_code: string;
+  object_type_name_key: string;
+  object_class: string;
+  min_picks: number;
+  max_picks: number;
+  extra_pick_probability: number;
+  resource_id: number;
+  resource_code: string;
+  resource_name_key: string;
+  weight: number;
+  coefficient_min: number;
+  coefficient_max: number;
+  rich_coefficient_min: number | null;
+  rich_coefficient_max: number | null;
+  is_active: boolean;
+}
+
+/** The values of a rule, new or changed. */
+export interface RuleInput {
+  version: number;
+  reason: string;
+  rule_group_id: number;
+  resource_id: number;
+  weight: number;
+  coefficient_min: number;
+  coefficient_max: number;
+  rich_coefficient_min: number | null;
+  rich_coefficient_max: number | null;
+  is_active: boolean;
+}
+
+/** The new values of a rule group. */
+export interface RuleGroupUpdate {
+  version: number;
+  reason: string;
+  min_picks: number;
+  max_picks: number;
+  extra_pick_probability: number;
+}
+
 /** The tables of the admin panel and their routes. */
 export const tableRoutes = {
   sectors: '/world/sectors',
   systems: '/world/systems',
   objects: '/world/objects',
   fields: '/world/fields',
+  objectTypes: '/world/object-types',
+  rules: '/world/generation-rules',
   runs: '/world/generation-runs',
   config: '/config',
   audit: '/audit',
@@ -170,6 +380,16 @@ export interface AdminApi {
   estimate(sectorCount: number): Promise<GenerationEstimate>;
   startGeneration(sectorCount: number, seed: number | null, ruleSet: string): Promise<GenerationRun>;
   run(runId: number): Promise<GenerationRun>;
+  fieldCard(fieldId: number): Promise<FieldCard>;
+  updateField(fieldId: number, update: FieldUpdate): Promise<FieldCard>;
+  bodyCard(planetId: number): Promise<BodyCard>;
+  updateBody(planetId: number, update: BodyUpdate): Promise<BodyCard>;
+  systemCard(systemId: number): Promise<SystemCard>;
+  updateSystem(systemId: number, update: SystemUpdate): Promise<SystemCard>;
+  updateObjectType(objectTypeId: number, update: ObjectTypeUpdate): Promise<void>;
+  updateRule(ruleId: number, update: RuleInput): Promise<void>;
+  addRule(rule: RuleInput): Promise<void>;
+  updateRuleGroup(ruleGroupId: number, update: RuleGroupUpdate): Promise<void>;
 }
 
 /**
@@ -244,6 +464,36 @@ export function createAdminApi(http: HttpClient): AdminApi {
     },
     run(runId) {
       return http.get<GenerationRun>(`${adminPrefix}/world/generation-runs/${runId}`);
+    },
+    fieldCard(fieldId) {
+      return http.get<FieldCard>(`${adminPrefix}/world/fields/${fieldId}`);
+    },
+    updateField(fieldId, update) {
+      return http.put<FieldCard>(`${adminPrefix}/world/fields/${fieldId}`, update);
+    },
+    bodyCard(planetId) {
+      return http.get<BodyCard>(`${adminPrefix}/world/objects/${planetId}`);
+    },
+    updateBody(planetId, update) {
+      return http.put<BodyCard>(`${adminPrefix}/world/objects/${planetId}`, update);
+    },
+    systemCard(systemId) {
+      return http.get<SystemCard>(`${adminPrefix}/world/systems/${systemId}`);
+    },
+    updateSystem(systemId, update) {
+      return http.put<SystemCard>(`${adminPrefix}/world/systems/${systemId}`, update);
+    },
+    async updateObjectType(objectTypeId, update) {
+      await http.put(`${adminPrefix}/world/object-types/${objectTypeId}`, update);
+    },
+    async updateRule(ruleId, update) {
+      await http.put(`${adminPrefix}/world/generation-rules/${ruleId}`, update);
+    },
+    async addRule(rule) {
+      await http.post(`${adminPrefix}/world/generation-rules`, rule);
+    },
+    async updateRuleGroup(ruleGroupId, update) {
+      await http.put(`${adminPrefix}/world/generation-rule-groups/${ruleGroupId}`, update);
     },
   };
 }

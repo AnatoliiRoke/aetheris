@@ -10,6 +10,8 @@ export const adminRoutes = {
   systems: '/admin/systems',
   objects: '/admin/objects',
   fields: '/admin/fields',
+  objectTypes: '/admin/object-types',
+  rules: '/admin/rules',
   config: '/admin/config',
   audit: '/admin/audit',
 } as const;

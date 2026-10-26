@@ -97,6 +97,16 @@ function fakeAdminApi(overrides: Partial<AdminApi> = {}): AdminApi {
     estimate: vi.fn().mockResolvedValue(estimate),
     startGeneration: vi.fn().mockResolvedValue({ ...finishedRun, status: 'queued' }),
     run: vi.fn().mockResolvedValue(finishedRun),
+    fieldCard: vi.fn(),
+    updateField: vi.fn(),
+    bodyCard: vi.fn(),
+    updateBody: vi.fn(),
+    systemCard: vi.fn(),
+    updateSystem: vi.fn(),
+    updateObjectType: vi.fn().mockResolvedValue(undefined),
+    updateRule: vi.fn().mockResolvedValue(undefined),
+    addRule: vi.fn().mockResolvedValue(undefined),
+    updateRuleGroup: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
