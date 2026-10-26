@@ -37,16 +37,18 @@ public sealed partial class NoGameTermsTests
     /// The prefixes that a seeded parameter key may have: the neutral test parameters, the
     /// parameters of the core mechanisms and those of the modules with their own definitions.
     /// </summary>
-    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world.", "admin."];
+    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world.", "admin.", "planets."];
 
     /// <summary>
-    /// The folders, relative to the server root, where the words of the world domain are
-    /// allowed: the World module and its tests.
+    /// The folders, relative to the server root, where the words of the game domain are
+    /// allowed: the World module, the Planets module of task 00011 and their tests.
     /// </summary>
     private static readonly string[] WorldDomainFolders =
     [
         Path.Combine("src", "Aetheris.World") + Path.DirectorySeparatorChar,
         Path.Combine("tests", "Aetheris.Tests", "World") + Path.DirectorySeparatorChar,
+        Path.Combine("src", "Aetheris.Planets") + Path.DirectorySeparatorChar,
+        Path.Combine("tests", "Aetheris.Tests", "Planets") + Path.DirectorySeparatorChar,
     ];
 
     /// <summary>
@@ -121,7 +123,8 @@ public sealed partial class NoGameTermsTests
         Assert.True(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "tests", "Aetheris.Tests", "World", "SectorGeneratorTests.cs")));
         Assert.False(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Host", "Program.cs")));
         Assert.False(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Core", "Commands", "Command.cs")));
-        Assert.False(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Planets", "PlanetsModule.cs")));
+        Assert.True(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Planets", "PlanetsModule.cs")));
+        Assert.False(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Economy", "EconomyModule.cs")));
         Assert.Contains(
             Path.Combine(serverRoot, "src", "Aetheris.Host", "Program.cs"),
             EnumerateScannedFiles(serverRoot));

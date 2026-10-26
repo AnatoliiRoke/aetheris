@@ -299,4 +299,46 @@ public sealed class WorldQueryService
             .Where(planet => planet.Id == planetId)
             .Select(planet => planet.OwnerPlayerId)
             .SingleOrDefaultAsync(cancellationToken);
+
+    /// <summary>
+    /// Gets the facts of a body that another module needs: the sector, the owner and the deposits.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The facts, or <see langword="null"/> when the body does not exist.</returns>
+    public async Task<PlanetFacts?> GetPlanetFactsAsync(long planetId, CancellationToken cancellationToken)
+    {
+        PlanetEntity? planet = await _dbContext.Planets.AsNoTracking()
+            .Include(entry => entry.DepositIds)
+            .SingleOrDefaultAsync(entry => entry.Id == planetId, cancellationToken).ConfigureAwait(false);
+
+        return planet is null
+            ? null
+            : new PlanetFacts(
+                planet.Id,
+                planet.SectorId,
+                planet.OwnerPlayerId,
+                planet.Name,
+                [.. planet.DepositIds.Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))]);
+    }
+
+    /// <summary>
+    /// Gets the resource types and their groups.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The catalog.</returns>
+    public async Task<ResourceCatalog> GetResourceCatalogAsync(CancellationToken cancellationToken)
+    {
+        List<ResourceGroupFact> groups = await _dbContext.ResourceGroups.AsNoTracking()
+            .OrderBy(group => group.Id)
+            .Select(group => new ResourceGroupFact(group.Id, group.Code, group.NameKey))
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        List<ResourceTypeFact> resources = await _dbContext.ResourceTypes.AsNoTracking()
+            .OrderBy(resource => resource.Id)
+            .Select(resource => new ResourceTypeFact(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId))
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        return new ResourceCatalog(groups, resources);
+    }
 }

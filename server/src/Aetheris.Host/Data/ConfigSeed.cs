@@ -2,6 +2,7 @@ using Aetheris.Core.Configuration;
 using Aetheris.Core.Security;
 using Aetheris.Host.Scheduling;
 using Aetheris.Host.Security;
+using Aetheris.Planets;
 using Aetheris.World.Configuration;
 
 namespace Aetheris.Host.Data;
@@ -13,7 +14,7 @@ namespace Aetheris.Host.Data;
 /// The core has no game rules, so it only seeds neutral <c>test.*</c> parameters, the
 /// <c>security.*</c> parameters of its own protection mechanisms and the
 /// <c>scheduler.*</c> parameters of the event scheduler. A module brings its own
-/// definitions, which are added here, for example the <c>world.*</c> parameters. Every parameter can be changed later from the admin
+/// definitions, which are added here, for example the <c>world.*</c> parameters and those of the Planets module. Every parameter can be changed later from the admin
 /// panel within its bounds; the seed only provides the starting point for a new database,
 /// so that the rules always find a value.
 /// </remarks>
@@ -101,7 +102,8 @@ public static class ConfigSeed
         new(SchedulerKeys.BatchSize, "100", "1", "10000", "Largest number of due events handled in one pass."),
     ];
 
-    private static readonly ConfigParameterDefinition[] Definitions = [.. CoreDefinitions, .. WorldConfigKeys.Definitions];
+    private static readonly ConfigParameterDefinition[] Definitions =
+        [.. CoreDefinitions, .. WorldConfigKeys.Definitions, .. PlanetsModule.ConfigDefinitions];
 
     private static readonly Dictionary<string, ConfigParameterDefinition> DefinitionsByKey =
         Definitions.ToDictionary(definition => definition.Key, StringComparer.Ordinal);

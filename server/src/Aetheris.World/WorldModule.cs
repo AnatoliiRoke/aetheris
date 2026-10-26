@@ -104,4 +104,24 @@ public sealed class WorldModule : IWorldModule
     /// <inheritdoc />
     public Task<SystemContentDto?> GetSystemContentAsync(long systemId, CancellationToken cancellationToken = default) =>
         _queries.GetSystemContentAsync(null, systemId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<PlanetFacts?> GetPlanetFactsAsync(long planetId, CancellationToken cancellationToken = default) =>
+        _queries.GetPlanetFactsAsync(planetId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<ResourceCatalog> GetResourceCatalogAsync(CancellationToken cancellationToken = default) =>
+        _queries.GetResourceCatalogAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<CivilizationHome>> GetCivilizationHomesAsync(CancellationToken cancellationToken = default) =>
+        await _civilizations.GetHomesAsync(cancellationToken).ConfigureAwait(false);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<int, long>> TakeLegacyStorageAsync(long planetId, CancellationToken cancellationToken = default) =>
+        _civilizations.TakeLegacyStorageAsync(planetId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<int> AssignStartBuildingAsync(int buildingTypeId, int level, CancellationToken cancellationToken = default) =>
+        _civilizations.AssignStartBuildingAsync(buildingTypeId, level, cancellationToken);
 }

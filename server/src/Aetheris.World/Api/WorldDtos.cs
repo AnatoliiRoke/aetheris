@@ -222,7 +222,46 @@ public sealed record CivilizationSummary(
     [property: System.Text.Json.Serialization.JsonPropertyName("sector_id")] int SectorId,
     [property: System.Text.Json.Serialization.JsonPropertyName("founded_at")] DateTimeOffset FoundedAt);
 
-/// <summary>The amount of a resource in the storage of a body.</summary>
+/// <summary>What another module needs to know about a body (task 00011).</summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="SectorId">The sector.</param>
+/// <param name="OwnerPlayerId">The owner, or <see langword="null"/> for a free body.</param>
+/// <param name="Name">The name the owner gave the body.</param>
+/// <param name="Deposits">The deposits with their coefficients.</param>
+public sealed record PlanetFacts(
+    long PlanetId,
+    int SectorId,
+    string? OwnerPlayerId,
+    string? Name,
+    IReadOnlyList<PlanetDepositFact> Deposits);
+
+/// <summary>A deposit of a body: the resource and the richness coefficient.</summary>
 /// <param name="ResourceTypeId">The resource.</param>
-/// <param name="Amount">The amount.</param>
-public sealed record StorageItemDto(int ResourceTypeId, long Amount);
+/// <param name="Coefficient">The richness coefficient of the deposit.</param>
+public sealed record PlanetDepositFact(int ResourceTypeId, decimal Coefficient);
+
+/// <summary>The resource types and their groups, for the modules that keep amounts of them.</summary>
+/// <param name="Groups">The resource groups.</param>
+/// <param name="Resources">The resource types.</param>
+public sealed record ResourceCatalog(IReadOnlyList<ResourceGroupFact> Groups, IReadOnlyList<ResourceTypeFact> Resources);
+
+/// <summary>A resource group.</summary>
+/// <param name="Id">The group.</param>
+/// <param name="Code">The stable code.</param>
+/// <param name="NameKey">The localisation key of the name.</param>
+public sealed record ResourceGroupFact(int Id, string Code, string NameKey);
+
+/// <summary>A resource type.</summary>
+/// <param name="Id">The resource.</param>
+/// <param name="Code">The stable code.</param>
+/// <param name="NameKey">The localisation key of the name.</param>
+/// <param name="ResourceGroupId">The group.</param>
+public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int ResourceGroupId);
+
+/// <summary>The home body of a civilization with the start building of its race.</summary>
+/// <param name="PlanetId">The home body.</param>
+/// <param name="SectorId">The sector.</param>
+/// <param name="PlayerId">The player.</param>
+/// <param name="StartBuildingTypeId">The start building of the race, if one is set.</param>
+/// <param name="StartBuildingLevel">The level of the start building.</param>
+public sealed record CivilizationHome(long PlanetId, int SectorId, string PlayerId, int? StartBuildingTypeId, int StartBuildingLevel);

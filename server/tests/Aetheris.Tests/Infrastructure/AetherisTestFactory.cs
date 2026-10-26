@@ -4,6 +4,7 @@ using Aetheris.Host.Auth;
 using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
 using Aetheris.Host.Security;
+using Aetheris.Planets;
 using Aetheris.World;
 using Aetheris.World.Data;
 using Microsoft.AspNetCore.Hosting;
@@ -161,6 +162,7 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
 
         await dbContext.Database.MigrateAsync();
         await WorldDatabase.MigrateAsync(ConnectionString);
+        await PlanetsModule.MigrateAsync(ConnectionString);
 
         await ResetDatabaseAsync(scope.ServiceProvider);
     }

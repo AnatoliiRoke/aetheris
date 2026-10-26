@@ -86,7 +86,7 @@ dotnet_naming_symbols.private_static_fields.required_modifiers = static
 # This section has to stay last: in an .editorconfig every section applies to every
 # file that matches it, so a section placed in the middle would also reset the rules
 # that follow it for the whole project.
-[src/{Aetheris.Host,Aetheris.World}/Data/Migrations/*.cs]
+[src/{Aetheris.Host,Aetheris.World,Aetheris.Planets}/Data/Migrations/*.cs]
 generated_code = true
 dotnet_diagnostic.IDE0161.severity = none
 dotnet_diagnostic.IDE0055.severity = none

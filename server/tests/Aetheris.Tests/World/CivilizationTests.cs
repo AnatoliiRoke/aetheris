@@ -4,6 +4,7 @@ using Aetheris.Core.Errors;
 using Aetheris.Core.Text;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Data;
+using Aetheris.Planets.Data;
 using Aetheris.Tests.Accounts;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.World.Api;
@@ -95,7 +96,8 @@ public sealed class CivilizationTests
 
     /// <summary>
     /// The start package comes from the tables of the race: a changed row changes the
-    /// result without a release, the storage limit caps it, and it is never given twice.
+    /// result without a release, the storage limit caps it, and it is never given twice. Since
+    /// task 00011 the amounts land in the balance of the body in the Planets module.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
@@ -110,7 +112,7 @@ public sealed class CivilizationTests
 
         (HttpClient first, long firstPlanet) = await FoundForNewPlayerAsync(race.Id, "Перша");
 
-        Dictionary<int, long> firstStorage = await StorageAsync(world, firstPlanet);
+        Dictionary<int, long> firstStorage = await StorageAsync(scope, firstPlanet);
         Assert.Equal(race.StartResourceIds.ToDictionary(entry => entry.ResourceTypeId, entry => entry.Amount), firstStorage);
 
         // A designer changes one row and lowers the storage limit.
@@ -120,7 +122,7 @@ public sealed class CivilizationTests
         await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, WorldConfigKeys.StartStorageCapacity, capacity.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
         (HttpClient second, long secondPlanet) = await FoundForNewPlayerAsync(race.Id, "Друга");
-        Dictionary<int, long> secondStorage = await StorageAsync(world, secondPlanet);
+        Dictionary<int, long> secondStorage = await StorageAsync(scope, secondPlanet);
 
         Assert.Equal(77, secondStorage[changed.ResourceTypeId]);
         Assert.All(secondStorage.Where(entry => entry.Key != changed.ResourceTypeId), entry => Assert.Equal(capacity, entry.Value));
@@ -128,7 +130,7 @@ public sealed class CivilizationTests
         // A second step is refused and gives nothing.
         HttpResponseMessage again = await CivilizationTestData.FoundAsync(first, race.Id, "Знову", "again-1");
         Assert.Equal(HttpStatusCode.UnprocessableEntity, again.StatusCode);
-        Assert.Equal(firstStorage, await StorageAsync(world, firstPlanet));
+        Assert.Equal(firstStorage, await StorageAsync(scope, firstPlanet));
 
         first.Dispose();
         second.Dispose();
@@ -136,8 +138,8 @@ public sealed class CivilizationTests
 
     /// <summary>
     /// The start building of the race goes to the extension point of the buildings module:
-    /// a stub placer receives the type and the level of the race, and the default placer keeps
-    /// the grant until that module exists.
+    /// a stub placer receives the type and the level of the race. Since task 00011 the placer
+    /// of the host is the Planets module, so the old grant table stays empty.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
@@ -166,6 +168,7 @@ public sealed class CivilizationTests
             scope.ServiceProvider.GetRequiredService<StartPlanetAllocator>(),
             scope.ServiceProvider.GetRequiredService<WorldReferenceRepository>(),
             stub,
+            scope.ServiceProvider.GetRequiredService<IHomePlanetStore>(),
             scope.ServiceProvider.GetRequiredService<ITextModeration>(),
             TimeProvider.System);
 
@@ -174,13 +177,11 @@ public sealed class CivilizationTests
         (long PlanetId, int BuildingTypeId, int Level) placed = Assert.Single(stub.Placed);
         Assert.Equal((summary.PlanetId, buildingTypeId, level), placed);
 
-        // The default placer of the host keeps the grant for the buildings module.
+        // The placer of the host is the Planets module: no grant is kept for later.
         (HttpClient client, long planetId) = await FoundForNewPlayerAsync(race.Id, "Типова");
         client.Dispose();
-        StartBuildingGrantEntity grant = await world.StartBuildingGrants.AsNoTracking().SingleAsync(entry => entry.PlanetId == planetId, Token);
 
-        Assert.Equal(buildingTypeId, grant.BuildingTypeId);
-        Assert.Equal(level, grant.Level);
+        Assert.False(await world.StartBuildingGrants.AsNoTracking().AnyAsync(entry => entry.PlanetId == planetId, Token));
     }
 
     /// <summary>
@@ -385,8 +386,8 @@ public sealed class CivilizationTests
         Assert.Null(await world.Planets.AsNoTracking().Where(entry => entry.Id == planetId).Select(entry => entry.OwnerPlayerId).SingleAsync(Token));
     }
 
-    private static async Task<Dictionary<int, long>> StorageAsync(WorldDbContext world, long planetId) =>
-        await world.Storage.AsNoTracking()
+    private static async Task<Dictionary<int, long>> StorageAsync(IServiceScope scope, long planetId) =>
+        await scope.ServiceProvider.GetRequiredService<PlanetsDbContext>().PlanetResources.AsNoTracking()
             .Where(entry => entry.PlanetId == planetId)
             .ToDictionaryAsync(entry => entry.ResourceTypeId, entry => entry.Amount, Token);
 

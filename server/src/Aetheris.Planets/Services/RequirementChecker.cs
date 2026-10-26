@@ -1,0 +1,128 @@
+namespace Aetheris.Planets.Services;
+
+/// <summary>
+/// What a requirement is checked against: the buildings and deposits of the body and the
+/// technologies of the player.
+/// </summary>
+/// <param name="BuildingLevels">The levels of the buildings of the body by type.</param>
+/// <param name="DepositResourceIds">The resources with a deposit on the body.</param>
+/// <param name="TechnologyLevels">The levels of the technologies of the player by technology.</param>
+public sealed record RequirementContext(
+    IReadOnlyDictionary<int, int> BuildingLevels,
+    IReadOnlySet<int> DepositResourceIds,
+    IReadOnlyDictionary<int, int> TechnologyLevels);
+
+/// <summary>A requirement that is not met, with the reason for the client.</summary>
+/// <param name="RequirementId">The requirement.</param>
+/// <param name="RequirementType">The requirement type.</param>
+/// <param name="TargetId">What is required.</param>
+/// <param name="TargetLevel">The required level.</param>
+/// <param name="ReasonCode">The localisation key of the reason.</param>
+public sealed record UnmetRequirement(int RequirementId, string RequirementType, int TargetId, int TargetLevel, string ReasonCode);
+
+/// <summary>
+/// The one check of the requirements of every closed subject (task 00011, decision 3): a
+/// building type and its levels now, technologies, modules, recipes and ship classes later.
+/// </summary>
+/// <remarks>
+/// A technology that does not exist yet, or that the player has not opened, leaves its
+/// requirement unmet; so do an unknown requirement type and a requirement on a building the
+/// body does not have.
+/// </remarks>
+public static class RequirementChecker
+{
+    /// <summary>
+    /// Finds the requirements of a subject level that are not met.
+    /// </summary>
+    /// <param name="catalog">The catalog with the requirements.</param>
+    /// <param name="subjectType">The subject type, one of <see cref="RequirementSubjectTypes"/>.</param>
+    /// <param name="subjectId">The subject.</param>
+    /// <param name="level">The level of the subject.</param>
+    /// <param name="context">The state the requirements are checked against.</param>
+    /// <returns>The unmet requirements; empty when the subject is available.</returns>
+    public static IReadOnlyList<UnmetRequirement> Check(
+        BuildingCatalog catalog,
+        string subjectType,
+        int subjectId,
+        int level,
+        RequirementContext context)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(context);
+
+        List<UnmetRequirement> unmet = [];
+
+        foreach (RequirementInfo requirement in catalog.RequirementsOf(subjectType, subjectId, level))
+        {
+            string? reason = requirement.RequirementType switch
+            {
+                RequirementTypes.BuildingLevel => context.BuildingLevels.GetValueOrDefault(requirement.TargetId) >= requirement.TargetLevel
+                    ? null
+                    : PlanetsErrorCodes.RequirementBuildingLevel,
+                RequirementTypes.TechnologyLevel => context.TechnologyLevels.TryGetValue(requirement.TargetId, out int technologyLevel) && technologyLevel >= requirement.TargetLevel
+                    ? null
+                    : PlanetsErrorCodes.RequirementTechnology,
+                RequirementTypes.Deposit => context.DepositResourceIds.Contains(requirement.TargetId)
+                    ? null
+                    : PlanetsErrorCodes.RequirementDeposit,
+                _ => PlanetsErrorCodes.RequirementUnknown,
+            };
+
+            if (reason is not null)
+            {
+                unmet.Add(new UnmetRequirement(requirement.Id, requirement.RequirementType, requirement.TargetId, requirement.TargetLevel, reason));
+            }
+        }
+
+        return unmet;
+    }
+}
+
+/// <summary>
+/// The technologies of a player, for the requirements and the bonuses. The research task
+/// (00012) provides them; until then a player has none.
+/// </summary>
+public interface ITechnologyLevels
+{
+    /// <summary>
+    /// Gets the levels of the technologies of a player.
+    /// </summary>
+    /// <param name="playerId">The player, or <see langword="null"/> for a body without an owner.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The levels by technology.</returns>
+    Task<IReadOnlyDictionary<int, int>> GetLevelsAsync(string? playerId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the bonuses the technologies of a player give the bodies.
+    /// </summary>
+    /// <param name="playerId">The player, or <see langword="null"/> for a body without an owner.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bonuses.</returns>
+    Task<PlanetBonuses> GetBonusesAsync(string? playerId, CancellationToken cancellationToken);
+}
+
+/// <summary>The multipliers the technologies give a body (decisions 6 and 8).</summary>
+/// <param name="ProductionMultiplier">The multiplier of the production of the mines.</param>
+/// <param name="ConstructionTimeMultiplier">The multiplier of the construction time.</param>
+public sealed record PlanetBonuses(decimal ProductionMultiplier, decimal ConstructionTimeMultiplier)
+{
+    /// <summary>Gets the bonuses of a player without technologies: nothing changes.</summary>
+    public static PlanetBonuses None { get; } = new(decimal.One, decimal.One);
+}
+
+/// <summary>
+/// The technologies until the research task exists: none, so every technology requirement is
+/// unmet and the bonuses change nothing.
+/// </summary>
+public sealed class NoTechnologyLevels : ITechnologyLevels
+{
+    private static readonly IReadOnlyDictionary<int, int> Empty = new Dictionary<int, int>();
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<int, int>> GetLevelsAsync(string? playerId, CancellationToken cancellationToken) =>
+        Task.FromResult(Empty);
+
+    /// <inheritdoc />
+    public Task<PlanetBonuses> GetBonusesAsync(string? playerId, CancellationToken cancellationToken) =>
+        Task.FromResult(PlanetBonuses.None);
+}

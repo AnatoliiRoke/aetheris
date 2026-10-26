@@ -27,6 +27,16 @@ public sealed class ModuleIsolationTests
         "Aetheris.World",
     ];
 
+    /// <summary>
+    /// The references between modules that are allowed: the Planets module reads the world
+    /// through its contract and plugs into its extension points (task 00011). The dependency
+    /// goes one way only.
+    /// </summary>
+    private static readonly Dictionary<string, string[]> AllowedReferences = new(StringComparer.Ordinal)
+    {
+        ["Aetheris.Planets"] = ["Aetheris.World"],
+    };
+
     private readonly AetherisTestFactory _factory;
 
     /// <summary>
@@ -41,7 +51,7 @@ public sealed class ModuleIsolationTests
     }
 
     /// <summary>
-    /// No module references another module's assembly.
+    /// No module references another module's assembly, except the allowed one-way references.
     /// </summary>
     /// <param name="moduleName">The module under test.</param>
     [Theory]
@@ -61,6 +71,7 @@ public sealed class ModuleIsolationTests
             .GetReferencedAssemblies()
             .Where(reference => ModuleNames.Contains(reference.Name ?? string.Empty))
             .Where(reference => reference.Name != moduleName)
+            .Where(reference => !AllowedReferences.GetValueOrDefault(moduleName, []).Contains(reference.Name))
             .Select(reference => reference.Name ?? string.Empty)
             .ToList();
 

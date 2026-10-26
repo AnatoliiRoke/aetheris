@@ -126,4 +126,11 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.world.admin.max_systems_per_run.description':
     'Найбільша очікувана кількість зоряних систем за один запуск: сектори, помножені на середнє systems_min і systems_max.',
   'config.world.admin.status_poll_seconds.description': 'Як часто адмінка питає стан запущеної генерації, у секундах.',
+
+  'config.planets.building.max_level.description': 'Найбільший рівень будь-якої будівлі на планеті.',
+  'config.planets.queue.base_slots.description': 'Місць у черзі будівництва планети, разом з будівлею, що будується.',
+  'config.planets.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черги будівництва планети.',
+  'config.planets.catalog.cache_seconds.description': 'Скільки секунд таблиці будівель тримаються в пам’яті сервера до повторного читання.',
+  'config.planets.start.building_code.description': 'Код будівлі, з якою починає кожна нова цивілізація.',
+  'config.planets.start.building_level.description': 'Рівень стартової будівлі.',
 };

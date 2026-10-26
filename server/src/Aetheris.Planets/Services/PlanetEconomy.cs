@@ -1,0 +1,256 @@
+namespace Aetheris.Planets.Services;
+
+/// <summary>
+/// The formulas of a body: production, storage, energy and the level limit (task 00011,
+/// decisions 2, 7, 8 and 10).
+/// </summary>
+/// <remarks>
+/// Only the shape of the formulas lives here; every value comes from the building tables, the
+/// deposits of the world and the configuration. The functions are pure, so the read of a body
+/// and the change of a body compute the same numbers.
+/// </remarks>
+public static class PlanetEconomy
+{
+    /// <summary>
+    /// Gets the effects of the buildings at their levels.
+    /// </summary>
+    /// <param name="catalog">The building catalog.</param>
+    /// <param name="levels">The levels by building type.</param>
+    /// <returns>The effects with the building type they come from.</returns>
+    public static IEnumerable<(int BuildingTypeId, BuildingEffectInfo Effect)> Effects(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(levels);
+
+        foreach ((int buildingTypeId, int level) in levels)
+        {
+            if (level <= 0 || catalog.FindType(buildingTypeId)?.Levels.GetValueOrDefault(level) is not { } info)
+            {
+                continue;
+            }
+
+            foreach (BuildingEffectInfo effect in info.Effects)
+            {
+                yield return (buildingTypeId, effect);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the production per hour of every resource: the value of the level times the
+    /// richness of the deposit times the bonus. A resource without a deposit is not produced.
+    /// </summary>
+    /// <param name="catalog">The building catalog.</param>
+    /// <param name="levels">The levels by building type.</param>
+    /// <param name="deposits">The richness coefficients by resource.</param>
+    /// <param name="multiplier">The production bonus of the technologies.</param>
+    /// <returns>The rates by resource.</returns>
+    public static Dictionary<int, decimal> ProductionRates(
+        BuildingCatalog catalog,
+        IReadOnlyDictionary<int, int> levels,
+        IReadOnlyDictionary<int, decimal> deposits,
+        decimal multiplier)
+    {
+        ArgumentNullException.ThrowIfNull(deposits);
+
+        Dictionary<int, decimal> rates = [];
+
+        foreach ((_, BuildingEffectInfo effect) in Effects(catalog, levels))
+        {
+            if (effect.EffectType != BuildingEffectTypes.Production
+                || effect.ResourceTypeId is not { } resourceTypeId
+                || !deposits.TryGetValue(resourceTypeId, out decimal coefficient))
+            {
+                continue;
+            }
+
+            rates[resourceTypeId] = rates.GetValueOrDefault(resourceTypeId) + (effect.Value * coefficient * multiplier);
+        }
+
+        return rates;
+    }
+
+    /// <summary>
+    /// Gets the storage capacity of every resource group.
+    /// </summary>
+    /// <param name="catalog">The building catalog.</param>
+    /// <param name="levels">The levels by building type.</param>
+    /// <returns>The capacities by group.</returns>
+    public static Dictionary<int, long> Capacities(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels)
+    {
+        Dictionary<int, long> capacities = [];
+
+        foreach ((_, BuildingEffectInfo effect) in Effects(catalog, levels))
+        {
+            if (effect.EffectType == BuildingEffectTypes.StorageCapacity && effect.ResourceGroupId is { } groupId)
+            {
+                capacities[groupId] = capacities.GetValueOrDefault(groupId) + effect.Value;
+            }
+        }
+
+        return capacities;
+    }
+
+    /// <summary>
+    /// Gets the energy produced and consumed by the buildings.
+    /// </summary>
+    /// <param name="catalog">The building catalog.</param>
+    /// <param name="levels">The levels by building type.</param>
+    /// <returns>The output, the consumption and the balance.</returns>
+    public static EnergyBalance Energy(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels)
+    {
+        long output = 0;
+        long consumption = 0;
+
+        foreach ((_, BuildingEffectInfo effect) in Effects(catalog, levels))
+        {
+            if (effect.EffectType == BuildingEffectTypes.EnergyOutput)
+            {
+                output += effect.Value;
+            }
+            else if (effect.EffectType == BuildingEffectTypes.EnergyConsumption)
+            {
+                consumption += effect.Value;
+            }
+        }
+
+        return new EnergyBalance(output, consumption);
+    }
+
+    /// <summary>
+    /// Gets the largest population of the body; the population task uses it.
+    /// </summary>
+    /// <param name="catalog">The building catalog.</param>
+    /// <param name="levels">The levels by building type.</param>
+    /// <returns>The largest population.</returns>
+    public static long PopulationMax(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels) =>
+        Effects(catalog, levels)
+            .Where(entry => entry.Effect.EffectType == BuildingEffectTypes.PopulationMax)
+            .Sum(entry => entry.Effect.Value);
+
+    /// <summary>
+    /// Gets the largest level a building of a type may have on the body: the limit of the
+    /// buildings with a level cap effect. A building with such an effect is not limited by
+    /// them (decision 2).
+    /// </summary>
+    /// <param name="catalog">The building catalog.</param>
+    /// <param name="levels">The levels by building type.</param>
+    /// <param name="buildingType">The building type.</param>
+    /// <returns>The limit, or <see langword="null"/> when the type has none.</returns>
+    public static long? LevelCap(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels, BuildingTypeInfo buildingType)
+    {
+        ArgumentNullException.ThrowIfNull(buildingType);
+
+        if (buildingType.CapsLevels)
+        {
+            return null;
+        }
+
+        return Effects(catalog, levels)
+            .Where(entry => entry.Effect.EffectType == BuildingEffectTypes.LevelCap && entry.BuildingTypeId != buildingType.Id)
+            .Select(entry => entry.Effect.Value)
+            .DefaultIfEmpty(0)
+            .Max();
+    }
+
+    /// <summary>
+    /// Brings the amounts of a body from one moment to another at constant rates (decision 8).
+    /// </summary>
+    /// <param name="catalog">The building catalog, for the groups of the resources.</param>
+    /// <param name="amounts">The amounts at <paramref name="from"/>.</param>
+    /// <param name="rates">The production per hour by resource.</param>
+    /// <param name="capacities">The capacities by resource group.</param>
+    /// <param name="from">The moment of the amounts.</param>
+    /// <param name="to">The moment to bring them to.</param>
+    /// <returns>The amounts at <paramref name="to"/> and the moment every group is full.</returns>
+    /// <remarks>
+    /// A group fills at the sum of the rates of its resources; when the sum of its amounts
+    /// reaches the capacity, every producer of the group stops. The amounts are whole numbers:
+    /// the fraction of a unit is left out, and the group that fills gets exactly its capacity.
+    /// </remarks>
+    public static AccumulationResult Accumulate(
+        BuildingCatalog catalog,
+        IReadOnlyDictionary<int, long> amounts,
+        IReadOnlyDictionary<int, decimal> rates,
+        IReadOnlyDictionary<int, long> capacities,
+        DateTimeOffset from,
+        DateTimeOffset to)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(amounts);
+        ArgumentNullException.ThrowIfNull(rates);
+        ArgumentNullException.ThrowIfNull(capacities);
+
+        Dictionary<int, long> result = new(amounts);
+        Dictionary<int, DateTimeOffset?> fullAt = [];
+        decimal elapsedTicks = to > from ? (to - from).Ticks : 0;
+
+        HashSet<int> groupIds = [.. capacities.Keys];
+        groupIds.UnionWith(amounts.Keys.Concat(rates.Keys).Select(catalog.GroupOf).OfType<int>());
+
+        foreach (int groupId in groupIds)
+        {
+            List<int> members = [.. amounts.Keys.Union(rates.Keys).Where(resourceTypeId => catalog.GroupOf(resourceTypeId) == groupId).Order()];
+            List<int> producers = [.. members.Where(resourceTypeId => rates.GetValueOrDefault(resourceTypeId) > 0)];
+            long stored = members.Sum(resourceTypeId => amounts.GetValueOrDefault(resourceTypeId));
+            long capacity = capacities.GetValueOrDefault(groupId);
+            decimal totalRate = producers.Sum(resourceTypeId => rates[resourceTypeId]);
+
+            if (stored >= capacity)
+            {
+                fullAt[groupId] = stored > 0 || totalRate > 0 ? from : null;
+
+                continue;
+            }
+
+            if (totalRate <= 0)
+            {
+                fullAt[groupId] = null;
+
+                continue;
+            }
+
+            decimal ticksToFull = (capacity - stored) * (decimal)TimeSpan.TicksPerHour / totalRate;
+            fullAt[groupId] = AddTicks(from, ticksToFull);
+            decimal producingHours = Math.Min(elapsedTicks, ticksToFull) / TimeSpan.TicksPerHour;
+            long added = 0;
+
+            foreach (int resourceTypeId in producers)
+            {
+                long produced = (long)decimal.Floor(rates[resourceTypeId] * producingHours);
+                result[resourceTypeId] = result.GetValueOrDefault(resourceTypeId) + produced;
+                added += produced;
+            }
+
+            if (elapsedTicks >= ticksToFull)
+            {
+                // The group is full: the fractions left out go to the fastest producer.
+                int fastest = producers.OrderByDescending(resourceTypeId => rates[resourceTypeId]).ThenBy(resourceTypeId => resourceTypeId).First();
+                result[fastest] += capacity - stored - added;
+            }
+        }
+
+        return new AccumulationResult(result, fullAt);
+    }
+
+    private static DateTimeOffset? AddTicks(DateTimeOffset from, decimal ticks)
+    {
+        decimal whole = decimal.Ceiling(ticks);
+
+        return whole >= (DateTimeOffset.MaxValue - from).Ticks ? null : from.AddTicks((long)whole);
+    }
+}
+
+/// <summary>The energy of a body (decision 7).</summary>
+/// <param name="Output">The energy produced.</param>
+/// <param name="Consumption">The energy consumed.</param>
+public sealed record EnergyBalance(long Output, long Consumption)
+{
+    /// <summary>Gets the balance: the output minus the consumption.</summary>
+    public long Balance => Output - Consumption;
+}
+
+/// <summary>The amounts of a body brought to a moment.</summary>
+/// <param name="Amounts">The amounts by resource.</param>
+/// <param name="FullAt">The moment every resource group is or will be full, or <see langword="null"/> when it does not fill.</param>
+public sealed record AccumulationResult(IReadOnlyDictionary<int, long> Amounts, IReadOnlyDictionary<int, DateTimeOffset?> FullAt);

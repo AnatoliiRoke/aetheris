@@ -5,7 +5,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!--
+    The module of the bodies reads the world (its bodies, deposits and resources) through
+    IWorldModule and plugs into its extension points. The dependency goes one way only.
+  -->
+  <ItemGroup>
     <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
+    <ProjectReference Include="..\Aetheris.World\Aetheris.World.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\planets-reference-seed.json" LogicalName="Aetheris.Planets.reference-seed.json" />
   </ItemGroup>
 
 </Project>

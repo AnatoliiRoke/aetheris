@@ -119,4 +119,44 @@ public interface IWorldModule
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The content, or <see langword="null"/>.</returns>
     Task<SystemContentDto?> GetSystemContentAsync(long systemId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the facts of a body for another module: the sector, the owner and the deposits.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The facts, or <see langword="null"/> when the body does not exist.</returns>
+    Task<PlanetFacts?> GetPlanetFactsAsync(long planetId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the resource types and their groups.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The catalog.</returns>
+    Task<ResourceCatalog> GetResourceCatalogAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the home body of every civilization with the start building of its race, so the
+    /// module of the bodies can adopt the civilizations created before it.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The home bodies.</returns>
+    Task<IReadOnlyList<CivilizationHome>> GetCivilizationHomesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Takes the amounts of a body out of the storage of task 00006; a second call returns nothing.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The amounts by resource.</returns>
+    Task<IReadOnlyDictionary<int, long>> TakeLegacyStorageAsync(long planetId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets the start building of every race that has none yet (task 00011).
+    /// </summary>
+    /// <param name="buildingTypeId">The building type.</param>
+    /// <param name="level">The level.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The number of races changed.</returns>
+    Task<int> AssignStartBuildingAsync(int buildingTypeId, int level, CancellationToken cancellationToken = default);
 }

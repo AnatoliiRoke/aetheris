@@ -19,9 +19,10 @@ namespace Aetheris.World.Services;
 /// refused, so the race never changes and the package is never given twice.
 /// </para>
 /// <para>
-/// The start resources come from <c>race_start_resource</c> and are written into the storage
-/// of the body, each up to <c>world.civilization.start_storage_capacity</c>. The start
-/// building of the race goes to <see cref="IStartBuildingPlacer"/>.
+/// The start resources come from <c>race_start_resource</c>, each up to
+/// <c>world.civilization.start_storage_capacity</c>, and go to <see cref="IHomePlanetStore"/>,
+/// the balance of the body (task 00011). The start building of the race goes to
+/// <see cref="IStartBuildingPlacer"/>.
 /// </para>
 /// </remarks>
 public sealed class CivilizationService
@@ -31,6 +32,7 @@ public sealed class CivilizationService
     private readonly StartPlanetAllocator _allocator;
     private readonly WorldReferenceRepository _reference;
     private readonly IStartBuildingPlacer _buildingPlacer;
+    private readonly IHomePlanetStore _homeStore;
     private readonly ITextModeration _moderation;
     private readonly TimeProvider _timeProvider;
 
@@ -42,6 +44,7 @@ public sealed class CivilizationService
     /// <param name="allocator">The start body allocator.</param>
     /// <param name="reference">The parameters.</param>
     /// <param name="buildingPlacer">The placer of the start building.</param>
+    /// <param name="homeStore">The store of the amounts of a home body.</param>
     /// <param name="moderation">The restricted words check.</param>
     /// <param name="timeProvider">The clock.</param>
     public CivilizationService(
@@ -50,6 +53,7 @@ public sealed class CivilizationService
         StartPlanetAllocator allocator,
         WorldReferenceRepository reference,
         IStartBuildingPlacer buildingPlacer,
+        IHomePlanetStore homeStore,
         ITextModeration moderation,
         TimeProvider timeProvider)
     {
@@ -58,6 +62,7 @@ public sealed class CivilizationService
         ArgumentNullException.ThrowIfNull(allocator);
         ArgumentNullException.ThrowIfNull(reference);
         ArgumentNullException.ThrowIfNull(buildingPlacer);
+        ArgumentNullException.ThrowIfNull(homeStore);
         ArgumentNullException.ThrowIfNull(moderation);
         ArgumentNullException.ThrowIfNull(timeProvider);
 
@@ -66,6 +71,7 @@ public sealed class CivilizationService
         _allocator = allocator;
         _reference = reference;
         _buildingPlacer = buildingPlacer;
+        _homeStore = homeStore;
         _moderation = moderation;
         _timeProvider = timeProvider;
     }
@@ -104,17 +110,60 @@ public sealed class CivilizationService
         .SingleOrDefaultAsync(cancellationToken);
 
     /// <summary>
-    /// Gets the storage of a body.
+    /// Gets the home bodies of every civilization with the start building of the race.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The home bodies.</returns>
+    public Task<List<CivilizationHome>> GetHomesAsync(CancellationToken cancellationToken) =>
+        (from civilization in _dbContext.Civilizations.AsNoTracking()
+         join race in _dbContext.Races on civilization.RaceId equals race.Id
+         orderby civilization.PlanetId
+         select new CivilizationHome(
+             civilization.PlanetId,
+             civilization.SectorId,
+             civilization.PlayerId,
+             race.StartBuildingTypeId,
+             race.StartBuildingLevel))
+        .ToListAsync(cancellationToken);
+
+    /// <summary>
+    /// Takes the amounts of a body out of the old <c>planet_storage</c> table of task 00006:
+    /// they are returned and removed, so a second call returns nothing.
     /// </summary>
     /// <param name="planetId">The body.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The amounts by resource.</returns>
-    public Task<List<StorageItemDto>> GetStorageAsync(long planetId, CancellationToken cancellationToken) =>
-        _dbContext.Storage.AsNoTracking()
-            .Where(item => item.PlanetId == planetId)
-            .OrderBy(item => item.ResourceTypeId)
-            .Select(item => new StorageItemDto(item.ResourceTypeId, item.Amount))
-            .ToListAsync(cancellationToken);
+    public Task<IReadOnlyDictionary<int, long>> TakeLegacyStorageAsync(long planetId, CancellationToken cancellationToken) =>
+        _unitOfWork.RunAsync<IReadOnlyDictionary<int, long>>(
+            async () =>
+            {
+                Dictionary<int, long> amounts = await _dbContext.Storage.AsNoTracking()
+                    .Where(item => item.PlanetId == planetId)
+                    .ToDictionaryAsync(item => item.ResourceTypeId, item => item.Amount, cancellationToken)
+                    .ConfigureAwait(false);
+
+                await _dbContext.Storage.Where(item => item.PlanetId == planetId).ExecuteDeleteAsync(cancellationToken).ConfigureAwait(false);
+                await _dbContext.StartBuildingGrants.Where(item => item.PlanetId == planetId).ExecuteDeleteAsync(cancellationToken).ConfigureAwait(false);
+
+                return amounts;
+            },
+            cancellationToken);
+
+    /// <summary>
+    /// Sets the start building of every race that has none yet.
+    /// </summary>
+    /// <param name="buildingTypeId">The building type.</param>
+    /// <param name="level">The level.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The number of races changed.</returns>
+    public Task<int> AssignStartBuildingAsync(int buildingTypeId, int level, CancellationToken cancellationToken) =>
+        _dbContext.Races
+            .Where(race => race.StartBuildingTypeId == null)
+            .ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(race => race.StartBuildingTypeId, buildingTypeId)
+                    .SetProperty(race => race.StartBuildingLevel, level),
+                cancellationToken);
 
     /// <summary>
     /// Creates the civilization of a player.
@@ -184,16 +233,13 @@ public sealed class CivilizationService
             FoundedAt = now,
         });
 
-        foreach (RaceStartResourceEntity resource in race.StartResourceIds.Where(entry => entry.Amount > 0))
-        {
-            _dbContext.Storage.Add(new PlanetStorageEntity
-            {
-                SectorId = planet.SectorId,
-                PlanetId = planet.Id,
-                ResourceTypeId = resource.ResourceTypeId,
-                Amount = Math.Min(resource.Amount, settings.StartStorageCapacity),
-            });
-        }
+        Dictionary<int, long> startResources = race.StartResourceIds
+            .Where(entry => entry.Amount > 0)
+            .ToDictionary(entry => entry.ResourceTypeId, entry => Math.Min(entry.Amount, settings.StartStorageCapacity));
+
+        await _homeStore
+            .WriteStartResourcesAsync(playerId, planet.Id, planet.SectorId, startResources, cancellationToken)
+            .ConfigureAwait(false);
 
         if (race.StartBuildingTypeId is { } buildingTypeId)
         {
@@ -251,6 +297,7 @@ public sealed class CivilizationService
         await _dbContext.Civilizations.Where(entry => entry.PlayerId == playerId).ExecuteDeleteAsync(cancellationToken).ConfigureAwait(false);
         await _dbContext.Storage.Where(entry => planetIds.Contains(entry.PlanetId)).ExecuteDeleteAsync(cancellationToken).ConfigureAwait(false);
         await _dbContext.StartBuildingGrants.Where(entry => planetIds.Contains(entry.PlanetId)).ExecuteDeleteAsync(cancellationToken).ConfigureAwait(false);
+        await _homeStore.ReleaseAsync(planetIds, cancellationToken).ConfigureAwait(false);
 
         foreach (PlanetEntity planet in planets)
         {

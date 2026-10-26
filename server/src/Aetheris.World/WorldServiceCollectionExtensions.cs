@@ -39,6 +39,7 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<StartPlanetAllocator>();
         services.AddScoped<CivilizationService>();
         services.AddScoped<IStartBuildingPlacer, PendingStartBuildingPlacer>();
+        services.AddScoped<IHomePlanetStore, LegacyHomePlanetStore>();
         services.AddScoped<FieldService>();
         services.AddScoped<WorldQueryService>();
         services.AddScoped<IWorldVisibility, OwnBodiesVisibility>();

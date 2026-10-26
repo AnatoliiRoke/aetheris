@@ -161,13 +161,15 @@ builder.Services.AddHealthChecks()
 // Modules
 // ---------------------------------------------------------------------------------------------
 builder.Services.AddSingleton<IEconomyModule, EconomyModule>();
-builder.Services.AddSingleton<IPlanetsModule, PlanetsModule>();
 builder.Services.AddSingleton<IFleetModule, FleetModule>();
 builder.Services.AddSingleton<IMarketModule, MarketModule>();
 builder.Services.AddSingleton<IRatingModule, RatingModule>();
 builder.Services.AddSingleton<IChatModule, ChatModule>();
 builder.Services.AddSingleton<IAdminModule, AdminModule>();
 builder.Services.AddWorldModule();
+
+// The Planets module plugs into the extension points of the world, so it comes after it.
+PlanetsModule.Register(builder.Services);
 
 WebApplication app = builder.Build();
 
@@ -204,6 +206,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 
     // Every module with its own tables applies its migrations the same way.
     await WorldDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
+    await PlanetsModule.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
 
@@ -231,6 +234,10 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
             world.GalaxyCreated,
             world.CreatedSectorIds.Count);
     }
+
+    // The Planets module fills its tables once the world has its reference data, and adopts
+    // the civilizations created before it (task 00011).
+    await scope.ServiceProvider.GetRequiredService<IPlanetsModule>().EnsureAsync().ConfigureAwait(false);
 }
 
 if (AdminCommandLine.IsCommand(args))
@@ -258,6 +265,7 @@ app.MapGet("/api/v1/ping", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapAdminEndpoints();
 app.MapWorldEndpoints();
+PlanetsModule.MapEndpoints(app);
 app.MapCommands();
 
 await app.RunAsync().ConfigureAwait(false);
