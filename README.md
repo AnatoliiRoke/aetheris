@@ -565,10 +565,25 @@ dotnet ef migrations remove --project src/Aetheris.Host
 
 # Нова міграція модуля World (свій контекст і свої таблиці)
 dotnet ef migrations add <Назва> --project src/Aetheris.World --startup-project src/Aetheris.Host --context WorldDbContext --output-dir Data/Migrations
+
+# Нова міграція модуля Planets (будівлі, вимоги, черги, баланс планет)
+dotnet ef migrations add <Назва> --project src/Aetheris.Planets --startup-project src/Aetheris.Host --context PlanetsDbContext --output-dir Data/Migrations
 ```
 
-Сервер застосовує міграції ядра і модуля World сам при старті. Обидва набори пишуть історію в
-спільну таблицю `__EFMigrationsHistory`.
+Сервер застосовує міграції ядра і модулів World та Planets сам при старті. Усі набори пишуть
+історію в спільну таблицю `__EFMigrationsHistory`.
+
+### Модуль Planets (задача 00011)
+
+`server/src/Aetheris.Planets` володіє будівлями планет, спільним механізмом вимог, чергами
+будівництва й балансом ресурсів планети. Світ (планети, родовища, ресурси) він читає лише через
+`IWorldModule`; залежність одностороння Planets → World. Типи будівель, рівні (вартість, час,
+ефекти) і вимоги лежать у таблицях `building_type`, `building_level*`, `requirement`; стартові
+значення в `Data/planets-reference-seed.json` записуються лише в порожню базу. Параметри
+`planets.*` (максимальний рівень, місця черги, кеш таблиць, стартова будівля) у `config_parameter`.
+Читання планети: `GET /api/v1/planets/{planetId}`; команди: `POST /api/v1/planets/construction/enqueue`
+і `/cancel`. Видобуток рахується ліниво за ігровим часом, завершення будівлі робить планувальник
+подій (`planets.construction_complete`).
 
 Імена таблиць і колонок — `snake_case`, як описано в `documentation/tech/03-model-danykh.md`.
 
