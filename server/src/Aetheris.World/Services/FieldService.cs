@@ -90,9 +90,13 @@ public sealed class FieldService
                 ExtractionResult result = FieldExtraction.Extract(field.Mass, composition, processingMass, freeHold);
                 field.Mass = result.RemainingMass;
 
+                // A card of the admin panel opened before this cycle is now out of date
+                // (task 00009, decision 6): its save is refused instead of restoring the mass.
+                field.Version++;
+
                 if (result.Depleted)
                 {
-                    await DepleteAsync(field, cancellationToken).ConfigureAwait(false);
+                    await DepleteFieldAsync(field, cancellationToken).ConfigureAwait(false);
                 }
 
                 return result;
@@ -179,7 +183,21 @@ public sealed class FieldService
             },
             cancellationToken);
 
-    private async Task DepleteAsync(AsteroidFieldEntity field, CancellationToken cancellationToken)
+    /// <summary>
+    /// Marks a field as depleted, writes the log and schedules its replacement, the same way a
+    /// field ends when it is mined out. The caller saves the change in its transaction.
+    /// </summary>
+    /// <param name="field">The tracked field.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the change is staged.</returns>
+    public Task DepleteAsync(AsteroidFieldEntity field, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(field);
+
+        return DepleteFieldAsync(field, cancellationToken);
+    }
+
+    private async Task DepleteFieldAsync(AsteroidFieldEntity field, CancellationToken cancellationToken)
     {
         WorldSettings settings = _reference.Settings;
         DateTimeOffset gameNow = _clock.GameNow;

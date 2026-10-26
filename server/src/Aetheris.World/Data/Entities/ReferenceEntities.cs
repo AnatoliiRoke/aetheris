@@ -68,6 +68,9 @@ public sealed class CelestialObjectTypeEntity
 
     /// <summary>Gets or sets the largest total mass of a field of this type.</summary>
     public long? MassMax { get; set; }
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
 }
 
 /// <summary>
@@ -122,6 +125,9 @@ public sealed class GenerationRuleGroupEntity
     /// <summary>Gets or sets the probability of every further pick.</summary>
     public double ExtraPickProbability { get; set; }
 
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
+
     /// <summary>Gets or sets the rules of the group.</summary>
     public List<GenerationRuleEntity> RuleIds { get; set; } = [];
 }
@@ -148,6 +154,24 @@ public sealed class GenerationRuleEntity
 
     /// <summary>Gets or sets the largest coefficient.</summary>
     public decimal CoefficientMax { get; set; }
+
+    /// <summary>
+    /// Gets or sets the smallest coefficient on a rich body, or <see langword="null"/> when the
+    /// rule has no rich range and a rich body uses the ordinary one (task 00009, decision 12).
+    /// </summary>
+    public decimal? RichCoefficientMin { get; set; }
+
+    /// <summary>Gets or sets the largest coefficient on a rich body, or <see langword="null"/>.</summary>
+    public decimal? RichCoefficientMax { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the generation uses the rule. A rule is switched
+    /// off instead of deleted, so the objects created by it keep their history.
+    /// </summary>
+    public bool IsActive { get; set; } = true;
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
 }
 
 /// <summary>

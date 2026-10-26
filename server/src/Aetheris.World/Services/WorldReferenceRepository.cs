@@ -34,7 +34,9 @@ public sealed class WorldReferenceRepository
     public WorldSettings Settings => WorldSettings.From(_config);
 
     /// <summary>
-    /// Reads the generator input as it is now.
+    /// Reads the generator input as it is now. The reference tables are read on every call, so
+    /// a change made in the admin panel is used by the next generation without a restart; a
+    /// switched off rule is left out.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The input.</returns>
@@ -80,12 +82,14 @@ public sealed class WorldReferenceRepository
                 group.MaxPicks,
                 group.ExtraPickProbability,
                 [
-                    .. group.RuleIds.Select(rule => new ReferenceRule(
+                    .. group.RuleIds.Where(rule => rule.IsActive).Select(rule => new ReferenceRule(
                         rule.Id,
                         rule.ResourceId,
                         rule.Weight,
                         rule.CoefficientMin,
-                        rule.CoefficientMax)),
+                        rule.CoefficientMax,
+                        rule.RichCoefficientMin,
+                        rule.RichCoefficientMax)),
                 ])));
 
         return new WorldGenerationConfig(Settings, reference);

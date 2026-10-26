@@ -46,6 +46,7 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<IScheduledEventHandler, FieldRespawnHandler>();
         services.AddScoped<GenerationRunService>();
         services.AddScoped<WorldAdminQueryService>();
+        services.AddScoped<WorldAdminEditService>();
         services.AddScoped<IScheduledEventHandler, GenerationRunHandler>();
 
         services.AddCommand<FoundCivilizationCommand>();

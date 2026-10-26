@@ -20,6 +20,12 @@ public interface IAdminAuditRecorder
     void Record(string target, string? oldValue, string? newValue);
 
     /// <summary>
+    /// Records the reason the administrator gave for the change.
+    /// </summary>
+    /// <param name="reason">The reason.</param>
+    void RecordReason(string reason);
+
+    /// <summary>
     /// Schedules work that may only run after the change and its audit record are stored.
     /// </summary>
     /// <param name="action">The work.</param>

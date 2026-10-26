@@ -86,6 +86,9 @@ public sealed class StarSystemEntity
     /// <summary>Gets or sets the number of newcomers who started in the system.</summary>
     public int NewbieCount { get; set; }
 
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
+
     /// <summary>Gets or sets the objects of the system.</summary>
     public List<CelestialObjectEntity> ObjectIds { get; set; } = [];
 }
@@ -158,6 +161,9 @@ public sealed class PlanetEntity
     /// <summary>Gets or sets the name the owner gave the body, or <see langword="null"/>.</summary>
     public string? Name { get; set; }
 
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
+
     /// <summary>Gets or sets the celestial object.</summary>
     public CelestialObjectEntity? CelestialObject { get; set; }
 
@@ -211,6 +217,9 @@ public sealed class AsteroidFieldEntity
 
     /// <summary>Gets or sets the moment of game time when the field was depleted and disappeared.</summary>
     public DateTimeOffset? DepletedAt { get; set; }
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
 
     /// <summary>Gets or sets the celestial object.</summary>
     public CelestialObjectEntity? CelestialObject { get; set; }

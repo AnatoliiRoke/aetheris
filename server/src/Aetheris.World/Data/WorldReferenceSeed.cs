@@ -115,6 +115,8 @@ public static class WorldReferenceSeed
                     Weight = rule.Weight,
                     CoefficientMin = rule.CoefficientMin,
                     CoefficientMax = rule.CoefficientMax,
+                    RichCoefficientMin = rule.RichCoefficientMin,
+                    RichCoefficientMax = rule.RichCoefficientMax,
                 }),
             ],
         }));
@@ -271,4 +273,12 @@ public sealed record SeedRuleGroup(
 /// <param name="Weight">The weight.</param>
 /// <param name="CoefficientMin">The smallest coefficient.</param>
 /// <param name="CoefficientMax">The largest coefficient.</param>
-public sealed record SeedRule(string Resource, int Weight, decimal CoefficientMin, decimal CoefficientMax);
+/// <param name="RichCoefficientMin">The smallest coefficient on a rich body, if the rule has a rich range.</param>
+/// <param name="RichCoefficientMax">The largest coefficient on a rich body, if the rule has a rich range.</param>
+public sealed record SeedRule(
+    string Resource,
+    int Weight,
+    decimal CoefficientMin,
+    decimal CoefficientMax,
+    decimal? RichCoefficientMin = null,
+    decimal? RichCoefficientMax = null);

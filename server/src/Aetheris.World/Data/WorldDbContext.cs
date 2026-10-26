@@ -24,7 +24,7 @@ public sealed class WorldDbContext : DbContext
     /// <summary>
     /// The length of a name or a localisation key column.
     /// </summary>
-    private const int NameLength = 128;
+    public const int NameLength = 128;
 
     /// <summary>
     /// The length of a player identifier, the same as the account identifier.
@@ -182,6 +182,8 @@ public sealed class WorldDbContext : DbContext
             entity.ToTable("generation_rule");
             entity.Property(e => e.CoefficientMin).HasPrecision(CoefficientPrecision, CoefficientScale);
             entity.Property(e => e.CoefficientMax).HasPrecision(CoefficientPrecision, CoefficientScale);
+            entity.Property(e => e.RichCoefficientMin).HasPrecision(CoefficientPrecision, CoefficientScale);
+            entity.Property(e => e.RichCoefficientMax).HasPrecision(CoefficientPrecision, CoefficientScale);
             entity.HasIndex(e => new { e.RuleGroupId, e.ResourceId }).IsUnique();
             entity.HasOne<ResourceTypeEntity>().WithMany().HasForeignKey(e => e.ResourceId).OnDelete(DeleteBehavior.Restrict);
         });

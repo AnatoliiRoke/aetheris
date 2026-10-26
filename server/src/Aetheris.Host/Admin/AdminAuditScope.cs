@@ -47,10 +47,7 @@ public sealed class AdminAuditScope : IAdminAuditRecorder
         NewValue = newValue;
     }
 
-    /// <summary>
-    /// Records the reason the administrator gave for the change.
-    /// </summary>
-    /// <param name="reason">The reason.</param>
+    /// <inheritdoc />
     public void RecordReason(string reason)
     {
         Reason = reason;

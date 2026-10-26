@@ -88,6 +88,15 @@ public static class WorldConfigKeys
     /// <summary>The largest share of a field composition; the rest is always empty rock.</summary>
     public const string FieldMaxCompositionShare = "world.field.max_composition_share";
 
+    /// <summary>The probability that a new planet is rich: every deposit gets the rich range of its rule.</summary>
+    public const string RichPlanetProbability = "world.planet.rich_probability";
+
+    /// <summary>The smallest coefficient a deposit of a body may have, for the generation rules and the admin panel.</summary>
+    public const string DepositCoefficientMin = "world.planet.deposit_coefficient_min";
+
+    /// <summary>The largest coefficient a deposit of a body may have, for the generation rules and the admin panel.</summary>
+    public const string DepositCoefficientMax = "world.planet.deposit_coefficient_max";
+
     /// <summary>The delay before a depleted field is replaced, in game seconds.</summary>
     public const string FieldRespawnDelaySeconds = "world.field.respawn_delay_seconds";
 
@@ -178,6 +187,9 @@ public static class WorldConfigKeys
         new(NebulaRadarMultiplier, "0.5", "0", "10", "Multiplier of the radar range inside a nebula."),
         new(NebulaBlocksJumpDrive, "true", null, null, "Whether a nebula forbids the jump drive."),
         new(FieldMaxCompositionShare, "0.95", "0", "1", "Largest share of a field composition; the rest is empty rock."),
+        new(RichPlanetProbability, "0.03", "0", "1", "Probability that a new planet is rich: every deposit gets the rich range of its rule."),
+        new(DepositCoefficientMin, "0.8", "0", "1000", "Smallest coefficient of a deposit of a body, checked in the generation rules and the admin panel."),
+        new(DepositCoefficientMax, "1.9", "0", "1000", "Largest coefficient of a deposit of a body, checked in the generation rules and the admin panel."),
         new(FieldRespawnDelaySeconds, "3600", "0", "31536000", "Delay before a depleted field is replaced, in game seconds."),
         new(FieldRespawnInSystemProbability, "0.3", "0", "1", "Probability that a replacement field lies on the outermost orbit of a system."),
         new(GasGiantStationLimit, "5", "0", "1000", "Largest number of stations on one gas giant."),

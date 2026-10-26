@@ -70,7 +70,9 @@ public static class WorldTestData
                         resourceIds[rule.Resource],
                         rule.Weight,
                         rule.CoefficientMin,
-                        rule.CoefficientMax)),
+                        rule.CoefficientMax,
+                        rule.RichCoefficientMin,
+                        rule.RichCoefficientMax)),
                 ])));
     }
 

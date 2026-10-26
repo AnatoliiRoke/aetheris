@@ -88,6 +88,15 @@ public sealed record WorldSettings
     /// <summary>Gets the largest share of a field composition.</summary>
     public decimal FieldMaxCompositionShare { get; init; }
 
+    /// <summary>Gets the probability that a new planet is rich.</summary>
+    public double RichPlanetProbability { get; init; }
+
+    /// <summary>Gets the smallest coefficient of a deposit of a body.</summary>
+    public decimal DepositCoefficientMin { get; init; }
+
+    /// <summary>Gets the largest coefficient of a deposit of a body.</summary>
+    public decimal DepositCoefficientMax { get; init; }
+
     /// <summary>Gets the delay before a depleted field is replaced.</summary>
     public TimeSpan FieldRespawnDelay { get; init; }
 
@@ -172,6 +181,9 @@ public sealed record WorldSettings
             NebulaRadarMultiplier = ReadDouble(config, WorldConfigKeys.NebulaRadarMultiplier),
             NebulaBlocksJumpDrive = ReadBoolean(config, WorldConfigKeys.NebulaBlocksJumpDrive),
             FieldMaxCompositionShare = (decimal)ReadDouble(config, WorldConfigKeys.FieldMaxCompositionShare),
+            RichPlanetProbability = ReadDouble(config, WorldConfigKeys.RichPlanetProbability),
+            DepositCoefficientMin = (decimal)ReadDouble(config, WorldConfigKeys.DepositCoefficientMin),
+            DepositCoefficientMax = (decimal)ReadDouble(config, WorldConfigKeys.DepositCoefficientMax),
             FieldRespawnDelay = TimeSpan.FromSeconds(ReadDouble(config, WorldConfigKeys.FieldRespawnDelaySeconds)),
             FieldRespawnInSystemProbability = ReadDouble(config, WorldConfigKeys.FieldRespawnInSystemProbability),
             GasGiantStationLimit = ReadInt32(config, WorldConfigKeys.GasGiantStationLimit),

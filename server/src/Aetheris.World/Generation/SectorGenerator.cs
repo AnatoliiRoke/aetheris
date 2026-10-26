@@ -229,10 +229,13 @@ public static class SectorGenerator
             ReferenceSizeClass sizeClass = PickWeighted(random, reference.SizeClasses, candidate => candidate.GenerationWeight);
             int size = random.NextInclusive(sizeClass.SizeMin, sizeClass.SizeMax);
 
+            // A rare rich planet takes the rich range of every rule (task 00009, decision 12).
+            bool rich = type.ObjectClass == WorldObjectClasses.Planet && random.Chance(settings.RichPlanetProbability);
+
             // The groups of a resource say whether it may lie on a body; ether never does.
             List<ResourceShare> deposits =
             [
-                .. RollComposition(random, reference, type.Id).Where(share => reference.IsAllowedOnPlanet(share.ResourceId)),
+                .. RollComposition(random, reference, type.Id, rich).Where(share => reference.IsAllowedOnPlanet(share.ResourceId)),
             ];
 
             string name = NameTemplate.Format(settings.Names.Body, (NameTemplate.System, systemName), (NameTemplate.Orbit, orbit));
@@ -249,8 +252,9 @@ public static class SectorGenerator
     /// <param name="random">The random source.</param>
     /// <param name="reference">The reference data.</param>
     /// <param name="objectTypeId">The object type.</param>
+    /// <param name="rich">Whether the object is rich: a rule with a rich range uses it instead of the ordinary one.</param>
     /// <returns>The resources with their coefficients; a resource appears once.</returns>
-    public static IReadOnlyList<ResourceShare> RollComposition(WorldRandom random, WorldReferenceData reference, int objectTypeId)
+    public static IReadOnlyList<ResourceShare> RollComposition(WorldRandom random, WorldReferenceData reference, int objectTypeId, bool rich = false)
     {
         ArgumentNullException.ThrowIfNull(random);
         ArgumentNullException.ThrowIfNull(reference);
@@ -273,9 +277,12 @@ public static class SectorGenerator
                 ReferenceRule rule = PickWeighted(random, available, candidate => candidate.Weight);
                 available.Remove(rule);
 
-                decimal span = rule.CoefficientMax - rule.CoefficientMin;
+                bool useRich = rich && rule.RichCoefficientMin is not null && rule.RichCoefficientMax is not null;
+                decimal minimum = useRich ? rule.RichCoefficientMin!.Value : rule.CoefficientMin;
+                decimal maximum = useRich ? rule.RichCoefficientMax!.Value : rule.CoefficientMax;
+                decimal span = maximum - minimum;
                 decimal coefficient = decimal.Round(
-                    rule.CoefficientMin + (span * (decimal)random.NextDouble()),
+                    minimum + (span * (decimal)random.NextDouble()),
                     CoefficientDecimals,
                     MidpointRounding.ToZero);
 

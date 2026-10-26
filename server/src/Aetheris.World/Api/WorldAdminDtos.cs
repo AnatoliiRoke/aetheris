@@ -125,6 +125,9 @@ public sealed record AdminSectorRow(
 /// <param name="NewbieCount">The newcomers who started there.</param>
 /// <param name="BodyCount">The bodies on its orbits.</param>
 /// <param name="FieldCount">The fields that still exist in it.</param>
+/// <param name="StarTypeId">The type of the star, if the system has one.</param>
+/// <param name="StarTypeCode">The code of the type of the star.</param>
+/// <param name="StarTypeNameKey">The localisation key of the type of the star.</param>
 public sealed record AdminSystemRow(
     long Id,
     int SectorId,
@@ -137,13 +140,17 @@ public sealed record AdminSystemRow(
     bool InNebula,
     int NewbieCount,
     int BodyCount,
-    int FieldCount);
+    int FieldCount,
+    int? StarTypeId,
+    string? StarTypeCode,
+    string? StarTypeNameKey);
 
 /// <summary>A share of a resource in a body or a field.</summary>
 /// <param name="ResourceId">The resource type.</param>
 /// <param name="ResourceCode">The code of the resource type.</param>
-/// <param name="Coefficient">The share.</param>
-public sealed record AdminShareDto(int ResourceId, string ResourceCode, decimal Coefficient);
+/// <param name="ResourceNameKey">The localisation key of the name of the resource type.</param>
+/// <param name="Coefficient">The share of a field, or the richness multiplier of a deposit.</param>
+public sealed record AdminShareDto(int ResourceId, string ResourceCode, string ResourceNameKey, decimal Coefficient);
 
 /// <summary>A body row of the admin panel: a planet or a gas giant.</summary>
 /// <param name="Id">The body.</param>
@@ -151,12 +158,17 @@ public sealed record AdminShareDto(int ResourceId, string ResourceCode, decimal 
 /// <param name="Name">The name.</param>
 /// <param name="ObjectTypeId">The type.</param>
 /// <param name="ObjectTypeCode">The code of the type.</param>
+/// <param name="ObjectTypeNameKey">The localisation key of the type.</param>
 /// <param name="ObjectClass">The class of the type.</param>
 /// <param name="SectorId">The sector.</param>
 /// <param name="SystemId">The star system.</param>
 /// <param name="SystemName">The name of the star system.</param>
 /// <param name="Orbit">The orbit.</param>
+/// <param name="X">The x within the sector, the one of its system.</param>
+/// <param name="Y">The y within the sector.</param>
+/// <param name="Z">The z within the sector.</param>
 /// <param name="SizeClassCode">The code of the size class.</param>
+/// <param name="SizeClassNameKey">The localisation key of the size class.</param>
 /// <param name="Size">The size.</param>
 /// <param name="OwnerPlayerId">The owner, if any.</param>
 /// <param name="DepositIds">The deposits.</param>
@@ -166,12 +178,17 @@ public sealed record AdminBodyRow(
     string Name,
     int ObjectTypeId,
     string ObjectTypeCode,
+    string ObjectTypeNameKey,
     string ObjectClass,
     int SectorId,
     long SystemId,
     string SystemName,
     int? Orbit,
+    double X,
+    double Y,
+    double Z,
     string SizeClassCode,
+    string SizeClassNameKey,
     int Size,
     string? OwnerPlayerId,
     IReadOnlyList<AdminShareDto> DepositIds);
@@ -180,10 +197,15 @@ public sealed record AdminBodyRow(
 /// <param name="Id">The field.</param>
 /// <param name="CelestialObjectId">The celestial object.</param>
 /// <param name="Name">The name.</param>
+/// <param name="ObjectTypeId">The type.</param>
 /// <param name="ObjectTypeCode">The code of the type.</param>
+/// <param name="ObjectTypeNameKey">The localisation key of the type.</param>
 /// <param name="SectorId">The sector.</param>
 /// <param name="SystemId">The star system, or <see langword="null"/> for a free field.</param>
 /// <param name="SystemName">The name of the star system.</param>
+/// <param name="X">The x within the sector.</param>
+/// <param name="Y">The y within the sector.</param>
+/// <param name="Z">The z within the sector; zero while the map is flat.</param>
 /// <param name="InitialMass">The mass at creation.</param>
 /// <param name="Mass">The mass left.</param>
 /// <param name="DepletedAt">When the field was used up.</param>
@@ -192,10 +214,15 @@ public sealed record AdminFieldRow(
     long Id,
     long CelestialObjectId,
     string Name,
+    int ObjectTypeId,
     string ObjectTypeCode,
+    string ObjectTypeNameKey,
     int SectorId,
     long? SystemId,
     string? SystemName,
+    double X,
+    double Y,
+    double Z,
     long InitialMass,
     long Mass,
     DateTimeOffset? DepletedAt,

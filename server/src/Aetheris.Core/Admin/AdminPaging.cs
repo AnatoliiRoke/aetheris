@@ -44,6 +44,57 @@ public interface IAdminQueryLimits
     /// Gets the largest length of the search text.
     /// </summary>
     int SearchMaxLength { get; }
+
+    /// <summary>
+    /// Gets the smallest length of the reason of an administrator change.
+    /// </summary>
+    int ReasonMinLength { get; }
+
+    /// <summary>
+    /// Gets the largest length of the reason of an administrator change.
+    /// </summary>
+    int ReasonMaxLength { get; }
+}
+
+/// <summary>
+/// The reason of an administrator change: mandatory, with its length from the configuration
+/// (task 00007, decision 7; task 00009, decision 3).
+/// </summary>
+public static class AdminReason
+{
+    /// <summary>The error code of a missing reason.</summary>
+    public const string Required = "required";
+
+    /// <summary>The error code of a reason that is too short.</summary>
+    public const string TooShort = "too_short";
+
+    /// <summary>The error code of a reason that is too long.</summary>
+    public const string TooLong = "too_long";
+
+    /// <summary>
+    /// Checks a reason.
+    /// </summary>
+    /// <param name="reason">The reason as it was sent.</param>
+    /// <param name="limits">The limits from the configuration.</param>
+    /// <returns>The error code, or <see langword="null"/> when the reason is accepted.</returns>
+    public static string? Check(string? reason, IAdminQueryLimits limits)
+    {
+        ArgumentNullException.ThrowIfNull(limits);
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            return Required;
+        }
+
+        int length = reason.Trim().Length;
+
+        if (length < limits.ReasonMinLength)
+        {
+            return TooShort;
+        }
+
+        return length > limits.ReasonMaxLength ? TooLong : null;
+    }
 }
 
 /// <summary>

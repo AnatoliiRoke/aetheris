@@ -46,4 +46,7 @@ public static class WorldErrorCodes
 
     /// <summary>The run stopped because the server restarted during it.</summary>
     public const string GenerationInterrupted = "world_generation_interrupted";
+
+    /// <summary>The record changed since the administrator opened it; nothing was written.</summary>
+    public const string VersionConflict = "world_version_conflict";
 }

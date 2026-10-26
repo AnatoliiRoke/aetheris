@@ -23,7 +23,19 @@
     { "code": "admin.world_generation_estimated", "kind": "screen" },
     { "code": "admin.world_generation_started", "kind": "action" },
     { "code": "admin.world_generation_runs_read", "kind": "screen" },
-    { "code": "admin.world_generation_run_read", "kind": "screen" }
+    { "code": "admin.world_generation_run_read", "kind": "screen" },
+    { "code": "admin.world_field_read", "kind": "screen" },
+    { "code": "admin.world_field_updated", "kind": "action" },
+    { "code": "admin.world_object_read", "kind": "screen" },
+    { "code": "admin.world_object_updated", "kind": "action" },
+    { "code": "admin.world_system_read", "kind": "screen" },
+    { "code": "admin.world_system_updated", "kind": "action" },
+    { "code": "admin.world_object_types_read", "kind": "screen" },
+    { "code": "admin.world_object_type_updated", "kind": "action" },
+    { "code": "admin.world_generation_rules_read", "kind": "screen" },
+    { "code": "admin.world_generation_rule_added", "kind": "action" },
+    { "code": "admin.world_generation_rule_updated", "kind": "action" },
+    { "code": "admin.world_generation_rule_group_updated", "kind": "action" }
   ],
   "roles": [
     {
@@ -47,7 +59,14 @@
         "admin.config_history_read",
         "admin.config_changed",
         "admin.config_rolled_back",
-        "admin.clock_read"
+        "admin.clock_read",
+        "admin.world_reference_read",
+        "admin.world_object_types_read",
+        "admin.world_object_type_updated",
+        "admin.world_generation_rules_read",
+        "admin.world_generation_rule_added",
+        "admin.world_generation_rule_updated",
+        "admin.world_generation_rule_group_updated"
       ]
     },
     {

@@ -45,7 +45,16 @@ public sealed record ReferenceSizeClass(int Id, string Code, int GenerationWeigh
 /// <param name="Weight">The weight within the group.</param>
 /// <param name="CoefficientMin">The smallest coefficient.</param>
 /// <param name="CoefficientMax">The largest coefficient.</param>
-public sealed record ReferenceRule(int Id, int ResourceId, int Weight, decimal CoefficientMin, decimal CoefficientMax);
+/// <param name="RichCoefficientMin">The smallest coefficient on a rich body, or <see langword="null"/> to use the ordinary range.</param>
+/// <param name="RichCoefficientMax">The largest coefficient on a rich body, or <see langword="null"/> to use the ordinary range.</param>
+public sealed record ReferenceRule(
+    int Id,
+    int ResourceId,
+    int Weight,
+    decimal CoefficientMin,
+    decimal CoefficientMax,
+    decimal? RichCoefficientMin = null,
+    decimal? RichCoefficientMax = null);
 
 /// <summary>A generation rule group of the reference snapshot.</summary>
 /// <param name="Id">The identifier.</param>

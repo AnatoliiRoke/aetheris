@@ -55,6 +55,10 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("system_id");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
                     b.HasKey("Id")
                         .HasName("pk_asteroid_field");
 
@@ -175,6 +179,10 @@ namespace Aetheris.World.Data.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("object_class");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_celestial_object_type");
@@ -318,13 +326,31 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("numeric(12,6)")
                         .HasColumnName("coefficient_min");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
                     b.Property<int>("ResourceId")
                         .HasColumnType("integer")
                         .HasColumnName("resource_id");
 
+                    b.Property<decimal?>("RichCoefficientMax")
+                        .HasPrecision(12, 6)
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("rich_coefficient_max");
+
+                    b.Property<decimal?>("RichCoefficientMin")
+                        .HasPrecision(12, 6)
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("rich_coefficient_min");
+
                     b.Property<int>("RuleGroupId")
                         .HasColumnType("integer")
                         .HasColumnName("rule_group_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
 
                     b.Property<int>("Weight")
                         .HasColumnType("integer")
@@ -373,6 +399,10 @@ namespace Aetheris.World.Data.Migrations
                     b.Property<int>("ObjectTypeId")
                         .HasColumnType("integer")
                         .HasColumnName("object_type_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_generation_rule_group");
@@ -580,6 +610,10 @@ namespace Aetheris.World.Data.Migrations
                     b.Property<long>("SystemId")
                         .HasColumnType("bigint")
                         .HasColumnName("system_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_planet");
@@ -973,6 +1007,10 @@ namespace Aetheris.World.Data.Migrations
                     b.Property<int>("SectorId")
                         .HasColumnType("integer")
                         .HasColumnName("sector_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
 
                     b.Property<double>("X")
                         .HasColumnType("double precision")

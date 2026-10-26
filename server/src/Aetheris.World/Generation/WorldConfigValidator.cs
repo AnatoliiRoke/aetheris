@@ -50,6 +50,8 @@ public static class WorldConfigValidator
         CheckProbability(errors, WorldConfigKeys.GasGiantProbability, settings.GasGiantProbability);
         CheckProbability(errors, WorldConfigKeys.SystemFieldProbability, settings.SystemFieldProbability);
         CheckProbability(errors, WorldConfigKeys.FieldRespawnInSystemProbability, settings.FieldRespawnInSystemProbability);
+        CheckProbability(errors, WorldConfigKeys.RichPlanetProbability, settings.RichPlanetProbability);
+        CheckRange(errors, WorldConfigKeys.DepositCoefficientMin, settings.DepositCoefficientMin, WorldConfigKeys.DepositCoefficientMax, settings.DepositCoefficientMax);
 
         CheckClass(errors, reference, WorldObjectClasses.Star, required: true);
         CheckClass(errors, reference, WorldObjectClasses.Planet, required: settings.BodiesMax > 0);
@@ -121,6 +123,25 @@ public static class WorldConfigValidator
             if (isBody && !reference.IsAllowedOnPlanet(rule.ResourceId))
             {
                 errors.Add($"{name} rule {rule.Id} puts a resource on a body that its group forbids there.");
+            }
+
+            CheckRichRange(errors, name, rule);
+        }
+    }
+
+    private static void CheckRichRange(List<string> errors, string name, ReferenceRule rule)
+    {
+        if (rule.RichCoefficientMin is null != rule.RichCoefficientMax is null)
+        {
+            errors.Add($"{name} rule {rule.Id} needs both bounds of the rich range or none.");
+        }
+        else if (rule.RichCoefficientMin is { } richMinimum && rule.RichCoefficientMax is { } richMaximum)
+        {
+            CheckRange(errors, $"{name} rule {rule.Id} rich_coefficient_min", richMinimum, "rich_coefficient_max", richMaximum);
+
+            if (richMinimum < 0)
+            {
+                errors.Add($"{name} rule {rule.Id} must not have a negative rich coefficient.");
             }
         }
     }

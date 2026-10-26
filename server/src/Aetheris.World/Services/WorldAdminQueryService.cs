@@ -41,6 +41,12 @@ public sealed class WorldAdminQueryService
     /// <summary>The sort column of the mass of a field.</summary>
     public const string SortByMass = "mass";
 
+    /// <summary>The sort column of the class of an object type.</summary>
+    public const string SortByClass = "object_class";
+
+    /// <summary>The sort column of a generation weight.</summary>
+    public const string SortByWeight = "weight";
+
     private readonly WorldDbContext _dbContext;
 
     /// <summary>
@@ -179,6 +185,12 @@ public sealed class WorldAdminQueryService
                 system.NewbieCount,
                 BodyCount = _dbContext.Planets.Count(planet => planet.SystemId == system.Id),
                 FieldCount = _dbContext.Fields.Count(field => field.SystemId == system.Id && field.DepletedAt == null),
+                Star = _dbContext.Objects
+                    .Where(entry => entry.SystemId == system.Id)
+                    .Join(_dbContext.ObjectTypes, entry => entry.ObjectTypeId, type => type.Id, (entry, type) => type)
+                    .Where(type => type.ObjectClass == WorldObjectClasses.Star)
+                    .Select(type => new { type.Id, type.Code, type.NameKey })
+                    .FirstOrDefault(),
             });
 
         rows = page.Sort switch
@@ -205,7 +217,10 @@ public sealed class WorldAdminQueryService
                 item.InNebula,
                 item.NewbieCount,
                 item.BodyCount,
-                item.FieldCount))],
+                item.FieldCount,
+                item.Star?.Id,
+                item.Star?.Code,
+                item.Star?.NameKey))],
             total,
             page.Page,
             page.PageSize);
@@ -274,12 +289,17 @@ public sealed class WorldAdminQueryService
             Name = body.Planet.Name ?? body.Object.Name,
             ObjectTypeId = body.Type.Id,
             ObjectTypeCode = body.Type.Code,
+            ObjectTypeNameKey = body.Type.NameKey,
             body.Type.ObjectClass,
             body.Planet.SectorId,
             body.Planet.SystemId,
             SystemName = body.System.Name,
             body.Object.Orbit,
+            body.Object.X,
+            body.Object.Y,
+            body.Object.Z,
             SizeClassCode = body.Size.Code,
+            SizeClassNameKey = body.Size.NameKey,
             body.Planet.Size,
             body.Planet.OwnerPlayerId,
         });
@@ -296,15 +316,7 @@ public sealed class WorldAdminQueryService
         var items = await rows.Skip(page.Skip).Take(page.PageSize).ToListAsync(cancellationToken).ConfigureAwait(false);
 
         List<long> planetIds = [.. items.Select(item => item.Id)];
-        ILookup<long, AdminShareDto> deposits = (await _dbContext.Deposits.AsNoTracking()
-            .Where(deposit => planetIds.Contains(deposit.PlanetId))
-            .Join(_dbContext.ResourceTypes, deposit => deposit.ResourceId, resource => resource.Id, (deposit, resource) => new
-            {
-                deposit.PlanetId,
-                Share = new AdminShareDto(resource.Id, resource.Code, deposit.Coefficient),
-            })
-            .ToListAsync(cancellationToken).ConfigureAwait(false))
-            .ToLookup(entry => entry.PlanetId, entry => entry.Share);
+        ILookup<long, AdminShareDto> deposits = await DepositsAsync(planetIds, cancellationToken).ConfigureAwait(false);
 
         return new PageResult<AdminBodyRow>(
             [.. items.Select(item => new AdminBodyRow(
@@ -313,12 +325,17 @@ public sealed class WorldAdminQueryService
                 item.Name,
                 item.ObjectTypeId,
                 item.ObjectTypeCode,
+                item.ObjectTypeNameKey,
                 item.ObjectClass,
                 item.SectorId,
                 item.SystemId,
                 item.SystemName,
                 item.Orbit,
+                item.X,
+                item.Y,
+                item.Z,
                 item.SizeClassCode,
+                item.SizeClassNameKey,
                 item.Size,
                 item.OwnerPlayerId,
                 [.. deposits[item.Id].OrderByDescending(share => share.Coefficient)]))],
@@ -382,10 +399,15 @@ public sealed class WorldAdminQueryService
             item.Field.Id,
             CelestialObjectId = item.Object.Id,
             item.Object.Name,
+            ObjectTypeId = item.Type.Id,
             ObjectTypeCode = item.Type.Code,
+            ObjectTypeNameKey = item.Type.NameKey,
             item.Field.SectorId,
             item.Field.SystemId,
             SystemName = _dbContext.Systems.Where(system => system.Id == item.Field.SystemId).Select(system => system.Name).FirstOrDefault(),
+            item.Object.X,
+            item.Object.Y,
+            item.Object.Z,
             item.Field.InitialMass,
             item.Field.Mass,
             item.Field.DepletedAt,
@@ -402,25 +424,22 @@ public sealed class WorldAdminQueryService
         var items = await rows.Skip(page.Skip).Take(page.PageSize).ToListAsync(cancellationToken).ConfigureAwait(false);
 
         List<long> fieldIds = [.. items.Select(item => item.Id)];
-        ILookup<long, AdminShareDto> compositions = (await _dbContext.FieldCompositions.AsNoTracking()
-            .Where(share => fieldIds.Contains(share.AsteroidFieldId))
-            .Join(_dbContext.ResourceTypes, share => share.ResourceId, resource => resource.Id, (share, resource) => new
-            {
-                share.AsteroidFieldId,
-                Share = new AdminShareDto(resource.Id, resource.Code, share.Coefficient),
-            })
-            .ToListAsync(cancellationToken).ConfigureAwait(false))
-            .ToLookup(entry => entry.AsteroidFieldId, entry => entry.Share);
+        ILookup<long, AdminShareDto> compositions = await CompositionsAsync(fieldIds, cancellationToken).ConfigureAwait(false);
 
         return new PageResult<AdminFieldRow>(
             [.. items.Select(item => new AdminFieldRow(
                 item.Id,
                 item.CelestialObjectId,
                 item.Name,
+                item.ObjectTypeId,
                 item.ObjectTypeCode,
+                item.ObjectTypeNameKey,
                 item.SectorId,
                 item.SystemId,
                 item.SystemName,
+                item.X,
+                item.Y,
+                item.Z,
                 item.InitialMass,
                 item.Mass,
                 item.DepletedAt,
@@ -429,6 +448,214 @@ public sealed class WorldAdminQueryService
             page.Page,
             page.PageSize);
     }
+
+    /// <summary>
+    /// Lists the object types of the reference table (task 00009, decision 7).
+    /// </summary>
+    /// <param name="page">The page; the search text finds a code or an identifier.</param>
+    /// <param name="objectClass">Only this class.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The page.</returns>
+    public async Task<PageResult<AdminObjectTypeRow>> GetObjectTypesAsync(PageRequest page, string? objectClass, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(page);
+
+        IQueryable<CelestialObjectTypeEntity> types = _dbContext.ObjectTypes.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(objectClass))
+        {
+            types = types.Where(type => type.ObjectClass == objectClass);
+        }
+
+        if (page.Search is { } search)
+        {
+            long? number = AdminPaging.AsNumber(search);
+            string pattern = AdminPaging.ContainsPattern(search);
+
+            types = number is null
+                ? types.Where(type => EF.Functions.ILike(type.Code, pattern, AdminPaging.LikeEscape))
+                : types.Where(type => type.Id == number);
+        }
+
+        var rows = types.Select(type => new
+        {
+            type.Id,
+            type.Version,
+            type.Code,
+            type.NameKey,
+            type.ObjectClass,
+            type.GenerationWeight,
+            type.MassMin,
+            type.MassMax,
+            type.IsColonizable,
+            ObjectCount = _dbContext.Objects.Count(entry => entry.ObjectTypeId == type.Id),
+        });
+
+        rows = page.Sort switch
+        {
+            SortByName => Order(rows, row => row.Code, page.Descending),
+            SortByClass => Order(rows, row => row.ObjectClass, page.Descending),
+            SortByWeight => Order(rows, row => row.GenerationWeight, page.Descending),
+            _ => Order(rows, row => row.Id, page.Descending),
+        };
+
+        int total = await rows.CountAsync(cancellationToken).ConfigureAwait(false);
+        var items = await rows.Skip(page.Skip).Take(page.PageSize).ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        return new PageResult<AdminObjectTypeRow>(
+            [.. items.Select(item => new AdminObjectTypeRow(
+                item.Id,
+                item.Version,
+                item.Code,
+                item.NameKey,
+                item.ObjectClass,
+                item.GenerationWeight,
+                item.MassMin,
+                item.MassMax,
+                item.IsColonizable,
+                item.ObjectCount))],
+            total,
+            page.Page,
+            page.PageSize);
+    }
+
+    /// <summary>
+    /// Lists the generation rules with their groups (task 00009, decision 7).
+    /// </summary>
+    /// <param name="page">The page; the search text finds the code of the type, of the group or of the resource, or an identifier.</param>
+    /// <param name="filter">The filters.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The page.</returns>
+    public async Task<PageResult<AdminRuleRow>> GetRulesAsync(PageRequest page, AdminRuleFilter filter, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(page);
+        ArgumentNullException.ThrowIfNull(filter);
+
+        var rules = _dbContext.Rules.AsNoTracking()
+            .Join(_dbContext.RuleGroups, rule => rule.RuleGroupId, group => group.Id, (rule, group) => new { Rule = rule, Group = group })
+            .Join(_dbContext.ObjectTypes, item => item.Group.ObjectTypeId, type => type.Id, (item, type) => new { item.Rule, item.Group, Type = type })
+            .Join(_dbContext.ResourceTypes, item => item.Rule.ResourceId, resource => resource.Id, (item, resource) => new { item.Rule, item.Group, item.Type, Resource = resource });
+
+        if (filter.ObjectTypeId is not null)
+        {
+            rules = rules.Where(item => item.Type.Id == filter.ObjectTypeId.Value);
+        }
+
+        if (filter.IsActive is not null)
+        {
+            rules = rules.Where(item => item.Rule.IsActive == filter.IsActive.Value);
+        }
+
+        if (page.Search is { } search)
+        {
+            long? number = AdminPaging.AsNumber(search);
+            string pattern = AdminPaging.ContainsPattern(search);
+
+            rules = number is null
+                ? rules.Where(item => EF.Functions.ILike(item.Type.Code, pattern, AdminPaging.LikeEscape)
+                    || EF.Functions.ILike(item.Group.Code, pattern, AdminPaging.LikeEscape)
+                    || EF.Functions.ILike(item.Resource.Code, pattern, AdminPaging.LikeEscape))
+                : rules.Where(item => item.Rule.Id == number);
+        }
+
+        var rows = rules.Select(item => new
+        {
+            item.Rule.Id,
+            item.Rule.Version,
+            RuleGroupId = item.Group.Id,
+            RuleGroupVersion = item.Group.Version,
+            RuleGroupCode = item.Group.Code,
+            ObjectTypeId = item.Type.Id,
+            ObjectTypeCode = item.Type.Code,
+            ObjectTypeNameKey = item.Type.NameKey,
+            item.Type.ObjectClass,
+            item.Group.MinPicks,
+            item.Group.MaxPicks,
+            item.Group.ExtraPickProbability,
+            ResourceId = item.Resource.Id,
+            ResourceCode = item.Resource.Code,
+            ResourceNameKey = item.Resource.NameKey,
+            item.Rule.Weight,
+            item.Rule.CoefficientMin,
+            item.Rule.CoefficientMax,
+            item.Rule.RichCoefficientMin,
+            item.Rule.RichCoefficientMax,
+            item.Rule.IsActive,
+        });
+
+        // The rules of one type and one group stay together.
+        rows = page.Sort switch
+        {
+            SortByWeight => Order(rows, row => row.Weight, page.Descending),
+            _ => page.Descending
+                ? rows.OrderByDescending(row => row.ObjectTypeId).ThenByDescending(row => row.RuleGroupId).ThenByDescending(row => row.Id)
+                : rows.OrderBy(row => row.ObjectTypeId).ThenBy(row => row.RuleGroupId).ThenBy(row => row.Id),
+        };
+
+        int total = await rows.CountAsync(cancellationToken).ConfigureAwait(false);
+        var items = await rows.Skip(page.Skip).Take(page.PageSize).ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        return new PageResult<AdminRuleRow>(
+            [.. items.Select(item => new AdminRuleRow(
+                item.Id,
+                item.Version,
+                item.RuleGroupId,
+                item.RuleGroupVersion,
+                item.RuleGroupCode,
+                item.ObjectTypeId,
+                item.ObjectTypeCode,
+                item.ObjectTypeNameKey,
+                item.ObjectClass,
+                item.MinPicks,
+                item.MaxPicks,
+                item.ExtraPickProbability,
+                item.ResourceId,
+                item.ResourceCode,
+                item.ResourceNameKey,
+                item.Weight,
+                item.CoefficientMin,
+                item.CoefficientMax,
+                item.RichCoefficientMin,
+                item.RichCoefficientMax,
+                item.IsActive))],
+            total,
+            page.Page,
+            page.PageSize);
+    }
+
+    /// <summary>
+    /// Reads the deposits of bodies in one query.
+    /// </summary>
+    /// <param name="planetIds">The bodies.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The deposits by body, the richest first.</returns>
+    public async Task<ILookup<long, AdminShareDto>> DepositsAsync(IReadOnlyCollection<long> planetIds, CancellationToken cancellationToken) =>
+        (await _dbContext.Deposits.AsNoTracking()
+            .Where(deposit => planetIds.Contains(deposit.PlanetId))
+            .Join(_dbContext.ResourceTypes, deposit => deposit.ResourceId, resource => resource.Id, (deposit, resource) => new
+            {
+                deposit.PlanetId,
+                Share = new AdminShareDto(resource.Id, resource.Code, resource.NameKey, deposit.Coefficient),
+            })
+            .ToListAsync(cancellationToken).ConfigureAwait(false))
+            .ToLookup(entry => entry.PlanetId, entry => entry.Share);
+
+    /// <summary>
+    /// Reads the compositions of fields in one query.
+    /// </summary>
+    /// <param name="fieldIds">The fields.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The shares by field.</returns>
+    public async Task<ILookup<long, AdminShareDto>> CompositionsAsync(IReadOnlyCollection<long> fieldIds, CancellationToken cancellationToken) =>
+        (await _dbContext.FieldCompositions.AsNoTracking()
+            .Where(share => fieldIds.Contains(share.AsteroidFieldId))
+            .Join(_dbContext.ResourceTypes, share => share.ResourceId, resource => resource.Id, (share, resource) => new
+            {
+                share.AsteroidFieldId,
+                Share = new AdminShareDto(resource.Id, resource.Code, resource.NameKey, share.Coefficient),
+            })
+            .ToListAsync(cancellationToken).ConfigureAwait(false))
+            .ToLookup(entry => entry.AsteroidFieldId, entry => entry.Share);
 
     private static IQueryable<T> Order<T, TKey>(IQueryable<T> rows, System.Linq.Expressions.Expression<Func<T, TKey>> key, bool descending) =>
         descending ? rows.OrderByDescending(key) : rows.OrderBy(key);

@@ -136,6 +136,12 @@ public sealed class AdminQueryLimits : IAdminQueryLimits
 
     /// <inheritdoc />
     public int SearchMaxLength => _settings.AdminSearchMaxLength;
+
+    /// <inheritdoc />
+    public int ReasonMinLength => _settings.AdminReasonMinLength;
+
+    /// <inheritdoc />
+    public int ReasonMaxLength => _settings.AdminReasonMaxLength;
 }
 
 /// <summary>

@@ -209,26 +209,34 @@
         {
           "resource": "iron",
           "weight": 40,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "titanium",
           "weight": 25,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "copper",
           "weight": 25,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "iridium",
           "weight": 10,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
@@ -242,26 +250,34 @@
         {
           "resource": "quartzite",
           "weight": 40,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "rubium",
           "weight": 25,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "sapphirite",
           "weight": 25,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "obsidian",
           "weight": 10,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
@@ -275,26 +291,34 @@
         {
           "resource": "iron",
           "weight": 30,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "titanium",
           "weight": 30,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "copper",
           "weight": 15,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "iridium",
           "weight": 25,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
@@ -308,26 +332,34 @@
         {
           "resource": "quartzite",
           "weight": 15,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "rubium",
           "weight": 40,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "sapphirite",
           "weight": 10,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "obsidian",
           "weight": 35,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
@@ -341,26 +373,34 @@
         {
           "resource": "iron",
           "weight": 30,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "titanium",
           "weight": 20,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "copper",
           "weight": 35,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "iridium",
           "weight": 15,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
@@ -374,26 +414,34 @@
         {
           "resource": "quartzite",
           "weight": 30,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "rubium",
           "weight": 10,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "sapphirite",
           "weight": 50,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "obsidian",
           "weight": 10,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
@@ -407,26 +455,34 @@
         {
           "resource": "iron",
           "weight": 35,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "titanium",
           "weight": 30,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "copper",
           "weight": 25,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "iridium",
           "weight": 10,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
@@ -440,26 +496,34 @@
         {
           "resource": "quartzite",
           "weight": 45,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "rubium",
           "weight": 25,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "sapphirite",
           "weight": 10,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "obsidian",
           "weight": 20,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
@@ -473,26 +537,34 @@
         {
           "resource": "iron",
           "weight": 30,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "titanium",
           "weight": 25,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "copper",
           "weight": 35,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "iridium",
           "weight": 10,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
@@ -506,26 +578,34 @@
         {
           "resource": "quartzite",
           "weight": 30,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "rubium",
           "weight": 20,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "sapphirite",
           "weight": 40,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         },
         {
           "resource": "obsidian",
           "weight": 10,
-          "coefficient_min": 0.5,
-          "coefficient_max": 1.5
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
@@ -539,8 +619,10 @@
         {
           "resource": "deuterium",
           "weight": 1,
-          "coefficient_min": 0.2,
-          "coefficient_max": 0.6
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
         }
       ]
     },
