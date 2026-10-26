@@ -12,6 +12,7 @@ export const routes = {
   confirmEmail: '/confirm-email',
   resetPassword: '/reset-password',
   game: '/game',
+  planet: '/planet',
   civilization: '/civilization',
   account: '/account',
 } as const;

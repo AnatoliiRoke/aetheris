@@ -37,6 +37,9 @@ export function PlayerLayout({ children, showNavigation = true }: { children: Re
               <Link className="text-btn" to={routes.game}>
                 {t('player.navGame')}
               </Link>
+              <Link className="text-btn" to={routes.planet}>
+                {t('player.navPlanet')}
+              </Link>
               <Link className="text-btn" to={routes.account}>
                 {t('player.navAccount')}
               </Link>

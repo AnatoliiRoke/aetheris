@@ -5,6 +5,7 @@ import { ApiContext, type Api } from './api/context';
 import { createGameApi } from './api/gameApi';
 import { HttpClient } from './api/http';
 import { mockContentApi } from './api/mockContentApi';
+import { createPlanetApi } from './api/planetApi';
 import { I18nProvider } from './i18n/I18nProvider';
 import { useI18n } from './i18n/useI18n';
 import { CheckEmailPage } from './pages/auth/CheckEmailPage';
@@ -18,6 +19,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { AccountPage } from './pages/player/AccountPage';
 import { CivilizationPage } from './pages/player/CivilizationPage';
 import { GamePage } from './pages/player/GamePage';
+import { PlanetPage } from './pages/player/PlanetPage';
 import { routes } from './router/context';
 import { RouterProvider } from './router/Router';
 import { useRouter } from './router/useRouter';
@@ -40,10 +42,11 @@ const pages: Record<string, () => ReactNode> = {
 };
 
 /**
- * The screens of a signed-in player (task 00006).
+ * The screens of a signed-in player (tasks 00006 and 00011).
  */
 const playerPages: Record<string, () => ReactNode> = {
   [routes.game]: () => <GamePage />,
+  [routes.planet]: () => <PlanetPage />,
   [routes.civilization]: () => <CivilizationPage />,
   [routes.account]: () => <AccountPage />,
 };
@@ -158,7 +161,7 @@ export default function App() {
   const api = useMemo<Api>(() => {
     const http = new HttpClient();
 
-    return { auth: createAuthApi(http), content: mockContentApi, game: createGameApi(http) };
+    return { auth: createAuthApi(http), content: mockContentApi, game: createGameApi(http), planets: createPlanetApi(http) };
   }, []);
 
   return (

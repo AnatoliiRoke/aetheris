@@ -1,0 +1,42 @@
+/* AETHERIS — the planet of a player (task 00011): balance, storage, energy, construction queue
+   and buildings. Only the tokens of tokens.css and the components of ui-art/05. */
+.panel__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.num { font-variant-numeric: tabular-nums; }
+.planet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-5); }
+.planet-subtitle { font-size: var(--fs-body); font-weight: 600; }
+
+.planet-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-lg); }
+.planet-table { width: 100%; border-collapse: collapse; }
+.planet-table th { padding: var(--space-3); font-size: var(--fs-small); font-weight: 500; color: var(--text-2); text-align: left; border-bottom: 1px solid var(--border); }
+.planet-table td { padding: var(--space-3); border-bottom: 1px solid var(--border); }
+.planet-table tr:last-child td { border-bottom: 0; }
+.planet-table tbody tr:hover { background: var(--bg-3); }
+.planet-table th:not(:first-child), .planet-table td.num { text-align: right; }
+
+.storage-list { display: flex; flex-direction: column; gap: var(--space-3); list-style: none; margin: 0; padding: 0; }
+.storage-row { display: grid; grid-template-columns: minmax(96px, max-content) minmax(120px, 1fr) max-content max-content; align-items: center; gap: var(--space-3); }
+.storage-row__meter { width: 100%; height: var(--space-3); accent-color: var(--accent); }
+
+.badge { display: inline-flex; align-items: center; padding: var(--space-1) var(--space-3); border-radius: var(--r-full); border: 1px solid var(--border-strong); font-size: var(--fs-small); color: var(--text-1); white-space: nowrap; }
+.badge--warning { border-color: var(--warning); color: var(--warning); }
+
+.queue-list { display: flex; flex-direction: column; gap: var(--space-3); list-style: none; margin: 0; padding: 0; }
+.queue-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-2); }
+.queue-item:first-child { border-color: var(--border-strong); }
+.queue-item__body { display: flex; flex-direction: column; gap: var(--space-1); }
+
+.building-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-4); list-style: none; margin: 0; padding: 0; }
+.building-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-2); }
+.building-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.building-card__name { font-size: var(--fs-body); font-weight: 600; }
+.building-card__text { color: var(--text-soft); font-size: var(--fs-small); }
+.building-card__next { display: flex; flex-direction: column; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--border); margin-top: auto; }
+.building-card .btn { align-self: stretch; }
+.effect-list { margin: 0; padding-left: var(--space-5); font-size: var(--fs-small); color: var(--text-soft); }
+.facts--compact { gap: var(--space-1) var(--space-3); font-size: var(--fs-small); }
+.reason-list { margin: 0; padding-left: var(--space-5); font-size: var(--fs-small); color: var(--warning); }
+
+@media (max-width: 480px) {
+  .storage-row { grid-template-columns: 1fr max-content; }
+  .storage-row__meter { grid-column: 1 / -1; }
+}
