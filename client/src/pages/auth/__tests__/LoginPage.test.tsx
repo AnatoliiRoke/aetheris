@@ -2,17 +2,21 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../api/http';
-import { fakeAuthApi, renderPage } from '../../../test/renderPage';
+import { fakeAuthApi, renderPage, signedInMe } from '../../../test/renderPage';
 
-async function fillAndSubmit(email: string, password: string) {
+async function fillAndSubmit(login: string, password: string, rememberMe = false) {
   const user = userEvent.setup();
 
-  if (email) {
-    await user.type(screen.getByLabelText('Електронна пошта'), email);
+  if (login) {
+    await user.type(screen.getByLabelText('Пошта або нік'), login);
   }
 
   if (password) {
     await user.type(screen.getByLabelText('Пароль'), password);
+  }
+
+  if (rememberMe) {
+    await user.click(screen.getByRole('checkbox', { name: 'Запам’ятати мене' }));
   }
 
   await user.click(screen.getByRole('button', { name: 'Увійти' }));
@@ -23,22 +27,35 @@ describe('LoginPage', () => {
     const auth = fakeAuthApi();
     renderPage('/login', { auth });
 
-    await fillAndSubmit('not-an-address', '');
+    await fillAndSubmit('', '');
 
-    expect(screen.getByText('Перевір адресу. Приклад: name@mail.com')).toBeInTheDocument();
+    expect(screen.getByText('Введи пошту або нік.')).toBeInTheDocument();
     expect(screen.getByText('Введи пароль.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Електронна пошта')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Пошта або нік')).toHaveAttribute('aria-invalid', 'true');
     expect(auth.login).not.toHaveBeenCalled();
   });
 
-  it('signs in and goes to the home page', async () => {
-    const auth = fakeAuthApi();
+  it('signs in with a nickname and "remember me" and goes to the game', async () => {
+    const auth = fakeAuthApi({ me: vi.fn().mockResolvedValueOnce(null).mockResolvedValue(signedInMe()) });
     renderPage('/login', { auth });
 
-    await fillAndSubmit('pilot@example.test', 'violet-harbor-lantern-42');
+    await fillAndSubmit('Pilot', 'Violet-harbor-lantern-42', true);
 
-    await waitFor(() => expect(window.location.pathname).toBe('/'));
-    expect(auth.login).toHaveBeenCalledWith('pilot@example.test', 'violet-harbor-lantern-42');
+    await waitFor(() => expect(window.location.pathname).toBe('/game'));
+    expect(auth.login).toHaveBeenCalledWith('Pilot', 'Violet-harbor-lantern-42', true);
+    expect(await screen.findByRole('heading', { name: 'Вітаємо, Pilot' })).toBeInTheDocument();
+  });
+
+  it('opens the account page when the sign-in cancelled a deletion', async () => {
+    const auth = fakeAuthApi({
+      login: vi.fn().mockResolvedValue({ deletionCancelled: true }),
+      me: vi.fn().mockResolvedValueOnce(null).mockResolvedValue(signedInMe()),
+    });
+    renderPage('/login', { auth });
+
+    await fillAndSubmit('pilot@example.test', 'Violet-harbor-lantern-42');
+
+    expect(await screen.findByText('Видалення скасовано')).toBeInTheDocument();
   });
 
   it('shows wrong credentials on the alert and on the password field', async () => {
@@ -59,16 +76,6 @@ describe('LoginPage', () => {
     await fillAndSubmit('pilot@example.test', 'any-password');
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Акаунт тимчасово заблоковано');
-  });
-
-  it('offers a new confirmation email for an unconfirmed address', async () => {
-    const auth = fakeAuthApi({ login: vi.fn().mockRejectedValue(new ApiError(403, 'email_not_confirmed')) });
-    renderPage('/login', { auth });
-
-    await fillAndSubmit('pilot@example.test', 'any-password');
-
-    const link = await screen.findByRole('link', { name: 'Надіслати лист ще раз' });
-    expect(link).toHaveAttribute('href', '/check-email?email=pilot%40example.test');
   });
 
   it('keeps the Google button disabled when the server has no Google credentials', async () => {

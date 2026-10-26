@@ -33,6 +33,9 @@ export const idempotencyHeader = 'Idempotency-Key';
 
 const csrfPath = '/api/v1/auth/csrf';
 const csrfErrorCode = 'csrf_token_invalid';
+const refreshPath = '/api/v1/auth/refresh';
+const authPrefix = '/api/v1/auth/';
+const mePath = '/api/v1/auth/me';
 
 interface RequestOptions {
   body?: unknown;
@@ -47,12 +50,16 @@ type FetchFunction = typeof fetch;
  * - every state-changing request carries the anti-forgery token from `GET /api/v1/auth/csrf`;
  *   the token belongs to the current session, so it is fetched again after a sign-in or a
  *   sign-out, and once more when the server refuses it;
- * - a command carries a fresh `Idempotency-Key`, so a repeated click does not repeat it.
+ * - a command carries a fresh `Idempotency-Key`, so a repeated click does not repeat it;
+ * - the session cookie lives a few minutes; when the server answers `401`, the client renews
+ *   the session once with the refresh cookie (`POST /api/v1/auth/refresh`) and repeats the
+ *   request. With "remember me" this also brings the session back after the browser restarts.
  */
 export class HttpClient {
   private readonly baseUrl: string;
   private readonly fetchFunction: FetchFunction;
   private csrfToken: Promise<string> | null = null;
+  private refreshing: Promise<boolean> | null = null;
 
   constructor(baseUrl: string = serverConfig.apiBaseUrl, fetchFunction: FetchFunction = (...args) => fetch(...args)) {
     this.baseUrl = baseUrl;
@@ -128,7 +135,32 @@ export class HttpClient {
       return this.send<T>(method, path, options, true);
     }
 
+    // The session cookie has expired; the refresh cookie may start a new one.
+    if (response.status === 401 && !isRetry && canRefresh(path) && (await this.refreshSession())) {
+      return this.send<T>(method, path, options, true);
+    }
+
     throw error;
+  }
+
+  /**
+   * Renews the session with the refresh cookie. Parallel callers share one attempt.
+   */
+  private refreshSession(): Promise<boolean> {
+    if (!this.refreshing) {
+      this.refreshing = this.send<unknown>('POST', refreshPath, {}, true)
+        .then(
+          () => true,
+          () => false,
+        )
+        .finally(() => {
+          // The anti-forgery token belongs to the session, which has just changed.
+          this.resetCsrf();
+          this.refreshing = null;
+        });
+    }
+
+    return this.refreshing;
   }
 
   private getCsrfToken(): Promise<string> {
@@ -158,6 +190,14 @@ export class HttpClient {
     const body = (await readJson(response)) as { token?: string } | null;
     return body?.token ?? '';
   }
+}
+
+/**
+ * The account routes answer `401` for a reason of their own (a wrong password, an expired
+ * link), so only the game routes and `/me` try to renew the session.
+ */
+function canRefresh(path: string): boolean {
+  return path === mePath || !path.startsWith(authPrefix);
 }
 
 async function readJson(response: Response): Promise<unknown> {

@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 
 /**
- * The routes of the public site (task 00003).
+ * The routes of the public site (task 00003) and of the signed-in player (task 00006).
  */
 export const routes = {
   home: '/',
@@ -11,6 +11,9 @@ export const routes = {
   checkEmail: '/check-email',
   confirmEmail: '/confirm-email',
   resetPassword: '/reset-password',
+  game: '/game',
+  civilization: '/civilization',
+  account: '/account',
 } as const;
 
 /**

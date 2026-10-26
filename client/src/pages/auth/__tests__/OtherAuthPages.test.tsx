@@ -73,11 +73,11 @@ describe('ResetPasswordPage', () => {
     const auth = fakeAuthApi();
     renderPage('/reset-password?userId=user-1&token=abc', { auth });
 
-    await user.type(screen.getByLabelText('Пароль'), 'amber-meadow-compass-58');
+    await user.type(screen.getByLabelText('Пароль'), 'Amber-meadow-compass-58');
     await user.click(screen.getByRole('button', { name: 'Зберегти пароль' }));
 
     expect(await screen.findByText('Пароль змінено')).toBeInTheDocument();
-    expect(auth.resetPassword).toHaveBeenCalledWith('user-1', 'abc', 'amber-meadow-compass-58');
+    expect(auth.resetPassword).toHaveBeenCalledWith('user-1', 'abc', 'Amber-meadow-compass-58');
   });
 });
 

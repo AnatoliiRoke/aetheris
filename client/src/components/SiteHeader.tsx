@@ -94,11 +94,9 @@ export function SiteHeader({ onLanding }: { onLanding: boolean }) {
         <div className="site-header__actions">
           <LangSwitch />
           {accountAction}
-          {signedIn ? null : (
-            <Link className="btn btn--primary" to={routes.register}>
-              {t('common.play')}
-            </Link>
-          )}
+          <Link className="btn btn--primary" to={signedIn ? routes.game : routes.register}>
+            {t('common.play')}
+          </Link>
           <button
             ref={toggleRef}
             className="icon-btn menu-toggle"

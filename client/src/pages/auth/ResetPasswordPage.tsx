@@ -10,7 +10,7 @@ import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
 import { useRouter } from '../../router/useRouter';
 import { AuthLayout } from './AuthLayout';
-import { describeError, passwordRuleErrors, type ErrorMessage } from './authErrors';
+import { describeError, passwordProblems, passwordRuleErrors, type ErrorMessage } from './authErrors';
 
 /**
  * The target of the reset link: `/reset-password?userId=…&token=…`.
@@ -31,8 +31,10 @@ export function ResetPasswordPage() {
     event.preventDefault();
     setFailure(null);
 
-    if (password.length < siteConfig.passwordMinLength) {
-      setErrors(['error.passwordShort']);
+    const problems = passwordProblems(password);
+
+    if (problems.length > 0) {
+      setErrors(problems);
       return;
     }
 
@@ -83,7 +85,7 @@ export function ResetPasswordPage() {
               required
               value={password}
               hint={t('auth.passwordHint', { min: siteConfig.passwordMinLength })}
-              hintOk={password.length >= siteConfig.passwordMinLength}
+              hintOk={passwordProblems(password).length === 0}
               error={errors.length > 0 ? errors.map((key) => t(key, { min: siteConfig.passwordMinLength })).join(' ') : undefined}
               onChange={(event) => {
                 setPassword(event.target.value);

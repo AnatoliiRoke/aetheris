@@ -65,4 +65,34 @@ describe('HttpClient', () => {
     expect(error).toBeInstanceOf(ApiError);
     expect(error).toMatchObject({ code: 'network_error' });
   });
+
+  it('renews an expired session once with the refresh cookie and repeats the request', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(401, { error: 'not_authenticated' }))
+      .mockResolvedValueOnce(jsonResponse(200, { token: 'csrf-1' }))
+      .mockResolvedValueOnce(jsonResponse(200, { user_id: 'user-1' }))
+      .mockResolvedValueOnce(jsonResponse(200, [{ id: 1 }]));
+    const http = new HttpClient('', fetchMock);
+
+    await expect(http.get('/api/v1/world/races')).resolves.toEqual([{ id: 1 }]);
+
+    expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
+      '/api/v1/world/races',
+      '/api/v1/auth/csrf',
+      '/api/v1/auth/refresh',
+      '/api/v1/world/races',
+    ]);
+  });
+
+  it('does not renew the session for an account route such as the sign-in', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(200, { token: 'csrf-1' }))
+      .mockResolvedValueOnce(jsonResponse(401, { error: 'invalid_credentials' }));
+    const http = new HttpClient('', fetchMock);
+
+    await expect(http.post('/api/v1/auth/login', {})).rejects.toMatchObject({ code: 'invalid_credentials' });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });

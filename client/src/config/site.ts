@@ -14,12 +14,23 @@ export const siteConfig = {
   copyrightYear: new Date().getFullYear(),
 
   /**
-   * The smallest password length shown in the hints and checked before sending. It mirrors
-   * the starting value of `security.password.min_length` on the server; the server stays the
-   * authority and answers with its own rule codes.
+   * The password rules shown in the hints and checked before sending. They mirror the
+   * starting values of `security.password.*` on the server; the server stays the authority
+   * and answers with its own rule codes.
    */
-  passwordMinLength: 12,
+  passwordMinLength: 8,
 
-  /** Seconds before the confirmation email can be requested again. */
-  resendCooldownSeconds: 60,
+  /**
+   * The nickname length shown in the hints and checked before sending; it mirrors
+   * `security.account.nickname_min_length` and `nickname_max_length`.
+   */
+  nicknameMinLength: 3,
+  nicknameMaxLength: 20,
+
+  /** The length of the name of the home planet; it mirrors `world.civilization.home_name_*`. */
+  planetNameMinLength: 3,
+  planetNameMaxLength: 20,
+
+  /** Seconds before the confirmation email can be requested again (`security.account.confirmation_resend_minutes`). */
+  resendCooldownSeconds: 300,
 } as const;
