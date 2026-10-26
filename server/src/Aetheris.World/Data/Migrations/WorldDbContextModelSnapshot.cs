@@ -384,6 +384,84 @@ namespace Aetheris.World.Data.Migrations
                     b.ToTable("generation_rule_group", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.World.Data.Entities.GenerationRunEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool?>("ActiveLock")
+                        .HasColumnType("boolean")
+                        .HasColumnName("active_lock");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("error");
+
+                    b.Property<int>("EstimatedSystemCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("estimated_system_count");
+
+                    b.Property<DateTimeOffset?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("finished_at");
+
+                    b.Property<string>("InitiatorId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("initiator_id");
+
+                    b.Property<string>("RuleSet")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("rule_set");
+
+                    b.Property<int>("SectorCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("sector_count");
+
+                    b.Property<long?>("Seed")
+                        .HasColumnType("bigint")
+                        .HasColumnName("seed");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("summary");
+
+                    b.HasKey("Id")
+                        .HasName("pk_generation_run");
+
+                    b.HasIndex("ActiveLock")
+                        .IsUnique()
+                        .HasDatabaseName("ix_generation_run_active_lock");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_generation_run_created_at");
+
+                    b.ToTable("generation_run", (string)null);
+                });
+
             modelBuilder.Entity("Aetheris.World.Data.Entities.NebulaCompositionEntity", b =>
                 {
                     b.Property<long>("Id")

@@ -407,3 +407,83 @@ public sealed class StartBuildingGrantEntity
     /// <summary>Gets or sets the moment of the grant.</summary>
     public DateTimeOffset GrantedAt { get; set; }
 }
+
+/// <summary>
+/// A generation run started from the admin panel: who, when, with what and with what result
+/// (task 00007, decision 3).
+/// </summary>
+public sealed class GenerationRunEntity
+{
+    /// <summary>Gets or sets the primary key.</summary>
+    public long Id { get; set; }
+
+    /// <summary>Gets or sets the administrator who started the run.</summary>
+    public string InitiatorId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the number of sectors to add.</summary>
+    public int SectorCount { get; set; }
+
+    /// <summary>Gets or sets the seed, or <see langword="null"/> to derive the seeds from the galaxy seed.</summary>
+    public long? Seed { get; set; }
+
+    /// <summary>Gets or sets the code of the rule set, one of <see cref="GenerationRuleSets"/>.</summary>
+    public string RuleSet { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the expected number of star systems shown at the confirmation.</summary>
+    public int EstimatedSystemCount { get; set; }
+
+    /// <summary>Gets or sets the status, one of <see cref="GenerationRunStatuses"/>.</summary>
+    public string Status { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets <see langword="true"/> while the run is queued or running and
+    /// <see langword="null"/> afterwards. A unique index on it lets only one run be active.
+    /// </summary>
+    public bool? ActiveLock { get; set; }
+
+    /// <summary>Gets or sets the UTC moment the run was requested.</summary>
+    public DateTimeOffset CreatedAt { get; set; }
+
+    /// <summary>Gets or sets the UTC moment the work started.</summary>
+    public DateTimeOffset? StartedAt { get; set; }
+
+    /// <summary>Gets or sets the UTC moment the work ended.</summary>
+    public DateTimeOffset? FinishedAt { get; set; }
+
+    /// <summary>Gets or sets what was created, as JSON.</summary>
+    public string Summary { get; set; } = "{}";
+
+    /// <summary>Gets or sets the error code of a failed run.</summary>
+    public string? Error { get; set; }
+}
+
+/// <summary>
+/// The statuses of a generation run.
+/// </summary>
+public static class GenerationRunStatuses
+{
+    /// <summary>Waits for the scheduler.</summary>
+    public const string Queued = "queued";
+
+    /// <summary>Creates the sectors.</summary>
+    public const string Running = "running";
+
+    /// <summary>Every sector was created.</summary>
+    public const string Succeeded = "succeeded";
+
+    /// <summary>The run stopped with an error; the sectors created before it stay.</summary>
+    public const string Failed = "failed";
+}
+
+/// <summary>
+/// The rule sets a generation run can use.
+/// </summary>
+/// <remarks>
+/// The database holds one set of generation rules (<c>generation_rule_group</c> and
+/// <c>generation_rule</c>), so the only choice is the current one.
+/// </remarks>
+public static class GenerationRuleSets
+{
+    /// <summary>The rules stored in the database now.</summary>
+    public const string Current = "current";
+}

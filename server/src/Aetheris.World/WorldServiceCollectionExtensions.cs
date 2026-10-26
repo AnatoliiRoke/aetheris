@@ -44,6 +44,9 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<IWorldVisibility, OwnBodiesVisibility>();
         services.AddScoped<IWorldModule, WorldModule>();
         services.AddScoped<IScheduledEventHandler, FieldRespawnHandler>();
+        services.AddScoped<GenerationRunService>();
+        services.AddScoped<WorldAdminQueryService>();
+        services.AddScoped<IScheduledEventHandler, GenerationRunHandler>();
 
         services.AddCommand<FoundCivilizationCommand>();
         services.AddOwnedObjectType<PlanetOwnerResolver>();

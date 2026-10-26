@@ -1,26 +1,23 @@
 namespace Aetheris.Core.Security;
 
 /// <summary>
-/// The roles of an administrator account (documentation/tech/05, section 8).
+/// The codes of the starting administrator roles (documentation/tech/05, section 8).
 /// </summary>
 /// <remarks>
-/// The roles are stored in the <c>admin_account.roles</c> column as a comma separated list
-/// and become claims of type <see cref="ClaimType"/> when the administrator signs in.
+/// The roles themselves are data: rows of <c>admin_role</c> with their permissions in
+/// <c>admin_role_permission</c>, seeded from <c>admin-access-seed.json</c> (task 00007,
+/// decision 4). A new role needs no constant here; these codes only name the starting roles
+/// for the command line and the tests.
 /// </remarks>
 public static class AdminRoles
 {
-    /// <summary>
-    /// The claim type that carries an administrator role.
-    /// </summary>
-    public const string ClaimType = "aetheris:admin_role";
-
     /// <summary>
     /// The claim type that carries the identifier of the administrator account.
     /// </summary>
     public const string AdminIdClaimType = "aetheris:admin_id";
 
     /// <summary>
-    /// The main role: every right, including the time multiplier.
+    /// The main role: every permission.
     /// </summary>
     public const string Owner = "owner";
 
@@ -38,9 +35,4 @@ public static class AdminRoles
     /// Moderates player content.
     /// </summary>
     public const string Moderation = "moderation";
-
-    /// <summary>
-    /// Gets every known role.
-    /// </summary>
-    public static IReadOnlyList<string> All { get; } = [Owner, Balance, Support, Moderation];
 }

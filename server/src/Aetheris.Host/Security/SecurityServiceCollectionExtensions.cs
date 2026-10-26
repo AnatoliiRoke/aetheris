@@ -129,6 +129,9 @@ public static class SecurityServiceCollectionExtensions
         }
         services.AddScoped<AdminAccountService>();
         services.AddScoped<AdminAuditScope>();
+        services.AddScoped<AdminAccessService>();
+        services.AddScoped<AdminConfigService>();
+        services.AddScoped<IAdminQueryLimits, AdminQueryLimits>();
         services.AddScoped<IAdminAuditRecorder>(serviceProvider => serviceProvider.GetRequiredService<AdminAuditScope>());
 
         return services;
@@ -265,26 +268,7 @@ public static class SecurityServiceCollectionExtensions
                 .AddAuthenticationSchemes(schemes)
                 .RequireAuthenticatedUser()
                 .RequireClaim(AetherisClaims.AdminId)
-                .RequireClaim(AetherisClaims.SecondFactor, AetherisClaims.Totp))
-            .AddPolicy(SecurityPolicies.AdminOwner, policy => AdminRole(policy, schemes))
-            .AddPolicy(SecurityPolicies.AdminBalance, policy => AdminRole(policy, schemes, AdminRoles.Balance))
-            .AddPolicy(SecurityPolicies.AdminSupport, policy => AdminRole(policy, schemes, AdminRoles.Support))
-            .AddPolicy(SecurityPolicies.AdminModeration, policy => AdminRole(policy, schemes, AdminRoles.Moderation));
-    }
-
-    /// <summary>
-    /// An administrator policy for a role. The owner role passes every one of them.
-    /// </summary>
-    private static void AdminRole(
-        Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder policy,
-        string[] schemes,
-        params string[] roles)
-    {
-        policy
-            .AddAuthenticationSchemes(schemes)
-            .RequireAuthenticatedUser()
-            .RequireClaim(AetherisClaims.SecondFactor, AetherisClaims.Totp)
-            .RequireClaim(AdminRoles.ClaimType, [AdminRoles.Owner, .. roles]);
+                .RequireClaim(AetherisClaims.AdminSessionId));
     }
 
     private static void ConfigureApiCookie(CookieAuthenticationOptions options)

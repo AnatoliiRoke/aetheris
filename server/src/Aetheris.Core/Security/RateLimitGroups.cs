@@ -39,8 +39,14 @@ public static class RateLimitGroups
     public const string Admin = "admin";
 
     /// <summary>
+    /// The sign-in of an administrator, counted per IP address. Stricter than <see cref="Auth"/>:
+    /// the admin panel is the most valuable target (task 00007, decision 5).
+    /// </summary>
+    public const string AdminAuth = "admin_auth";
+
+    /// <summary>
     /// Gets the groups that endpoints can name. The <see cref="Ip"/> limit is global and
     /// is not named by endpoints.
     /// </summary>
-    public static IReadOnlyList<string> EndpointGroups { get; } = [Auth, Command, Admin];
+    public static IReadOnlyList<string> EndpointGroups { get; } = [Auth, AdminAuth, Command, Admin];
 }

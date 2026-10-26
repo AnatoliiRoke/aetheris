@@ -116,12 +116,6 @@ namespace Aetheris.Host.Data.Migrations
                         .HasColumnType("character varying(450)")
                         .HasColumnName("identity_user_id");
 
-                    b.Property<string>("Roles")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("roles");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean")
                         .HasColumnName("two_factor_enabled");
@@ -133,6 +127,36 @@ namespace Aetheris.Host.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("admin_account", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.AdminAccountRoleEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AdminAccountId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("admin_account_id");
+
+                    b.Property<int>("AdminRoleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("admin_role_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_admin_account_roles");
+
+                    b.HasIndex("AdminRoleId");
+
+                    b.HasIndex("AdminAccountId", "AdminRoleId")
+                        .IsUnique();
+
+                    b.ToTable("admin_account_role", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Host.Data.Entities.AdminAuditLogEntity", b =>
@@ -168,6 +192,11 @@ namespace Aetheris.Host.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("old_value");
 
+                    b.Property<string>("Reason")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("reason");
+
                     b.Property<string>("Target")
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)")
@@ -179,6 +208,142 @@ namespace Aetheris.Host.Data.Migrations
                     b.HasIndex("At");
 
                     b.ToTable("admin_audit_log", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.AdminPermissionEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("kind");
+
+                    b.HasKey("Id")
+                        .HasName("pk_admin_permissions");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("admin_permission", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.AdminRoleEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("NameKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name_key");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id")
+                        .HasName("pk_admin_roles");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("admin_role", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.AdminRolePermissionEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdminPermissionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("admin_permission_id");
+
+                    b.Property<int>("AdminRoleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("admin_role_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_admin_role_permissions");
+
+                    b.HasIndex("AdminPermissionId");
+
+                    b.HasIndex("AdminRoleId", "AdminPermissionId")
+                        .IsUnique();
+
+                    b.ToTable("admin_role_permission", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.AdminSessionEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AdminAccountId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("admin_account_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("EndReason")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("end_reason");
+
+                    b.Property<DateTimeOffset?>("EndedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ended_at");
+
+                    b.Property<DateTimeOffset>("LastActivityAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_activity_at");
+
+                    b.Property<string>("SecondFactor")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("second_factor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_admin_sessions");
+
+                    b.HasIndex("AdminAccountId");
+
+                    b.ToTable("admin_session", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Host.Data.Entities.BlockedEmailDomainEntity", b =>
@@ -255,6 +420,67 @@ namespace Aetheris.Host.Data.Migrations
                     b.HasIndex("ObjectType", "ObjectId", "At");
 
                     b.ToTable("change_journal", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.ConfigParameterChangeEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AdminAccountId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("admin_account_id");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("changed_at");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("key");
+
+                    b.Property<string>("NewValue")
+                        .IsRequired()
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)")
+                        .HasColumnName("new_value");
+
+                    b.Property<string>("OldValue")
+                        .IsRequired()
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)")
+                        .HasColumnName("old_value");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("reason");
+
+                    b.Property<long?>("RolledBackChangeId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("rolled_back_change_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_config_parameter_changes");
+
+                    b.HasIndex("RolledBackChangeId");
+
+                    b.HasIndex("Key", "Id");
+
+                    b.ToTable("config_parameter_change", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Host.Data.Entities.ConfigVersionEntity", b =>
@@ -359,6 +585,18 @@ namespace Aetheris.Host.Data.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("player_profile", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.ReadOnlyConfigParameterEntity", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("key");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("config_parameter_read_only", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Host.Data.Entities.RefreshTokenEntity", b =>
@@ -865,6 +1103,53 @@ namespace Aetheris.Host.Data.Migrations
                         .HasName("pk_asp_net_user_tokens");
 
                     b.ToTable("asp_net_user_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.AdminAccountRoleEntity", b =>
+                {
+                    b.HasOne("Aetheris.Host.Data.Entities.AdminAccountEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AdminAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Aetheris.Host.Data.Entities.AdminRoleEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AdminRoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.AdminRolePermissionEntity", b =>
+                {
+                    b.HasOne("Aetheris.Host.Data.Entities.AdminPermissionEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AdminPermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Aetheris.Host.Data.Entities.AdminRoleEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AdminRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.AdminSessionEntity", b =>
+                {
+                    b.HasOne("Aetheris.Host.Data.Entities.AdminAccountEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AdminAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.ConfigParameterChangeEntity", b =>
+                {
+                    b.HasOne("Aetheris.Host.Data.Entities.ConfigParameterChangeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("RolledBackChangeId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Aetheris.Host.Data.Entities.PlayerProfileEntity", b =>

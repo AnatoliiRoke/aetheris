@@ -30,6 +30,11 @@ public sealed class AdminAuditScope : IAdminAuditRecorder
     public string? NewValue { get; private set; }
 
     /// <summary>
+    /// Gets the reason the administrator gave for the change.
+    /// </summary>
+    public string? Reason { get; private set; }
+
+    /// <summary>
     /// Gets the work to do once the change and its audit record are committed.
     /// </summary>
     public IReadOnlyList<Func<Task>> AfterCommit => _afterCommit;
@@ -40,6 +45,15 @@ public sealed class AdminAuditScope : IAdminAuditRecorder
         Target = target;
         OldValue = oldValue;
         NewValue = newValue;
+    }
+
+    /// <summary>
+    /// Records the reason the administrator gave for the change.
+    /// </summary>
+    /// <param name="reason">The reason.</param>
+    public void RecordReason(string reason)
+    {
+        Reason = reason;
     }
 
     /// <inheritdoc />
@@ -62,6 +76,11 @@ public sealed class AdminAuditScope : IAdminAuditRecorder
 /// </remarks>
 public sealed class AdminAuditFilter : IEndpointFilter
 {
+    /// <summary>
+    /// The suffix of the action of a refused request.
+    /// </summary>
+    public const string RejectedSuffix = ".rejected";
+
     /// <inheritdoc />
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -84,10 +103,11 @@ public sealed class AdminAuditFilter : IEndpointFilter
         dbContext.AdminAuditLogs.Add(new AdminAuditLogEntity
         {
             AdminId = httpContext.User.GetAdminId() ?? "unknown",
-            Action = rejected ? action + ".rejected" : action,
+            Action = rejected ? action + RejectedSuffix : action,
             Target = scope.Target,
             OldValue = rejected ? null : scope.OldValue,
             NewValue = rejected ? null : scope.NewValue,
+            Reason = rejected ? null : scope.Reason,
             At = timeProvider.GetUtcNow(),
         });
 

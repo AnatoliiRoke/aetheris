@@ -16,6 +16,7 @@ public sealed class WorldModule : IWorldModule
     private readonly CivilizationService _civilizations;
     private readonly FieldService _fields;
     private readonly WorldQueryService _queries;
+    private readonly GenerationRunService _runs;
     private readonly IGameConfig _config;
 
     /// <summary>
@@ -26,6 +27,7 @@ public sealed class WorldModule : IWorldModule
     /// <param name="civilizations">The civilization service.</param>
     /// <param name="fields">The field service.</param>
     /// <param name="queries">The read service.</param>
+    /// <param name="runs">The generation runs of the admin panel.</param>
     /// <param name="config">The game configuration.</param>
     public WorldModule(
         WorldGenerationService generation,
@@ -33,6 +35,7 @@ public sealed class WorldModule : IWorldModule
         CivilizationService civilizations,
         FieldService fields,
         WorldQueryService queries,
+        GenerationRunService runs,
         IGameConfig config)
     {
         ArgumentNullException.ThrowIfNull(generation);
@@ -40,6 +43,7 @@ public sealed class WorldModule : IWorldModule
         ArgumentNullException.ThrowIfNull(civilizations);
         ArgumentNullException.ThrowIfNull(fields);
         ArgumentNullException.ThrowIfNull(queries);
+        ArgumentNullException.ThrowIfNull(runs);
         ArgumentNullException.ThrowIfNull(config);
 
         _generation = generation;
@@ -47,6 +51,7 @@ public sealed class WorldModule : IWorldModule
         _civilizations = civilizations;
         _fields = fields;
         _queries = queries;
+        _runs = runs;
         _config = config;
     }
 
@@ -63,6 +68,10 @@ public sealed class WorldModule : IWorldModule
     /// <inheritdoc />
     public Task<SectorSummary> AddSectorAsync(long? seed, bool isNewbie, string actorId, CancellationToken cancellationToken = default) =>
         _generation.AddSectorAsync(seed, isNewbie, actorId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<int> FailInterruptedGenerationRunsAsync(CancellationToken cancellationToken = default) =>
+        _runs.FailInterruptedAsync(cancellationToken);
 
     /// <inheritdoc />
     public Task<SectorSummary> RegenerateSectorAsync(int sectorId, long? seed, string actorId, CancellationToken cancellationToken = default) =>

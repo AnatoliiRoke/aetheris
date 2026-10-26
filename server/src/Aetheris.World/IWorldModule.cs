@@ -42,6 +42,14 @@ public interface IWorldModule
     Task<SectorSummary> AddSectorAsync(long? seed, bool isNewbie, string actorId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Marks the generation runs that were running when the server stopped as failed, so a new
+    /// run can start (task 00007, decision 3).
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The number of runs marked.</returns>
+    Task<int> FailInterruptedGenerationRunsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Generates a sector without owners again.
     /// </summary>
     /// <param name="sectorId">The sector.</param>

@@ -16,27 +16,8 @@ public static class SecurityPolicies
     public const string Player = "player";
 
     /// <summary>
-    /// A signed-in administrator who passed the second factor, with any administrator role.
+    /// A signed-in administrator with an open session. What the administrator may do is decided
+    /// per endpoint by the permissions of the roles in the database (task 00007, decision 4).
     /// </summary>
     public const string Admin = "admin";
-
-    /// <summary>
-    /// An administrator with the owner role: the time multiplier and every other right.
-    /// </summary>
-    public const string AdminOwner = "admin.owner";
-
-    /// <summary>
-    /// An administrator who may change the configuration parameters.
-    /// </summary>
-    public const string AdminBalance = "admin.balance";
-
-    /// <summary>
-    /// An administrator who handles player support and reads the audit log.
-    /// </summary>
-    public const string AdminSupport = "admin.support";
-
-    /// <summary>
-    /// An administrator who moderates player content.
-    /// </summary>
-    public const string AdminModeration = "admin.moderation";
 }

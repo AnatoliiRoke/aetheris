@@ -62,6 +62,15 @@ public static class AetherisClaims
     /// <summary>The value of <see cref="SecondFactor"/> for a time-based one-time code.</summary>
     public const string Totp = "totp";
 
+    /// <summary>
+    /// The value of <see cref="SecondFactor"/> for a session opened while the second factor of
+    /// the administrators is switched off (<c>admin.require_totp</c>, task 00007, decision 6).
+    /// </summary>
+    public const string NoSecondFactor = "none";
+
     /// <summary>The claim that carries the identifier of the administrator account.</summary>
     public const string AdminId = AdminRoles.AdminIdClaimType;
+
+    /// <summary>The claim that carries the identifier of the administrator session.</summary>
+    public const string AdminSessionId = "aetheris:admin_session";
 }

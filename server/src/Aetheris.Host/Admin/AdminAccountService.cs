@@ -1,4 +1,3 @@
-using Aetheris.Core.Security;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -7,8 +6,12 @@ using Microsoft.EntityFrameworkCore;
 namespace Aetheris.Host.Admin;
 
 /// <summary>
-/// Creates administrator accounts with a mandatory second factor (task 00002, section 2.5).
+/// Creates administrator accounts (task 00002, section 2.5; task 00007, decision 4).
 /// </summary>
+/// <remarks>
+/// The authenticator key is always enrolled, so the second factor works as soon as
+/// <c>admin.require_totp</c> is switched on. The roles must exist in <c>admin_role</c>.
+/// </remarks>
 public sealed class AdminAccountService
 {
     /// <summary>
@@ -16,6 +19,11 @@ public sealed class AdminAccountService
     /// signed-in administrator.
     /// </summary>
     public const string SystemActor = "system";
+
+    /// <summary>
+    /// The action of the audit record of a new administrator account.
+    /// </summary>
+    public const string AccountCreatedAction = "admin.account_created";
 
     private readonly AetherisDbContext _dbContext;
     private readonly UserManager<IdentityUser> _userManager;
@@ -44,7 +52,7 @@ public sealed class AdminAccountService
     /// <param name="email">The e-mail address of the administrator.</param>
     /// <param name="password">The password of a new account; ignored when the account exists.</param>
     /// <param name="displayName">The name shown in the admin panel.</param>
-    /// <param name="roles">The administrator roles, from <see cref="AdminRoles"/>.</param>
+    /// <param name="roles">The role codes, from the <c>admin_role</c> table.</param>
     /// <returns>The authenticator key to enrol in an authenticator app.</returns>
     public async Task<string> CreateAsync(string email, string password, string displayName, IReadOnlyCollection<string> roles)
     {
@@ -52,7 +60,10 @@ public sealed class AdminAccountService
         ArgumentNullException.ThrowIfNull(password);
         ArgumentNullException.ThrowIfNull(roles);
 
-        List<string> unknownRoles = roles.Except(AdminRoles.All, StringComparer.Ordinal).ToList();
+        List<AdminRoleEntity> knownRoles = await _dbContext.AdminRoles.AsNoTracking()
+            .Where(role => roles.Contains(role.Code))
+            .ToListAsync().ConfigureAwait(false);
+        List<string> unknownRoles = roles.Except(knownRoles.Select(role => role.Code), StringComparer.Ordinal).ToList();
 
         if (roles.Count == 0 || unknownRoles.Count > 0)
         {
@@ -89,18 +100,22 @@ public sealed class AdminAccountService
             Id = Guid.NewGuid().ToString(),
             IdentityUserId = user.Id,
             DisplayName = displayName,
-            Roles = string.Join(',', roles),
             TwoFactorEnabled = true,
             CreatedAt = _timeProvider.GetUtcNow(),
         };
 
         _dbContext.AdminAccounts.Add(admin);
+        _dbContext.AdminAccountRoles.AddRange(knownRoles.Select(role => new AdminAccountRoleEntity
+        {
+            AdminAccountId = admin.Id,
+            AdminRoleId = role.Id,
+        }));
         _dbContext.AdminAuditLogs.Add(new AdminAuditLogEntity
         {
             AdminId = SystemActor,
-            Action = "admin.account_created",
+            Action = AccountCreatedAction,
             Target = admin.Id,
-            NewValue = admin.Roles,
+            NewValue = string.Join(',', knownRoles.Select(role => role.Code)),
             At = admin.CreatedAt,
         });
 

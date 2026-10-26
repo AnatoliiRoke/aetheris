@@ -1,0 +1,89 @@
+{
+  "permissions": [
+    { "code": "admin.ping", "kind": "screen" },
+    { "code": "admin.me", "kind": "screen" },
+    { "code": "admin.sign_out", "kind": "action" },
+    { "code": "admin.config_read", "kind": "screen" },
+    { "code": "admin.config_history_read", "kind": "screen" },
+    { "code": "admin.config_changed", "kind": "action" },
+    { "code": "admin.config_rolled_back", "kind": "action" },
+    { "code": "admin.clock_read", "kind": "screen" },
+    { "code": "admin.clock_changed", "kind": "action" },
+    { "code": "admin.audit_read", "kind": "screen" },
+    { "code": "admin.player_email_changed", "kind": "action" },
+    { "code": "admin.player_access_log_read", "kind": "screen" },
+    { "code": "admin.world_reference_read", "kind": "screen" },
+    { "code": "admin.world_sectors_read", "kind": "screen" },
+    { "code": "admin.world_systems_read", "kind": "screen" },
+    { "code": "admin.world_objects_read", "kind": "screen" },
+    { "code": "admin.world_fields_read", "kind": "screen" },
+    { "code": "admin.world_sector_stats", "kind": "screen" },
+    { "code": "admin.world_sector_added", "kind": "action" },
+    { "code": "admin.world_sector_regenerated", "kind": "action" },
+    { "code": "admin.world_generation_estimated", "kind": "screen" },
+    { "code": "admin.world_generation_started", "kind": "action" },
+    { "code": "admin.world_generation_runs_read", "kind": "screen" },
+    { "code": "admin.world_generation_run_read", "kind": "screen" }
+  ],
+  "roles": [
+    {
+      "code": "owner",
+      "name_key": "admin.role.owner",
+      "sort_order": 1,
+      "all_permissions": true,
+      "permissions": []
+    },
+    {
+      "code": "balance",
+      "name_key": "admin.role.balance",
+      "sort_order": 2,
+      "all_permissions": false,
+      "permissions": [
+        "admin.ping",
+        "admin.me",
+        "admin.sign_out",
+        "admin.world_sector_stats",
+        "admin.config_read",
+        "admin.config_history_read",
+        "admin.config_changed",
+        "admin.config_rolled_back",
+        "admin.clock_read"
+      ]
+    },
+    {
+      "code": "support",
+      "name_key": "admin.role.support",
+      "sort_order": 3,
+      "all_permissions": false,
+      "permissions": [
+        "admin.ping",
+        "admin.me",
+        "admin.sign_out",
+        "admin.world_sector_stats",
+        "admin.audit_read",
+        "admin.player_email_changed",
+        "admin.player_access_log_read"
+      ]
+    },
+    {
+      "code": "moderation",
+      "name_key": "admin.role.moderation",
+      "sort_order": 4,
+      "all_permissions": false,
+      "permissions": [
+        "admin.ping",
+        "admin.me",
+        "admin.sign_out",
+        "admin.world_sector_stats"
+      ]
+    }
+  ],
+  "read_only_parameters": [
+    "admin.require_totp",
+    "security.admin.max_clock_multiplier",
+    "security.password.hash_iterations",
+    "security.signalr.max_message_bytes",
+    "security.hsts.max_age_days",
+    "world.galaxy.seed"
+  ]
+}

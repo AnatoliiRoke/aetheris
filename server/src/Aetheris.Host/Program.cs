@@ -216,6 +216,10 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     // first request instead of waiting for the background reload.
     await scope.ServiceProvider.GetRequiredService<ConfigReloader>().ReloadAsync().ConfigureAwait(false);
 
+    // A generation run of the admin panel that was running when the server stopped is marked
+    // failed, so the next run is not blocked (task 00007, decision 3).
+    await scope.ServiceProvider.GetRequiredService<IWorldModule>().FailInterruptedGenerationRunsAsync().ConfigureAwait(false);
+
     // The first start creates the galaxy and its initial sectors; a later start finds them
     // and changes nothing (task 00004, section 2.6).
     if (app.Configuration.GetValue(WorldStartup.GenerateOnStartupKey, true))

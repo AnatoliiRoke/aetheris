@@ -41,6 +41,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Auth\common-passwords.txt" />
     <EmbeddedResource Include="Data\account-lists-seed.json" LogicalName="Aetheris.Host.account-lists-seed.json" />
+    <EmbeddedResource Include="Data\admin-access-seed.json" LogicalName="Aetheris.Host.admin-access-seed.json" />
   </ItemGroup>
 
 </Project>

@@ -53,6 +53,7 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
         [SecurityKeys.RateLimitPermits(RateLimitGroups.Auth)] = "10000",
         [SecurityKeys.RateLimitPermits(RateLimitGroups.Command)] = "100000",
         [SecurityKeys.RateLimitPermits(RateLimitGroups.Admin)] = "10000",
+        [SecurityKeys.RateLimitPermits(RateLimitGroups.AdminAuth)] = "10000",
         [SecurityKeys.AlertFailedSignInThreshold] = "100000",
 
         // Every test request comes from the same address, so the limits of one address are

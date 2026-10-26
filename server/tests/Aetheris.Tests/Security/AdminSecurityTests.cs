@@ -7,6 +7,7 @@ using Aetheris.Core.Security;
 using Aetheris.Host.Admin;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
+using Aetheris.Host.Security;
 using Aetheris.Tests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,11 +40,26 @@ public sealed class AdminSecurityTests
     }
 
     /// <summary>
-    /// The right password without a code, and with a wrong code, does not sign in.
+    /// With the second factor switched on, the right password without a code, and with a wrong
+    /// code, does not sign in.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
     public async Task An_administrator_cannot_sign_in_without_the_one_time_code()
+    {
+        await RequireTotpAsync(true);
+
+        try
+        {
+            await SignInWithSecondFactorAsync();
+        }
+        finally
+        {
+            await RequireTotpAsync(false);
+        }
+    }
+
+    private async Task SignInWithSecondFactorAsync()
     {
         (TestAccount admin, string key) = await CreateAdminAsync(AdminRoles.Owner);
 
@@ -81,7 +97,7 @@ public sealed class AdminSecurityTests
 
         HttpResponseMessage change = await client.PutAsJsonAsync(
             AdminEndpoints.Prefix + "/config/" + ConfigSeed.HelloMultiplier,
-            new { value = "5" },
+            new { value = "5", reason = "Audit test" },
             TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.OK, change.StatusCode);
 
@@ -126,7 +142,7 @@ public sealed class AdminSecurityTests
 
         HttpResponseMessage outOfBounds = await client.PutAsJsonAsync(
             AdminEndpoints.Prefix + "/config/" + ConfigSeed.HelloMultiplier,
-            new { value = "-5" },
+            new { value = "-5", reason = "Bounds test" },
             TestContext.Current.CancellationToken);
         Assert.Equal(HttpStatusCode.BadRequest, outOfBounds.StatusCode);
 
@@ -186,6 +202,13 @@ public sealed class AdminSecurityTests
             .SingleAsync(entry => entry.Id == id, TestContext.Current.CancellationToken);
 
         Assert.Equal("original", stored.NewValue);
+    }
+
+    private async Task RequireTotpAsync(bool required)
+    {
+        using IServiceScope scope = _factory.Services.CreateScope();
+
+        await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, SecurityKeys.AdminRequireTotp, required ? "true" : "false");
     }
 
     private async Task<(TestAccount Account, string Key)> CreateAdminAsync(string role)

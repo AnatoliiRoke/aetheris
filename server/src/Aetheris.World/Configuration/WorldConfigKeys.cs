@@ -139,6 +139,15 @@ public static class WorldConfigKeys
     /// <summary>The name template of a nebula.</summary>
     public const string NebulaNameTemplate = "world.naming.nebula_template";
 
+    /// <summary>The largest number of sectors an administrator adds in one generation run.</summary>
+    public const string MaxSectorsPerRun = "world.admin.max_sectors_per_run";
+
+    /// <summary>The largest expected number of star systems of one generation run.</summary>
+    public const string MaxSystemsPerRun = "world.admin.max_systems_per_run";
+
+    /// <summary>How often the admin panel asks for the status of a running generation, in seconds.</summary>
+    public const string StatusPollSeconds = "world.admin.status_poll_seconds";
+
     /// <summary>
     /// Gets the definitions of the world parameters with their starting values and bounds.
     /// </summary>
@@ -186,5 +195,8 @@ public static class WorldConfigKeys
         new(BodyNameTemplate, "{system}-{orbit}", null, null, "Name template of a body: {system}, {orbit}."),
         new(FieldNameTemplate, "{sector}-F{number}", null, null, "Name template of an asteroid field: {sector}, {number}."),
         new(NebulaNameTemplate, "{sector}-N{number}", null, null, "Name template of a nebula: {sector}, {number}."),
+        new(MaxSectorsPerRun, "10", "1", "1000", "Largest number of sectors an administrator adds in one generation run."),
+        new(MaxSystemsPerRun, "100", "1", "1000000", "Largest expected number of star systems of one generation run: sectors times the average of systems_min and systems_max."),
+        new(StatusPollSeconds, "2", "1", "60", "How often the admin panel asks for the status of a running generation, in seconds."),
     ];
 }

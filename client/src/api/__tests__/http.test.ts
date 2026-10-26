@@ -95,4 +95,26 @@ describe('HttpClient', () => {
     await expect(http.post('/api/v1/auth/login', {})).rejects.toMatchObject({ code: 'invalid_credentials' });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it('does not renew the session for the admin panel, which has its own sign-in', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(401, { error: 'session_expired' }));
+    const http = new HttpClient('', fetchMock);
+
+    await expect(http.get('/api/admin/auth/me')).rejects.toMatchObject({ status: 401, code: 'session_expired' });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('sends a change with PUT and the anti-forgery token', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(200, { token: 'csrf-1' }))
+      .mockResolvedValueOnce(jsonResponse(200, {}));
+    const http = new HttpClient('', fetchMock);
+
+    await http.put('/api/admin/config/test.key', { value: '1', reason: 'Test' });
+
+    const [, init] = fetchMock.mock.calls[1] as [string, RequestInit];
+    expect(init.method).toBe('PUT');
+    expect((init.headers as Record<string, string>)[csrfHeader]).toBe('csrf-1');
+  });
 });

@@ -39,6 +39,11 @@ public sealed class AdminAuditLogEntity
     public string? NewValue { get; set; }
 
     /// <summary>
+    /// Gets or sets the reason the administrator gave for a change, or <see langword="null"/>.
+    /// </summary>
+    public string? Reason { get; set; }
+
+    /// <summary>
     /// Gets or sets the UTC timestamp of the action.
     /// </summary>
     public DateTimeOffset At { get; set; }

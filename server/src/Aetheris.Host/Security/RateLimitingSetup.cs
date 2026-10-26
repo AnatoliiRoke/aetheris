@@ -105,7 +105,7 @@ public static class RateLimitingSetup
 
     /// <summary>
     /// The policy of one rate limit group: per account when the caller is signed in,
-    /// per IP otherwise. The sign-in group is always counted per IP.
+    /// per IP otherwise. The sign-in groups are always counted per IP.
     /// </summary>
     private sealed class GroupPolicy : IRateLimiterPolicy<string>
     {
@@ -121,7 +121,9 @@ public static class RateLimitingSetup
 
         public RateLimitPartition<string> GetPartition(HttpContext httpContext)
         {
-            string? accountId = _group == RateLimitGroups.Auth ? null : httpContext.User.GetPlayerId();
+            string? accountId = _group is RateLimitGroups.Auth or RateLimitGroups.AdminAuth
+                ? null
+                : httpContext.User.GetPlayerId();
 
             string caller = accountId is not null
                 ? "account:" + accountId

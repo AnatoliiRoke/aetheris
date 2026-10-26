@@ -1,5 +1,4 @@
 using Aetheris.Core.Errors;
-using Aetheris.Core.Security;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
@@ -52,12 +51,10 @@ public static class AdminPlayerEndpoints
         ArgumentNullException.ThrowIfNull(secured);
 
         secured.MapPut("/players/{userId}/email", ChangeEmailAsync)
-            .WithName("admin.player_email_changed")
-            .RequireAuthorization(SecurityPolicies.AdminSupport);
+            .WithName("admin.player_email_changed");
 
         secured.MapGet("/players/{userId}/access-log", ReadAccessLogAsync)
-            .WithName("admin.player_access_log_read")
-            .RequireAuthorization(SecurityPolicies.AdminSupport);
+            .WithName("admin.player_access_log_read");
 
         return secured;
     }

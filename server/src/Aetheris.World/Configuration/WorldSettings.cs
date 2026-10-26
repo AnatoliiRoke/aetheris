@@ -124,6 +124,15 @@ public sealed record WorldSettings
     /// <summary>Gets the largest number of free bodies returned at once.</summary>
     public int FreeBodiesPageSize { get; init; }
 
+    /// <summary>Gets the largest number of sectors of one generation run.</summary>
+    public int MaxSectorsPerRun { get; init; }
+
+    /// <summary>Gets the largest expected number of star systems of one generation run.</summary>
+    public int MaxSystemsPerRun { get; init; }
+
+    /// <summary>Gets how often the admin panel asks for the status of a running generation.</summary>
+    public int StatusPollSeconds { get; init; }
+
     /// <summary>Gets the name templates.</summary>
     public WorldNameTemplates Names { get; init; } = new(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
 
@@ -175,6 +184,9 @@ public sealed record WorldSettings
             StartStorageCapacity = ReadInt64(config, WorldConfigKeys.StartStorageCapacity),
             RevealAll = ReadBoolean(config, WorldConfigKeys.RevealAll),
             FreeBodiesPageSize = ReadInt32(config, WorldConfigKeys.FreeBodiesPageSize),
+            MaxSectorsPerRun = ReadInt32(config, WorldConfigKeys.MaxSectorsPerRun),
+            MaxSystemsPerRun = ReadInt32(config, WorldConfigKeys.MaxSystemsPerRun),
+            StatusPollSeconds = ReadInt32(config, WorldConfigKeys.StatusPollSeconds),
             Names = new WorldNameTemplates(
                 ReadText(config, WorldConfigKeys.SectorNameTemplate),
                 ReadText(config, WorldConfigKeys.SystemNameTemplate),

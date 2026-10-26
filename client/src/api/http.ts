@@ -36,6 +36,7 @@ const csrfErrorCode = 'csrf_token_invalid';
 const refreshPath = '/api/v1/auth/refresh';
 const authPrefix = '/api/v1/auth/';
 const mePath = '/api/v1/auth/me';
+const adminPrefix = '/api/admin/';
 
 interface RequestOptions {
   body?: unknown;
@@ -86,6 +87,10 @@ export class HttpClient {
 
   post<T>(path: string, body?: unknown): Promise<T> {
     return this.send<T>('POST', path, { body });
+  }
+
+  put<T>(path: string, body?: unknown): Promise<T> {
+    return this.send<T>('PUT', path, { body });
   }
 
   /**
@@ -194,9 +199,14 @@ export class HttpClient {
 
 /**
  * The account routes answer `401` for a reason of their own (a wrong password, an expired
- * link), so only the game routes and `/me` try to renew the session.
+ * link), so only the game routes and `/me` try to renew the session. The admin panel has its
+ * own session without a refresh token (task 00007): its `401` means a new sign-in.
  */
 function canRefresh(path: string): boolean {
+  if (path.startsWith(adminPrefix)) {
+    return false;
+  }
+
   return path === mePath || !path.startsWith(authPrefix);
 }
 

@@ -6,8 +6,8 @@ namespace Aetheris.Host.Data.Entities;
 /// <remarks>
 /// Kept separate from the player accounts (documentation/tech/03-model-danykh.md,
 /// section 3.7). Administrator sign-in is handled by ASP.NET Core Identity, which stores
-/// its own identity rows; this table holds the administrator profile and the roles used
-/// by the admin panel (balance, support, moderation).
+/// its own identity rows; this table holds the administrator profile. The roles live in
+/// <c>admin_account_role</c> (task 00007, decision 4).
 /// </remarks>
 public sealed class AdminAccountEntity
 {
@@ -25,11 +25,6 @@ public sealed class AdminAccountEntity
     /// Gets or sets the display name of the administrator.
     /// </summary>
     public string DisplayName { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets a comma separated list of administrator roles.
-    /// </summary>
-    public string Roles { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets a value indicating whether two-factor authentication is enforced.

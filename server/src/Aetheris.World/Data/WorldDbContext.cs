@@ -119,6 +119,9 @@ public sealed class WorldDbContext : DbContext
     /// <summary>Gets the generation log.</summary>
     public DbSet<WorldGenerationLogEntity> GenerationLog => Set<WorldGenerationLogEntity>();
 
+    /// <summary>Gets the generation runs started from the admin panel.</summary>
+    public DbSet<GenerationRunEntity> GenerationRuns => Set<GenerationRunEntity>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -352,6 +355,19 @@ public sealed class WorldDbContext : DbContext
             entity.Property(e => e.Action).HasMaxLength(CodeLength);
             entity.Property(e => e.ActorId).HasMaxLength(PlayerIdLength);
             entity.HasIndex(e => new { e.SectorId, e.At });
+        });
+
+        modelBuilder.Entity<GenerationRunEntity>(entity =>
+        {
+            entity.ToTable("generation_run");
+            entity.Property(e => e.InitiatorId).HasMaxLength(PlayerIdLength);
+            entity.Property(e => e.RuleSet).HasMaxLength(CodeLength);
+            entity.Property(e => e.Status).HasMaxLength(CodeLength);
+            entity.Property(e => e.Error).HasMaxLength(NameLength);
+
+            // Only one run is queued or running at a time; finished runs hold null.
+            entity.HasIndex(e => e.ActiveLock).IsUnique();
+            entity.HasIndex(e => e.CreatedAt);
         });
     }
 

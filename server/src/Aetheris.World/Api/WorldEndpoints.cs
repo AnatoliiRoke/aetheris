@@ -103,15 +103,15 @@ public static class WorldEndpoints
         ArgumentNullException.ThrowIfNull(secured);
 
         secured.MapPost("/world/sectors", AddSectorAsync)
-            .WithName("admin.world_sector_added")
-            .RequireAuthorization(SecurityPolicies.AdminOwner);
+            .WithName("admin.world_sector_added");
 
         secured.MapPost("/world/sectors/{sectorId:int}/regenerate", RegenerateSectorAsync)
-            .WithName("admin.world_sector_regenerated")
-            .RequireAuthorization(SecurityPolicies.AdminOwner);
+            .WithName("admin.world_sector_regenerated");
 
         secured.MapGet("/world/sectors/{sectorId:int}/stats", ReadStatisticsAsync)
             .WithName("admin.world_sector_stats");
+
+        secured.MapWorldAdminScreens();
 
         return secured;
     }

@@ -117,8 +117,34 @@ public sealed class SecuritySettings
     /// <summary>Gets the registrations from one IP address within the window after which the captcha is asked.</summary>
     public int CaptchaAfterRegistrations => ReadInt32(SecurityKeys.CaptchaAfterRegistrations);
 
-    /// <summary>Gets the lifetime of the administrator session.</summary>
-    public TimeSpan AdminSessionLifetime => TimeSpan.FromMinutes(Read(SecurityKeys.AdminSessionMinutes));
+    /// <summary>Gets the time without activity after which the administrator session ends.</summary>
+    public TimeSpan AdminSessionIdleTimeout => TimeSpan.FromMinutes(Read(SecurityKeys.AdminSessionMinutes));
+
+    /// <summary>Gets the longest life of an administrator session, however active.</summary>
+    public TimeSpan AdminSessionMaxLifetime => TimeSpan.FromHours(Read(SecurityKeys.AdminSessionMaxHours));
+
+    /// <summary>Gets a value indicating whether an administrator signs in with a one-time code.</summary>
+    /// <remarks>An unreadable value counts as switched on: a typo never opens the panel.</remarks>
+    public bool AdminRequireTotp =>
+        !bool.TryParse(_config.GetRaw(SecurityKeys.AdminRequireTotp), out bool required) || required;
+
+    /// <summary>Gets the failed administrator sign-ins in a row before the account is locked.</summary>
+    public int AdminLoginMaxFailedAttempts => ReadInt32(SecurityKeys.AdminLoginMaxFailedAttempts);
+
+    /// <summary>Gets how long a locked administrator account stays locked.</summary>
+    public TimeSpan AdminLoginLockout => TimeSpan.FromMinutes(Read(SecurityKeys.AdminLoginLockoutMinutes));
+
+    /// <summary>Gets the largest number of rows of an admin table returned at once.</summary>
+    public int AdminPageSize => ReadInt32(SecurityKeys.AdminPageSize);
+
+    /// <summary>Gets the largest length of the search text of an admin table.</summary>
+    public int AdminSearchMaxLength => ReadInt32(SecurityKeys.AdminSearchMaxLength);
+
+    /// <summary>Gets the smallest length of the reason of an administrator change.</summary>
+    public int AdminReasonMinLength => ReadInt32(SecurityKeys.AdminReasonMinLength);
+
+    /// <summary>Gets the largest length of the reason of an administrator change.</summary>
+    public int AdminReasonMaxLength => ReadInt32(SecurityKeys.AdminReasonMaxLength);
 
     /// <summary>Gets the largest time multiplier an administrator may set.</summary>
     public double AdminMaxClockMultiplier => Read(SecurityKeys.AdminMaxClockMultiplier);

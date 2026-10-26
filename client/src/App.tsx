@@ -1,4 +1,5 @@
-import { useEffect, useMemo, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useMemo, type ReactNode } from 'react';
+import { isAdminPath } from './admin/adminRoutes';
 import { createAuthApi } from './api/authApi';
 import { ApiContext, type Api } from './api/context';
 import { createGameApi } from './api/gameApi';
@@ -22,6 +23,11 @@ import { RouterProvider } from './router/Router';
 import { useRouter } from './router/useRouter';
 import { SessionProvider } from './session/SessionProvider';
 import { useSession } from './session/useSession';
+
+/**
+ * The admin panel (task 00007): a separate module, loaded only at `/admin`.
+ */
+const AdminApp = lazy(() => import('./admin/AdminApp'));
 
 const pages: Record<string, () => ReactNode> = {
   [routes.home]: () => <LandingPage />,
@@ -50,11 +56,31 @@ export function Pages() {
   const normalized = path.length > 1 ? path.replace(/\/+$/, '') : path;
   const page = pages[normalized];
 
+  if (isAdminPath(normalized)) {
+    return <AdminPage />;
+  }
+
   if (playerPages[normalized]) {
     return <PlayerPage path={normalized} />;
   }
 
   return page ? page() : <NotFoundPage />;
+}
+
+function AdminPage() {
+  const { t } = useI18n();
+
+  return (
+    <Suspense
+      fallback={
+        <p className="lead" role="status">
+          {t('common.loading')}
+        </p>
+      }
+    >
+      <AdminApp />
+    </Suspense>
+  );
 }
 
 /**

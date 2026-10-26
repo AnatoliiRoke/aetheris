@@ -12,23 +12,38 @@ namespace Aetheris.Host.Configuration;
 /// administrator who changed a value keeps the change. The seed runs after the migrations
 /// and before the configuration is loaded for the first time, so the rules always
 /// find a value.
+/// <para>
+/// The starting value of a missing parameter can be replaced for one environment through the
+/// <c>ConfigSeed:Overrides</c> section, for example to switch the second factor of the
+/// administrators off on a developer machine (task 00007, decision 6). An existing value is
+/// never touched by an override either.
+/// </para>
 /// </remarks>
 public sealed class ConfigSeedService
 {
+    /// <summary>
+    /// The configuration section with the starting values of one environment.
+    /// </summary>
+    public const string OverridesSection = "ConfigSeed:Overrides";
+
     private readonly AetherisDbContext _dbContext;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<ConfigSeedService> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfigSeedService"/> class.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
+    /// <param name="configuration">The application configuration.</param>
     /// <param name="logger">The logger.</param>
-    public ConfigSeedService(AetherisDbContext dbContext, ILogger<ConfigSeedService> logger)
+    public ConfigSeedService(AetherisDbContext dbContext, IConfiguration configuration, ILogger<ConfigSeedService> logger)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(configuration);
         ArgumentNullException.ThrowIfNull(logger);
 
         _dbContext = dbContext;
+        _configuration = configuration;
         _logger = logger;
     }
 
@@ -42,8 +57,12 @@ public sealed class ConfigSeedService
         // The lists of the account rules are seeded with the parameters, so a fresh database
         // and a cleared test database get both (task 00006).
         await AccountListsSeed.SeedAsync(_dbContext, cancellationToken).ConfigureAwait(false);
+        await AdminAccessSeed.SeedAsync(_dbContext, cancellationToken).ConfigureAwait(false);
 
-        IReadOnlyList<(string Key, string Value)> parameters = ConfigSeed.GetParameters();
+        IConfigurationSection overrides = _configuration.GetSection(OverridesSection);
+        IReadOnlyList<(string Key, string Value)> parameters = ConfigSeed.GetParameters()
+            .Select(parameter => (parameter.Key, overrides[parameter.Key] ?? parameter.Value))
+            .ToList();
 
         List<string> existingKeys = await _dbContext.ConfigParameters
             .AsNoTracking()

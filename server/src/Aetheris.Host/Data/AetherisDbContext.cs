@@ -60,6 +60,41 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
     public DbSet<AdminAuditLogEntity> AdminAuditLogs => Set<AdminAuditLogEntity>();
 
     /// <summary>
+    /// Gets the administrator roles table.
+    /// </summary>
+    public DbSet<AdminRoleEntity> AdminRoles => Set<AdminRoleEntity>();
+
+    /// <summary>
+    /// Gets the administrator permissions table.
+    /// </summary>
+    public DbSet<AdminPermissionEntity> AdminPermissions => Set<AdminPermissionEntity>();
+
+    /// <summary>
+    /// Gets the permissions of the administrator roles.
+    /// </summary>
+    public DbSet<AdminRolePermissionEntity> AdminRolePermissions => Set<AdminRolePermissionEntity>();
+
+    /// <summary>
+    /// Gets the roles of the administrator accounts.
+    /// </summary>
+    public DbSet<AdminAccountRoleEntity> AdminAccountRoles => Set<AdminAccountRoleEntity>();
+
+    /// <summary>
+    /// Gets the administrator sessions table.
+    /// </summary>
+    public DbSet<AdminSessionEntity> AdminSessions => Set<AdminSessionEntity>();
+
+    /// <summary>
+    /// Gets the history of the configuration parameters.
+    /// </summary>
+    public DbSet<ConfigParameterChangeEntity> ConfigParameterChanges => Set<ConfigParameterChangeEntity>();
+
+    /// <summary>
+    /// Gets the parameters the admin panel never changes.
+    /// </summary>
+    public DbSet<ReadOnlyConfigParameterEntity> ReadOnlyConfigParameters => Set<ReadOnlyConfigParameterEntity>();
+
+    /// <summary>
     /// Gets the security journal table.
     /// </summary>
     public DbSet<SecurityEventEntity> SecurityEvents => Set<SecurityEventEntity>();
@@ -170,8 +205,85 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
             entity.Property(e => e.Id).HasMaxLength(450);
             entity.Property(e => e.IdentityUserId).HasMaxLength(450);
             entity.Property(e => e.DisplayName).HasMaxLength(256);
-            entity.Property(e => e.Roles).HasMaxLength(512);
             entity.HasIndex(e => e.IdentityUserId).IsUnique();
+        });
+
+        builder.Entity<AdminRoleEntity>(entity =>
+        {
+            entity.ToTable("admin_role");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Code).HasMaxLength(64);
+            entity.Property(e => e.NameKey).HasMaxLength(128);
+            entity.HasIndex(e => e.Code).IsUnique();
+        });
+
+        builder.Entity<AdminPermissionEntity>(entity =>
+        {
+            entity.ToTable("admin_permission");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Code).HasMaxLength(128);
+            entity.Property(e => e.Kind).HasMaxLength(32);
+            entity.HasIndex(e => e.Code).IsUnique();
+        });
+
+        builder.Entity<AdminRolePermissionEntity>(entity =>
+        {
+            entity.ToTable("admin_role_permission");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.HasIndex(e => new { e.AdminRoleId, e.AdminPermissionId }).IsUnique();
+            entity.HasIndex(e => e.AdminPermissionId);
+            entity.HasOne<AdminRoleEntity>().WithMany().HasForeignKey(e => e.AdminRoleId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<AdminPermissionEntity>().WithMany().HasForeignKey(e => e.AdminPermissionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<AdminAccountRoleEntity>(entity =>
+        {
+            entity.ToTable("admin_account_role");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.AdminAccountId).HasMaxLength(450);
+            entity.HasIndex(e => new { e.AdminAccountId, e.AdminRoleId }).IsUnique();
+            entity.HasIndex(e => e.AdminRoleId);
+            entity.HasOne<AdminAccountEntity>().WithMany().HasForeignKey(e => e.AdminAccountId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<AdminRoleEntity>().WithMany().HasForeignKey(e => e.AdminRoleId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<AdminSessionEntity>(entity =>
+        {
+            entity.ToTable("admin_session");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasMaxLength(64);
+            entity.Property(e => e.AdminAccountId).HasMaxLength(450);
+            entity.Property(e => e.SecondFactor).HasMaxLength(32);
+            entity.Property(e => e.EndReason).HasMaxLength(64);
+            entity.HasIndex(e => e.AdminAccountId);
+            entity.HasOne<AdminAccountEntity>().WithMany().HasForeignKey(e => e.AdminAccountId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ConfigParameterChangeEntity>(entity =>
+        {
+            entity.ToTable("config_parameter_change");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Key).HasMaxLength(128);
+            entity.Property(e => e.OldValue).HasMaxLength(4096);
+            entity.Property(e => e.NewValue).HasMaxLength(4096);
+            entity.Property(e => e.Reason).HasMaxLength(2000);
+            entity.Property(e => e.AdminAccountId).HasMaxLength(450);
+
+            // The history of one parameter, newest first.
+            entity.HasIndex(e => new { e.Key, e.Id });
+            entity.HasOne<ConfigParameterChangeEntity>().WithMany().HasForeignKey(e => e.RolledBackChangeId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<ReadOnlyConfigParameterEntity>(entity =>
+        {
+            entity.ToTable("config_parameter_read_only");
+            entity.HasKey(e => e.Key);
+            entity.Property(e => e.Key).HasMaxLength(128);
         });
 
         builder.Entity<AdminAuditLogEntity>(entity =>
@@ -182,6 +294,7 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
             entity.Property(e => e.AdminId).HasMaxLength(450);
             entity.Property(e => e.Action).HasMaxLength(256);
             entity.Property(e => e.Target).HasMaxLength(512);
+            entity.Property(e => e.Reason).HasMaxLength(2000);
             entity.HasIndex(e => e.At);
         });
 

@@ -171,7 +171,8 @@ dotnet run --project src/Aetheris.Host
 | `GET /api/v1/ping` | Проста перевірка живості |
 | `/api/v1/auth/...` | Реєстрація, повторний лист підтвердження, підтвердження email, вхід, оновлення сесії, вихід, скидання пароля, Google, `providers` (чи увімкнено Google) |
 | `POST /api/v1/test/echo` | Нейтральна тестова команда: показує весь конвеєр захисту |
-| `/api/admin/...` | Адмінка: вхід із TOTP, `ping`, зміна параметрів, коефіцієнт часу, журнал, сектори світу |
+| `/api/admin/...` | Адмінка (задача 00007): вхід (TOTP за перемикачем `admin.require_totp`), сесія, параметри з історією й відкатом, журнал, генерація секторів у фоні, таблиці світу |
+| `/admin` (клієнт) | Сторінка адміністратора: окремий модуль клієнта, посилання з меню гравця немає |
 | `/api/v1/world/...` | Світ для гравця: довідники, сектори, системи, вміст системи, вільні планети, стартова планета |
 | `/hubs/game` | SignalR-хаб ігрових подій (лише для гравця, що увійшов) |
 
@@ -194,7 +195,7 @@ dotnet test
 `AETHERIS_DATABASE__CONNECTIONSTRING` або з `appsettings.Local.json`, і завжди перемикають
 базу на `aetheris_test`.
 
-143 тести (123 тести сервера і 20 тестів аналізаторів), зокрема:
+224 тести (204 тести сервера і 20 тестів аналізаторів), зокрема:
 
 - **Конфігурація без хардкоду** — зміна значення в базі змінює результат без перезбірки.
 - **Ігровий годинник** — якір `(real0, game0, k)`, зміна множника, round-trip перетворень.
@@ -223,6 +224,12 @@ dotnet test
   поля й нове поле подією планувальника на прискореному годиннику, 100 паралельних новачків
   без спільної планети, продуктивність (сектор зі 150 систем до 2 с, читання системи до 20 мс),
   адмін-команди з роллю, TOTP і журналами, видимість «лише своя планета».
+- **Адмін-панель (задача 00007)** — `tests/Aetheris.Tests/Admin` і `World/AdminGenerationTests.cs`:
+  відмова всім адмін-маршрутам без сесії й гравцю, завершення за бездіяльністю й вихід,
+  суворіші ліміти входу, перемикач TOTP в обох станах, кожен ендпоінт — право головної ролі,
+  ендпоінт без коду дії не проходить, параметри (тип, межі, причина, лише читання, дія без
+  перезапуску, журнал, відкат), фонова генерація й «одна одночасно», той самий seed — той самий
+  результат, таблиці з пошуком/фільтрами/пагінацією, відсутність хешів, токенів і листів у відповідях.
 
 > **Ізоляція тестів.** Усі тести, що працюють із базою, живуть у спільній колекції
 > `database` і виконуються послідовно: одна тестова база — значить, тести не можуть
@@ -297,7 +304,7 @@ dotnet test
 | Облікові записи | `Auth/` | Identity, хеш PBKDF2 з кількістю ітерацій з бази, довжина й поширені паролі, підтвердження email, тимчасове блокування після серії невдач |
 | Сесія | `Auth/SessionIssuer.cs` | Коротка cookie сесії + refresh-токен (хеш у базі, одноразовий, повторне використання відкликає всі сесії); cookie `HttpOnly`, `Secure`, `SameSite=Strict` |
 | Google | `Security/SecurityServiceCollectionExtensions.cs` | Вмикається, лише якщо задані `Authentication:Google:ClientId` і `ClientSecret`; `state` і correlation cookie перевіряє обробник |
-| Політики прав | `Aetheris.Core/Security/SecurityPolicies.cs` | `player`, `admin`, `admin.owner/balance/support/moderation`; адмінські ролі окремі від гравця |
+| Політики прав | `Aetheris.Core/Security/SecurityPolicies.cs` | `player`, `admin`; права адмінів — таблиці `admin_role`, `admin_permission`, `admin_role_permission`, `admin_account_role` (задача 00007) |
 | Власність об'єктів | `Commands/OwnershipChecker.cs` | Єдина перевірка «це мій об'єкт» для команд і підписок SignalR |
 | Конвеєр команд | `Commands/CommandEndpoints.cs` | Політика → ліміт → ідентифікатор запиту → розмір → валідація → власність → транзакція з журналом змін і збереженою відповіддю |
 | Повтори | таблиця `request_idempotency` | Той самий `Idempotency-Key` повертає збережену відповідь, команда не виконується вдруге |
@@ -307,7 +314,7 @@ dotnet test
 | CORS і CSRF | `Security/ClientOrigins.cs`, `Security/CsrfProtectionMiddleware.cs` | Лише адреси з `Cors:AllowedOrigins`; запит із cookie сесії потребує токена `X-XSRF-TOKEN` з `GET /api/v1/auth/csrf`; хаб перевіряє `Origin` |
 | Помилки | `Security/ApiExceptionHandler.cs` | Назовні лише `{ "error": "код" }`, без стеків і таблиць |
 | Журнал безпеки | таблиця `security_event` | Входи, невдачі, блокування, зміна пароля, ліміти, CSRF, чужі об'єкти; сповіщення (рівень Error → Sentry) на серію невдалих входів |
-| Адмінка | `Admin/` | Вхід лише з TOTP; кожен запит пише `admin_audit_log` (хто, що, коли, старе й нове значення); журнал не змінюється ні застосунком, ні SQL (тригер) |
+| Адмінка | `Admin/` | Вхід з окремими суворішими лімітами (`admin_auth`, блокування після 3 невдач); TOTP за перемикачем `admin.require_totp`; серверна сесія `admin_session` завершується за бездіяльністю; кожен запит перевіряє право з БД за кодом дії (ім'я ендпоінта) і пише `admin_audit_log` (хто, що, коли, старе й нове значення, причина); журнал не змінюється ні застосунком, ні SQL (тригер) |
 | Логи | `Observability/SensitiveDataMaskingEnricher.cs` | Маскує паролі, токени й email у кожній події Serilog |
 
 ### Параметри безпеки
@@ -327,7 +334,13 @@ dotnet test
 | `security.login.lockout_minutes` | 15 | Тривалість блокування |
 | `security.session.access_minutes` | 15 | Життя cookie сесії |
 | `security.session.refresh_days` | 14 | Життя refresh-токена |
-| `security.admin.session_minutes` | 30 | Життя адмінської сесії |
+| `security.admin.session_minutes` | 30 | Хвилин бездіяльності, після яких адмінська сесія завершується |
+| `security.admin.session_max_hours` | 12 | Найдовше життя адмінської сесії навіть з активністю |
+| `admin.require_totp` | true (у dev — false) | Чи потрібен код TOTP для входу адміна; у панелі лише читання |
+| `security.admin.login_max_failed_attempts` / `login_lockout_minutes` | 3 / 30 | Блокування адмін-акаунта (суворіше, ніж для гравця) |
+| `security.rate_limit.admin_auth.permit_limit` / `window_seconds` | 5 / 60 | Ліміт запитів входу в адмінку на IP |
+| `security.admin.page_size` / `search_max_length` | 50 / 100 | Розмір сторінки й довжина пошуку адмін-таблиць |
+| `security.admin.reason_min_length` / `reason_max_length` | 3 / 500 | Довжина обов'язкової причини зміни |
 | `security.admin.max_clock_multiplier` | 100 | Найбільший коефіцієнт часу |
 | `security.admin.audit_page_size` | 100 | Записів журналу за раз |
 | `security.rate_limit.{ip,auth,command,admin}.permit_limit` | 300 / 20 / 120 / 60 | Запитів за вікно |
@@ -347,13 +360,26 @@ dotnet test
 
 ```bash
 cd server
+dotnet run --project src/Aetheris.Host -- create-admin                      # email спитає в терміналі, роль owner
 dotnet run --project src/Aetheris.Host -- create-admin admin@example.com owner
 ```
 
-Пароль вводиться без відлуння (або береться зі змінної `AETHERIS_ADMIN_PASSWORD`, якщо
-консолі немає). Команда друкує `otpauth://`-посилання з ключем: його додають у застосунок
-автентифікації. Ролі: `owner`, `balance`, `support`, `moderation` (через кому). Без коду
-TOTP вхід в адмінку (`POST /api/admin/auth/login`) неможливий.
+Email можна передати аргументом або ввести в терміналі; пароль вводиться без відлуння (або
+береться зі змінної `AETHERIS_ADMIN_PASSWORD`, якщо консолі немає). Роль за замовчуванням —
+головна `owner`; інші коди беруться з таблиці `admin_role` (у seed також `balance`, `support`,
+`moderation` з 00002). Команда друкує `otpauth://`-посилання з ключем для застосунку
+автентифікації. Після цього вхід — на сторінці `/admin`.
+
+**TOTP-перемикач.** Параметр `admin.require_totp`: у розробці seed пише `false`
+(`appsettings.Development.json`, розділ `ConfigSeed:Overrides`), в інших середовищах — `true`.
+У панелі параметр лише читається. **Перед публічним запуском обов'язково ввімкнути:**
+
+```sql
+UPDATE config_parameter SET value = 'true', version = version + 1, updated_at = now()
+WHERE key = 'admin.require_totp';
+```
+
+Після ввімкнення відкриті сесії без TOTP завершуються, вхід вимагає код.
 
 ### Листи
 
@@ -679,11 +705,20 @@ psql -d aetheris_dev -c "SELECT key, value, version FROM config_parameter ORDER 
 | `POST /api/admin/world/sectors/{id}/regenerate` `{ "seed": 5 }` | `owner` | Перегенерувати сектор без власників |
 | `GET /api/admin/world/sectors/{id}/stats` | будь-яка | Кількість об'єктів за типами, вільні й зайняті планети, поля та їхня маса |
 
+Генерація з панелі (задача 00007): `GET /api/admin/world/generation/estimate?sector_count=N`
+(підсумок для підтвердження), `POST /api/admin/world/generation-runs`
+`{ "sector_count": 2, "seed": 42, "rule_set": "current" }` (202, виконується планувальником у фоні;
+друга одночасна — 409), `GET /api/admin/world/generation-runs[/{id}]` (статус, підсумок, історія).
+Ліміти — `world.admin.max_sectors_per_run` і `world.admin.max_systems_per_run` (очікувана кількість
+систем = сектори × середнє `systems_min`/`systems_max`). Таблиці: `GET /api/admin/world/sectors`,
+`/systems`, `/objects`, `/fields` з `page`, `page_size`, `search` (число — пошук за ID),
+`sort`, `direction` і фільтрами (`sector_id`, `system_id`, `object_class`, `owned`, `free`, `depleted`...).
+
 ### Як змінити параметри
 
 Числа — у `config_parameter` під ключами `world.*` (межі в
 `server/src/Aetheris.World/Configuration/WorldConfigKeys.cs`), змінюються через
-`PUT /api/admin/config/{key}` або SQL і діють на наступну генерацію без перезбірки:
+`PUT /api/admin/config/{key}` `{ "value": "80", "reason": "..." }` (сторінка «Параметри» в `/admin`, з історією й відкатом) або SQL і діють на наступну генерацію без перезбірки:
 
 ```sql
 UPDATE config_parameter SET value = '80', version = version + 1, updated_at = now()

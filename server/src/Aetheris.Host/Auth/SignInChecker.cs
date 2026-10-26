@@ -29,6 +29,17 @@ public enum SignInOutcome
 public sealed record SignInCheckResult(SignInOutcome Outcome, IdentityUser? User);
 
 /// <summary>
+/// The lockout of a kind of sign-in.
+/// </summary>
+/// <param name="MaxFailedAttempts">The failed attempts in a row before the account is locked.</param>
+/// <param name="Lockout">How long the account stays locked.</param>
+/// <remarks>
+/// The players use the <c>security.login.*</c> parameters; the administrators have their own,
+/// stricter ones (task 00007, decision 5).
+/// </remarks>
+public sealed record SignInLimits(int MaxFailedAttempts, TimeSpan Lockout);
+
+/// <summary>
 /// Checks a password and keeps the count of failed sign-ins, shared by the player and the
 /// administrator sign-in (task 00002, section 2.1).
 /// </summary>
@@ -86,6 +97,7 @@ public sealed class SignInChecker
     /// <param name="httpContext">The request, used for the security journal.</param>
     /// <param name="failureEventType">The security event written for a failure.</param>
     /// <param name="requireConfirmedEmail">Whether an account without a confirmed e-mail address is refused.</param>
+    /// <param name="limits">The lockout to apply, or <see langword="null"/> for the one of the players.</param>
     /// <returns>The result of the check.</returns>
     /// <remarks>
     /// A player signs in before the confirmation and only gets the actions allowed without it
@@ -96,7 +108,8 @@ public sealed class SignInChecker
         string password,
         HttpContext httpContext,
         string failureEventType,
-        bool requireConfirmedEmail = true)
+        bool requireConfirmedEmail = true,
+        SignInLimits? limits = null)
     {
         ArgumentNullException.ThrowIfNull(login);
         ArgumentNullException.ThrowIfNull(httpContext);
@@ -122,7 +135,7 @@ public sealed class SignInChecker
 
         if (!await _userManager.CheckPasswordAsync(user, password).ConfigureAwait(false))
         {
-            await RegisterFailureAsync(user, httpContext, failureEventType, "wrong_password").ConfigureAwait(false);
+            await RegisterFailureAsync(user, httpContext, failureEventType, "wrong_password", limits).ConfigureAwait(false);
 
             return new SignInCheckResult(SignInOutcome.InvalidCredentials, user);
         }
@@ -144,14 +157,18 @@ public sealed class SignInChecker
     /// <param name="httpContext">The request, used for the security journal.</param>
     /// <param name="failureEventType">The security event written for the failure.</param>
     /// <param name="detail">The reason of the failure.</param>
+    /// <param name="limits">The lockout to apply, or <see langword="null"/> for the one of the players.</param>
     /// <returns>A task that completes when the failure is recorded.</returns>
     public async Task RegisterFailureAsync(
         IdentityUser user,
         HttpContext httpContext,
         string failureEventType,
-        string detail)
+        string detail,
+        SignInLimits? limits = null)
     {
         ArgumentNullException.ThrowIfNull(user);
+
+        SignInLimits applied = limits ?? new SignInLimits(_settings.LoginMaxFailedAttempts, _settings.LoginLockout);
 
         await _securityLog.WriteAsync(failureEventType, httpContext, user.Id, detail).ConfigureAwait(false);
 
@@ -160,14 +177,14 @@ public sealed class SignInChecker
 
         int failures = await _userManager.GetAccessFailedCountAsync(user).ConfigureAwait(false);
 
-        if (failures < _settings.LoginMaxFailedAttempts)
+        if (failures < applied.MaxFailedAttempts)
         {
             return;
         }
 
         await _userManager.SetLockoutEnabledAsync(user, true).ConfigureAwait(false);
         await _userManager
-            .SetLockoutEndDateAsync(user, _timeProvider.GetUtcNow() + _settings.LoginLockout)
+            .SetLockoutEndDateAsync(user, _timeProvider.GetUtcNow() + applied.Lockout)
             .ConfigureAwait(false);
         await _userManager.ResetAccessFailedCountAsync(user).ConfigureAwait(false);
 

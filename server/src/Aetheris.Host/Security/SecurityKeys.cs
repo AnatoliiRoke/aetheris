@@ -103,6 +103,30 @@ public static class SecurityKeys
     /// <summary>The largest number of audit records returned at once.</summary>
     public const string AdminAuditPageSize = "security.admin.audit_page_size";
 
+    /// <summary>Whether an administrator signs in with the one-time code of an authenticator app.</summary>
+    public const string AdminRequireTotp = "admin.require_totp";
+
+    /// <summary>The longest life of an administrator session, however active, in hours.</summary>
+    public const string AdminSessionMaxHours = "security.admin.session_max_hours";
+
+    /// <summary>The failed administrator sign-ins in a row before the account is locked.</summary>
+    public const string AdminLoginMaxFailedAttempts = "security.admin.login_max_failed_attempts";
+
+    /// <summary>How long a locked administrator account stays locked, in minutes.</summary>
+    public const string AdminLoginLockoutMinutes = "security.admin.login_lockout_minutes";
+
+    /// <summary>The largest number of rows of an admin table returned at once.</summary>
+    public const string AdminPageSize = "security.admin.page_size";
+
+    /// <summary>The largest length of the search text of an admin table.</summary>
+    public const string AdminSearchMaxLength = "security.admin.search_max_length";
+
+    /// <summary>The smallest length of the reason of an administrator change.</summary>
+    public const string AdminReasonMinLength = "security.admin.reason_min_length";
+
+    /// <summary>The largest length of the reason of an administrator change.</summary>
+    public const string AdminReasonMaxLength = "security.admin.reason_max_length";
+
     /// <summary>The largest request body, in bytes.</summary>
     public const string RequestMaxBodyBytes = "security.request.max_body_bytes";
 
