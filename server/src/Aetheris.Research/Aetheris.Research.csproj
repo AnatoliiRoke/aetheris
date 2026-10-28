@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <RootNamespace>Aetheris.Research</RootNamespace>
@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Data\research-reference-seed.json" LogicalName="Aetheris.Research.reference-seed.json" />
+    <EmbeddedResource Include="Data\admin-reference-texts.json" LogicalName="Aetheris.Research.admin-reference-texts.json" />
   </ItemGroup>
 
 </Project>

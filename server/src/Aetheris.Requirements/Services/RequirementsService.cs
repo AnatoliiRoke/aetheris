@@ -73,6 +73,66 @@ public sealed class RequirementsService
     }
 
     /// <summary>
+    /// Replaces every requirement of a subject. A kept requirement keeps its row, so its
+    /// identifier does not change; the others are removed or added.
+    /// </summary>
+    /// <param name="subjectType">The subject type, one of <see cref="RequirementSubjectTypes"/>.</param>
+    /// <param name="subjectId">The subject.</param>
+    /// <param name="requirements">The new requirements with the first level of the subject each applies to; the subject of each is ignored.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the requirements are replaced.</returns>
+    public Task ReplaceAsync(
+        string subjectType,
+        int subjectId,
+        IReadOnlyList<SubjectRequirement> requirements,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(subjectType);
+        ArgumentNullException.ThrowIfNull(requirements);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                List<RequirementEntity> stored = await _dbContext.Requirements
+                    .Where(requirement => requirement.SubjectType == subjectType && requirement.SubjectId == subjectId)
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                List<SubjectRequirement> missing = [.. requirements];
+
+                foreach (RequirementEntity row in stored)
+                {
+                    SubjectRequirement? kept = missing.FirstOrDefault(requirement => requirement.SubjectLevel == row.SubjectLevel
+                        && requirement.Requirement.RequirementType == row.RequirementType
+                        && requirement.Requirement.TargetId == row.TargetId
+                        && requirement.Requirement.TargetLevel == row.TargetLevel);
+
+                    if (kept is null)
+                    {
+                        _dbContext.Requirements.Remove(row);
+                    }
+                    else
+                    {
+                        missing.Remove(kept);
+                    }
+                }
+
+                _dbContext.Requirements.AddRange(missing.Select(requirement => new RequirementEntity
+                {
+                    SubjectType = subjectType,
+                    SubjectId = subjectId,
+                    SubjectLevel = requirement.SubjectLevel,
+                    RequirementType = requirement.Requirement.RequirementType,
+                    TargetId = requirement.Requirement.TargetId,
+                    TargetLevel = requirement.Requirement.TargetLevel,
+                }));
+
+                return true;
+            },
+            cancellationToken);
+    }
+
+    /// <summary>
     /// Gets the requirements of a subject that apply to a level.
     /// </summary>
     /// <param name="subjectType">The subject type, one of <see cref="RequirementSubjectTypes"/>.</param>

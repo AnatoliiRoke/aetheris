@@ -29,6 +29,30 @@ public static class BuildingEffectTypes
 
     /// <summary>The level of every other building of the body cannot exceed the value.</summary>
     public const string LevelCap = "level_cap";
+
+    /// <summary>
+    /// Gets every effect type, in the order of the form of the admin panel (task 00023).
+    /// </summary>
+    public static IReadOnlyList<string> All { get; } =
+    [
+        MetalProduction,
+        CrystalProduction,
+        StorageCapacity,
+        EnergyOutput,
+        EnergyConsumption,
+        PopulationMax,
+        LevelCap,
+    ];
+
+    /// <summary>
+    /// Gets the effect types that name the resource they produce.
+    /// </summary>
+    public static IReadOnlySet<string> OfResource { get; } = new HashSet<string>(StringComparer.Ordinal) { MetalProduction, CrystalProduction };
+
+    /// <summary>
+    /// Gets the effect types that name the resource group they store.
+    /// </summary>
+    public static IReadOnlySet<string> OfResourceGroup { get; } = new HashSet<string>(StringComparer.Ordinal) { StorageCapacity };
 }
 
 /// <summary>
@@ -41,6 +65,9 @@ public static class PlanetsErrorCodes
 
     /// <summary>The building type does not exist.</summary>
     public const string BuildingUnknown = "planets_building_unknown";
+
+    /// <summary>The building type is archived: no new building or level of it (task 00023).</summary>
+    public const string BuildingArchived = "planets_building_archived";
 
     /// <summary>A requirement of the building or of its level is not met.</summary>
     public const string RequirementUnmet = "planets_requirement_unmet";

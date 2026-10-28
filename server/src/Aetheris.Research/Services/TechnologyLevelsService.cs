@@ -117,4 +117,8 @@ public sealed class TechnologyLevelsService : ITechnologyLevels
             energyOutput,
             populationMax);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlySet<int>> GetTechnologyIdsAsync(CancellationToken cancellationToken) =>
+        new HashSet<int>(await _dbContext.Technologies.AsNoTracking().Select(technology => technology.Id).ToListAsync(cancellationToken).ConfigureAwait(false));
 }

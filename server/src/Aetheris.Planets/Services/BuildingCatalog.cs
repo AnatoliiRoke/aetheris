@@ -74,6 +74,7 @@ public sealed record BuildingCatalog(
 /// <param name="SortOrder">The order in the lists.</param>
 /// <param name="BuildingClass">The class of the type: what the building is for.</param>
 /// <param name="Levels">The levels by number.</param>
+/// <param name="IsArchived">Whether the type is archived: its buildings work, no new building or level of it is offered.</param>
 public sealed record BuildingTypeInfo(
     int Id,
     string Code,
@@ -81,7 +82,8 @@ public sealed record BuildingTypeInfo(
     string DescriptionKey,
     int SortOrder,
     string BuildingClass,
-    IReadOnlyDictionary<int, BuildingLevelInfo> Levels)
+    IReadOnlyDictionary<int, BuildingLevelInfo> Levels,
+    bool IsArchived = false)
 {
     /// <summary>
     /// Gets a value indicating whether a building of this type limits the levels of the others;
@@ -254,7 +256,8 @@ public sealed class BuildingCatalogCache
                             level.Level,
                             level.DurationSeconds,
                             level.CostIds.ToDictionary(cost => cost.ResourceTypeId, cost => cost.Amount),
-                            [.. level.EffectIds.Select(effect => new BuildingEffectInfo(effect.EffectType, effect.ResourceTypeId, effect.ResourceGroupId, effect.Value))])))),
+                            [.. level.EffectIds.Select(effect => new BuildingEffectInfo(effect.EffectType, effect.ResourceTypeId, effect.ResourceGroupId, effect.Value))])),
+                    type.IsArchived)),
             ],
             requirementInfos,
             resources.Resources,

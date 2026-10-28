@@ -37,6 +37,14 @@ public sealed class RequirementsModule : IRequirementsModule
         _requirements.AddAsync(subjectType, subjectId, subjectLevel, requirements, cancellationToken);
 
     /// <inheritdoc />
+    public Task ReplaceAsync(
+        string subjectType,
+        int subjectId,
+        IReadOnlyList<SubjectRequirement> requirements,
+        CancellationToken cancellationToken = default) =>
+        _requirements.ReplaceAsync(subjectType, subjectId, requirements, cancellationToken);
+
+    /// <inheritdoc />
     public Task<IReadOnlyList<RequirementDefinition>> GetAsync(
         string subjectType,
         int subjectId,

@@ -1,3 +1,4 @@
+using Aetheris.Core.Admin;
 using Aetheris.Core.Commands;
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Data;
@@ -19,7 +20,7 @@ namespace Aetheris.Planets;
 /// </summary>
 /// <remarks>
 /// The host calls the static members: <see cref="Register"/>, <see cref="MapEndpoints"/>,
-/// <see cref="MigrateAsync"/> and <see cref="ConfigDefinitions"/>.
+/// <see cref="MapAdminEndpoints"/>, <see cref="MigrateAsync"/> and <see cref="ConfigDefinitions"/>.
 /// </remarks>
 public sealed class PlanetsModule : IPlanetsModule
 {
@@ -72,6 +73,8 @@ public sealed class PlanetsModule : IPlanetsModule
         services.TryAddScoped<ITechnologyLevels, NoTechnologyLevels>();
         services.AddScoped<IPlanetsModule, PlanetsModule>();
         services.AddScoped<IScheduledEventHandler, ConstructionCompleteHandler>();
+        services.AddScoped<PlanetsReferenceAdminService>();
+        services.AddScoped<IAdminReferenceService>(serviceProvider => serviceProvider.GetRequiredService<PlanetsReferenceAdminService>());
 
         // The start package of a new civilization lands in this module instead of the old
         // storage of the world.
@@ -92,6 +95,15 @@ public sealed class PlanetsModule : IPlanetsModule
     /// <param name="endpoints">The endpoint builder.</param>
     /// <returns>The same builder.</returns>
     public static IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) => PlanetsEndpoints.Map(endpoints);
+
+    /// <summary>
+    /// Maps the reference kinds of the module on the secured admin group of the host
+    /// (task 00023): the module owns the endpoints of its own reference.
+    /// </summary>
+    /// <param name="secured">The secured admin group.</param>
+    /// <returns>The same group.</returns>
+    public static RouteGroupBuilder MapAdminEndpoints(RouteGroupBuilder secured) =>
+        secured.MapAdminReference<PlanetsReferenceAdminService>(PlanetsReferenceAdminService.BuildingDescriptor);
 
     /// <summary>
     /// Applies the migrations of the module.

@@ -132,6 +132,13 @@ public static class ConstructionRules
         BuildingLevelInfo? info = buildingType.Levels.GetValueOrDefault(level);
         List<string> reasons = [];
 
+        // An archived type keeps the buildings the players have, but no new level of it is
+        // offered (task 00023, decision 5).
+        if (buildingType.IsArchived)
+        {
+            reasons.Add(PlanetsErrorCodes.BuildingArchived);
+        }
+
         IReadOnlyList<UnmetRequirement> unmet = RequirementChecker.Check(
             catalog,
             RequirementSubjectTypes.BuildingType,
@@ -255,6 +262,12 @@ public static class PlanetOverviewBuilder
         foreach (BuildingTypeInfo type in catalog.Types)
         {
             int level = figures.Levels.GetValueOrDefault(type.Id);
+
+            // An archived type is shown only on a body that has a building of it or has it in the queue.
+            if (type.IsArchived && level == 0 && queuedLevels.GetValueOrDefault(type.Id) == 0)
+            {
+                continue;
+            }
             NextLevelCheck next = ConstructionRules.CheckNext(catalog, settings, figures, type);
 
             buildings.Add(new BuildingDto(

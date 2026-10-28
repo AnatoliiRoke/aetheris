@@ -1,0 +1,16 @@
+{
+  "admin.reference.technology.title": { "uk": "Технології", "en": "Technologies" },
+  "admin.reference.technology_branch.title": { "uk": "Гілки технологій", "en": "Technology branches" },
+  "admin.reference.field.branch": { "uk": "Гілка", "en": "Branch" },
+  "admin.reference.field.research_center_level": { "uk": "Рівень наукового центру", "en": "Research centre level" },
+  "admin.reference.field.unlock_kind": { "uk": "Що відкриває", "en": "What it opens" },
+  "admin.reference.field.unlock_target": { "uk": "Відкритий запис", "en": "Opened record" },
+  "admin.reference.technology_effect.unlocks": { "uk": "Відкриває", "en": "Opens" },
+  "admin.reference.technology_effect.metal_production": { "uk": "Множник видобутку металів", "en": "Metal production multiplier" },
+  "admin.reference.technology_effect.crystal_production": { "uk": "Множник видобутку кристалів", "en": "Crystal production multiplier" },
+  "admin.reference.technology_effect.construction_time": { "uk": "Множник часу будівництва", "en": "Construction time multiplier" },
+  "admin.reference.technology_effect.storage_capacity": { "uk": "Множник місткості складів", "en": "Storage capacity multiplier" },
+  "admin.reference.technology_effect.energy_output": { "uk": "Множник енергії", "en": "Energy output multiplier" },
+  "admin.reference.technology_effect.population_max": { "uk": "Множник максимуму населення", "en": "Population limit multiplier" },
+  "admin.reference.unlock.building_type": { "uk": "Будівлю", "en": "A building" }
+}

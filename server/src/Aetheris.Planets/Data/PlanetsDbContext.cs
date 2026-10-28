@@ -90,6 +90,7 @@ public sealed class PlanetsDbContext : DbContext
             entity.Property(e => e.NameKey).HasMaxLength(NameLength);
             entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
             entity.Property(e => e.BuildingClass).HasMaxLength(CodeLength);
+            entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasIndex(e => e.BuildingClass);
             entity.HasMany(e => e.LevelIds).WithOne().HasForeignKey(level => level.BuildingTypeId).OnDelete(DeleteBehavior.Cascade);

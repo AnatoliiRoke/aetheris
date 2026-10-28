@@ -12,6 +12,8 @@ using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Localization;
 using Aetheris.Host.Security;
+using Aetheris.Planets;
+using Aetheris.Research;
 using Aetheris.World.Api;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication;
@@ -230,6 +232,8 @@ public static class AdminEndpoints
         secured.MapPlayerAdminEndpoints();
         secured.MapReferenceKindEndpoints();
         secured.MapReferenceImageAdminEndpoints();
+        PlanetsModule.MapAdminEndpoints(secured);
+        ResearchServiceCollectionExtensions.MapAdminEndpoints(secured);
     }
 
     private static async Task<IResult> SignInAsync(

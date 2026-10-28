@@ -1,3 +1,4 @@
+using Aetheris.Core.Admin;
 using Aetheris.Core.Commands;
 using Aetheris.Core.Data;
 using Aetheris.Core.Scheduling;
@@ -42,6 +43,8 @@ public static class ResearchServiceCollectionExtensions
         services.AddScoped<ResearchTreeBuilder>();
         services.AddScoped<IResearchModule, ResearchModule>();
         services.AddScoped<IScheduledEventHandler, ResearchCompleteHandler>();
+        services.AddScoped<ResearchReferenceAdminService>();
+        services.AddScoped<IAdminReferenceService>(serviceProvider => serviceProvider.GetRequiredService<ResearchReferenceAdminService>());
 
         services.AddCommand<EnqueueResearchCommand>();
         services.AddCommand<CancelResearchCommand>();
@@ -61,4 +64,15 @@ public static class ResearchServiceCollectionExtensions
     /// <returns>The same builder.</returns>
     public static IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) =>
         ResearchEndpoints.Map(endpoints);
+
+    /// <summary>
+    /// Maps the reference kinds of the module on the secured admin group of the host
+    /// (task 00023): the technologies and the branches of the tree.
+    /// </summary>
+    /// <param name="secured">The secured admin group.</param>
+    /// <returns>The same group.</returns>
+    public static RouteGroupBuilder MapAdminEndpoints(RouteGroupBuilder secured) =>
+        secured
+            .MapAdminReference<ResearchReferenceAdminService>(ResearchReferenceAdminService.TechnologyDescriptor)
+            .MapAdminReference<ResearchReferenceAdminService>(ResearchReferenceAdminService.BranchDescriptor);
 }

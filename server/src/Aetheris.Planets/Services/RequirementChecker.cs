@@ -115,6 +115,14 @@ public interface ITechnologyLevels
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The bonuses.</returns>
     Task<PlanetBonuses> GetBonusesAsync(string? playerId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the technologies that exist, for the check of a requirement of a building in the
+    /// admin panel (task 00023).
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The identifiers of the technologies.</returns>
+    Task<IReadOnlySet<int>> GetTechnologyIdsAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -163,4 +171,8 @@ public sealed class NoTechnologyLevels : ITechnologyLevels
     /// <inheritdoc />
     public Task<PlanetBonuses> GetBonusesAsync(string? playerId, CancellationToken cancellationToken) =>
         Task.FromResult(PlanetBonuses.None);
+
+    /// <inheritdoc />
+    public Task<IReadOnlySet<int>> GetTechnologyIdsAsync(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlySet<int>>(new HashSet<int>());
 }

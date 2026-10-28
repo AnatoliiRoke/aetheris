@@ -157,6 +157,15 @@ namespace Aetheris.Planets.Data.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("description_key");
 
+                    b.Property<string>("ImageKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("image_key");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
                     b.Property<bool>("IsStartBuilding")
                         .HasColumnType("boolean")
                         .HasColumnName("is_start_building");
@@ -170,6 +179,10 @@ namespace Aetheris.Planets.Data.Migrations
                     b.Property<int>("SortOrder")
                         .HasColumnType("integer")
                         .HasColumnName("sort_order");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_building_type");

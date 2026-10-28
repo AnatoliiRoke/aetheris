@@ -41,6 +41,19 @@ public sealed class BuildingTypeEntity
     /// </remarks>
     public string BuildingClass { get; set; } = Services.BuildingClasses.None;
 
+    /// <summary>Gets or sets the key of the picture, or <see langword="null"/> for the neutral placeholder.</summary>
+    public string? ImageKey { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the type is archived: the buildings of the players
+    /// keep working and the queue finishes, but no new building or level of it is offered
+    /// (task 00023, decision 5).
+    /// </summary>
+    public bool IsArchived { get; set; }
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
+
     /// <summary>Gets or sets the levels of the type.</summary>
     public List<BuildingLevelEntity> LevelIds { get; set; } = [];
 }

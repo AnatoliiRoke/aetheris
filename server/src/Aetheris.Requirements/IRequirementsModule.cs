@@ -43,6 +43,21 @@ public interface IRequirementsModule
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Replaces every requirement of a subject, for the form of the admin panel that edits the
+    /// subject with its levels (task 00023, section 4.4).
+    /// </summary>
+    /// <param name="subjectType">The subject type, one of <see cref="Services.RequirementSubjectTypes"/>.</param>
+    /// <param name="subjectId">The subject.</param>
+    /// <param name="requirements">The new requirements with the first level of the subject each applies to.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the requirements are replaced.</returns>
+    Task ReplaceAsync(
+        string subjectType,
+        int subjectId,
+        IReadOnlyList<SubjectRequirement> requirements,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the requirements of a subject that apply to a level.
     /// </summary>
     /// <param name="subjectType">The subject type, one of <see cref="Services.RequirementSubjectTypes"/>.</param>
