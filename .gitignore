@@ -39,4 +39,4 @@ coverage/
 TestResults/
 
 # The pictures of the reference rows uploaded on a developer machine (task 00023)
-server/src/Aetheris.Host/data/
+server/src/Aetheris.Host/uploads/

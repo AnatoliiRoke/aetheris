@@ -30,7 +30,7 @@ public static class ReferenceImageKeys
     [
         new(Types, "image/png,image/webp", null, null, "Allowed types of a picture of a reference row, separated by commas: image/png, image/webp."),
         new(MaxBytes, "1048576", "1024", "16777216", "Largest size of a picture of a reference row, in bytes."),
-        new(Directory, "data/reference-images", null, null, "Folder of the pictures of the reference rows; a relative path starts at the folder of the server."),
+        new(Directory, "uploads/reference-images", null, null, "Folder of the pictures of the reference rows; a relative path starts at the folder of the server."),
     ];
 }
 
