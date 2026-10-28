@@ -29,6 +29,21 @@ public static class BuildingClasses
 
     /// <summary>A building where the player trades with other players.</summary>
     public const string TradeCenter = "trade_center";
+
+    /// <summary>A building that mines a resource of the body.</summary>
+    public const string Mine = "mine";
+
+    /// <summary>A building that makes goods from raw materials.</summary>
+    public const string Production = "production";
+
+    /// <summary>A building that sees the fleets of other players.</summary>
+    public const string Sensor = "sensor";
+
+    /// <summary>A building that defends the body.</summary>
+    public const string Defence = "defence";
+
+    /// <summary>A building that joins the distant systems.</summary>
+    public const string Portal = "portal";
 }
 
 /// <summary>The classes a building type may have.</summary>
@@ -44,6 +59,11 @@ public static class BuildingClassValues
         BuildingClasses.ResearchCenter,
         BuildingClasses.Shipyard,
         BuildingClasses.TradeCenter,
+        BuildingClasses.Mine,
+        BuildingClasses.Production,
+        BuildingClasses.Sensor,
+        BuildingClasses.Defence,
+        BuildingClasses.Portal,
     ];
 
     /// <summary>

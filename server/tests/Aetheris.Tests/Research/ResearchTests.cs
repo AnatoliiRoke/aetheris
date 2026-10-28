@@ -1,5 +1,9 @@
 using Aetheris.Core.Errors;
+using Aetheris.Planets;
+using Aetheris.Planets.Api;
+using Aetheris.Planets.Data;
 using Aetheris.Planets.Services;
+using Aetheris.Requirements.Services;
 using Aetheris.Research;
 using Aetheris.Research.Api;
 using Aetheris.Research.Configuration;
@@ -206,6 +210,64 @@ public sealed class ResearchTests
         Assert.True(bonuses.MetalProductionMultiplier > decimal.One);
         Assert.Equal(decimal.One, bonuses.CrystalProductionMultiplier);
     }
+
+    /// <summary>
+    /// A building that a technology opens is not available until the technology is learned,
+    /// and it is available right after (task 00012, criterion 4).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_building_opens_only_after_its_technology_is_learned()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ScienceCenter, 3);
+        await PlanetsTestData.SetDepositAsync(services, player.PlanetId, "resource_2", 1m);
+        await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, await RichBalanceAsync(services), PlanetsTestData.GameNow(services));
+
+        IResearchModule research = services.GetRequiredService<IResearchModule>();
+        ResearchTreeDto tree = await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token);
+
+        TechnologyDto opener = tree.Technologies.Single(technology => technology.NameKey == "research.technology.tech_7.name");
+
+        // The mine is closed while the technology is unknown.
+        AvailabilityDto before = await services.GetRequiredService<IPlanetsModule>()
+            .CheckRequirementsAsync(
+                RequirementSubjectTypes.BuildingType,
+                await BuildingTypeIdAsync(services, SeedCodes.TitaniumMine),
+                1,
+                player.PlanetId,
+                player.Account.UserId,
+                Token);
+
+        Assert.False(before.IsAvailable);
+        Assert.Equal(PlanetsErrorCodes.RequirementTechnology, before.UnmetRequirements.Single().ReasonCode);
+
+        // The technology is learned, so the mine opens.
+        await research.EnqueueAsync(player.Account.UserId, player.PlanetId, opener.Id, 1, Token);
+        await services.GetRequiredService<ResearchQueueService>()
+            .CompleteDueAsync(player.Account.UserId, DateTimeOffset.MaxValue, Token);
+
+        AvailabilityDto after = await services.GetRequiredService<IPlanetsModule>()
+            .CheckRequirementsAsync(
+                RequirementSubjectTypes.BuildingType,
+                await BuildingTypeIdAsync(services, SeedCodes.TitaniumMine),
+                1,
+                player.PlanetId,
+                player.Account.UserId,
+                Token);
+
+        Assert.True(after.IsAvailable);
+    }
+
+    private static Task<int> BuildingTypeIdAsync(IServiceProvider services, string code) =>
+        services.GetRequiredService<PlanetsDbContext>().BuildingTypes.AsNoTracking()
+            .Where(type => type.Code == code)
+            .Select(type => type.Id)
+            .SingleAsync(Token);
 
     private async Task ResetAsync()
     {

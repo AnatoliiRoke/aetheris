@@ -1,6 +1,8 @@
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Data;
 using Aetheris.Core.Text;
+using Aetheris.Planets;
+using Aetheris.Requirements;
 using Aetheris.Research.Data;
 using Aetheris.World;
 using Aetheris.World.Api;
@@ -25,6 +27,8 @@ public sealed class ResearchBootstrapService
     private readonly IGameConfig _config;
     private readonly ILocalizationTexts _texts;
     private readonly ICodeSequence _codes;
+    private readonly IPlanetsModule _planets;
+    private readonly IRequirementsModule _requirements;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResearchBootstrapService"/> class.
@@ -36,6 +40,8 @@ public sealed class ResearchBootstrapService
     /// <param name="config">The game configuration.</param>
     /// <param name="texts">The texts of the game data.</param>
     /// <param name="codes">The counters of the neutral codes.</param>
+    /// <param name="planets">The bodies module, for the buildings a technology opens.</param>
+    /// <param name="requirements">The common requirements module.</param>
     public ResearchBootstrapService(
         ResearchDbContext dbContext,
         ResearchUnitOfWork unitOfWork,
@@ -43,7 +49,9 @@ public sealed class ResearchBootstrapService
         IWorldModule world,
         IGameConfig config,
         ILocalizationTexts texts,
-        ICodeSequence codes)
+        ICodeSequence codes,
+        IPlanetsModule planets,
+        IRequirementsModule requirements)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -52,6 +60,8 @@ public sealed class ResearchBootstrapService
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(texts);
         ArgumentNullException.ThrowIfNull(codes);
+        ArgumentNullException.ThrowIfNull(planets);
+        ArgumentNullException.ThrowIfNull(requirements);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -60,6 +70,8 @@ public sealed class ResearchBootstrapService
         _config = config;
         _texts = texts;
         _codes = codes;
+        _planets = planets;
+        _requirements = requirements;
     }
 
     /// <summary>
@@ -72,7 +84,7 @@ public sealed class ResearchBootstrapService
         ResourceCatalog resources = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
 
         bool seeded = await _unitOfWork.RunAsync(
-            () => ResearchReferenceSeed.SeedAsync(_dbContext, resources, _texts, _codes, cancellationToken),
+            () => ResearchReferenceSeed.SeedAsync(_dbContext, resources, _texts, _codes, _planets, _requirements, cancellationToken),
             cancellationToken).ConfigureAwait(false);
 
         _catalogCache.Invalidate();

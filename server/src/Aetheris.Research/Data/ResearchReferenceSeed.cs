@@ -1,6 +1,9 @@
 using System.Text.Json;
 using Aetheris.Core.Data;
 using Aetheris.Core.Text;
+using Aetheris.Planets;
+using Aetheris.Requirements;
+using Aetheris.Requirements.Services;
 using Aetheris.Research.Data.Entities;
 using Aetheris.Research.Services;
 using Aetheris.World.Api;
@@ -87,6 +90,8 @@ public static class ResearchReferenceSeed
     /// <param name="resources">The resource catalog of the world.</param>
     /// <param name="texts">The texts of the game data.</param>
     /// <param name="codes">The counters of the neutral codes.</param>
+    /// <param name="planets">The bodies module, for the buildings a technology opens.</param>
+    /// <param name="requirements">The common requirements module, for the conditions of the technologies.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns><see langword="true"/> when the data was written.</returns>
     public static async Task<bool> SeedAsync(
@@ -94,12 +99,16 @@ public static class ResearchReferenceSeed
         ResourceCatalog resources,
         ILocalizationTexts texts,
         ICodeSequence codes,
+        IPlanetsModule planets,
+        IRequirementsModule requirements,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(resources);
         ArgumentNullException.ThrowIfNull(texts);
         ArgumentNullException.ThrowIfNull(codes);
+        ArgumentNullException.ThrowIfNull(planets);
+        ArgumentNullException.ThrowIfNull(requirements);
 
         ResearchSeedData seed = Load();
 
@@ -118,6 +127,28 @@ public static class ResearchReferenceSeed
         }
 
         Dictionary<string, int> resourceIds = resources.Resources.ToDictionary(resource => resource.Code, resource => resource.Id, StringComparer.Ordinal);
+
+        // The subjects a technology opens are named by their neutral code in the starting data,
+        // so the codes are looked up before the rows are written.
+        Dictionary<string, int> unlockIds = [];
+
+        foreach (string code in seed.Technologies
+            .SelectMany(technology => technology.Effects)
+            .Where(effect => effect.UnlockKind == TechnologyUnlockKinds.BuildingType)
+            .Select(effect => effect.UnlockTarget)
+            .OfType<string>()
+            .Distinct(StringComparer.Ordinal))
+        {
+            int? buildingTypeId = await planets.FindBuildingTypeIdAsync(code, cancellationToken).ConfigureAwait(false);
+
+            if (buildingTypeId is null)
+            {
+                throw new InvalidOperationException(
+                    $"The starting data opens the building '{code}', which the bodies module does not have.");
+            }
+
+            unlockIds[code] = buildingTypeId.Value;
+        }
 
         Dictionary<string, TechnologyEntity> technologies = seed.Technologies.ToDictionary(
             technology => technology.Code,
@@ -143,7 +174,7 @@ public static class ResearchReferenceSeed
                             {
                                 EffectType = effect.Type,
                                 UnlockKind = effect.UnlockKind,
-                                UnlockTargetId = effect.UnlockTargetId,
+                                UnlockTargetId = unlockIds.TryGetValue(effect.UnlockTarget ?? string.Empty, out int unlockId) ? unlockId : null,
                                 Value = MultiplierAt(effect.Growth ?? new SeedGrowth { Base = 1 }, level),
                             }),
                         ],
@@ -154,6 +185,29 @@ public static class ResearchReferenceSeed
 
         dbContext.Technologies.AddRange(technologies.Values);
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        // A technology that opens a building closes it until the technology is learned, so the
+        // requirement of the building lives in the common requirements module.
+        foreach ((SeedTechnology seedTechnology, TechnologyEntity technology) in seed.Technologies
+            .Select(seedTechnology => (seedTechnology, technologies[seedTechnology.Code])))
+        {
+            foreach (SeedTechnologyEffect effect in seedTechnology.Effects.Where(effect => effect.Type == TechnologyEffectTypes.Unlocks))
+            {
+                if (effect.UnlockKind != TechnologyUnlockKinds.BuildingType
+                    || effect.UnlockTarget is null
+                    || !unlockIds.TryGetValue(effect.UnlockTarget, out int buildingTypeId))
+                {
+                    continue;
+                }
+
+                await requirements.AddAsync(
+                    RequirementSubjectTypes.BuildingType,
+                    buildingTypeId,
+                    1,
+                    [new RequirementDefinition(RequirementTypes.TechnologyLevel, technology.Id, 1)],
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
 
         await texts.AddMissingAsync(
             [
@@ -242,14 +296,14 @@ public sealed record SeedTechnologyCost(string Resource, SeedGrowth Growth);
 /// <summary>An effect of a level of a technology of the starting data.</summary>
 /// <param name="Type">The kind of the effect.</param>
 /// <param name="UnlockKind">The kind of the subject the effect opens.</param>
-/// <param name="UnlockTargetId">The subject the effect opens.</param>
+/// <param name="UnlockTarget">The neutral code of the subject the effect opens.</param>
 /// <param name="Base">The value at the first level.</param>
 /// <param name="Growth">The multiplier per level.</param>
 /// <param name="Step">The amount added per level.</param>
 public sealed record SeedTechnologyEffect(
     string Type,
     string? UnlockKind = null,
-    int? UnlockTargetId = null,
+    string? UnlockTarget = null,
     SeedGrowth? Growth = null);
 
 /// <summary>The growth of a value with the level.</summary>

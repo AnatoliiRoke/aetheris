@@ -80,4 +80,10 @@ public static class SeedCodes
 
     /// <summary>The fuel tank.</summary>
     public const string FuelStorage = "building_9";
+
+    /// <summary>The mine of the titanium, which a technology opens.</summary>
+    public const string TitaniumMine = "building_10";
+
+    /// <summary>The factory, which a technology opens.</summary>
+    public const string Factory = "building_13";
 }

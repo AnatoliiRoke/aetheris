@@ -69,4 +69,16 @@ public interface IPlanetsModule
         long planetId,
         string? playerId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Finds the identifier of a building type by its neutral code.
+    /// </summary>
+    /// <param name="code">The neutral code of the building type.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The identifier, or <see langword="null"/> when the code is unknown.</returns>
+    /// <remarks>
+    /// The codes come from the data of the other modules, so they are looked up and never
+    /// written in the code (documentation/tech/09, section 3.1).
+    /// </remarks>
+    Task<int?> FindBuildingTypeIdAsync(string code, CancellationToken cancellationToken = default);
 }

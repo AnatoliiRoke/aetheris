@@ -51,7 +51,10 @@ export PATH="$HOME/.dotnet:$PATH"
 │   │   ├── Aetheris.Market/    │
 │   │   ├── Aetheris.Rating/    │
 │   │   ├── Aetheris.Chat/      │
-│   │   └── Aetheris.Admin/     ┘
+│   │   ├── Aetheris.Admin/     ┘
+│   │   ├── Aetheris.World/         ← генерація всесвіту
+│   │   ├── Aetheris.Requirements/  ← спільна таблиця вимог
+│   │   └── Aetheris.Research/      ← технології та черга досліджень
 │   ├── analyzers/          ← власні Roslyn-аналізатори (AETHERIS001)
 │   └── tests/
 │       ├── Aetheris.Tests/         ← xunit v3, тести сервера
@@ -566,11 +569,17 @@ dotnet ef migrations remove --project src/Aetheris.Host
 # Нова міграція модуля World (свій контекст і свої таблиці)
 dotnet ef migrations add <Назва> --project src/Aetheris.World --startup-project src/Aetheris.Host --context WorldDbContext --output-dir Data/Migrations
 
-# Нова міграція модуля Planets (будівлі, вимоги, черги, баланс планет)
+# Нова міграція модуля Planets (будівлі, черги, баланс планет)
 dotnet ef migrations add <Назва> --project src/Aetheris.Planets --startup-project src/Aetheris.Host --context PlanetsDbContext --output-dir Data/Migrations
+
+# Нова міграція спільного модуля вимог
+dotnet ef migrations add <Назва> --project src/Aetheris.Requirements --startup-project src/Aetheris.Host --context RequirementsDbContext --output-dir Data/Migrations
+
+# Нова міграція модуля технологій (технології, рівні, ефекти, черга досліджень)
+dotnet ef migrations add <Назва> --project src/Aetheris.Research --startup-project src/Aetheris.Host --context ResearchDbContext --output-dir Data/Migrations
 ```
 
-Сервер застосовує міграції ядра і модулів World та Planets сам при старті. Усі набори пишуть
+Сервер застосовує міграції ядра і модулів World, Planets, Requirements та Research сам при старті. Усі набори пишуть
 історію в спільну таблицю `__EFMigrationsHistory`.
 
 ### Модуль Planets (задача 00011)

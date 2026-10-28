@@ -308,6 +308,512 @@
           }
         }
       ]
+    },
+    {
+      "code": "tech_7",
+      "branch": "titanium_mining",
+      "sort_order": 7,
+      "max_level": 1,
+      "research_center_level": 3,
+      "name": {
+        "uk": "Видобуток титану",
+        "en": "Titanium mining"
+      },
+      "description": {
+        "uk": "Відкриває: видобуток титану.",
+        "en": "Unlocks: titanium mining."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_10",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_8",
+      "branch": "iridium_mining",
+      "sort_order": 8,
+      "max_level": 1,
+      "research_center_level": 4,
+      "name": {
+        "uk": "Видобуток іридію",
+        "en": "Iridium mining"
+      },
+      "description": {
+        "uk": "Відкриває: видобуток іридію.",
+        "en": "Unlocks: iridium mining."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_11",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_9",
+      "branch": "crystal_mining",
+      "sort_order": 9,
+      "max_level": 1,
+      "research_center_level": 5,
+      "name": {
+        "uk": "Видобуток кристалів",
+        "en": "Crystal mining"
+      },
+      "description": {
+        "uk": "Відкриває: видобуток кристалів.",
+        "en": "Unlocks: crystal mining."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_12",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_10",
+      "branch": "factory_building",
+      "sort_order": 10,
+      "max_level": 1,
+      "research_center_level": 7,
+      "name": {
+        "uk": "Завод",
+        "en": "Factory"
+      },
+      "description": {
+        "uk": "Відкриває: завод.",
+        "en": "Unlocks: factory."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_13",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_11",
+      "branch": "shipyard_building",
+      "sort_order": 11,
+      "max_level": 1,
+      "research_center_level": 8,
+      "name": {
+        "uk": "Верф",
+        "en": "Shipyard"
+      },
+      "description": {
+        "uk": "Відкриває: верф.",
+        "en": "Unlocks: shipyard."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_14",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_12",
+      "branch": "radar_building",
+      "sort_order": 12,
+      "max_level": 1,
+      "research_center_level": 6,
+      "name": {
+        "uk": "Радар",
+        "en": "Radar"
+      },
+      "description": {
+        "uk": "Відкриває: радар.",
+        "en": "Unlocks: radar."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_15",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_13",
+      "branch": "defence_building",
+      "sort_order": 13,
+      "max_level": 1,
+      "research_center_level": 9,
+      "name": {
+        "uk": "Оборона",
+        "en": "Defence"
+      },
+      "description": {
+        "uk": "Відкриває: оборона.",
+        "en": "Unlocks: defence."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_16",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_14",
+      "branch": "portal_building",
+      "sort_order": 14,
+      "max_level": 1,
+      "research_center_level": 10,
+      "name": {
+        "uk": "Портал",
+        "en": "Portal"
+      },
+      "description": {
+        "uk": "Відкриває: портал.",
+        "en": "Unlocks: portal."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_17",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_15",
+      "branch": "trade_center_building",
+      "sort_order": 15,
+      "max_level": 1,
+      "research_center_level": 7,
+      "name": {
+        "uk": "Торговий центр",
+        "en": "Trade center"
+      },
+      "description": {
+        "uk": "Відкриває: торговий центр.",
+        "en": "Unlocks: trade center."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_18",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_16",
+      "branch": "bunker_building",
+      "sort_order": 16,
+      "max_level": 1,
+      "research_center_level": 8,
+      "name": {
+        "uk": "Бункер",
+        "en": "Bunker"
+      },
+      "description": {
+        "uk": "Відкриває: бункер.",
+        "en": "Unlocks: bunker."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_19",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_17",
+      "branch": "recycling_building",
+      "sort_order": 17,
+      "max_level": 1,
+      "research_center_level": 9,
+      "name": {
+        "uk": "Фабрика утилізації",
+        "en": "Recycling plant"
+      },
+      "description": {
+        "uk": "Відкриває: фабрика утилізації.",
+        "en": "Unlocks: recycling plant."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_20",
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
     }
   ]
 }

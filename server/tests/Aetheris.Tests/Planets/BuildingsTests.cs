@@ -255,7 +255,7 @@ public sealed class BuildingsTests
         BuildingTypeInfo main = catalog.FindType(await PlanetsTestData.TypeAsync(services, SeedCodes.AdminCenter) is { } mainType ? mainType.Id : 0)!;
         Assert.Equal(BuildingClasses.None, main.BuildingClass);
         Assert.Null(catalog.FindByClass(SeedCodes.ScienceCenter));
-        Assert.Null(catalog.FindByClass(BuildingClasses.Shipyard));
+        Assert.Null(catalog.FindByClass("not_a_building_class"));
 
         // The class is a logical code of the program, so every value of it is known.
         Assert.All(BuildingClassValues.All, value => Assert.True(BuildingClassValues.IsKnown(value)));

@@ -172,4 +172,20 @@ public sealed class PlanetQueryService
             .SingleOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false) ?? 0;
     }
+
+    /// <summary>
+    /// Finds the identifier of a building type by its neutral code (task 00012).
+    /// </summary>
+    /// <param name="code">The neutral code of the building type.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The identifier, or <see langword="null"/> when the code is unknown.</returns>
+    public Task<int?> FindBuildingTypeIdAsync(string code, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(code);
+
+        return _dbContext.BuildingTypes.AsNoTracking()
+            .Where(type => type.Code == code)
+            .Select(type => (int?)type.Id)
+            .SingleOrDefaultAsync(cancellationToken);
+    }
 }

@@ -226,8 +226,8 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 
     // Every module with its own tables applies its migrations the same way.
     await WorldDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
-    await RequirementsDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await PlanetsModule.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
+    await RequirementsDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await ResearchDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
