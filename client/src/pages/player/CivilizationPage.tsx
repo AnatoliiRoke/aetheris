@@ -10,6 +10,7 @@ import type { MessageKey } from '../../i18n/uk';
 import { routes } from '../../router/context';
 import { useRouter } from '../../router/useRouter';
 import { useSession } from '../../session/useSession';
+import { useTexts } from '../../texts/useTexts';
 import { describeError, fieldRuleErrors, planetNameProblems, type ErrorMessage } from '../auth/authErrors';
 import { PlayerLayout } from './PlayerLayout';
 
@@ -19,6 +20,7 @@ import { PlayerLayout } from './PlayerLayout';
  */
 export function CivilizationPage() {
   const { t } = useI18n();
+  const { name, text } = useTexts();
   const { game } = useApi();
   const { refresh } = useSession();
   const { navigate } = useRouter();
@@ -99,8 +101,8 @@ export function CivilizationPage() {
           {races?.map((race) => (
             <label key={race.id} className="race-option">
               <input type="radio" name="race" value={race.id} checked={raceId === race.id} onChange={() => { setRaceId(race.id); setRaceError(false); }} />
-              <span className="race-option__name">{t(race.nameKey as MessageKey)}</span>
-              <span className="race-option__text">{t(`races.${race.code}.text` as MessageKey)}</span>
+              <span className="race-option__name">{name(race.nameKey)}</span>
+              <span className="race-option__text">{text(race.descriptionKey) ?? ''}</span>
             </label>
           ))}
         </fieldset>

@@ -12,7 +12,7 @@ export interface AuthProviders {
  */
 export interface Civilization {
   raceId: number;
-  raceCode: string;
+  raceNameKey: string;
   planetId: number;
   planetName: string | null;
   systemId: number;
@@ -85,7 +85,7 @@ interface MeAnswer {
  */
 export interface CivilizationAnswer {
   race_id: number;
-  race_code: string;
+  race_name_key: string;
   planet_id: number;
   planet_name: string | null;
   system_id: number;
@@ -98,7 +98,7 @@ export interface CivilizationAnswer {
 export function toCivilization(answer: CivilizationAnswer): Civilization {
   return {
     raceId: answer.race_id,
-    raceCode: answer.race_code,
+    raceNameKey: answer.race_name_key,
     planetId: answer.planet_id,
     planetName: answer.planet_name,
     systemId: answer.system_id,

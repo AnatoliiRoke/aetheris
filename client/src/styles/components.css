@@ -103,15 +103,17 @@
 .card__media { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-bottom: 1px solid var(--border); background: var(--bg-2); }
 .card__media--wide { aspect-ratio: 16 / 9; }
 .card__media--ship { aspect-ratio: 4 / 3; }
+.card__media--placeholder { background: var(--bg-3); }
 .card__body { display: flex; flex-direction: column; gap: var(--space-2); padding: 20px; flex: 1 1 auto; }
 .card__text { color: var(--text-2); }
 
 /* Race card */
-.race-card { --race: var(--race-terran); --race-rgb: 108, 141, 184; border-top: 4px solid var(--race); }
-.race-card--terran { --race: var(--race-terran); --race-rgb: 108, 141, 184; }
-.race-card--kvarr  { --race: var(--race-kvarr);  --race-rgb: 208, 138, 78; }
-.race-card--skolar { --race: var(--race-skolar); --race-rgb: 210, 68, 60; }
-.race-card--nexar  { --race: var(--race-nexar);  --race-rgb: 127, 224, 238; }
+/* A race names its colour by the key of its data (race-1...); a race without one stays neutral */
+.race-card { --race: var(--text-2); --race-rgb: 154, 167, 199; border-top: 4px solid var(--race); }
+.race-card--race-1 { --race: var(--race-1); --race-rgb: 108, 141, 184; }
+.race-card--race-2 { --race: var(--race-2); --race-rgb: 208, 138, 78; }
+.race-card--race-3 { --race: var(--race-3); --race-rgb: 210, 68, 60; }
+.race-card--race-4 { --race: var(--race-4); --race-rgb: 127, 224, 238; }
 .race-card__title { display: flex; align-items: center; gap: 10px; }
 .race-card__mood strong { color: var(--text-1); font-weight: 600; }
 .traits { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: auto; padding-top: 4px; }
@@ -123,11 +125,12 @@
 /* Race glyphs: shape + color, never color alone */
 .glyph { display: inline-block; width: 20px; height: 20px; flex: 0 0 auto; }
 .glyph--sm { width: 14px; height: 14px; }
-.glyph--terran { background: var(--race-terran); clip-path: polygon(50% 0, 100% 16%, 100% 58%, 50% 100%, 0 58%, 0 16%); }
-.glyph--kvarr  { background: var(--race-kvarr);  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
-.glyph--skolar { background: var(--race-skolar); clip-path: polygon(50% 0, 100% 100%, 50% 72%, 0 100%); }
-.glyph--nexar  { border-radius: 50%; box-shadow: inset 0 0 0 4px var(--race-nexar); }
-.glyph--nexar.glyph--sm { box-shadow: inset 0 0 0 3px var(--race-nexar); }
+.glyph--neutral { border-radius: var(--r-sm); background: var(--text-2); }
+.glyph--race-1 { background: var(--race-1); clip-path: polygon(50% 0, 100% 16%, 100% 58%, 50% 100%, 0 58%, 0 16%); }
+.glyph--race-2 { background: var(--race-2); clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
+.glyph--race-3 { background: var(--race-3); clip-path: polygon(50% 0, 100% 100%, 50% 72%, 0 100%); }
+.glyph--race-4 { border-radius: 50%; box-shadow: inset 0 0 0 4px var(--race-4); }
+.glyph--race-4.glyph--sm { box-shadow: inset 0 0 0 3px var(--race-4); }
 
 /* Gallery */
 .gallery__stage {
@@ -164,7 +167,7 @@
 .place { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: var(--bg-2); font-weight: 700; font-size: 15px; }
 .place--1 { background: var(--warning); color: var(--on-accent); }
 .place--2 { background: var(--text-soft); color: var(--on-accent); }
-.place--3 { background: var(--race-kvarr); color: var(--on-accent); }
+.place--3 { background: var(--race-2); color: var(--on-accent); }
 .player { display: flex; align-items: center; gap: 10px; font-weight: 500; }
 .avatar { width: 32px; height: 32px; flex: 0 0 auto; border-radius: 50%; background: var(--bg-3); display: inline-flex; align-items: center; justify-content: center; font-size: var(--fs-small); font-weight: 600; }
 .race { display: inline-flex; align-items: center; gap: 8px; }

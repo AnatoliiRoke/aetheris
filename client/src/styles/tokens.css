@@ -21,10 +21,10 @@
   --warning: #F2C14E;
 
   /* Races */
-  --race-terran: #6C8DB8;
-  --race-kvarr: #D08A4E;
-  --race-skolar: #D2443C;
-  --race-nexar: #7FE0EE;
+  --race-1: #6C8DB8;
+  --race-2: #D08A4E;
+  --race-3: #D2443C;
+  --race-4: #7FE0EE;
 
   /* Typography */
   --font: "Inter", Roboto, system-ui, Arial, sans-serif;

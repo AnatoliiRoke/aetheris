@@ -1,17 +1,13 @@
 import type { Language } from '../i18n/context';
 
 /**
- * The races of the game (documentation/game-design/08-rasy.md).
- */
-export type RaceId = 'terran' | 'kvarr' | 'skolar' | 'nexar';
-
-/**
  * One line of the public ranking.
  */
 export interface RankingEntry {
   place: number;
   playerName: string;
-  race: RaceId;
+  /** The race, an identifier of the races of the server. */
+  raceId: number;
   score: number;
 }
 

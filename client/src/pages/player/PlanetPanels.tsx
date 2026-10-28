@@ -195,7 +195,7 @@ export function BuildingCard({
   const { next } = building;
   const name = names.building(building.buildingTypeId);
   const reasons = [
-    ...next.unmetRequirements.map((requirement) => requirementText(language, requirement)),
+    ...next.unmetRequirements.map((requirement) => requirementText(language, requirement, names.entities)),
     ...next.reasonCodes.filter((code) => code !== 'planets_requirement_unmet').map((code) => reasonText(language, code)),
   ];
 
@@ -212,7 +212,7 @@ export function BuildingCard({
         <h3 className="building-card__name">{name}</h3>
         <span className="badge">{building.level > 0 ? t('planet.level', { level: building.level }) : t('planet.notBuilt')}</span>
       </div>
-      <p className="building-card__text">{lookup(language, building.descriptionKey, '')}</p>
+      <p className="building-card__text">{lookup(language, building.descriptionKey, '', undefined, names.entities)}</p>
       {building.queuedLevel > building.level ? <p className="meta">{t('planet.queuedTo', { level: building.queuedLevel })}</p> : null}
       {building.effects.length > 0 ? (
         <ul className="effect-list">

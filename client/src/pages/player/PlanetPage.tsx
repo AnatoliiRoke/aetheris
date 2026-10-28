@@ -6,6 +6,7 @@ import { Alert } from '../../components/Alert';
 import { useDocumentTitle } from '../../components/useDocumentTitle';
 import { useI18n } from '../../i18n/useI18n';
 import { useSession } from '../../session/useSession';
+import { useTexts } from '../../texts/useTexts';
 import { BuildingCard, EnergyPanel, QueuePanel, ResourcesPanel } from './PlanetPanels';
 import { PlayerLayout } from './PlayerLayout';
 import { namer, reasonText, secondsLeft } from './planetText';
@@ -30,7 +31,8 @@ export function PlanetPage() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const reloadedFor = useRef<number | null>(null);
-  const names = useMemo(() => (planet ? namer(planet, language) : null), [planet, language]);
+  const { text } = useTexts();
+  const names = useMemo(() => (planet ? namer(planet, language, text) : null), [planet, language, text]);
 
   // When the timer of the construction under way runs out, the page asks the server again;
   // the read completes a due construction.
@@ -66,7 +68,7 @@ export function PlanetPage() {
   const onEnqueue = (building: Building) =>
     void run(async () => {
       apply(await planets.enqueue(civilization.planetId, building.buildingTypeId));
-      setNotice({ kind: 'success', text: t('planet.queued', { name: names?.building(building.buildingTypeId) ?? building.code, level: building.next.level }) });
+      setNotice({ kind: 'success', text: t('planet.queued', { name: names?.building(building.buildingTypeId) ?? building.nameKey, level: building.next.level }) });
     });
 
   const onCancel = (item: QueueItem) =>

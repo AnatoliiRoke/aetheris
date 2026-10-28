@@ -4,9 +4,10 @@ import { AppProviders, Pages } from '../App';
 import type { AuthApi, Me } from '../api/authApi';
 import type { Api } from '../api/context';
 import type { ContentApi } from '../api/contentApi';
-import type { GameApi } from '../api/gameApi';
+import type { GameApi, Race } from '../api/gameApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
+import type { TextsApi } from '../api/textsApi';
 
 /**
  * An account API whose every method is a spy; a test overrides what it needs.
@@ -33,17 +34,71 @@ export function fakeAuthApi(overrides: Partial<AuthApi> = {}): AuthApi {
 }
 
 /**
+ * A race of the tests with neutral keys, as the server sends it.
+ */
+export function sampleRace(id: number): Race {
+  const key = (part: string) => `world.race.race_${id}.${part}`;
+
+  return {
+    id,
+    nameKey: key('name'),
+    descriptionKey: key('description'),
+    moodKey: key('mood'),
+    traitKeys: [key('trait_1'), key('trait_2')],
+    imageKey: id <= 4 ? `art-${String(id + 6).padStart(2, '0')}` : null,
+    colorKey: id <= 4 ? `race-${id}` : null,
+  };
+}
+
+/**
+ * The texts of the game data the tests show, as the server keeps them in the database.
+ */
+export const sampleTexts: Record<string, Record<string, string>> = {
+  uk: {
+    'world.race.race_1.name': 'Терани',
+    'world.race.race_1.description': 'Надійні й дисципліновані.',
+    'world.race.race_1.mood': 'військовий порядок',
+    'world.race.race_1.trait_1': 'Оборона',
+    'world.race.race_1.trait_2': 'Логістика',
+    'world.race.race_2.name': 'Кварри',
+    'world.race.race_2.description': 'Кристалічні корпуси й товста броня.',
+    'world.race.race_3.name': 'Сколари',
+    'world.race.race_4.name': 'Нексари',
+    'world.resource.resource_1.name': 'Залізо',
+    'world.resource.resource_3.name': 'Мідь',
+    'world.resource_group.resource_group_1.name': 'Видобувні',
+    'planets.building.building_1.name': 'Адміністративний центр',
+    'planets.building.building_1.description': 'Головна будівля планети.',
+    'planets.building.building_2.name': 'Науковий центр',
+    'planets.building.building_5.name': 'Шахта заліза',
+  },
+  en: {
+    'world.race.race_1.name': 'Terrans',
+    'world.race.race_2.name': 'Kvarr',
+    'world.resource.resource_1.name': 'Iron',
+    'planets.building.building_1.name': 'Administrative center',
+  },
+};
+
+/**
+ * A texts API that answers with the sample texts; a test overrides what it needs.
+ */
+export function fakeTextsApi(texts: Record<string, Record<string, string>> = sampleTexts): TextsApi {
+  return {
+    pack: vi.fn((language: string) => Promise.resolve({ language, version: 1, texts: { ...(texts[language] ?? {}) } })),
+  };
+}
+
+/**
  * A world API whose every method is a spy; a test overrides what it needs.
  */
 export function fakeGameApi(overrides: Partial<GameApi> = {}): GameApi {
   return {
-    races: vi.fn().mockResolvedValue([
-      { id: 1, code: 'terran', nameKey: 'races.terran.name' },
-      { id: 2, code: 'kvarr', nameKey: 'races.kvarr.name' },
-    ]),
+    races: vi.fn().mockResolvedValue([sampleRace(1), sampleRace(2)]),
+    publicRaces: vi.fn().mockResolvedValue([sampleRace(1), sampleRace(2), sampleRace(3), sampleRace(4)]),
     foundCivilization: vi.fn().mockResolvedValue({
       raceId: 1,
-      raceCode: 'terran',
+      raceNameKey: 'world.race.race_1.name',
       planetId: 10,
       planetName: 'Nova',
       systemId: 3,
@@ -86,9 +141,9 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
     buildings: [
       {
         buildingTypeId: 1,
-        code: 'admin_center',
-        nameKey: 'planets.building.admin_center.name',
-        descriptionKey: 'planets.building.admin_center.description',
+        code: 'building_1',
+        nameKey: 'planets.building.building_1.name',
+        descriptionKey: 'planets.building.building_1.description',
         level: 1,
         queuedLevel: 1,
         maxLevel: 20,
@@ -107,9 +162,9 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
       },
       {
         buildingTypeId: 2,
-        code: 'science_center',
-        nameKey: 'planets.building.science_center.name',
-        descriptionKey: 'planets.building.science_center.description',
+        code: 'building_2',
+        nameKey: 'planets.building.building_2.name',
+        descriptionKey: 'planets.building.building_2.description',
         level: 0,
         queuedLevel: 0,
         maxLevel: 20,
@@ -129,7 +184,7 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
               targetId: 1,
               targetLevel: 2,
               reasonCode: 'planets_requirement_building_level',
-              targetNameKey: 'planets.building.admin_center.name',
+              targetNameKey: 'planets.building.building_1.name',
             },
           ],
           missingResources: [],
@@ -137,9 +192,9 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
       },
       {
         buildingTypeId: 5,
-        code: 'iron_mine',
-        nameKey: 'planets.building.iron_mine.name',
-        descriptionKey: 'planets.building.iron_mine.description',
+        code: 'building_5',
+        nameKey: 'planets.building.building_5.name',
+        descriptionKey: 'planets.building.building_5.description',
         level: 0,
         queuedLevel: 1,
         maxLevel: 20,
@@ -159,10 +214,10 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
     ],
     populationMax: 0,
     resourceTypes: [
-      { id: 1, code: 'iron', nameKey: 'world.resource.iron', resourceGroupId: 1 },
-      { id: 3, code: 'copper', nameKey: 'world.resource.copper', resourceGroupId: 1 },
+      { id: 1, code: 'resource_1', nameKey: 'world.resource.resource_1.name', resourceGroupId: 1 },
+      { id: 3, code: 'resource_3', nameKey: 'world.resource.resource_3.name', resourceGroupId: 1 },
     ],
-    resourceGroups: [{ id: 1, code: 'extractable', nameKey: 'world.resource_group.extractable', resourceGroupId: null }],
+    resourceGroups: [{ id: 1, code: 'resource_group_1', nameKey: 'world.resource_group.resource_group_1.name', resourceGroupId: null }],
     ...overrides,
   };
 }
@@ -189,7 +244,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
     email: 'pilot@example.test',
     emailConfirmed: true,
     nicknameChangedAt: null,
-    civilization: { raceId: 1, raceCode: 'terran', planetId: 10, planetName: 'Nova', systemId: 3, sectorId: 1 },
+    civilization: { raceId: 1, raceNameKey: 'world.race.race_1.name', planetId: 10, planetName: 'Nova', systemId: 3, sectorId: 1 },
     ...overrides,
   };
 }
@@ -199,7 +254,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
  */
 export function renderPage(
   path: string,
-  options: { auth?: AuthApi; content?: ContentApi; game?: GameApi; planets?: PlanetApi } = {},
+  options: { auth?: AuthApi; content?: ContentApi; game?: GameApi; planets?: PlanetApi; texts?: TextsApi } = {},
 ): RenderResult & { api: Api } {
   window.history.replaceState(null, '', path);
 
@@ -208,6 +263,7 @@ export function renderPage(
     content: options.content ?? mockContentApi,
     game: options.game ?? fakeGameApi(),
     planets: options.planets ?? fakePlanetApi(),
+    texts: options.texts ?? fakeTextsApi(),
   };
   const result = render(
     <AppProviders api={api}>

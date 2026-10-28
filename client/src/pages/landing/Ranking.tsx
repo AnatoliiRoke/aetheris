@@ -2,8 +2,9 @@ import { useCallback } from 'react';
 import { useApi } from '../../api/useApi';
 import { Glyph } from '../../components/Glyph';
 import { useI18n } from '../../i18n/useI18n';
-import { raceNameKey } from './raceKeys';
+import { useTexts } from '../../texts/useTexts';
 import { useAsync } from './useAsync';
+import { usePublicRaces } from './usePublicRaces';
 
 /**
  * The places with their own colour in the table.
@@ -23,6 +24,9 @@ export function Ranking() {
   const { content } = useApi();
   const loadPlayers = useCallback(() => content.getTopPlayers(), [content]);
   const state = useAsync(loadPlayers);
+  const races = usePublicRaces();
+  const { name } = useTexts();
+  const raceOf = (raceId: number) => (races.status === 'ready' ? races.data.find((race) => race.id === raceId) : undefined);
   const numbers = new Intl.NumberFormat(language === 'uk' ? 'uk-UA' : 'en-GB');
 
   return (
@@ -70,8 +74,8 @@ export function Ranking() {
                     </td>
                     <td>
                       <span className="race">
-                        <Glyph race={entry.race} small />
-                        {t(raceNameKey(entry.race))}
+                        <Glyph colorKey={raceOf(entry.raceId)?.colorKey} small />
+                        {name(raceOf(entry.raceId)?.nameKey, '—')}
                       </span>
                     </td>
                     <td className="score">{numbers.format(entry.score)}</td>

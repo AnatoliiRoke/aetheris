@@ -5,6 +5,7 @@ import type { MessageKey } from '../../i18n/uk';
 import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
 import { useSession } from '../../session/useSession';
+import { useTexts } from '../../texts/useTexts';
 import { formatDuration, namer, secondsLeft } from './planetText';
 import { PlayerLayout } from './PlayerLayout';
 import { useNow, usePlanet } from './usePlanet';
@@ -28,6 +29,7 @@ const sections: MessageKey[] = [
  */
 export function GamePage() {
   const { t } = useI18n();
+  const { name } = useTexts();
   const { session } = useSession();
   useDocumentTitle(t('meta.game.title'));
 
@@ -48,7 +50,7 @@ export function GamePage() {
           </h2>
           <dl className="facts">
             <dt>{t('player.game.race')}</dt>
-            <dd>{t(`races.${me.civilization.raceCode}.name` as MessageKey)}</dd>
+            <dd>{name(me.civilization.raceNameKey)}</dd>
             <dt>{t('player.game.planet')}</dt>
             <dd>{me.civilization.planetName}</dd>
           </dl>
@@ -88,7 +90,8 @@ function QueueSummary({ planetId }: { planetId: number }) {
   const { t, language } = useI18n();
   const { planet, receivedAt } = usePlanet(planetId);
   const now = useNow();
-  const names = useMemo(() => (planet ? namer(planet, language) : null), [planet, language]);
+  const { text } = useTexts();
+  const names = useMemo(() => (planet ? namer(planet, language, text) : null), [planet, language, text]);
   const items = planet?.queue.items ?? [];
 
   return (

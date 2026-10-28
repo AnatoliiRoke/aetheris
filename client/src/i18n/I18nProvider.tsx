@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { I18nContext, dictionaries, format, type I18nValue, type Language, type MessageParams } from './context';
+import { I18nContext, dictionaries, fallbackLanguage, format, type I18nValue, type Language, type MessageParams } from './context';
 import type { MessageKey } from './uk';
 
 /**
@@ -34,7 +34,7 @@ interface I18nProviderProps {
  * Holds the current language, remembers it and keeps `<html lang>` in step.
  */
 export function I18nProvider({ children, initialLanguage }: I18nProviderProps) {
-  const [language, setLanguageState] = useState<Language>(() => initialLanguage ?? readStoredLanguage() ?? 'uk');
+  const [language, setLanguageState] = useState<Language>(() => initialLanguage ?? readStoredLanguage() ?? fallbackLanguage);
 
   useEffect(() => {
     document.documentElement.lang = language;

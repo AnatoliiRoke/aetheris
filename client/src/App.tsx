@@ -6,6 +6,7 @@ import { createGameApi } from './api/gameApi';
 import { HttpClient } from './api/http';
 import { mockContentApi } from './api/mockContentApi';
 import { createPlanetApi } from './api/planetApi';
+import { createTextsApi } from './api/textsApi';
 import { I18nProvider } from './i18n/I18nProvider';
 import { useI18n } from './i18n/useI18n';
 import { CheckEmailPage } from './pages/auth/CheckEmailPage';
@@ -24,6 +25,7 @@ import { routes } from './router/context';
 import { RouterProvider } from './router/Router';
 import { useRouter } from './router/useRouter';
 import { SessionProvider } from './session/SessionProvider';
+import { TextsProvider } from './texts/TextsProvider';
 import { useSession } from './session/useSession';
 
 /**
@@ -136,7 +138,8 @@ function PlayerPage({ path }: { path: string }) {
 }
 
 /**
- * The providers of the site: language, server interfaces, session and routing.
+ * The providers of the site: language, server interfaces, texts of the game data, session and
+ * routing.
  *
  * @param api The server interfaces; tests pass their own.
  */
@@ -144,9 +147,11 @@ export function AppProviders({ api, children }: { api: Api; children: ReactNode 
   return (
     <I18nProvider>
       <ApiContext.Provider value={api}>
-        <SessionProvider>
-          <RouterProvider>{children}</RouterProvider>
-        </SessionProvider>
+        <TextsProvider>
+          <SessionProvider>
+            <RouterProvider>{children}</RouterProvider>
+          </SessionProvider>
+        </TextsProvider>
       </ApiContext.Provider>
     </I18nProvider>
   );
@@ -161,7 +166,13 @@ export default function App() {
   const api = useMemo<Api>(() => {
     const http = new HttpClient();
 
-    return { auth: createAuthApi(http), content: mockContentApi, game: createGameApi(http), planets: createPlanetApi(http) };
+    return {
+      auth: createAuthApi(http),
+      content: mockContentApi,
+      game: createGameApi(http),
+      planets: createPlanetApi(http),
+      texts: createTextsApi(http),
+    };
   }, []);
 
   return (

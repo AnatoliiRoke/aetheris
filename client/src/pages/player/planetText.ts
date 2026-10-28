@@ -1,21 +1,27 @@
 import type { BuildingEffect, Planet, ResourceAmount, UnmetRequirement } from '../../api/planetApi';
-import { worldNamesEn, worldNamesUk } from '../../admin/i18n/worldNames';
 import { dictionaries, format, type Language, type MessageParams } from '../../i18n/context';
 import type { MessageKey } from '../../i18n/uk';
-
-const worldNames: Record<Language, Record<string, string>> = { uk: worldNamesUk, en: worldNamesEn };
+import type { EntityText } from '../../texts/context';
 
 /**
- * Finds the text of a localisation key that comes from the server (a building, a resource, a
- * reason). A key without a text shows the fallback, never an empty place.
+ * Finds the text of a localisation key that comes from the server: a reason of the interface
+ * from the dictionary of the client, or a building or a resource from the texts of the game
+ * data in the database (task 00022). A key without a text shows the fallback, never an empty
+ * place.
  */
-export function lookup(language: Language, key: string | null | undefined, fallback: string, params?: MessageParams): string {
+export function lookup(
+  language: Language,
+  key: string | null | undefined,
+  fallback: string,
+  params?: MessageParams,
+  entities?: EntityText,
+): string {
   if (!key) {
     return fallback;
   }
 
   const messages: Record<string, string> = dictionaries[language];
-  const text = messages[key] ?? worldNames[language][key];
+  const text = messages[key] ?? entities?.(key);
 
   return text === undefined ? fallback : format(text, params);
 }
@@ -28,28 +34,22 @@ export function hasKey(language: Language, key: string): key is MessageKey {
 }
 
 /**
- * Names the resources and groups of a body by their localisation keys.
+ * Names the resources, groups and buildings of a body by their localisation keys and the texts
+ * of the game data. A row without a text shows its key, never its code.
  */
-export function namer(planet: Planet, language: Language) {
+export function namer(planet: Planet, language: Language, entities: EntityText) {
   const resources = new Map(planet.resourceTypes.map((resource) => [resource.id, resource]));
   const groups = new Map(planet.resourceGroups.map((group) => [group.id, group]));
   const buildings = new Map(planet.buildings.map((building) => [building.buildingTypeId, building]));
+  const name = (key: string | undefined, id: number | null) => lookup(language, key, key ?? String(id), undefined, entities);
 
   return {
-    resource: (id: number | null) => {
-      const resource = id === null ? undefined : resources.get(id);
-      return lookup(language, resource?.nameKey, resource?.code ?? String(id));
-    },
-    group: (id: number | null) => {
-      const group = id === null ? undefined : groups.get(id);
-      return lookup(language, group?.nameKey, group?.code ?? String(id));
-    },
-    building: (id: number) => {
-      const building = buildings.get(id);
-      return lookup(language, building?.nameKey, building?.code ?? String(id));
-    },
+    entities,
+    resource: (id: number | null) => name(id === null ? undefined : resources.get(id)?.nameKey, id),
+    group: (id: number | null) => name(id === null ? undefined : groups.get(id)?.nameKey, id),
+    building: (id: number) => name(buildings.get(id)?.nameKey, id),
     amounts: (amounts: ResourceAmount[]) =>
-      amounts.map((amount) => `${lookup(language, resources.get(amount.resourceTypeId)?.nameKey, String(amount.resourceTypeId))} ${formatNumber(amount.amount, language)}`).join(', '),
+      amounts.map((amount) => `${name(resources.get(amount.resourceTypeId)?.nameKey, amount.resourceTypeId)} ${formatNumber(amount.amount, language)}`).join(', '),
   };
 }
 
@@ -65,8 +65,8 @@ export function effectText(language: Language, effect: BuildingEffect, names: Re
 /**
  * The text of an unmet requirement.
  */
-export function requirementText(language: Language, requirement: UnmetRequirement): string {
-  const name = lookup(language, requirement.targetNameKey, String(requirement.targetId));
+export function requirementText(language: Language, requirement: UnmetRequirement, entities: EntityText): string {
+  const name = lookup(language, requirement.targetNameKey, requirement.targetNameKey ?? String(requirement.targetId), undefined, entities);
 
   return lookup(language, `reason.${requirement.reasonCode}`, requirement.reasonCode, { name, level: requirement.targetLevel });
 }

@@ -1,7 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { fakeAuthApi, renderPage } from '../../../test/renderPage';
+import { fakeAuthApi, fakeGameApi, renderPage, sampleRace } from '../../../test/renderPage';
 
 describe('LandingPage', () => {
   it('shows every block of the design', async () => {
@@ -32,7 +32,23 @@ describe('LandingPage', () => {
     // The header row and ten players.
     expect(rows).toHaveLength(11);
     expect(within(rows[1]).getByText('Kapitan_Zoria')).toBeInTheDocument();
-    expect(within(rows[1]).getByText('Терани')).toBeInTheDocument();
+    expect(await within(rows[1]).findByText('Терани')).toBeInTheDocument();
+  });
+
+  it('shows the races of the server with their texts, and a race without a picture gets the placeholder', async () => {
+    const game = fakeGameApi({
+      publicRaces: vi.fn().mockResolvedValue([sampleRace(1), { ...sampleRace(5), nameKey: 'world.race.race_5.name' }]),
+    });
+
+    renderPage('/', { game });
+
+    const section = screen.getByRole('region', { name: 'Обери, під чиїм прапором летіти' });
+
+    expect(await within(section).findByRole('heading', { level: 3, name: 'Терани' })).toBeInTheDocument();
+    expect(within(section).getByText('Оборона')).toBeInTheDocument();
+    expect(within(section).getByRole('img', { name: 'Флагман раси Терани' })).toHaveAttribute('src');
+    expect(within(section).getByRole('heading', { level: 3, name: 'world.race.race_5.name' })).toBeInTheDocument();
+    expect(within(section).getByRole('img', { name: 'Флагман раси world.race.race_5.name' })).not.toHaveAttribute('src');
   });
 
   it('reports a ranking that could not be loaded', async () => {

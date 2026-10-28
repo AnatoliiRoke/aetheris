@@ -8,6 +8,11 @@ import { uk, type MessageKey, type Messages } from './uk';
 export type Language = 'uk' | 'en';
 
 /**
+ * The language shown when the chosen one has no text: the first language of the project.
+ */
+export const fallbackLanguage: Language = 'uk';
+
+/**
  * The texts of every language.
  */
 export const dictionaries: Record<Language, Messages> = { uk, en };

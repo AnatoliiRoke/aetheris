@@ -5,16 +5,16 @@ import type { ContentApi, NewsItem, RankingEntry } from './contentApi';
  * Invented players of the design (task 00003, section 3.4): no real persons.
  */
 const topPlayers: RankingEntry[] = [
-  { place: 1, playerName: 'Kapitan_Zoria', race: 'terran', score: 128450 },
-  { place: 2, playerName: 'NovaWolf', race: 'nexar', score: 121930 },
-  { place: 3, playerName: 'RedFang', race: 'skolar', score: 117205 },
-  { place: 4, playerName: 'Krystal_Kvarr', race: 'kvarr', score: 109880 },
-  { place: 5, playerName: 'Strilets', race: 'terran', score: 102340 },
-  { place: 6, playerName: 'Hex_Nomad', race: 'nexar', score: 98715 },
-  { place: 7, playerName: 'Tikha_Hvylia', race: 'kvarr', score: 91060 },
-  { place: 8, playerName: 'Orion_77', race: 'terran', score: 87420 },
-  { place: 9, playerName: 'Luna_Vartova', race: 'nexar', score: 83190 },
-  { place: 10, playerName: 'IronMayak', race: 'skolar', score: 79655 },
+  { place: 1, playerName: 'Kapitan_Zoria', raceId: 1, score: 128450 },
+  { place: 2, playerName: 'NovaWolf', raceId: 4, score: 121930 },
+  { place: 3, playerName: 'RedFang', raceId: 3, score: 117205 },
+  { place: 4, playerName: 'Krystal_Kvarr', raceId: 2, score: 109880 },
+  { place: 5, playerName: 'Strilets', raceId: 1, score: 102340 },
+  { place: 6, playerName: 'Hex_Nomad', raceId: 4, score: 98715 },
+  { place: 7, playerName: 'Tikha_Hvylia', raceId: 2, score: 91060 },
+  { place: 8, playerName: 'Orion_77', raceId: 1, score: 87420 },
+  { place: 9, playerName: 'Luna_Vartova', raceId: 4, score: 83190 },
+  { place: 10, playerName: 'IronMayak', raceId: 3, score: 79655 },
 ];
 
 type LocalizedNews = Omit<NewsItem, 'title' | 'excerpt'> & Record<'title' | 'excerpt', Record<Language, string>>;
@@ -34,7 +34,7 @@ const news: LocalizedNews[] = [
     },
   },
   {
-    id: 'crystal-storm',
+    id: 'storm-event',
     publishedOn: '2026-10-14',
     image: 'comet',
     title: { uk: 'Подія «Кристальний шторм»', en: 'Event “Crystal Storm”' },
