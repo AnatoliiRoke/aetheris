@@ -58,6 +58,10 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
     /// <summary>The place of the buildings in the menu of the reference kinds.</summary>
     private const int BuildingSortOrder = 30;
 
+    /// <summary>The texts of the labels, read once from the embedded file.</summary>
+    private static readonly IReadOnlyList<LocalizationTextEntry> Labels =
+        AdminReferenceRules.LoadLabelTexts(typeof(PlanetsReferenceAdminService).Assembly, LabelTextsResource);
+
     private readonly PlanetsDbContext _dbContext;
     private readonly PlanetsUnitOfWork _unitOfWork;
     private readonly ICodeSequence _codes;
@@ -116,31 +120,6 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
         _catalogCache = catalogCache;
         _config = config;
     }
-
-    /// <summary>
-    /// Gets the field of the requirements of a level, shared with the technologies: the type of the
-    /// requirement names the kind its target is picked from.
-    /// </summary>
-    public static AdminReferenceField RequirementsDescriptorField { get; } = new(
-        RequirementsField,
-        AdminReferenceFieldTypes.Requirements,
-        LabelPrefix + "field.requirements",
-        Fields:
-        [
-            new(
-                "requirement_type",
-                AdminReferenceFieldTypes.Select,
-                LabelPrefix + "field.requirement_type",
-                IsRequired: true,
-                Options:
-                [
-                    new(RequirementTypes.BuildingLevel, LabelPrefix + "requirement." + RequirementTypes.BuildingLevel, BuildingKind),
-                    new(RequirementTypes.TechnologyLevel, LabelPrefix + "requirement." + RequirementTypes.TechnologyLevel, "technology"),
-                    new(RequirementTypes.Deposit, LabelPrefix + "requirement." + RequirementTypes.Deposit, "resource"),
-                ]),
-            new("target_id", AdminReferenceFieldTypes.Reference, LabelPrefix + "field.target", IsRequired: true, ReferenceKindFrom: "requirement_type"),
-            new("target_level", AdminReferenceFieldTypes.Number, LabelPrefix + "field.target_level", Minimum: 0),
-        ]);
 
     /// <summary>
     /// Gets the kind of the building types.
@@ -206,7 +185,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
                             new("resource_group_id", AdminReferenceFieldTypes.Reference, LabelPrefix + "field.resource_group", ReferenceKind: "resource_group"),
                             new("value", AdminReferenceFieldTypes.Number, LabelPrefix + "field.value", IsRequired: true, Minimum: 0),
                         ]),
-                    RequirementsDescriptorField,
+                    RequirementAdminFields.Field,
                 ]),
         ]);
 
@@ -214,8 +193,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
     public IReadOnlyList<AdminReferenceDescriptor> Descriptors { get; } = [BuildingDescriptor];
 
     /// <inheritdoc />
-    public IReadOnlyList<LocalizationTextEntry> LabelTexts { get; } =
-        AdminReferenceRules.LoadLabelTexts(typeof(PlanetsReferenceAdminService).Assembly, LabelTextsResource);
+    public IReadOnlyList<LocalizationTextEntry> LabelTexts => Labels;
 
     /// <inheritdoc />
     public async Task<PageResult<AdminReferenceRow>> ReadAsync(string kind, AdminReferenceQuery query, CancellationToken cancellationToken)
@@ -565,7 +543,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
             {
                 string path = AdminReferenceRules.PathOf(LevelsField, index, RequirementsField) + "." + requirementIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-                if (RequirementRules.Check(failures, path, requirement.RequirementType, requirement.TargetId, requirement.TargetLevel, buildingIds, technologyIds, resourcesById.Keys) is { } definition)
+                if (RequirementAdminFields.Check(failures, path, requirement.RequirementType, requirement.TargetId, requirement.TargetLevel, buildingIds, technologyIds, resourcesById.Keys) is { } definition)
                 {
                     requirements.Add(new SubjectRequirement(stored?.Id ?? 0, level.Level!.Value, definition));
                 }
@@ -804,65 +782,4 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
     /// <param name="TargetId">The target.</param>
     /// <param name="TargetLevel">The required level of the target.</param>
     private sealed record RequirementValues(string? RequirementType, int? TargetId, int? TargetLevel);
-}
-
-/// <summary>
-/// The check of a requirement sent by a form of the admin panel, shared by the buildings and the
-/// technologies (task 00023).
-/// </summary>
-public static class RequirementRules
-{
-    /// <summary>
-    /// Checks a requirement: a known type, an existing target and a level that suits the type.
-    /// </summary>
-    /// <param name="failures">The failures.</param>
-    /// <param name="path">The path of the field.</param>
-    /// <param name="requirementType">The requirement type.</param>
-    /// <param name="targetId">The target.</param>
-    /// <param name="targetLevel">The required level of the target.</param>
-    /// <param name="buildingIds">The building types that exist.</param>
-    /// <param name="technologyIds">The technologies that exist.</param>
-    /// <param name="resourceIds">The resources that exist.</param>
-    /// <returns>The requirement, or <see langword="null"/> when it is refused.</returns>
-    public static RequirementDefinition? Check(
-        Dictionary<string, List<string>> failures,
-        string path,
-        string? requirementType,
-        int? targetId,
-        int? targetLevel,
-        IReadOnlySet<int> buildingIds,
-        IReadOnlySet<int> technologyIds,
-        IEnumerable<int> resourceIds)
-    {
-        ArgumentNullException.ThrowIfNull(buildingIds);
-        ArgumentNullException.ThrowIfNull(technologyIds);
-        ArgumentNullException.ThrowIfNull(resourceIds);
-
-        bool known = requirementType switch
-        {
-            RequirementTypes.BuildingLevel => targetId is { } building && buildingIds.Contains(building),
-            RequirementTypes.TechnologyLevel => targetId is { } technology && technologyIds.Contains(technology),
-            RequirementTypes.Deposit => targetId is { } resource && resourceIds.Contains(resource),
-            _ => false,
-        };
-
-        if (!known)
-        {
-            AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Unknown);
-
-            return null;
-        }
-
-        // A deposit has no level; a building or a technology is required of at least level one.
-        int level = requirementType == RequirementTypes.Deposit ? 0 : targetLevel ?? 0;
-
-        if (requirementType != RequirementTypes.Deposit && level < 1)
-        {
-            AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.OutOfBounds);
-
-            return null;
-        }
-
-        return new RequirementDefinition(requirementType!, targetId!.Value, level);
-    }
 }

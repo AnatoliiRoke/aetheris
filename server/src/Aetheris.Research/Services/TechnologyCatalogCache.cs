@@ -17,6 +17,7 @@ public sealed class TechnologyCatalogCache
     private readonly IGameConfig _config;
     private readonly IGameClock _clock;
     private volatile CachedCatalog? _cached;
+    private long _generation;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TechnologyCatalogCache"/> class.
@@ -33,9 +34,15 @@ public sealed class TechnologyCatalogCache
     }
 
     /// <summary>
-    /// Forgets the catalog, so the next read loads it again.
+    /// Forgets the catalog, so the next read loads it again. A read that was loading while the
+    /// catalog was forgotten does not keep what it loaded, since it may hold the rows before the
+    /// change (task 00023: a change of the admin panel takes effect at once).
     /// </summary>
-    public void Invalidate() => _cached = null;
+    public void Invalidate()
+    {
+        Interlocked.Increment(ref _generation);
+        _cached = null;
+    }
 
     /// <summary>
     /// Gets the catalog, loading it when it is missing or old.
@@ -59,6 +66,7 @@ public sealed class TechnologyCatalogCache
 
         try
         {
+            long generation = Interlocked.Read(ref _generation);
             cached = _cached;
 
             if (cached is not null && _clock.UtcNow - cached.LoadedAt < lifetime)
@@ -67,7 +75,10 @@ public sealed class TechnologyCatalogCache
             }
 
             TechnologyCatalog catalog = await LoadAsync(dbContext, cancellationToken).ConfigureAwait(false);
-            _cached = new CachedCatalog(catalog, _clock.UtcNow);
+            if (generation == Interlocked.Read(ref _generation))
+            {
+                _cached = new CachedCatalog(catalog, _clock.UtcNow);
+            }
 
             return catalog;
         }

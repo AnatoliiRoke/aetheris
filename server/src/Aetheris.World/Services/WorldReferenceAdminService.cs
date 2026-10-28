@@ -46,6 +46,10 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <summary>The place of the resource groups in the menu of the reference kinds.</summary>
     private const int ResourceGroupSortOrder = 20;
 
+    /// <summary>The texts of the labels, read once from the embedded file.</summary>
+    private static readonly IReadOnlyList<LocalizationTextEntry> Labels =
+        AdminReferenceRules.LoadLabelTexts(typeof(WorldReferenceAdminService).Assembly, LabelTextsResource);
+
     private readonly WorldDbContext _dbContext;
     private readonly WorldUnitOfWork _unitOfWork;
     private readonly ICodeSequence _codes;
@@ -131,8 +135,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     public IReadOnlyList<AdminReferenceDescriptor> Descriptors { get; } = [ResourceDescriptor, ResourceGroupDescriptor];
 
     /// <inheritdoc />
-    public IReadOnlyList<LocalizationTextEntry> LabelTexts { get; } =
-        AdminReferenceRules.LoadLabelTexts(typeof(WorldReferenceAdminService).Assembly, LabelTextsResource);
+    public IReadOnlyList<LocalizationTextEntry> LabelTexts => Labels;
 
     /// <inheritdoc />
     public async Task<PageResult<AdminReferenceRow>> ReadAsync(string kind, AdminReferenceQuery query, CancellationToken cancellationToken)

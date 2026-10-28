@@ -4,7 +4,6 @@ using Aetheris.Core.Data;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
-using Aetheris.Planets.Services;
 using Aetheris.Requirements;
 using Aetheris.Requirements.Services;
 using Aetheris.Research.Data;
@@ -63,6 +62,10 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
 
     /// <summary>The place of the branches in the menu of the reference kinds.</summary>
     private const int BranchSortOrder = 50;
+
+    /// <summary>The texts of the labels, read once from the embedded file.</summary>
+    private static readonly IReadOnlyList<LocalizationTextEntry> Labels =
+        AdminReferenceRules.LoadLabelTexts(typeof(ResearchReferenceAdminService).Assembly, LabelTextsResource);
 
     private readonly ResearchDbContext _dbContext;
     private readonly ResearchUnitOfWork _unitOfWork;
@@ -177,11 +180,11 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
                                 "unlock_kind",
                                 AdminReferenceFieldTypes.Select,
                                 LabelPrefix + "field.unlock_kind",
-                                Options: [new(TechnologyUnlockKinds.BuildingType, LabelPrefix + "unlock." + TechnologyUnlockKinds.BuildingType, PlanetsReferenceAdminService.BuildingKind)]),
+                                Options: [new(TechnologyUnlockKinds.BuildingType, LabelPrefix + "unlock." + TechnologyUnlockKinds.BuildingType, RequirementReferenceKinds.Building)]),
                             new("unlock_target_id", AdminReferenceFieldTypes.Reference, LabelPrefix + "field.unlock_target", ReferenceKindFrom: "unlock_kind"),
                             new("value", AdminReferenceFieldTypes.Number, LabelPrefix + "field.value", IsRequired: true, Minimum: 0, IsDecimal: true),
                         ]),
-                    PlanetsReferenceAdminService.RequirementsDescriptorField,
+                    RequirementAdminFields.Field,
                 ]),
         ]);
 
@@ -213,8 +216,7 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
     public IReadOnlyList<AdminReferenceDescriptor> Descriptors { get; } = [TechnologyDescriptor, BranchDescriptor];
 
     /// <inheritdoc />
-    public IReadOnlyList<LocalizationTextEntry> LabelTexts { get; } =
-        AdminReferenceRules.LoadLabelTexts(typeof(ResearchReferenceAdminService).Assembly, LabelTextsResource);
+    public IReadOnlyList<LocalizationTextEntry> LabelTexts => Labels;
 
     /// <inheritdoc />
     public async Task<PageResult<AdminReferenceRow>> ReadAsync(string kind, AdminReferenceQuery query, CancellationToken cancellationToken)
@@ -716,7 +718,7 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
             {
                 string path = AdminReferenceRules.PathOf(LevelsField, index, RequirementsField) + "." + requirementIndex.ToString(CultureInfo.InvariantCulture);
 
-                if (RequirementRules.Check(failures, path, requirement.RequirementType, requirement.TargetId, requirement.TargetLevel, buildingIds, technologyIds, resourcesById.Keys) is { } definition)
+                if (RequirementAdminFields.Check(failures, path, requirement.RequirementType, requirement.TargetId, requirement.TargetLevel, buildingIds, technologyIds, resourcesById.Keys) is { } definition)
                 {
                     requirements.Add(new SubjectRequirement(stored?.Id ?? 0, level.Level!.Value, definition));
                 }
