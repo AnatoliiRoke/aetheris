@@ -9,3 +9,16 @@ regexes = [
   # The throwaway password of the PostgreSQL service container of the CI workflow.
   '''Username=postgres;Password=postgres''',
 ]
+
+# Test accounts carry fixed throwaway passwords that the generic-api-key rule takes for keys
+# (task 00021). The rule keeps its default regex and only skips the test folders; every
+# other rule still scans them, and the rule still scans the rest of the repository.
+[[rules]]
+id = "generic-api-key"
+
+[rules.allowlist]
+description = "Throwaway passwords of the test accounts"
+paths = [
+  '''(^|/)tests/''',
+  '''(^|/)__tests__/''',
+]
