@@ -460,6 +460,51 @@ services.AddOwnedObjectType<ThingOwnerResolver>(); // IOwnedObjectResolver з Ob
 **Тест** — як `ProtectedRequestExampleTests`: без сесії 401, чужий об'єкт 403, невалідний
 запит 400, без CSRF 403, повтор того самого ключа не виконує команду вдруге.
 
+## Як додати новий вид довідника
+
+Інструкція для агентів (задача 00023). Довідник — це таблиці модуля, який ним володіє, плюс
+**опис виду** і **один сервіс**; клієнт і Host не змінюються: пункт меню «Довідники», список і
+форма з'являються самі. Зразки в коді: `server/src/Aetheris.World/Services/WorldReferenceAdminService.cs`
+(прості види), `server/src/Aetheris.Planets/Services/PlanetsReferenceAdminService.cs` (рівні,
+вартість, ефекти, вимоги).
+
+**1. Таблиця.** Рядок має `code` (нейтральний код `<група>_N` від `ICodeSequence`), `name_key`,
+`description_key`, за потреби `image_key`, а також `is_archived` (bool, false) і `version`
+(int, 1). Видалення немає: лише архівування.
+
+**2. Опис виду** — `AdminReferenceDescriptor` (`Aetheris.Core.Admin`): логічний код виду,
+група кодів, префікс ключів текстів, ключ назви в меню, місце в меню, маршрут, коди дій і поля
+(`AdminReferenceField`: `text` з мовами, `number`, `select`, `reference`, `image`, `flag`,
+`levels`/`costs`/`effects`/`requirements` зі своїми колонками). Вимоги рівня беріть готовим
+полем `RequirementAdminFields.Field`.
+
+**3. Сервіс** реалізує `IAdminReferenceService`: список (пошук і фільтр архіву —
+`AdminReferenceRules.Page`), запис форми, створення, зміна з версією (`FOR UPDATE` +
+`AdminReferenceRules.CheckVersion`), архівування. Тексти — `ILocalizationTexts.AddMissingAsync`
+/ `SetAsync` у тій самій транзакції; після коміту скиньте кеш каталогу модуля
+(`Invalidate()`). Помилки — `AdminReferenceException` з кодом поля.
+
+**4. Реєстрація** у модулі:
+
+```csharp
+services.AddScoped<ThingReferenceAdminService>();
+services.AddScoped<IAdminReferenceService>(sp => sp.GetRequiredService<ThingReferenceAdminService>());
+
+// у Map…AdminEndpoints(RouteGroupBuilder secured), який Host викликає в Admin/AdminEndpoints.cs:
+secured.MapAdminReference<ThingReferenceAdminService>(ThingReferenceAdminService.ThingDescriptor);
+```
+
+Коди дій виду (читання списку і запису — screen, створення, зміна, архів, повернення —
+action) потрапляють у сид дозволів автоматично; роль із `all_permissions` отримує їх одразу.
+
+**5. Підписи полів** — ключі `admin.reference.*` у вбудованому файлі модуля
+`Data/admin-reference-texts.json` (українською й англійською); сид додає відсутні й не
+перезаписує змінені в «Текстах».
+
+**6. Тести** — як у `Planets/BuildingReferenceTests.cs`: створення доходить до гравця, зміна
+діє без перезапуску, правила полів (400/422), архів, 409 за старої версії, 20 паралельних
+створень, сид не перезаписує, рядок, доданий прямо в таблицю, доходить до гри.
+
 ---
 
 ## Клієнт
