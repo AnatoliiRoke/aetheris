@@ -1,5 +1,6 @@
 using Aetheris.Host.Data;
 using Aetheris.Planets.Data;
+using Aetheris.Requirements.Data;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.World.Data;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,10 @@ public sealed class NeutralCodeMigrationTests
             await MigrateAsync(HostOptions(connectionString), null);
             await MigrateAsync(WorldOptions(connectionString), LastWorldMigration);
             await MigrateAsync(PlanetsOptions(connectionString), LastPlanetsMigration);
+
+            // The common requirements module takes the table of the requirements of the bodies
+            // module, so it runs after the bodies module reached the table (task 00012).
+            await MigrateAsync(RequirementsOptions(connectionString), null);
 
             await using (AetherisDbContext old = new(HostOptions(connectionString)))
             {
@@ -168,6 +173,11 @@ public sealed class NeutralCodeMigrationTests
     private static DbContextOptions<PlanetsDbContext> PlanetsOptions(string connectionString) =>
         new DbContextOptionsBuilder<PlanetsDbContext>()
             .UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly(typeof(PlanetsDbContext).Assembly.FullName))
+            .Options;
+
+    private static DbContextOptions<RequirementsDbContext> RequirementsOptions(string connectionString) =>
+        new DbContextOptionsBuilder<RequirementsDbContext>()
+            .UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly(typeof(RequirementsDbContext).Assembly.FullName))
             .Options;
 
     private static async Task MigrateAsync<TContext>(DbContextOptions<TContext> options, string? target)

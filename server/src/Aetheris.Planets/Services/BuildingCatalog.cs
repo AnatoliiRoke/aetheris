@@ -2,6 +2,9 @@ using Aetheris.Core.Configuration;
 using Aetheris.Core.Time;
 using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Data;
+using Aetheris.Planets.Data.Entities;
+using Aetheris.Requirements;
+using Aetheris.Requirements.Services;
 using Aetheris.World;
 using Aetheris.World.Api;
 using Microsoft.EntityFrameworkCore;
@@ -158,12 +161,18 @@ public sealed class BuildingCatalogCache
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="world">The world, for the resources.</param>
+    /// <param name="requirements">The common requirements module, for the requirements of the subjects.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The catalog.</returns>
-    public async Task<BuildingCatalog> GetAsync(PlanetsDbContext dbContext, IWorldModule world, CancellationToken cancellationToken)
+    public async Task<BuildingCatalog> GetAsync(
+        PlanetsDbContext dbContext,
+        IWorldModule world,
+        IRequirementsModule requirements,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(requirements);
 
         TimeSpan lifetime = PlanetsSettings.From(_config).CatalogCacheDuration;
         CachedCatalog? cached = _cached;
@@ -184,7 +193,7 @@ public sealed class BuildingCatalogCache
                 return cached.Catalog;
             }
 
-            BuildingCatalog catalog = await LoadAsync(dbContext, world, cancellationToken).ConfigureAwait(false);
+            BuildingCatalog catalog = await LoadAsync(dbContext, world, requirements, cancellationToken).ConfigureAwait(false);
             _cached = new CachedCatalog(catalog, _clock.UtcNow);
 
             return catalog;
@@ -195,7 +204,11 @@ public sealed class BuildingCatalogCache
         }
     }
 
-    private static async Task<BuildingCatalog> LoadAsync(PlanetsDbContext dbContext, IWorldModule world, CancellationToken cancellationToken)
+    private static async Task<BuildingCatalog> LoadAsync(
+        PlanetsDbContext dbContext,
+        IWorldModule world,
+        IRequirementsModule requirements,
+        CancellationToken cancellationToken)
     {
         var types = await dbContext.BuildingTypes.AsNoTracking()
             .Include(type => type.LevelIds).ThenInclude(level => level.CostIds)
@@ -205,17 +218,24 @@ public sealed class BuildingCatalogCache
             .ThenBy(type => type.Id)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-        List<RequirementInfo> requirements = await dbContext.Requirements.AsNoTracking()
-            .OrderBy(requirement => requirement.Id)
-            .Select(requirement => new RequirementInfo(
-                requirement.Id,
-                requirement.SubjectType,
-                requirement.SubjectId,
-                requirement.SubjectLevel,
-                requirement.RequirementType,
-                requirement.TargetId,
-                requirement.TargetLevel))
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        // The requirements live in the common requirements module, so the catalog reads them
+        // through its contract and never through the tables of that module.
+        IReadOnlyList<SubjectRequirement> subjectRequirements = await requirements.GetManyAsync(
+            RequirementSubjectTypes.BuildingType,
+            [.. types.Select(type => new SubjectLevel(type.Id, HighestLevel(type)))],
+            cancellationToken).ConfigureAwait(false);
+
+        List<RequirementInfo> requirementInfos =
+        [
+            .. subjectRequirements.Select(subjectRequirement => new RequirementInfo(
+                subjectRequirement.Requirement.Id,
+                RequirementSubjectTypes.BuildingType,
+                subjectRequirement.SubjectId,
+                subjectRequirement.SubjectLevel,
+                subjectRequirement.Requirement.RequirementType,
+                subjectRequirement.Requirement.TargetId,
+                subjectRequirement.Requirement.TargetLevel)),
+        ];
 
         ResourceCatalog resources = await world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
 
@@ -236,10 +256,19 @@ public sealed class BuildingCatalogCache
                             level.CostIds.ToDictionary(cost => cost.ResourceTypeId, cost => cost.Amount),
                             [.. level.EffectIds.Select(effect => new BuildingEffectInfo(effect.EffectType, effect.ResourceTypeId, effect.ResourceGroupId, effect.Value))])))),
             ],
-            requirements,
+            requirementInfos,
             resources.Resources,
             resources.Groups);
     }
+
+    /// <summary>
+    /// Gets the largest level of a building type: the requirements of a type are read for it,
+    /// so the catalog holds every requirement of the type.
+    /// </summary>
+    /// <param name="type">The building type.</param>
+    /// <returns>The largest level of the type.</returns>
+    private static int HighestLevel(BuildingTypeEntity type) =>
+        type.LevelIds.Count == 0 ? 1 : type.LevelIds.Max(level => level.Level);
 
     private sealed record CachedCatalog(BuildingCatalog Catalog, DateTimeOffset LoadedAt);
 }

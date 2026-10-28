@@ -1,6 +1,8 @@
 using Aetheris.Core.Time;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Data;
+using Aetheris.Requirements;
+using Aetheris.Requirements.Services;
 using Aetheris.World;
 using Aetheris.World.Api;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +24,7 @@ public sealed class PlanetQueryService
     private readonly BuildingCatalogCache _catalogCache;
     private readonly IWorldModule _world;
     private readonly ITechnologyLevels _technologies;
+    private readonly IRequirementsModule _requirements;
     private readonly IGameClock _clock;
 
     /// <summary>
@@ -32,6 +35,7 @@ public sealed class PlanetQueryService
     /// <param name="catalogCache">The building catalog.</param>
     /// <param name="world">The world, for the owner of a body.</param>
     /// <param name="technologies">The technologies of the players.</param>
+    /// <param name="requirements">The common requirements module.</param>
     /// <param name="clock">The game clock.</param>
     public PlanetQueryService(
         PlanetsDbContext dbContext,
@@ -39,6 +43,7 @@ public sealed class PlanetQueryService
         BuildingCatalogCache catalogCache,
         IWorldModule world,
         ITechnologyLevels technologies,
+        IRequirementsModule requirements,
         IGameClock clock)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
@@ -46,6 +51,7 @@ public sealed class PlanetQueryService
         ArgumentNullException.ThrowIfNull(catalogCache);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(technologies);
+        ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(clock);
 
         _dbContext = dbContext;
@@ -53,6 +59,7 @@ public sealed class PlanetQueryService
         _catalogCache = catalogCache;
         _world = world;
         _technologies = technologies;
+        _requirements = requirements;
         _clock = clock;
     }
 
@@ -107,7 +114,7 @@ public sealed class PlanetQueryService
         string? playerId,
         CancellationToken cancellationToken)
     {
-        BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, cancellationToken).ConfigureAwait(false);
+        BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
         PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
 
         Dictionary<int, int> levels = await _dbContext.PlanetBuildings.AsNoTracking()

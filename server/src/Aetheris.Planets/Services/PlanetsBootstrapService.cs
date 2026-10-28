@@ -3,6 +3,7 @@ using Aetheris.Core.Data;
 using Aetheris.Core.Text;
 using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Data;
+using Aetheris.Requirements;
 using Aetheris.World;
 using Aetheris.World.Api;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,7 @@ public sealed class PlanetsBootstrapService
     private readonly IGameConfig _config;
     private readonly ILocalizationTexts _texts;
     private readonly ICodeSequence _codes;
+    private readonly IRequirementsModule _requirements;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PlanetsBootstrapService"/> class.
@@ -48,6 +50,7 @@ public sealed class PlanetsBootstrapService
     /// <param name="config">The game configuration.</param>
     /// <param name="texts">The texts of the game data.</param>
     /// <param name="codes">The counters of the neutral codes.</param>
+    /// <param name="requirements">The common requirements module.</param>
     public PlanetsBootstrapService(
         PlanetsDbContext dbContext,
         PlanetsUnitOfWork unitOfWork,
@@ -56,7 +59,8 @@ public sealed class PlanetsBootstrapService
         IWorldModule world,
         IGameConfig config,
         ILocalizationTexts texts,
-        ICodeSequence codes)
+        ICodeSequence codes,
+        IRequirementsModule requirements)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -66,6 +70,7 @@ public sealed class PlanetsBootstrapService
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(texts);
         ArgumentNullException.ThrowIfNull(codes);
+        ArgumentNullException.ThrowIfNull(requirements);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -75,6 +80,7 @@ public sealed class PlanetsBootstrapService
         _config = config;
         _texts = texts;
         _codes = codes;
+        _requirements = requirements;
     }
 
     /// <summary>
@@ -85,7 +91,7 @@ public sealed class PlanetsBootstrapService
     public async Task<PlanetsBootstrapResult> EnsureAsync(CancellationToken cancellationToken)
     {
         ResourceCatalog resources = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
-        bool seeded = await _unitOfWork.RunAsync(() => PlanetsReferenceSeed.SeedAsync(_dbContext, resources, _texts, _codes, cancellationToken), cancellationToken).ConfigureAwait(false);
+        bool seeded = await _unitOfWork.RunAsync(() => PlanetsReferenceSeed.SeedAsync(_dbContext, resources, _texts, _codes, _requirements, cancellationToken), cancellationToken).ConfigureAwait(false);
 
         _catalogCache.Invalidate();
 

@@ -11,9 +11,12 @@
   <!--
     The module of the bodies reads the world (its bodies, deposits and resources) through
     IWorldModule and plugs into its extension points. The dependency goes one way only.
+    The requirements of the buildings live in the common requirements module, so the
+    bodies module adds and reads them through IRequirementsModule.
   -->
   <ItemGroup>
     <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
+    <ProjectReference Include="..\Aetheris.Requirements\Aetheris.Requirements.csproj" />
     <ProjectReference Include="..\Aetheris.World\Aetheris.World.csproj" />
   </ItemGroup>
 

@@ -4,6 +4,10 @@ using Aetheris.Planets.Api;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
+using Aetheris.Requirements;
+using Aetheris.Requirements.Data;
+using Aetheris.Requirements.Data.Entities;
+using Aetheris.Requirements.Services;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.World;
 using Aetheris.World;
@@ -105,14 +109,15 @@ public sealed class BuildingsTests
         Assert.Equal(2, science.TargetLevel);
         Assert.Equal(PlanetsErrorCodes.RequirementDeposit, Assert.Single(PlanetsTestData.Building(overview, SeedCodes.CopperMine).Next.UnmetRequirements).ReasonCode);
 
-        // A designer lowers the requirement of the science centre in the database.
-        PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
-        await planets.Requirements.Where(entry => entry.Id == science.RequirementId)
+        // A designer lowers the requirement of the science centre in the database. The
+        // requirements live in the common requirements module (task 00012, decision 3).
+        RequirementsDbContext requirements = services.GetRequiredService<RequirementsDbContext>();
+        await requirements.Requirements.Where(entry => entry.Id == science.RequirementId)
             .ExecuteUpdateAsync(setters => setters.SetProperty(entry => entry.TargetLevel, 1), Token);
 
         // A technology that does not exist yet closes the housing.
         BuildingTypeEntity housing = await PlanetsTestData.TypeAsync(services, SeedCodes.ResidentialComplex);
-        planets.Requirements.Add(new RequirementEntity
+        requirements.Requirements.Add(new RequirementEntity
         {
             SubjectType = RequirementSubjectTypes.BuildingType,
             SubjectId = housing.Id,
@@ -121,7 +126,7 @@ public sealed class BuildingsTests
             TargetId = 1,
             TargetLevel = 1,
         });
-        await planets.SaveChangesAsync(Token);
+        await requirements.SaveChangesAsync(Token);
 
         PlanetOverviewDto changed = await PlanetsTestData.ReadAsync(services, player.PlanetId, now);
 
@@ -233,7 +238,11 @@ public sealed class BuildingsTests
 
         PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
         BuildingCatalogCache cache = services.GetRequiredService<BuildingCatalogCache>();
-        BuildingCatalog catalog = await cache.GetAsync(planets, services.GetRequiredService<IWorldModule>(), Token);
+        BuildingCatalog catalog = await cache.GetAsync(
+            planets,
+            services.GetRequiredService<IWorldModule>(),
+            services.GetRequiredService<IRequirementsModule>(),
+            Token);
 
         BuildingTypeEntity science = await PlanetsTestData.TypeAsync(services, SeedCodes.ScienceCenter);
         Assert.Equal(BuildingClasses.ResearchCenter, science.BuildingClass);

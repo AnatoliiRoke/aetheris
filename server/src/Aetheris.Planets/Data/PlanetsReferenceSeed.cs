@@ -3,6 +3,8 @@ using Aetheris.Core.Data;
 using Aetheris.Core.Text;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
+using Aetheris.Requirements;
+using Aetheris.Requirements.Services;
 using Aetheris.World.Api;
 using Aetheris.World.Data;
 using Microsoft.EntityFrameworkCore;
@@ -68,6 +70,7 @@ public static class PlanetsReferenceSeed
     /// <param name="resources">The resource catalog of the world.</param>
     /// <param name="texts">The texts of the game data.</param>
     /// <param name="codes">The counters of the neutral codes.</param>
+    /// <param name="requirements">The common requirements module, for the requirements of the buildings.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns><see langword="true"/> when the data was written.</returns>
     public static async Task<bool> SeedAsync(
@@ -75,12 +78,14 @@ public static class PlanetsReferenceSeed
         ResourceCatalog resources,
         ILocalizationTexts texts,
         ICodeSequence codes,
+        IRequirementsModule requirements,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(resources);
         ArgumentNullException.ThrowIfNull(texts);
         ArgumentNullException.ThrowIfNull(codes);
+        ArgumentNullException.ThrowIfNull(requirements);
 
         if (resources.Resources.Count == 0 || await dbContext.BuildingTypes.AnyAsync(cancellationToken).ConfigureAwait(false))
         {
@@ -126,22 +131,34 @@ public static class PlanetsReferenceSeed
         dbContext.BuildingTypes.AddRange(types.Values);
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        dbContext.Requirements.AddRange(seed.BuildingTypes.SelectMany(type => type.Requirements.Select(requirement => new RequirementEntity
+        // The requirements live in the common requirements module, so the seed adds them
+        // through its contract and never through the tables of that module. The requirements
+        // of one type are grouped by the level they apply from.
+        foreach ((string code, SeedBuildingType type) in seed.BuildingTypes.Select(type => (type.Code, type)))
         {
-            SubjectType = RequirementSubjectTypes.BuildingType,
-            SubjectId = types[type.Code].Id,
-            SubjectLevel = requirement.SubjectLevel ?? 1,
-            RequirementType = requirement.Type,
-            TargetId = requirement.Type switch
+            if (type.Requirements.Count == 0)
             {
-                RequirementTypes.BuildingLevel => types[requirement.Target].Id,
-                RequirementTypes.Deposit => resourceIds[requirement.Target],
-                _ => throw new InvalidOperationException($"The starting data names the requirement type '{requirement.Type}', which it cannot resolve."),
-            },
-            TargetLevel = requirement.TargetLevel ?? 0,
-        })));
+                continue;
+            }
 
-        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            foreach (IGrouping<int, SeedRequirement> group in type.Requirements.GroupBy(requirement => requirement.SubjectLevel ?? 1))
+            {
+                await requirements.AddAsync(
+                    RequirementSubjectTypes.BuildingType,
+                    types[code].Id,
+                    group.Key,
+                    [.. group.Select(requirement => new RequirementDefinition(
+                        requirement.Type,
+                        requirement.Type switch
+                        {
+                            RequirementTypes.BuildingLevel => types[requirement.Target].Id,
+                            RequirementTypes.Deposit => resourceIds[requirement.Target],
+                            _ => throw new InvalidOperationException($"The starting data names the requirement type '{requirement.Type}', which it cannot resolve."),
+                        },
+                        requirement.TargetLevel ?? 0))],
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
 
         await texts.AddMissingAsync(
             [

@@ -139,6 +139,12 @@ namespace Aetheris.Planets.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BuildingClass")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("building_class");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -167,6 +173,9 @@ namespace Aetheris.Planets.Data.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_building_type");
+
+                    b.HasIndex("BuildingClass")
+                        .HasDatabaseName("ix_building_type_building_class");
 
                     b.HasIndex("Code")
                         .IsUnique()
@@ -417,52 +426,6 @@ namespace Aetheris.Planets.Data.Migrations
                         .HasDatabaseName("ix_planet_storage_group_sector_id");
 
                     b.ToTable("planet_storage_group", (string)null);
-                });
-
-            modelBuilder.Entity("Aetheris.Planets.Data.Entities.RequirementEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("RequirementType")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("requirement_type");
-
-                    b.Property<int>("SubjectId")
-                        .HasColumnType("integer")
-                        .HasColumnName("subject_id");
-
-                    b.Property<int>("SubjectLevel")
-                        .HasColumnType("integer")
-                        .HasColumnName("subject_level");
-
-                    b.Property<string>("SubjectType")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("subject_type");
-
-                    b.Property<int>("TargetId")
-                        .HasColumnType("integer")
-                        .HasColumnName("target_id");
-
-                    b.Property<int>("TargetLevel")
-                        .HasColumnType("integer")
-                        .HasColumnName("target_level");
-
-                    b.HasKey("Id")
-                        .HasName("pk_requirement");
-
-                    b.HasIndex("SubjectType", "SubjectId")
-                        .HasDatabaseName("ix_requirement_subject_type_subject_id");
-
-                    b.ToTable("requirement", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Planets.Data.Entities.BuildingLevelCostEntity", b =>

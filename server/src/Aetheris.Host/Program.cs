@@ -21,6 +21,8 @@ using Aetheris.Host.Security;
 using Aetheris.Market;
 using Aetheris.Planets;
 using Aetheris.Rating;
+using Aetheris.Requirements;
+using Aetheris.Requirements.Data;
 using Aetheris.World;
 using Aetheris.World.Api;
 using Aetheris.World.Data;
@@ -177,6 +179,10 @@ builder.Services.AddSingleton<IChatModule, ChatModule>();
 builder.Services.AddSingleton<IAdminModule, AdminModule>();
 builder.Services.AddWorldModule();
 
+// The common requirements module keeps the requirements of every closed subject, so it comes
+// before the modules that add their requirements through its contract.
+builder.Services.AddRequirementsModule();
+
 // The Planets module plugs into the extension points of the world, so it comes after it.
 PlanetsModule.Register(builder.Services);
 
@@ -215,6 +221,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 
     // Every module with its own tables applies its migrations the same way.
     await WorldDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
+    await RequirementsDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await PlanetsModule.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");

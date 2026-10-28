@@ -9,6 +9,7 @@
     <Project Path="src/Aetheris.Market/Aetheris.Market.csproj" />
     <Project Path="src/Aetheris.Planets/Aetheris.Planets.csproj" />
     <Project Path="src/Aetheris.Rating/Aetheris.Rating.csproj" />
+    <Project Path="src/Aetheris.Requirements/Aetheris.Requirements.csproj" />
     <Project Path="src/Aetheris.World/Aetheris.World.csproj" />
   </Folder>
   <Folder Name="/tests/">

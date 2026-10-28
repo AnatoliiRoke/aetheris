@@ -25,16 +25,18 @@ public sealed class ModuleIsolationTests
         "Aetheris.Chat",
         "Aetheris.Admin",
         "Aetheris.World",
+        "Aetheris.Requirements",
     ];
 
     /// <summary>
     /// The references between modules that are allowed: the Planets module reads the world
-    /// through its contract and plugs into its extension points (task 00011). The dependency
-    /// goes one way only.
+    /// through its contract and plugs into its extension points (task 00011), and it keeps the
+    /// requirements of its own subjects in the common requirements module (task 00012). The
+    /// dependencies go one way only.
     /// </summary>
     private static readonly Dictionary<string, string[]> AllowedReferences = new(StringComparer.Ordinal)
     {
-        ["Aetheris.Planets"] = ["Aetheris.World"],
+        ["Aetheris.Planets"] = ["Aetheris.World", "Aetheris.Requirements"],
     };
 
     private readonly AetherisTestFactory _factory;
@@ -63,6 +65,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Chat")]
     [InlineData("Aetheris.Admin")]
     [InlineData("Aetheris.World")]
+    [InlineData("Aetheris.Requirements")]
     public void A_module_does_not_reference_another_module(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -93,6 +96,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Chat")]
     [InlineData("Aetheris.Admin")]
     [InlineData("Aetheris.World")]
+    [InlineData("Aetheris.Requirements")]
     public void A_module_exposes_exactly_one_public_contract(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -122,6 +126,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Chat")]
     [InlineData("Aetheris.Admin")]
     [InlineData("Aetheris.World")]
+    [InlineData("Aetheris.Requirements")]
     public void The_public_contract_follows_the_naming_convention(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -156,6 +161,7 @@ public sealed class ModuleIsolationTests
         Assert.NotNull(services.GetService<Aetheris.Chat.IChatModule>());
         Assert.NotNull(services.GetService<Aetheris.Admin.IAdminModule>());
         Assert.NotNull(services.GetService<Aetheris.World.IWorldModule>());
+        Assert.NotNull(services.GetService<Aetheris.Requirements.IRequirementsModule>());
     }
 
     /// <summary>

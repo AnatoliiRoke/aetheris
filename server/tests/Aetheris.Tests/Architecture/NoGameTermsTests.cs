@@ -41,7 +41,8 @@ public sealed partial class NoGameTermsTests
 
     /// <summary>
     /// The folders, relative to the server root, where the words of the game domain are
-    /// allowed: the World module, the Planets module of task 00011 and their tests.
+    /// allowed: the World module, the Planets module of task 00011, the common requirements
+    /// module of task 00012 and their tests.
     /// </summary>
     private static readonly string[] WorldDomainFolders =
     [
@@ -49,6 +50,7 @@ public sealed partial class NoGameTermsTests
         Path.Combine("tests", "Aetheris.Tests", "World") + Path.DirectorySeparatorChar,
         Path.Combine("src", "Aetheris.Planets") + Path.DirectorySeparatorChar,
         Path.Combine("tests", "Aetheris.Tests", "Planets") + Path.DirectorySeparatorChar,
+        Path.Combine("src", "Aetheris.Requirements") + Path.DirectorySeparatorChar,
     ];
 
     /// <summary>
@@ -208,7 +210,7 @@ public sealed partial class NoGameTermsTests
     /// API that describes the service, MSBuild embedded files, a standard HTTP header and the
     /// reflection API that reads embedded files.
     /// </summary>
-    [GeneratedRegex(@"\bI?(Economy|Planets|Fleet|Market|Rating|Chat|Admin)Module\b|Aetheris\.(Economy|Planets|Fleet|Market|Rating|Chat|Admin)\b|""(Economy|Planets|Fleet|Market|Rating|Chat|Admin)""|\b(Economy|Planets|Fleet|Market|Rating|Chat|Admin) module\b|OpenTelemetry\.Resources|ConfigureResource|EmbeddedResource|Cross-Origin-Resource-Policy|GetManifestResource(Names|Stream)")]
+    [GeneratedRegex(@"\bI?(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements)Module\b|Aetheris\.(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements)\b|""(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements)""|\b(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements) module\b|OpenTelemetry\.Resources|ConfigureResource|EmbeddedResource|Cross-Origin-Resource-Policy|GetManifestResource(Names|Stream)")]
     private static partial Regex AllowedNames();
 
     [GeneratedRegex("[^A-Za-z]+")]

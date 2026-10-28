@@ -8,6 +8,7 @@ using Aetheris.Planets.Api;
 using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
+using Aetheris.Requirements;
 using Aetheris.World;
 using Aetheris.World.Api;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,7 @@ public sealed class ConstructionService
     private readonly BuildingCatalogCache _catalogCache;
     private readonly IWorldModule _world;
     private readonly ITechnologyLevels _technologies;
+    private readonly IRequirementsModule _requirements;
     private readonly IEventScheduler _scheduler;
     private readonly IGameConfig _config;
     private readonly IGameClock _clock;
@@ -54,6 +56,7 @@ public sealed class ConstructionService
     /// <param name="catalogCache">The building catalog.</param>
     /// <param name="world">The world, for the deposits.</param>
     /// <param name="technologies">The technologies of the players.</param>
+    /// <param name="requirements">The common requirements module.</param>
     /// <param name="scheduler">The event scheduler.</param>
     /// <param name="config">The game configuration.</param>
     /// <param name="clock">The game clock.</param>
@@ -63,6 +66,7 @@ public sealed class ConstructionService
         BuildingCatalogCache catalogCache,
         IWorldModule world,
         ITechnologyLevels technologies,
+        IRequirementsModule requirements,
         IEventScheduler scheduler,
         IGameConfig config,
         IGameClock clock)
@@ -72,6 +76,7 @@ public sealed class ConstructionService
         ArgumentNullException.ThrowIfNull(catalogCache);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(technologies);
+        ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(scheduler);
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(clock);
@@ -81,6 +86,7 @@ public sealed class ConstructionService
         _catalogCache = catalogCache;
         _world = world;
         _technologies = technologies;
+        _requirements = requirements;
         _scheduler = scheduler;
         _config = config;
         _clock = clock;
@@ -297,7 +303,7 @@ public sealed class ConstructionService
 
         return new PlanetSession(
             _dbContext,
-            await _catalogCache.GetAsync(_dbContext, _world, cancellationToken).ConfigureAwait(false),
+            await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false),
             PlanetsSettings.From(_config),
             state,
             await buildings.ToListAsync(cancellationToken).ConfigureAwait(false),
