@@ -1,6 +1,6 @@
 # Задача 00017 — Дизайн сторінки будівництва
 
-> **Статус:** не розпочата (створено 26.10.2026).
+> **Статус:** ВИКОНАНО автором (макет у `documentation/design/AETHERIS_4_pages`, 28.10.2026).
 > **Інструмент:** Claude Design (тип «Design»; візуальний макет на полотні).
 > **Спільно з:** [задача 00016](00016-dyzain-storinky-planety.md) (сторінка планети) — та сама оболонка й стиль.
 > **Документи:** [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md), [game-design/03 Розвиток планет](../game-design/03-rozvytok-planet.md), [задача 00011](../tasks/00011-vymohy-budivli-ta-cherha-budivnytstva.md)

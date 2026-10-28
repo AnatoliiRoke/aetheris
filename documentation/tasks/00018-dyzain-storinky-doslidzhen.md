@@ -1,6 +1,6 @@
 # Задача 00018 — Дизайн сторінки дослідження
 
-> **Статус:** не розпочата (створено 26.10.2026).
+> **Статус:** ВИКОНАНО автором (макет у `documentation/design/AETHERIS_4_pages`, 28.10.2026).
 > **Інструмент:** Claude Design (тип «Design»; візуальний макет на полотні).
 > **Спільно з:** [задача 00016](00016-dyzain-storinky-planety.md) (сторінка планети), [задача 00017](00017-dyzain-storinky-budivnytstva.md) (сторінка будівництва) — та сама оболонка й стиль.
 > **Документи:** [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md), [game-design/04 Технології](../game-design/04-tekhnolohii.md), [задача 00012](../tasks/00012-naukovyi-tsentr-ta-cherha-doslidzhen.md)

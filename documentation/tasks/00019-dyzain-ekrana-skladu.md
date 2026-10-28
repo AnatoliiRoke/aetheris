@@ -1,6 +1,6 @@
 # Задача 00019 — Дизайн екрана складу
 
-> **Статус:** не розпочата (створено 26.10.2026).
+> **Статус:** ВИКОНАНО автором (макет у `documentation/design/AETHERIS_4_pages`, 28.10.2026).
 > **Інструмент:** Claude Design (тип «Design»; візуальний макет на полотні).
 > **Спільно з:** [задача 00016](00016-dyzain-storinky-planety.md), [задача 00017](00017-dyzain-storinky-budivnytstva.md), [задача 00018](00018-dyzain-storinky-doslidzhen.md) — та сама оболонка й стиль.
 > **Документи:** [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md), [game-design/02 Економіка](../game-design/02-ekonomika-ta-resursy.md), [задача 00011](../tasks/00011-vymohy-budivli-ta-cherha-budivnytstva.md), [задача 00013](../tasks/00013-vyrobnytstvo-retsepty-zavody-sklad-detalei.md)

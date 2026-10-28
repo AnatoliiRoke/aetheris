@@ -1,6 +1,6 @@
 # Задача 00015 — Населення, кредити та торгова валюта (баланси цивілізації)
 
-> **Статус:** ЧЕРНЕТКА, чекає затвердження автора (створено 26.10.2026). Не передавати агенту, поки автор не напише «затверджую». Залежить від [00011](00011-vymohy-budivli-ta-cherha-budivnytstva.md) (будівлі, ефекти, ліниве накопичення) і [00012](00012-naukovyi-tsentr-ta-cherha-doslidzhen.md) (бонуси технологій).
+> **Статус:** ЗАТВЕРДЖЕНО автором 26.10.2026. Виконувати після 00011 і 00012. Залежить від [00011](00011-vymohy-budivli-ta-cherha-budivnytstva.md) (будівлі, ефекти, ліниве накопичення) і [00012](00012-naukovyi-tsentr-ta-cherha-doslidzhen.md) (бонуси технологій).
 > **Етап:** 1 (production/01)
 > **Документи:** [game-design/02 Економіка](../game-design/02-ekonomika-ta-resursy.md) (розділ 3 Населення), [game-design/03 Розвиток планет](../game-design/03-rozvytok-planet.md), [game-design/12 Монетизація](../game-design/12-monetyzatsiia.md) (розділ 6 торгова валюта), [задача 00014](00014-planetarni-protsesy-teraformuvannia-rozbyrannia-peretvoriuvach.md) (вимирання понад ліміт), [tech/07 Планувальник](../tech/07-planuvalnyk-podii.md), [tech/08 Правила коду](../tech/08-pravyla-kodu-dlia-ahentiv.md), [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md)
 
