@@ -1,6 +1,7 @@
 # Задача 00013 — Виробництво: рецепти, заводи, склад деталей
 
 > **Статус:** ЗАТВЕРДЖЕНО автором 26.10.2026. Виконувати лише після 00011 і 00012 (вони ще чекають затвердження). Залежить від [00011](00011-vymohy-budivli-ta-cherha-budivnytstva.md) і [00012](00012-naukovyi-tsentr-ta-cherha-doslidzhen.md).
+> **Аналіз:** [00013-аналіз після 00012](00013-analiz-pislia-00012.md) (28.10.2026) — що готове, чого бракує, перелік питань автору.
 > **Етап:** 1 (production/01)
 > **Документи:** [game-design/05a Модулі та компоненти](../game-design/05a-moduli-ta-komponenty.md), [game-design/02 Економіка](../game-design/02-ekonomika-ta-resursy.md), [game-design/03 Розвиток планет](../game-design/03-rozvytok-planet.md), [game-design/08 Раси](../game-design/08-rasy.md), [game-design/12 Монетизація](../game-design/12-monetyzatsiia.md), [tech/07 Планувальник](../tech/07-planuvalnyk-podii.md), [tech/08 Правила коду](../tech/08-pravyla-kodu-dlia-ahentiv.md), [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md)
 
