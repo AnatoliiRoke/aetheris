@@ -6,6 +6,7 @@ using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
 using Aetheris.Tests.Infrastructure;
+using Aetheris.Tests.World;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -52,9 +53,9 @@ public sealed class ConstructionTests
         Dictionary<int, long> balance = await BuildingsTests.RichBalanceAsync(services);
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, balance, start);
 
-        BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, "power_plant");
-        BuildingTypeEntity housing = await PlanetsTestData.TypeAsync(services, "residential_complex");
-        BuildingTypeEntity storage = await PlanetsTestData.TypeAsync(services, "metal_storage");
+        BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, SeedCodes.PowerPlant);
+        BuildingTypeEntity housing = await PlanetsTestData.TypeAsync(services, SeedCodes.ResidentialComplex);
+        BuildingTypeEntity storage = await PlanetsTestData.TypeAsync(services, SeedCodes.MetalStorage);
         BuildingLevelEntity plantLevel = plant.LevelIds.Single(level => level.Level == 1);
         BuildingLevelEntity housingLevel = housing.LevelIds.Single(level => level.Level == 1);
 
@@ -84,7 +85,7 @@ public sealed class ConstructionTests
         // Nothing is done a moment before the end.
         DateTimeOffset end = underWay.FinishesAt!.Value;
         PlanetOverviewDto before = await PlanetsTestData.ReadAsync(services, player.PlanetId, end.AddSeconds(-1));
-        Assert.Equal(0, PlanetsTestData.Building(before, "power_plant").Level);
+        Assert.Equal(0, PlanetsTestData.Building(before, SeedCodes.PowerPlant).Level);
 
         // The scheduler completes the plant at its end and starts the housing at that moment.
         int applied = await ShiftedGameClock.RunDueEventsAsync(_factory, end - PlanetsTestData.GameNow(services) + TimeSpan.FromSeconds(1));
@@ -93,7 +94,7 @@ public sealed class ConstructionTests
         PlanetOverviewDto after = await PlanetsTestData.ReadAsync(services, player.PlanetId, end);
         QueueItemDto next = Assert.Single(after.Queue.Items);
 
-        Assert.Equal(1, PlanetsTestData.Building(after, "power_plant").Level);
+        Assert.Equal(1, PlanetsTestData.Building(after, SeedCodes.PowerPlant).Level);
         Assert.Equal(housing.Id, next.BuildingTypeId);
         Assert.Equal(end, next.StartedAt);
         Assert.Equal(end.AddSeconds(housingLevel.DurationSeconds), next.FinishesAt);
@@ -101,7 +102,7 @@ public sealed class ConstructionTests
         // A late read completes the housing at its own end as well.
         PlanetOverviewDto done = await PlanetsTestData.ReadAsync(services, player.PlanetId, next.FinishesAt!.Value.AddHours(1));
         Assert.Empty(done.Queue.Items);
-        Assert.Equal(1, PlanetsTestData.Building(done, "residential_complex").Level);
+        Assert.Equal(1, PlanetsTestData.Building(done, SeedCodes.ResidentialComplex).Level);
     }
 
     /// <summary>
@@ -120,8 +121,8 @@ public sealed class ConstructionTests
         DateTimeOffset start = PlanetsTestData.GameNow(services);
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, await BuildingsTests.RichBalanceAsync(services), start);
 
-        BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, "power_plant");
-        BuildingTypeEntity housing = await PlanetsTestData.TypeAsync(services, "residential_complex");
+        BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, SeedCodes.PowerPlant);
+        BuildingTypeEntity housing = await PlanetsTestData.TypeAsync(services, SeedCodes.ResidentialComplex);
 
         PlanetOverviewDto initial = await PlanetsTestData.ReadAsync(services, player.PlanetId, start);
         await construction.EnqueueAsync(player.PlanetId, plant.Id, start, Token);
@@ -137,7 +138,7 @@ public sealed class ConstructionTests
         await ShiftedGameClock.RunDueEventsAsync(_factory, TimeSpan.FromSeconds(plant.LevelIds.Single(level => level.Level == 1).DurationSeconds + 1));
         PlanetOverviewDto after = await PlanetsTestData.ReadAsync(services, player.PlanetId, start.AddSeconds(11));
 
-        Assert.Equal(0, PlanetsTestData.Building(after, "power_plant").Level);
+        Assert.Equal(0, PlanetsTestData.Building(after, SeedCodes.PowerPlant).Level);
 
         // Every resource is back except the cost of the housing.
         BuildingLevelEntity housingLevel = housing.LevelIds.Single(level => level.Level == 1);
@@ -166,17 +167,17 @@ public sealed class ConstructionTests
 
         // The main building of level 2 opens the science centre and gives some energy.
         const int mainLevel = 2;
-        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, "admin_center", mainLevel);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.AdminCenter, mainLevel);
 
-        BuildingTypeEntity main = await PlanetsTestData.TypeAsync(services, "admin_center");
-        BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, "power_plant");
+        BuildingTypeEntity main = await PlanetsTestData.TypeAsync(services, SeedCodes.AdminCenter);
+        BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, SeedCodes.PowerPlant);
         List<BuildingTypeEntity> consumers =
         [
-            await PlanetsTestData.TypeAsync(services, "residential_complex"),
-            await PlanetsTestData.TypeAsync(services, "metal_storage"),
-            await PlanetsTestData.TypeAsync(services, "crystal_storage"),
-            await PlanetsTestData.TypeAsync(services, "fuel_storage"),
-            await PlanetsTestData.TypeAsync(services, "science_center"),
+            await PlanetsTestData.TypeAsync(services, SeedCodes.ResidentialComplex),
+            await PlanetsTestData.TypeAsync(services, SeedCodes.MetalStorage),
+            await PlanetsTestData.TypeAsync(services, SeedCodes.MineralStorage),
+            await PlanetsTestData.TypeAsync(services, SeedCodes.FuelStorage),
+            await PlanetsTestData.TypeAsync(services, SeedCodes.ScienceCenter),
         ];
 
         long output = Effect(main, mainLevel, BuildingEffectTypes.EnergyOutput);
@@ -232,11 +233,11 @@ public sealed class ConstructionTests
         IServiceProvider services = scope.ServiceProvider;
 
         const decimal richness = 1.5m;
-        int iron = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, "iron", richness);
+        int iron = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, SeedCodes.Iron, richness);
         DateTimeOffset start = PlanetsTestData.GameNow(services);
 
-        BuildingTypeEntity mine = await PlanetsTestData.TypeAsync(services, "iron_mine");
-        BuildingTypeEntity main = await PlanetsTestData.TypeAsync(services, "admin_center");
+        BuildingTypeEntity mine = await PlanetsTestData.TypeAsync(services, SeedCodes.IronMine);
+        BuildingTypeEntity main = await PlanetsTestData.TypeAsync(services, SeedCodes.AdminCenter);
         long value = Effect(mine, 1, BuildingEffectTypes.Production);
         BuildingLevelEffectEntity capacityEffect = main.LevelIds.Single(level => level.Level == 1).EffectIds
             .Single(effect => effect.EffectType == BuildingEffectTypes.StorageCapacity && effect.ResourceGroupId != null
@@ -244,9 +245,9 @@ public sealed class ConstructionTests
 
         // Copper of the same group pays for a later change and takes part of the capacity.
         const long copperAmount = 1000;
-        int copper = await PlanetsTestData.ResourceIdAsync(services, "copper");
+        int copper = await PlanetsTestData.ResourceIdAsync(services, SeedCodes.Copper);
 
-        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, "iron_mine", 1);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.IronMine, 1);
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, new Dictionary<int, long> { [iron] = 0, [copper] = copperAmount }, start);
 
         decimal rate = value * richness;
@@ -271,7 +272,7 @@ public sealed class ConstructionTests
         // A change fixes the balance and writes the alarm as the state of the group.
         await services.GetRequiredService<ConstructionService>().EnqueueAsync(
             player.PlanetId,
-            (await PlanetsTestData.TypeAsync(services, "power_plant")).Id,
+            (await PlanetsTestData.TypeAsync(services, SeedCodes.PowerPlant)).Id,
             fullAt.AddDays(3),
             Token);
 
@@ -298,8 +299,8 @@ public sealed class ConstructionTests
 
         await AetherisTestFactory.SetParameterAsync(services, PlanetsConfigKeys.QueueBaseSlots, (requests + 1).ToString(System.Globalization.CultureInfo.InvariantCulture));
 
-        BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, "power_plant");
-        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, "admin_center", affordableLevels + 1);
+        BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, SeedCodes.PowerPlant);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.AdminCenter, affordableLevels + 1);
 
         // The balance pays for exactly three levels of the plant.
         Dictionary<int, long> balance = [];

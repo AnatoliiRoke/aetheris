@@ -126,11 +126,14 @@ public sealed class StartPlanetAllocator
             return new StartPlanetResult(owned.Id, owned.CelestialObjectId, owned.SystemId, owned.SectorId, true);
         }
 
+        // The start type is a flag of the data, not a code in the configuration (task 00022,
+        // decision 5); with several flagged types the oldest one wins.
         int startTypeId = await _dbContext.ObjectTypes.AsNoTracking()
-            .Where(type => type.Code == settings.StartPlanetTypeCode && type.IsColonizable)
+            .Where(type => type.IsStartDefault && type.IsColonizable)
+            .OrderBy(type => type.Id)
             .Select(type => (int?)type.Id)
-            .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false)
-            ?? throw new GameException(WorldErrorCodes.StartTypeUnknown, $"The start type '{settings.StartPlanetTypeCode}' is not a colonizable type.");
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false)
+            ?? throw new GameException(WorldErrorCodes.StartTypeUnknown, "No colonizable body type is marked as the start type.");
 
         List<int> typeIds = [startTypeId];
 

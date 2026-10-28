@@ -106,6 +106,22 @@ public static class WorldTestData
         new(Settings(overrides), ReferenceFromSeed());
 
     /// <summary>
+    /// Gets the resource group of the rules of a rule group: the group of its first resource.
+    /// </summary>
+    /// <param name="reference">The reference data.</param>
+    /// <param name="ruleGroup">The rule group.</param>
+    /// <returns>The resource group.</returns>
+    public static int GroupOfRules(WorldReferenceData reference, ReferenceRuleGroup ruleGroup)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        ArgumentNullException.ThrowIfNull(ruleGroup);
+
+        int resourceId = ruleGroup.RuleIds.First().ResourceId;
+
+        return reference.Resources.Single(resource => resource.Id == resourceId).ResourceGroupId;
+    }
+
+    /// <summary>
     /// Gets the identifiers of the resources of a group.
     /// </summary>
     /// <param name="reference">The reference data.</param>

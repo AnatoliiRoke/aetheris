@@ -25,9 +25,6 @@ public static class PlanetsConfigKeys
     /// <summary>How long the building tables stay in the memory of the server before they are read again, in seconds.</summary>
     public const string CatalogCacheSeconds = "planets.catalog.cache_seconds";
 
-    /// <summary>The code of the building every civilization starts with.</summary>
-    public const string StartBuildingCode = "planets.start.building_code";
-
     /// <summary>The level of the start building.</summary>
     public const string StartBuildingLevel = "planets.start.building_level";
 
@@ -40,7 +37,6 @@ public static class PlanetsConfigKeys
         new(QueueBaseSlots, "2", "1", "100", "Places of the construction queue of a body, the building under way included."),
         new(QueueMaxExtraSlots, "2", "0", "100", "Largest number of paid places added to the construction queue of a body."),
         new(CatalogCacheSeconds, "30", "0", "86400", "How long the building tables stay in memory before they are read again, in seconds."),
-        new(StartBuildingCode, "admin_center", null, null, "Code of the building every new civilization starts with."),
         new(StartBuildingLevel, "1", "1", "1000", "Level of the start building."),
     ];
 }

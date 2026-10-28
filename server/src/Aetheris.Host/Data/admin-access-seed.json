@@ -36,6 +36,7 @@
     { "code": "admin.world_generation_rule_added", "kind": "action" },
     { "code": "admin.world_generation_rule_updated", "kind": "action" },
     { "code": "admin.world_generation_rule_group_updated", "kind": "action" },
+    { "code": "admin.world_reference_row_added", "kind": "action" },
     { "code": "admin.texts_read", "kind": "screen" },
     { "code": "admin.text_updated", "kind": "action" }
   ],
@@ -69,6 +70,7 @@
         "admin.world_generation_rule_added",
         "admin.world_generation_rule_updated",
         "admin.world_generation_rule_group_updated",
+        "admin.world_reference_row_added",
         "admin.texts_read",
         "admin.text_updated"
       ]

@@ -1,18 +1,22 @@
 namespace Aetheris.World.Data.Entities;
 
 /// <summary>
-/// A group of resource types: extractable, crystal, fuel, ether and any group added later.
+/// A group of resource types. The groups are data: a new group is a new row with a neutral code
+/// and its texts (task 00022).
 /// </summary>
 public sealed class ResourceGroupEntity
 {
     /// <summary>Gets or sets the primary key.</summary>
     public int Id { get; set; }
 
-    /// <summary>Gets or sets the stable code of the group.</summary>
+    /// <summary>Gets or sets the neutral code of the group, given by the server (task 00022).</summary>
     public string Code { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the localisation key of the name.</summary>
     public string NameKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localisation key of the description.</summary>
+    public string DescriptionKey { get; set; } = string.Empty;
 
     /// <summary>Gets or sets a value indicating whether a resource of the group may lie on a planet or a gas giant.</summary>
     public bool AllowedOnPlanet { get; set; }
@@ -26,7 +30,7 @@ public sealed class ResourceTypeEntity
     /// <summary>Gets or sets the primary key.</summary>
     public int Id { get; set; }
 
-    /// <summary>Gets or sets the stable code of the resource.</summary>
+    /// <summary>Gets or sets the neutral code of the resource, given by the server (task 00022).</summary>
     public string Code { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the group of the resource.</summary>
@@ -34,6 +38,12 @@ public sealed class ResourceTypeEntity
 
     /// <summary>Gets or sets the localisation key of the name.</summary>
     public string NameKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localisation key of the description.</summary>
+    public string DescriptionKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the key of the picture of the resource, or <see langword="null"/> for the neutral placeholder.</summary>
+    public string? ImageKey { get; set; }
 }
 
 /// <summary>
@@ -48,7 +58,7 @@ public sealed class CelestialObjectTypeEntity
     /// <summary>Gets or sets the primary key.</summary>
     public int Id { get; set; }
 
-    /// <summary>Gets or sets the stable code of the type.</summary>
+    /// <summary>Gets or sets the neutral code of the type, given by the server (task 00022).</summary>
     public string Code { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the class of the type, one of <see cref="WorldObjectClasses"/>.</summary>
@@ -56,6 +66,32 @@ public sealed class CelestialObjectTypeEntity
 
     /// <summary>Gets or sets the localisation key of the name.</summary>
     public string NameKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localisation key of the description.</summary>
+    public string DescriptionKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the key of the picture of the type, or <see langword="null"/> for the neutral placeholder.</summary>
+    public string? ImageKey { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether a newcomer whose race names no body type starts on
+    /// a body of this type (task 00022, decision 5: a flag of the data instead of a code in the
+    /// configuration).
+    /// </summary>
+    public bool IsStartDefault { get; set; }
+
+    /// <summary>
+    /// Gets or sets the resource a field of this type hides, or <see langword="null"/>. The hidden
+    /// share is not part of the composition the player sees (task 00022, decision 7); the
+    /// extraction from fields uses it with its own task.
+    /// </summary>
+    public int? HiddenResourceTypeId { get; set; }
+
+    /// <summary>Gets or sets the smallest hidden share of a cycle of extraction, or <see langword="null"/>.</summary>
+    public decimal? HiddenShareMin { get; set; }
+
+    /// <summary>Gets or sets the largest hidden share of a cycle of extraction, or <see langword="null"/>.</summary>
+    public decimal? HiddenShareMax { get; set; }
 
     /// <summary>Gets or sets a value indicating whether a player may own an object of this type.</summary>
     public bool IsColonizable { get; set; }
@@ -81,11 +117,14 @@ public sealed class PlanetSizeClassEntity
     /// <summary>Gets or sets the primary key.</summary>
     public int Id { get; set; }
 
-    /// <summary>Gets or sets the stable code of the class.</summary>
+    /// <summary>Gets or sets the neutral code of the class, given by the server (task 00022).</summary>
     public string Code { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the localisation key of the name.</summary>
     public string NameKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localisation key of the description.</summary>
+    public string DescriptionKey { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the weight of the class.</summary>
     public int GenerationWeight { get; set; }
@@ -113,7 +152,7 @@ public sealed class GenerationRuleGroupEntity
     /// <summary>Gets or sets the object type the group belongs to.</summary>
     public int ObjectTypeId { get; set; }
 
-    /// <summary>Gets or sets the stable code of the group.</summary>
+    /// <summary>Gets or sets the neutral code of the group, given by the server (task 00022).</summary>
     public string Code { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the number of resources that are always picked.</summary>
@@ -186,11 +225,26 @@ public sealed class RaceEntity
     /// <summary>Gets or sets the primary key.</summary>
     public int Id { get; set; }
 
-    /// <summary>Gets or sets the stable code of the race.</summary>
+    /// <summary>Gets or sets the neutral code of the race, given by the server (task 00022).</summary>
     public string Code { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the localisation key of the name.</summary>
     public string NameKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localisation key of the description.</summary>
+    public string DescriptionKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localisation key of the mood shown on the card of the race.</summary>
+    public string MoodKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localisation keys of the strengths shown on the card of the race.</summary>
+    public List<string> TraitKeys { get; set; } = [];
+
+    /// <summary>Gets or sets the key of the picture of the race, or <see langword="null"/> for the neutral placeholder.</summary>
+    public string? ImageKey { get; set; }
+
+    /// <summary>Gets or sets the key of the colour of the race in the style of the client, or <see langword="null"/> for the neutral one.</summary>
+    public string? ColorKey { get; set; }
 
     /// <summary>Gets or sets the order of the race in the list of the client.</summary>
     public int SortOrder { get; set; }
@@ -203,8 +257,8 @@ public sealed class RaceEntity
     /// while none is set.
     /// </summary>
     /// <remarks>
-    /// The building types belong to the buildings module, which does not exist yet; the column
-    /// gets its foreign key with that module.
+    /// The building types belong to the Planets module, which fills the column at start; the
+    /// tables of the two modules have no foreign keys between them.
     /// </remarks>
     public int? StartBuildingTypeId { get; set; }
 

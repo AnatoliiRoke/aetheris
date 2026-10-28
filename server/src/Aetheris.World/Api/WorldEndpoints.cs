@@ -37,6 +37,11 @@ public static class WorldEndpoints
     public const string Prefix = "/api/v1/world";
 
     /// <summary>
+    /// The public route of the races, read by the landing page (task 00022).
+    /// </summary>
+    public const string PublicRacesRoute = "/api/v1/public/races";
+
+    /// <summary>
     /// Maps the reads of a player. They need a signed-in player and count against the command
     /// rate limit of the player (task 00004, section 2.7).
     /// </summary>
@@ -52,6 +57,11 @@ public static class WorldEndpoints
 
         world.MapGet("/races", async (CivilizationService civilizations, CancellationToken cancellationToken) =>
             Results.Json(await civilizations.GetRacesAsync(cancellationToken).ConfigureAwait(false), WorldJson.Options));
+
+        // The landing page shows the races before any sign-in; the list holds no player data.
+        endpoints.MapGet(PublicRacesRoute, async (CivilizationService civilizations, CancellationToken cancellationToken) =>
+            Results.Json(await civilizations.GetRacesAsync(cancellationToken).ConfigureAwait(false), WorldJson.Options))
+            .AllowAnonymous();
 
         world.MapGet("/civilization", async (ClaimsPrincipal user, CivilizationService civilizations, CancellationToken cancellationToken) =>
         {

@@ -1,7 +1,10 @@
 using System.Text.Json;
+using Aetheris.Core.Data;
+using Aetheris.Core.Text;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
 using Aetheris.World.Api;
+using Aetheris.World.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aetheris.Planets.Data;
@@ -14,8 +17,9 @@ namespace Aetheris.Planets.Data;
 /// The starting data lives in the embedded file <c>Data/planets-reference-seed.json</c>: every
 /// building type with the start value and the growth of its time, costs and effects. The seed
 /// turns them into one row per level, <c>round(base × growth^(level − 1) + step × (level − 1))</c>,
-/// so the database holds a plain table that a designer or the simulator changes later. The seed
-/// runs only while the building table is empty, so it never overwrites a change.
+/// so the database holds a plain table that a designer or the simulator changes later. Every type
+/// has a neutral code and its texts in every language (task 00022). The seed runs only while the
+/// building table is empty, so it never overwrites a change.
 /// </remarks>
 public static class PlanetsReferenceSeed
 {
@@ -62,12 +66,21 @@ public static class PlanetsReferenceSeed
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="resources">The resource catalog of the world.</param>
+    /// <param name="texts">The texts of the game data.</param>
+    /// <param name="codes">The counters of the neutral codes.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns><see langword="true"/> when the data was written.</returns>
-    public static async Task<bool> SeedAsync(PlanetsDbContext dbContext, ResourceCatalog resources, CancellationToken cancellationToken)
+    public static async Task<bool> SeedAsync(
+        PlanetsDbContext dbContext,
+        ResourceCatalog resources,
+        ILocalizationTexts texts,
+        ICodeSequence codes,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(resources);
+        ArgumentNullException.ThrowIfNull(texts);
+        ArgumentNullException.ThrowIfNull(codes);
 
         if (resources.Resources.Count == 0 || await dbContext.BuildingTypes.AnyAsync(cancellationToken).ConfigureAwait(false))
         {
@@ -83,9 +96,10 @@ public static class PlanetsReferenceSeed
             type => new BuildingTypeEntity
             {
                 Code = type.Code,
-                NameKey = type.NameKey,
-                DescriptionKey = type.DescriptionKey,
+                NameKey = PlanetsTextKeys.Name(type.Code),
+                DescriptionKey = PlanetsTextKeys.Description(type.Code),
                 SortOrder = type.SortOrder,
+                IsStartBuilding = type.IsStartBuilding,
                 LevelIds =
                 [
                     .. Enumerable.Range(1, seed.LevelCount).Select(level => new BuildingLevelEntity
@@ -128,8 +142,45 @@ public static class PlanetsReferenceSeed
 
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+        await texts.AddMissingAsync(
+            [
+                .. seed.BuildingTypes.SelectMany(type => SeedTexts.Entries(PlanetsTextKeys.Name(type.Code), type.Name)),
+                .. seed.BuildingTypes.SelectMany(type => SeedTexts.Entries(PlanetsTextKeys.Description(type.Code), type.Description)),
+            ],
+            SeedTexts.Author,
+            cancellationToken).ConfigureAwait(false);
+
+        await WorldReferenceSeed.RaiseAsync(codes, PlanetsTextKeys.CodeGroup, seed.BuildingTypes.Select(type => type.Code), cancellationToken).ConfigureAwait(false);
+
         return true;
     }
+}
+
+/// <summary>
+/// The neutral codes and the localisation keys of the building types (task 00022):
+/// <c>building_1</c>, <c>planets.building.building_1.name</c>.
+/// </summary>
+public static class PlanetsTextKeys
+{
+    /// <summary>The group of the neutral codes of the building types.</summary>
+    public const string CodeGroup = "building";
+
+    /// <summary>The prefix of the keys of the building types.</summary>
+    public const string Building = "planets.building";
+
+    /// <summary>
+    /// Builds the key of the name of a building type.
+    /// </summary>
+    /// <param name="code">The neutral code.</param>
+    /// <returns>The key.</returns>
+    public static string Name(string code) => WorldTextKeys.Name(Building, code);
+
+    /// <summary>
+    /// Builds the key of the description of a building type.
+    /// </summary>
+    /// <param name="code">The neutral code.</param>
+    /// <returns>The key.</returns>
+    public static string Description(string code) => WorldTextKeys.Description(Building, code);
 }
 
 /// <summary>The starting data of the building tables.</summary>
@@ -138,23 +189,25 @@ public static class PlanetsReferenceSeed
 public sealed record PlanetsSeedData(int LevelCount, IReadOnlyList<SeedBuildingType> BuildingTypes);
 
 /// <summary>A building type of the starting data.</summary>
-/// <param name="Code">The code.</param>
-/// <param name="NameKey">The localisation key of the name.</param>
-/// <param name="DescriptionKey">The localisation key of the description.</param>
+/// <param name="Code">The neutral code.</param>
 /// <param name="SortOrder">The order in the lists.</param>
+/// <param name="Name">The name by language.</param>
+/// <param name="Description">The description by language.</param>
 /// <param name="DurationSeconds">The growth of the construction time.</param>
 /// <param name="Costs">The growth of the costs.</param>
 /// <param name="Effects">The growth of the effects.</param>
 /// <param name="Requirements">The requirements.</param>
+/// <param name="IsStartBuilding">Whether a race without a start building gets this type.</param>
 public sealed record SeedBuildingType(
     string Code,
-    string NameKey,
-    string DescriptionKey,
     int SortOrder,
+    IReadOnlyDictionary<string, string> Name,
+    IReadOnlyDictionary<string, string>? Description,
     SeedGrowth DurationSeconds,
     IReadOnlyList<SeedCost> Costs,
     IReadOnlyList<SeedEffect> Effects,
-    IReadOnlyList<SeedRequirement> Requirements);
+    IReadOnlyList<SeedRequirement> Requirements,
+    bool IsStartBuilding = false);
 
 /// <summary>The growth of a value with the level.</summary>
 /// <remarks>The value at a level is <c>base × growth^(level − 1) + step × (level − 1)</c>.</remarks>

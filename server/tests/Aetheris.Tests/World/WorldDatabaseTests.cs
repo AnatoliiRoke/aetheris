@@ -257,7 +257,7 @@ public sealed class WorldDatabaseTests
         SectorEntity sector = await db.Sectors.AsNoTracking().SingleAsync(entry => entry.Id == planet.SectorId, Token);
 
         Assert.Equal("player-one", planet.OwnerPlayerId);
-        Assert.Equal(WorldSettings.From(scope.ServiceProvider.GetRequiredService<Aetheris.Core.Configuration.IGameConfig>()).StartPlanetTypeCode, type.Code);
+        Assert.True(type.IsStartDefault);
         Assert.True(type.IsColonizable);
         Assert.True(sector.IsNewbie);
     }
@@ -365,20 +365,32 @@ public sealed class WorldDatabaseTests
         using IServiceScope scope = _factory.Services.CreateScope();
         WorldDbContext db = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
 
-        int extractable = await db.ResourceGroups.Where(group => group.Code == "extractable").Select(group => group.Id).SingleAsync(Token);
-        int crystal = await db.ResourceGroups.Where(group => group.Code == "crystal").Select(group => group.Id).SingleAsync(Token);
+        int extractable = await db.ResourceGroups.Where(group => group.Code == SeedCodes.MetalGroup).Select(group => group.Id).SingleAsync(Token);
+        int crystal = await db.ResourceGroups.Where(group => group.Code == SeedCodes.MineralGroup).Select(group => group.Id).SingleAsync(Token);
 
         ResourceTypeEntity metal = new() { Code = "test_alloy", NameKey = "world.resource.test_alloy", ResourceGroupId = extractable };
         ResourceTypeEntity gem = new() { Code = "test_gem", NameKey = "world.resource.test_gem", ResourceGroupId = crystal };
         db.ResourceTypes.AddRange(metal, gem);
         await db.SaveChangesAsync(Token);
 
-        foreach (GenerationRuleGroupEntity group in await db.RuleGroups.Where(entry => entry.Code == "metals" || entry.Code == "crystals").ToListAsync(Token))
+        // A rule group gives the resources of one resource group; the groups of the metals and of
+        // the minerals get the new resources.
+        var ruleGroups = await db.RuleGroups
+            .Select(group => new
+            {
+                group.Id,
+                ResourceGroupId = db.Rules.Where(rule => rule.RuleGroupId == group.Id)
+                    .Join(db.ResourceTypes, rule => rule.ResourceId, resource => resource.Id, (rule, resource) => resource.ResourceGroupId)
+                    .First(),
+            })
+            .ToListAsync(Token);
+
+        foreach (var group in ruleGroups.Where(entry => entry.ResourceGroupId == extractable || entry.ResourceGroupId == crystal))
         {
             db.Rules.Add(new GenerationRuleEntity
             {
                 RuleGroupId = group.Id,
-                ResourceId = group.Code == "metals" ? metal.Id : gem.Id,
+                ResourceId = group.ResourceGroupId == extractable ? metal.Id : gem.Id,
                 Weight = 1_000_000,
                 CoefficientMin = 0.01m,
                 CoefficientMax = 0.02m,

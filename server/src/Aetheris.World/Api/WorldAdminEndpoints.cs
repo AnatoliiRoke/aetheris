@@ -83,6 +83,9 @@ public static class WorldAdminEndpoints
         secured.MapPut("/world/generation-rule-groups/{ruleGroupId:int}", UpdateRuleGroupAsync)
             .WithName("admin.world_generation_rule_group_updated");
 
+        secured.MapPost("/world/resources", CreateResourceAsync)
+            .WithName("admin.world_reference_row_added");
+
         secured.MapGet("/world/generation/estimate", EstimateAsync)
             .WithName("admin.world_generation_estimated");
 
@@ -300,6 +303,21 @@ public static class WorldAdminEndpoints
             audit,
             limits,
             () => edits.AddRuleAsync(request, cancellationToken),
+            null);
+
+    private static Task<IResult> CreateResourceAsync(
+        AdminResourceCreate request,
+        ClaimsPrincipal principal,
+        WorldReferenceAdminService references,
+        IAdminAuditRecorder audit,
+        IAdminQueryLimits limits,
+        CancellationToken cancellationToken) =>
+        ApplyAsync(
+            "resource",
+            request.Reason,
+            audit,
+            limits,
+            () => references.CreateResourceAsync(request, AdminId(principal), cancellationToken),
             null);
 
     private static Task<IResult> UpdateRuleAsync(

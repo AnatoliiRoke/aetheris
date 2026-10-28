@@ -235,9 +235,8 @@ public sealed class WorldQueryService
     /// <returns>The reference tables.</returns>
     public async Task<WorldReferenceDto> GetReferenceAsync(CancellationToken cancellationToken)
     {
-        Dictionary<int, string> groups = await _dbContext.ResourceGroups.AsNoTracking()
-            .ToDictionaryAsync(group => group.Id, group => group.Code, cancellationToken).ConfigureAwait(false);
-
+        List<ResourceGroupEntity> groups = await _dbContext.ResourceGroups.AsNoTracking()
+            .OrderBy(group => group.Id).ToListAsync(cancellationToken).ConfigureAwait(false);
         List<ResourceTypeEntity> resources = await _dbContext.ResourceTypes.AsNoTracking()
             .OrderBy(resource => resource.Id).ToListAsync(cancellationToken).ConfigureAwait(false);
         List<CelestialObjectTypeEntity> types = await _dbContext.ObjectTypes.AsNoTracking()
@@ -246,9 +245,17 @@ public sealed class WorldQueryService
             .OrderBy(size => size.Id).ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return new WorldReferenceDto(
-            [.. resources.Select(resource => new ReferenceDto(resource.Id, resource.Code, resource.NameKey, groups.GetValueOrDefault(resource.ResourceGroupId)))],
-            [.. types.Select(type => new ReferenceDto(type.Id, type.Code, type.NameKey, type.ObjectClass))],
-            [.. sizes.Select(size => new ReferenceDto(size.Id, size.Code, size.NameKey, null))]);
+            [.. groups.Select(group => new ReferenceDto(group.Id, group.Code, group.NameKey, group.DescriptionKey, null, null, null))],
+            [.. resources.Select(resource => new ReferenceDto(
+                resource.Id,
+                resource.Code,
+                resource.NameKey,
+                resource.DescriptionKey,
+                null,
+                resource.ResourceGroupId,
+                resource.ImageKey))],
+            [.. types.Select(type => new ReferenceDto(type.Id, type.Code, type.NameKey, type.DescriptionKey, type.ObjectClass, null, type.ImageKey))],
+            [.. sizes.Select(size => new ReferenceDto(size.Id, size.Code, size.NameKey, size.DescriptionKey, null, null, null))]);
     }
 
     /// <summary>

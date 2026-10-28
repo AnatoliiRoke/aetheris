@@ -157,14 +157,14 @@ public sealed class PlanetEconomyTests
 
     private static List<ResourceTypeFact> Resources() =>
     [
-        new(Iron, "iron", "iron", Metals),
-        new(Copper, "copper", "copper", Metals),
-        new(Quartzite, "quartzite", "quartzite", Crystals),
+        new(Iron, "resource_1", "world.resource.resource_1.name", Metals),
+        new(Copper, "resource_3", "world.resource.resource_3.name", Metals),
+        new(Quartzite, "resource_5", "world.resource.resource_5.name", Crystals),
     ];
 
     private static List<ResourceGroupFact> Groups() =>
     [
-        new(Metals, "extractable", "extractable"),
-        new(Crystals, "crystal", "crystal"),
+        new(Metals, "resource_group_1", "world.resource_group.resource_group_1.name"),
+        new(Crystals, "resource_group_2", "world.resource_group.resource_group_2.name"),
     ];
 }

@@ -12,7 +12,7 @@ public sealed class BuildingTypeEntity
     /// <summary>Gets or sets the primary key.</summary>
     public int Id { get; set; }
 
-    /// <summary>Gets or sets the stable code.</summary>
+    /// <summary>Gets or sets the neutral code, given by the server (task 00022).</summary>
     public string Code { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the localisation key of the name.</summary>
@@ -23,6 +23,13 @@ public sealed class BuildingTypeEntity
 
     /// <summary>Gets or sets the order in the lists of the client.</summary>
     public int SortOrder { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether a race without a start building gets this type
+    /// at start (task 00022, decision 5: a flag of the data instead of a code in the
+    /// configuration).
+    /// </summary>
+    public bool IsStartBuilding { get; set; }
 
     /// <summary>Gets or sets the levels of the type.</summary>
     public List<BuildingLevelEntity> LevelIds { get; set; } = [];

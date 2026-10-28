@@ -139,6 +139,7 @@ public sealed class WorldDbContext : DbContext
             entity.ToTable("resource_group");
             entity.Property(e => e.Code).HasMaxLength(CodeLength);
             entity.Property(e => e.NameKey).HasMaxLength(NameLength);
+            entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
             entity.HasIndex(e => e.Code).IsUnique();
         });
 
@@ -147,6 +148,8 @@ public sealed class WorldDbContext : DbContext
             entity.ToTable("resource_type");
             entity.Property(e => e.Code).HasMaxLength(CodeLength);
             entity.Property(e => e.NameKey).HasMaxLength(NameLength);
+            entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
+            entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasOne<ResourceGroupEntity>().WithMany().HasForeignKey(e => e.ResourceGroupId).OnDelete(DeleteBehavior.Restrict);
         });
@@ -157,7 +160,12 @@ public sealed class WorldDbContext : DbContext
             entity.Property(e => e.Code).HasMaxLength(CodeLength);
             entity.Property(e => e.ObjectClass).HasMaxLength(CodeLength);
             entity.Property(e => e.NameKey).HasMaxLength(NameLength);
+            entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
+            entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
+            entity.Property(e => e.HiddenShareMin).HasPrecision(CoefficientPrecision, CoefficientScale);
+            entity.Property(e => e.HiddenShareMax).HasPrecision(CoefficientPrecision, CoefficientScale);
             entity.HasIndex(e => e.Code).IsUnique();
+            entity.HasOne<ResourceTypeEntity>().WithMany().HasForeignKey(e => e.HiddenResourceTypeId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<PlanetSizeClassEntity>(entity =>
@@ -165,6 +173,7 @@ public sealed class WorldDbContext : DbContext
             entity.ToTable("planet_size_class");
             entity.Property(e => e.Code).HasMaxLength(CodeLength);
             entity.Property(e => e.NameKey).HasMaxLength(NameLength);
+            entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
             entity.HasIndex(e => e.Code).IsUnique();
         });
 
@@ -193,6 +202,10 @@ public sealed class WorldDbContext : DbContext
             entity.ToTable("race");
             entity.Property(e => e.Code).HasMaxLength(CodeLength);
             entity.Property(e => e.NameKey).HasMaxLength(NameLength);
+            entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
+            entity.Property(e => e.MoodKey).HasMaxLength(NameLength);
+            entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
+            entity.Property(e => e.ColorKey).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasOne<CelestialObjectTypeEntity>().WithMany().HasForeignKey(e => e.PreferredObjectTypeId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(e => e.StartResourceIds).WithOne().HasForeignKey(resource => resource.RaceId).OnDelete(DeleteBehavior.Cascade);

@@ -109,9 +109,6 @@ public static class WorldConfigKeys
     /// <summary>The fixed travel time inside a star system, in game seconds.</summary>
     public const string InSystemTravelSeconds = "world.travel.in_system_seconds";
 
-    /// <summary>The code of the body type a newcomer starts on.</summary>
-    public const string StartPlanetTypeCode = "world.start.planet_type_code";
-
     /// <summary>The largest number of newcomers who start in one star system.</summary>
     public const string MaxNewbiesPerSystem = "world.start.max_newbies_per_system";
 
@@ -194,7 +191,6 @@ public static class WorldConfigKeys
         new(FieldRespawnInSystemProbability, "0.3", "0", "1", "Probability that a replacement field lies on the outermost orbit of a system."),
         new(GasGiantStationLimit, "5", "0", "1000", "Largest number of stations on one gas giant."),
         new(InSystemTravelSeconds, "600", "0", "86400", "Fixed travel time inside a star system, in game seconds."),
-        new(StartPlanetTypeCode, "terrestrial", null, null, "Code of the body type a newcomer starts on."),
         new(MaxNewbiesPerSystem, "3", "1", "100", "Largest number of newcomers who start in one star system."),
         new(RevealAll, "false", null, null, "Development switch: every player sees the whole map."),
         new(FreeBodiesPageSize, "100", "1", "10000", "Largest number of free bodies returned at once."),

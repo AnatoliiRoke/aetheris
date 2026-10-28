@@ -151,6 +151,10 @@ namespace Aetheris.Planets.Data.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("description_key");
 
+                    b.Property<bool>("IsStartBuilding")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_start_building");
+
                     b.Property<string>("NameKey")
                         .IsRequired()
                         .HasMaxLength(128)

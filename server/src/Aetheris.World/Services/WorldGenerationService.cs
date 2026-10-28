@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Text.Json;
+using Aetheris.Core.Data;
 using Aetheris.Core.Errors;
+using Aetheris.Core.Text;
 using Aetheris.World.Api;
 using Aetheris.World.Configuration;
 using Aetheris.World.Data;
@@ -30,6 +32,8 @@ public sealed class WorldGenerationService
     private readonly WorldDbContext _dbContext;
     private readonly WorldUnitOfWork _unitOfWork;
     private readonly WorldReferenceRepository _reference;
+    private readonly ILocalizationTexts _texts;
+    private readonly ICodeSequence _codes;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<WorldGenerationService> _logger;
 
@@ -39,24 +43,32 @@ public sealed class WorldGenerationService
     /// <param name="dbContext">The world context.</param>
     /// <param name="unitOfWork">The transaction of the request.</param>
     /// <param name="reference">The generator input.</param>
+    /// <param name="texts">The texts of the game data.</param>
+    /// <param name="codes">The counters of the neutral codes.</param>
     /// <param name="timeProvider">The clock.</param>
     /// <param name="logger">The logger.</param>
     public WorldGenerationService(
         WorldDbContext dbContext,
         WorldUnitOfWork unitOfWork,
         WorldReferenceRepository reference,
+        ILocalizationTexts texts,
+        ICodeSequence codes,
         TimeProvider timeProvider,
         ILogger<WorldGenerationService> logger)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(reference);
+        ArgumentNullException.ThrowIfNull(texts);
+        ArgumentNullException.ThrowIfNull(codes);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
         _reference = reference;
+        _texts = texts;
+        _codes = codes;
         _timeProvider = timeProvider;
         _logger = logger;
     }
@@ -72,8 +84,8 @@ public sealed class WorldGenerationService
         bool referenceSeeded = await _unitOfWork.RunAsync(
             async () =>
             {
-                bool seeded = await WorldReferenceSeed.SeedAsync(_dbContext, cancellationToken).ConfigureAwait(false);
-                seeded |= await WorldReferenceSeed.SeedRacesAsync(_dbContext, cancellationToken).ConfigureAwait(false);
+                bool seeded = await WorldReferenceSeed.SeedAsync(_dbContext, _texts, _codes, cancellationToken).ConfigureAwait(false);
+                seeded |= await WorldReferenceSeed.SeedRacesAsync(_dbContext, _texts, _codes, cancellationToken).ConfigureAwait(false);
 
                 if (seeded)
                 {
@@ -83,6 +95,11 @@ public sealed class WorldGenerationService
                 return seeded;
             },
             cancellationToken).ConfigureAwait(false);
+
+        if (referenceSeeded)
+        {
+            _texts.Invalidate();
+        }
 
         (GalaxyEntity galaxy, bool galaxyCreated) = await EnsureGalaxyAsync(cancellationToken).ConfigureAwait(false);
         WorldSettings settings = _reference.Settings;

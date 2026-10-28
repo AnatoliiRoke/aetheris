@@ -85,7 +85,16 @@ public sealed class CivilizationService
         _dbContext.Races.AsNoTracking()
             .OrderBy(race => race.SortOrder)
             .ThenBy(race => race.Id)
-            .Select(race => new RaceDto(race.Id, race.Code, race.NameKey, race.PreferredObjectTypeId))
+            .Select(race => new RaceDto(
+                race.Id,
+                race.Code,
+                race.NameKey,
+                race.DescriptionKey,
+                race.MoodKey,
+                race.TraitKeys,
+                race.ImageKey,
+                race.ColorKey,
+                race.PreferredObjectTypeId))
             .ToListAsync(cancellationToken);
 
     /// <summary>
@@ -102,6 +111,7 @@ public sealed class CivilizationService
          select new CivilizationSummary(
              race.Id,
              race.Code,
+             race.NameKey,
              planet.Id,
              planet.Name,
              planet.SystemId,
@@ -248,7 +258,7 @@ public sealed class CivilizationService
                 .ConfigureAwait(false);
         }
 
-        return new CivilizationSummary(race.Id, race.Code, planet.Id, planet.Name, planet.SystemId, planet.SectorId, now);
+        return new CivilizationSummary(race.Id, race.Code, race.NameKey, planet.Id, planet.Name, planet.SystemId, planet.SectorId, now);
     }
 
     private async Task ValidateHomeNameAsync(string homeName, WorldSettings settings, CancellationToken cancellationToken)

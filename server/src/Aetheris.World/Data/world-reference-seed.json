@@ -1,213 +1,387 @@
 {
   "resource_groups": [
     {
-      "code": "extractable",
-      "name_key": "world.resource_group.extractable",
-      "allowed_on_planet": true
+      "code": "resource_group_1",
+      "allowed_on_planet": true,
+      "name": {
+        "uk": "Видобувні",
+        "en": "Extractable"
+      }
     },
     {
-      "code": "crystal",
-      "name_key": "world.resource_group.crystal",
-      "allowed_on_planet": true
+      "code": "resource_group_2",
+      "allowed_on_planet": true,
+      "name": {
+        "uk": "Мінерали",
+        "en": "Minerals"
+      }
     },
     {
-      "code": "fuel",
-      "name_key": "world.resource_group.fuel",
-      "allowed_on_planet": true
+      "code": "resource_group_3",
+      "allowed_on_planet": true,
+      "name": {
+        "uk": "Пальне",
+        "en": "Fuel"
+      }
     },
     {
-      "code": "ether",
-      "name_key": "world.resource_group.ether",
-      "allowed_on_planet": false
+      "code": "resource_group_4",
+      "allowed_on_planet": false,
+      "name": {
+        "uk": "Ефір",
+        "en": "Ether"
+      }
+    },
+    {
+      "code": "resource_group_5",
+      "allowed_on_planet": false,
+      "name": {
+        "uk": "Кристали",
+        "en": "Crystals"
+      },
+      "description": {
+        "uk": "Унікальні кристали, які трапляються лише в астероїдних полях.",
+        "en": "Unique crystals found only in asteroid fields."
+      }
     }
   ],
   "resources": [
     {
-      "code": "iron",
-      "group": "extractable",
-      "name_key": "world.resource.iron"
+      "code": "resource_1",
+      "group": "resource_group_1",
+      "name": {
+        "uk": "Залізо",
+        "en": "Iron"
+      },
+      "description": {
+        "uk": "Базові корпуси й будівлі.",
+        "en": "Basic hulls and buildings."
+      }
     },
     {
-      "code": "titanium",
-      "group": "extractable",
-      "name_key": "world.resource.titanium"
+      "code": "resource_2",
+      "group": "resource_group_1",
+      "name": {
+        "uk": "Титан",
+        "en": "Titanium"
+      },
+      "description": {
+        "uk": "Броня й важкі кораблі.",
+        "en": "Armour and heavy ships."
+      }
     },
     {
-      "code": "copper",
-      "group": "extractable",
-      "name_key": "world.resource.copper"
+      "code": "resource_3",
+      "group": "resource_group_1",
+      "name": {
+        "uk": "Мідь",
+        "en": "Copper"
+      },
+      "description": {
+        "uk": "Енергосистеми й електроніка.",
+        "en": "Power systems and electronics."
+      }
     },
     {
-      "code": "iridium",
-      "group": "extractable",
-      "name_key": "world.resource.iridium"
+      "code": "resource_4",
+      "group": "resource_group_1",
+      "name": {
+        "uk": "Іридій",
+        "en": "Iridium"
+      },
+      "description": {
+        "uk": "Елітні корпуси й оборонні споруди.",
+        "en": "Elite hulls and defence structures."
+      }
     },
     {
-      "code": "quartzite",
-      "group": "crystal",
-      "name_key": "world.resource.quartzite"
+      "code": "resource_5",
+      "group": "resource_group_2",
+      "name": {
+        "uk": "Кварцит",
+        "en": "Quartzite"
+      },
+      "description": {
+        "uk": "Базові технології й сенсори.",
+        "en": "Basic technologies and sensors."
+      }
     },
     {
-      "code": "rubium",
-      "group": "crystal",
-      "name_key": "world.resource.rubium"
+      "code": "resource_6",
+      "group": "resource_group_2",
+      "name": {
+        "uk": "Рубій",
+        "en": "Rubium"
+      },
+      "description": {
+        "uk": "Лазерна й енергетична зброя.",
+        "en": "Laser and energy weapons."
+      }
     },
     {
-      "code": "sapphirite",
-      "group": "crystal",
-      "name_key": "world.resource.sapphirite"
+      "code": "resource_7",
+      "group": "resource_group_2",
+      "name": {
+        "uk": "Сапфірит",
+        "en": "Sapphirite"
+      },
+      "description": {
+        "uk": "Щити.",
+        "en": "Shields."
+      }
     },
     {
-      "code": "obsidian",
-      "group": "crystal",
-      "name_key": "world.resource.obsidian"
+      "code": "resource_8",
+      "group": "resource_group_2",
+      "name": {
+        "uk": "Обсидіан",
+        "en": "Obsidian"
+      },
+      "description": {
+        "uk": "Двигуни й гіперстрибки.",
+        "en": "Engines and hyperjumps."
+      }
     },
     {
-      "code": "deuterium",
-      "group": "fuel",
-      "name_key": "world.resource.deuterium"
+      "code": "resource_9",
+      "group": "resource_group_3",
+      "name": {
+        "uk": "Дейтерій",
+        "en": "Deuterium"
+      },
+      "description": {
+        "uk": "Пальне для звичайних досвітлових двигунів.",
+        "en": "Fuel for ordinary sublight engines."
+      }
     },
     {
-      "code": "plasma",
-      "group": "fuel",
-      "name_key": "world.resource.plasma"
+      "code": "resource_10",
+      "group": "resource_group_3",
+      "name": {
+        "uk": "Плазма",
+        "en": "Plasma"
+      },
+      "description": {
+        "uk": "Пальне для швидкісних двигунів.",
+        "en": "Fuel for fast engines."
+      }
     },
     {
-      "code": "ether",
-      "group": "ether",
-      "name_key": "world.resource.ether"
+      "code": "resource_11",
+      "group": "resource_group_4",
+      "name": {
+        "uk": "Ефір",
+        "en": "Ether"
+      },
+      "description": {
+        "uk": "Дуже рідкісний ресурс космосу для найкращих кораблів і технологій.",
+        "en": "A very rare resource of space for the best ships and technologies."
+      }
+    },
+    {
+      "code": "resource_12",
+      "group": "resource_group_5",
+      "name": {
+        "uk": "Кристал",
+        "en": "Crystal"
+      },
+      "description": {
+        "uk": "Унікальний ресурс астероїдних полів.",
+        "en": "A unique resource of asteroid fields."
+      }
     }
   ],
   "object_types": [
     {
-      "code": "yellow_dwarf",
+      "code": "object_type_1",
       "object_class": "star",
-      "name_key": "world.object_type.yellow_dwarf",
       "is_colonizable": false,
-      "generation_weight": 50
+      "generation_weight": 50,
+      "name": {
+        "uk": "Жовтий карлик",
+        "en": "Yellow dwarf"
+      }
     },
     {
-      "code": "red_dwarf",
+      "code": "object_type_2",
       "object_class": "star",
-      "name_key": "world.object_type.red_dwarf",
       "is_colonizable": false,
-      "generation_weight": 30
+      "generation_weight": 30,
+      "name": {
+        "uk": "Червоний карлик",
+        "en": "Red dwarf"
+      }
     },
     {
-      "code": "white_dwarf",
+      "code": "object_type_3",
       "object_class": "star",
-      "name_key": "world.object_type.white_dwarf",
       "is_colonizable": false,
-      "generation_weight": 10
+      "generation_weight": 10,
+      "name": {
+        "uk": "Білий карлик",
+        "en": "White dwarf"
+      }
     },
     {
-      "code": "blue_giant",
+      "code": "object_type_4",
       "object_class": "star",
-      "name_key": "world.object_type.blue_giant",
       "is_colonizable": false,
-      "generation_weight": 10
+      "generation_weight": 10,
+      "name": {
+        "uk": "Блакитний гігант",
+        "en": "Blue giant"
+      }
     },
     {
-      "code": "terrestrial",
+      "code": "object_type_5",
       "object_class": "planet",
-      "name_key": "world.object_type.terrestrial",
       "is_colonizable": true,
-      "generation_weight": 30
+      "generation_weight": 30,
+      "name": {
+        "uk": "Землеподібна",
+        "en": "Terrestrial"
+      },
+      "image_key": "art-12a",
+      "is_start_default": true
     },
     {
-      "code": "volcanic",
+      "code": "object_type_6",
       "object_class": "planet",
-      "name_key": "world.object_type.volcanic",
       "is_colonizable": true,
-      "generation_weight": 15
+      "generation_weight": 15,
+      "name": {
+        "uk": "Вулканічна",
+        "en": "Volcanic"
+      },
+      "image_key": "art-12b"
     },
     {
-      "code": "ice",
+      "code": "object_type_7",
       "object_class": "planet",
-      "name_key": "world.object_type.ice",
       "is_colonizable": true,
-      "generation_weight": 20
+      "generation_weight": 20,
+      "name": {
+        "uk": "Крижана",
+        "en": "Ice"
+      },
+      "image_key": "art-12c"
     },
     {
-      "code": "desert",
+      "code": "object_type_8",
       "object_class": "planet",
-      "name_key": "world.object_type.desert",
       "is_colonizable": true,
-      "generation_weight": 20
+      "generation_weight": 20,
+      "name": {
+        "uk": "Пустельна",
+        "en": "Desert"
+      },
+      "image_key": "art-12d"
     },
     {
-      "code": "ocean",
+      "code": "object_type_9",
       "object_class": "planet",
-      "name_key": "world.object_type.ocean",
       "is_colonizable": true,
-      "generation_weight": 15
+      "generation_weight": 15,
+      "name": {
+        "uk": "Океанічна",
+        "en": "Ocean"
+      },
+      "image_key": "art-12e"
     },
     {
-      "code": "gas_giant",
+      "code": "object_type_10",
       "object_class": "gas_giant",
-      "name_key": "world.object_type.gas_giant",
       "is_colonizable": false,
-      "generation_weight": 1
+      "generation_weight": 1,
+      "name": {
+        "uk": "Газовий гігант",
+        "en": "Gas giant"
+      },
+      "image_key": "art-12f"
     },
     {
-      "code": "field_ordinary",
+      "code": "object_type_11",
       "object_class": "asteroid_field",
-      "name_key": "world.object_type.field_ordinary",
       "is_colonizable": false,
       "generation_weight": 80,
       "mass_min": 500000,
-      "mass_max": 1500000
+      "mass_max": 1500000,
+      "name": {
+        "uk": "Звичайне поле",
+        "en": "Ordinary field"
+      },
+      "hidden_resource": "resource_12",
+      "hidden_share_min": 0.04,
+      "hidden_share_max": 0.1
     },
     {
-      "code": "field_rich",
+      "code": "object_type_12",
       "object_class": "asteroid_field",
-      "name_key": "world.object_type.field_rich",
       "is_colonizable": false,
       "generation_weight": 20,
       "mass_min": 300000,
-      "mass_max": 1000000
+      "mass_max": 1000000,
+      "name": {
+        "uk": "Багате поле",
+        "en": "Rich field"
+      },
+      "hidden_resource": "resource_12",
+      "hidden_share_min": 0.04,
+      "hidden_share_max": 0.1
     },
     {
-      "code": "nebula_standard",
+      "code": "object_type_13",
       "object_class": "nebula",
-      "name_key": "world.object_type.nebula_standard",
       "is_colonizable": false,
-      "generation_weight": 1
+      "generation_weight": 1,
+      "name": {
+        "uk": "Звичайна туманність",
+        "en": "Standard nebula"
+      }
     }
   ],
   "size_classes": [
     {
-      "code": "small",
-      "name_key": "world.size.small",
+      "code": "size_class_1",
       "generation_weight": 40,
       "size_min": 60,
-      "size_max": 89
+      "size_max": 89,
+      "name": {
+        "uk": "Мала",
+        "en": "Small"
+      }
     },
     {
-      "code": "medium",
-      "name_key": "world.size.medium",
+      "code": "size_class_2",
       "generation_weight": 40,
       "size_min": 90,
-      "size_max": 119
+      "size_max": 119,
+      "name": {
+        "uk": "Середня",
+        "en": "Medium"
+      }
     },
     {
-      "code": "large",
-      "name_key": "world.size.large",
+      "code": "size_class_3",
       "generation_weight": 20,
       "size_min": 120,
-      "size_max": 150
+      "size_max": 150,
+      "name": {
+        "uk": "Велика",
+        "en": "Large"
+      }
     }
   ],
   "rule_groups": [
     {
-      "object_type": "terrestrial",
-      "code": "metals",
+      "object_type": "object_type_5",
+      "code": "rule_group_1",
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
       "rules": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -215,7 +389,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "weight": 25,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -223,7 +397,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "weight": 25,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -231,7 +405,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "iridium",
+          "resource": "resource_4",
           "weight": 10,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -241,14 +415,14 @@
       ]
     },
     {
-      "object_type": "terrestrial",
-      "code": "crystals",
+      "object_type": "object_type_5",
+      "code": "rule_group_2",
       "min_picks": 1,
       "max_picks": 2,
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -256,7 +430,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "rubium",
+          "resource": "resource_6",
           "weight": 25,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -264,7 +438,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "sapphirite",
+          "resource": "resource_7",
           "weight": 25,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -272,7 +446,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "obsidian",
+          "resource": "resource_8",
           "weight": 10,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -282,14 +456,14 @@
       ]
     },
     {
-      "object_type": "volcanic",
-      "code": "metals",
+      "object_type": "object_type_6",
+      "code": "rule_group_3",
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
       "rules": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -297,7 +471,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -305,7 +479,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "weight": 15,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -313,7 +487,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "iridium",
+          "resource": "resource_4",
           "weight": 25,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -323,14 +497,14 @@
       ]
     },
     {
-      "object_type": "volcanic",
-      "code": "crystals",
+      "object_type": "object_type_6",
+      "code": "rule_group_4",
       "min_picks": 1,
       "max_picks": 2,
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "weight": 15,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -338,7 +512,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "rubium",
+          "resource": "resource_6",
           "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -346,7 +520,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "sapphirite",
+          "resource": "resource_7",
           "weight": 10,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -354,7 +528,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "obsidian",
+          "resource": "resource_8",
           "weight": 35,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -364,14 +538,14 @@
       ]
     },
     {
-      "object_type": "ice",
-      "code": "metals",
+      "object_type": "object_type_7",
+      "code": "rule_group_5",
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
       "rules": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -379,7 +553,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "weight": 20,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -387,7 +561,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "weight": 35,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -395,7 +569,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "iridium",
+          "resource": "resource_4",
           "weight": 15,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -405,14 +579,14 @@
       ]
     },
     {
-      "object_type": "ice",
-      "code": "crystals",
+      "object_type": "object_type_7",
+      "code": "rule_group_6",
       "min_picks": 1,
       "max_picks": 2,
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -420,7 +594,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "rubium",
+          "resource": "resource_6",
           "weight": 10,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -428,7 +602,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "sapphirite",
+          "resource": "resource_7",
           "weight": 50,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -436,7 +610,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "obsidian",
+          "resource": "resource_8",
           "weight": 10,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -446,14 +620,14 @@
       ]
     },
     {
-      "object_type": "desert",
-      "code": "metals",
+      "object_type": "object_type_8",
+      "code": "rule_group_7",
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
       "rules": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "weight": 35,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -461,7 +635,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -469,7 +643,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "weight": 25,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -477,7 +651,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "iridium",
+          "resource": "resource_4",
           "weight": 10,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -487,14 +661,14 @@
       ]
     },
     {
-      "object_type": "desert",
-      "code": "crystals",
+      "object_type": "object_type_8",
+      "code": "rule_group_8",
       "min_picks": 1,
       "max_picks": 2,
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "weight": 45,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -502,7 +676,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "rubium",
+          "resource": "resource_6",
           "weight": 25,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -510,7 +684,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "sapphirite",
+          "resource": "resource_7",
           "weight": 10,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -518,7 +692,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "obsidian",
+          "resource": "resource_8",
           "weight": 20,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -528,14 +702,14 @@
       ]
     },
     {
-      "object_type": "ocean",
-      "code": "metals",
+      "object_type": "object_type_9",
+      "code": "rule_group_9",
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
       "rules": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -543,7 +717,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "weight": 25,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -551,7 +725,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "weight": 35,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -559,7 +733,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "iridium",
+          "resource": "resource_4",
           "weight": 10,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -569,14 +743,14 @@
       ]
     },
     {
-      "object_type": "ocean",
-      "code": "crystals",
+      "object_type": "object_type_9",
+      "code": "rule_group_10",
       "min_picks": 1,
       "max_picks": 2,
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -584,7 +758,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "rubium",
+          "resource": "resource_6",
           "weight": 20,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -592,7 +766,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "sapphirite",
+          "resource": "resource_7",
           "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -600,7 +774,7 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "obsidian",
+          "resource": "resource_8",
           "weight": 10,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -610,14 +784,14 @@
       ]
     },
     {
-      "object_type": "ice",
-      "code": "fuel",
+      "object_type": "object_type_7",
+      "code": "rule_group_11",
       "min_picks": 0,
       "max_picks": 1,
       "extra_pick_probability": 0.5,
       "rules": [
         {
-          "resource": "deuterium",
+          "resource": "resource_9",
           "weight": 1,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -627,20 +801,20 @@
       ]
     },
     {
-      "object_type": "gas_giant",
-      "code": "fuel",
+      "object_type": "object_type_10",
+      "code": "rule_group_12",
       "min_picks": 1,
       "max_picks": 1,
       "extra_pick_probability": 0,
       "rules": [
         {
-          "resource": "deuterium",
+          "resource": "resource_9",
           "weight": 80,
           "coefficient_min": 0.8,
           "coefficient_max": 1.6
         },
         {
-          "resource": "plasma",
+          "resource": "resource_10",
           "weight": 20,
           "coefficient_min": 0.8,
           "coefficient_max": 1.6
@@ -648,32 +822,32 @@
       ]
     },
     {
-      "object_type": "field_ordinary",
-      "code": "metals",
+      "object_type": "object_type_11",
+      "code": "rule_group_13",
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
       "rules": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "weight": 40,
           "coefficient_min": 0.1,
           "coefficient_max": 0.3
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "weight": 25,
           "coefficient_min": 0.1,
           "coefficient_max": 0.3
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "weight": 25,
           "coefficient_min": 0.1,
           "coefficient_max": 0.3
         },
         {
-          "resource": "iridium",
+          "resource": "resource_4",
           "weight": 10,
           "coefficient_min": 0.1,
           "coefficient_max": 0.3
@@ -681,32 +855,32 @@
       ]
     },
     {
-      "object_type": "field_ordinary",
-      "code": "crystals",
+      "object_type": "object_type_11",
+      "code": "rule_group_14",
       "min_picks": 1,
       "max_picks": 2,
       "extra_pick_probability": 0.3,
       "rules": [
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "weight": 30,
           "coefficient_min": 0.02,
           "coefficient_max": 0.06
         },
         {
-          "resource": "rubium",
+          "resource": "resource_6",
           "weight": 25,
           "coefficient_min": 0.02,
           "coefficient_max": 0.06
         },
         {
-          "resource": "sapphirite",
+          "resource": "resource_7",
           "weight": 25,
           "coefficient_min": 0.02,
           "coefficient_max": 0.06
         },
         {
-          "resource": "obsidian",
+          "resource": "resource_8",
           "weight": 20,
           "coefficient_min": 0.02,
           "coefficient_max": 0.06
@@ -714,32 +888,32 @@
       ]
     },
     {
-      "object_type": "field_rich",
-      "code": "metals",
+      "object_type": "object_type_12",
+      "code": "rule_group_15",
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
       "rules": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "weight": 40,
           "coefficient_min": 0.1,
           "coefficient_max": 0.25
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "weight": 25,
           "coefficient_min": 0.1,
           "coefficient_max": 0.25
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "weight": 25,
           "coefficient_min": 0.1,
           "coefficient_max": 0.25
         },
         {
-          "resource": "iridium",
+          "resource": "resource_4",
           "weight": 10,
           "coefficient_min": 0.1,
           "coefficient_max": 0.25
@@ -747,32 +921,32 @@
       ]
     },
     {
-      "object_type": "field_rich",
-      "code": "crystals",
+      "object_type": "object_type_12",
+      "code": "rule_group_16",
       "min_picks": 2,
       "max_picks": 3,
       "extra_pick_probability": 0.4,
       "rules": [
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "weight": 30,
           "coefficient_min": 0.04,
           "coefficient_max": 0.1
         },
         {
-          "resource": "rubium",
+          "resource": "resource_6",
           "weight": 25,
           "coefficient_min": 0.04,
           "coefficient_max": 0.1
         },
         {
-          "resource": "sapphirite",
+          "resource": "resource_7",
           "weight": 25,
           "coefficient_min": 0.04,
           "coefficient_max": 0.1
         },
         {
-          "resource": "obsidian",
+          "resource": "resource_8",
           "weight": 20,
           "coefficient_min": 0.04,
           "coefficient_max": 0.1
@@ -780,14 +954,14 @@
       ]
     },
     {
-      "object_type": "field_rich",
-      "code": "ether",
+      "object_type": "object_type_12",
+      "code": "rule_group_17",
       "min_picks": 0,
       "max_picks": 1,
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "ether",
+          "resource": "resource_11",
           "weight": 1,
           "coefficient_min": 0.01,
           "coefficient_max": 0.03
@@ -795,20 +969,20 @@
       ]
     },
     {
-      "object_type": "nebula_standard",
-      "code": "fuel",
+      "object_type": "object_type_13",
+      "code": "rule_group_18",
       "min_picks": 1,
       "max_picks": 2,
       "extra_pick_probability": 0.3,
       "rules": [
         {
-          "resource": "deuterium",
+          "resource": "resource_9",
           "weight": 70,
           "coefficient_min": 0.2,
           "coefficient_max": 0.5
         },
         {
-          "resource": "plasma",
+          "resource": "resource_10",
           "weight": 30,
           "coefficient_min": 0.2,
           "coefficient_max": 0.5
@@ -816,14 +990,14 @@
       ]
     },
     {
-      "object_type": "nebula_standard",
-      "code": "ether",
+      "object_type": "object_type_13",
+      "code": "rule_group_19",
       "min_picks": 0,
       "max_picks": 1,
       "extra_pick_probability": 0.1,
       "rules": [
         {
-          "resource": "ether",
+          "resource": "resource_11",
           "weight": 1,
           "coefficient_min": 0.01,
           "coefficient_max": 0.05
@@ -833,124 +1007,212 @@
   ],
   "races": [
     {
-      "code": "terran",
-      "name_key": "races.terran.name",
+      "code": "race_1",
       "sort_order": 1,
-      "preferred_object_type": "terrestrial",
-      "start_building_type_id": null,
+      "preferred_object_type": "object_type_5",
       "start_building_level": 1,
       "start_resources": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "amount": 1000
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "amount": 600
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "amount": 600
         },
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "amount": 200
         },
         {
-          "resource": "deuterium",
+          "resource": "resource_9",
           "amount": 300
         }
-      ]
+      ],
+      "name": {
+        "uk": "Терани",
+        "en": "Terrans"
+      },
+      "description": {
+        "uk": "Надійні й дисципліновані. Сірий метал, синій стяг і флот, що тримає стрій.",
+        "en": "Reliable and disciplined. Grey metal, a blue banner and a fleet that holds formation."
+      },
+      "mood": {
+        "uk": "військовий порядок",
+        "en": "military order"
+      },
+      "traits": [
+        {
+          "uk": "Оборона",
+          "en": "Defence"
+        },
+        {
+          "uk": "Логістика",
+          "en": "Logistics"
+        }
+      ],
+      "image_key": "art-07",
+      "color_key": "race-1"
     },
     {
-      "code": "kvarr",
-      "name_key": "races.kvarr.name",
+      "code": "race_2",
       "sort_order": 2,
-      "preferred_object_type": "volcanic",
-      "start_building_type_id": null,
+      "preferred_object_type": "object_type_6",
       "start_building_level": 1,
       "start_resources": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "amount": 1000
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "amount": 600
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "amount": 600
         },
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "amount": 200
         },
         {
-          "resource": "deuterium",
+          "resource": "resource_9",
           "amount": 300
         }
-      ]
+      ],
+      "name": {
+        "uk": "Кварри",
+        "en": "Kvarr"
+      },
+      "description": {
+        "uk": "Кристалічні корпуси й товста броня. Повільні, але їх майже не пробити.",
+        "en": "Crystalline hulls and thick armour. Slow, but almost impossible to break through."
+      },
+      "mood": {
+        "uk": "камінь і терпіння",
+        "en": "stone and patience"
+      },
+      "traits": [
+        {
+          "uk": "Броня",
+          "en": "Armour"
+        },
+        {
+          "uk": "Видобуток",
+          "en": "Mining"
+        }
+      ],
+      "image_key": "art-08",
+      "color_key": "race-2"
     },
     {
-      "code": "skolar",
-      "name_key": "races.skolar.name",
+      "code": "race_3",
       "sort_order": 3,
-      "preferred_object_type": "desert",
-      "start_building_type_id": null,
+      "preferred_object_type": "object_type_8",
       "start_building_level": 1,
       "start_resources": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "amount": 1000
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "amount": 600
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "amount": 600
         },
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "amount": 200
         },
         {
-          "resource": "deuterium",
+          "resource": "resource_9",
           "amount": 300
         }
-      ]
+      ],
+      "name": {
+        "uk": "Сколари",
+        "en": "Skolar"
+      },
+      "description": {
+        "uk": "Гострі силуети й червоні вогні. Рейдери, що б’ють першими й зникають.",
+        "en": "Sharp silhouettes and red lights. Raiders who strike first and vanish."
+      },
+      "mood": {
+        "uk": "швидкий удар",
+        "en": "swift strike"
+      },
+      "traits": [
+        {
+          "uk": "Атака",
+          "en": "Attack"
+        },
+        {
+          "uk": "Швидкість",
+          "en": "Speed"
+        }
+      ],
+      "image_key": "art-09",
+      "color_key": "race-3"
     },
     {
-      "code": "nexar",
-      "name_key": "races.nexar.name",
+      "code": "race_4",
       "sort_order": 4,
-      "preferred_object_type": "ice",
-      "start_building_type_id": null,
+      "preferred_object_type": "object_type_7",
       "start_building_level": 1,
       "start_resources": [
         {
-          "resource": "iron",
+          "resource": "resource_1",
           "amount": 1000
         },
         {
-          "resource": "titanium",
+          "resource": "resource_2",
           "amount": 600
         },
         {
-          "resource": "copper",
+          "resource": "resource_3",
           "amount": 600
         },
         {
-          "resource": "quartzite",
+          "resource": "resource_5",
           "amount": 200
         },
         {
-          "resource": "deuterium",
+          "resource": "resource_9",
           "amount": 300
         }
-      ]
+      ],
+      "name": {
+        "uk": "Нексари",
+        "en": "Nexar"
+      },
+      "description": {
+        "uk": "Плавні форми й світні лінії. Ставка на сенсори, щити й точний розрахунок.",
+        "en": "Smooth shapes and glowing lines. They rely on sensors, shields and precise calculation."
+      },
+      "mood": {
+        "uk": "тиша технологій",
+        "en": "silence of technology"
+      },
+      "traits": [
+        {
+          "uk": "Технології",
+          "en": "Technology"
+        },
+        {
+          "uk": "Сенсори",
+          "en": "Sensors"
+        }
+      ],
+      "image_key": "art-10",
+      "color_key": "race-4"
     }
   ]
 }

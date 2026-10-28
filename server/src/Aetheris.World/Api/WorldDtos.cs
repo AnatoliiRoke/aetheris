@@ -184,30 +184,57 @@ public sealed record FreePlanetDto(
 
 /// <summary>A row of a reference table, for the client to name the identifiers.</summary>
 /// <param name="Id">The identifier.</param>
-/// <param name="Code">The code.</param>
-/// <param name="NameKey">The localisation key.</param>
-/// <param name="GroupCode">The group or class code, if the table has one.</param>
-public sealed record ReferenceDto(int Id, string Code, string NameKey, string? GroupCode);
+/// <param name="Code">The neutral code, for the journals and debugging only.</param>
+/// <param name="NameKey">The localisation key of the name.</param>
+/// <param name="DescriptionKey">The localisation key of the description.</param>
+/// <param name="GroupCode">The class code of an object type, if the table has one.</param>
+/// <param name="GroupId">The resource group of a resource type, if the table has one.</param>
+/// <param name="ImageKey">The key of the picture, or <see langword="null"/> for the neutral placeholder.</param>
+public sealed record ReferenceDto(
+    int Id,
+    string Code,
+    string NameKey,
+    string DescriptionKey,
+    string? GroupCode,
+    int? GroupId,
+    string? ImageKey);
 
 /// <summary>The reference tables of the world.</summary>
+/// <param name="ResourceGroups">The resource groups.</param>
 /// <param name="Resources">The resource types.</param>
 /// <param name="ObjectTypes">The object types.</param>
 /// <param name="SizeClasses">The size classes.</param>
 public sealed record WorldReferenceDto(
+    IReadOnlyList<ReferenceDto> ResourceGroups,
     IReadOnlyList<ReferenceDto> Resources,
     IReadOnlyList<ReferenceDto> ObjectTypes,
     IReadOnlyList<ReferenceDto> SizeClasses);
 
-/// <summary>A race the client offers at the first step of the game.</summary>
+/// <summary>A race the client offers at the first step of the game and on the landing page.</summary>
 /// <param name="Id">The race.</param>
-/// <param name="Code">The stable code.</param>
+/// <param name="Code">The neutral code, for the journals and debugging only.</param>
 /// <param name="NameKey">The localisation key of the name.</param>
+/// <param name="DescriptionKey">The localisation key of the description.</param>
+/// <param name="MoodKey">The localisation key of the mood.</param>
+/// <param name="TraitKeys">The localisation keys of the strengths.</param>
+/// <param name="ImageKey">The key of the picture, or <see langword="null"/> for the neutral placeholder.</param>
+/// <param name="ColorKey">The key of the colour, or <see langword="null"/> for the neutral one.</param>
 /// <param name="PreferredObjectTypeId">The preferred start body type, if any.</param>
-public sealed record RaceDto(int Id, string Code, string NameKey, int? PreferredObjectTypeId);
+public sealed record RaceDto(
+    int Id,
+    string Code,
+    string NameKey,
+    string DescriptionKey,
+    string MoodKey,
+    IReadOnlyList<string> TraitKeys,
+    string? ImageKey,
+    string? ColorKey,
+    int? PreferredObjectTypeId);
 
 /// <summary>The civilization of a player.</summary>
 /// <param name="RaceId">The race.</param>
-/// <param name="RaceCode">The code of the race.</param>
+/// <param name="RaceCode">The neutral code of the race, for debugging only.</param>
+/// <param name="RaceNameKey">The localisation key of the name of the race.</param>
 /// <param name="PlanetId">The home body.</param>
 /// <param name="PlanetName">The name the player gave the home body.</param>
 /// <param name="SystemId">The star system of the home body.</param>
@@ -216,6 +243,7 @@ public sealed record RaceDto(int Id, string Code, string NameKey, int? Preferred
 public sealed record CivilizationSummary(
     [property: System.Text.Json.Serialization.JsonPropertyName("race_id")] int RaceId,
     [property: System.Text.Json.Serialization.JsonPropertyName("race_code")] string RaceCode,
+    [property: System.Text.Json.Serialization.JsonPropertyName("race_name_key")] string RaceNameKey,
     [property: System.Text.Json.Serialization.JsonPropertyName("planet_id")] long PlanetId,
     [property: System.Text.Json.Serialization.JsonPropertyName("planet_name")] string? PlanetName,
     [property: System.Text.Json.Serialization.JsonPropertyName("system_id")] long SystemId,

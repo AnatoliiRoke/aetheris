@@ -1,0 +1,64 @@
+{
+  "resource_group": {
+    "extractable": "resource_group_1",
+    "crystal": "resource_group_2",
+    "fuel": "resource_group_3",
+    "ether": "resource_group_4"
+  },
+  "resource": {
+    "iron": "resource_1",
+    "titanium": "resource_2",
+    "copper": "resource_3",
+    "iridium": "resource_4",
+    "quartzite": "resource_5",
+    "rubium": "resource_6",
+    "sapphirite": "resource_7",
+    "obsidian": "resource_8",
+    "deuterium": "resource_9",
+    "plasma": "resource_10",
+    "ether": "resource_11"
+  },
+  "object_type": {
+    "yellow_dwarf": "object_type_1",
+    "red_dwarf": "object_type_2",
+    "white_dwarf": "object_type_3",
+    "blue_giant": "object_type_4",
+    "terrestrial": "object_type_5",
+    "volcanic": "object_type_6",
+    "ice": "object_type_7",
+    "desert": "object_type_8",
+    "ocean": "object_type_9",
+    "gas_giant": "object_type_10",
+    "field_ordinary": "object_type_11",
+    "field_rich": "object_type_12",
+    "nebula_standard": "object_type_13"
+  },
+  "size_class": {
+    "small": "size_class_1",
+    "medium": "size_class_2",
+    "large": "size_class_3"
+  },
+  "race": {
+    "terran": "race_1",
+    "kvarr": "race_2",
+    "skolar": "race_3",
+    "nexar": "race_4"
+  },
+  "building": {
+    "admin_center": "building_1",
+    "science_center": "building_2",
+    "residential_complex": "building_3",
+    "power_plant": "building_4",
+    "iron_mine": "building_5",
+    "copper_mine": "building_6",
+    "metal_storage": "building_7",
+    "crystal_storage": "building_8",
+    "fuel_storage": "building_9"
+  },
+  "rule_group": {
+    "metals": "rule_group",
+    "crystals": "rule_group",
+    "fuel": "rule_group",
+    "ether": "rule_group"
+  }
+}

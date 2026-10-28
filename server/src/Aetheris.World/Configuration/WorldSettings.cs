@@ -109,9 +109,6 @@ public sealed record WorldSettings
     /// <summary>Gets the fixed travel time inside a star system.</summary>
     public TimeSpan InSystemTravelTime { get; init; }
 
-    /// <summary>Gets the code of the body type a newcomer starts on.</summary>
-    public string StartPlanetTypeCode { get; init; } = string.Empty;
-
     /// <summary>Gets the largest number of newcomers in one star system.</summary>
     public int MaxNewbiesPerSystem { get; init; }
 
@@ -188,7 +185,6 @@ public sealed record WorldSettings
             FieldRespawnInSystemProbability = ReadDouble(config, WorldConfigKeys.FieldRespawnInSystemProbability),
             GasGiantStationLimit = ReadInt32(config, WorldConfigKeys.GasGiantStationLimit),
             InSystemTravelTime = TimeSpan.FromSeconds(ReadDouble(config, WorldConfigKeys.InSystemTravelSeconds)),
-            StartPlanetTypeCode = ReadText(config, WorldConfigKeys.StartPlanetTypeCode),
             MaxNewbiesPerSystem = ReadInt32(config, WorldConfigKeys.MaxNewbiesPerSystem),
             HomeNameMinLength = ReadInt32(config, WorldConfigKeys.HomeNameMinLength),
             HomeNameMaxLength = ReadInt32(config, WorldConfigKeys.HomeNameMaxLength),

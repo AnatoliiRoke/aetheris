@@ -69,7 +69,7 @@ public sealed class AdminObjectEditingTests
         JsonElement body = bodies.RootElement.GetProperty("items")[0];
         Assert.True(body.TryGetProperty("x", out _));
         Assert.True(body.TryGetProperty("z", out _));
-        Assert.StartsWith("world.size.", body.GetProperty("size_class_name_key").GetString(), StringComparison.Ordinal);
+        Assert.StartsWith("world.size_class.", body.GetProperty("size_class_name_key").GetString(), StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ public sealed class AdminObjectEditingTests
         using HttpClient client = await TestAdmins.SignInAsync(_factory, owner);
         (long fieldId, _) = await FreeFieldAsync();
         Dictionary<string, int> resources = await ResourcesAsync();
-        int richType = await TypeIdAsync("field_rich");
+        int richType = await TypeIdAsync(SeedCodes.RichField);
 
         using JsonDocument card = await GetAsync(client, $"/world/fields/{fieldId}");
         JsonElement before = card.RootElement;
@@ -107,8 +107,8 @@ public sealed class AdminObjectEditingTests
             depleted = false,
             composition_ids = new[]
             {
-                new { resource_id = resources["iron"], coefficient = 0.5m },
-                new { resource_id = resources["quartzite"], coefficient = 0.1m },
+                new { resource_id = resources[SeedCodes.Iron], coefficient = 0.5m },
+                new { resource_id = resources[SeedCodes.Quartzite], coefficient = 0.1m },
             },
         };
 
@@ -130,7 +130,7 @@ public sealed class AdminObjectEditingTests
         Assert.Equal(5000, field.GetProperty("initial_mass").GetInt64());
         Assert.Equal(before.GetProperty("version").GetInt32() + 1, field.GetProperty("version").GetInt32());
         Assert.Equal(
-            [resources["iron"], resources["quartzite"]],
+            [resources[SeedCodes.Iron], resources[SeedCodes.Quartzite]],
             field.GetProperty("composition_ids").EnumerateArray().Select(share => share.GetProperty("resource_id").GetInt32()).Order());
 
         AdminAuditLogEntity audit = await LastAuditAsync(owner, "admin.world_field_updated");
@@ -169,8 +169,8 @@ public sealed class AdminObjectEditingTests
         using HttpClient client = await OwnerAsync();
         (long fieldId, _) = await FreeFieldAsync();
         Dictionary<string, int> resources = await ResourcesAsync();
-        int fieldType = await TypeIdAsync("field_ordinary");
-        int planetType = await TypeIdAsync("terrestrial");
+        int fieldType = await TypeIdAsync(SeedCodes.OrdinaryField);
+        int planetType = await TypeIdAsync(SeedCodes.Terrestrial);
 
         using JsonDocument card = await GetAsync(client, $"/world/fields/{fieldId}");
         int version = card.RootElement.GetProperty("version").GetInt32();
@@ -191,7 +191,7 @@ public sealed class AdminObjectEditingTests
             composition_ids = shares.Select(share => new { resource_id = share.ResourceId, coefficient = share.Coefficient }).ToArray(),
         };
 
-        await AssertRefusedAsync(client, fieldId, Field(fieldType, 1, 10, (resources["iron"], 0.6m), (resources["copper"], 0.4m)), "composition_ids", AdminEditErrors.ShareTooLarge);
+        await AssertRefusedAsync(client, fieldId, Field(fieldType, 1, 10, (resources[SeedCodes.Iron], 0.6m), (resources[SeedCodes.Copper], 0.4m)), "composition_ids", AdminEditErrors.ShareTooLarge);
         await AssertRefusedAsync(client, fieldId, Field(fieldType, 1, -1), "mass", AdminEditErrors.Negative);
         await AssertRefusedAsync(client, fieldId, Field(fieldType, 1001, 10), "x", AdminEditErrors.OutOfBounds);
         await AssertRefusedAsync(client, fieldId, Field(fieldType, 1, 10, (999_999, 0.1m)), "composition_ids", AdminEditErrors.Unknown);
@@ -306,7 +306,7 @@ public sealed class AdminObjectEditingTests
         }
 
         JsonElement sizeClass = bounds.GetProperty("size_class_ids")[0];
-        int desert = await TypeIdAsync("desert");
+        int desert = await TypeIdAsync(SeedCodes.Desert);
 
         object Body(int orbit, int resourceId, decimal coefficient) => new
         {
@@ -321,11 +321,11 @@ public sealed class AdminObjectEditingTests
             deposit_ids = new[] { new { resource_id = resourceId, coefficient } },
         };
 
-        await AssertBodyRefusedAsync(client, planetId, Body(neighbourOrbit, resources["iron"], 1m), "orbit", AdminEditErrors.OrbitTaken);
-        await AssertBodyRefusedAsync(client, planetId, Body(freeOrbit, resources["ether"], 1m), "deposit_ids", AdminEditErrors.NotAllowedOnBody);
-        await AssertBodyRefusedAsync(client, planetId, Body(freeOrbit, resources["iron"], 2.5m), "deposit_ids", AdminEditErrors.OutOfBounds);
+        await AssertBodyRefusedAsync(client, planetId, Body(neighbourOrbit, resources[SeedCodes.Iron], 1m), "orbit", AdminEditErrors.OrbitTaken);
+        await AssertBodyRefusedAsync(client, planetId, Body(freeOrbit, resources[SeedCodes.Ether], 1m), "deposit_ids", AdminEditErrors.NotAllowedOnBody);
+        await AssertBodyRefusedAsync(client, planetId, Body(freeOrbit, resources[SeedCodes.Iron], 2.5m), "deposit_ids", AdminEditErrors.OutOfBounds);
 
-        HttpResponseMessage saved = await client.PutAsJsonAsync(AdminEndpoints.Prefix + $"/world/objects/{planetId}", Body(freeOrbit, resources["iron"], 1.25m), Token);
+        HttpResponseMessage saved = await client.PutAsJsonAsync(AdminEndpoints.Prefix + $"/world/objects/{planetId}", Body(freeOrbit, resources[SeedCodes.Iron], 1.25m), Token);
         Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
 
         using JsonDocument after = JsonDocument.Parse(await saved.Content.ReadAsStringAsync(Token));
@@ -336,7 +336,7 @@ public sealed class AdminObjectEditingTests
         Assert.Equal("player-of-the-test", body.GetProperty("owner_player_id").GetString());
         JsonElement deposit = Assert.Single(body.GetProperty("deposit_ids").EnumerateArray());
         Assert.Equal(1.25m, deposit.GetProperty("coefficient").GetDecimal());
-        Assert.Equal("world.resource.iron", deposit.GetProperty("resource_name_key").GetString());
+        Assert.Equal("world.resource." + SeedCodes.Iron + ".name", deposit.GetProperty("resource_name_key").GetString());
 
         // The request type has nothing that reaches the owner or the name the owner gave.
         Assert.DoesNotContain(
@@ -364,8 +364,8 @@ public sealed class AdminObjectEditingTests
 
         using JsonDocument card = await GetAsync(client, $"/world/systems/{systemId}");
         int version = card.RootElement.GetProperty("version").GetInt32();
-        int redDwarf = await TypeIdAsync("red_dwarf");
-        int terrestrial = await TypeIdAsync("terrestrial");
+        int redDwarf = await TypeIdAsync(SeedCodes.RedDwarf);
+        int terrestrial = await TypeIdAsync(SeedCodes.Terrestrial);
 
         object System(double x, int starTypeId) => new { version, reason = Reason, name = "Edited system", x, y = 33.5, z = 0d, star_type_id = starTypeId };
 
@@ -403,8 +403,8 @@ public sealed class AdminObjectEditingTests
         await WorldTestData.ResetWorldAsync(_factory);
         TestAdmin owner = await TestAdmins.CreateAsync(_factory, AdminRoles.Owner);
         using HttpClient client = await TestAdmins.SignInAsync(_factory, owner);
-        int ordinary = await TypeIdAsync("field_ordinary");
-        int rich = await TypeIdAsync("field_rich");
+        int ordinary = await TypeIdAsync(SeedCodes.OrdinaryField);
+        int rich = await TypeIdAsync(SeedCodes.RichField);
 
         using JsonDocument types = await GetAsync(client, "/world/object-types?object_class=asteroid_field");
         List<JsonElement> fieldTypes = [.. types.RootElement.GetProperty("items").EnumerateArray()];
@@ -437,10 +437,10 @@ public sealed class AdminObjectEditingTests
         Assert.Equal(Reason, audit.Reason);
 
         // A rule is switched off, and a new one is added to its group.
-        using JsonDocument rules = await GetAsync(client, $"/world/generation-rules?object_type_id={ordinary}&search=crystals");
+        using JsonDocument rules = await GetAsync(client, $"/world/generation-rules?object_type_id={ordinary}&search={SeedCodes.Quartzite}");
         JsonElement quartzite = rules.RootElement.GetProperty("items").EnumerateArray()
-            .Single(row => row.GetProperty("resource_code").GetString() == "quartzite");
-        Assert.Equal("world.resource.quartzite", quartzite.GetProperty("resource_name_key").GetString());
+            .Single(row => row.GetProperty("resource_code").GetString() == SeedCodes.Quartzite);
+        Assert.Equal("world.resource." + SeedCodes.Quartzite + ".name", quartzite.GetProperty("resource_name_key").GetString());
 
         HttpResponseMessage switchedOff = await client.PutAsJsonAsync(
             AdminEndpoints.Prefix + $"/world/generation-rules/{quartzite.GetProperty("id").GetInt32()}",
@@ -500,7 +500,7 @@ public sealed class AdminObjectEditingTests
     {
         await WorldTestData.ResetWorldAsync(_factory);
         using HttpClient client = await OwnerAsync();
-        int terrestrial = await TypeIdAsync("terrestrial");
+        int terrestrial = await TypeIdAsync(SeedCodes.Terrestrial);
 
         using JsonDocument rules = await GetAsync(client, $"/world/generation-rules?object_type_id={terrestrial}");
         JsonElement rule = rules.RootElement.GetProperty("items")[0];

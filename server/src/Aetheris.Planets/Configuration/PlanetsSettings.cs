@@ -24,9 +24,6 @@ public sealed record PlanetsSettings
     /// <summary>Gets how long the building tables stay in memory.</summary>
     public TimeSpan CatalogCacheDuration { get; init; }
 
-    /// <summary>Gets the code of the start building.</summary>
-    public string StartBuildingCode { get; init; } = string.Empty;
-
     /// <summary>Gets the level of the start building.</summary>
     public int StartBuildingLevel { get; init; }
 
@@ -45,7 +42,6 @@ public sealed record PlanetsSettings
             QueueBaseSlots = ReadInt32(config, PlanetsConfigKeys.QueueBaseSlots),
             QueueMaxExtraSlots = ReadInt32(config, PlanetsConfigKeys.QueueMaxExtraSlots),
             CatalogCacheDuration = TimeSpan.FromSeconds(ReadInt64(config, PlanetsConfigKeys.CatalogCacheSeconds)),
-            StartBuildingCode = config.GetRaw(PlanetsConfigKeys.StartBuildingCode) ?? Default(PlanetsConfigKeys.StartBuildingCode),
             StartBuildingLevel = ReadInt32(config, PlanetsConfigKeys.StartBuildingLevel),
         };
     }

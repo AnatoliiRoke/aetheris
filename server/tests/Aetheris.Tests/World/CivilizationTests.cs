@@ -57,7 +57,7 @@ public sealed class CivilizationTests
 
         using IServiceScope scope = _factory.Services.CreateScope();
         WorldDbContext world = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
-        RaceEntity race = await world.Races.AsNoTracking().SingleAsync(entry => entry.Code == "kvarr", Token);
+        RaceEntity race = await world.Races.AsNoTracking().SingleAsync(entry => entry.Code == SeedCodes.SecondRace, Token);
         bool preferredIsFree = await world.Planets.AnyAsync(
             planet => planet.OwnerPlayerId == null && planet.CelestialObject!.ObjectTypeId == race.PreferredObjectTypeId,
             Token);
@@ -68,7 +68,7 @@ public sealed class CivilizationTests
         using JsonDocument body = JsonDocument.Parse(await founded.Content.ReadAsStringAsync(Token));
         long planetId = body.RootElement.GetProperty("planet_id").GetInt64();
 
-        Assert.Equal("kvarr", body.RootElement.GetProperty("race_code").GetString());
+        Assert.Equal(SeedCodes.SecondRace, body.RootElement.GetProperty("race_code").GetString());
         Assert.Equal("Нова Земля", body.RootElement.GetProperty("planet_name").GetString());
 
         int typeId = await world.Planets.AsNoTracking()

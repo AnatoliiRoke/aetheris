@@ -110,7 +110,6 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.world.field.respawn_in_system_probability.description': 'Імовірність, що нове поле замість вичерпаного зʼявиться на найдальшій орбіті системи.',
   'config.world.gas_giant.station_limit.description': 'Найбільша кількість станцій на одному газовому гіганті.',
   'config.world.travel.in_system_seconds.description': 'Фіксований час польоту всередині зоряної системи, в ігрових секундах.',
-  'config.world.start.planet_type_code.description': 'Код типу тіла, на якому стартує новачок.',
   'config.world.start.max_newbies_per_system.description': 'Найбільша кількість новачків, які стартують в одній зоряній системі.',
   'config.world.visibility.reveal_all.description': 'Перемикач для розробки: кожен гравець бачить усю карту.',
   'config.world.query.free_page_size.description': 'Найбільша кількість вільних тіл за один запит.',
@@ -134,6 +133,5 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.planets.queue.base_slots.description': 'Місць у черзі будівництва планети, разом з будівлею, що будується.',
   'config.planets.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черги будівництва планети.',
   'config.planets.catalog.cache_seconds.description': 'Скільки секунд таблиці будівель тримаються в пам’яті сервера до повторного читання.',
-  'config.planets.start.building_code.description': 'Код будівлі, з якою починає кожна нова цивілізація.',
   'config.planets.start.building_level.description': 'Рівень стартової будівлі.',
 };

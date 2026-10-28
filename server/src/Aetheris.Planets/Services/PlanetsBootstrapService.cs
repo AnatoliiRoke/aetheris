@@ -1,4 +1,6 @@
 using Aetheris.Core.Configuration;
+using Aetheris.Core.Data;
+using Aetheris.Core.Text;
 using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Data;
 using Aetheris.World;
@@ -32,6 +34,8 @@ public sealed class PlanetsBootstrapService
     private readonly BuildingCatalogCache _catalogCache;
     private readonly IWorldModule _world;
     private readonly IGameConfig _config;
+    private readonly ILocalizationTexts _texts;
+    private readonly ICodeSequence _codes;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PlanetsBootstrapService"/> class.
@@ -42,13 +46,17 @@ public sealed class PlanetsBootstrapService
     /// <param name="catalogCache">The building catalog.</param>
     /// <param name="world">The world.</param>
     /// <param name="config">The game configuration.</param>
+    /// <param name="texts">The texts of the game data.</param>
+    /// <param name="codes">The counters of the neutral codes.</param>
     public PlanetsBootstrapService(
         PlanetsDbContext dbContext,
         PlanetsUnitOfWork unitOfWork,
         PlanetStartPackage startPackage,
         BuildingCatalogCache catalogCache,
         IWorldModule world,
-        IGameConfig config)
+        IGameConfig config,
+        ILocalizationTexts texts,
+        ICodeSequence codes)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -56,6 +64,8 @@ public sealed class PlanetsBootstrapService
         ArgumentNullException.ThrowIfNull(catalogCache);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(config);
+        ArgumentNullException.ThrowIfNull(texts);
+        ArgumentNullException.ThrowIfNull(codes);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -63,6 +73,8 @@ public sealed class PlanetsBootstrapService
         _catalogCache = catalogCache;
         _world = world;
         _config = config;
+        _texts = texts;
+        _codes = codes;
     }
 
     /// <summary>
@@ -73,15 +85,23 @@ public sealed class PlanetsBootstrapService
     public async Task<PlanetsBootstrapResult> EnsureAsync(CancellationToken cancellationToken)
     {
         ResourceCatalog resources = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
-        bool seeded = await _unitOfWork.RunAsync(() => PlanetsReferenceSeed.SeedAsync(_dbContext, resources, cancellationToken), cancellationToken).ConfigureAwait(false);
+        bool seeded = await _unitOfWork.RunAsync(() => PlanetsReferenceSeed.SeedAsync(_dbContext, resources, _texts, _codes, cancellationToken), cancellationToken).ConfigureAwait(false);
 
         _catalogCache.Invalidate();
 
+        if (seeded)
+        {
+            _texts.Invalidate();
+        }
+
+        // The start building is a flag of the data (task 00022, decision 5); with several
+        // flagged types the oldest one wins.
         PlanetsSettings settings = PlanetsSettings.From(_config);
         int? startTypeId = await _dbContext.BuildingTypes.AsNoTracking()
-            .Where(type => type.Code == settings.StartBuildingCode)
+            .Where(type => type.IsStartBuilding)
+            .OrderBy(type => type.Id)
             .Select(type => (int?)type.Id)
-            .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
         int assigned = startTypeId is { } typeId
             ? await _world.AssignStartBuildingAsync(typeId, settings.StartBuildingLevel, cancellationToken).ConfigureAwait(false)

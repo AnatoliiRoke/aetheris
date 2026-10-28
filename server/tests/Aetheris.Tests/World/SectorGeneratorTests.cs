@@ -58,8 +58,8 @@ public sealed class SectorGeneratorTests
         WorldGenerationConfig config = WorldTestData.Config();
         WorldSettings settings = config.Settings;
         WorldReferenceData reference = config.Reference;
-        HashSet<int> crystals = WorldTestData.ResourcesOfGroup(reference, "crystal");
-        HashSet<int> ether = WorldTestData.ResourcesOfGroup(reference, "ether");
+        HashSet<int> crystals = WorldTestData.ResourcesOfGroup(reference, SeedCodes.MineralGroup);
+        HashSet<int> ether = WorldTestData.ResourcesOfGroup(reference, SeedCodes.EtherGroup);
 
         Property property = Prop.ForAll(
             Arb.From(Gen.Choose(0, int.MaxValue)),
@@ -137,7 +137,7 @@ public sealed class SectorGeneratorTests
     {
         WorldGenerationConfig config = WorldTestData.Config();
         WorldReferenceData reference = config.Reference;
-        HashSet<int> crystals = WorldTestData.ResourcesOfGroup(reference, "crystal");
+        HashSet<int> crystals = WorldTestData.ResourcesOfGroup(reference, SeedCodes.MineralGroup);
 
         List<BodyPlan> planets = [];
         List<BodyPlan> bodies = [];
@@ -178,7 +178,7 @@ public sealed class SectorGeneratorTests
         }
 
         double twoCrystals = planets.Count(body => body.DepositIds.Count(share => crystals.Contains(share.ResourceId)) == 2) / (double)planets.Count;
-        double configured = reference.RuleGroups.First(group => group.Code == "crystals").ExtraPickProbability;
+        double configured = reference.RuleGroups.First(group => WorldTestData.GroupOfRules(reference, group) == reference.Groups.Single(entry => entry.Code == SeedCodes.MineralGroup).Id).ExtraPickProbability;
 
         Assert.True(Math.Abs(twoCrystals - configured) <= ShareTolerance, $"two kinds of crystals: expected {configured:F3}, got {twoCrystals:F3}.");
     }
@@ -260,15 +260,15 @@ public sealed class SectorGeneratorTests
     public void Ether_on_a_body_is_refused_by_the_validation()
     {
         WorldReferenceData seed = WorldTestData.ReferenceFromSeed();
-        int etherId = WorldTestData.ResourcesOfGroup(seed, "ether").Single();
-        int terrestrialId = seed.ObjectTypes.Single(type => type.Code == "terrestrial").Id;
+        int etherId = WorldTestData.ResourcesOfGroup(seed, SeedCodes.EtherGroup).Single();
+        int terrestrialId = seed.ObjectTypes.Single(type => type.Code == SeedCodes.Terrestrial).Id;
 
         WorldReferenceData broken = new(
             seed.Groups,
             seed.Resources,
             seed.ObjectTypes,
             seed.SizeClasses,
-            [.. seed.RuleGroups, new ReferenceRuleGroup(1000, terrestrialId, "ether", 1, 1, 0d, [new ReferenceRule(1000, etherId, 1, 0.1m, 0.2m)])]);
+            [.. seed.RuleGroups, new ReferenceRuleGroup(1000, terrestrialId, "rule_group_1000", 1, 1, 0d, [new ReferenceRule(1000, etherId, 1, 0.1m, 0.2m)])]);
 
         IReadOnlyList<string> errors = WorldConfigValidator.Validate(new WorldGenerationConfig(WorldTestData.Settings(), broken));
 
@@ -283,18 +283,18 @@ public sealed class SectorGeneratorTests
     public void A_new_resource_added_as_data_reaches_the_world()
     {
         WorldReferenceData seed = WorldTestData.ReferenceFromSeed();
-        int extractable = seed.Groups.Single(group => group.Code == "extractable").Id;
-        int crystal = seed.Groups.Single(group => group.Code == "crystal").Id;
+        int extractable = seed.Groups.Single(group => group.Code == SeedCodes.MetalGroup).Id;
+        int crystal = seed.Groups.Single(group => group.Code == SeedCodes.MineralGroup).Id;
         int newMetal = seed.Resources.Max(resource => resource.Id) + 1;
         int newCrystal = newMetal + 1;
         int ruleId = seed.RuleGroups.SelectMany(group => group.RuleIds).Max(rule => rule.Id);
 
         List<ReferenceRuleGroup> groups =
         [
-            .. seed.RuleGroups.Select(group => group.Code switch
+            .. seed.RuleGroups.Select(group => WorldTestData.GroupOfRules(seed, group) switch
             {
-                "metals" => group with { RuleIds = [.. group.RuleIds, new ReferenceRule(++ruleId, newMetal, 1_000_000, 0.1m, 0.2m)] },
-                "crystals" => group with { RuleIds = [.. group.RuleIds, new ReferenceRule(++ruleId, newCrystal, 1_000_000, 0.01m, 0.02m)] },
+                int groupId when groupId == extractable => group with { RuleIds = [.. group.RuleIds, new ReferenceRule(++ruleId, newMetal, 1_000_000, 0.1m, 0.2m)] },
+                int groupId when groupId == crystal => group with { RuleIds = [.. group.RuleIds, new ReferenceRule(++ruleId, newCrystal, 1_000_000, 0.01m, 0.02m)] },
                 _ => group,
             }),
         ];

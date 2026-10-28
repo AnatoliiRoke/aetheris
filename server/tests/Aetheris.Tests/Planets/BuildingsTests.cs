@@ -5,6 +5,7 @@ using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
 using Aetheris.Tests.Infrastructure;
+using Aetheris.Tests.World;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +51,7 @@ public sealed class BuildingsTests
             .Include(entry => entry.StartResourceIds)
             .OrderBy(entry => entry.SortOrder)
             .FirstAsync(Token);
-        BuildingTypeEntity main = await PlanetsTestData.TypeAsync(scope.ServiceProvider, "admin_center");
+        BuildingTypeEntity main = await PlanetsTestData.TypeAsync(scope.ServiceProvider, SeedCodes.AdminCenter);
 
         Assert.Equal(main.Id, race.StartBuildingTypeId);
 
@@ -67,7 +68,7 @@ public sealed class BuildingsTests
         PlanetOverviewDto? overview = await scope.ServiceProvider.GetRequiredService<IPlanetsModule>()
             .GetPlanetAsync(player.Account.UserId, player.PlanetId, Token);
         Assert.NotNull(overview);
-        Assert.Equal(1, PlanetsTestData.Building(overview, "admin_center").Level);
+        Assert.Equal(1, PlanetsTestData.Building(overview, SeedCodes.AdminCenter).Level);
 
         // Another player does not see the body.
         Assert.Null(await scope.ServiceProvider.GetRequiredService<IPlanetsModule>().GetPlanetAsync("someone-else", player.PlanetId, Token));
@@ -88,20 +89,20 @@ public sealed class BuildingsTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        await PlanetsTestData.SetDepositAsync(services, player.PlanetId, "iron", 1m);
-        await PlanetsTestData.RemoveDepositAsync(services, player.PlanetId, "copper");
+        await PlanetsTestData.SetDepositAsync(services, player.PlanetId, SeedCodes.Iron, 1m);
+        await PlanetsTestData.RemoveDepositAsync(services, player.PlanetId, SeedCodes.Copper);
 
         DateTimeOffset now = PlanetsTestData.GameNow(services);
         PlanetOverviewDto overview = await PlanetsTestData.ReadAsync(services, player.PlanetId, now);
 
-        string[] open = ["admin_center", "residential_complex", "power_plant", "iron_mine", "metal_storage", "crystal_storage", "fuel_storage"];
+        string[] open = [SeedCodes.AdminCenter, SeedCodes.ResidentialComplex, SeedCodes.PowerPlant, SeedCodes.IronMine, SeedCodes.MetalStorage, SeedCodes.MineralStorage, SeedCodes.FuelStorage];
 
         Assert.All(open, code => Assert.DoesNotContain(PlanetsErrorCodes.RequirementUnmet, PlanetsTestData.Building(overview, code).Next.ReasonCodes));
 
-        RequirementDto science = Assert.Single(PlanetsTestData.Building(overview, "science_center").Next.UnmetRequirements);
+        RequirementDto science = Assert.Single(PlanetsTestData.Building(overview, SeedCodes.ScienceCenter).Next.UnmetRequirements);
         Assert.Equal(PlanetsErrorCodes.RequirementBuildingLevel, science.ReasonCode);
         Assert.Equal(2, science.TargetLevel);
-        Assert.Equal(PlanetsErrorCodes.RequirementDeposit, Assert.Single(PlanetsTestData.Building(overview, "copper_mine").Next.UnmetRequirements).ReasonCode);
+        Assert.Equal(PlanetsErrorCodes.RequirementDeposit, Assert.Single(PlanetsTestData.Building(overview, SeedCodes.CopperMine).Next.UnmetRequirements).ReasonCode);
 
         // A designer lowers the requirement of the science centre in the database.
         PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
@@ -109,7 +110,7 @@ public sealed class BuildingsTests
             .ExecuteUpdateAsync(setters => setters.SetProperty(entry => entry.TargetLevel, 1), Token);
 
         // A technology that does not exist yet closes the housing.
-        BuildingTypeEntity housing = await PlanetsTestData.TypeAsync(services, "residential_complex");
+        BuildingTypeEntity housing = await PlanetsTestData.TypeAsync(services, SeedCodes.ResidentialComplex);
         planets.Requirements.Add(new RequirementEntity
         {
             SubjectType = RequirementSubjectTypes.BuildingType,
@@ -123,8 +124,8 @@ public sealed class BuildingsTests
 
         PlanetOverviewDto changed = await PlanetsTestData.ReadAsync(services, player.PlanetId, now);
 
-        Assert.Empty(PlanetsTestData.Building(changed, "science_center").Next.UnmetRequirements);
-        Assert.Equal(PlanetsErrorCodes.RequirementTechnology, Assert.Single(PlanetsTestData.Building(changed, "residential_complex").Next.UnmetRequirements).ReasonCode);
+        Assert.Empty(PlanetsTestData.Building(changed, SeedCodes.ScienceCenter).Next.UnmetRequirements);
+        Assert.Equal(PlanetsErrorCodes.RequirementTechnology, Assert.Single(PlanetsTestData.Building(changed, SeedCodes.ResidentialComplex).Next.UnmetRequirements).ReasonCode);
 
         // The common check answers the same for any subject.
         AvailabilityDto availability = await services.GetRequiredService<IPlanetsModule>().CheckRequirementsAsync(
@@ -156,16 +157,16 @@ public sealed class BuildingsTests
         IServiceProvider services = scope.ServiceProvider;
         DateTimeOffset now = PlanetsTestData.GameNow(services);
 
-        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, "power_plant", 1);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.PowerPlant, 1);
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, await RichBalanceAsync(services), now);
 
-        BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, "power_plant");
-        BuildingTypeEntity science = await PlanetsTestData.TypeAsync(services, "science_center");
+        BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, SeedCodes.PowerPlant);
+        BuildingTypeEntity science = await PlanetsTestData.TypeAsync(services, SeedCodes.ScienceCenter);
         ConstructionService construction = services.GetRequiredService<ConstructionService>();
 
         PlanetOverviewDto overview = await PlanetsTestData.ReadAsync(services, player.PlanetId, now);
-        Assert.Contains(PlanetsErrorCodes.LevelCapped, PlanetsTestData.Building(overview, "power_plant").Next.ReasonCodes);
-        Assert.Contains(PlanetsErrorCodes.RequirementUnmet, PlanetsTestData.Building(overview, "science_center").Next.ReasonCodes);
+        Assert.Contains(PlanetsErrorCodes.LevelCapped, PlanetsTestData.Building(overview, SeedCodes.PowerPlant).Next.ReasonCodes);
+        Assert.Contains(PlanetsErrorCodes.RequirementUnmet, PlanetsTestData.Building(overview, SeedCodes.ScienceCenter).Next.ReasonCodes);
 
         GameException capped = await Assert.ThrowsAsync<GameException>(() => construction.EnqueueAsync(player.PlanetId, plant.Id, now, Token));
         Assert.Equal(PlanetsErrorCodes.LevelCapped, capped.Code);
@@ -174,13 +175,13 @@ public sealed class BuildingsTests
         Assert.Equal(PlanetsErrorCodes.RequirementUnmet, closed.Code);
 
         // The main building grows by the ordinary rules, and the others follow it.
-        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, "admin_center", 2);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.AdminCenter, 2);
 
         PlanetOverviewDto grown = await construction.EnqueueAsync(player.PlanetId, plant.Id, now, Token);
-        Assert.Equal(2, PlanetsTestData.Building(grown, "power_plant").QueuedLevel);
+        Assert.Equal(2, PlanetsTestData.Building(grown, SeedCodes.PowerPlant).QueuedLevel);
 
         PlanetOverviewDto opened = await construction.EnqueueAsync(player.PlanetId, science.Id, now, Token);
-        Assert.Equal(1, PlanetsTestData.Building(opened, "science_center").QueuedLevel);
+        Assert.Equal(1, PlanetsTestData.Building(opened, SeedCodes.ScienceCenter).QueuedLevel);
     }
 
     /// <summary>
@@ -196,7 +197,7 @@ public sealed class BuildingsTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
         WorldDbContext world = services.GetRequiredService<WorldDbContext>();
-        int iron = await PlanetsTestData.ResourceIdAsync(services, "iron");
+        int iron = await PlanetsTestData.ResourceIdAsync(services, SeedCodes.Iron);
 
         // The state of task 00006: nothing in the module, the amounts in the world storage.
         await services.GetRequiredService<PlanetsDbContext>().PlanetStates.Where(entry => entry.PlanetId == player.PlanetId).ExecuteDeleteAsync(Token);
@@ -213,7 +214,7 @@ public sealed class BuildingsTests
         Assert.False(await world.Storage.AnyAsync(entry => entry.PlanetId == player.PlanetId, Token));
 
         PlanetOverviewDto overview = await PlanetsTestData.ReadAsync(services, player.PlanetId, PlanetsTestData.GameNow(services));
-        Assert.Equal(1, PlanetsTestData.Building(overview, "admin_center").Level);
+        Assert.Equal(1, PlanetsTestData.Building(overview, SeedCodes.AdminCenter).Level);
     }
 
     /// <summary>
