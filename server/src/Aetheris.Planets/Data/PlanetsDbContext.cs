@@ -53,9 +53,6 @@ public sealed class PlanetsDbContext : DbContext
     /// <summary>Gets the effects of the levels.</summary>
     public DbSet<BuildingLevelEffectEntity> BuildingLevelEffects => Set<BuildingLevelEffectEntity>();
 
-    /// <summary>Gets the requirements of every closed subject.</summary>
-    public DbSet<RequirementEntity> Requirements => Set<RequirementEntity>();
-
     /// <summary>Gets the states of the bodies.</summary>
     public DbSet<PlanetStateEntity> PlanetStates => Set<PlanetStateEntity>();
 
@@ -92,7 +89,9 @@ public sealed class PlanetsDbContext : DbContext
             entity.Property(e => e.Code).HasMaxLength(CodeLength);
             entity.Property(e => e.NameKey).HasMaxLength(NameLength);
             entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
+            entity.Property(e => e.BuildingClass).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
+            entity.HasIndex(e => e.BuildingClass);
             entity.HasMany(e => e.LevelIds).WithOne().HasForeignKey(level => level.BuildingTypeId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -117,14 +116,6 @@ public sealed class PlanetsDbContext : DbContext
             entity.ToTable("building_level_effect");
             entity.Property(e => e.EffectType).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.BuildingLevelId);
-        });
-
-        modelBuilder.Entity<RequirementEntity>(entity =>
-        {
-            entity.ToTable("requirement");
-            entity.Property(e => e.SubjectType).HasMaxLength(CodeLength);
-            entity.Property(e => e.RequirementType).HasMaxLength(CodeLength);
-            entity.HasIndex(e => new { e.SubjectType, e.SubjectId });
         });
     }
 

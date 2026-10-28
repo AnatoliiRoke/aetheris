@@ -32,6 +32,18 @@ public sealed record BuildingCatalog(
     public BuildingTypeInfo? FindType(int buildingTypeId) => _typesById.GetValueOrDefault(buildingTypeId);
 
     /// <summary>
+    /// Finds the building type of a class: what a building is for (task 00012).
+    /// </summary>
+    /// <param name="buildingClass">The class, one of <see cref="BuildingClasses"/>.</param>
+    /// <returns>The type, or <see langword="null"/> when no type has the class.</returns>
+    public BuildingTypeInfo? FindByClass(string buildingClass)
+    {
+        ArgumentNullException.ThrowIfNull(buildingClass);
+
+        return Types.FirstOrDefault(type => string.Equals(type.BuildingClass, buildingClass, StringComparison.Ordinal));
+    }
+
+    /// <summary>
     /// Finds the group of a resource.
     /// </summary>
     /// <param name="resourceTypeId">The resource.</param>
@@ -57,6 +69,7 @@ public sealed record BuildingCatalog(
 /// <param name="NameKey">The localisation key of the name.</param>
 /// <param name="DescriptionKey">The localisation key of the description.</param>
 /// <param name="SortOrder">The order in the lists.</param>
+/// <param name="BuildingClass">The class of the type: what the building is for.</param>
 /// <param name="Levels">The levels by number.</param>
 public sealed record BuildingTypeInfo(
     int Id,
@@ -64,6 +77,7 @@ public sealed record BuildingTypeInfo(
     string NameKey,
     string DescriptionKey,
     int SortOrder,
+    string BuildingClass,
     IReadOnlyDictionary<int, BuildingLevelInfo> Levels)
 {
     /// <summary>
@@ -213,6 +227,7 @@ public sealed class BuildingCatalogCache
                     type.NameKey,
                     type.DescriptionKey,
                     type.SortOrder,
+                    type.BuildingClass,
                     type.LevelIds.ToDictionary(
                         level => level.Level,
                         level => new BuildingLevelInfo(

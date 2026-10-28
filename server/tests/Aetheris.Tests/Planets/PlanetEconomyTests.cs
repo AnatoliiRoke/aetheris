@@ -150,7 +150,7 @@ public sealed class PlanetEconomyTests
         new([Type(1, effects)], [], Resources(), Groups());
 
     private static BuildingTypeInfo Type(int id, params BuildingEffectInfo[] effects) =>
-        new(id, "type_" + id, "name", "description", id, new Dictionary<int, BuildingLevelInfo>
+        new(id, "type_" + id, "name", "description", id, BuildingClasses.None, new Dictionary<int, BuildingLevelInfo>
         {
             [1] = new BuildingLevelInfo(1, 60, new Dictionary<int, long>(), effects),
         });

@@ -100,6 +100,7 @@ public static class PlanetsReferenceSeed
                 DescriptionKey = PlanetsTextKeys.Description(type.Code),
                 SortOrder = type.SortOrder,
                 IsStartBuilding = type.IsStartBuilding,
+                BuildingClass = type.BuildingClass,
                 LevelIds =
                 [
                     .. Enumerable.Range(1, seed.LevelCount).Select(level => new BuildingLevelEntity
@@ -198,6 +199,7 @@ public sealed record PlanetsSeedData(int LevelCount, IReadOnlyList<SeedBuildingT
 /// <param name="Effects">The growth of the effects.</param>
 /// <param name="Requirements">The requirements.</param>
 /// <param name="IsStartBuilding">Whether a race without a start building gets this type.</param>
+/// <param name="BuildingClass">The class of the type: what the building is for (task 00012).</param>
 public sealed record SeedBuildingType(
     string Code,
     int SortOrder,
@@ -207,7 +209,8 @@ public sealed record SeedBuildingType(
     IReadOnlyList<SeedCost> Costs,
     IReadOnlyList<SeedEffect> Effects,
     IReadOnlyList<SeedRequirement> Requirements,
-    bool IsStartBuilding = false);
+    bool IsStartBuilding = false,
+    string BuildingClass = Services.BuildingClasses.None);
 
 /// <summary>The growth of a value with the level.</summary>
 /// <remarks>The value at a level is <c>base × growth^(level − 1) + step × (level − 1)</c>.</remarks>

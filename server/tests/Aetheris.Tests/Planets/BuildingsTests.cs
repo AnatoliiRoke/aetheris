@@ -6,6 +6,7 @@ using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.World;
+using Aetheris.World;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -215,6 +216,41 @@ public sealed class BuildingsTests
 
         PlanetOverviewDto overview = await PlanetsTestData.ReadAsync(services, player.PlanetId, PlanetsTestData.GameNow(services));
         Assert.Equal(1, PlanetsTestData.Building(overview, SeedCodes.AdminCenter).Level);
+    }
+
+    /// <summary>
+    /// A building type says what it is for by its class, not by its neutral code: the catalog
+    /// finds the science centre by the class, and the code of the row may be any (task 00012,
+    /// decision 1).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_building_type_is_found_by_its_class_and_not_by_its_code()
+    {
+        await PlanetsTestData.ResetAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
+        BuildingCatalogCache cache = services.GetRequiredService<BuildingCatalogCache>();
+        BuildingCatalog catalog = await cache.GetAsync(planets, services.GetRequiredService<IWorldModule>(), Token);
+
+        BuildingTypeEntity science = await PlanetsTestData.TypeAsync(services, SeedCodes.ScienceCenter);
+        Assert.Equal(BuildingClasses.ResearchCenter, science.BuildingClass);
+
+        BuildingTypeInfo? found = catalog.FindByClass(BuildingClasses.ResearchCenter);
+        Assert.NotNull(found);
+        Assert.Equal(science.Id, found.Id);
+
+        // A building without a role has no class, and an unknown class finds nothing.
+        BuildingTypeInfo main = catalog.FindType(await PlanetsTestData.TypeAsync(services, SeedCodes.AdminCenter) is { } mainType ? mainType.Id : 0)!;
+        Assert.Equal(BuildingClasses.None, main.BuildingClass);
+        Assert.Null(catalog.FindByClass(SeedCodes.ScienceCenter));
+        Assert.Null(catalog.FindByClass(BuildingClasses.Shipyard));
+
+        // The class is a logical code of the program, so every value of it is known.
+        Assert.All(BuildingClassValues.All, value => Assert.True(BuildingClassValues.IsKnown(value)));
+        Assert.False(BuildingClassValues.IsKnown("research"));
     }
 
     /// <summary>
