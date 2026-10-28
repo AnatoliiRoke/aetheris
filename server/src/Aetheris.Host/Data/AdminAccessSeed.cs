@@ -49,13 +49,25 @@ public static class AdminAccessSeed
     /// Writes the missing roles, permissions and grants.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
+    /// <param name="modulePermissions">
+    /// The permissions of the endpoints the modules map themselves, such as the reference kinds of
+    /// the admin panel (task 00023); a role with every permission gets them as well.
+    /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the data are written.</returns>
-    public static async Task SeedAsync(AetherisDbContext dbContext, CancellationToken cancellationToken)
+    public static async Task SeedAsync(
+        AetherisDbContext dbContext,
+        IReadOnlyList<SeedAdminPermission> modulePermissions,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(modulePermissions);
 
-        AdminAccessSeedData seed = Load();
+        AdminAccessSeedData file = Load();
+        AdminAccessSeedData seed = file with
+        {
+            Permissions = [.. file.Permissions, .. modulePermissions.Where(permission => !file.Permissions.Any(known => known.Code == permission.Code))],
+        };
 
         Dictionary<string, AdminPermissionEntity> permissions = await dbContext.AdminPermissions
             .ToDictionaryAsync(permission => permission.Code, StringComparer.Ordinal, cancellationToken)

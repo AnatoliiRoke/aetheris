@@ -1,0 +1,10 @@
+{
+  "admin.reference.resource.title": { "uk": "Ресурси", "en": "Resources" },
+  "admin.reference.resource_group.title": { "uk": "Групи ресурсів", "en": "Resource groups" },
+  "admin.reference.field.image": { "uk": "Зображення", "en": "Picture" },
+  "admin.reference.field.name": { "uk": "Назва", "en": "Name" },
+  "admin.reference.field.description": { "uk": "Опис", "en": "Description" },
+  "admin.reference.field.sort_order": { "uk": "Порядок у списках", "en": "Order in the lists" },
+  "admin.reference.field.resource_group": { "uk": "Група ресурсів", "en": "Resource group" },
+  "admin.reference.field.allowed_on_planet": { "uk": "Може лежати на планеті", "en": "May lie on a planet" }
+}

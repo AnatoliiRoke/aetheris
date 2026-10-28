@@ -4,10 +4,15 @@
     <RootNamespace>Aetheris.Core</RootNamespace>
   </PropertyGroup>
 
+  <!--
+    The shared endpoints of the reference kinds of the admin panel (task 00023). The framework
+    brings the hosting, options and logging abstractions the core used as packages before.
+  -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.Options" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentValidation" />
   </ItemGroup>
 

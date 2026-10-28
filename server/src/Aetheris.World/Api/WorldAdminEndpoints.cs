@@ -14,7 +14,8 @@ namespace Aetheris.World.Api;
 /// <summary>
 /// The screens of the admin panel for the world: the generation of sectors, the tables of
 /// what was generated (task 00007, decisions 2 and 3), the cards that correct a field, a body
-/// or a system, and the reference tables of the generation (task 00009).
+/// or a system, the reference tables of the generation (task 00009) and the reference kinds of
+/// the resources (task 00023).
 /// </summary>
 /// <remarks>
 /// The routes are mapped on the secured admin group of the host, which checks the session,
@@ -83,8 +84,10 @@ public static class WorldAdminEndpoints
         secured.MapPut("/world/generation-rule-groups/{ruleGroupId:int}", UpdateRuleGroupAsync)
             .WithName("admin.world_generation_rule_group_updated");
 
-        secured.MapPost("/world/resources", CreateResourceAsync)
-            .WithName("admin.world_reference_row_added");
+        // The resources and the resource groups are reference kinds: the list, the form, the
+        // change and the archive come from the shared endpoints (task 00023).
+        secured.MapAdminReference<WorldReferenceAdminService>(WorldReferenceAdminService.ResourceDescriptor);
+        secured.MapAdminReference<WorldReferenceAdminService>(WorldReferenceAdminService.ResourceGroupDescriptor);
 
         secured.MapGet("/world/generation/estimate", EstimateAsync)
             .WithName("admin.world_generation_estimated");
@@ -303,21 +306,6 @@ public static class WorldAdminEndpoints
             audit,
             limits,
             () => edits.AddRuleAsync(request, cancellationToken),
-            null);
-
-    private static Task<IResult> CreateResourceAsync(
-        AdminResourceCreate request,
-        ClaimsPrincipal principal,
-        WorldReferenceAdminService references,
-        IAdminAuditRecorder audit,
-        IAdminQueryLimits limits,
-        CancellationToken cancellationToken) =>
-        ApplyAsync(
-            "resource",
-            request.Reason,
-            audit,
-            limits,
-            () => references.CreateResourceAsync(request, AdminId(principal), cancellationToken),
             null);
 
     private static Task<IResult> UpdateRuleAsync(

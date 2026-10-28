@@ -58,6 +58,23 @@ public interface ILocalizationTexts
     Task<int> AddMissingAsync(IEnumerable<LocalizationTextEntry> entries, string changedBy, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Writes the texts: a changed text gets the new text and a new version, a missing one is
+    /// added, an unchanged one is kept. The texts join the transaction of the request.
+    /// </summary>
+    /// <remarks>
+    /// A reference row is changed with its texts, and the row is locked first, so two changes of
+    /// the texts of one row never meet here (task 00023, section 4.1).
+    /// </remarks>
+    /// <param name="entries">The texts.</param>
+    /// <param name="changedBy">Who writes them: an administrator.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The texts before the change by key and language; a missing text has none.</returns>
+    Task<IReadOnlyDictionary<(string Key, string Language), string>> SetAsync(
+        IEnumerable<LocalizationTextEntry> entries,
+        string changedBy,
+        CancellationToken cancellationToken);
+
+    /// <summary>
     /// Drops the copy in memory; call it once the change of the texts is committed.
     /// </summary>
     void Invalidate();

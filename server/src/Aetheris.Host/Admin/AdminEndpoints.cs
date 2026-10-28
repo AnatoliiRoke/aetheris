@@ -228,6 +228,8 @@ public static class AdminEndpoints
         secured.MapWorldAdminEndpoints();
         secured.MapTextAdminEndpoints();
         secured.MapPlayerAdminEndpoints();
+        secured.MapReferenceKindEndpoints();
+        secured.MapReferenceImageAdminEndpoints();
     }
 
     private static async Task<IResult> SignInAsync(

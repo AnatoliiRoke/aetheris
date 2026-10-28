@@ -163,5 +163,51 @@ public sealed class LocalizationTextStore : ILocalizationTexts
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<(string Key, string Language), string>> SetAsync(
+        IEnumerable<LocalizationTextEntry> entries,
+        string changedBy,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        ArgumentException.ThrowIfNullOrEmpty(changedBy);
+
+        List<LocalizationTextEntry> candidates = [.. entries.DistinctBy(entry => (entry.Key, entry.Language))];
+        List<string> keys = [.. candidates.Select(entry => entry.Key).Distinct(StringComparer.Ordinal)];
+        Dictionary<(string Key, string Language), LocalizationTextEntity> existing = (await _dbContext.LocalizationTexts
+            .Where(text => keys.Contains(text.Key))
+            .ToListAsync(cancellationToken).ConfigureAwait(false))
+            .ToDictionary(text => (text.Key, text.Language));
+
+        DateTimeOffset now = _timeProvider.GetUtcNow();
+        Dictionary<(string Key, string Language), string> before = existing.ToDictionary(entry => entry.Key, entry => entry.Value.Text);
+
+        foreach (LocalizationTextEntry entry in candidates)
+        {
+            if (!existing.TryGetValue((entry.Key, entry.Language), out LocalizationTextEntity? text))
+            {
+                _dbContext.LocalizationTexts.Add(new LocalizationTextEntity
+                {
+                    Key = entry.Key,
+                    Language = entry.Language,
+                    Text = entry.Text,
+                    UpdatedAt = now,
+                    UpdatedBy = changedBy,
+                });
+            }
+            else if (!string.Equals(text.Text, entry.Text, StringComparison.Ordinal))
+            {
+                text.Text = entry.Text;
+                text.Version++;
+                text.UpdatedAt = now;
+                text.UpdatedBy = changedBy;
+            }
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return before;
+    }
+
+    /// <inheritdoc />
     public void Invalidate() => _cache.Invalidate();
 }

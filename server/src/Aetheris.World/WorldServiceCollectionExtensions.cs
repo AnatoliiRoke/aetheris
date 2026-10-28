@@ -1,3 +1,4 @@
+using Aetheris.Core.Admin;
 using Aetheris.Core.Commands;
 using Aetheris.Core.Data;
 using Aetheris.Core.Scheduling;
@@ -49,6 +50,7 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<WorldAdminQueryService>();
         services.AddScoped<WorldAdminEditService>();
         services.AddScoped<WorldReferenceAdminService>();
+        services.AddScoped<IAdminReferenceService>(serviceProvider => serviceProvider.GetRequiredService<WorldReferenceAdminService>());
         services.AddScoped<IScheduledEventHandler, GenerationRunHandler>();
 
         services.AddCommand<FoundCivilizationCommand>();

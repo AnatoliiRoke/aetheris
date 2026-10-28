@@ -60,6 +60,9 @@ public static class AdminEditErrors
 
     /// <summary>The value does not apply to the class of the type.</summary>
     public const string NotApplicable = "not_applicable";
+
+    /// <summary>The referenced row is archived, so it is not offered for a new rule (task 00023).</summary>
+    public const string Archived = "archived";
 }
 
 /// <summary>
@@ -790,7 +793,7 @@ public sealed class WorldAdminEditService
                 GenerationRuleGroupEntity group = await _dbContext.RuleGroups.AsNoTracking()
                     .SingleAsync(entry => entry.Id == rule.RuleGroupId, cancellationToken).ConfigureAwait(false);
 
-                await CheckRuleAsync(group, ruleId, request, cancellationToken).ConfigureAwait(false);
+                await CheckRuleAsync(group, ruleId, rule.ResourceId, request, cancellationToken).ConfigureAwait(false);
 
                 ChangeSet changes = new();
                 changes.Set("resource_id", rule.ResourceId, request.ResourceId);
@@ -842,7 +845,7 @@ public sealed class WorldAdminEditService
                         GameErrorCodes.ValidationFailed,
                         new Dictionary<string, string[]> { ["rule_group_id"] = [AdminEditErrors.Unknown] });
 
-                await CheckRuleAsync(group, null, request, cancellationToken).ConfigureAwait(false);
+                await CheckRuleAsync(group, null, null, request, cancellationToken).ConfigureAwait(false);
 
                 GenerationRuleEntity rule = new()
                 {
@@ -874,7 +877,12 @@ public sealed class WorldAdminEditService
             cancellationToken);
     }
 
-    private async Task CheckRuleAsync(GenerationRuleGroupEntity group, int? ruleId, AdminRuleInput request, CancellationToken cancellationToken)
+    private async Task CheckRuleAsync(
+        GenerationRuleGroupEntity group,
+        int? ruleId,
+        int? storedResourceId,
+        AdminRuleInput request,
+        CancellationToken cancellationToken)
     {
         WorldSettings settings = _reference.Settings;
         Dictionary<string, List<string>> errors = [];
@@ -887,6 +895,12 @@ public sealed class WorldAdminEditService
         if (!(await ResourceIdsAsync(cancellationToken).ConfigureAwait(false)).Contains(request.ResourceId))
         {
             Add(errors, "resource_id", AdminEditErrors.Unknown);
+        }
+        else if (request.ResourceId != storedResourceId
+            && await _dbContext.ResourceTypes.AnyAsync(resource => resource.Id == request.ResourceId && resource.IsArchived, cancellationToken).ConfigureAwait(false))
+        {
+            // An archived resource keeps the rules it already has, but no rule gets it anew.
+            Add(errors, "resource_id", AdminEditErrors.Archived);
         }
         else if (await _dbContext.Rules.AnyAsync(
             rule => rule.RuleGroupId == group.Id && rule.ResourceId == request.ResourceId && rule.Id != ruleId,

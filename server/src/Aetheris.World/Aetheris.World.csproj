@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <RootNamespace>Aetheris.World</RootNamespace>
@@ -19,6 +19,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Data\world-reference-seed.json" LogicalName="Aetheris.World.reference-seed.json" />
     <EmbeddedResource Include="Data\neutral-code-map.json" LogicalName="Aetheris.World.neutral-code-map.json" />
+    <EmbeddedResource Include="Data\admin-reference-texts.json" LogicalName="Aetheris.World.admin-reference-texts.json" />
   </ItemGroup>
 
 </Project>

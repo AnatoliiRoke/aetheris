@@ -938,11 +938,19 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("description_key");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
                     b.Property<string>("NameKey")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("name_key");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_resource_group");
@@ -980,6 +988,10 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("image_key");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
                     b.Property<string>("NameKey")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -989,6 +1001,10 @@ namespace Aetheris.World.Data.Migrations
                     b.Property<int>("ResourceGroupId")
                         .HasColumnType("integer")
                         .HasColumnName("resource_group_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_resource_type");

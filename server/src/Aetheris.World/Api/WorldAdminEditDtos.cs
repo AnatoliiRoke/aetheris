@@ -359,17 +359,3 @@ public sealed record AdminRuleRow(
 /// <param name="ObjectTypeId">Only the rules of this object type.</param>
 /// <param name="IsActive">Only the active or only the switched off rules.</param>
 public sealed record AdminRuleFilter(int? ObjectTypeId, bool? IsActive);
-
-/// <summary>
-/// A new resource type from the admin panel (task 00022, decision 6). The server gives the code;
-/// the name and the description are required in every language of the texts.
-/// </summary>
-/// <param name="Reason">Why the resource is added; written to the journal.</param>
-/// <param name="ResourceGroupId">The group of the resource.</param>
-/// <param name="Name">The name by language.</param>
-/// <param name="Description">The description by language.</param>
-public sealed record AdminResourceCreate(
-    [property: JsonPropertyName("reason")] string? Reason,
-    [property: JsonPropertyName("resource_group_id")] int ResourceGroupId,
-    [property: JsonPropertyName("name")] IReadOnlyDictionary<string, string>? Name,
-    [property: JsonPropertyName("description")] IReadOnlyDictionary<string, string>? Description);

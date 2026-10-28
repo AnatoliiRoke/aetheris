@@ -277,14 +277,16 @@ public sealed record ResourceCatalog(IReadOnlyList<ResourceGroupFact> Groups, IR
 /// <param name="Id">The group.</param>
 /// <param name="Code">The stable code.</param>
 /// <param name="NameKey">The localisation key of the name.</param>
-public sealed record ResourceGroupFact(int Id, string Code, string NameKey);
+/// <param name="IsArchived">Whether the group is archived: it is not offered for new rows (task 00023).</param>
+public sealed record ResourceGroupFact(int Id, string Code, string NameKey, bool IsArchived = false);
 
 /// <summary>A resource type.</summary>
 /// <param name="Id">The resource.</param>
 /// <param name="Code">The stable code.</param>
 /// <param name="NameKey">The localisation key of the name.</param>
 /// <param name="ResourceGroupId">The group.</param>
-public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int ResourceGroupId);
+/// <param name="IsArchived">Whether the resource is archived: the stocks stay, it is not offered for new rows (task 00023).</param>
+public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int ResourceGroupId, bool IsArchived = false);
 
 /// <summary>The home body of a civilization with the start building of its race.</summary>
 /// <param name="PlanetId">The home body.</param>

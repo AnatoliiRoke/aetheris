@@ -38,7 +38,9 @@
     { "code": "admin.world_generation_rule_group_updated", "kind": "action" },
     { "code": "admin.world_reference_row_added", "kind": "action" },
     { "code": "admin.texts_read", "kind": "screen" },
-    { "code": "admin.text_updated", "kind": "action" }
+    { "code": "admin.text_updated", "kind": "action" },
+    { "code": "admin.reference_kinds_read", "kind": "screen" },
+    { "code": "admin.reference_image_uploaded", "kind": "action" }
   ],
   "roles": [
     {

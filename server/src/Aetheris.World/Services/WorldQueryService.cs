@@ -338,12 +338,12 @@ public sealed class WorldQueryService
     {
         List<ResourceGroupFact> groups = await _dbContext.ResourceGroups.AsNoTracking()
             .OrderBy(group => group.Id)
-            .Select(group => new ResourceGroupFact(group.Id, group.Code, group.NameKey))
+            .Select(group => new ResourceGroupFact(group.Id, group.Code, group.NameKey, group.IsArchived))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         List<ResourceTypeFact> resources = await _dbContext.ResourceTypes.AsNoTracking()
             .OrderBy(resource => resource.Id)
-            .Select(resource => new ResourceTypeFact(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId))
+            .Select(resource => new ResourceTypeFact(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId, resource.IsArchived))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return new ResourceCatalog(groups, resources);

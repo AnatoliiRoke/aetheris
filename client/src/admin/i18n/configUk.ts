@@ -75,6 +75,9 @@ export const configDescriptionsUk: Record<string, string> = {
 
   'config.admin.texts.languages.description': 'Мови текстів ігрових даних через кому; перша з них запасна.',
   'config.admin.texts.max_length.description': 'Найбільша довжина одного тексту ігрових даних.',
+  'config.admin.reference.image_types.description': 'Дозволені типи зображення запису довідника через кому: image/png, image/webp.',
+  'config.admin.reference.image_max_bytes.description': 'Найбільший розмір зображення запису довідника, у байтах.',
+  'config.admin.reference.image_directory.description': 'Каталог зображень довідників на сервері; відносний шлях рахується від каталогу сервера.',
 
   'config.world.galaxy.seed.description': 'Зерно галактики; з нього виводяться зерна секторів.',
   'config.world.galaxy.initial_sector_count.description': 'Секторів, створених під час першого старту.',

@@ -1,5 +1,6 @@
 using Aetheris.Admin;
 using Aetheris.Chat;
+using Aetheris.Core.Admin;
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Data;
 using Aetheris.Core.Scheduling;
@@ -127,6 +128,10 @@ builder.Services.AddSingleton<LocalizationTextCache>();
 builder.Services.AddSingleton<TextSettings>();
 builder.Services.AddScoped<ILocalizationTexts, LocalizationTextStore>();
 builder.Services.AddScoped<AdminTextService>();
+
+// The pictures of the reference rows of the admin panel (task 00023).
+builder.Services.AddSingleton<ReferenceImageStore>();
+builder.Services.AddSingleton<IAdminReferenceImages>(sp => sp.GetRequiredService<ReferenceImageStore>());
 
 // ---------------------------------------------------------------------------------------------
 // Security: identity, policies, rate limits, command pipeline, admin panel (task 00002)
@@ -291,6 +296,7 @@ app.MapGet("/api/v1/ping", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapAdminEndpoints();
 app.MapTextEndpoints();
+app.MapReferenceImageEndpoints();
 app.MapWorldEndpoints();
 PlanetsModule.MapEndpoints(app);
 ResearchServiceCollectionExtensions.MapEndpoints(app);

@@ -20,6 +20,15 @@ public sealed class ResourceGroupEntity
 
     /// <summary>Gets or sets a value indicating whether a resource of the group may lie on a planet or a gas giant.</summary>
     public bool AllowedOnPlanet { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the group is archived: it stays with its resources,
+    /// but no new resource gets it (task 00023, decision 5).
+    /// </summary>
+    public bool IsArchived { get; set; }
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
 }
 
 /// <summary>
@@ -44,6 +53,16 @@ public sealed class ResourceTypeEntity
 
     /// <summary>Gets or sets the key of the picture of the resource, or <see langword="null"/> for the neutral placeholder.</summary>
     public string? ImageKey { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the resource is archived: the stocks of the players and
+    /// the costs already written stay, but no new level, recipe or generation rule gets it
+    /// (task 00023, decision 5).
+    /// </summary>
+    public bool IsArchived { get; set; }
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
 }
 
 /// <summary>

@@ -1,5 +1,8 @@
+using Aetheris.Core.Admin;
+using Aetheris.Core.Text;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
+using Aetheris.World.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aetheris.Host.Configuration;
@@ -29,6 +32,8 @@ public sealed class ConfigSeedService
     private readonly AetherisDbContext _dbContext;
     private readonly IConfiguration _configuration;
     private readonly ILogger<ConfigSeedService> _logger;
+    private readonly IEnumerable<IAdminReferenceService> _references;
+    private readonly ILocalizationTexts _texts;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfigSeedService"/> class.
@@ -36,15 +41,26 @@ public sealed class ConfigSeedService
     /// <param name="dbContext">The database context.</param>
     /// <param name="configuration">The application configuration.</param>
     /// <param name="logger">The logger.</param>
-    public ConfigSeedService(AetherisDbContext dbContext, IConfiguration configuration, ILogger<ConfigSeedService> logger)
+    /// <param name="references">The reference kinds of the modules, for their permissions and the texts of their labels.</param>
+    /// <param name="texts">The texts of the game data.</param>
+    public ConfigSeedService(
+        AetherisDbContext dbContext,
+        IConfiguration configuration,
+        ILogger<ConfigSeedService> logger,
+        IEnumerable<IAdminReferenceService> references,
+        ILocalizationTexts texts)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(configuration);
         ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(references);
+        ArgumentNullException.ThrowIfNull(texts);
 
         _dbContext = dbContext;
         _configuration = configuration;
         _logger = logger;
+        _references = references;
+        _texts = texts;
     }
 
     /// <summary>
@@ -57,7 +73,7 @@ public sealed class ConfigSeedService
         // The lists of the account rules are seeded with the parameters, so a fresh database
         // and a cleared test database get both (task 00006).
         await AccountListsSeed.SeedAsync(_dbContext, cancellationToken).ConfigureAwait(false);
-        await AdminAccessSeed.SeedAsync(_dbContext, cancellationToken).ConfigureAwait(false);
+        await SeedReferenceKindsAsync(cancellationToken).ConfigureAwait(false);
 
         IConfigurationSection overrides = _configuration.GetSection(OverridesSection);
         IReadOnlyList<(string Key, string Value)> parameters = ConfigSeed.GetParameters()
@@ -99,5 +115,32 @@ public sealed class ConfigSeedService
             string.Join(", ", missing.Select(parameter => parameter.Key)));
 
         return missing.Count;
+    }
+
+    /// <summary>
+    /// Adds the permissions of the reference kinds of the modules to the seed of the permissions,
+    /// and the missing texts of their labels (task 00023). A text changed in the admin panel is
+    /// kept.
+    /// </summary>
+    private async Task SeedReferenceKindsAsync(CancellationToken cancellationToken)
+    {
+        List<IAdminReferenceService> references = [.. _references];
+        List<SeedAdminPermission> permissions =
+        [
+            .. references
+                .SelectMany(reference => reference.Descriptors)
+                .SelectMany(descriptor => descriptor.Permissions.Screens.Select(code => new SeedAdminPermission(code, AdminPermissionKinds.Screen))
+                    .Concat(descriptor.Permissions.Actions.Select(code => new SeedAdminPermission(code, AdminPermissionKinds.Action)))),
+        ];
+
+        await AdminAccessSeed.SeedAsync(_dbContext, permissions, cancellationToken).ConfigureAwait(false);
+
+        int added = await _texts.AddMissingAsync(references.SelectMany(reference => reference.LabelTexts), SeedTexts.Author, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (added > 0)
+        {
+            _texts.Invalidate();
+        }
     }
 }
