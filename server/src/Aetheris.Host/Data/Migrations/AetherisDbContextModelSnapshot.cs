@@ -422,6 +422,25 @@ namespace Aetheris.Host.Data.Migrations
                     b.ToTable("change_journal", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.CodeSequenceEntity", b =>
+                {
+                    b.Property<string>("CodeGroup")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("code_group");
+
+                    b.Property<int>("LastNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_number");
+
+                    b.HasKey("CodeGroup");
+
+                    b.ToTable("code_sequence", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_code_sequence_last_number", "last_number >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Aetheris.Host.Data.Entities.ConfigParameterChangeEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -511,6 +530,58 @@ namespace Aetheris.Host.Data.Migrations
                     b.HasIndex("Version");
 
                     b.ToTable("config_version", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.LocalizationTextEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("key");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)")
+                        .HasColumnName("language");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)")
+                        .HasColumnName("text");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("updated_by");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_localization_texts");
+
+                    b.HasIndex("Language");
+
+                    b.HasIndex("Key", "Language")
+                        .IsUnique();
+
+                    b.ToTable("localization_text", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Host.Data.Entities.PlayerEventEntity", b =>

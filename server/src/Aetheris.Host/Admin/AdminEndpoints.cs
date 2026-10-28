@@ -10,6 +10,7 @@ using Aetheris.Host.Auth;
 using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
+using Aetheris.Host.Localization;
 using Aetheris.Host.Security;
 using Aetheris.World.Api;
 using FluentValidation;
@@ -225,6 +226,7 @@ public static class AdminEndpoints
         // The actions of the modules share the same group, so they get the session, the
         // permission check, the rate limit and the audit record like the actions above.
         secured.MapWorldAdminEndpoints();
+        secured.MapTextAdminEndpoints();
         secured.MapPlayerAdminEndpoints();
     }
 

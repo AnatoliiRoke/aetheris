@@ -144,6 +144,16 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
     /// </summary>
     public DbSet<UnconfirmedAllowedActionEntity> UnconfirmedAllowedActions => Set<UnconfirmedAllowedActionEntity>();
 
+    /// <summary>
+    /// Gets the texts of the game data.
+    /// </summary>
+    public DbSet<LocalizationTextEntity> LocalizationTexts => Set<LocalizationTextEntity>();
+
+    /// <summary>
+    /// Gets the counters of the neutral codes.
+    /// </summary>
+    public DbSet<CodeSequenceEntity> CodeSequences => Set<CodeSequenceEntity>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -405,6 +415,29 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
             entity.Property(e => e.Field).HasMaxLength(128);
             entity.Property(e => e.Reason).HasMaxLength(256);
             entity.HasIndex(e => new { e.ObjectType, e.ObjectId, e.At });
+        });
+
+        builder.Entity<LocalizationTextEntity>(entity =>
+        {
+            entity.ToTable("localization_text");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Key).HasMaxLength(256);
+            entity.Property(e => e.Language).HasMaxLength(8);
+            entity.Property(e => e.Text).HasMaxLength(10000);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(450);
+
+            // One text per key and language; the client reads the texts of one language.
+            entity.HasIndex(e => new { e.Key, e.Language }).IsUnique();
+            entity.HasIndex(e => e.Language);
+        });
+
+        builder.Entity<CodeSequenceEntity>(entity =>
+        {
+            entity.ToTable("code_sequence");
+            entity.HasKey(e => e.CodeGroup);
+            entity.Property(e => e.CodeGroup).HasMaxLength(64);
+            entity.ToTable(table => table.HasCheckConstraint("ck_code_sequence_last_number", "last_number >= 0"));
         });
     }
 

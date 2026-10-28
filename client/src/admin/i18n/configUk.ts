@@ -73,6 +73,9 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.scheduler.poll_seconds.description': 'Інтервал перевірки запланованих подій, у секундах.',
   'config.scheduler.batch_size.description': 'Найбільша кількість подій, оброблених за один прохід.',
 
+  'config.admin.texts.languages.description': 'Мови текстів ігрових даних через кому; перша з них запасна.',
+  'config.admin.texts.max_length.description': 'Найбільша довжина одного тексту ігрових даних.',
+
   'config.world.galaxy.seed.description': 'Зерно галактики; з нього виводяться зерна секторів.',
   'config.world.galaxy.initial_sector_count.description': 'Секторів, створених під час першого старту.',
   'config.world.galaxy.newbie_sector_count.description': 'Скільки перших секторів позначаються для новачків.',

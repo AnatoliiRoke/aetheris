@@ -35,7 +35,9 @@
     { "code": "admin.world_generation_rules_read", "kind": "screen" },
     { "code": "admin.world_generation_rule_added", "kind": "action" },
     { "code": "admin.world_generation_rule_updated", "kind": "action" },
-    { "code": "admin.world_generation_rule_group_updated", "kind": "action" }
+    { "code": "admin.world_generation_rule_group_updated", "kind": "action" },
+    { "code": "admin.texts_read", "kind": "screen" },
+    { "code": "admin.text_updated", "kind": "action" }
   ],
   "roles": [
     {
@@ -66,7 +68,9 @@
         "admin.world_generation_rules_read",
         "admin.world_generation_rule_added",
         "admin.world_generation_rule_updated",
-        "admin.world_generation_rule_group_updated"
+        "admin.world_generation_rule_group_updated",
+        "admin.texts_read",
+        "admin.text_updated"
       ]
     },
     {

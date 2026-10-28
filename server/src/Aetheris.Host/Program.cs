@@ -3,6 +3,7 @@ using Aetheris.Chat;
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Data;
 using Aetheris.Core.Scheduling;
+using Aetheris.Core.Text;
 using Aetheris.Core.Time;
 using Aetheris.Economy;
 using Aetheris.Fleet;
@@ -12,6 +13,7 @@ using Aetheris.Host.Commands;
 using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
 using Aetheris.Host.Health;
+using Aetheris.Host.Localization;
 using Aetheris.Host.Observability;
 using Aetheris.Host.Realtime;
 using Aetheris.Host.Scheduling;
@@ -114,6 +116,13 @@ builder.Services.AddDbContext<AetherisDbContext>(options =>
 // The contexts of the modules work on the connection of the main context and join its
 // transaction, so a request commits as one.
 builder.Services.AddScoped<IDatabaseSession, EfDatabaseSession>();
+
+// The neutral codes of the reference rows and the texts of the game data (task 00022).
+builder.Services.AddScoped<ICodeSequence, EfCodeSequence>();
+builder.Services.AddSingleton<LocalizationTextCache>();
+builder.Services.AddSingleton<TextSettings>();
+builder.Services.AddScoped<ILocalizationTexts, LocalizationTextStore>();
+builder.Services.AddScoped<AdminTextService>();
 
 // ---------------------------------------------------------------------------------------------
 // Security: identity, policies, rate limits, command pipeline, admin panel (task 00002)
@@ -264,6 +273,7 @@ app.MapGet("/api/v1/ping", () => Results.Ok(new { status = "ok" }));
 
 app.MapAuthEndpoints();
 app.MapAdminEndpoints();
+app.MapTextEndpoints();
 app.MapWorldEndpoints();
 PlanetsModule.MapEndpoints(app);
 app.MapCommands();
