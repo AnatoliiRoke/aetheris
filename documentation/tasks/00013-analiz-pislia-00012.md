@@ -392,17 +392,20 @@ Production має читати:
 Див. `IPlanetsModule.GetBuildingLevelAsync` — він уже приймає `buildingClass`, а не
 `buildingTypeId`. Для виробництва треба рівень **конкретного заводу**, а не класу.
 
-**Проблема «рівень конкретного заводу».** `GetBuildingLevelAsync` дає рівень будівлі **класу**
-(«науковий центр на планеті»), а для виробництва потрібен рівень **конкретної будівлі-завода**
-(«корпусний цех 3 рівня»). Тобто потрібен ще один метод контракту:
+**Рівень конкретного заводу — окремої проблеми немає.** Це вже працює:
 
-```csharp
-Task<int> GetBuildingLevelByTypeAsync(int buildingTypeId, long planetId, string? playerId, CancellationToken cancellationToken);
-```
+- вимога «рівень заводу N» — це наявний тип вимоги `RequirementTypes.BuildingLevel`
+  (`RequirementCodes.cs`), і його перевіряє `RequirementChecker.Check`
+  (`RequirementChecker.cs:69`) через `RequirementContext.BuildingLevels`;
+- `BuildingLevels` — це словник **рівнів конкретних типів будівель** на планеті
+  (`PlanetSession.Levels()` дає `building_type_id → level`), тобто перевіряється саме
+  «корпусний цех 3 рівня», а не «якась будівля класу production»;
+- рецепт — суб'єкт вимог `RequirementSubjectTypes.Recipe` (заготовка вже є в
+  `RequirementCodes.cs`), тож вимога «завод 6 рівня» пишеться в спільну таблицю вимог
+  так само, як вимога до будівлі.
 
-Або — що, на мій погляд, краще — Production вже знає `building_type_id` заводу (він у черзі),
-тому достатньо одного виклику, який повертає рівень **за `building_type_id`**, а не за класом.
-Це треба узгодити з автором у §5 (питання 9).
+**Висновок:** окремий метод контракту не потрібен. Виробництво бере рівень заводу з того
+ж словника рівнів, яким користується перевірка вимог.
 
 ---
 
@@ -458,11 +461,9 @@ Task<int> GetBuildingLevelByTypeAsync(int buildingTypeId, long planetId, string?
      довідник у базі, чи словник логічних кодів у коді? Моє рішення: **ключі атрибутів
      — довідник** (набір атрибутів розширюється), а **значення-переліки** («тип урону»,
      «розмір слота») — логічні коди в коді, бо конструктор їх читає.
-9. **Рівень конкретного заводу:** `IPlanetsModule.GetBuildingLevelAsync` дає рівень
-   будівлі **класу**, а виробництву потрібен рівень **конкретної будівлі-завода**
-   («корпусний цех 3 рівня»). Додати метод контракту за `building_type_id`, чи
-   Production вже знає `building_type_id` заводу і йому вистачає одного виклику?
-   Моє рішення: **другий варіант** — менше змін у контракті Planets.
+9. **Рівень конкретного заводу:** вимога «рівень заводу N» для рецепта — це вже
+   існуючий механізм вимог (`RequirementTypes.BuildingLevel`), тож окреме питання
+   не потрібне. Деталі в аналізі (§3.7).
 10. **Текст технології «Промислова автоматизація»:** за вашим рішенням вона прискорює
    і будівництво, і виробництво, але **двома незалежними ефектами**. Текст у сиді треба
    оновити («Прискорює будівництво й виробництво»), інакше гравець побачить лише половину.
@@ -541,3 +542,7 @@ Task<int> GetBuildingLevelByTypeAsync(int buildingTypeId, long planetId, string?
 | **Множники бонусів живуть у `PlanetBonuses` (модуль Planets)** | `server/src/Aetheris.Planets/Services/RequirementChecker.cs:119-135` |
 | **`ConstructionTimeMultiplier` множить час будівництва** | `server/src/Aetheris.Planets/Services/ConstructionRules.cs:199` |
 | **`GetBuildingLevelAsync` дає рівень за класом, не за типом** | `server/src/Aetheris.Planets/IPlanetsModule.cs` |
+| **Вимога «рівень заводу» — наявний тип `building_level`** | `server/src/Aetheris.Requirements/Services/RequirementCodes.cs` (`RequirementTypes.BuildingLevel`) |
+| **Її перевіряє `RequirementChecker.Check` за `BuildingLevels`** | `server/src/Aetheris.Planets/Services/RequirementChecker.cs:69` |
+| **`BuildingLevels` — рівні конкретних типів будівель на планеті** | `server/src/Aetheris.Planets/Services/PlanetSession.cs:83` (`Levels()`) |
+| **Рецепт — суб'єкт вимог (заготовка)** | `server/src/Aetheris.Requirements/Services/RequirementCodes.cs` (`RequirementSubjectTypes.Recipe`) |
