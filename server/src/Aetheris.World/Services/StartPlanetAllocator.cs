@@ -4,6 +4,7 @@ using Aetheris.World.Configuration;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Aetheris.World.Services;
 
@@ -22,9 +23,27 @@ namespace Aetheris.World.Services;
 /// A system is locked while a newcomer is placed in it; parallel calls skip the locked system
 /// and take the next one instead of waiting.
 /// </para>
+/// <para>
+/// The procedure cannot deadlock (task 00021). Every attempt runs under a savepoint; a system
+/// that turns out to have no free body, and any system a lock query kept without returning it,
+/// is released by rolling the savepoint back. A call that has to wait therefore holds no
+/// system, and the calls that wait line up behind one lock, so at most one of them waits for a
+/// system at a time and nobody it waits for is waiting itself.
+/// </para>
 /// </remarks>
 public sealed class StartPlanetAllocator
 {
+    /// <summary>
+    /// The savepoint of one attempt to take a body in a system.
+    /// </summary>
+    private const string AttemptSavepoint = "start_planet_attempt";
+
+    /// <summary>
+    /// The name of the lock that lines up the calls waiting for a system. The two-key form of
+    /// the lock keeps it apart from the lock of a player.
+    /// </summary>
+    private const string WaitLockName = "start_planet_wait";
+
     private readonly WorldDbContext _dbContext;
     private readonly WorldUnitOfWork _unitOfWork;
     private readonly WorldReferenceRepository _reference;
@@ -150,21 +169,42 @@ public sealed class StartPlanetAllocator
 
     private async Task<PlanetEntity?> TakePlanetAsync(bool newbieSectors, int startTypeId, int maxNewbies, CancellationToken cancellationToken)
     {
+        IDbContextTransaction transaction = _dbContext.Database.CurrentTransaction
+            ?? throw new InvalidOperationException("The start body is allocated only inside a transaction.");
+
         List<long> skipped = [];
 
         while (true)
         {
             long[] excluded = [.. skipped];
 
+            await transaction.CreateSavepointAsync(AttemptSavepoint, cancellationToken).ConfigureAwait(false);
+
             // Parallel calls skip a system that another call holds. Only when every candidate
             // is held does the call wait for one, so a free body is never missed.
             StarSystemEntity? system = await LockSystemAsync(newbieSectors, startTypeId, maxNewbies, excluded, wait: false, cancellationToken)
-                .ConfigureAwait(false)
-                ?? await LockSystemAsync(newbieSectors, startTypeId, maxNewbies, excluded, wait: true, cancellationToken)
                 .ConfigureAwait(false);
 
             if (system is null)
             {
+                // A lock query may lock a system that no longer matches once the change of
+                // another call is committed, keep it and go on to the next row, so even an empty
+                // answer can leave a system locked. Such locks are let go before waiting. The
+                // waiting calls then queue up one by one, and the others never wait for a
+                // system, so no cycle can close.
+                await transaction.RollbackToSavepointAsync(AttemptSavepoint, cancellationToken).ConfigureAwait(false);
+                await _dbContext.Database
+                    .ExecuteSqlAsync($"SELECT pg_advisory_xact_lock(hashtext({WaitLockName}), 0)", cancellationToken)
+                    .ConfigureAwait(false);
+
+                system = await LockSystemAsync(newbieSectors, startTypeId, maxNewbies, excluded, wait: true, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            if (system is null)
+            {
+                await transaction.ReleaseSavepointAsync(AttemptSavepoint, cancellationToken).ConfigureAwait(false);
+
                 return null;
             }
 
@@ -185,10 +225,23 @@ public sealed class StartPlanetAllocator
 
             if (planet is null || system.NewbieCount >= maxNewbies)
             {
+                // The lock query sees the free bodies as they were before it waited, so the
+                // system may have been filled meanwhile. Holding it while waiting for the next
+                // one could close a cycle with another call, so the lock is let go here.
+                await transaction.RollbackToSavepointAsync(AttemptSavepoint, cancellationToken).ConfigureAwait(false);
+                await transaction.ReleaseSavepointAsync(AttemptSavepoint, cancellationToken).ConfigureAwait(false);
+                _dbContext.Entry(system).State = EntityState.Detached;
+
+                if (planet is not null)
+                {
+                    _dbContext.Entry(planet).State = EntityState.Detached;
+                }
+
                 skipped.Add(system.Id);
                 continue;
             }
 
+            await transaction.ReleaseSavepointAsync(AttemptSavepoint, cancellationToken).ConfigureAwait(false);
             system.NewbieCount++;
 
             return planet;
