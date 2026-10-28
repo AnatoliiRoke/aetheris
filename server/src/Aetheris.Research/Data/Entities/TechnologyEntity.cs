@@ -10,9 +10,9 @@ namespace Aetheris.Research.Data.Entities;
 /// (documentation/tech/09, sections 3.1 and 4).
 /// </para>
 /// <para>
-/// The branch and the kinds of the effects are logical codes of the program
-/// (documentation/tech/09, section 3.4), and the levels of the technology are rows of the
-/// table of the levels.
+/// The branch is a row of the table of the branches (task 00023, decision 8), the kinds of the
+/// effects are logical codes of the program (documentation/tech/09, section 3.4), and the
+/// levels of the technology are rows of the table of the levels.
 /// </para>
 /// </remarks>
 public sealed class TechnologyEntity
@@ -29,8 +29,21 @@ public sealed class TechnologyEntity
     /// <summary>Gets or sets the localisation key of the description.</summary>
     public string DescriptionKey { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the branch of the tree, one of <see cref="Services.TechnologyBranches"/>.</summary>
-    public string Branch { get; set; } = string.Empty;
+    /// <summary>Gets or sets the branch of the tree.</summary>
+    public int BranchId { get; set; }
+
+    /// <summary>Gets or sets the key of the picture, or <see langword="null"/> for the neutral placeholder.</summary>
+    public string? ImageKey { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the technology is archived: the levels the players
+    /// learned keep working and the queue finishes, but no new research of it starts
+    /// (task 00023, decision 5).
+    /// </summary>
+    public bool IsArchived { get; set; }
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
 
     /// <summary>Gets or sets the order of the technology in the lists of its branch.</summary>
     public int SortOrder { get; set; }

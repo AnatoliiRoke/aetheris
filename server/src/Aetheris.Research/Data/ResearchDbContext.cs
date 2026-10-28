@@ -39,6 +39,9 @@ public sealed class ResearchDbContext : DbContext
     {
     }
 
+    /// <summary>Gets the branches of the tree.</summary>
+    public DbSet<TechnologyBranchEntity> TechnologyBranches => Set<TechnologyBranchEntity>();
+
     /// <summary>Gets the technologies.</summary>
     public DbSet<TechnologyEntity> Technologies => Set<TechnologyEntity>();
 
@@ -75,15 +78,26 @@ public sealed class ResearchDbContext : DbContext
 
     private static void ConfigureReferenceTables(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<TechnologyBranchEntity>(entity =>
+        {
+            entity.ToTable("technology_branch");
+            entity.Property(e => e.Code).HasMaxLength(CodeLength);
+            entity.Property(e => e.NameKey).HasMaxLength(NameLength);
+            entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
+            entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
+            entity.HasIndex(e => e.Code).IsUnique();
+        });
+
         modelBuilder.Entity<TechnologyEntity>(entity =>
         {
             entity.ToTable("technology");
             entity.Property(e => e.Code).HasMaxLength(CodeLength);
             entity.Property(e => e.NameKey).HasMaxLength(NameLength);
             entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
-            entity.Property(e => e.Branch).HasMaxLength(CodeLength);
+            entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
-            entity.HasIndex(e => new { e.Branch, e.SortOrder });
+            entity.HasIndex(e => new { e.BranchId, e.SortOrder });
+            entity.HasOne<TechnologyBranchEntity>().WithMany().HasForeignKey(e => e.BranchId).OnDelete(DeleteBehavior.Restrict);
             entity.ToTable(table => table.HasCheckConstraint("ck_technology_max_level", "max_level >= 1"));
             entity.ToTable(table => table.HasCheckConstraint("ck_technology_research_center_level", "research_center_level >= 1"));
         });

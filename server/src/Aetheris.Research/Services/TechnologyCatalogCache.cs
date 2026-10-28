@@ -79,11 +79,18 @@ public sealed class TechnologyCatalogCache
 
     private static async Task<TechnologyCatalog> LoadAsync(ResearchDbContext dbContext, CancellationToken cancellationToken)
     {
+        List<TechnologyBranchInfo> branches = await dbContext.TechnologyBranches.AsNoTracking()
+            .OrderBy(branch => branch.SortOrder)
+            .ThenBy(branch => branch.Id)
+            .Select(branch => new TechnologyBranchInfo(branch.Id, branch.Code, branch.NameKey, branch.SortOrder, branch.IsArchived))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
         var technologies = await dbContext.Technologies.AsNoTracking()
             .Include(technology => technology.LevelIds).ThenInclude(level => level.CostIds)
             .Include(technology => technology.LevelIds).ThenInclude(level => level.EffectIds)
             .AsSplitQuery()
-            .OrderBy(technology => technology.Branch)
+            .OrderBy(technology => technology.BranchId)
             .ThenBy(technology => technology.SortOrder)
             .ThenBy(technology => technology.Id)
             .ToListAsync(cancellationToken)
@@ -96,7 +103,7 @@ public sealed class TechnologyCatalogCache
                 technology.Code,
                 technology.NameKey,
                 technology.DescriptionKey,
-                technology.Branch,
+                technology.BranchId,
                 technology.SortOrder,
                 technology.MaxLevel,
                 technology.ResearchCenterLevel,
@@ -110,8 +117,10 @@ public sealed class TechnologyCatalogCache
                             effect.EffectType,
                             effect.UnlockKind,
                             effect.UnlockTargetId,
-                            effect.Value))])))),
-        ]);
+                            effect.Value))])),
+                technology.IsArchived)),
+        ],
+        branches);
     }
 
     private sealed record CachedCatalog(TechnologyCatalog Catalog, DateTimeOffset LoadedAt);

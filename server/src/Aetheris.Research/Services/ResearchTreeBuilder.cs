@@ -19,9 +19,19 @@ public sealed class ResearchTreeBuilder
     {
         ArgumentNullException.ThrowIfNull(snapshot);
 
+        // An archived technology, or one of an archived branch, is not offered for a new
+        // research; the player who learned it or has it in the queue still sees it (task 00023,
+        // decision 5).
+        List<TechnologyInfo> shown =
+        [
+            .. snapshot.Catalog.Technologies.Where(technology => snapshot.Catalog.IsOffered(technology)
+                || snapshot.LearnedLevels.GetValueOrDefault(technology.Id) > 0
+                || snapshot.Queue.Any(item => item.TechnologyId == technology.Id)),
+        ];
+
         List<TechnologyDto> technologies =
         [
-            .. snapshot.Catalog.Technologies.Select(technology => BuildTechnology(snapshot, technology)),
+            .. shown.Select(technology => BuildTechnology(snapshot, technology)),
         ];
 
         List<ResearchQueueItemDto> queue =
@@ -49,7 +59,7 @@ public sealed class ResearchTreeBuilder
         ];
 
         return new ResearchTreeDto(
-            [.. BuildBranches(snapshot)],
+            [.. BuildBranches(snapshot, shown)],
             technologies,
             queue,
             snapshot.QueueSlots,
@@ -91,6 +101,11 @@ public sealed class ResearchTreeBuilder
                 ? ResearchTechnologyStatuses.Researching
                 : ResearchTechnologyStatuses.Queued;
         }
+        else if (!snapshot.Catalog.IsOffered(technology))
+        {
+            status = ResearchTechnologyStatuses.Unavailable;
+            reason = ResearchErrorCodes.TechnologyArchived;
+        }
         else if (snapshot.AvailableCenterLevel <= 0 || snapshot.AvailableCenterLevel < technology.ResearchCenterLevel)
         {
             // The research of the technology starts on a chosen body, and the science centre of
@@ -113,7 +128,8 @@ public sealed class ResearchTreeBuilder
             technology.Code,
             technology.NameKey,
             technology.DescriptionKey,
-            technology.Branch,
+            technology.BranchId,
+            snapshot.Catalog.FindBranch(technology.BranchId)?.Code ?? string.Empty,
             technology.SortOrder,
             technology.MaxLevel,
             learned,
@@ -146,15 +162,15 @@ public sealed class ResearchTreeBuilder
             ? snapshot.BuildingNameKeys.GetValueOrDefault(buildingTypeId)
             : null;
 
-    private static IEnumerable<ResearchBranchDto> BuildBranches(ResearchTreeSnapshot snapshot)
+    private static IEnumerable<ResearchBranchDto> BuildBranches(ResearchTreeSnapshot snapshot, IReadOnlyList<TechnologyInfo> shown)
     {
-        // Every branch of the program is listed, an empty one too, and a branch that only the
-        // data names comes after them.
-        foreach (string branch in TechnologyBranches.All
-            .Concat(snapshot.Catalog.Technologies.Select(technology => technology.Branch).Order(StringComparer.Ordinal))
-            .Distinct(StringComparer.Ordinal))
+        // Every branch of the table is listed in its order, an empty one too (task 00012,
+        // decision 11); an archived branch only while the player still sees a technology of it.
+        HashSet<int> shownBranchIds = [.. shown.Select(technology => technology.BranchId)];
+
+        foreach (TechnologyBranchInfo branch in snapshot.Catalog.Branches.Where(branch => !branch.IsArchived || shownBranchIds.Contains(branch.Id)))
         {
-            yield return new ResearchBranchDto(branch, ResearchBranchTextKeys.Name(branch));
+            yield return new ResearchBranchDto(branch.Id, branch.Code, branch.NameKey);
         }
     }
 }

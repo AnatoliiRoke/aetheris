@@ -24,8 +24,9 @@ namespace Aetheris.Research.Data;
 /// so the database holds a plain table that a designer or the simulator changes later.
 /// </para>
 /// <para>
-/// Every technology has a neutral code and its texts in every language (task 00022). The seed
-/// runs only while the technology table is empty, so it never overwrites a change.
+/// Every technology and every branch has a neutral code and its texts in every language
+/// (task 00022, task 00023). The seed writes the branches only while their table is empty and
+/// the technologies only while theirs is, so it never overwrites a change of the admin panel.
 /// </para>
 /// </remarks>
 public static class ResearchReferenceSeed
@@ -112,19 +113,43 @@ public static class ResearchReferenceSeed
 
         ResearchSeedData seed = Load();
 
-        // The texts of the branches arrive with the module, even when the technologies are
-        // already there, so a branch added later always has its name.
+        // The branches are rows of their own table (task 00023, decision 8); the migration that
+        // made the table wrote the branches of an existing database, and a fresh one gets them
+        // here. Their texts arrive with the module and never overwrite a change.
+        if (!await dbContext.TechnologyBranches.AnyAsync(cancellationToken).ConfigureAwait(false))
+        {
+            dbContext.TechnologyBranches.AddRange(seed.Branches.Select(branch => new TechnologyBranchEntity
+            {
+                Code = branch.Code,
+                NameKey = ResearchBranchTextKeys.Name(branch.Code),
+                DescriptionKey = ResearchBranchTextKeys.Description(branch.Code),
+                SortOrder = branch.SortOrder,
+            }));
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         await texts.AddMissingAsync(
             [
-                .. seed.Branches.SelectMany(branch => SeedTexts.Entries(ResearchBranchTextKeys.Name(branch.Branch), branch.Name)),
+                .. seed.Branches.SelectMany(branch => SeedTexts.Entries(ResearchBranchTextKeys.Name(branch.Code), branch.Name)),
+                .. seed.Branches.SelectMany(branch => SeedTexts.Entries(ResearchBranchTextKeys.Description(branch.Code), branch.Description)),
             ],
             SeedTexts.Author,
+            cancellationToken).ConfigureAwait(false);
+
+        await WorldReferenceSeed.RaiseAsync(
+            codes,
+            ResearchBranchTextKeys.CodeGroup,
+            await dbContext.TechnologyBranches.Select(branch => branch.Code).ToListAsync(cancellationToken).ConfigureAwait(false),
             cancellationToken).ConfigureAwait(false);
 
         if (resources.Resources.Count == 0 || await dbContext.Technologies.AnyAsync(cancellationToken).ConfigureAwait(false))
         {
             return false;
         }
+
+        Dictionary<string, int> branchIds = await dbContext.TechnologyBranches
+            .ToDictionaryAsync(branch => branch.Code, branch => branch.Id, StringComparer.Ordinal, cancellationToken)
+            .ConfigureAwait(false);
 
         Dictionary<string, int> resourceIds = resources.Resources.ToDictionary(resource => resource.Code, resource => resource.Id, StringComparer.Ordinal);
 
@@ -157,7 +182,7 @@ public static class ResearchReferenceSeed
                 Code = technology.Code,
                 NameKey = ResearchTextKeys.Name(technology.Code),
                 DescriptionKey = ResearchTextKeys.Description(technology.Code),
-                Branch = technology.Branch,
+                BranchId = branchIds[technology.Branch],
                 SortOrder = technology.SortOrder,
                 MaxLevel = technology.MaxLevel,
                 ResearchCenterLevel = technology.ResearchCenterLevel,
@@ -260,13 +285,19 @@ public sealed record ResearchSeedData(
     IReadOnlyList<SeedTechnology> Technologies);
 
 /// <summary>A branch of the tree of the starting data.</summary>
-/// <param name="Branch">The logical code of the branch.</param>
+/// <param name="Code">The neutral code of the branch.</param>
+/// <param name="SortOrder">The order of the branch in the tree.</param>
 /// <param name="Name">The name by language.</param>
-public sealed record SeedBranch(string Branch, IReadOnlyDictionary<string, string> Name);
+/// <param name="Description">The description by language.</param>
+public sealed record SeedBranch(
+    string Code,
+    int SortOrder,
+    IReadOnlyDictionary<string, string> Name,
+    IReadOnlyDictionary<string, string> Description);
 
 /// <summary>A technology of the starting data.</summary>
 /// <param name="Code">The neutral code.</param>
-/// <param name="Branch">The branch of the tree.</param>
+/// <param name="Branch">The neutral code of the branch of the tree.</param>
 /// <param name="SortOrder">The order in the lists.</param>
 /// <param name="MaxLevel">The largest level of the technology.</param>
 /// <param name="ResearchCenterLevel">The level of the science centre the research needs.</param>

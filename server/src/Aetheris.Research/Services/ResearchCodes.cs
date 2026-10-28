@@ -34,6 +34,9 @@ public static class ResearchErrorCodes
 
     /// <summary>A requirement of the level of the technology is not met.</summary>
     public const string RequirementUnmet = "research_requirement_unmet";
+
+    /// <summary>The technology or its branch is archived: no new research of it starts (task 00023).</summary>
+    public const string TechnologyArchived = "research_technology_archived";
 }
 
 /// <summary>

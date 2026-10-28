@@ -2,52 +2,82 @@
   "level_count": 10,
   "branches": [
     {
-      "branch": "economy",
+      "code": "branch_1",
+      "sort_order": 1,
       "name": {
         "uk": "Економіка",
         "en": "Economy"
+      },
+      "description": {
+        "uk": "Видобуток, виробництво, склади й енергія планет.",
+        "en": "The extraction, the production, the storages and the energy of the planets."
       }
     },
     {
-      "branch": "fleet",
+      "code": "branch_2",
+      "sort_order": 2,
       "name": {
         "uk": "Флот",
         "en": "Fleet"
+      },
+      "description": {
+        "uk": "Кораблі, верфі та озброєння.",
+        "en": "The ships, the shipyards and the weapons."
       }
     },
     {
-      "branch": "engines_and_logistics",
+      "code": "branch_3",
+      "sort_order": 3,
       "name": {
         "uk": "Двигуни й логістика",
         "en": "Engines and logistics"
+      },
+      "description": {
+        "uk": "Двигуни, швидкість і перевезення.",
+        "en": "The engines, the speed and the transport."
       }
     },
     {
-      "branch": "defence",
+      "code": "branch_4",
+      "sort_order": 4,
       "name": {
         "uk": "Оборона",
         "en": "Defence"
+      },
+      "description": {
+        "uk": "Захист планет, радари й сховища.",
+        "en": "The defence of the planets, the radars and the shelters."
       }
     },
     {
-      "branch": "colonisation",
+      "code": "branch_5",
+      "sort_order": 5,
       "name": {
         "uk": "Колонізація",
         "en": "Colonisation"
+      },
+      "description": {
+        "uk": "Освоєння нових планет і простору.",
+        "en": "The settlement of new planets and of the space."
       }
     },
     {
-      "branch": "trade",
+      "code": "branch_6",
+      "sort_order": 6,
       "name": {
         "uk": "Торгівля",
         "en": "Trade"
+      },
+      "description": {
+        "uk": "Торгівля, ринок і портали.",
+        "en": "The trade, the market and the portals."
       }
     }
   ],
   "technologies": [
     {
       "code": "tech_1",
-      "branch": "economy",
+      "branch": "branch_1",
       "sort_order": 1,
       "max_level": 10,
       "research_center_level": 1,
@@ -91,7 +121,7 @@
     },
     {
       "code": "tech_2",
-      "branch": "economy",
+      "branch": "branch_1",
       "sort_order": 2,
       "max_level": 10,
       "research_center_level": 2,
@@ -135,7 +165,7 @@
     },
     {
       "code": "tech_3",
-      "branch": "economy",
+      "branch": "branch_1",
       "sort_order": 3,
       "max_level": 10,
       "research_center_level": 3,
@@ -179,7 +209,7 @@
     },
     {
       "code": "tech_4",
-      "branch": "economy",
+      "branch": "branch_1",
       "sort_order": 4,
       "max_level": 10,
       "research_center_level": 4,
@@ -223,7 +253,7 @@
     },
     {
       "code": "tech_5",
-      "branch": "economy",
+      "branch": "branch_1",
       "sort_order": 5,
       "max_level": 10,
       "research_center_level": 5,
@@ -267,7 +297,7 @@
     },
     {
       "code": "tech_6",
-      "branch": "economy",
+      "branch": "branch_1",
       "sort_order": 6,
       "max_level": 10,
       "research_center_level": 6,
@@ -311,7 +341,7 @@
     },
     {
       "code": "tech_7",
-      "branch": "titanium_mining",
+      "branch": "branch_1",
       "sort_order": 7,
       "max_level": 1,
       "research_center_level": 3,
@@ -357,7 +387,7 @@
     },
     {
       "code": "tech_8",
-      "branch": "iridium_mining",
+      "branch": "branch_1",
       "sort_order": 8,
       "max_level": 1,
       "research_center_level": 4,
@@ -403,7 +433,7 @@
     },
     {
       "code": "tech_9",
-      "branch": "crystal_mining",
+      "branch": "branch_1",
       "sort_order": 9,
       "max_level": 1,
       "research_center_level": 5,
@@ -449,7 +479,7 @@
     },
     {
       "code": "tech_10",
-      "branch": "factory_building",
+      "branch": "branch_1",
       "sort_order": 10,
       "max_level": 1,
       "research_center_level": 7,
@@ -495,7 +525,7 @@
     },
     {
       "code": "tech_11",
-      "branch": "shipyard_building",
+      "branch": "branch_2",
       "sort_order": 11,
       "max_level": 1,
       "research_center_level": 8,
@@ -541,7 +571,7 @@
     },
     {
       "code": "tech_12",
-      "branch": "radar_building",
+      "branch": "branch_4",
       "sort_order": 12,
       "max_level": 1,
       "research_center_level": 6,
@@ -587,7 +617,7 @@
     },
     {
       "code": "tech_13",
-      "branch": "defence_building",
+      "branch": "branch_4",
       "sort_order": 13,
       "max_level": 1,
       "research_center_level": 9,
@@ -633,7 +663,7 @@
     },
     {
       "code": "tech_14",
-      "branch": "portal_building",
+      "branch": "branch_6",
       "sort_order": 14,
       "max_level": 1,
       "research_center_level": 10,
@@ -679,7 +709,7 @@
     },
     {
       "code": "tech_15",
-      "branch": "trade_center_building",
+      "branch": "branch_6",
       "sort_order": 15,
       "max_level": 1,
       "research_center_level": 7,
@@ -725,7 +755,7 @@
     },
     {
       "code": "tech_16",
-      "branch": "bunker_building",
+      "branch": "branch_4",
       "sort_order": 16,
       "max_level": 1,
       "research_center_level": 8,
@@ -771,7 +801,7 @@
     },
     {
       "code": "tech_17",
-      "branch": "recycling_building",
+      "branch": "branch_1",
       "sort_order": 17,
       "max_level": 1,
       "research_center_level": 9,

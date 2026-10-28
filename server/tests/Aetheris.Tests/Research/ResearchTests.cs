@@ -58,7 +58,7 @@ public sealed class ResearchTests
         Assert.NotEmpty(tree.Technologies);
         Assert.All(tree.Technologies, technology => Assert.StartsWith("tech_", technology.Code, StringComparison.Ordinal));
         Assert.All(tree.Technologies, technology => Assert.StartsWith("research.technology.", technology.NameKey, StringComparison.Ordinal));
-        Assert.Contains(tree.Branches, branch => branch.Branch == TechnologyBranches.Economy);
+        Assert.Contains(tree.Branches, branch => branch.Branch == ResearchReferenceSeed.Load().Branches[0].Code);
 
         // Without a science centre the technologies that need one are not available.
         Assert.All(
@@ -592,7 +592,7 @@ public sealed class ResearchTests
             .First(effect => effect.UnlockKind == TechnologyUnlockKinds.BuildingType);
         Assert.False(string.IsNullOrEmpty(opens.UnlockNameKey));
 
-        Assert.Equal(TechnologyBranches.All, tree.Branches.Select(branch => branch.Branch).Take(TechnologyBranches.All.Count));
+        Assert.Equal(ResearchReferenceSeed.Load().Branches.Select(branch => branch.Code), tree.Branches.Select(branch => branch.Branch));
         Assert.True(tree.TimeMultiplier > 0);
         Assert.NotEqual(default, tree.GameNow);
     }

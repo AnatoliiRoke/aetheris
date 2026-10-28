@@ -134,6 +134,13 @@ public sealed class ResearchQueueService
                 TechnologyLevelInfo level = technology.Levels.GetValueOrDefault(targetLevel)
                     ?? throw new GameException(ResearchErrorCodes.LevelUnknown, "The level of the technology does not exist.");
 
+                // An archived technology keeps working for its owners and its queue finishes, but
+                // no new research of it starts (task 00023, decision 5).
+                if (!catalog.IsOffered(technology))
+                {
+                    throw new GameException(ResearchErrorCodes.TechnologyArchived, "The technology is archived.");
+                }
+
                 ResearchSettings settings = ResearchSettings.From(_config);
 
                 if (queue.Count >= Slots(settings, state))

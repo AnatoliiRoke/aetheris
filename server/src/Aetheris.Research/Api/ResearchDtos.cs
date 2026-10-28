@@ -7,7 +7,8 @@ namespace Aetheris.Research.Api;
 /// <param name="Code">The neutral code of the technology.</param>
 /// <param name="NameKey">The localisation key of the name.</param>
 /// <param name="DescriptionKey">The localisation key of the description.</param>
-/// <param name="Branch">The branch of the tree, one of <see cref="Services.TechnologyBranches"/>.</param>
+/// <param name="BranchId">The branch of the tree.</param>
+/// <param name="Branch">The neutral code of the branch, for the grouping of the client.</param>
 /// <param name="SortOrder">The order in the lists.</param>
 /// <param name="MaxLevel">The largest level of the technology.</param>
 /// <param name="LearnedLevel">The level the player has learned; zero when the player knows nothing.</param>
@@ -21,6 +22,7 @@ public sealed record TechnologyDto(
     string Code,
     string NameKey,
     string DescriptionKey,
+    int BranchId,
     string Branch,
     int SortOrder,
     int MaxLevel,
@@ -128,11 +130,12 @@ public sealed record ResearchTreeDto(
 public sealed record ResearchPlanetDto(long PlanetId, string? Name, int ResearchCenterLevel, bool IsAvailable, string? ReasonCode);
 
 /// <summary>
-/// A branch of the tree of the technologies (task 00012, section 3.2).
+/// A branch of the tree of the technologies (task 00012, section 3.2; task 00023, decision 8).
 /// </summary>
-/// <param name="Branch">The branch, one of <see cref="Services.TechnologyBranches"/>.</param>
+/// <param name="Id">The branch.</param>
+/// <param name="Branch">The neutral code of the branch.</param>
 /// <param name="NameKey">The localisation key of the name of the branch.</param>
-public sealed record ResearchBranchDto(string Branch, string NameKey);
+public sealed record ResearchBranchDto(int Id, string Branch, string NameKey);
 
 /// <summary>
 /// The states of a technology for a player (task 00012, section 3.2).

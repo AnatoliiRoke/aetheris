@@ -178,7 +178,7 @@ namespace Aetheris.Research.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Aetheris.Research.Data.Entities.TechnologyEntity", b =>
+            modelBuilder.Entity("Aetheris.Research.Data.Entities.TechnologyBranchEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -186,12 +186,6 @@ namespace Aetheris.Research.Data.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Branch")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("branch");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -204,6 +198,73 @@ namespace Aetheris.Research.Data.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("description_key");
+
+                    b.Property<string>("ImageKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("image_key");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
+                    b.Property<string>("NameKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name_key");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_technology_branch");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_technology_branch_code");
+
+                    b.ToTable("technology_branch", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Research.Data.Entities.TechnologyEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("integer")
+                        .HasColumnName("branch_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("DescriptionKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description_key");
+
+                    b.Property<string>("ImageKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("image_key");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
 
                     b.Property<int>("MaxLevel")
                         .HasColumnType("integer")
@@ -223,6 +284,10 @@ namespace Aetheris.Research.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("sort_order");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
                     b.HasKey("Id")
                         .HasName("pk_technology");
 
@@ -230,8 +295,8 @@ namespace Aetheris.Research.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_technology_code");
 
-                    b.HasIndex("Branch", "SortOrder")
-                        .HasDatabaseName("ix_technology_branch_sort_order");
+                    b.HasIndex("BranchId", "SortOrder")
+                        .HasDatabaseName("ix_technology_branch_id_sort_order");
 
                     b.ToTable("technology", null, t =>
                         {
@@ -380,6 +445,16 @@ namespace Aetheris.Research.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_research_queue_item_technology_technology_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Research.Data.Entities.TechnologyEntity", b =>
+                {
+                    b.HasOne("Aetheris.Research.Data.Entities.TechnologyBranchEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_technology_technology_branch_branch_id");
                 });
 
             modelBuilder.Entity("Aetheris.Research.Data.Entities.TechnologyLevelCostEntity", b =>
