@@ -12,6 +12,8 @@ export const adminRoutes = {
   fields: '/admin/fields',
   objectTypes: '/admin/object-types',
   rules: '/admin/rules',
+  resources: '/admin/resources',
+  texts: '/admin/texts',
   config: '/admin/config',
   audit: '/admin/audit',
 } as const;

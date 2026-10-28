@@ -1,11 +1,9 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../api/http';
-import { I18nProvider } from '../../i18n/I18nProvider';
-import { RouterProvider } from '../../router/Router';
 import type { AdminApi, FieldCard, Page, Row, WorldReference } from '../adminApi';
-import AdminApp from '../AdminApp';
+import { renderAdmin } from '../../test/renderAdmin';
 
 const permissions = [
   'admin.me',
@@ -20,14 +18,18 @@ const permissions = [
 
 const reference: WorldReference = {
   resources: [
-    { id: 1, code: 'iron', name_key: 'world.resource.iron', group_code: 'extractable' },
-    { id: 5, code: 'quartzite', name_key: 'world.resource.quartzite', group_code: 'crystal' },
+    { id: 1, code: 'resource_1', name_key: 'world.resource.resource_1.name', group_code: null, group_id: 1 },
+    { id: 5, code: 'resource_5', name_key: 'world.resource.resource_5.name', group_code: null, group_id: 2 },
   ],
   object_types: [
-    { id: 11, code: 'field_ordinary', name_key: 'world.object_type.field_ordinary', group_code: 'asteroid_field' },
-    { id: 5, code: 'terrestrial', name_key: 'world.object_type.terrestrial', group_code: 'planet' },
+    { id: 11, code: 'object_type_11', name_key: 'world.object_type.object_type_11.name', group_code: 'asteroid_field' },
+    { id: 5, code: 'object_type_5', name_key: 'world.object_type.object_type_5.name', group_code: 'planet' },
   ],
-  size_classes: [{ id: 1, code: 'small', name_key: 'world.size.small', group_code: null }],
+  resource_groups: [
+    { id: 1, code: 'resource_group_1', name_key: 'world.resource_group.resource_group_1.name', group_code: null },
+    { id: 2, code: 'resource_group_2', name_key: 'world.resource_group.resource_group_2.name', group_code: null },
+  ],
+  size_classes: [{ id: 1, code: 'size_class_1', name_key: 'world.size_class.size_class_1.name', group_code: null }],
 };
 
 const fieldRow = {
@@ -35,8 +37,8 @@ const fieldRow = {
   celestial_object_id: 30,
   name: 'S1-F1',
   object_type_id: 11,
-  object_type_code: 'field_ordinary',
-  object_type_name_key: 'world.object_type.field_ordinary',
+  object_type_code: 'object_type_11',
+  object_type_name_key: 'world.object_type.object_type_11.name',
   sector_id: 1,
   system_id: null,
   system_name: null,
@@ -47,8 +49,8 @@ const fieldRow = {
   mass: 800000,
   depleted_at: null,
   composition_ids: [
-    { resource_id: 1, resource_code: 'iron', resource_name_key: 'world.resource.iron', coefficient: 0.296 },
-    { resource_id: 5, resource_code: 'quartzite', resource_name_key: 'world.resource.quartzite', coefficient: 0.04 },
+    { resource_id: 1, resource_code: 'resource_1', resource_name_key: 'world.resource.resource_1.name', coefficient: 0.296 },
+    { resource_id: 5, resource_code: 'resource_5', resource_name_key: 'world.resource.resource_5.name', coefficient: 0.04 },
   ],
 };
 
@@ -90,20 +92,11 @@ function fakeApi(overrides: Partial<AdminApi> = {}): AdminApi {
     updateRule: vi.fn(),
     addRule: vi.fn(),
     updateRuleGroup: vi.fn(),
+    textSettings: vi.fn().mockResolvedValue({ languages: ['uk', 'en'], max_length: 2000 }),
+    changeText: vi.fn(),
+    createResource: vi.fn(),
     ...overrides,
   };
-}
-
-function renderAdmin(path: string, api: AdminApi) {
-  window.history.replaceState(null, '', path);
-
-  return render(
-    <I18nProvider initialLanguage="uk">
-      <RouterProvider>
-        <AdminApp api={api} />
-      </RouterProvider>
-    </I18nProvider>,
-  );
 }
 
 describe('admin cards (task 00009)', () => {
@@ -112,8 +105,8 @@ describe('admin cards (task 00009)', () => {
 
     const row = (await screen.findByText('S1-F1')).closest('tr')!;
 
-    expect(within(row).getByText('Звичайне поле')).toHaveAttribute('title', 'field_ordinary');
-    expect(within(row).getByText('Кварцит 4%')).toHaveAttribute('title', 'quartzite');
+    expect(within(row).getByText('Звичайне поле')).toHaveAttribute('title', 'object_type_11');
+    expect(within(row).getByText('Кварцит 4%')).toHaveAttribute('title', 'resource_5');
     expect(within(row).getByText('Залізо 29,6%')).toBeInTheDocument();
     expect(within(row).getByText('порожня порода 66,4%')).toBeInTheDocument();
     expect(within(row).getByText('12,5')).toBeInTheDocument();
@@ -125,14 +118,14 @@ describe('admin cards (task 00009)', () => {
       id: 9,
       name: 'S1-1-3',
       object_class: 'planet',
-      object_type_code: 'terrestrial',
-      object_type_name_key: 'world.object_type.terrestrial',
-      size_class_code: 'small',
-      size_class_name_key: 'world.size.small',
+      object_type_code: 'object_type_5',
+      object_type_name_key: 'world.object_type.object_type_5.name',
+      size_class_code: 'size_class_1',
+      size_class_name_key: 'world.size_class.size_class_1.name',
       x: 1,
       y: 2,
       z: 0,
-      deposit_ids: [{ resource_id: 1, resource_code: 'iron', resource_name_key: 'world.resource.iron', coefficient: 0.949 }],
+      deposit_ids: [{ resource_id: 1, resource_code: 'resource_1', resource_name_key: 'world.resource.resource_1.name', coefficient: 0.949 }],
     };
     renderAdmin('/admin/objects', fakeApi({ table: vi.fn().mockResolvedValue(page<Row>([body])) }));
 
@@ -142,7 +135,7 @@ describe('admin cards (task 00009)', () => {
       '1,00 = стандартне родовище типу; 0,5–1,5 діапазон генерації.',
     );
     const row = screen.getByText('S1-1-3').closest('tr')!;
-    expect(within(row).getByText('Землеподібна')).toHaveAttribute('title', 'terrestrial');
+    expect(within(row).getByText('Землеподібна')).toHaveAttribute('title', 'object_type_5');
   });
 
   it('opens the card of a field and saves it only with a reason', async () => {

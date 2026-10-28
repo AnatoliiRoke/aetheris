@@ -1,12 +1,10 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../api/http';
-import { I18nProvider } from '../../i18n/I18nProvider';
-import { RouterProvider } from '../../router/Router';
 import type { AdminApi, AdminMe, ConfigParameter, GenerationEstimate, GenerationRun, Page, Row } from '../adminApi';
 import { tableSearch } from '../adminApi';
-import AdminApp from '../AdminApp';
+import { renderAdmin } from '../../test/renderAdmin';
 import { adminEn } from '../i18n/en';
 import { adminUk } from '../i18n/uk';
 
@@ -107,20 +105,11 @@ function fakeAdminApi(overrides: Partial<AdminApi> = {}): AdminApi {
     updateRule: vi.fn().mockResolvedValue(undefined),
     addRule: vi.fn().mockResolvedValue(undefined),
     updateRuleGroup: vi.fn().mockResolvedValue(undefined),
+    textSettings: vi.fn().mockResolvedValue({ languages: ['uk', 'en'], max_length: 2000 }),
+    changeText: vi.fn().mockResolvedValue(undefined),
+    createResource: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
-}
-
-function renderAdmin(path: string, api: AdminApi) {
-  window.history.replaceState(null, '', path);
-
-  return render(
-    <I18nProvider initialLanguage="uk">
-      <RouterProvider>
-        <AdminApp api={api} />
-      </RouterProvider>
-    </I18nProvider>,
-  );
 }
 
 describe('admin texts', () => {

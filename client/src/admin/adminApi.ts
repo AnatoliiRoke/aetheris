@@ -125,19 +125,55 @@ export interface GenerationRun {
   error: string | null;
 }
 
-/** A reference row of the world. */
+/**
+ * A reference row of the world. The code is neutral and only shown as a hint; the name and the
+ * description are texts of the database by their keys (task 00022).
+ */
 export interface ReferenceRow {
   id: number;
   code: string;
   name_key: string;
+  description_key?: string;
+  /** The class of an object type. */
   group_code: string | null;
+  /** The resource group of a resource. */
+  group_id?: number | null;
+  image_key?: string | null;
 }
 
 /** The reference tables of the world, for the filters. */
 export interface WorldReference {
+  resource_groups?: ReferenceRow[];
   resources: ReferenceRow[];
   object_types: ReferenceRow[];
   size_classes: ReferenceRow[];
+}
+
+/** A text of the screen «Тексти»: a key in one language, or the gap where its text is missing. */
+export interface TextRow {
+  key: string;
+  language: string;
+  text: string | null;
+  version: number;
+  updated_by: string | null;
+  updated_at: string | null;
+}
+
+/** The languages of the texts and the largest length of one text. */
+export interface TextSettings {
+  languages: string[];
+  max_length: number;
+}
+
+/** A text in every language. */
+export type TextsByLanguage = Record<string, string>;
+
+/** A new resource: the server gives the code (task 00022, decision 6). */
+export interface ResourceInput {
+  resource_group_id: number;
+  name: TextsByLanguage;
+  description: TextsByLanguage;
+  reason: string;
 }
 
 /** A row of any admin table. */
@@ -362,6 +398,7 @@ export const tableRoutes = {
   runs: '/world/generation-runs',
   config: '/config',
   audit: '/audit',
+  texts: '/texts',
 } as const;
 
 export type TableName = keyof typeof tableRoutes;
@@ -390,6 +427,9 @@ export interface AdminApi {
   updateRule(ruleId: number, update: RuleInput): Promise<void>;
   addRule(rule: RuleInput): Promise<void>;
   updateRuleGroup(ruleGroupId: number, update: RuleGroupUpdate): Promise<void>;
+  textSettings(): Promise<TextSettings>;
+  changeText(key: string, language: string, text: string, version: number, reason: string): Promise<void>;
+  createResource(input: ResourceInput): Promise<void>;
 }
 
 /**
@@ -494,6 +534,16 @@ export function createAdminApi(http: HttpClient): AdminApi {
     },
     async updateRuleGroup(ruleGroupId, update) {
       await http.put(`${adminPrefix}/world/generation-rule-groups/${ruleGroupId}`, update);
+    },
+    async textSettings() {
+      const answer = await http.get<TextSettings>(`${adminPrefix}/texts?page=1&page_size=1`);
+      return { languages: answer.languages, max_length: answer.max_length };
+    },
+    async changeText(key, language, text, version, reason) {
+      await http.put(`${adminPrefix}/texts`, { key, language, text, version, reason });
+    },
+    async createResource(input) {
+      await http.post(`${adminPrefix}/world/resources`, input);
     },
   };
 }

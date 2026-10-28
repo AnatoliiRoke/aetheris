@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Alert } from '../../components/Alert';
-import type { ObjectTypeRow, Row, RuleRow } from '../adminApi';
+import type { ObjectTypeRow, Row, RuleRow, WorldReference } from '../adminApi';
 import { useAdmin } from '../adminContext';
 import { AdminDialog } from '../AdminDialog';
 import { DataTable, type Column, type Filter } from '../DataTable';
@@ -204,7 +204,11 @@ export function RulesScreen() {
       label: 'admin.col.type',
       render: (row) => <WorldName nameKey={row['object_type_name_key'] as string} code={row['object_type_code'] as string} />,
     },
-    { key: 'rule_group_code', label: 'admin.col.ruleGroup' },
+    {
+      key: 'rule_group_code',
+      label: 'admin.col.ruleGroup',
+      render: (row) => <WorldName nameKey={groupKeyOfResource(reference, Number(row['resource_id']))} code={row['rule_group_code'] as string} />,
+    },
     {
       key: 'picks',
       label: 'admin.col.picks',
@@ -279,11 +283,15 @@ export function RulesScreen() {
 function RuleDialog({ row, onClose, onSaved }: { row: RuleRow; onClose: () => void; onSaved: () => void }) {
   const { t } = useAdminText();
   const name = useWorldName();
+  const reference = useReference();
   const [mode, setMode] = useState<'rule' | 'add' | 'group'>('rule');
 
   return (
     <AdminDialog
-      title={t('admin.card.ruleTitle', { type: name(row.object_type_name_key, row.object_type_code), group: row.rule_group_code })}
+      title={t('admin.card.ruleTitle', {
+        type: name(row.object_type_name_key, row.object_type_code),
+        group: name(groupKeyOfResource(reference, row.resource_id), row.rule_group_code),
+      })}
       onClose={onClose}
     >
       <div className="admin-tabs" role="tablist" aria-label={t('admin.rules.title')}>
@@ -464,4 +472,14 @@ function RuleGroupForm({ row, onCancel, onSaved }: { row: RuleRow; onCancel: () 
       />
     </form>
   );
+}
+
+/**
+ * The name key of the resource group of a resource: a rule group picks the resources of one
+ * group, so it is named by that group (task 00022); its own code is neutral.
+ */
+function groupKeyOfResource(reference: WorldReference | null, resourceId: number): string | undefined {
+  const groupId = reference?.resources.find((resource) => resource.id === resourceId)?.group_id;
+
+  return reference?.resource_groups?.find((group) => group.id === groupId)?.name_key;
 }
