@@ -7,6 +7,7 @@ import type { ContentApi } from '../api/contentApi';
 import type { GameApi, Race } from '../api/gameApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
+import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
 
 /**
@@ -71,12 +72,18 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'planets.building.building_1.description': 'Головна будівля планети.',
     'planets.building.building_2.name': 'Науковий центр',
     'planets.building.building_5.name': 'Шахта заліза',
+    'research.branch.economy.name': 'Економіка',
+    'research.technology.tech_1.name': 'Глибинний видобуток',
+    'research.technology.tech_1.description': 'Шахти видобувають більше металів.',
   },
   en: {
     'world.race.race_1.name': 'Terrans',
     'world.race.race_2.name': 'Kvarr',
     'world.resource.resource_1.name': 'Iron',
     'planets.building.building_1.name': 'Administrative center',
+    'research.branch.economy.name': 'Economy',
+    'research.technology.tech_1.name': 'Deep extraction',
+    'research.technology.tech_1.description': 'The mines extract more metals.',
   },
 };
 
@@ -235,6 +242,60 @@ export function fakePlanetApi(overrides: Partial<PlanetApi> = {}): PlanetApi {
 }
 
 /**
+ * A sample tree of the technologies for the tests (task 00012).
+ */
+export function sampleResearchTree(overrides: Partial<ResearchTree> = {}): ResearchTree {
+  return {
+    branches: [{ branch: 'economy', nameKey: 'research.branch.economy.name' }],
+    technologies: [
+      {
+        id: 1,
+        code: 'tech_1',
+        nameKey: 'research.technology.tech_1.name',
+        descriptionKey: 'research.technology.tech_1.description',
+        branch: 'economy',
+        sortOrder: 1,
+        maxLevel: 10,
+        learnedLevel: 0,
+        status: 'available',
+        researchCenterLevel: 1,
+        availableCenterLevel: 2,
+        reasonCode: null,
+        levels: [
+          {
+            level: 1,
+            durationSeconds: 300,
+            costs: [{ resourceTypeId: 1, amount: 200 }],
+            effects: [{ effectType: 'metal_production', unlockKind: null, unlockTargetId: null, unlockNameKey: null, value: 1.05 }],
+            unmetRequirementIds: [],
+          },
+        ],
+      },
+    ],
+    queue: [],
+    queueSlots: 2,
+    queueUsedSlots: 0,
+    selectedPlanetId: 10,
+    availableCenterLevel: 2,
+    gameNow: '2026-10-26T12:00:00Z',
+    timeMultiplier: 1,
+    ...overrides,
+  };
+}
+
+/**
+ * A research API whose every method is a spy; a test overrides what it needs.
+ */
+export function fakeResearchApi(overrides: Partial<ResearchApi> = {}): ResearchApi {
+  return {
+    tree: vi.fn().mockResolvedValue(sampleResearchTree()),
+    enqueue: vi.fn().mockResolvedValue(sampleResearchTree()),
+    cancel: vi.fn().mockResolvedValue(sampleResearchTree()),
+    ...overrides,
+  };
+}
+
+/**
  * A signed-in account for the tests.
  */
 export function signedInMe(overrides: Partial<Me> = {}): Me {
@@ -254,7 +315,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
  */
 export function renderPage(
   path: string,
-  options: { auth?: AuthApi; content?: ContentApi; game?: GameApi; planets?: PlanetApi; texts?: TextsApi } = {},
+  options: { auth?: AuthApi; content?: ContentApi; game?: GameApi; planets?: PlanetApi; research?: ResearchApi; texts?: TextsApi } = {},
 ): RenderResult & { api: Api } {
   window.history.replaceState(null, '', path);
 
@@ -263,6 +324,7 @@ export function renderPage(
     content: options.content ?? mockContentApi,
     game: options.game ?? fakeGameApi(),
     planets: options.planets ?? fakePlanetApi(),
+    research: options.research ?? fakeResearchApi(),
     texts: options.texts ?? fakeTextsApi(),
   };
   const result = render(

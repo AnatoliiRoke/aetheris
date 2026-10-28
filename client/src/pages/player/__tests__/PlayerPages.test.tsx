@@ -1,8 +1,8 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../api/http';
-import { fakeAuthApi, fakeGameApi, renderPage, signedInMe } from '../../../test/renderPage';
+import { fakeAuthApi, fakeGameApi, fakeResearchApi, renderPage, signedInMe } from '../../../test/renderPage';
 
 describe('Player gate', () => {
   it('sends a visitor to the sign-in', async () => {
@@ -90,6 +90,36 @@ describe('GamePage', () => {
     expect(await screen.findByRole('heading', { name: 'Вітаємо, Pilot' })).toBeInTheDocument();
     expect(screen.queryByText('Підтверди пошту')).not.toBeInTheDocument();
     expect(screen.getByText('Nova')).toBeInTheDocument();
+  });
+
+  it('shows the tree of the technologies with the real data', async () => {
+    const research = fakeResearchApi();
+    renderPage('/game', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
+
+    const panel = await screen.findByRole('region', { name: 'Дослідження' });
+
+    expect(await within(panel).findByText('Глибинний видобуток')).toBeInTheDocument();
+    expect(within(panel).getByText('Рівень: 0 з 10')).toBeInTheDocument();
+    expect(within(panel).getByText('Науковий центр: рівень 2.')).toBeInTheDocument();
+    expect(research.tree).toHaveBeenCalledWith(10);
+  });
+
+  it('puts a technology in the queue and returns the whole cost', async () => {
+    const user = userEvent.setup();
+    const research = fakeResearchApi();
+    renderPage('/game', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
+
+    await user.click(await screen.findByRole('button', { name: 'Дослідити' }));
+
+    await waitFor(() => expect(research.enqueue).toHaveBeenCalledWith(10, 1, 1));
+  });
+
+  it('keeps the research closed until the e-mail is confirmed', async () => {
+    const auth = fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe({ emailConfirmed: false })) });
+    renderPage('/game', { auth });
+
+    expect(await screen.findByText('Підтверди пошту')).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Дослідження' })).not.toBeInTheDocument();
   });
 });
 

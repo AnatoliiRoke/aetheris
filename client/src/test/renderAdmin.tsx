@@ -7,7 +7,7 @@ import type { TextsApi } from '../api/textsApi';
 import { I18nProvider } from '../i18n/I18nProvider';
 import { RouterProvider } from '../router/Router';
 import { TextsProvider } from '../texts/TextsProvider';
-import { fakeAuthApi, fakeGameApi, fakePlanetApi, fakeTextsApi } from './renderPage';
+import { fakeAuthApi, fakeGameApi, fakePlanetApi, fakeResearchApi, fakeTextsApi } from './renderPage';
 
 /**
  * The texts of the game data the admin tests show, by the neutral keys of the database.
@@ -31,7 +31,7 @@ export const adminTexts: Record<string, Record<string, string>> = {
 export function renderAdmin(path: string, api: AdminApi, texts: TextsApi = fakeTextsApi(adminTexts)): RenderResult & { texts: TextsApi } {
   window.history.replaceState(null, '', path);
 
-  const site: Api = { auth: fakeAuthApi(), content: mockContentApi, game: fakeGameApi(), planets: fakePlanetApi(), texts };
+  const site: Api = { auth: fakeAuthApi(), content: mockContentApi, game: fakeGameApi(), planets: fakePlanetApi(), research: fakeResearchApi(), texts };
   const result = render(
     <I18nProvider initialLanguage="uk">
       <ApiContext.Provider value={site}>
