@@ -26,6 +26,7 @@ public sealed class ModuleIsolationTests
         "Aetheris.Admin",
         "Aetheris.World",
         "Aetheris.Requirements",
+        "Aetheris.Research",
     ];
 
     /// <summary>
@@ -37,6 +38,7 @@ public sealed class ModuleIsolationTests
     private static readonly Dictionary<string, string[]> AllowedReferences = new(StringComparer.Ordinal)
     {
         ["Aetheris.Planets"] = ["Aetheris.World", "Aetheris.Requirements"],
+        ["Aetheris.Research"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements"],
     };
 
     private readonly AetherisTestFactory _factory;
@@ -66,6 +68,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Admin")]
     [InlineData("Aetheris.World")]
     [InlineData("Aetheris.Requirements")]
+    [InlineData("Aetheris.Research")]
     public void A_module_does_not_reference_another_module(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -97,6 +100,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Admin")]
     [InlineData("Aetheris.World")]
     [InlineData("Aetheris.Requirements")]
+    [InlineData("Aetheris.Research")]
     public void A_module_exposes_exactly_one_public_contract(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -127,6 +131,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Admin")]
     [InlineData("Aetheris.World")]
     [InlineData("Aetheris.Requirements")]
+    [InlineData("Aetheris.Research")]
     public void The_public_contract_follows_the_naming_convention(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -162,6 +167,7 @@ public sealed class ModuleIsolationTests
         Assert.NotNull(services.GetService<Aetheris.Admin.IAdminModule>());
         Assert.NotNull(services.GetService<Aetheris.World.IWorldModule>());
         Assert.NotNull(services.GetService<Aetheris.Requirements.IRequirementsModule>());
+        Assert.NotNull(services.GetService<Aetheris.Research.IResearchModule>());
     }
 
     /// <summary>

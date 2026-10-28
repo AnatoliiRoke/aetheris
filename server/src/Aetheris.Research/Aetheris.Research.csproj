@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Aetheris.Research</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!--
+    The module of the research reads the bodies module through IPlanetsModule, for the level
+    of the science centre of the body the research starts from, and keeps the requirements of
+    its technologies in the common requirements module. The dependencies go one way only.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
+    <ProjectReference Include="..\Aetheris.Planets\Aetheris.Planets.csproj" />
+    <ProjectReference Include="..\Aetheris.Requirements\Aetheris.Requirements.csproj" />
+    <ProjectReference Include="..\Aetheris.World\Aetheris.World.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\research-reference-seed.json" LogicalName="Aetheris.Research.reference-seed.json" />
+  </ItemGroup>
+
+</Project>

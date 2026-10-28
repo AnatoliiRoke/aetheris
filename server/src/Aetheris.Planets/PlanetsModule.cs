@@ -65,6 +65,8 @@ public sealed class PlanetsModule : IPlanetsModule
         services.AddScoped<PlanetsUnitOfWork>();
         services.AddScoped<ConstructionService>();
         services.AddScoped<PlanetQueryService>();
+        services.AddScoped<PlanetResourcesService>();
+        services.AddScoped<IPlanetResources, PlanetResourcesService>();
         services.AddScoped<PlanetsBootstrapService>();
         services.AddScoped<PlanetStartPackage>();
         services.TryAddScoped<ITechnologyLevels, NoTechnologyLevels>();
@@ -117,4 +119,12 @@ public sealed class PlanetsModule : IPlanetsModule
         string? playerId,
         CancellationToken cancellationToken = default) =>
         _queries.CheckAsync(subjectType, subjectId, level, planetId, playerId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<int> GetBuildingLevelAsync(
+        string buildingClass,
+        long planetId,
+        string? playerId,
+        CancellationToken cancellationToken = default) =>
+        _queries.GetBuildingLevelAsync(buildingClass, planetId, playerId, cancellationToken);
 }

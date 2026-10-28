@@ -134,4 +134,8 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.planets.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черги будівництва планети.',
   'config.planets.catalog.cache_seconds.description': 'Скільки секунд таблиці будівель тримаються в пам’яті сервера до повторного читання.',
   'config.planets.start.building_level.description': 'Рівень стартової будівлі.',
+
+  'config.research.queue.base_slots.description': 'Місць у черзі досліджень гравця, разом із тим, що досліджується.',
+  'config.research.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черзі досліджень гравця.',
+  'config.research.catalog.cache_seconds.description': 'Скільки секунд таблиці технологій тримаються в пам’яті сервера до повторного читання.',
 };

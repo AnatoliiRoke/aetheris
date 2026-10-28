@@ -23,6 +23,8 @@ using Aetheris.Planets;
 using Aetheris.Rating;
 using Aetheris.Requirements;
 using Aetheris.Requirements.Data;
+using Aetheris.Research;
+using Aetheris.Research.Data;
 using Aetheris.World;
 using Aetheris.World.Api;
 using Aetheris.World.Data;
@@ -186,6 +188,9 @@ builder.Services.AddRequirementsModule();
 // The Planets module plugs into the extension points of the world, so it comes after it.
 PlanetsModule.Register(builder.Services);
 
+// The Research module reads the bodies module, so it comes after it.
+builder.Services.AddResearchModule();
+
 WebApplication app = builder.Build();
 
 // ---------------------------------------------------------------------------------------------
@@ -223,6 +228,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     await WorldDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await RequirementsDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await PlanetsModule.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
+    await ResearchDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
 
@@ -254,6 +260,10 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     // The Planets module fills its tables once the world has its reference data, and adopts
     // the civilizations created before it (task 00011).
     await scope.ServiceProvider.GetRequiredService<IPlanetsModule>().EnsureAsync().ConfigureAwait(false);
+
+    // The Research module fills its tables once the bodies module has its own reference
+    // data, because a research starts on a body (task 00012).
+    await scope.ServiceProvider.GetRequiredService<IResearchModule>().EnsureAsync().ConfigureAwait(false);
 }
 
 if (AdminCommandLine.IsCommand(args))
@@ -283,6 +293,7 @@ app.MapAdminEndpoints();
 app.MapTextEndpoints();
 app.MapWorldEndpoints();
 PlanetsModule.MapEndpoints(app);
+ResearchServiceCollectionExtensions.MapEndpoints(app);
 app.MapCommands();
 
 await app.RunAsync().ConfigureAwait(false);

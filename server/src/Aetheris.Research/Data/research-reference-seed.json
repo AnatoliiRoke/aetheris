@@ -1,0 +1,313 @@
+{
+  "level_count": 10,
+  "branches": [
+    {
+      "branch": "economy",
+      "name": {
+        "uk": "Економіка",
+        "en": "Economy"
+      }
+    },
+    {
+      "branch": "fleet",
+      "name": {
+        "uk": "Флот",
+        "en": "Fleet"
+      }
+    },
+    {
+      "branch": "engines_and_logistics",
+      "name": {
+        "uk": "Двигуни й логістика",
+        "en": "Engines and logistics"
+      }
+    },
+    {
+      "branch": "defence",
+      "name": {
+        "uk": "Оборона",
+        "en": "Defence"
+      }
+    },
+    {
+      "branch": "colonisation",
+      "name": {
+        "uk": "Колонізація",
+        "en": "Colonisation"
+      }
+    },
+    {
+      "branch": "trade",
+      "name": {
+        "uk": "Торгівля",
+        "en": "Trade"
+      }
+    }
+  ],
+  "technologies": [
+    {
+      "code": "tech_1",
+      "branch": "economy",
+      "sort_order": 1,
+      "max_level": 10,
+      "research_center_level": 1,
+      "name": {
+        "uk": "Глибинний видобуток",
+        "en": "Deep extraction"
+      },
+      "description": {
+        "uk": "Шахти видобувають більше металів.",
+        "en": "The mines extract more metals."
+      },
+      "duration_seconds": {
+        "base": 300,
+        "growth": 1.8
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 200,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 50,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "metal_production",
+          "growth": {
+            "base": 1.05,
+            "growth": 1.02
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_2",
+      "branch": "economy",
+      "sort_order": 2,
+      "max_level": 10,
+      "research_center_level": 2,
+      "name": {
+        "uk": "Кристалографія",
+        "en": "Crystallography"
+      },
+      "description": {
+        "uk": "Шахти видобувають більше кристалів.",
+        "en": "The mines extract more crystals."
+      },
+      "duration_seconds": {
+        "base": 420,
+        "growth": 1.8
+      },
+      "costs": [
+        {
+          "resource": "resource_3",
+          "growth": {
+            "base": 200,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 80,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "crystal_production",
+          "growth": {
+            "base": 1.05,
+            "growth": 1.02
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_3",
+      "branch": "economy",
+      "sort_order": 3,
+      "max_level": 10,
+      "research_center_level": 3,
+      "name": {
+        "uk": "Енергетика",
+        "en": "Energetics"
+      },
+      "description": {
+        "uk": "Електростанції виробляють більше енергії.",
+        "en": "The power plants produce more energy."
+      },
+      "duration_seconds": {
+        "base": 540,
+        "growth": 1.8
+      },
+      "costs": [
+        {
+          "resource": "resource_3",
+          "growth": {
+            "base": 250,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 100,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "energy_output",
+          "growth": {
+            "base": 1.05,
+            "growth": 1.02
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_4",
+      "branch": "economy",
+      "sort_order": 4,
+      "max_level": 10,
+      "research_center_level": 4,
+      "name": {
+        "uk": "Логістика складів",
+        "en": "Warehouse logistics"
+      },
+      "description": {
+        "uk": "Склади вміщають більше ресурсів.",
+        "en": "The storages hold more resources."
+      },
+      "duration_seconds": {
+        "base": 660,
+        "growth": 1.8
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 300,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 120,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "storage_capacity",
+          "growth": {
+            "base": 1.05,
+            "growth": 1.02
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_5",
+      "branch": "economy",
+      "sort_order": 5,
+      "max_level": 10,
+      "research_center_level": 5,
+      "name": {
+        "uk": "Промислова автоматизація",
+        "en": "Industrial automation"
+      },
+      "description": {
+        "uk": "Будівлі будуються швидше.",
+        "en": "The buildings are built faster."
+      },
+      "duration_seconds": {
+        "base": 780,
+        "growth": 1.8
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 350,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_3",
+          "growth": {
+            "base": 250,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "construction_time",
+          "growth": {
+            "base": 0.95,
+            "growth": 0.98
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_6",
+      "branch": "economy",
+      "sort_order": 6,
+      "max_level": 10,
+      "research_center_level": 6,
+      "name": {
+        "uk": "Демографія",
+        "en": "Demography"
+      },
+      "description": {
+        "uk": "Планета вміщає більше населення.",
+        "en": "The planet holds a larger population."
+      },
+      "duration_seconds": {
+        "base": 900,
+        "growth": 1.8
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 400,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 200,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "population_max",
+          "growth": {
+            "base": 1.05,
+            "growth": 1.02
+          }
+        }
+      ]
+    }
+  ]
+}

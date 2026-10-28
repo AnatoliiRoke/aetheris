@@ -54,4 +54,19 @@ public interface IPlanetsModule
         long planetId,
         string? playerId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the level of the building of a class on a body: the level of the science centre
+    /// of a body, for example (task 00012, decision 6).
+    /// </summary>
+    /// <param name="buildingClass">The class of the building, one of <see cref="BuildingClasses"/>.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="playerId">The player, or <see langword="null"/> when the level of any body is wanted.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The level of the building, or zero when the body has no building of the class.</returns>
+    Task<int> GetBuildingLevelAsync(
+        string buildingClass,
+        long planetId,
+        string? playerId,
+        CancellationToken cancellationToken = default);
 }

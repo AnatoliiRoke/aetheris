@@ -37,7 +37,7 @@ public sealed partial class NoGameTermsTests
     /// The prefixes that a seeded parameter key may have: the neutral test parameters, the
     /// parameters of the core mechanisms and those of the modules with their own definitions.
     /// </summary>
-    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world.", "admin.", "planets."];
+    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world.", "admin.", "planets.", "research."];
 
     /// <summary>
     /// The folders, relative to the server root, where the words of the game domain are
@@ -51,6 +51,8 @@ public sealed partial class NoGameTermsTests
         Path.Combine("src", "Aetheris.Planets") + Path.DirectorySeparatorChar,
         Path.Combine("tests", "Aetheris.Tests", "Planets") + Path.DirectorySeparatorChar,
         Path.Combine("src", "Aetheris.Requirements") + Path.DirectorySeparatorChar,
+        Path.Combine("src", "Aetheris.Research") + Path.DirectorySeparatorChar,
+        Path.Combine("tests", "Aetheris.Tests", "Research") + Path.DirectorySeparatorChar,
     ];
 
     /// <summary>
@@ -210,7 +212,7 @@ public sealed partial class NoGameTermsTests
     /// API that describes the service, MSBuild embedded files, a standard HTTP header and the
     /// reflection API that reads embedded files.
     /// </summary>
-    [GeneratedRegex(@"\bI?(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements)Module\b|Aetheris\.(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements)\b|""(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements)""|\b(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements) module\b|OpenTelemetry\.Resources|ConfigureResource|EmbeddedResource|Cross-Origin-Resource-Policy|GetManifestResource(Names|Stream)")]
+    [GeneratedRegex(@"\bI?(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research)Module\b|Aetheris\.(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research)\b|""(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research)""|\b(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research) module\b|OpenTelemetry\.Resources|ConfigureResource|EmbeddedResource|Cross-Origin-Resource-Policy|GetManifestResource(Names|Stream)")]
     private static partial Regex AllowedNames();
 
     [GeneratedRegex("[^A-Za-z]+")]

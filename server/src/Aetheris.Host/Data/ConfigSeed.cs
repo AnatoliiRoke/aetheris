@@ -4,6 +4,7 @@ using Aetheris.Host.Localization;
 using Aetheris.Host.Scheduling;
 using Aetheris.Host.Security;
 using Aetheris.Planets;
+using Aetheris.Research.Configuration;
 using Aetheris.World.Configuration;
 
 namespace Aetheris.Host.Data;
@@ -104,7 +105,7 @@ public static class ConfigSeed
     ];
 
     private static readonly ConfigParameterDefinition[] Definitions =
-        [.. CoreDefinitions, .. TextKeys.Definitions, .. WorldConfigKeys.Definitions, .. PlanetsModule.ConfigDefinitions];
+        [.. CoreDefinitions, .. TextKeys.Definitions, .. WorldConfigKeys.Definitions, .. PlanetsModule.ConfigDefinitions, .. ResearchConfigKeys.Definitions];
 
     private static readonly Dictionary<string, ConfigParameterDefinition> DefinitionsByKey =
         Definitions.ToDictionary(definition => definition.Key, StringComparer.Ordinal);
