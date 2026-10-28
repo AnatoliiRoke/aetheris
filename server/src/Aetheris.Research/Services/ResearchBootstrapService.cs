@@ -89,6 +89,13 @@ public sealed class ResearchBootstrapService
 
         _catalogCache.Invalidate();
 
+        // The seed writes the requirements of the buildings that the technologies open, so the
+        // building catalog the bodies module keeps in memory is read again after the commit.
+        if (seeded)
+        {
+            _planets.InvalidateCatalog();
+        }
+
         return new ResearchBootstrapResult(seeded ? 1 : 0);
     }
 }

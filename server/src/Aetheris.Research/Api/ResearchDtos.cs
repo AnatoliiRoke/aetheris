@@ -102,6 +102,9 @@ public sealed record ResearchQueueItemDto(
 /// <param name="QueueUsedSlots">The places of the queue that are taken.</param>
 /// <param name="SelectedPlanetId">The body the research starts from.</param>
 /// <param name="AvailableCenterLevel">The level of the science centre of the selected body.</param>
+/// <param name="Planets">The bodies of the player the research can start from.</param>
+/// <param name="GameNow">The moment of game time of the answer, for the timers of the client.</param>
+/// <param name="TimeMultiplier">The game seconds per real second.</param>
 public sealed record ResearchTreeDto(
     IReadOnlyList<ResearchBranchDto> Branches,
     IReadOnlyList<TechnologyDto> Technologies,
@@ -109,7 +112,20 @@ public sealed record ResearchTreeDto(
     int QueueSlots,
     int QueueUsedSlots,
     long? SelectedPlanetId,
-    int AvailableCenterLevel);
+    int AvailableCenterLevel,
+    IReadOnlyList<ResearchPlanetDto> Planets,
+    DateTimeOffset GameNow,
+    double TimeMultiplier);
+
+/// <summary>
+/// A body of the player the research can start from (task 00012, decisions 5 and 5a).
+/// </summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="Name">The name of the body.</param>
+/// <param name="ResearchCenterLevel">The level of the science centre of the body.</param>
+/// <param name="IsAvailable">Whether a research can start from the body.</param>
+/// <param name="ReasonCode">Why a research cannot start from the body.</param>
+public sealed record ResearchPlanetDto(long PlanetId, string? Name, int ResearchCenterLevel, bool IsAvailable, string? ReasonCode);
 
 /// <summary>
 /// A branch of the tree of the technologies (task 00012, section 3.2).

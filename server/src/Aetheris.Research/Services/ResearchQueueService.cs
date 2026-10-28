@@ -5,7 +5,11 @@ using Aetheris.Core.Errors;
 using Aetheris.Core.Scheduling;
 using Aetheris.Core.Time;
 using Aetheris.Planets;
+using Aetheris.Planets.Api;
 using Aetheris.Planets.Services;
+using Aetheris.Requirements;
+using Aetheris.Requirements.Services;
+using Aetheris.Research.Api;
 using Aetheris.Research.Configuration;
 using Aetheris.Research.Data;
 using Aetheris.Research.Data.Entities;
@@ -42,6 +46,7 @@ public sealed class ResearchQueueService
     private readonly TechnologyCatalogCache _catalogCache;
     private readonly IPlanetsModule _planets;
     private readonly IPlanetResources _resources;
+    private readonly IRequirementsModule _requirements;
     private readonly IWorldModule _world;
     private readonly IEventScheduler _scheduler;
     private readonly IGameConfig _config;
@@ -55,6 +60,7 @@ public sealed class ResearchQueueService
     /// <param name="catalogCache">The catalog of the technologies.</param>
     /// <param name="planets">The bodies module, for the level of the science centre.</param>
     /// <param name="resources">The balance of a body, for the cost of the research.</param>
+    /// <param name="requirements">The common requirements module.</param>
     /// <param name="world">The world, for the sector of the body.</param>
     /// <param name="scheduler">The scheduler of the events.</param>
     /// <param name="config">The game configuration.</param>
@@ -65,6 +71,7 @@ public sealed class ResearchQueueService
         TechnologyCatalogCache catalogCache,
         IPlanetsModule planets,
         IPlanetResources resources,
+        IRequirementsModule requirements,
         IWorldModule world,
         IEventScheduler scheduler,
         IGameConfig config,
@@ -75,6 +82,7 @@ public sealed class ResearchQueueService
         ArgumentNullException.ThrowIfNull(catalogCache);
         ArgumentNullException.ThrowIfNull(planets);
         ArgumentNullException.ThrowIfNull(resources);
+        ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(scheduler);
         ArgumentNullException.ThrowIfNull(config);
@@ -85,6 +93,7 @@ public sealed class ResearchQueueService
         _catalogCache = catalogCache;
         _planets = planets;
         _resources = resources;
+        _requirements = requirements;
         _world = world;
         _scheduler = scheduler;
         _config = config;
@@ -115,6 +124,9 @@ public sealed class ResearchQueueService
                 ResearchQueueStateEntity state = await LockStateAsync(playerId, cancellationToken).ConfigureAwait(false);
                 List<ResearchQueueItemEntity> queue = await LoadQueueAsync(playerId, cancellationToken).ConfigureAwait(false);
 
+                // What is due is completed first, so a finished research never holds a place.
+                await CompleteDueAsync(playerId, queue, _clock.GameNow, cancellationToken).ConfigureAwait(false);
+
                 TechnologyCatalog catalog = await _catalogCache.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
                 TechnologyInfo technology = catalog.FindTechnology(technologyId)
                     ?? throw new GameException(ResearchErrorCodes.TechnologyUnknown, "The technology does not exist.");
@@ -122,20 +134,14 @@ public sealed class ResearchQueueService
                 TechnologyLevelInfo level = technology.Levels.GetValueOrDefault(targetLevel)
                     ?? throw new GameException(ResearchErrorCodes.LevelUnknown, "The level of the technology does not exist.");
 
-                await CheckAvailableAsync(playerId, planetId, technologyId, targetLevel, cancellationToken).ConfigureAwait(false);
-
                 ResearchSettings settings = ResearchSettings.From(_config);
-                int slots = settings.QueueBaseSlots + state.ExtraQueueSlots;
 
-                if (queue.Count >= slots)
+                if (queue.Count >= Slots(settings, state))
                 {
                     throw new GameException(ResearchErrorCodes.QueueFull, "The queue of the researches has no free place.");
                 }
 
-                if (queue.Any(entry => entry.TechnologyId == technologyId && entry.TargetLevel == targetLevel))
-                {
-                    throw new GameException(ResearchErrorCodes.AlreadyQueued, "The level of the technology is already in the queue.");
-                }
+                await CheckAvailableAsync(playerId, planetId, technology, targetLevel, queue, cancellationToken).ConfigureAwait(false);
 
                 // The resources are paid when the record enters the queue and returned in
                 // full when it leaves it.
@@ -182,21 +188,47 @@ public sealed class ResearchQueueService
             {
                 await LockStateAsync(playerId, cancellationToken).ConfigureAwait(false);
                 List<ResearchQueueItemEntity> queue = await LoadQueueAsync(playerId, cancellationToken).ConfigureAwait(false);
+                await CompleteDueAsync(playerId, queue, _clock.GameNow, cancellationToken).ConfigureAwait(false);
 
-                ResearchQueueItemEntity item = queue.FirstOrDefault(entry => entry.Id == queueItemId)
+                ResearchQueueItemEntity cancelled = queue.FirstOrDefault(entry => entry.Id == queueItemId)
                     ?? throw new GameException(ResearchErrorCodes.QueueItemUnknown, "The record of the queue does not exist.");
 
-                bool headRemoved = queue[0].Id == item.Id;
-                Dictionary<int, long> refund = item.CostIds.ToDictionary(cost => cost.ResourceTypeId, cost => cost.Amount);
+                bool headRemoved = queue[0].Id == cancelled.Id;
 
-                queue.Remove(item);
-                _dbContext.ResearchQueueItems.Remove(item);
-                await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                // The later levels of the same technology go with the record, since their
+                // research rests on it; every record returns its whole cost to its own body.
+                List<ResearchQueueItemEntity> removed =
+                [
+                    .. queue.Where(entry => entry.TechnologyId == cancelled.TechnologyId && entry.TargetLevel >= cancelled.TargetLevel),
+                ];
 
-                await _resources.GiveAsync(item.PlanetId, playerId, refund, cancellationToken).ConfigureAwait(false);
+                // The costs are read before the records are deleted, since a deleted record
+                // loses its cost rows. The bodies are paid back in the order of their
+                // identifiers, the order every change of the player locks them in.
+                List<(long PlanetId, Dictionary<int, long> Amounts)> refunds =
+                [
+                    .. removed
+                        .GroupBy(item => item.PlanetId)
+                        .OrderBy(group => group.Key)
+                        .Select(group => (group.Key, group
+                            .SelectMany(item => item.CostIds)
+                            .GroupBy(cost => cost.ResourceTypeId)
+                            .ToDictionary(cost => cost.Key, cost => cost.Sum(entry => entry.Amount)))),
+                ];
+
+                foreach (ResearchQueueItemEntity item in removed)
+                {
+                    queue.Remove(item);
+                    _dbContext.ResearchQueueItems.Remove(item);
+                }
 
                 Renumber(queue);
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                foreach ((long refundPlanetId, Dictionary<int, long> amounts) in refunds)
+                {
+                    await _resources.GiveAsync(refundPlanetId, playerId, amounts, cancellationToken).ConfigureAwait(false);
+                }
 
                 if (headRemoved)
                 {
@@ -225,34 +257,7 @@ public sealed class ResearchQueueService
                 await LockStateAsync(playerId, cancellationToken).ConfigureAwait(false);
                 List<ResearchQueueItemEntity> queue = await LoadQueueAsync(playerId, cancellationToken).ConfigureAwait(false);
 
-                int completed = 0;
-
-                while (queue.Count > 0)
-                {
-                    ResearchQueueItemEntity head = queue[0];
-
-                    if (head.FinishesAt is null)
-                    {
-                        break;
-                    }
-
-                    if (head.FinishesAt > now)
-                    {
-                        break;
-                    }
-
-                    await LearnAsync(playerId, head, cancellationToken).ConfigureAwait(false);
-
-                    queue.RemoveAt(0);
-                    _dbContext.ResearchQueueItems.Remove(head);
-                    Renumber(queue);
-                    await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                    await StartNextAsync(queue, head.FinishesAt.Value, cancellationToken).ConfigureAwait(false);
-                    completed++;
-                }
-
-                return completed;
+                return await CompleteDueAsync(playerId, queue, now, cancellationToken).ConfigureAwait(false);
             },
             cancellationToken);
     }
@@ -273,23 +278,68 @@ public sealed class ResearchQueueService
         return await SnapshotAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task<ResearchQueueStateEntity> LockStateAsync(string playerId, CancellationToken cancellationToken)
+    private async Task<int> CompleteDueAsync(
+        string playerId,
+        List<ResearchQueueItemEntity> queue,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
     {
-        ResearchQueueStateEntity? state = (await _dbContext.ResearchQueueStates
-            .FromSql($"SELECT * FROM research_queue_state WHERE player_id = {playerId} FOR UPDATE")
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false)).FirstOrDefault();
+        int completed = 0;
 
-        if (state is not null)
+        while (queue.Count > 0)
         {
-            return state;
+            ResearchQueueItemEntity head = queue[0];
+
+            if (head.FinishesAt is null)
+            {
+                // A head that never started (its technology left the catalog and came
+                // back, for example) starts now.
+                if (!await StartNextAsync(queue, now, cancellationToken).ConfigureAwait(false))
+                {
+                    break;
+                }
+
+                continue;
+            }
+
+            if (head.FinishesAt > now)
+            {
+                break;
+            }
+
+            DateTimeOffset finishedAt = head.FinishesAt.Value;
+
+            // The bonuses of the player change with the new level, so the balance of
+            // every body is brought to the end of the research first, and the moment
+            // its storage is full is computed again after the change.
+            await _resources.FixPlayerAsync(playerId, finishedAt, cancellationToken).ConfigureAwait(false);
+            await LearnAsync(playerId, head, cancellationToken).ConfigureAwait(false);
+
+            queue.RemoveAt(0);
+            _dbContext.ResearchQueueItems.Remove(head);
+            Renumber(queue);
+            await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            await _resources.FixPlayerAsync(playerId, finishedAt, cancellationToken).ConfigureAwait(false);
+            await StartNextAsync(queue, finishedAt, cancellationToken).ConfigureAwait(false);
+            completed++;
         }
 
-        state = new ResearchQueueStateEntity { PlayerId = playerId };
-        _dbContext.ResearchQueueStates.Add(state);
-        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return completed;
+    }
 
-        return state;
+    private async Task<ResearchQueueStateEntity> LockStateAsync(string playerId, CancellationToken cancellationToken)
+    {
+        // The row is created without a conflict first, so the first parallel commands of a
+        // player wait for one row instead of failing on a duplicate key.
+        await _dbContext.Database
+            .ExecuteSqlAsync($"INSERT INTO research_queue_state (player_id, extra_queue_slots) VALUES ({playerId}, 0) ON CONFLICT (player_id) DO NOTHING", cancellationToken)
+            .ConfigureAwait(false);
+
+        return (await _dbContext.ResearchQueueStates
+            .FromSql($"SELECT * FROM research_queue_state WHERE player_id = {playerId} FOR UPDATE")
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false)).Single();
     }
 
     private async Task<List<ResearchQueueItemEntity>> LoadQueueAsync(string playerId, CancellationToken cancellationToken) =>
@@ -301,27 +351,20 @@ public sealed class ResearchQueueService
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false)];
 
-    private async Task StartNextAsync(List<ResearchQueueItemEntity> queue, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<bool> StartNextAsync(List<ResearchQueueItemEntity> queue, DateTimeOffset now, CancellationToken cancellationToken)
     {
         if (queue.Count == 0 || queue[0].FinishesAt is not null)
         {
-            return;
+            return false;
         }
 
         ResearchQueueItemEntity head = queue[0];
         TechnologyCatalog catalog = await _catalogCache.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
-        TechnologyInfo? technology = catalog.FindTechnology(head.TechnologyId);
-
-        if (technology is null)
-        {
-            return;
-        }
-
-        TechnologyLevelInfo? level = technology.Levels.GetValueOrDefault(head.TargetLevel);
+        TechnologyLevelInfo? level = catalog.FindTechnology(head.TechnologyId)?.Levels.GetValueOrDefault(head.TargetLevel);
 
         if (level is null)
         {
-            return;
+            return false;
         }
 
         head.StartsAt = now;
@@ -330,6 +373,8 @@ public sealed class ResearchQueueService
 
         PlanetFacts? facts = await _world.GetPlanetFactsAsync(head.PlanetId, cancellationToken).ConfigureAwait(false);
 
+        // The key of the event names the record, so a repeated start never doubles the event,
+        // and an event of a cancelled record finds nothing due and changes nothing.
         await _scheduler.ScheduleAsync(
             new ScheduledEventRequest(
                 facts?.SectorId ?? 0,
@@ -338,6 +383,8 @@ public sealed class ResearchQueueService
                 JsonSerializer.Serialize(new CompletePayload(head.PlayerId, head.Id)),
                 CompleteEventType + ":" + head.Id.ToString(CultureInfo.InvariantCulture)),
             cancellationToken).ConfigureAwait(false);
+
+        return true;
     }
 
     private async Task LearnAsync(string playerId, ResearchQueueItemEntity item, CancellationToken cancellationToken)
@@ -364,33 +411,80 @@ public sealed class ResearchQueueService
     private async Task CheckAvailableAsync(
         string playerId,
         long planetId,
-        int technologyId,
+        TechnologyInfo technology,
         int targetLevel,
+        IReadOnlyList<ResearchQueueItemEntity> queue,
         CancellationToken cancellationToken)
     {
+        int learned = await _dbContext.PlayerTechnologies.AsNoTracking()
+            .Where(entry => entry.PlayerId == playerId && entry.TechnologyId == technology.Id)
+            .Select(entry => entry.Level)
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (targetLevel <= learned)
+        {
+            throw new GameException(ResearchErrorCodes.AlreadyLearned, "The player has already learned the level of the technology.");
+        }
+
+        int queued = queue.Where(entry => entry.TechnologyId == technology.Id).Select(entry => entry.TargetLevel).DefaultIfEmpty(0).Max();
+
+        if (targetLevel <= queued)
+        {
+            throw new GameException(ResearchErrorCodes.AlreadyQueued, "The level of the technology is already in the queue.");
+        }
+
+        // The levels follow one another: a level is researched after the levels below it are
+        // learned or wait in the queue before it.
+        if (targetLevel != Math.Max(learned, queued) + 1)
+        {
+            throw new GameException(ResearchErrorCodes.LevelOutOfOrder, "The level of the technology is not the next one.");
+        }
+
+        // The science centre of the chosen body must be of the level the technology needs; a
+        // body of another player has none for this player.
         int centerLevel = await _planets.GetBuildingLevelAsync(
             BuildingClasses.ResearchCenter,
             planetId,
             playerId,
             cancellationToken).ConfigureAwait(false);
 
-        if (centerLevel <= 0)
+        if (centerLevel <= 0 || centerLevel < technology.ResearchCenterLevel)
         {
-            throw new GameException(ResearchErrorCodes.ResearchCenterLevel, "The body has no science centre.");
+            throw new GameException(
+                ResearchErrorCodes.ResearchCenterLevel,
+                "The body has no science centre of the level the technology needs.",
+                new Dictionary<string, object?>
+                {
+                    ["required_level"] = technology.ResearchCenterLevel,
+                    ["available_level"] = centerLevel,
+                });
         }
 
-        IReadOnlyDictionary<int, int> learned = await _dbContext.PlayerTechnologies.AsNoTracking()
-            .Where(entry => entry.PlayerId == playerId && entry.TechnologyId == technologyId)
-            .ToDictionaryAsync(entry => entry.TechnologyId, entry => entry.Level, cancellationToken)
-            .ConfigureAwait(false);
+        // The other requirements of the level live in the common requirements module and are
+        // checked by the one check of the bodies module, on the chosen body.
+        AvailabilityDto availability = await _planets.CheckRequirementsAsync(
+            RequirementSubjectTypes.Technology,
+            technology.Id,
+            targetLevel,
+            planetId,
+            playerId,
+            cancellationToken).ConfigureAwait(false);
 
-        int current = learned.GetValueOrDefault(technologyId);
-
-        if (targetLevel <= current)
+        if (!availability.IsAvailable)
         {
-            throw new GameException(ResearchErrorCodes.AlreadyLearned, "The player has already learned the level of the technology.");
+            throw new GameException(
+                ResearchErrorCodes.RequirementUnmet,
+                "A requirement of the level of the technology is not met.",
+                new Dictionary<string, object?>
+                {
+                    ["unmet_requirements"] = JsonSerializer.SerializeToElement(availability.UnmetRequirements, ResearchJson.Options),
+                });
         }
     }
+
+    private int Slots(ResearchSettings settings, ResearchQueueStateEntity? state) =>
+        settings.QueueBaseSlots + Math.Clamp(state?.ExtraQueueSlots ?? 0, 0, settings.QueueMaxExtraSlots);
 
     /// <summary>
     /// The payload of the end of a research.
@@ -421,14 +515,33 @@ public sealed class ResearchQueueService
             .SingleOrDefaultAsync(entry => entry.PlayerId == playerId, cancellationToken)
             .ConfigureAwait(false);
 
-        int slots = settings.QueueBaseSlots + (state?.ExtraQueueSlots ?? 0);
+        // The research starts from a body the player chooses; without a choice the body with
+        // the highest science centre is taken, and a body of another player is never chosen.
+        IReadOnlyList<PlanetBuildingLevel> planets = await _planets
+            .GetBuildingLevelsAsync(BuildingClasses.ResearchCenter, playerId, cancellationToken)
+            .ConfigureAwait(false);
+
+        PlanetBuildingLevel? selected = planetId is null
+            ? planets.OrderByDescending(planet => planet.Level).ThenBy(planet => planet.PlanetId).FirstOrDefault()
+            : planets.FirstOrDefault(planet => planet.PlanetId == planetId);
+
+        // The requirements of the next level of every technology are read in one query.
+        IReadOnlyList<SubjectRequirement> requirements = await _requirements.GetManyAsync(
+            RequirementSubjectTypes.Technology,
+            [.. catalog.Technologies.Select(technology => new SubjectLevel(technology.Id, Math.Min(learned.GetValueOrDefault(technology.Id) + 1, technology.MaxLevel)))],
+            cancellationToken).ConfigureAwait(false);
 
         return new ResearchTreeSnapshot(
             catalog,
             queue,
             learned,
-            slots,
-            planetId,
-            await _planets.GetBuildingLevelAsync(BuildingClasses.ResearchCenter, planetId ?? 0, playerId, cancellationToken).ConfigureAwait(false));
+            Slots(settings, state),
+            selected?.PlanetId,
+            selected?.Level ?? 0,
+            planets,
+            requirements,
+            await _planets.GetBuildingNameKeysAsync(cancellationToken).ConfigureAwait(false),
+            _clock.GameNow,
+            _clock.Multiplier);
     }
 }

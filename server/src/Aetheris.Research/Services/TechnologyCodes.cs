@@ -27,6 +27,12 @@ public static class TechnologyBranches
 
     /// <summary>The branch of the trade.</summary>
     public const string Trade = "trade";
+
+    /// <summary>
+    /// Gets every branch in the order of the tree; a branch without technologies is shown
+    /// empty (task 00012, decision 11).
+    /// </summary>
+    public static IReadOnlyList<string> All { get; } = [Economy, Fleet, EnginesAndLogistics, Defence, Colonisation, Trade];
 }
 
 /// <summary>

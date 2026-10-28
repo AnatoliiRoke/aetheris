@@ -28,6 +28,12 @@ public static class ResearchErrorCodes
 
     /// <summary>The technology is already in the queue.</summary>
     public const string AlreadyQueued = "research_already_queued";
+
+    /// <summary>The level is not the next one after the learned and the queued levels of the technology.</summary>
+    public const string LevelOutOfOrder = "research_level_out_of_order";
+
+    /// <summary>A requirement of the level of the technology is not met.</summary>
+    public const string RequirementUnmet = "research_requirement_unmet";
 }
 
 /// <summary>

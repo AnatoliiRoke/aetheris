@@ -1,3 +1,4 @@
+using Aetheris.Requirements.Services;
 using Aetheris.Research.Api;
 using Aetheris.Research.Data.Entities;
 using Aetheris.World.Api;
@@ -37,6 +38,16 @@ public sealed class ResearchTreeBuilder
                 [.. item.CostIds.OrderBy(cost => cost.ResourceTypeId).Select(cost => new ResourceAmountDto(cost.ResourceTypeId, cost.Amount))])),
         ];
 
+        List<ResearchPlanetDto> planets =
+        [
+            .. snapshot.Planets.Select(planet => new ResearchPlanetDto(
+                planet.PlanetId,
+                planet.Name,
+                planet.Level,
+                planet.Level > 0,
+                planet.Level > 0 ? null : ResearchErrorCodes.ResearchCenterLevel)),
+        ];
+
         return new ResearchTreeDto(
             [.. BuildBranches(snapshot)],
             technologies,
@@ -44,13 +55,28 @@ public sealed class ResearchTreeBuilder
             snapshot.QueueSlots,
             snapshot.Queue.Count,
             snapshot.SelectedPlanetId,
-            snapshot.AvailableCenterLevel);
+            snapshot.AvailableCenterLevel,
+            planets,
+            snapshot.GameNow,
+            snapshot.TimeMultiplier);
     }
 
     private static TechnologyDto BuildTechnology(ResearchTreeSnapshot snapshot, TechnologyInfo technology)
     {
         int learned = snapshot.LearnedLevels.GetValueOrDefault(technology.Id);
+        int nextLevel = Math.Min(learned + 1, technology.MaxLevel);
         ResearchQueueItemEntity? queued = snapshot.Queue.FirstOrDefault(item => item.TechnologyId == technology.Id);
+
+        // The requirements on other technologies are checked here against the learned levels;
+        // the requirements on a body are checked by the command on the chosen body.
+        HashSet<int> unmet =
+        [
+            .. snapshot.Requirements
+                .Where(requirement => requirement.SubjectId == technology.Id
+                    && requirement.Requirement.RequirementType == RequirementTypes.TechnologyLevel
+                    && snapshot.LearnedLevels.GetValueOrDefault(requirement.Requirement.TargetId) < requirement.Requirement.TargetLevel)
+                .Select(requirement => requirement.Requirement.Id),
+        ];
 
         string status;
         string? reason = null;
@@ -65,12 +91,17 @@ public sealed class ResearchTreeBuilder
                 ? ResearchTechnologyStatuses.Researching
                 : ResearchTechnologyStatuses.Queued;
         }
-        else if (snapshot.AvailableCenterLevel < technology.ResearchCenterLevel)
+        else if (snapshot.AvailableCenterLevel <= 0 || snapshot.AvailableCenterLevel < technology.ResearchCenterLevel)
         {
             // The research of the technology starts on a chosen body, and the science centre of
             // that body must be of the level the technology needs.
             status = ResearchTechnologyStatuses.Unavailable;
             reason = ResearchErrorCodes.ResearchCenterLevel;
+        }
+        else if (unmet.Count > 0)
+        {
+            status = ResearchTechnologyStatuses.Unavailable;
+            reason = ResearchErrorCodes.RequirementUnmet;
         }
         else
         {
@@ -90,10 +121,10 @@ public sealed class ResearchTreeBuilder
             technology.ResearchCenterLevel,
             snapshot.AvailableCenterLevel,
             reason,
-            [.. technology.Levels.Keys.Order().Select(level => BuildLevel(technology, level))]);
+            [.. technology.Levels.Keys.Order().Select(level => BuildLevel(snapshot, technology, level, level == nextLevel ? unmet : []))]);
     }
 
-    private static TechnologyLevelDto BuildLevel(TechnologyInfo technology, int level)
+    private static TechnologyLevelDto BuildLevel(ResearchTreeSnapshot snapshot, TechnologyInfo technology, int level, IReadOnlySet<int> unmet)
     {
         TechnologyLevelInfo? info = technology.Levels.GetValueOrDefault(level);
 
@@ -105,17 +136,23 @@ public sealed class ResearchTreeBuilder
                 effect.EffectType,
                 effect.UnlockKind,
                 effect.UnlockTargetId,
-                effect.UnlockKind is null ? null : string.Empty,
+                UnlockNameKey(snapshot, effect),
                 effect.Value))],
-            []);
+            [.. unmet.Order()]);
     }
+
+    private static string? UnlockNameKey(ResearchTreeSnapshot snapshot, TechnologyEffectInfo effect) =>
+        effect.UnlockKind == TechnologyUnlockKinds.BuildingType && effect.UnlockTargetId is int buildingTypeId
+            ? snapshot.BuildingNameKeys.GetValueOrDefault(buildingTypeId)
+            : null;
 
     private static IEnumerable<ResearchBranchDto> BuildBranches(ResearchTreeSnapshot snapshot)
     {
-        foreach (string branch in snapshot.Catalog.Technologies
-            .Select(technology => technology.Branch)
-            .Distinct()
-            .Order(StringComparer.Ordinal))
+        // Every branch of the program is listed, an empty one too, and a branch that only the
+        // data names comes after them.
+        foreach (string branch in TechnologyBranches.All
+            .Concat(snapshot.Catalog.Technologies.Select(technology => technology.Branch).Order(StringComparer.Ordinal))
+            .Distinct(StringComparer.Ordinal))
         {
             yield return new ResearchBranchDto(branch, ResearchBranchTextKeys.Name(branch));
         }
