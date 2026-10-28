@@ -122,3 +122,39 @@
 | `e05b6dd` | Модуль Research: технології, рівні, ефекти, черга, подія завершення |
 | `8f94bd3` | Клієнт: блок «Дослідження» на `/game` з реальних даних |
 | `9da9702` | Технології відкривають будівлі: 11 будівель у сиді, 11 технологій, вимоги |
+
+### Повторна перевірка (✅ 28.10.2026)
+Повний огляд змін `49b22aa..a9d1e95`. Для кожної знайденої помилки є тест, що її ловить.
+
+**Знайдено й виправлено (сервер)**
+| № | Помилка | Файл | Тест |
+|---|---|---|---|
+| 1 | Постановка дослідження перевіряла лише «центр є» (рівень > 0), а не рівень центру, який потрібен технології: центр 1 рівня відкривав технології рівня 2–4 | `Research/Services/ResearchQueueService.cs` | `ResearchTests.A_technology_is_refused_on_a_science_centre_below_its_level` |
+| 2 | Рівні технології можна було ставити не по черзі (рівень 2 без рівня 1); скасування рівня лишало в черзі вищі рівні тієї ж технології | там само | `ResearchTests.The_levels_follow_one_another_and_a_cancel_takes_the_later_levels_with_it` |
+| 3 | Вимоги рівня технології зі спільного модуля вимог (інші технології) не перевірялися ні в дереві, ні при постановці; `PlanetsModule.CheckRequirementsAsync` знав лише вимоги будівель | `ResearchQueueService.cs`, `ResearchTreeBuilder.cs`, `Planets/Services/PlanetQueryService.cs`, `RequirementChecker.cs` | `ResearchTests.A_requirement_on_another_technology_closes_the_level` |
+| 4 | Перші паралельні команди гравця без рядка `research_queue_state` падали на дублікаті ключа; тесту на 20 паралельних запитів не було | `ResearchQueueService.cs` (`INSERT … ON CONFLICT DO NOTHING`, потім `FOR UPDATE`) | `ResearchTests.Twenty_parallel_researches_never_spend_twice_or_go_below_zero` (HTTP, конвеєр команд) |
+| 5 | Оплата й повернення ресурсів дослідження змінювали збережену кількість без лінивого нарахування: не бачили виробленого з останнього перерахунку, не завершували належне будівництво, не оновлювали момент заповнення складу, нові рядки ресурсу мали `sector_id = 0` | `Planets/Services/PlanetResourcesService.cs`, `ConstructionService.ChangeBalanceAsync` | `ResearchTests.A_research_pays_from_what_the_body_has_produced` |
+| 6 | Завершення дослідження змінювало бонуси гравця без фіксації балансу планет: новий множник заднім числом діяв на час до завершення (tech/09 §5.2) | `ResearchQueueService.cs`, `ConstructionService.FixPlayerAsync`, `IPlanetResources.FixPlayerAsync` | `ResearchTests.A_new_bonus_counts_only_from_the_end_of_the_research` |
+| 7 | Вибору планети не було: читання без планети давало рівень центру 0, клієнт завжди брав рідну планету (рішення 5/5а) | `ResearchQueueService.SnapshotAsync`, `IPlanetsModule.GetBuildingLevelsAsync`, `ResearchDtos.cs` (`planets`) | `ResearchTests.The_research_starts_from_a_chosen_body_of_the_player` |
+| 8 | Платні місця черги не обмежувалися `research.queue.max_extra_slots` | `ResearchQueueService.Slots` | `ResearchTests.The_queue_has_no_more_paid_places_than_the_limit` |
+| 9 | Кеш каталогу будівель Planets не скидався після того, як сид Research записав вимоги «технологія відкриває будівлю»: до спливання кешу будівлі здавалися відкритими | `ResearchBootstrapService.cs`, `IPlanetsModule.InvalidateCatalog` | `ResearchTests.The_building_catalog_sees_the_requirements_of_the_technologies_at_once` |
+| 10 | Відповідь дерева не мала `game_now` і `time_multiplier` (таймер клієнта давав NaN), ефект «відкриває» мав порожню назву, гілки «Флот» і «Оборона» без технологій не показувалися (рішення 9, 11) | `ResearchTreeBuilder.cs`, `ResearchDtos.cs`, `TechnologyBranches.All` | `ResearchTests.The_tree_names_what_a_technology_opens_and_its_moment` |
+| 11 | Завершене, але ще не оброблене дослідження займало місце в черзі при новій постановці | `ResearchQueueService.EnqueueAsync`/`CancelAsync` (спершу `CompleteDue`) | покривається тестами 2 і 4 |
+
+**Знайдено й виправлено (клієнт)**
+- Відповіді команд «Дослідити» / «Скасувати» не застосовувалися (екран оновлювався лише через 15 с), помилки сервера губилися без повідомлення; тепер відповідь одразу показується, помилка має текст за кодом (`reason.research_*`).
+- Блок показував лише гілку `economy` (рядок у коді); тепер усі гілки з сервера, порожня з позначкою «Скоро».
+- Вибір планети дослідження: список планет гравця з рівнем центру, недоступна з причиною.
+- Ефект «відкриває» показує назву будівлі з `localization_text`.
+- Тести: `PlayerPages.test.tsx` (відповідь команди, текст відмови, вибір планети, порожня гілка).
+
+**Перевірено без змін:** порядок міграцій (Planets перейменовує й переносить `requirement`, міграція Requirements має `IF NOT EXISTS`, відкат повертає рядки з тими самими `id`); ідемпотентність події завершення (ключ `research.complete:<id>`, подія скасованого запису нічого не змінює, після перезапуску подія виконується з таблиці планувальника, а читання дерева теж завершує належне); порядок блокувань (`research_queue_state` → `planet_state` за зростанням `planet_id`, Planets не блокує рядки Research); тексти технологій і гілок у `localization_text`; у коді немає `building_N`, `tech_N` чи назв ресурсів; межі модулів (Research не читає таблиць Planets і Requirements).
+
+**Чесні обмеження**
+- Вимоги технології на будівлю чи родовище перевіряються лише командою на обраній планеті; дерево показує причину тільки для вимог на інші технології.
+- Рівень центру береться з таблиці будівель без завершення будівництва, що вже мало закінчитися, але ще не оброблене (виправиться першим читанням планети).
+- Якщо гравець втратить планету, з якої оплачено дослідження, скасування не зможе повернути ресурси (втрати планет у грі ще немає).
+- Тести «спіймали помилку» перевірено логікою сценарію: на старому коді нові тести не компілюються, бо використовують нові поля й коди (`planets`, `research_level_out_of_order`), тож окремо прогнати їх на старій версії не вдалося.
+- Ручну перевірку в Chrome і CI не виконано (пуш робить автор).
+
+**Збірка й тести:** `dotnet build -c Release` без попереджень, `dotnet test -c Release` 290/290, `dotnet format --verify-no-changes` чисто; клієнт: lint чисто, 89/89 тестів, build успішний.
