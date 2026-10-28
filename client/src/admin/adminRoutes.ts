@@ -13,6 +13,7 @@ export const adminRoutes = {
   objectTypes: '/admin/object-types',
   rules: '/admin/rules',
   resources: '/admin/resources',
+  reference: '/admin/reference',
   texts: '/admin/texts',
   config: '/admin/config',
   audit: '/admin/audit',

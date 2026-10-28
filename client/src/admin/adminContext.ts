@@ -2,12 +2,15 @@ import { createContext, useContext } from 'react';
 import { ApiError } from '../api/http';
 import type { AdminApi, AdminMe } from './adminApi';
 import type { AdminMessageKey } from './i18n/uk';
+import type { ReferenceApi } from './referenceApi';
 
 /**
  * What the screens of the admin panel get: the endpoints, the administrator and the sign-out.
  */
 export interface AdminContextValue {
   api: AdminApi;
+  /** The endpoints of the reference kinds (task 00023). */
+  references: ReferenceApi;
   me: AdminMe;
   /** Whether a role of the administrator grants an action code. */
   can: (actionCode: string) => boolean;
@@ -49,6 +52,7 @@ const errorKeys: Record<string, AdminMessageKey> = {
   world_generation_too_large: 'admin.error.generationTooLarge',
   world_rule_set_unknown: 'admin.error.ruleSetUnknown',
   world_version_conflict: 'admin.edit.conflict',
+  reference_version_conflict: 'admin.edit.conflict',
   world_config_invalid: 'admin.error.configInvalid',
   network_error: 'admin.error.network',
 };

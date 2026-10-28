@@ -13,6 +13,8 @@ import { useAdminText } from './i18n/useAdminText';
 import { ConfigScreen } from './screens/ConfigScreen';
 import { GenerationScreen } from './screens/GenerationScreen';
 import { ObjectTypesScreen, RulesScreen } from './screens/ReferenceScreens';
+import { createReferenceApi, type ReferenceApi } from './referenceApi';
+import { ReferenceScreen } from './screens/ReferenceScreen';
 import { ResourcesScreen } from './screens/ResourcesScreen';
 import { AuditScreen, RunsScreen } from './screens/RunsAndAudit';
 import { TextsScreen } from './screens/TextsScreen';
@@ -27,6 +29,8 @@ interface Screen {
   label: AdminMessageKey;
   permission: string;
   render: () => ReactNode;
+  /** Whether the screen owns the addresses under its path too. */
+  nested?: boolean;
 }
 
 const screens: Screen[] = [
@@ -38,6 +42,7 @@ const screens: Screen[] = [
   { path: adminRoutes.fields, label: 'admin.nav.fields', permission: 'admin.world_fields_read', render: () => <FieldsScreen /> },
   { path: adminRoutes.objectTypes, label: 'admin.nav.objectTypes', permission: 'admin.world_object_types_read', render: () => <ObjectTypesScreen /> },
   { path: adminRoutes.rules, label: 'admin.nav.rules', permission: 'admin.world_generation_rules_read', render: () => <RulesScreen /> },
+  { path: adminRoutes.reference, label: 'admin.nav.reference', permission: 'admin.reference_kinds_read', render: () => <ReferenceScreen />, nested: true },
   { path: adminRoutes.resources, label: 'admin.nav.resources', permission: 'admin.world_reference_read', render: () => <ResourcesScreen /> },
   { path: adminRoutes.texts, label: 'admin.nav.texts', permission: 'admin.texts_read', render: () => <TextsScreen /> },
   { path: adminRoutes.config, label: 'admin.nav.config', permission: 'admin.config_read', render: () => <ConfigScreen /> },
@@ -51,10 +56,13 @@ const screens: Screen[] = [
  * client only hides what is not allowed.
  *
  * @param api The admin endpoints; tests pass their own.
+ * @param references The endpoints of the reference kinds; tests pass their own.
  */
-export default function AdminApp({ api: givenApi }: { api?: AdminApi }) {
+export default function AdminApp({ api: givenApi, references: givenReferences }: { api?: AdminApi; references?: ReferenceApi }) {
   const { t } = useAdminText();
-  const api = useMemo(() => givenApi ?? createAdminApi(new HttpClient()), [givenApi]);
+  const http = useMemo(() => new HttpClient(), []);
+  const api = useMemo(() => givenApi ?? createAdminApi(http), [givenApi, http]);
+  const references = useMemo(() => givenReferences ?? createReferenceApi(http), [givenReferences, http]);
   const [session, setSession] = useState<AdminSession>({ status: 'loading' });
   useDocumentTitle(t('admin.meta.title'));
 
@@ -105,17 +113,29 @@ export default function AdminApp({ api: givenApi }: { api?: AdminApi }) {
     return <AdminLogin api={api} notice={session.notice} onSignedIn={(me) => setSession({ status: 'signed-in', me })} />;
   }
 
-  return <AdminShell api={api} me={session.me} onError={onError} onSignOut={() => void signOut()} />;
+  return <AdminShell api={api} references={references} me={session.me} onError={onError} onSignOut={() => void signOut()} />;
 }
 
-function AdminShell({ api, me, onError, onSignOut }: { api: AdminApi; me: AdminMe; onError: (error: unknown) => void; onSignOut: () => void }) {
+function AdminShell({
+  api,
+  references,
+  me,
+  onError,
+  onSignOut,
+}: {
+  api: AdminApi;
+  references: ReferenceApi;
+  me: AdminMe;
+  onError: (error: unknown) => void;
+  onSignOut: () => void;
+}) {
   const { t } = useAdminText();
   const { path, navigate } = useRouter();
   const can = useCallback((code: string) => me.permission_codes.includes(code), [me]);
   const allowed = screens.filter((screen) => can(screen.permission));
   const normalized = path.length > 1 ? path.replace(/\/+$/, '') : path;
-  const current = allowed.find((screen) => screen.path === normalized);
-  const value = useMemo<AdminContextValue>(() => ({ api, me, can, onError }), [api, me, can, onError]);
+  const current = allowed.find((screen) => screen.path === normalized || (screen.nested === true && normalized.startsWith(`${screen.path}/`)));
+  const value = useMemo<AdminContextValue>(() => ({ api, references, me, can, onError }), [api, references, me, can, onError]);
 
   useEffect(() => {
     if (!current && allowed.length > 0) {

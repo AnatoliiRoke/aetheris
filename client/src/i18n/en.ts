@@ -338,6 +338,7 @@ export const en: Messages = {
   'reason.research_already_queued': 'This level is already queued',
   'reason.research_level_out_of_order': 'Research the previous level first',
   'reason.research_requirement_unmet': 'Learn the required technologies first',
+  'reason.research_technology_archived': 'The technology is archived: no new research',
   'player.game.openPlanet': 'Open the planet',
 
   'planet.title': 'Planet {name}',
@@ -395,6 +396,7 @@ export const en: Messages = {
   'reason.planets_level_missing': 'This level is not open yet',
   'reason.planets_level_capped': 'Upgrade the main building of the planet first',
   'reason.planets_queue_full': 'The queue is full',
+  'reason.planets_building_archived': 'The building is archived: no new levels',
   'reason.planets_energy_short': 'Not enough energy: build or upgrade a power plant',
   'reason.planets_resources_short': 'Not enough resources',
   'reason.planets_requirement_building_level': 'Needs: {name}, level {level}',

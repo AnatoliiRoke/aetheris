@@ -23,6 +23,16 @@ const editErrorKeys: Record<string, AdminMessageKey> = {
   not_colonizable: 'admin.edit.error.notColonizable',
   not_applicable: 'admin.edit.error.notApplicable',
   not_a_number: 'admin.edit.error.notANumber',
+  archived: 'admin.edit.error.archived',
+  levels_missing: 'admin.edit.error.levelsMissing',
+  levels_gap: 'admin.edit.error.levelsGap',
+  cost_missing: 'admin.edit.error.costMissing',
+  requirements_missing: 'admin.edit.error.requirementsMissing',
+  levels_in_use: 'admin.edit.error.levelsInUse',
+  state_unchanged: 'admin.edit.error.stateUnchanged',
+  invalid: 'admin.edit.error.invalid',
+  image_type_refused: 'admin.edit.error.imageTypeRefused',
+  image_too_large: 'admin.edit.error.imageTooLarge',
 };
 
 /**

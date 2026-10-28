@@ -90,3 +90,15 @@
 .admin-tabs .admin__link { border: 0; background: none; font: inherit; font-size: var(--fs-small); cursor: pointer; }
 .admin-tabs .admin__link--active { background: var(--bg-3); }
 .admin-problems { margin: var(--space-2) 0 0; padding-left: var(--space-5); }
+
+/* The reference kinds (task 00023): the kinds on the left, the list or the form on the right. */
+.admin-reference { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.admin-reference__menu { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-1); }
+.admin-reference__body { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.admin-reference__row { display: flex; flex-direction: column; gap: var(--space-2); padding-bottom: var(--space-2); border-bottom: 1px solid var(--border); }
+.admin-reference__image { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3); }
+.admin-reference__picture { width: var(--space-7); height: var(--space-7); object-fit: cover; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-3); }
+.admin-reference__picture--empty { display: inline-grid; place-items: center; color: var(--text-2); font-size: var(--fs-small); }
+@media (max-width: 760px) {
+  .admin-reference { grid-template-columns: minmax(0, 1fr); }
+}

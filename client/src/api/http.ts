@@ -40,6 +40,7 @@ const adminPrefix = '/api/admin/';
 
 interface RequestOptions {
   body?: unknown;
+  file?: Blob;
   idempotencyKey?: string;
 }
 
@@ -94,6 +95,13 @@ export class HttpClient {
   }
 
   /**
+   * Sends a file as the body of the request, for the pictures of the admin panel (task 00023).
+   */
+  upload<T>(path: string, file: Blob): Promise<T> {
+    return this.send<T>('POST', path, { file });
+  }
+
+  /**
    * Sends a command with a new request identifier.
    */
   command<T>(path: string, body: unknown): Promise<T> {
@@ -103,7 +111,9 @@ export class HttpClient {
   private async send<T>(method: string, path: string, options: RequestOptions, isRetry = false): Promise<T> {
     const headers: Record<string, string> = { Accept: 'application/json' };
 
-    if (options.body !== undefined) {
+    if (options.file !== undefined) {
+      headers['Content-Type'] = 'application/octet-stream';
+    } else if (options.body !== undefined) {
       headers['Content-Type'] = 'application/json';
     }
 
@@ -122,7 +132,7 @@ export class HttpClient {
         method,
         headers,
         credentials: 'include',
-        body: options.body === undefined ? undefined : JSON.stringify(options.body),
+        body: options.file ?? (options.body === undefined ? undefined : JSON.stringify(options.body)),
       });
     } catch {
       throw new ApiError(0, clientErrorCodes.network);

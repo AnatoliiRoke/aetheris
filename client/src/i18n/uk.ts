@@ -336,6 +336,7 @@ export const uk = {
   'reason.research_already_queued': 'Цей рівень уже в черзі',
   'reason.research_level_out_of_order': 'Спершу дослідіть попередній рівень',
   'reason.research_requirement_unmet': 'Спершу вивчіть потрібні технології',
+  'reason.research_technology_archived': 'Технологія в архіві: нові дослідження недоступні',
   'player.game.openPlanet': 'Відкрити планету',
 
   'planet.title': 'Планета {name}',
@@ -393,6 +394,7 @@ export const uk = {
   'reason.planets_level_missing': 'Цей рівень ще не відкрито',
   'reason.planets_level_capped': 'Спершу покращ головну будівлю планети',
   'reason.planets_queue_full': 'Черга заповнена',
+  'reason.planets_building_archived': 'Будівля в архіві: нові рівні недоступні',
   'reason.planets_energy_short': 'Не вистачить енергії: збудуй або покращ електростанцію',
   'reason.planets_resources_short': 'Не вистачає ресурсів',
   'reason.planets_requirement_building_level': 'Потрібно: {name}, рівень {level}',
