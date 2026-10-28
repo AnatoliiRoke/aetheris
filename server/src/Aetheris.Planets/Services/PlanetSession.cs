@@ -252,8 +252,8 @@ public sealed class PlanetSession
         return PlanetEconomy.Accumulate(
             Catalog,
             _resources.ToDictionary(row => row.ResourceTypeId, row => row.Amount),
-            PlanetEconomy.ProductionRates(Catalog, levels, _deposits, _bonuses.ProductionMultiplier),
-            PlanetEconomy.Capacities(Catalog, levels),
+            PlanetEconomy.ProductionRates(Catalog, levels, _deposits, _bonuses),
+            PlanetEconomy.Capacities(Catalog, levels, _bonuses),
             from,
             to);
     }

@@ -38,53 +38,68 @@ public static class PlanetEconomy
 
     /// <summary>
     /// Gets the production per hour of every resource: the value of the level times the
-    /// richness of the deposit times the bonus. A resource without a deposit is not produced.
+    /// richness of the deposit times the bonus of the kind of the resource. A resource without
+    /// a deposit is not produced.
     /// </summary>
     /// <param name="catalog">The building catalog.</param>
     /// <param name="levels">The levels by building type.</param>
     /// <param name="deposits">The richness coefficients by resource.</param>
-    /// <param name="multiplier">The production bonus of the technologies.</param>
+    /// <param name="bonuses">The bonuses of the technologies.</param>
     /// <returns>The rates by resource.</returns>
     public static Dictionary<int, decimal> ProductionRates(
         BuildingCatalog catalog,
         IReadOnlyDictionary<int, int> levels,
         IReadOnlyDictionary<int, decimal> deposits,
-        decimal multiplier)
+        PlanetBonuses bonuses)
     {
         ArgumentNullException.ThrowIfNull(deposits);
+        ArgumentNullException.ThrowIfNull(bonuses);
 
         Dictionary<int, decimal> rates = [];
 
         foreach ((_, BuildingEffectInfo effect) in Effects(catalog, levels))
         {
-            if (effect.EffectType != BuildingEffectTypes.Production
+            decimal? multiplier = effect.EffectType switch
+            {
+                BuildingEffectTypes.MetalProduction => bonuses.MetalProductionMultiplier,
+                BuildingEffectTypes.CrystalProduction => bonuses.CrystalProductionMultiplier,
+                _ => null,
+            };
+
+            if (multiplier is not { } factor
                 || effect.ResourceTypeId is not { } resourceTypeId
                 || !deposits.TryGetValue(resourceTypeId, out decimal coefficient))
             {
                 continue;
             }
 
-            rates[resourceTypeId] = rates.GetValueOrDefault(resourceTypeId) + (effect.Value * coefficient * multiplier);
+            rates[resourceTypeId] = rates.GetValueOrDefault(resourceTypeId) + (effect.Value * coefficient * factor);
         }
 
         return rates;
     }
 
     /// <summary>
-    /// Gets the storage capacity of every resource group.
+    /// Gets the storage capacity of every resource group, with the bonus of the technologies.
     /// </summary>
     /// <param name="catalog">The building catalog.</param>
     /// <param name="levels">The levels by building type.</param>
+    /// <param name="bonuses">The bonuses of the technologies.</param>
     /// <returns>The capacities by group.</returns>
-    public static Dictionary<int, long> Capacities(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels)
+    public static Dictionary<int, long> Capacities(
+        BuildingCatalog catalog,
+        IReadOnlyDictionary<int, int> levels,
+        PlanetBonuses bonuses)
     {
+        ArgumentNullException.ThrowIfNull(bonuses);
+
         Dictionary<int, long> capacities = [];
 
         foreach ((_, BuildingEffectInfo effect) in Effects(catalog, levels))
         {
             if (effect.EffectType == BuildingEffectTypes.StorageCapacity && effect.ResourceGroupId is { } groupId)
             {
-                capacities[groupId] = capacities.GetValueOrDefault(groupId) + effect.Value;
+                capacities[groupId] = capacities.GetValueOrDefault(groupId) + (long)decimal.Floor(effect.Value * bonuses.StorageCapacityMultiplier);
             }
         }
 
@@ -92,13 +107,20 @@ public static class PlanetEconomy
     }
 
     /// <summary>
-    /// Gets the energy produced and consumed by the buildings.
+    /// Gets the energy produced and consumed by the buildings, with the bonus of the
+    /// technologies on the produced energy.
     /// </summary>
     /// <param name="catalog">The building catalog.</param>
     /// <param name="levels">The levels by building type.</param>
+    /// <param name="bonuses">The bonuses of the technologies.</param>
     /// <returns>The output, the consumption and the balance.</returns>
-    public static EnergyBalance Energy(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels)
+    public static EnergyBalance Energy(
+        BuildingCatalog catalog,
+        IReadOnlyDictionary<int, int> levels,
+        PlanetBonuses bonuses)
     {
+        ArgumentNullException.ThrowIfNull(bonuses);
+
         long output = 0;
         long consumption = 0;
 
@@ -106,7 +128,7 @@ public static class PlanetEconomy
         {
             if (effect.EffectType == BuildingEffectTypes.EnergyOutput)
             {
-                output += effect.Value;
+                output += (long)decimal.Floor(effect.Value * bonuses.EnergyOutputMultiplier);
             }
             else if (effect.EffectType == BuildingEffectTypes.EnergyConsumption)
             {
@@ -118,15 +140,24 @@ public static class PlanetEconomy
     }
 
     /// <summary>
-    /// Gets the largest population of the body; the population task uses it.
+    /// Gets the largest population of the body with the bonus of the technologies; the
+    /// population task uses it.
     /// </summary>
     /// <param name="catalog">The building catalog.</param>
     /// <param name="levels">The levels by building type.</param>
+    /// <param name="bonuses">The bonuses of the technologies.</param>
     /// <returns>The largest population.</returns>
-    public static long PopulationMax(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels) =>
-        Effects(catalog, levels)
+    public static long PopulationMax(
+        BuildingCatalog catalog,
+        IReadOnlyDictionary<int, int> levels,
+        PlanetBonuses bonuses)
+    {
+        ArgumentNullException.ThrowIfNull(bonuses);
+
+        return Effects(catalog, levels)
             .Where(entry => entry.Effect.EffectType == BuildingEffectTypes.PopulationMax)
-            .Sum(entry => entry.Effect.Value);
+            .Sum(entry => (long)decimal.Floor(entry.Effect.Value * bonuses.PopulationMaxMultiplier));
+    }
 
     /// <summary>
     /// Gets the largest level a building of a type may have on the body: the limit of the

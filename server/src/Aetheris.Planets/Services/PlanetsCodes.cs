@@ -9,8 +9,11 @@ namespace Aetheris.Planets.Services;
 /// </remarks>
 public static class BuildingEffectTypes
 {
-    /// <summary>Yields a resource per hour; the value is multiplied by the richness of the deposit and the bonus.</summary>
-    public const string Production = "production";
+    /// <summary>Yields a metal per hour; the value is multiplied by the richness of the deposit and the metal bonus.</summary>
+    public const string MetalProduction = "metal_production";
+
+    /// <summary>Yields a crystal per hour; the value is multiplied by the richness of the deposit and the crystal bonus.</summary>
+    public const string CrystalProduction = "crystal_production";
 
     /// <summary>Adds capacity to the storage of a resource group.</summary>
     public const string StorageCapacity = "storage_capacity";
@@ -26,46 +29,6 @@ public static class BuildingEffectTypes
 
     /// <summary>The level of every other building of the body cannot exceed the value.</summary>
     public const string LevelCap = "level_cap";
-}
-
-/// <summary>
-/// The kinds of requirements of the common requirement mechanism (decision 3).
-/// </summary>
-public static class RequirementTypes
-{
-    /// <summary>A building of the target type of at least the target level on the same body.</summary>
-    public const string BuildingLevel = "building_level";
-
-    /// <summary>A technology of the player of at least the target level.</summary>
-    public const string TechnologyLevel = "technology_level";
-
-    /// <summary>A deposit of the target resource on the body.</summary>
-    public const string Deposit = "deposit";
-}
-
-/// <summary>
-/// The kinds of subjects that can be closed by requirements (decision 3).
-/// </summary>
-/// <remarks>
-/// Building types use the mechanism now; technologies, modules, recipes and ship classes
-/// bring their rows with their tasks.
-/// </remarks>
-public static class RequirementSubjectTypes
-{
-    /// <summary>A building type and its levels.</summary>
-    public const string BuildingType = "building_type";
-
-    /// <summary>A technology.</summary>
-    public const string Technology = "technology";
-
-    /// <summary>A ship module.</summary>
-    public const string Module = "module";
-
-    /// <summary>A production recipe.</summary>
-    public const string Recipe = "recipe";
-
-    /// <summary>A ship class.</summary>
-    public const string ShipClass = "ship_class";
 }
 
 /// <summary>

@@ -238,7 +238,7 @@ public sealed class ConstructionTests
 
         BuildingTypeEntity mine = await PlanetsTestData.TypeAsync(services, SeedCodes.IronMine);
         BuildingTypeEntity main = await PlanetsTestData.TypeAsync(services, SeedCodes.AdminCenter);
-        long value = Effect(mine, 1, BuildingEffectTypes.Production);
+        long value = Effect(mine, 1, BuildingEffectTypes.MetalProduction);
         BuildingLevelEffectEntity capacityEffect = main.LevelIds.Single(level => level.Level == 1).EffectIds
             .Single(effect => effect.EffectType == BuildingEffectTypes.StorageCapacity && effect.ResourceGroupId != null
                 && services.GetRequiredService<Aetheris.World.Data.WorldDbContext>().ResourceTypes.Any(resource => resource.Id == iron && resource.ResourceGroupId == effect.ResourceGroupId));

@@ -164,7 +164,7 @@ public static class ConstructionRules
         }
 
         queuedLevels[buildingType.Id] = level;
-        EnergyBalance energyAfter = PlanetEconomy.Energy(catalog, queuedLevels);
+        EnergyBalance energyAfter = PlanetEconomy.Energy(catalog, queuedLevels, figures.Bonuses);
         bool consumes = info?.Effects.Any(effect => effect.EffectType == BuildingEffectTypes.EnergyConsumption && effect.Value > 0) ?? false;
 
         if (consumes && energyAfter.Balance < 0)
@@ -214,10 +214,10 @@ public static class PlanetOverviewBuilder
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(figures);
 
-        Dictionary<int, decimal> rates = PlanetEconomy.ProductionRates(catalog, figures.Levels, figures.Deposits, figures.Bonuses.ProductionMultiplier);
-        Dictionary<int, long> capacities = PlanetEconomy.Capacities(catalog, figures.Levels);
+        Dictionary<int, decimal> rates = PlanetEconomy.ProductionRates(catalog, figures.Levels, figures.Deposits, figures.Bonuses);
+        Dictionary<int, long> capacities = PlanetEconomy.Capacities(catalog, figures.Levels, figures.Bonuses);
         Dictionary<int, int> queuedLevels = figures.QueuedLevels();
-        EnergyBalance energy = PlanetEconomy.Energy(catalog, figures.Levels);
+        EnergyBalance energy = PlanetEconomy.Energy(catalog, figures.Levels, figures.Bonuses);
 
         List<StorageGroupDto> groups = [];
 
@@ -284,7 +284,7 @@ public static class PlanetOverviewBuilder
             timeMultiplier,
             resources,
             groups,
-            new EnergyDto(energy.Output, energy.Consumption, energy.Balance, PlanetEconomy.Energy(catalog, queuedLevels).Balance),
+            new EnergyDto(energy.Output, energy.Consumption, energy.Balance, PlanetEconomy.Energy(catalog, queuedLevels, figures.Bonuses).Balance),
             new ConstructionQueueDto(
                 ConstructionRules.SlotCount(settings, figures.ExtraQueueSlots),
                 [
@@ -299,7 +299,7 @@ public static class PlanetOverviewBuilder
                         Amounts(item.Costs))),
                 ]),
             buildings,
-            PlanetEconomy.PopulationMax(catalog, figures.Levels),
+            PlanetEconomy.PopulationMax(catalog, figures.Levels, figures.Bonuses),
             [.. catalog.Resources.Select(resource => new NamedItemDto(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId))],
             [.. catalog.Groups.Select(group => new NamedItemDto(group.Id, group.Code, group.NameKey, null))]);
     }

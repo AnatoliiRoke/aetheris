@@ -215,7 +215,7 @@
       ],
       "effects": [
         {
-          "type": "production",
+          "type": "metal_production",
           "resource": "resource_1",
           "base": 60,
           "growth": 1.3
@@ -263,7 +263,7 @@
       ],
       "effects": [
         {
-          "type": "production",
+          "type": "metal_production",
           "resource": "resource_3",
           "base": 50,
           "growth": 1.3

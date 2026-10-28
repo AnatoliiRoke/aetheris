@@ -18,19 +18,69 @@ public sealed class PlanetEconomyTests
 
     /// <summary>
     /// The production of a mine is the value of its level times the richness of the deposit
-    /// times the bonus; a resource without a deposit is not produced.
+    /// times the bonus of the kind of the resource; a resource without a deposit is not
+    /// produced.
     /// </summary>
     [Fact]
     public void The_rate_multiplies_the_level_value_by_the_deposit_and_the_bonus()
     {
-        BuildingCatalog catalog = Catalog(new BuildingEffectInfo(BuildingEffectTypes.Production, Iron, null, 60));
+        BuildingCatalog catalog = Catalog(new BuildingEffectInfo(BuildingEffectTypes.MetalProduction, Iron, null, 60));
         Dictionary<int, int> levels = new() { [1] = 1 };
 
-        Dictionary<int, decimal> rates = PlanetEconomy.ProductionRates(catalog, levels, new Dictionary<int, decimal> { [Iron] = 1.5m }, 2m);
-        Dictionary<int, decimal> withoutDeposit = PlanetEconomy.ProductionRates(catalog, levels, new Dictionary<int, decimal> { [Copper] = 1.5m }, 1m);
+        Dictionary<int, decimal> rates = PlanetEconomy.ProductionRates(catalog, levels, new Dictionary<int, decimal> { [Iron] = 1.5m }, Bonuses(metalProduction: 2m));
+        Dictionary<int, decimal> withoutDeposit = PlanetEconomy.ProductionRates(catalog, levels, new Dictionary<int, decimal> { [Copper] = 1.5m }, Bonuses(metalProduction: 1m));
 
         Assert.Equal(180m, rates[Iron]);
         Assert.Empty(withoutDeposit);
+    }
+
+    /// <summary>
+    /// The metals and the crystals have their own bonus, so a technology changes only the
+    /// production of the kind of the resource it belongs to.
+    /// </summary>
+    [Fact]
+    public void The_metal_and_the_crystal_bonuses_change_only_their_own_production()
+    {
+        BuildingCatalog catalog = Catalog(
+            new BuildingEffectInfo(BuildingEffectTypes.MetalProduction, Iron, null, 60),
+            new BuildingEffectInfo(BuildingEffectTypes.CrystalProduction, Quartzite, null, 40));
+        Dictionary<int, int> levels = new() { [1] = 1 };
+        Dictionary<int, decimal> deposits = new() { [Iron] = 1m, [Quartzite] = 1m };
+
+        Dictionary<int, decimal> metalOnly = PlanetEconomy.ProductionRates(catalog, levels, deposits, Bonuses(metalProduction: 2m));
+        Dictionary<int, decimal> crystalOnly = PlanetEconomy.ProductionRates(catalog, levels, deposits, Bonuses(crystalProduction: 3m));
+
+        Assert.Equal(120m, metalOnly[Iron]);
+        Assert.Equal(40m, metalOnly[Quartzite]);
+        Assert.Equal(60m, crystalOnly[Iron]);
+        Assert.Equal(120m, crystalOnly[Quartzite]);
+    }
+
+    /// <summary>
+    /// The capacity of the storages, the energy the buildings produce and the largest
+    /// population of the body take their own bonus.
+    /// </summary>
+    [Fact]
+    public void The_capacity_the_energy_and_the_population_take_their_own_bonus()
+    {
+        BuildingCatalog catalog = Catalog(
+            new BuildingEffectInfo(BuildingEffectTypes.StorageCapacity, null, Metals, 1000),
+            new BuildingEffectInfo(BuildingEffectTypes.EnergyOutput, null, null, 50),
+            new BuildingEffectInfo(BuildingEffectTypes.PopulationMax, null, null, 200));
+        Dictionary<int, int> levels = new() { [1] = 1 };
+
+        Dictionary<int, long> capacities = PlanetEconomy.Capacities(catalog, levels, Bonuses(storageCapacity: 1.5m));
+        EnergyBalance energy = PlanetEconomy.Energy(catalog, levels, Bonuses(energyOutput: 2m));
+        long population = PlanetEconomy.PopulationMax(catalog, levels, Bonuses(populationMax: 1.25m));
+
+        Assert.Equal(1500, capacities[Metals]);
+        Assert.Equal(100, energy.Output);
+        Assert.Equal(250, population);
+
+        // Without the technologies nothing changes.
+        Assert.Equal(1000, PlanetEconomy.Capacities(catalog, levels, PlanetBonuses.None)[Metals]);
+        Assert.Equal(50, PlanetEconomy.Energy(catalog, levels, PlanetBonuses.None).Output);
+        Assert.Equal(200, PlanetEconomy.PopulationMax(catalog, levels, PlanetBonuses.None));
     }
 
     /// <summary>
@@ -138,13 +188,22 @@ public sealed class PlanetEconomyTests
         BuildingCatalog catalog = new([main, mine], [], Resources(), Groups());
         Dictionary<int, int> levels = new() { [1] = 1, [2] = 1 };
 
-        EnergyBalance energy = PlanetEconomy.Energy(catalog, levels);
+        EnergyBalance energy = PlanetEconomy.Energy(catalog, levels, PlanetBonuses.None);
 
         Assert.Equal(6, energy.Balance);
         Assert.Equal(3, PlanetEconomy.LevelCap(catalog, levels, mine));
         Assert.Null(PlanetEconomy.LevelCap(catalog, levels, main));
         Assert.Equal(0, PlanetEconomy.LevelCap(catalog, new Dictionary<int, int> { [2] = 1 }, mine));
     }
+
+    private static PlanetBonuses Bonuses(
+        decimal metalProduction = 1m,
+        decimal crystalProduction = 1m,
+        decimal constructionTime = 1m,
+        decimal storageCapacity = 1m,
+        decimal energyOutput = 1m,
+        decimal populationMax = 1m) =>
+        new(metalProduction, crystalProduction, constructionTime, storageCapacity, energyOutput, populationMax);
 
     private static BuildingCatalog Catalog(params BuildingEffectInfo[] effects) =>
         new([Type(1, effects)], [], Resources(), Groups());

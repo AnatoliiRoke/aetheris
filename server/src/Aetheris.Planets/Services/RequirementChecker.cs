@@ -103,13 +103,35 @@ public interface ITechnologyLevels
     Task<PlanetBonuses> GetBonusesAsync(string? playerId, CancellationToken cancellationToken);
 }
 
-/// <summary>The multipliers the technologies give a body (decisions 6 and 8).</summary>
-/// <param name="ProductionMultiplier">The multiplier of the production of the mines.</param>
+/// <summary>
+/// The multipliers the technologies give a body (task 00012, decision 4).
+/// </summary>
+/// <param name="MetalProductionMultiplier">The multiplier of the production of the metal mines.</param>
+/// <param name="CrystalProductionMultiplier">The multiplier of the production of the crystal mines.</param>
 /// <param name="ConstructionTimeMultiplier">The multiplier of the construction time.</param>
-public sealed record PlanetBonuses(decimal ProductionMultiplier, decimal ConstructionTimeMultiplier)
+/// <param name="StorageCapacityMultiplier">The multiplier of the capacity of the storages.</param>
+/// <param name="EnergyOutputMultiplier">The multiplier of the energy the buildings produce.</param>
+/// <param name="PopulationMaxMultiplier">The multiplier of the largest population of the body.</param>
+/// <remarks>
+/// Every multiplier is a separate bonus of the technologies, so a technology changes only the
+/// parameter it belongs to. A multiplier of one changes nothing.
+/// </remarks>
+public sealed record PlanetBonuses(
+    decimal MetalProductionMultiplier,
+    decimal CrystalProductionMultiplier,
+    decimal ConstructionTimeMultiplier,
+    decimal StorageCapacityMultiplier,
+    decimal EnergyOutputMultiplier,
+    decimal PopulationMaxMultiplier)
 {
     /// <summary>Gets the bonuses of a player without technologies: nothing changes.</summary>
-    public static PlanetBonuses None { get; } = new(decimal.One, decimal.One);
+    public static PlanetBonuses None { get; } = new(
+        decimal.One,
+        decimal.One,
+        decimal.One,
+        decimal.One,
+        decimal.One,
+        decimal.One);
 }
 
 /// <summary>
