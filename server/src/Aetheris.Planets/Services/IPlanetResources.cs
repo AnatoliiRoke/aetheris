@@ -51,4 +51,15 @@ public interface IPlanetResources
         long planetId,
         string playerId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Brings the balance of every body of a player to a moment with the rates as they are.
+    /// A module calls it before and after it changes the bonuses of the player, so the new
+    /// bonuses apply only from that moment on (documentation/tech/09, section 5.2).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="moment">The moment of game time.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the balances are fixed.</returns>
+    Task FixPlayerAsync(string playerId, DateTimeOffset moment, CancellationToken cancellationToken = default);
 }

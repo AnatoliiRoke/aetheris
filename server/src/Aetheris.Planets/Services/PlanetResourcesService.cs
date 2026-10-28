@@ -1,6 +1,6 @@
 using Aetheris.Core.Errors;
+using Aetheris.Core.Time;
 using Aetheris.Planets.Data;
-using Aetheris.Planets.Data.Entities;
 using Aetheris.World;
 using Aetheris.World.Api;
 using Microsoft.EntityFrameworkCore;
@@ -17,24 +17,32 @@ namespace Aetheris.Planets.Services;
 public sealed class PlanetResourcesService : IPlanetResources
 {
     private readonly PlanetsDbContext _dbContext;
-    private readonly PlanetsUnitOfWork _unitOfWork;
+    private readonly ConstructionService _construction;
     private readonly IWorldModule _world;
+    private readonly IGameClock _clock;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PlanetResourcesService"/> class.
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
-    /// <param name="unitOfWork">The transaction of the module.</param>
+    /// <param name="construction">The changes of a body.</param>
     /// <param name="world">The world, for the owner of a body.</param>
-    public PlanetResourcesService(PlanetsDbContext dbContext, PlanetsUnitOfWork unitOfWork, IWorldModule world)
+    /// <param name="clock">The game clock.</param>
+    public PlanetResourcesService(
+        PlanetsDbContext dbContext,
+        ConstructionService construction,
+        IWorldModule world,
+        IGameClock clock)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
-        ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(construction);
         ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(clock);
 
         _dbContext = dbContext;
-        _unitOfWork = unitOfWork;
+        _construction = construction;
         _world = world;
+        _clock = clock;
     }
 
     /// <inheritdoc />
@@ -69,7 +77,11 @@ public sealed class PlanetResourcesService : IPlanetResources
             .ConfigureAwait(false);
     }
 
-    private Task ChangeAsync(
+    /// <inheritdoc />
+    public Task FixPlayerAsync(string playerId, DateTimeOffset moment, CancellationToken cancellationToken = default) =>
+        _construction.FixPlayerAsync(playerId, moment, cancellationToken);
+
+    private async Task ChangeAsync(
         long planetId,
         string playerId,
         IReadOnlyDictionary<int, long> amounts,
@@ -81,69 +93,16 @@ public sealed class PlanetResourcesService : IPlanetResources
 
         if (amounts.Count == 0)
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        return _unitOfWork.RunAsync(
-            async () =>
-            {
-                await EnsureOwnedAsync(planetId, playerId, cancellationToken).ConfigureAwait(false);
+        await EnsureOwnedAsync(planetId, playerId, cancellationToken).ConfigureAwait(false);
 
-                // The row of the body is locked first, so two changes of the same body never
-                // spend the same resources twice.
-                await _dbContext.PlanetStates
-                    .FromSql($"SELECT * FROM planet_state WHERE planet_id = {planetId} FOR UPDATE")
-                    .ToListAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                List<PlanetResourceEntity> rows = await _dbContext.PlanetResources
-                    .Where(row => row.PlanetId == planetId)
-                    .ToListAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                foreach ((int resourceTypeId, long amount) in amounts)
-                {
-                    if (amount < 0)
-                    {
-                        throw new GameException(PlanetsErrorCodes.ResourcesShort, "The amount of a resource cannot be negative.");
-                    }
-
-                    PlanetResourceEntity? row = rows.FirstOrDefault(entry => entry.ResourceTypeId == resourceTypeId);
-
-                    if (row is null)
-                    {
-                        if (give)
-                        {
-                            _dbContext.PlanetResources.Add(new PlanetResourceEntity { PlanetId = planetId, ResourceTypeId = resourceTypeId, Amount = amount });
-                        }
-                        else if (amount > 0)
-                        {
-                            throw new GameException(PlanetsErrorCodes.ResourcesShort, "The body lacks resources for the cost.");
-                        }
-
-                        continue;
-                    }
-
-                    if (give)
-                    {
-                        row.Amount += amount;
-                    }
-                    else
-                    {
-                        if (row.Amount < amount)
-                        {
-                            throw new GameException(PlanetsErrorCodes.ResourcesShort, "The body lacks resources for the cost.");
-                        }
-
-                        row.Amount -= amount;
-                    }
-                }
-
-                await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                return true;
-            },
-            cancellationToken);
+        // The body is opened like for a construction: the row of the body is locked, the due
+        // constructions are completed and the balance is brought to the moment before the
+        // amounts change, so the payment never spends the same resources twice and sees what
+        // the body has produced since the last change.
+        await _construction.ChangeBalanceAsync(planetId, amounts, give, _clock.GameNow, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task EnsureOwnedAsync(long planetId, string playerId, CancellationToken cancellationToken)

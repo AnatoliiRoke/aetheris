@@ -50,11 +50,25 @@ public static class RequirementChecker
         RequirementContext context)
     {
         ArgumentNullException.ThrowIfNull(catalog);
+
+        return Check(catalog.RequirementsOf(subjectType, subjectId, level), context);
+    }
+
+    /// <summary>
+    /// Finds the requirements that are not met among the given ones, for a subject whose
+    /// requirements the building catalog does not keep (a technology, for example).
+    /// </summary>
+    /// <param name="requirements">The requirements of the subject level.</param>
+    /// <param name="context">The state the requirements are checked against.</param>
+    /// <returns>The unmet requirements; empty when the subject is available.</returns>
+    public static IReadOnlyList<UnmetRequirement> Check(IEnumerable<RequirementInfo> requirements, RequirementContext context)
+    {
+        ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(context);
 
         List<UnmetRequirement> unmet = [];
 
-        foreach (RequirementInfo requirement in catalog.RequirementsOf(subjectType, subjectId, level))
+        foreach (RequirementInfo requirement in requirements)
         {
             string? reason = requirement.RequirementType switch
             {

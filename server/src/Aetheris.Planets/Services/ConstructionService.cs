@@ -240,6 +240,109 @@ public sealed class ConstructionService
     }
 
     /// <summary>
+    /// Takes amounts from the balance of a body or gives them back, for a module that pays for
+    /// something on the body (task 00012).
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="amounts">The amounts by resource.</param>
+    /// <param name="give">Whether the amounts are given back rather than taken.</param>
+    /// <param name="now">The moment of game time.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the balance is changed.</returns>
+    /// <remarks>
+    /// The body is opened like for a construction: the due constructions are completed and the
+    /// balance is brought to the moment first, so the payment sees what the body has produced
+    /// and the production after the change starts from the new amounts.
+    /// </remarks>
+    public Task ChangeBalanceAsync(
+        long planetId,
+        IReadOnlyDictionary<int, long> amounts,
+        bool give,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(amounts);
+
+        now = Normalize(now);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                PlanetSession session = await OpenAsync(planetId, now, cancellationToken).ConfigureAwait(false);
+
+                foreach ((int resourceTypeId, long amount) in amounts.OrderBy(entry => entry.Key))
+                {
+                    if (amount < 0)
+                    {
+                        throw new GameException(PlanetsErrorCodes.ResourcesShort, "The amount of a resource cannot be negative.");
+                    }
+
+                    if (give)
+                    {
+                        session.Give(resourceTypeId, amount);
+                    }
+                    else
+                    {
+                        session.Take(resourceTypeId, amount);
+                    }
+                }
+
+                session.RefreshStorage(now);
+
+                return true;
+            },
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Brings the balance of every body of a player to a moment with the rates as they are, so
+    /// a change of the bonuses of the player applies only from that moment on (documentation/tech/09,
+    /// section 5.2).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="moment">The moment of game time.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The number of bodies of the player.</returns>
+    /// <remarks>
+    /// The bodies are locked in the order of their identifiers, so two changes of one player
+    /// never wait for each other in a circle. A moment before the last fix of a body changes no
+    /// amount there and only computes again when its storage is full.
+    /// </remarks>
+    public Task<int> FixPlayerAsync(string playerId, DateTimeOffset moment, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        moment = Normalize(moment);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                List<long> planetIds = await _dbContext.PlanetStates.AsNoTracking()
+                    .Where(state => state.OwnerPlayerId == playerId)
+                    .OrderBy(state => state.PlanetId)
+                    .Select(state => state.PlanetId)
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                foreach (long planetId in planetIds)
+                {
+                    PlanetSession? session = await TryOpenAsync(planetId, cancellationToken).ConfigureAwait(false);
+
+                    if (session is null)
+                    {
+                        continue;
+                    }
+
+                    await CompleteDueAsync(session, moment, cancellationToken).ConfigureAwait(false);
+                    session.FixTo(moment);
+                }
+
+                return planetIds.Count;
+            },
+            cancellationToken);
+    }
+
+    /// <summary>
     /// Gets the answer about a body inside the current change.
     /// </summary>
     /// <param name="planetId">The body.</param>

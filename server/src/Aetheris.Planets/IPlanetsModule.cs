@@ -81,4 +81,31 @@ public interface IPlanetsModule
     /// written in the code (documentation/tech/09, section 3.1).
     /// </remarks>
     Task<int?> FindBuildingTypeIdAsync(string code, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets every body of a player with the level of its building of a class: the bodies a
+    /// research can start from, for example (task 00012, decisions 5 and 5a).
+    /// </summary>
+    /// <param name="buildingClass">The class of the building, one of <see cref="BuildingClasses"/>.</param>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bodies of the player in the order of their identifiers; the level is zero on a body without the building.</returns>
+    Task<IReadOnlyList<PlanetBuildingLevel>> GetBuildingLevelsAsync(
+        string buildingClass,
+        string playerId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the localisation keys of the names of the building types, for the modules that
+    /// name a building they open (task 00012, decision 9).
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The keys by building type.</returns>
+    Task<IReadOnlyDictionary<int, string>> GetBuildingNameKeysAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Forgets the building catalog kept in memory, so the next read loads it again. A module
+    /// that adds requirements to the building types calls it after its change is committed.
+    /// </summary>
+    void InvalidateCatalog();
 }

@@ -127,7 +127,21 @@ public sealed class PlanetQueryService
             (facts?.Deposits ?? []).Select(deposit => deposit.ResourceTypeId).ToHashSet(),
             await _technologies.GetLevelsAsync(playerId, cancellationToken).ConfigureAwait(false));
 
-        IReadOnlyList<UnmetRequirement> unmet = RequirementChecker.Check(catalog, subjectType, subjectId, level, context);
+        // The building catalog keeps the requirements of the building types; the requirements
+        // of the other subjects are read from the common module, and the same check applies.
+        IReadOnlyList<UnmetRequirement> unmet = string.Equals(subjectType, RequirementSubjectTypes.BuildingType, StringComparison.Ordinal)
+            ? RequirementChecker.Check(catalog, subjectType, subjectId, level, context)
+            : RequirementChecker.Check(
+                (await _requirements.GetAsync(subjectType, subjectId, level, cancellationToken).ConfigureAwait(false))
+                    .Select(requirement => new RequirementInfo(
+                        requirement.Id,
+                        subjectType,
+                        subjectId,
+                        level,
+                        requirement.RequirementType,
+                        requirement.TargetId,
+                        requirement.TargetLevel)),
+                context);
 
         return new AvailabilityDto(unmet.Count == 0, PlanetOverviewBuilder.Requirements(catalog, unmet));
     }
@@ -188,4 +202,83 @@ public sealed class PlanetQueryService
             .Select(type => (int?)type.Id)
             .SingleOrDefaultAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// Gets every body of a player with the level of its building of a class (task 00012,
+    /// decisions 5 and 5a).
+    /// </summary>
+    /// <param name="buildingClass">The class of the building, one of <see cref="BuildingClasses"/>.</param>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bodies of the player in the order of their identifiers.</returns>
+    /// <remarks>
+    /// The bodies come from the state rows of the module and the owner is confirmed by the
+    /// world, so a body the player has lost is never listed.
+    /// </remarks>
+    public async Task<IReadOnlyList<PlanetBuildingLevel>> GetBuildingLevelsAsync(
+        string buildingClass,
+        string playerId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(buildingClass);
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
+        int? buildingTypeId = catalog.FindByClass(buildingClass)?.Id;
+
+        List<long> planetIds = await _dbContext.PlanetStates.AsNoTracking()
+            .Where(state => state.OwnerPlayerId == playerId)
+            .OrderBy(state => state.PlanetId)
+            .Select(state => state.PlanetId)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        Dictionary<long, int> levels = buildingTypeId is null
+            ? []
+            : await _dbContext.PlanetBuildings.AsNoTracking()
+                .Where(building => planetIds.Contains(building.PlanetId) && building.BuildingTypeId == buildingTypeId)
+                .ToDictionaryAsync(building => building.PlanetId, building => building.Level, cancellationToken)
+                .ConfigureAwait(false);
+
+        List<PlanetBuildingLevel> planets = [];
+
+        foreach (long planetId in planetIds)
+        {
+            PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
+
+            if (facts is null || !string.Equals(facts.OwnerPlayerId, playerId, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            planets.Add(new PlanetBuildingLevel(planetId, facts.Name, levels.GetValueOrDefault(planetId)));
+        }
+
+        return planets;
+    }
+
+    /// <summary>
+    /// Gets the localisation keys of the names of the building types (task 00012, decision 9).
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The keys by building type.</returns>
+    public async Task<IReadOnlyDictionary<int, string>> GetBuildingNameKeysAsync(CancellationToken cancellationToken)
+    {
+        BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
+
+        return catalog.Types.ToDictionary(type => type.Id, type => type.NameKey);
+    }
+
+    /// <summary>
+    /// Forgets the building catalog kept in memory.
+    /// </summary>
+    public void InvalidateCatalog() => _catalogCache.Invalidate();
 }
+
+/// <summary>
+/// A body of a player with the level of its building of a class (task 00012, decision 5).
+/// </summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="Name">The name of the body.</param>
+/// <param name="Level">The level of the building, or zero when the body has none.</param>
+public sealed record PlanetBuildingLevel(long PlanetId, string? Name, int Level);
