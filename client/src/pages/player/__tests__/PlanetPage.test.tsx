@@ -15,7 +15,9 @@ describe('PlanetPage', () => {
     renderPage('/planet', { auth: signedIn(), planets });
 
     expect(await screen.findByRole('heading', { name: 'Планета Nova' })).toBeInTheDocument();
-    expect(planets.planet).toHaveBeenCalledWith(10);
+    // The heading comes from the account, the planet request from a passive effect that may
+    // run after the heading is already on the page.
+    await waitFor(() => expect(planets.planet).toHaveBeenCalledWith(10));
 
     const queue = await screen.findByRole('region', { name: 'Черга будівництва' });
     expect(within(queue).getByText('Шахта заліза, рівень 1')).toBeInTheDocument();
