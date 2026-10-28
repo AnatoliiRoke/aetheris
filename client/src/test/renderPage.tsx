@@ -277,6 +277,10 @@ export function sampleResearchTree(overrides: Partial<ResearchTree> = {}): Resea
     queueUsedSlots: 0,
     selectedPlanetId: 10,
     availableCenterLevel: 2,
+    planets: [
+      { planetId: 10, name: 'Nova', researchCenterLevel: 2, isAvailable: true, reasonCode: null },
+      { planetId: 11, name: 'Vega', researchCenterLevel: 0, isAvailable: false, reasonCode: 'research_center_level_unmet' },
+    ],
     gameNow: '2026-10-26T12:00:00Z',
     timeMultiplier: 1,
     ...overrides,

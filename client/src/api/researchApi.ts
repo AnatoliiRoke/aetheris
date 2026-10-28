@@ -78,6 +78,17 @@ export interface ResearchBranch {
 }
 
 /**
+ * A body of the player a research can start from (task 00012, decisions 5 and 5a).
+ */
+export interface ResearchPlanet {
+  planetId: number;
+  name: string | null;
+  researchCenterLevel: number;
+  isAvailable: boolean;
+  reasonCode: string | null;
+}
+
+/**
  * The tree of the technologies with the queue of the researches
  * (`GET /api/v1/research`).
  */
@@ -89,6 +100,7 @@ export interface ResearchTree {
   queueUsedSlots: number;
   selectedPlanetId: number | null;
   availableCenterLevel: number;
+  planets: ResearchPlanet[];
   gameNow: string;
   timeMultiplier: number;
 }
