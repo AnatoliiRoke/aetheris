@@ -1248,10 +1248,14 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     ];
 
     /// <summary>
-    /// Drops the copy of the catalog after the change is committed, so a player sees it at
-    /// once.
+    /// Drops the copies of the catalog and of the texts after the change is committed, so a
+    /// player and the form see it at once.
     /// </summary>
-    private void Committed() => _catalogCache.Invalidate();
+    private void Committed()
+    {
+        _catalogCache.Invalidate();
+        _texts.Invalidate();
+    }
 
     private sealed record GroupValues(
         Dictionary<string, string>? Name,
