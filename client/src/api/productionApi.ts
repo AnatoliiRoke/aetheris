@@ -41,6 +41,19 @@ export interface ProductionRecipe {
   durationSeconds: number;
   isAvailable: boolean;
   reasons: ProductionReason[];
+  imageKey: string | null;
+  unitSeconds: number;
+  ingredients: ProductionIngredient[];
+}
+
+/**
+ * An ingredient of a unit of a recipe: a resource or a part with its name.
+ */
+export interface ProductionIngredient {
+  resourceTypeId: number | null;
+  partTypeId: number | null;
+  amount: number;
+  nameKey: string;
 }
 
 /**
@@ -50,6 +63,7 @@ export interface ProductionReason {
   code: string;
   targetId: number;
   targetLevel: number;
+  targetNameKey?: string | null;
 }
 
 /**
@@ -95,6 +109,8 @@ export interface ProductionStack {
   hasRaceBonus: boolean;
   conditionPercent: number;
   quantity: number;
+  nameKey: string;
+  imageKey: string | null;
 }
 
 /**

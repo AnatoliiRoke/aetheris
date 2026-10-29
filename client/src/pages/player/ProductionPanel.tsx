@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { ApiError } from '../../api/http';
-import type { ProductionFactory, ProductionOrder, ProductionRecipe, ProductionStack } from '../../api/productionApi';
+import type { ProductionFactory, ProductionOrder, ProductionReason, ProductionRecipe, ProductionStack } from '../../api/productionApi';
 import { useApi } from '../../api/useApi';
 import { Alert } from '../../components/Alert';
 import { TextField } from '../../components/FormField';
 import type { Language } from '../../i18n/context';
 import { useI18n } from '../../i18n/useI18n';
+import type { EntityText } from '../../texts/context';
 import { useTexts } from '../../texts/useTexts';
 import { formatDuration, formatNumber, lookup } from './planetText';
 import { useNow } from './usePlanet';
@@ -24,7 +25,7 @@ export function ProductionPanel({ planetId }: { planetId: number }) {
   const { t, language } = useI18n();
   const { production } = useApi();
   const { text } = useTexts();
-  const { factories, factory, stock, receivedAt, failed, reload, applyFactory, selectFactory } = useProduction(planetId);
+  const { factories, factory, stock, receivedAt, loaded, failed, reload, applyFactory, selectFactory } = useProduction(planetId);
   const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const now = useNow();
@@ -40,7 +41,7 @@ export function ProductionPanel({ planetId }: { planetId: number }) {
       const code = error instanceof ApiError ? error.code : 'internal_error';
       setNotice({
         kind: 'error',
-        text: reasonPrefixes.some((prefix) => code.startsWith(prefix)) ? reasonText(language, code) : t('error.generic.text'),
+        text: reasonPrefixes.some((prefix) => code.startsWith(prefix)) ? lookup(language, `reason.${code}`, code) : t('error.generic.text'),
       });
       await reload();
     } finally {
@@ -58,6 +59,8 @@ export function ProductionPanel({ planetId }: { planetId: number }) {
         </div>
         {failed ? (
           <Alert kind="error">{t('production.loadFailed')}</Alert>
+        ) : loaded ? (
+          <p className="lead">{t('production.noFactory')}</p>
         ) : (
           <p className="lead" role="status">
             {t('production.loading')}
@@ -256,13 +259,22 @@ function RecipeList({
               <span className="building-card__text num">
                 {t('production.output', {
                   quantity: formatNumber(recipe.outputQuantity, language),
-                  time: formatDuration(language, recipe.durationSeconds),
+                  time: formatDuration(language, recipe.unitSeconds),
                 })}
               </span>
+              {recipe.ingredients.length > 0 ? (
+                <span className="building-card__text num">
+                  {t('production.ingredients', {
+                    list: recipe.ingredients
+                      .map((ingredient) => `${text(ingredient.nameKey) ?? ingredient.nameKey} ${formatNumber(ingredient.amount, language)}`)
+                      .join(', '),
+                  })}
+                </span>
+              ) : null}
               {!recipe.isAvailable ? (
                 <ul className="reason-list">
                   {recipe.reasons.map((reason) => (
-                    <li key={`${reason.code}-${reason.targetId}`}>{reasonText(language, reason.code)}</li>
+                    <li key={`${reason.code}-${reason.targetId}`}>{reasonText(language, reason, text)}</li>
                   ))}
                 </ul>
               ) : null}
@@ -302,6 +314,7 @@ function RecipeList({
  */
 function StockPanel({ stacks, capacity, stored }: { stacks: ProductionStack[]; capacity: number; stored: number }) {
   const { t, language } = useI18n();
+  const { text } = useTexts();
 
   return (
     <div className="production-block">
@@ -318,7 +331,7 @@ function StockPanel({ stacks, capacity, stored }: { stacks: ProductionStack[]; c
         <ul className="storage-list">
           {stacks.map((stack) => (
             <li key={`${stack.partTypeId}-${stack.markLevel}-${stack.hasRaceBonus}-${stack.conditionPercent}`} className="storage-row">
-              <span>{t('production.part', { id: stack.partTypeId })}</span>
+              <span>{text(stack.nameKey) ?? t('production.part', { id: stack.partTypeId })}</span>
               <span className="num">
                 {t('production.mark', { level: markName(stack.markLevel) })}
               </span>
@@ -353,8 +366,10 @@ function markName(level: number): string {
 }
 
 /**
- * The text of a reason of the server.
+ * The text of a reason why a recipe is closed, with the name and the level of what it needs.
  */
-function reasonText(language: Language, code: string): string {
-  return lookup(language, `reason.${code}`, code);
+function reasonText(language: Language, reason: ProductionReason, text: EntityText): string {
+  const name = reason.targetNameKey ? (text(reason.targetNameKey) ?? reason.targetNameKey) : String(reason.targetId);
+
+  return lookup(language, `reason.${reason.code}`, reason.code, { name, level: reason.targetLevel });
 }

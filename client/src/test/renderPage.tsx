@@ -80,6 +80,7 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'production.recipe.recipe_1.description': 'Плити й балки з сировини.',
     'production.recipe.recipe_2.name': 'Корпусний модуль',
     'production.recipe.recipe_2.description': 'Модуль корпусу корабля.',
+    'production.part_type.part_3.name': 'Корпус «Оса» Мк. II',
   },
   en: {
     'world.race.race_1.name': 'Terrans',
@@ -343,6 +344,9 @@ export function sampleProductionFactory(overrides: Partial<ProductionFactory> = 
         durationSeconds: 60,
         isAvailable: true,
         reasons: [],
+        imageKey: null,
+        unitSeconds: 60,
+        ingredients: [{ resourceTypeId: 1, partTypeId: null, amount: 4, nameKey: 'world.resource.resource_1.name' }],
       },
       {
         recipeId: 2,
@@ -355,7 +359,10 @@ export function sampleProductionFactory(overrides: Partial<ProductionFactory> = 
         outputQuantity: 1,
         durationSeconds: 120,
         isAvailable: false,
-        reasons: [{ code: 'production_requirement_technology', targetId: 5, targetLevel: 1 }],
+        reasons: [{ code: 'production_requirement_technology', targetId: 5, targetLevel: 1, targetNameKey: 'research.technology.tech_1.name' }],
+        imageKey: null,
+        unitSeconds: 120,
+        ingredients: [{ resourceTypeId: 3, partTypeId: null, amount: 2, nameKey: 'world.resource.resource_3.name' }],
       },
     ],
     queue: [
@@ -390,7 +397,7 @@ export function sampleProductionFactories(): ProductionFactorySummary[] {
 export function sampleProductionStock(overrides: Partial<ProductionStock> = {}): ProductionStock {
   return {
     planetId: 10,
-    stacks: [{ partTypeId: 3, markLevel: 2, hasRaceBonus: true, conditionPercent: 100, quantity: 4 }],
+    stacks: [{ partTypeId: 3, markLevel: 2, hasRaceBonus: true, conditionPercent: 100, quantity: 4, nameKey: 'production.part_type.part_3.name', imageKey: null }],
     storage: { capacity: 100, stored: 4, fullAt: null },
     gameNow: '2026-10-26T12:00:00Z',
     ...overrides,
