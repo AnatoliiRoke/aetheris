@@ -9,6 +9,7 @@ using Aetheris.Production.Configuration;
 using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
+using Aetheris.Research.Services;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.Planets;
 using Aetheris.Tests.World;
@@ -395,6 +396,193 @@ public sealed class ProductionTests
         // The code of the row is in the code of the program nowhere.
         string sources = Path.Combine(ServerRoot(), "src", "Aetheris.Production");
         Assert.False(File.ReadAllText(Path.Combine(sources, "Data", "production-reference-seed.json")).Contains("part_group_900", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// The room of the storage of the parts is the effect of its building at its level: a body
+    /// without the building keeps no parts, and the next level adds room (task 00013,
+    /// decision 9).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_room_of_the_storage_comes_from_its_building()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+        IProductionModule production = services.GetRequiredService<IProductionModule>();
+
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, services);
+        await ProductionTestData.GiveEveryResourceAsync(player, services);
+        Assert.Equal(0, (await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage.Capacity);
+
+        // Without the building a part has nowhere to go, so the batch waits.
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(services);
+        await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 1, Token);
+        await ProductionTestData.CompleteAsync(player, services, buildingId);
+        Assert.True(Assert.Single((await production.GetFactoryAsync(player.Account.UserId, player.PlanetId, buildingId, Token)).Queue).IsBlocked);
+
+        long first = await ProductionTestData.BuildStorageAsync(player, services);
+        Assert.Equal(first, (await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage.Capacity);
+
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, "building_21", 2);
+        long second = (await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage.Capacity;
+        Assert.True(second > first);
+        Assert.Equal(
+            second,
+            await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>().GetBuildingEffectTotalAsync(player.PlanetId, BuildingEffectTypes.PartStorageCapacity, Token));
+    }
+
+    /// <summary>
+    /// The factory and the storage of a body are read only by its owner (found in the review of
+    /// task 00013).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_stranger_does_not_read_the_factory_or_the_storage()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer owner = await PlanetsTestData.FoundAsync(_factory);
+        using PlanetsTestPlayer stranger = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
+
+        long buildingId = await ProductionTestData.BuildFactoryAsync(owner, scope.ServiceProvider);
+        RecipeInfo recipe = await ProductionTestData.FirstRecipeAsync(scope.ServiceProvider);
+
+        GameException factory = await Assert.ThrowsAsync<GameException>(() =>
+            production.GetFactoryAsync(stranger.Account.UserId, owner.PlanetId, buildingId, Token));
+        GameException stock = await Assert.ThrowsAsync<GameException>(() =>
+            production.GetStockAsync(stranger.Account.UserId, owner.PlanetId, Token));
+        GameException order = await Assert.ThrowsAsync<GameException>(() =>
+            production.EnqueueAsync(stranger.Account.UserId, owner.PlanetId, buildingId, recipe.Id, 1, Token));
+
+        Assert.All(new[] { factory, stock, order }, failure => Assert.Equal(ProductionErrorCodes.PlanetUnknown, failure.Code));
+    }
+
+    /// <summary>
+    /// A batch of no units, or of so many units that the cost or the time overflow, is refused
+    /// and takes nothing (found in the review of task 00013).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_batch_of_a_wrong_quantity_is_refused()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
+
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        RecipeInfo recipe = await ProductionTestData.FirstRecipeAsync(scope.ServiceProvider);
+        long before = await ProductionTestData.BalanceAsync(player, scope.ServiceProvider, recipe.IngredientIds[0].ResourceTypeId!.Value);
+
+        foreach (long quantity in new[] { 0L, -1L, long.MaxValue, long.MaxValue / 2 })
+        {
+            GameException failure = await Assert.ThrowsAsync<GameException>(() =>
+                production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, quantity, Token));
+            Assert.Equal(ProductionErrorCodes.QuantityInvalid, failure.Code);
+        }
+
+        Assert.Equal(before, await ProductionTestData.BalanceAsync(player, scope.ServiceProvider, recipe.IngredientIds[0].ResourceTypeId!.Value));
+        Assert.Empty((await production.GetFactoryAsync(player.Account.UserId, player.PlanetId, buildingId, Token)).Queue);
+    }
+
+    /// <summary>
+    /// The starting recipes have different codes, their texts are keyed by their codes, and
+    /// every requirement names a row that exists (found in the review of task 00013).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_seed_of_the_recipes_is_consistent()
+    {
+        await ResetAsync();
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+        ProductionCatalog catalog = await services.GetRequiredService<ProductionCatalogCache>()
+            .GetAsync(services.GetRequiredService<ProductionDbContext>(), services.GetRequiredService<Aetheris.Requirements.IRequirementsModule>(), Token);
+
+        Assert.Equal(catalog.Recipes.Count, catalog.Recipes.Select(recipe => recipe.Code).Distinct(StringComparer.Ordinal).Count());
+        Assert.All(catalog.Recipes, recipe => Assert.Equal(ProductionTextKeys.RecipeName(recipe.Code), recipe.NameKey));
+        Assert.All(catalog.Parts, part => Assert.Equal(ProductionTextKeys.PartName(part.Code), part.NameKey));
+
+        Aetheris.Core.Text.LocalizationPack ukrainian = await services.GetRequiredService<Aetheris.Core.Text.ILocalizationTexts>().GetPackAsync("uk", Token);
+        Assert.All(catalog.Recipes, recipe => Assert.False(string.IsNullOrWhiteSpace(ukrainian.Texts.GetValueOrDefault(recipe.NameKey)), recipe.Code));
+
+        HashSet<int> buildingIds = [.. (await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>().GetBuildingNameKeysAsync(Token)).Keys];
+        HashSet<int> technologyIds = [.. await services.GetRequiredService<ITechnologyLevels>().GetTechnologyIdsAsync(Token)];
+        HashSet<int> raceIds = [.. (await services.GetRequiredService<Aetheris.World.IWorldModule>().GetRacesAsync(Token)).Select(race => race.Id)];
+
+        foreach (RecipeInfo recipe in catalog.Recipes)
+        {
+            foreach (ProductionRequirementInfo requirement in catalog.RequirementsOf(recipe.Id))
+            {
+                HashSet<int> targets = requirement.RequirementType switch
+                {
+                    Aetheris.Requirements.Services.RequirementTypes.BuildingLevel => buildingIds,
+                    Aetheris.Requirements.Services.RequirementTypes.TechnologyLevel => technologyIds,
+                    ProductionRequirementTypes.Race => raceIds,
+                    _ => [],
+                };
+
+                Assert.True(targets.Contains(requirement.TargetId), $"{recipe.Code}: {requirement.RequirementType} {requirement.TargetId}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// The multiplier of the production time of a learned technology scales the unit; an empty
+    /// multiplier changes nothing, and a negative one is broken data that never makes the
+    /// production instant (found in the review of task 00013).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_multiplier_of_the_production_time_scales_the_unit()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+        IProductionModule production = services.GetRequiredService<IProductionModule>();
+        await AetherisTestFactory.SetParameterAsync(services, Aetheris.Research.Configuration.ResearchConfigKeys.CatalogCacheSeconds, "0");
+        await services.GetRequiredService<Aetheris.Research.IResearchModule>().EnsureAsync(Token);
+
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, services);
+        RecipeInfo recipe = await ProductionTestData.FirstRecipeAsync(services);
+
+        Aetheris.Research.Data.ResearchDbContext research = services.GetRequiredService<Aetheris.Research.Data.ResearchDbContext>();
+        int branchId = await research.TechnologyBranches.AsNoTracking().OrderBy(branch => branch.Id).Select(branch => branch.Id).FirstAsync(Token);
+        Aetheris.Research.Data.Entities.TechnologyLevelEffectEntity effect = new() { EffectType = TechnologyEffectTypes.ProductionTime, Value = 0.5m };
+        Aetheris.Research.Data.Entities.TechnologyEntity technology = new()
+        {
+            Code = "tech_901",
+            NameKey = "research.technology.tech_901.name",
+            DescriptionKey = "research.technology.tech_901.description",
+            BranchId = branchId,
+            SortOrder = 901,
+            MaxLevel = 1,
+            ResearchCenterLevel = 1,
+            LevelIds = [new Aetheris.Research.Data.Entities.TechnologyLevelEntity { Level = 1, DurationSeconds = 60, EffectIds = [effect] }],
+        };
+        research.Technologies.Add(technology);
+        await research.SaveChangesAsync(Token);
+        research.PlayerTechnologies.Add(new Aetheris.Research.Data.Entities.PlayerTechnologyEntity { PlayerId = player.Account.UserId, TechnologyId = technology.Id, Level = 1 });
+        await research.SaveChangesAsync(Token);
+
+        async Task<long> UnitSecondsAsync() =>
+            (await production.GetFactoryAsync(player.Account.UserId, player.PlanetId, buildingId, Token)).Recipes.Single(entry => entry.RecipeId == recipe.Id).UnitSeconds;
+
+        Assert.Equal((long)Math.Ceiling(recipe.DurationSeconds * 0.5m), await UnitSecondsAsync());
+
+        effect.Value = 0m;
+        await research.SaveChangesAsync(Token);
+        Assert.Equal(recipe.DurationSeconds, await UnitSecondsAsync());
+
+        effect.Value = -1m;
+        await research.SaveChangesAsync(Token);
+        await Assert.ThrowsAsync<InvalidOperationException>(UnitSecondsAsync);
     }
 
     private static string ServerRoot()
