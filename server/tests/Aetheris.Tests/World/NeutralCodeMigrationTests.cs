@@ -112,11 +112,17 @@ public sealed class NeutralCodeMigrationTests
             Assert.Equal("Склад мінералів", await TextAsync(connectionString, "planets.building.building_8.name", "uk"));
             Assert.Equal(6, await ScalarAsync<int>(connectionString, $"""SELECT building_type_id AS "Value" FROM building_level WHERE id = 60"""));
 
+            // The storage of the parts is added to a database that already has its buildings,
+            // with the next number of the counter and its texts (task 00013).
+            Assert.Equal("Склад деталей", await TextAsync(connectionString, "planets.building.building_9.name", "uk"));
+            Assert.Equal(1, await ScalarAsync<long>(connectionString, $"""SELECT count(DISTINCT bl.building_type_id) AS "Value" FROM building_level bl JOIN building_level_effect e ON e.building_level_id = bl.id WHERE e.effect_type = 'part_storage_capacity'"""));
+
             // The counters are above every number that is taken: the produced goods of the
-            // production module added their group and their five resources (task 00013).
+            // production module added their group and their five resources, and the storage of
+            // the parts its building (task 00013).
             Assert.Equal(17, await ScalarAsync<int>(connectionString, $"""SELECT last_number AS "Value" FROM code_sequence WHERE code_group = 'resource'"""));
             Assert.Equal(6, await ScalarAsync<int>(connectionString, $"""SELECT last_number AS "Value" FROM code_sequence WHERE code_group = 'resource_group'"""));
-            Assert.Equal(8, await ScalarAsync<int>(connectionString, $"""SELECT last_number AS "Value" FROM code_sequence WHERE code_group = 'building'"""));
+            Assert.Equal(9, await ScalarAsync<int>(connectionString, $"""SELECT last_number AS "Value" FROM code_sequence WHERE code_group = 'building'"""));
         }
         finally
         {

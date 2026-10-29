@@ -1,0 +1,219 @@
+using Aetheris.Planets.Data;
+using Aetheris.Planets.Data.Entities;
+using Aetheris.Planets.Services;
+using Aetheris.Production.Data;
+using Aetheris.Production.Data.Entities;
+using Aetheris.Production.Services;
+using Aetheris.Tests.Planets;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Aetheris.Tests.Production;
+
+/// <summary>
+/// Helpers of the tests of the production: a factory and a storage on a body, its balance and
+/// the recipes of the catalog (task 00013).
+/// </summary>
+internal static class ProductionTestData
+{
+    private static CancellationToken Token => TestContext.Current.CancellationToken;
+
+    /// <summary>
+    /// Puts the first factory of the starting data on the body, at level 1.
+    /// </summary>
+    /// <param name="player">The player and the body.</param>
+    /// <param name="services">The services of the request.</param>
+    /// <returns>The building of the factory.</returns>
+    internal static async Task<long> BuildFactoryAsync(PlanetsTestPlayer player, IServiceProvider services)
+    {
+        PlanetsDbContext dbContext = services.GetRequiredService<PlanetsDbContext>();
+
+        int factoryTypeId = await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>()
+            .FindBuildingTypeIdAsync("building_13", Token)
+            ?? throw new InvalidOperationException("The factory type does not exist.");
+
+        PlanetBuildingEntity? building = await dbContext.PlanetBuildings
+            .Where(entry => entry.PlanetId == player.PlanetId && entry.BuildingTypeId == factoryTypeId)
+            .FirstOrDefaultAsync(Token);
+
+        if (building is not null)
+        {
+            return building.Id;
+        }
+
+        PlanetBuildingEntity entity = new()
+        {
+            PlanetId = player.PlanetId,
+            SectorId = 0,
+            BuildingTypeId = factoryTypeId,
+            Level = 1,
+        };
+
+        dbContext.PlanetBuildings.Add(entity);
+        await dbContext.SaveChangesAsync(Token);
+
+        return entity.Id;
+    }
+
+    /// <summary>
+    /// Completes every batch of a factory that is due, at the moment its last unit is ready.
+    /// </summary>
+    /// <param name="player">The player and the body.</param>
+    /// <param name="services">The services of the request.</param>
+    /// <param name="buildingId">The factory.</param>
+    /// <returns>A task that completes when the batches are made.</returns>
+    internal static async Task CompleteAsync(PlanetsTestPlayer player, IServiceProvider services, long buildingId)
+    {
+        ProductionDbContext dbContext = services.GetRequiredService<ProductionDbContext>();
+
+        // The batch is run until its last unit is made, so the whole batch is done.
+        DateTimeOffset? finishesAt = await dbContext.ProductionOrders.AsNoTracking()
+            .Where(entry => entry.PlanetId == player.PlanetId && entry.PlanetBuildingId == buildingId)
+            .MaxAsync(entry => (DateTimeOffset?)entry.FinishesAt, Token);
+
+        await services.GetRequiredService<ProductionQueueService>()
+            .CompleteDueAsync(player.Account.UserId, player.PlanetId, buildingId, finishesAt ?? DateTimeOffset.MaxValue, Token);
+    }
+
+    /// <summary>
+    /// Gives the body every resource of the world, so a recipe whose ingredients are the
+    /// produced resources can be ordered too.
+    /// </summary>
+    /// <param name="player">The player and the body.</param>
+    /// <param name="services">The services of the request.</param>
+    /// <returns>A task that completes when the balance is filled.</returns>
+    internal static async Task GiveEveryResourceAsync(PlanetsTestPlayer player, IServiceProvider services)
+    {
+        PlanetsDbContext dbContext = services.GetRequiredService<PlanetsDbContext>();
+        Aetheris.World.Data.WorldDbContext world = services.GetRequiredService<Aetheris.World.Data.WorldDbContext>();
+
+        List<int> resourceTypeIds = await world.ResourceTypes.AsNoTracking()
+            .Select(resource => resource.Id)
+            .ToListAsync(Token);
+
+        List<PlanetResourceEntity> rows = await dbContext.PlanetResources
+            .Where(entry => entry.PlanetId == player.PlanetId)
+            .ToListAsync(Token);
+
+        foreach (PlanetResourceEntity row in rows)
+        {
+            row.Amount = 1_000_000L;
+        }
+
+        foreach (int resourceTypeId in resourceTypeIds)
+        {
+            if (rows.Any(row => row.ResourceTypeId == resourceTypeId))
+            {
+                continue;
+            }
+
+            dbContext.PlanetResources.Add(new PlanetResourceEntity
+            {
+                PlanetId = player.PlanetId,
+                SectorId = 0,
+                ResourceTypeId = resourceTypeId,
+                Amount = 1_000_000L,
+            });
+        }
+
+        await dbContext.SaveChangesAsync(Token);
+    }
+
+    /// <summary>
+    /// Builds the storage of the parts on the body, so its room comes from the data of the
+    /// building, and fills it until only the given room is free.
+    /// </summary>
+    /// <param name="player">The player and the body.</param>
+    /// <param name="services">The services of the request.</param>
+    /// <param name="freeRoom">How many units still fit, or <see langword="null"/> for an empty storage.</param>
+    /// <returns>The room of the storage.</returns>
+    internal static async Task<long> BuildStorageAsync(PlanetsTestPlayer player, IServiceProvider services, long? freeRoom = null)
+    {
+        PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
+        Aetheris.Planets.IPlanetsModule planetsModule = services.GetRequiredService<Aetheris.Planets.IPlanetsModule>();
+
+        int storageTypeId = await planetsModule.FindBuildingTypeIdAsync("building_21", Token)
+            ?? throw new InvalidOperationException("The storage type does not exist.");
+
+        if (!await planets.PlanetBuildings.AnyAsync(entry => entry.PlanetId == player.PlanetId && entry.BuildingTypeId == storageTypeId, Token))
+        {
+            planets.PlanetBuildings.Add(new PlanetBuildingEntity
+            {
+                PlanetId = player.PlanetId,
+                SectorId = 0,
+                BuildingTypeId = storageTypeId,
+                Level = 1,
+            });
+            await planets.SaveChangesAsync(Token);
+        }
+
+        long capacity = await planetsModule.GetBuildingEffectTotalAsync(player.PlanetId, BuildingEffectTypes.PartStorageCapacity, Token);
+        Assert.True(capacity > 0);
+
+        ProductionDbContext dbContext = services.GetRequiredService<ProductionDbContext>();
+        PartStorageEntity? storage = await dbContext.PartStorages
+            .SingleOrDefaultAsync(entry => entry.PlanetId == player.PlanetId, Token);
+
+        if (storage is null)
+        {
+            storage = new PartStorageEntity { PlanetId = player.PlanetId, SectorId = 0 };
+            dbContext.PartStorages.Add(storage);
+        }
+
+        storage.Capacity = capacity;
+        storage.Quantity = freeRoom is null ? 0 : Math.Max(0, capacity - freeRoom.Value);
+        await dbContext.SaveChangesAsync(Token);
+
+        return capacity;
+    }
+
+    /// <summary>
+    /// Reads the stored amount of one resource of the body.
+    /// </summary>
+    /// <param name="player">The player and the body.</param>
+    /// <param name="services">The services of the request.</param>
+    /// <param name="resourceTypeId">The resource.</param>
+    /// <returns>The amount.</returns>
+    internal static async Task<long> BalanceAsync(PlanetsTestPlayer player, IServiceProvider services, int resourceTypeId)
+    {
+        PlanetsDbContext dbContext = services.GetRequiredService<PlanetsDbContext>();
+
+        PlanetResourceEntity? row = await dbContext.PlanetResources
+            .AsNoTracking()
+            .SingleOrDefaultAsync(entry => entry.PlanetId == player.PlanetId && entry.ResourceTypeId == resourceTypeId, Token);
+
+        return row?.Amount ?? 0;
+    }
+
+    /// <summary>
+    /// Finds the first recipe of the catalog that makes a resource.
+    /// </summary>
+    /// <param name="services">The services of the request.</param>
+    /// <returns>The recipe.</returns>
+    internal static async Task<RecipeInfo> FirstRecipeAsync(IServiceProvider services)
+    {
+        ProductionCatalog catalog = await services.GetRequiredService<ProductionCatalogCache>()
+            .GetAsync(
+                services.GetRequiredService<ProductionDbContext>(),
+                services.GetRequiredService<Aetheris.Requirements.IRequirementsModule>(),
+                Token);
+
+        return catalog.Recipes.First(recipe => recipe.PartTypeId is null);
+    }
+
+    /// <summary>
+    /// Finds the first recipe of the catalog that makes a part.
+    /// </summary>
+    /// <param name="services">The services of the request.</param>
+    /// <returns>The recipe.</returns>
+    internal static async Task<RecipeInfo> FirstPartRecipeAsync(IServiceProvider services)
+    {
+        ProductionCatalog catalog = await services.GetRequiredService<ProductionCatalogCache>()
+            .GetAsync(
+                services.GetRequiredService<ProductionDbContext>(),
+                services.GetRequiredService<Aetheris.Requirements.IRequirementsModule>(),
+                Token);
+
+        return catalog.Recipes.First(recipe => recipe.PartTypeId is not null);
+    }
+}

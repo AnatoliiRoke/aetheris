@@ -93,7 +93,7 @@ public sealed class ProductionTests
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
 
         // The body has no factory yet, so the recipes of a factory are closed.
-        long buildingId = await BuildFactoryAsync(player, scope.ServiceProvider);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
 
         ProductionFactoryDto factory = await production.GetFactoryAsync(player.Account.UserId, player.PlanetId, buildingId, Token);
 
@@ -118,14 +118,14 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await BuildFactoryAsync(player, scope.ServiceProvider);
-        await GiveEveryResourceAsync(player, scope.ServiceProvider);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
 
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
         ProductionFactoryDto factory = await production.GetFactoryAsync(player.Account.UserId, player.PlanetId, buildingId, Token);
 
-        RecipeInfo recipe = await FirstRecipeAsync(scope.ServiceProvider);
-        long before = await BalanceAsync(player, scope.ServiceProvider, recipe.IngredientIds[0].ResourceTypeId!.Value);
+        RecipeInfo recipe = await ProductionTestData.FirstRecipeAsync(scope.ServiceProvider);
+        long before = await ProductionTestData.BalanceAsync(player, scope.ServiceProvider, recipe.IngredientIds[0].ResourceTypeId!.Value);
 
         ProductionFactoryDto queued = await production.EnqueueAsync(
             player.Account.UserId,
@@ -138,7 +138,7 @@ public sealed class ProductionTests
         Assert.Single(queued.Queue);
         Assert.Equal(3, queued.Queue[0].Quantity);
 
-        long after = await BalanceAsync(player, scope.ServiceProvider, recipe.IngredientIds[0].ResourceTypeId!.Value);
+        long after = await ProductionTestData.BalanceAsync(player, scope.ServiceProvider, recipe.IngredientIds[0].ResourceTypeId!.Value);
         Assert.Equal(before - (recipe.IngredientIds[0].Amount * 3), after);
 
         ProductionFactoryDto cancelled = await production.CancelAsync(
@@ -150,7 +150,7 @@ public sealed class ProductionTests
 
         Assert.Empty(cancelled.Queue);
 
-        long restored = await BalanceAsync(player, scope.ServiceProvider, recipe.IngredientIds[0].ResourceTypeId!.Value);
+        long restored = await ProductionTestData.BalanceAsync(player, scope.ServiceProvider, recipe.IngredientIds[0].ResourceTypeId!.Value);
         Assert.Equal(before, restored);
     }
 
@@ -166,11 +166,11 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await BuildFactoryAsync(player, scope.ServiceProvider);
-        await GiveEveryResourceAsync(player, scope.ServiceProvider);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
 
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
-        RecipeInfo recipe = await FirstRecipeAsync(scope.ServiceProvider);
+        RecipeInfo recipe = await ProductionTestData.FirstRecipeAsync(scope.ServiceProvider);
 
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 1, Token);
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 1, Token);
@@ -193,12 +193,12 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await BuildFactoryAsync(player, scope.ServiceProvider);
-        await GiveEveryResourceAsync(player, scope.ServiceProvider);
-        await SetStorageCapacityAsync(player, scope.ServiceProvider, 100);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider);
 
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
-        RecipeInfo recipe = await FirstPartRecipeAsync(scope.ServiceProvider);
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
 
         ProductionFactoryDto queued = await production.EnqueueAsync(
             player.Account.UserId,
@@ -211,12 +211,53 @@ public sealed class ProductionTests
         Assert.Equal(0, queued.Queue[0].ProducedQuantity);
 
         // The batch is due, so the units are made one by one.
-        await CompleteAsync(player, scope.ServiceProvider, buildingId);
+        await ProductionTestData.CompleteAsync(player, scope.ServiceProvider, buildingId);
 
         ProductionStockDto stock = await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token);
 
         Assert.Equal(2, stock.Storage.Stored);
         Assert.NotEmpty(stock.Stacks);
+    }
+
+    /// <summary>
+    /// A unit the scheduler makes in its own scope between two calls of another scope is not
+    /// written over with the old values that scope still tracks (found in the review of task
+    /// 00013: the quantity of the storage came back from the tracker and one unit was lost).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_unit_made_by_another_scope_is_not_lost()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider);
+
+        IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
+
+        ProductionFactoryDto queued = await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 2, Token);
+        ProductionOrderDto order = queued.Queue[0];
+
+        // The scheduler makes the first unit in a scope of its own.
+        using (IServiceScope scheduler = _factory.Services.CreateScope())
+        {
+            int made = await scheduler.ServiceProvider.GetRequiredService<ProductionQueueService>()
+                .CompleteDueAsync(player.Account.UserId, player.PlanetId, buildingId, order.NextUnitAt!.Value, Token);
+            Assert.Equal(1, made);
+        }
+
+        // The first scope still tracks the batch and the storage it read before.
+        await scope.ServiceProvider.GetRequiredService<ProductionQueueService>()
+            .CompleteDueAsync(player.Account.UserId, player.PlanetId, buildingId, order.FinishesAt!.Value, Token);
+
+        ProductionStockDto stock = await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token);
+
+        Assert.Equal(2, stock.Storage.Stored);
+        Assert.Equal(2, stock.Stacks.Sum(stack => stack.Quantity));
     }
 
     /// <summary>
@@ -231,20 +272,20 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await BuildFactoryAsync(player, scope.ServiceProvider);
-        await GiveEveryResourceAsync(player, scope.ServiceProvider);
-        await SetStorageCapacityAsync(player, scope.ServiceProvider, 1);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        long capacity = await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider, 1);
 
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
-        RecipeInfo recipe = await FirstPartRecipeAsync(scope.ServiceProvider);
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
 
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 5, Token);
 
-        await CompleteAsync(player, scope.ServiceProvider, buildingId);
+        await ProductionTestData.CompleteAsync(player, scope.ServiceProvider, buildingId);
 
         ProductionStockDto stock = await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token);
 
-        Assert.Equal(1, stock.Storage.Stored);
+        Assert.Equal(capacity, stock.Storage.Stored);
         Assert.NotNull(stock.Storage.FullAt);
     }
 
@@ -262,13 +303,13 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await BuildFactoryAsync(player, scope.ServiceProvider);
-        await GiveEveryResourceAsync(player, scope.ServiceProvider);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
 
-        RecipeInfo recipe = await FirstRecipeAsync(scope.ServiceProvider);
+        RecipeInfo recipe = await ProductionTestData.FirstRecipeAsync(scope.ServiceProvider);
         int resourceTypeId = recipe.IngredientIds[0].ResourceTypeId!.Value;
         long amount = recipe.IngredientIds[0].Amount;
-        long before = await BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
+        long before = await ProductionTestData.BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
 
         Task<ProductionFactoryDto>[] tasks = [.. Enumerable.Range(0, parallelCount).Select(index =>
             EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 1, index))];
@@ -278,7 +319,7 @@ public sealed class ProductionTests
         // The queue of a factory has two places, so the rest is refused.
         Assert.Equal(2, results.Count(result => result.Queue.Count > 0));
 
-        long after = await BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
+        long after = await ProductionTestData.BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
 
         Assert.True(after >= 0);
         Assert.Equal(before - (amount * 2), after);
@@ -296,9 +337,9 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await BuildFactoryAsync(player, scope.ServiceProvider);
-        await GiveEveryResourceAsync(player, scope.ServiceProvider);
-        await SetStorageCapacityAsync(player, scope.ServiceProvider, 100);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider);
 
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
 
@@ -308,7 +349,7 @@ public sealed class ProductionTests
 
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 1, Token);
 
-        await CompleteAsync(player, scope.ServiceProvider, buildingId);
+        await ProductionTestData.CompleteAsync(player, scope.ServiceProvider, buildingId);
 
         ProductionStockDto stock = await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token);
 
@@ -383,89 +424,6 @@ public sealed class ProductionTests
         }
     }
 
-    private async Task<long> BuildFactoryAsync(PlanetsTestPlayer player, IServiceProvider services)
-    {
-        PlanetsDbContext dbContext = services.GetRequiredService<PlanetsDbContext>();
-
-        int factoryTypeId = await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>()
-            .FindBuildingTypeIdAsync("building_13", Token)
-            ?? throw new InvalidOperationException("The factory type does not exist.");
-
-        PlanetBuildingEntity? building = await dbContext.PlanetBuildings
-            .Where(entry => entry.PlanetId == player.PlanetId && entry.BuildingTypeId == factoryTypeId)
-            .FirstOrDefaultAsync(Token);
-
-        if (building is not null)
-        {
-            return building.Id;
-        }
-
-        PlanetBuildingEntity entity = new()
-        {
-            PlanetId = player.PlanetId,
-            SectorId = 0,
-            BuildingTypeId = factoryTypeId,
-            Level = 1,
-        };
-
-        dbContext.PlanetBuildings.Add(entity);
-        await dbContext.SaveChangesAsync(Token);
-
-        return entity.Id;
-    }
-
-    private async Task<RecipeInfo> FirstRecipeAsync(IServiceProvider services)
-    {
-        ProductionCatalog catalog = await services.GetRequiredService<ProductionCatalogCache>()
-            .GetAsync(
-                services.GetRequiredService<ProductionDbContext>(),
-                services.GetRequiredService<Aetheris.Requirements.IRequirementsModule>(),
-                Token);
-
-        return catalog.Recipes.First(recipe => recipe.PartTypeId is null);
-    }
-
-    private async Task<RecipeInfo> FirstPartRecipeAsync(IServiceProvider services)
-    {
-        ProductionCatalog catalog = await services.GetRequiredService<ProductionCatalogCache>()
-            .GetAsync(
-                services.GetRequiredService<ProductionDbContext>(),
-                services.GetRequiredService<Aetheris.Requirements.IRequirementsModule>(),
-                Token);
-
-        return catalog.Recipes.First(recipe => recipe.PartTypeId is not null);
-    }
-
-    private static async Task GiveResourcesAsync(PlanetsTestPlayer player, IServiceProvider services)
-    {
-        PlanetsDbContext dbContext = services.GetRequiredService<PlanetsDbContext>();
-
-        List<PlanetResourceEntity> rows = await dbContext.PlanetResources
-            .Where(entry => entry.PlanetId == player.PlanetId)
-            .ToListAsync(Token);
-
-        foreach (PlanetResourceEntity row in rows)
-        {
-            row.Amount = 1_000_000L;
-        }
-
-        await dbContext.SaveChangesAsync(Token);
-    }
-
-    /// <summary>
-    /// Gives the body every resource of the world, so a recipe whose ingredients are the
-    /// produced resources can be ordered too.
-    /// </summary>
-    /// <param name="player">The player and the body.</param>
-    /// <param name="services">The services of the request.</param>
-    /// <returns>A task that completes when the balance is filled.</returns>
-    /// <summary>
-    /// Completes every batch of a factory that is due, at the moment its last unit is ready.
-    /// </summary>
-    /// <param name="player">The player and the body.</param>
-    /// <param name="services">The services of the request.</param>
-    /// <param name="buildingId">The factory.</param>
-    /// <returns>A task that completes when the batches are made.</returns>
     /// <summary>
     /// Finds a recipe of a part of a group the race of the player has a bonus in.
     /// </summary>
@@ -501,80 +459,6 @@ public sealed class ProductionTests
             && catalog.FindPart(recipe.PartTypeId.Value) is { } part
             && part.MarkLevel > 1
             && bonusGroups.Contains(part.PartGroupId));
-    }
-
-    private static async Task CompleteAsync(PlanetsTestPlayer player, IServiceProvider services, long buildingId)
-    {
-        ProductionDbContext dbContext = services.GetRequiredService<ProductionDbContext>();
-
-        // The batch is run until its last unit is made, so the whole batch is done.
-        DateTimeOffset? finishesAt = await dbContext.ProductionOrders.AsNoTracking()
-            .Where(entry => entry.PlanetId == player.PlanetId && entry.PlanetBuildingId == buildingId)
-            .MaxAsync(entry => (DateTimeOffset?)entry.FinishesAt, Token);
-
-        await services.GetRequiredService<ProductionQueueService>()
-            .CompleteDueAsync(player.Account.UserId, player.PlanetId, buildingId, finishesAt ?? DateTimeOffset.MaxValue, Token);
-    }
-
-    private static async Task GiveEveryResourceAsync(PlanetsTestPlayer player, IServiceProvider services)
-    {
-        PlanetsDbContext dbContext = services.GetRequiredService<PlanetsDbContext>();
-        Aetheris.World.Data.WorldDbContext world = services.GetRequiredService<Aetheris.World.Data.WorldDbContext>();
-
-        List<int> resourceTypeIds = await world.ResourceTypes.AsNoTracking()
-            .Select(resource => resource.Id)
-            .ToListAsync(Token);
-
-        List<PlanetResourceEntity> rows = await dbContext.PlanetResources
-            .Where(entry => entry.PlanetId == player.PlanetId)
-            .ToListAsync(Token);
-
-        foreach (PlanetResourceEntity row in rows)
-        {
-            row.Amount = 1_000_000L;
-        }
-
-        foreach (int resourceTypeId in resourceTypeIds)
-        {
-            if (rows.Any(row => row.ResourceTypeId == resourceTypeId))
-            {
-                continue;
-            }
-
-            dbContext.PlanetResources.Add(new PlanetResourceEntity
-            {
-                PlanetId = player.PlanetId,
-                SectorId = 0,
-                ResourceTypeId = resourceTypeId,
-                Amount = 1_000_000L,
-            });
-        }
-
-        await dbContext.SaveChangesAsync(Token);
-    }
-
-    private static async Task SetStorageCapacityAsync(PlanetsTestPlayer player, IServiceProvider services, int capacity)
-    {
-        ProductionDbContext dbContext = services.GetRequiredService<ProductionDbContext>();
-
-        PartStorageEntity storage = await dbContext.PartStorages
-            .SingleOrDefaultAsync(entry => entry.PlanetId == player.PlanetId, Token)
-            ?? new PartStorageEntity { PlanetId = player.PlanetId, SectorId = 0, Capacity = capacity, Quantity = 0 };
-
-        storage.Capacity = capacity;
-        dbContext.PartStorages.Add(storage);
-        await dbContext.SaveChangesAsync(Token);
-    }
-
-    private static async Task<long> BalanceAsync(PlanetsTestPlayer player, IServiceProvider services, int resourceTypeId)
-    {
-        PlanetsDbContext dbContext = services.GetRequiredService<PlanetsDbContext>();
-
-        PlanetResourceEntity? row = await dbContext.PlanetResources
-            .AsNoTracking()
-            .SingleOrDefaultAsync(entry => entry.PlanetId == player.PlanetId && entry.ResourceTypeId == resourceTypeId, Token);
-
-        return row?.Amount ?? 0;
     }
 
     private async Task ResetAsync()
