@@ -75,6 +75,12 @@ public sealed class ProductionOrderCostEntity
     /// <summary>Gets or sets the part the ingredient is, or <see langword="null"/>.</summary>
     public int? PartTypeId { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether the parts taken carried the bonus of a race, so cancelling the
+    /// batch gives back the same stack (task 00013, decision 2.8).
+    /// </summary>
+    public bool HasRaceBonus { get; set; }
+
     /// <summary>Gets or sets how many of the ingredient was paid.</summary>
     public long Amount { get; set; }
 }

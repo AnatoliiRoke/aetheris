@@ -119,6 +119,14 @@ public sealed class TechnologyLevelsService : ITechnologyLevels
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<int, string>> GetTechnologyNameKeysAsync(CancellationToken cancellationToken)
+    {
+        TechnologyCatalog catalog = await _catalogCache.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
+
+        return catalog.Technologies.ToDictionary(technology => technology.Id, technology => technology.NameKey);
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlySet<int>> GetTechnologyIdsAsync(CancellationToken cancellationToken) =>
         new HashSet<int>(await _dbContext.Technologies.AsNoTracking().Select(technology => technology.Id).ToListAsync(cancellationToken).ConfigureAwait(false));
 }

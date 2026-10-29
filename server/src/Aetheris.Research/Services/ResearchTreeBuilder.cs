@@ -158,9 +158,11 @@ public sealed class ResearchTreeBuilder
     }
 
     private static string? UnlockNameKey(ResearchTreeSnapshot snapshot, TechnologyEffectInfo effect) =>
-        effect.UnlockKind == TechnologyUnlockKinds.BuildingType && effect.UnlockTargetId is int buildingTypeId
-            ? snapshot.BuildingNameKeys.GetValueOrDefault(buildingTypeId)
-            : null;
+        effect.UnlockTargetId is not int targetId || effect.UnlockKind is null
+            ? null
+            : effect.UnlockKind == TechnologyUnlockKinds.BuildingType
+                ? snapshot.BuildingNameKeys.GetValueOrDefault(targetId)
+                : snapshot.UnlockNameKeys?.GetValueOrDefault(effect.UnlockKind)?.GetValueOrDefault(targetId);
 
     private static IEnumerable<ResearchBranchDto> BuildBranches(ResearchTreeSnapshot snapshot, IReadOnlyList<TechnologyInfo> shown)
     {

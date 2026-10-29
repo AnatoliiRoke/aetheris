@@ -49,6 +49,9 @@ public sealed record ProductionFactorySummaryDto(
 /// <param name="DurationSeconds">The time of one unit, in game seconds.</param>
 /// <param name="IsAvailable">Whether the recipe can be ordered.</param>
 /// <param name="Reasons">The reasons why it is not available.</param>
+/// <param name="ImageKey">The key of the picture, or <see langword="null"/>.</param>
+/// <param name="UnitSeconds">The time of one unit for the player, with the multiplier of the technologies.</param>
+/// <param name="Ingredients">The ingredients of one unit.</param>
 public sealed record ProductionRecipeDto(
     int RecipeId,
     string Code,
@@ -60,7 +63,23 @@ public sealed record ProductionRecipeDto(
     long OutputQuantity,
     long DurationSeconds,
     bool IsAvailable,
-    IReadOnlyList<ProductionReasonDto> Reasons);
+    IReadOnlyList<ProductionReasonDto> Reasons,
+    string? ImageKey,
+    long UnitSeconds,
+    IReadOnlyList<ProductionIngredientDto> Ingredients);
+
+/// <summary>
+/// An ingredient of one unit of a recipe (task 00013, section 3.2).
+/// </summary>
+/// <param name="ResourceTypeId">The resource the ingredient is, or <see langword="null"/>.</param>
+/// <param name="PartTypeId">The part the ingredient is, or <see langword="null"/>.</param>
+/// <param name="Amount">How many of the ingredient one unit takes.</param>
+/// <param name="NameKey">The localisation key of the name of the ingredient.</param>
+public sealed record ProductionIngredientDto(
+    int? ResourceTypeId,
+    int? PartTypeId,
+    long Amount,
+    string NameKey);
 
 /// <summary>
 /// A reason why a recipe is not available.
@@ -68,10 +87,12 @@ public sealed record ProductionRecipeDto(
 /// <param name="Code">The localisation key of the reason.</param>
 /// <param name="TargetId">What is required, when the reason names it.</param>
 /// <param name="TargetLevel">The required level of the target.</param>
+/// <param name="TargetNameKey">The localisation key of the name of the target, or <see langword="null"/>.</param>
 public sealed record ProductionReasonDto(
     string Code,
     int TargetId,
-    int TargetLevel);
+    int TargetLevel,
+    string? TargetNameKey = null);
 
 /// <summary>
 /// A batch of a queue.
@@ -128,9 +149,13 @@ public sealed record ProductionStockDto(
 /// <param name="HasRaceBonus">Whether the parts carry the bonus of their race.</param>
 /// <param name="ConditionPercent">The condition of the parts in per cent.</param>
 /// <param name="Quantity">How many parts the stack holds.</param>
+/// <param name="NameKey">The localisation key of the name of the part.</param>
+/// <param name="ImageKey">The key of the picture of the part, or <see langword="null"/>.</param>
 public sealed record ProductionStackDto(
     int PartTypeId,
     int MarkLevel,
     bool HasRaceBonus,
     int ConditionPercent,
-    long Quantity);
+    long Quantity,
+    string NameKey,
+    string? ImageKey);

@@ -30,6 +30,9 @@ public static class BuildingEffectTypes
     /// <summary>The level of every other building of the body cannot exceed the value.</summary>
     public const string LevelCap = "level_cap";
 
+    /// <summary>Adds room for the parts in the storage of the parts of the body (task 00013, decision 9).</summary>
+    public const string PartStorageCapacity = "part_storage_capacity";
+
     /// <summary>
     /// Gets every effect type, in the order of the form of the admin panel (task 00023).
     /// </summary>
@@ -42,6 +45,7 @@ public static class BuildingEffectTypes
         EnergyConsumption,
         PopulationMax,
         LevelCap,
+        PartStorageCapacity,
     ];
 
     /// <summary>

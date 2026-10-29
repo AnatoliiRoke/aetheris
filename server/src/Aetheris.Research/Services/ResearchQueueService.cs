@@ -51,6 +51,7 @@ public sealed class ResearchQueueService
     private readonly IEventScheduler _scheduler;
     private readonly IGameConfig _config;
     private readonly IGameClock _clock;
+    private readonly IReadOnlyList<ITechnologyUnlockTargets> _unlockTargets;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResearchQueueService"/> class.
@@ -65,6 +66,7 @@ public sealed class ResearchQueueService
     /// <param name="scheduler">The scheduler of the events.</param>
     /// <param name="config">The game configuration.</param>
     /// <param name="clock">The game clock.</param>
+    /// <param name="unlockTargets">The subjects of the other modules a technology may open, for their names.</param>
     public ResearchQueueService(
         ResearchDbContext dbContext,
         ResearchUnitOfWork unitOfWork,
@@ -75,7 +77,8 @@ public sealed class ResearchQueueService
         IWorldModule world,
         IEventScheduler scheduler,
         IGameConfig config,
-        IGameClock clock)
+        IGameClock clock,
+        IEnumerable<ITechnologyUnlockTargets> unlockTargets)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -87,6 +90,7 @@ public sealed class ResearchQueueService
         ArgumentNullException.ThrowIfNull(scheduler);
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(unlockTargets);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -98,6 +102,7 @@ public sealed class ResearchQueueService
         _scheduler = scheduler;
         _config = config;
         _clock = clock;
+        _unlockTargets = [.. unlockTargets];
     }
 
     /// <summary>
@@ -538,6 +543,13 @@ public sealed class ResearchQueueService
             [.. catalog.Technologies.Select(technology => new SubjectLevel(technology.Id, Math.Min(learned.GetValueOrDefault(technology.Id) + 1, technology.MaxLevel)))],
             cancellationToken).ConfigureAwait(false);
 
+        Dictionary<string, IReadOnlyDictionary<int, string>> unlockNameKeys = new(StringComparer.Ordinal);
+
+        foreach (ITechnologyUnlockTargets targets in _unlockTargets)
+        {
+            unlockNameKeys[targets.UnlockKind] = await targets.GetNameKeysAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         return new ResearchTreeSnapshot(
             catalog,
             queue,
@@ -549,6 +561,7 @@ public sealed class ResearchQueueService
             requirements,
             await _planets.GetBuildingNameKeysAsync(cancellationToken).ConfigureAwait(false),
             _clock.GameNow,
-            _clock.Multiplier);
+            _clock.Multiplier,
+            unlockNameKeys);
     }
 }

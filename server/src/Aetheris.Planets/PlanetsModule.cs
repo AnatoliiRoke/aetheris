@@ -180,5 +180,12 @@ public sealed class PlanetsModule : IPlanetsModule
         await _queries.GetBuildingsByTypesAsync(planetId, buildingTypeIds, playerId, cancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc />
+    public Task<long> GetBuildingEffectTotalAsync(
+        long planetId,
+        string effectType,
+        CancellationToken cancellationToken = default) =>
+        _queries.GetBuildingEffectTotalAsync(planetId, effectType, cancellationToken);
+
+    /// <inheritdoc />
     public void InvalidateCatalog() => _queries.InvalidateCatalog();
 }

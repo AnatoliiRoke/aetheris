@@ -271,6 +271,29 @@ public sealed class PlanetQueryService
     }
 
     /// <summary>
+    /// Gets the sum of one effect of the buildings of a body at their levels: the room of the
+    /// storage of the parts, for example (task 00013, decision 9).
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="effectType">The effect type, one of <see cref="BuildingEffectTypes"/>.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The sum of the values of the effect, or zero when no building has it.</returns>
+    public async Task<long> GetBuildingEffectTotalAsync(long planetId, string effectType, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(effectType);
+
+        BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
+        Dictionary<int, int> levels = await _dbContext.PlanetBuildings.AsNoTracking()
+            .Where(building => building.PlanetId == planetId)
+            .ToDictionaryAsync(building => building.BuildingTypeId, building => building.Level, cancellationToken)
+            .ConfigureAwait(false);
+
+        return PlanetEconomy.Effects(catalog, levels)
+            .Where(entry => string.Equals(entry.Effect.EffectType, effectType, StringComparison.Ordinal))
+            .Sum(entry => entry.Effect.Value);
+    }
+
+    /// <summary>
     /// Gets the level of a building type on a body of a player.
     /// </summary>
     /// <param name="buildingTypeId">The building type.</param>

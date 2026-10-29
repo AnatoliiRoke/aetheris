@@ -6,6 +6,7 @@ using Aetheris.Production.Api;
 using Aetheris.Production.Data;
 using Aetheris.Production.Events;
 using Aetheris.Production.Services;
+using Aetheris.Research.Services;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -41,6 +42,9 @@ public static class ProductionServiceCollectionExtensions
         services.AddScoped<IScheduledEventHandler, ProductionUnitReadyHandler>();
         services.AddScoped<ProductionReferenceAdminService>();
         services.AddScoped<IAdminReferenceService>(serviceProvider => serviceProvider.GetRequiredService<ProductionReferenceAdminService>());
+
+        // A technology may open a recipe with its effect «opens» (task 00023, decision 7).
+        services.AddScoped<ITechnologyUnlockTargets, ProductionUnlockTargets>();
 
         services.AddCommand<EnqueueProductionCommand>();
         services.AddCommand<CancelProductionCommand>();

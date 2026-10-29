@@ -46,6 +46,14 @@ public sealed class ProductionUnitOfWork
             ? await _session.BeginTransactionAsync(cancellationToken).ConfigureAwait(false)
             : null;
 
+        if (owned is not null)
+        {
+            // A unit with its own transaction reads its rows anew: a row the scheduler changed
+            // since the last unit of the same scope would otherwise come back with its old
+            // values from the tracker, and the old quantity would be written over the new one.
+            _dbContext.ChangeTracker.Clear();
+        }
+
         try
         {
             await _dbContext.Database.UseTransactionAsync(_session.CurrentTransaction, cancellationToken).ConfigureAwait(false);

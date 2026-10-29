@@ -12,5 +12,6 @@
   "admin.reference.technology_effect.storage_capacity": { "uk": "Множник місткості складів", "en": "Storage capacity multiplier" },
   "admin.reference.technology_effect.energy_output": { "uk": "Множник енергії", "en": "Energy output multiplier" },
   "admin.reference.technology_effect.population_max": { "uk": "Множник максимуму населення", "en": "Population limit multiplier" },
-  "admin.reference.unlock.building_type": { "uk": "Будівлю", "en": "A building" }
+  "admin.reference.unlock.building_type": { "uk": "Будівлю", "en": "A building" },
+  "admin.reference.unlock.recipe": { "uk": "Рецепт виробництва", "en": "A production recipe" }
 }

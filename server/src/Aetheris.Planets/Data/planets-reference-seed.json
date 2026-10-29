@@ -845,6 +845,49 @@
         }
       ],
       "requirements": []
+    },
+    {
+      "code": "building_21",
+      "sort_order": 21,
+      "building_class": "",
+      "is_start_building": false,
+      "name": {
+        "uk": "Склад деталей",
+        "en": "Parts storage"
+      },
+      "description": {
+        "uk": "Зберігає вироблені деталі: кожен рівень додає місця.",
+        "en": "Keeps the produced parts: every level adds room."
+      },
+      "duration_seconds": {
+        "base": 120,
+        "growth": 1.5
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "base": 200,
+          "growth": 1.6
+        },
+        {
+          "resource": "resource_3",
+          "base": 120,
+          "growth": 1.6
+        }
+      ],
+      "effects": [
+        {
+          "type": "part_storage_capacity",
+          "base": 200,
+          "growth": 1.5
+        },
+        {
+          "type": "energy_consumption",
+          "base": 2,
+          "growth": 1.2
+        }
+      ],
+      "requirements": []
     }
   ]
 }

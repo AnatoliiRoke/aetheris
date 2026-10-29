@@ -20,6 +20,7 @@ public sealed class ProductionCatalogCache
     private readonly IGameConfig _config;
     private readonly IGameClock _clock;
     private volatile CachedCatalog? _cached;
+    private long _generation;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProductionCatalogCache"/> class.
@@ -36,9 +37,14 @@ public sealed class ProductionCatalogCache
     }
 
     /// <summary>
-    /// Forgets the catalog, so the next read loads it again.
+    /// Forgets the catalog, so the next read loads it again. A read that is loading the catalog
+    /// at this moment does not keep what it loaded (documentation/tech/09, section 10a.6).
     /// </summary>
-    public void Invalidate() => _cached = null;
+    public void Invalidate()
+    {
+        Interlocked.Increment(ref _generation);
+        _cached = null;
+    }
 
     /// <summary>
     /// Gets the catalog, loading it when it is missing or old.
@@ -74,8 +80,15 @@ public sealed class ProductionCatalogCache
                 return cached.Catalog;
             }
 
+            long generation = Interlocked.Read(ref _generation);
             ProductionCatalog catalog = await LoadAsync(dbContext, requirements, cancellationToken).ConfigureAwait(false);
-            _cached = new CachedCatalog(catalog, _clock.UtcNow);
+
+            // A change committed while the tables were read leaves the loaded copy behind, so it is
+            // used for this read only and the next read loads the tables again.
+            if (generation == Interlocked.Read(ref _generation))
+            {
+                _cached = new CachedCatalog(catalog, _clock.UtcNow);
+            }
 
             return catalog;
         }

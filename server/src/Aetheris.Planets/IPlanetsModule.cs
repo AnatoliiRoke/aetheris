@@ -141,6 +141,19 @@ public interface IPlanetsModule
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the sum of one effect of the buildings of a body at their levels: the room of the
+    /// storage of the parts the production module keeps, for example (task 00013, decision 9).
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="effectType">The effect type, one of <see cref="Services.BuildingEffectTypes"/>.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The sum of the values of the effect, or zero when no building has it.</returns>
+    Task<long> GetBuildingEffectTotalAsync(
+        long planetId,
+        string effectType,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the localisation keys of the names of the building types, for the modules that
     /// name a building they open (task 00012, decision 9).
     /// </summary>

@@ -162,7 +162,8 @@ namespace Aetheris.Production.Data.Migrations
 
                     b.HasIndex("PlanetId", "PartTypeId", "MarkLevel", "HasRaceBonus", "ConditionPercent")
                         .IsUnique()
-                        .HasDatabaseName("ix_part_stock_planet_id_part_type_id_mark_level_has_race_bonus~");
+                        .HasDatabaseName("ix_part_stock_planet_id_part_type_id_mark_level_has_race_bonus~")
+                        .HasFilter("condition_percent = 100");
 
                     b.ToTable("part_stock", null, t =>
                         {
@@ -299,6 +300,10 @@ namespace Aetheris.Production.Data.Migrations
                     b.Property<long>("Amount")
                         .HasColumnType("bigint")
                         .HasColumnName("amount");
+
+                    b.Property<bool>("HasRaceBonus")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_race_bonus");
 
                     b.Property<int?>("PartTypeId")
                         .HasColumnType("integer")

@@ -123,6 +123,14 @@ public interface ITechnologyLevels
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The identifiers of the technologies.</returns>
     Task<IReadOnlySet<int>> GetTechnologyIdsAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the localisation keys of the names of the technologies, for the modules that name
+    /// the technology a subject waits for (task 00013, decision 7).
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The keys by technology.</returns>
+    Task<IReadOnlyDictionary<int, string>> GetTechnologyNameKeysAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -175,4 +183,8 @@ public sealed class NoTechnologyLevels : ITechnologyLevels
     /// <inheritdoc />
     public Task<IReadOnlySet<int>> GetTechnologyIdsAsync(CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlySet<int>>(new HashSet<int>());
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<int, string>> GetTechnologyNameKeysAsync(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyDictionary<int, string>>(new Dictionary<int, string>());
 }

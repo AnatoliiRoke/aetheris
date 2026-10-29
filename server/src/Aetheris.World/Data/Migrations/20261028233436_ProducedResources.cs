@@ -10,8 +10,9 @@ namespace Aetheris.World.Data.Migrations
     /// (task 00013, decision 2.12).
     /// </summary>
     /// <remarks>
-    /// The rows are data, so the migration adds them: a fresh database and an existing one get
-    /// the same group and the same resources. The identifiers of the rows that are already
+    /// The rows are data, so the migration adds them to a database that already has the
+    /// starting data; a fresh database gets them from the seed of the module, which runs only
+    /// while the table of the groups is empty. The identifiers of the rows that are already
     /// there do not change, and the texts are added without touching the ones the administrator
     /// has edited.
     /// </remarks>
@@ -26,7 +27,8 @@ namespace Aetheris.World.Data.Migrations
                        'world.resource_group.resource_group_6.name',
                        'world.resource_group.resource_group_6.description',
                        false, 1, true
-                WHERE NOT EXISTS (SELECT 1 FROM resource_group WHERE code = 'resource_group_6');
+                WHERE NOT EXISTS (SELECT 1 FROM resource_group WHERE code = 'resource_group_6')
+                  AND EXISTS (SELECT 1 FROM resource_group);
                 """);
 
             migrationBuilder.Sql("""

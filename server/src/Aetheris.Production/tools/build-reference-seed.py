@@ -69,7 +69,7 @@ PART_GROUPS = [
         "description": {"uk": "Легкий корпус для розвідників і дронів.", "en": "A light hull for the scouts and the drones."},
         "ingredients": [{"resource": "resource_1", "amount": 12}, {"resource": "resource_13", "amount": 4}],
         "duration": 60,
-        "attributes": {"slot_size": {"code": "small"}, "mass": {"number": 40}},
+        "attributes": {"slot_size": {"code": "compact"}, "mass": {"number": 40}},
         "race": None,
     },
     {
@@ -79,7 +79,7 @@ PART_GROUPS = [
         "description": {"uk": "Дешевий двигун на дейтерії для легких кораблів.", "en": "A cheap deuterium engine for the light ships."},
         "ingredients": [{"resource": "resource_8", "amount": 6}, {"resource": "resource_15", "amount": 2}],
         "duration": 70,
-        "attributes": {"energy": {"number": 10}, "mass": {"number": 25}, "slot_size": {"code": "large"}},
+        "attributes": {"energy": {"number": 10}, "mass": {"number": 25}, "slot_size": {"code": "heavy"}},
         "race": "race_1",
     },
     {
@@ -89,7 +89,7 @@ PART_GROUPS = [
         "description": {"uk": "Незвичайний генератор для транспортів і дронів.", "en": "A small generator for the transports and the drones."},
         "ingredients": [{"resource": "resource_3", "amount": 6}, {"resource": "resource_17", "amount": 1}],
         "duration": 55,
-        "attributes": {"energy": {"number": 15}, "mass": {"number": 20}, "slot_size": {"code": "medium"}},
+        "attributes": {"energy": {"number": 15}, "mass": {"number": 20}, "slot_size": {"code": "standard"}},
         "race": None,
     },
     {
@@ -99,7 +99,7 @@ PART_GROUPS = [
         "description": {"uk": "Підтримує екіпаж корабля.", "en": "Keeps the crew of the ship alive."},
         "ingredients": [{"resource": "resource_13", "amount": 3}, {"resource": "resource_15", "amount": 1}],
         "duration": 50,
-        "attributes": {"crew": {"number": 20}, "energy": {"number": 5}, "mass": {"number": 15}, "slot_size": {"code": "medium"}},
+        "attributes": {"crew": {"number": 20}, "energy": {"number": 5}, "mass": {"number": 15}, "slot_size": {"code": "standard"}},
         "race": None,
     },
     {
@@ -109,7 +109,7 @@ PART_GROUPS = [
         "description": {"uk": "Дешевий точний лазер для легких кораблів.", "en": "A cheap and precise laser for the light ships."},
         "ingredients": [{"resource": "resource_3", "amount": 4}, {"resource": "resource_6", "amount": 2}, {"resource": "resource_15", "amount": 2}],
         "duration": 65,
-        "attributes": {"damage": {"number": 10}, "damage_kind": {"code": "energy"}, "range": {"number": 300}, "energy": {"number": 8}, "mass": {"number": 10}, "slot_size": {"code": "small"}},
+        "attributes": {"damage": {"number": 10}, "damage_kind": {"code": "energy"}, "range": {"number": 300}, "energy": {"number": 8}, "mass": {"number": 10}, "slot_size": {"code": "compact"}},
         "race": "race_3",
     },
     {
@@ -119,7 +119,7 @@ PART_GROUPS = [
         "description": {"uk": "Базова пасивна броня для легких і середніх кораблів.", "en": "The basic passive armour for the light and middle ships."},
         "ingredients": [{"resource": "resource_1", "amount": 8}, {"resource": "resource_13", "amount": 2}],
         "duration": 60,
-        "attributes": {"mass": {"number": 30}, "slot_size": {"code": "medium"}},
+        "attributes": {"mass": {"number": 30}, "slot_size": {"code": "standard"}},
         "race": "race_2",
     },
     {
@@ -129,7 +129,7 @@ PART_GROUPS = [
         "description": {"uk": "Виявляє ворожі флоти заздалегідь.", "en": "Finds the hostile fleets in advance."},
         "ingredients": [{"resource": "resource_5", "amount": 4}, {"resource": "resource_14", "amount": 2}, {"resource": "resource_15", "amount": 1}],
         "duration": 60,
-        "attributes": {"energy": {"number": 6}, "mass": {"number": 8}, "slot_size": {"code": "small"}},
+        "attributes": {"energy": {"number": 6}, "mass": {"number": 8}, "slot_size": {"code": "compact"}},
         "race": "race_4",
     },
     {
@@ -139,7 +139,7 @@ PART_GROUPS = [
         "description": {"uk": "Видобуває метали з надр планети.", "en": "Extracts the metals from the ground of the body."},
         "ingredients": [{"resource": "resource_1", "amount": 6}, {"resource": "resource_2", "amount": 2}, {"resource": "resource_13", "amount": 2}],
         "duration": 60,
-        "attributes": {"energy": {"number": 12}, "mass": {"number": 25}, "slot_size": {"code": "medium"}},
+        "attributes": {"energy": {"number": 12}, "mass": {"number": 25}, "slot_size": {"code": "standard"}},
         "race": "race_2",
     },
     {
@@ -149,7 +149,7 @@ PART_GROUPS = [
         "description": {"uk": "Місце для вантажу, деталей і боєприпасів.", "en": "A place for the cargo, the parts and the ammunition."},
         "ingredients": [{"resource": "resource_1", "amount": 5}, {"resource": "resource_13", "amount": 3}],
         "duration": 45,
-        "attributes": {"mass": {"number": 12}, "slot_size": {"code": "medium"}},
+        "attributes": {"mass": {"number": 12}, "slot_size": {"code": "standard"}},
         "race": "race_3",
     },
     {
@@ -159,7 +159,7 @@ PART_GROUPS = [
         "description": {"uk": "Місце для командира корабля.", "en": "A place for the commander of the ship."},
         "ingredients": [{"resource": "resource_13", "amount": 4}, {"resource": "resource_15", "amount": 2}, {"resource": "resource_17", "amount": 1}],
         "duration": 80,
-        "attributes": {"crew": {"number": 3}, "energy": {"number": 10}, "mass": {"number": 18}, "slot_size": {"code": "medium"}},
+        "attributes": {"crew": {"number": 3}, "energy": {"number": 10}, "mass": {"number": 18}, "slot_size": {"code": "standard"}},
         "race": None,
     },
     {
@@ -195,12 +195,16 @@ def scale_attributes(attributes, factor):
     return grown
 
 
-def build_parts():
-    """Builds the parts of every group, one row per mark level."""
+def build_parts(first_recipe_number):
+    """Builds the parts of every group, one row per mark level.
+
+    The recipes of the parts take their numbers after the recipes of the produced resources,
+    so every recipe of the file has a code of its own.
+    """
     parts = []
     recipes = []
     part_number = 0
-    recipe_number = 0
+    recipe_number = first_recipe_number
 
     for group in PART_GROUPS:
         for mark in MARK_LEVELS:
@@ -307,8 +311,9 @@ def build_race_bonuses():
 
 def main():
     """Writes the catalog file."""
-    parts, recipes = build_parts()
-    recipes = build_produced_resources() + recipes
+    produced = build_produced_resources()
+    parts, recipes = build_parts(len(produced))
+    recipes = produced + recipes
 
     with open(os.path.join(HERE, os.pardir, "Data", "production-reference-seed.json"), encoding="utf-8") as source:
         catalog = json.load(source)

@@ -16,6 +16,9 @@ public static class RequirementReferenceKinds
 
     /// <summary>The resources of the world.</summary>
     public const string Resource = "resource";
+
+    /// <summary>The recipes of the production module (task 00013).</summary>
+    public const string Recipe = "recipe";
 }
 
 /// <summary>

@@ -89,7 +89,20 @@ public sealed class ProductionMultipliersService : IProductionMultipliers
 
             foreach (TechnologyEffectInfo effect in technology.Levels.GetValueOrDefault(level)?.Effects ?? [])
             {
-                if (effect.EffectType == TechnologyEffectTypes.ProductionTime)
+                if (effect.EffectType != TechnologyEffectTypes.ProductionTime)
+                {
+                    continue;
+                }
+
+                // An empty multiplier changes nothing; a negative one is broken data, which must
+                // never make the production instant (task 00013, decision 14).
+                if (effect.Value < 0)
+                {
+                    throw new InvalidOperationException(
+                        $"The technology {technology.Code} has a negative multiplier of the production time at level {level}.");
+                }
+
+                if (effect.Value > 0)
                 {
                     productionTime *= effect.Value;
                 }

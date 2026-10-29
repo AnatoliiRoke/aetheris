@@ -3,6 +3,7 @@ using Aetheris.Core.Data;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
+using Aetheris.Planets.Services;
 using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
@@ -69,10 +70,9 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     private const string RequirementsField = "requirements";
 
     /// <summary>
-    /// The empty set of the technologies: the module of the production does not own them, so
-    /// the requirement on a technology is checked by the module of the research.
+    /// The reference kind of the races, which a requirement «only the race X» picks from.
     /// </summary>
-    private static readonly IReadOnlySet<int> EmptyIds = new HashSet<int>();
+    private const string RaceReferenceKind = "race";
 
     /// <summary>The place of the groups of the parts in the menu of the reference kinds.</summary>
     private const int PartGroupSortOrder = 60;
@@ -87,6 +87,27 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     private static readonly IReadOnlyList<LocalizationTextEntry> Labels =
         AdminReferenceRules.LoadLabelTexts(typeof(ProductionReferenceAdminService).Assembly, LabelTextsResource);
 
+    /// <summary>
+    /// Gets the field of the requirements of a recipe: the shared kinds of requirement and
+    /// «only the race X» (task 00013, decision 2.7).
+    /// </summary>
+    private static AdminReferenceField RecipeRequirementsField { get; } = RequirementAdminFields.Field with
+    {
+        Fields =
+        [
+            .. RequirementAdminFields.Field.Fields!.Select(field => field.Name == "requirement_type"
+                ? field with
+                {
+                    Options =
+                    [
+                        .. field.Options!,
+                        new AdminReferenceOption(ProductionRequirementTypes.Race, LabelPrefix + "requirement." + ProductionRequirementTypes.Race, RaceReferenceKind),
+                    ],
+                }
+                : field),
+        ],
+    };
+
     private readonly ProductionDbContext _dbContext;
     private readonly ProductionUnitOfWork _unitOfWork;
     private readonly ProductionCatalogCache _catalogCache;
@@ -96,6 +117,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     private readonly IWorldModule _world;
     private readonly IPlanetsModule _planets;
     private readonly IRequirementsModule _requirements;
+    private readonly ITechnologyLevels _technologies;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProductionReferenceAdminService"/> class.
@@ -109,6 +131,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     /// <param name="world">The world, for the resources and the races.</param>
     /// <param name="planets">The bodies module, for the factories.</param>
     /// <param name="requirements">The common requirements module.</param>
+    /// <param name="technologies">The technologies, for the requirement of a recipe on a technology.</param>
     public ProductionReferenceAdminService(
         ProductionDbContext dbContext,
         ProductionUnitOfWork unitOfWork,
@@ -118,7 +141,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         IAdminReferenceImages images,
         IWorldModule world,
         IPlanetsModule planets,
-        IRequirementsModule requirements)
+        IRequirementsModule requirements,
+        ITechnologyLevels technologies)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -127,7 +151,9 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         ArgumentNullException.ThrowIfNull(texts);
         ArgumentNullException.ThrowIfNull(images);
         ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(planets);
         ArgumentNullException.ThrowIfNull(requirements);
+        ArgumentNullException.ThrowIfNull(technologies);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -138,6 +164,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         _world = world;
         _planets = planets;
         _requirements = requirements;
+        _technologies = technologies;
     }
 
     /// <summary>
@@ -279,7 +306,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                     new("part_type_id", AdminReferenceFieldTypes.Reference, LabelPrefix + "field.part", ReferenceKind: PartKind),
                     new("amount", AdminReferenceFieldTypes.Number, LabelPrefix + "field.amount", IsRequired: true, Minimum: 1),
                 ]),
-            RequirementAdminFields.Field,
+            RecipeRequirementsField,
         ]);
 
     /// <inheritdoc />
@@ -426,15 +453,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             [GroupField] = part.PartGroupId,
                             [MarkLevelField] = part.MarkLevel,
                             [SortOrderField] = part.SortOrder,
-                            [AttributesField] = part.AttributeIds
-                                .Select(attribute => (object?)new Dictionary<string, object?>
-                                {
-                                    ["attribute_key"] = attribute.AttributeKey,
-                                    ["number_value"] = attribute.NumberValue,
-                                    ["code_value"] = attribute.CodeValue,
-                                    ["text_value"] = attribute.TextValue,
-                                })
-                                .ToList(),
+                            [AttributesField] = AttributesOf(part),
                         });
                 }
 
@@ -448,6 +467,13 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                     {
                         return null;
                     }
+
+                    // The requirements are a part of the form, so saving the form keeps them.
+                    IReadOnlyList<RequirementDefinition> requirements = await _requirements.GetAsync(
+                        RequirementSubjectTypes.Recipe,
+                        recipe.Id,
+                        1,
+                        cancellationToken).ConfigureAwait(false);
 
                     return new AdminReferenceRecord(
                         recipe.Id,
@@ -468,14 +494,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             [OutputQuantityField] = recipe.OutputQuantity,
                             [DurationField] = recipe.DurationSeconds,
                             [SortOrderField] = recipe.SortOrder,
-                            [IngredientsField] = recipe.IngredientIds
-                                .Select(ingredient => (object?)new Dictionary<string, object?>
-                                {
-                                    ["resource_type_id"] = ingredient.ResourceTypeId,
-                                    ["part_type_id"] = ingredient.PartTypeId,
-                                    ["amount"] = ingredient.Amount,
-                                })
-                                .ToList(),
+                            [IngredientsField] = IngredientsOf(recipe),
+                            [RequirementsField] = RequirementsOf(requirements),
                         });
                 }
 
@@ -612,8 +632,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                     case PartGroupKind:
                         {
                             GroupValues values = AdminReferenceJson.Read<GroupValues>(input.Values);
-                            await LockAsync(id, cancellationToken).ConfigureAwait(false);
-                            PartGroupEntity group = (await LoadGroupAsync(id, cancellationToken).ConfigureAwait(false))!;
+                            PartGroupEntity group = await LockGroupAsync(id, cancellationToken).ConfigureAwait(false);
                             AdminReferenceRules.CheckVersion(group.Version, input.Version);
                             await CheckGroupAsync(values, group, cancellationToken).ConfigureAwait(false);
 
@@ -622,6 +641,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             {
                                 [AdminReferenceRules.NameField] = AdminReferenceRules.TextsOf(packs, group.NameKey),
                                 [AdminReferenceRules.DescriptionField] = AdminReferenceRules.TextsOf(packs, group.DescriptionKey),
+                                [AdminReferenceRules.ImageField] = group.ImageKey,
                                 [SortOrderField] = group.SortOrder,
                             };
 
@@ -645,8 +665,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                     case PartKind:
                         {
                             PartValues values = AdminReferenceJson.Read<PartValues>(input.Values);
-                            await LockAsync(id, cancellationToken).ConfigureAwait(false);
-                            PartTypeEntity part = (await LoadPartAsync(id, cancellationToken).ConfigureAwait(false))!;
+                            PartTypeEntity part = await LockPartAsync(id, cancellationToken).ConfigureAwait(false);
                             AdminReferenceRules.CheckVersion(part.Version, input.Version);
                             await CheckPartAsync(values, part, cancellationToken).ConfigureAwait(false);
 
@@ -655,9 +674,11 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             {
                                 [AdminReferenceRules.NameField] = AdminReferenceRules.TextsOf(packs, part.NameKey),
                                 [AdminReferenceRules.DescriptionField] = AdminReferenceRules.TextsOf(packs, part.DescriptionKey),
+                                [AdminReferenceRules.ImageField] = part.ImageKey,
                                 [GroupField] = part.PartGroupId,
                                 [MarkLevelField] = part.MarkLevel,
                                 [SortOrderField] = part.SortOrder,
+                                [AttributesField] = AttributesOf(part),
                             };
 
                             Apply(part, values);
@@ -680,22 +701,29 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                     case RecipeKind:
                         {
                             RecipeValues values = AdminReferenceJson.Read<RecipeValues>(input.Values);
-                            await LockAsync(id, cancellationToken).ConfigureAwait(false);
-                            RecipeEntity recipe = (await LoadRecipeAsync(id, cancellationToken).ConfigureAwait(false))!;
+                            RecipeEntity recipe = await LockRecipeAsync(id, cancellationToken).ConfigureAwait(false);
                             AdminReferenceRules.CheckVersion(recipe.Version, input.Version);
                             List<SubjectRequirement> requirements = await CheckRecipeAsync(values, recipe, cancellationToken).ConfigureAwait(false);
 
                             IReadOnlyList<LocalizationPack> packs = await AdminReferenceRules.PacksAsync(_texts, cancellationToken).ConfigureAwait(false);
+                            IReadOnlyList<RequirementDefinition> storedRequirements = await _requirements.GetAsync(
+                                RequirementSubjectTypes.Recipe,
+                                recipe.Id,
+                                1,
+                                cancellationToken).ConfigureAwait(false);
                             Dictionary<string, object?> before = new()
                             {
                                 [AdminReferenceRules.NameField] = AdminReferenceRules.TextsOf(packs, recipe.NameKey),
                                 [AdminReferenceRules.DescriptionField] = AdminReferenceRules.TextsOf(packs, recipe.DescriptionKey),
+                                [AdminReferenceRules.ImageField] = recipe.ImageKey,
                                 [FactoryField] = recipe.BuildingTypeId,
                                 [PartField] = recipe.PartTypeId,
                                 [ResourceField] = recipe.ResourceTypeId,
                                 [OutputQuantityField] = recipe.OutputQuantity,
                                 [DurationField] = recipe.DurationSeconds,
                                 [SortOrderField] = recipe.SortOrder,
+                                [IngredientsField] = IngredientsOf(recipe),
+                                [RequirementsField] = RequirementsOf(storedRequirements),
                             };
 
                             Apply(recipe, values);
@@ -839,13 +867,19 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         Dictionary<string, List<string>> failures = [];
         AdminReferenceRules.CheckTexts(failures, _texts, values.Name, values.Description);
 
-        if (values.PartGroupId is null)
+        if (values.PartGroupId is not { } groupId)
         {
             AdminReferenceRules.Fail(failures, GroupField, AdminReferenceErrors.Required);
         }
-        else if (!await _dbContext.PartGroups.AnyAsync(group => group.Id == values.PartGroupId.Value, cancellationToken).ConfigureAwait(false))
+        else if (await _dbContext.PartGroups.AsNoTracking().SingleOrDefaultAsync(group => group.Id == groupId, cancellationToken).ConfigureAwait(false) is not { } group)
         {
             AdminReferenceRules.Fail(failures, GroupField, AdminReferenceErrors.Unknown);
+        }
+        else if (group.IsArchived && stored?.PartGroupId != groupId)
+        {
+            // An archived group keeps its parts, but a new choice of it is refused (task 00023,
+            // decision 5).
+            AdminReferenceRules.Fail(failures, GroupField, AdminReferenceErrors.Archived);
         }
 
         if (values.MarkLevel is null or < PartMarkLevels.First or > PartMarkLevels.Max)
@@ -861,6 +895,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), stored?.ImageKey, cancellationToken)
             .ConfigureAwait(false);
 
+        HashSet<string> seenKeys = new(StringComparer.Ordinal);
         int index = 0;
 
         foreach (AttributeValues attribute in values.Attributes ?? [])
@@ -871,8 +906,17 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             {
                 AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Unknown);
             }
+            else if (!seenKeys.Add(attribute.AttributeKey))
+            {
+                AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Duplicate);
+            }
 
-            AdminReferenceRules.ThrowIfInvalid(failures);
+            // A logical code is one the program knows; the constructor of the ships reads it.
+            if (attribute.CodeValue is { } codeValue && !PartDamageKinds.All.Contains(codeValue) && !PartSlotSizes.All.Contains(codeValue))
+            {
+                AdminReferenceRules.Fail(failures, AdminReferenceRules.PathOf(AttributesField, index, "code_value"), AdminReferenceErrors.Unknown);
+            }
+
             index++;
         }
 
@@ -885,28 +929,43 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         AdminReferenceRules.CheckTexts(failures, _texts, values.Name, values.Description);
 
         ResourceCatalog resources = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
-        HashSet<int> resourceIds = [.. resources.Resources.Select(resource => resource.Id)];
-        HashSet<int> partIds = [.. await _dbContext.PartTypes.AsNoTracking().Select(part => part.Id).ToListAsync(cancellationToken).ConfigureAwait(false)];
-        HashSet<int> groupIds = [.. await _dbContext.PartGroups.AsNoTracking().Select(group => group.Id).ToListAsync(cancellationToken).ConfigureAwait(false)];
+        Dictionary<int, ResourceTypeFact> resourcesById = resources.Resources.ToDictionary(resource => resource.Id);
+        Dictionary<int, PartTypeEntity> partsById = await _dbContext.PartTypes.AsNoTracking().ToDictionaryAsync(part => part.Id, cancellationToken).ConfigureAwait(false);
+        HashSet<int> archivedGroupIds = [.. await _dbContext.PartGroups.AsNoTracking().Where(group => group.IsArchived).Select(group => group.Id).ToListAsync(cancellationToken).ConfigureAwait(false)];
+        HashSet<int> buildingIds = [.. (await _planets.GetBuildingNameKeysAsync(cancellationToken).ConfigureAwait(false)).Keys];
 
-        if (values.BuildingTypeId is null)
+        // An archived row keeps working where it is already used, but a new choice of it is
+        // refused (task 00023, decision 5).
+        HashSet<int> storedResourceIds = [.. stored?.IngredientIds.Select(ingredient => ingredient.ResourceTypeId ?? 0) ?? [], stored?.ResourceTypeId ?? 0];
+        HashSet<int> storedPartIds = [.. stored?.IngredientIds.Select(ingredient => ingredient.PartTypeId ?? 0) ?? [], stored?.PartTypeId ?? 0];
+
+        if (values.BuildingTypeId is not { } buildingTypeId)
         {
             AdminReferenceRules.Fail(failures, FactoryField, AdminReferenceErrors.Required);
         }
+        else if (!buildingIds.Contains(buildingTypeId))
+        {
+            AdminReferenceRules.Fail(failures, FactoryField, AdminReferenceErrors.Unknown);
+        }
 
+        // A recipe makes one product: a part or a resource.
         if (values.PartTypeId is null && values.ResourceTypeId is null)
         {
             AdminReferenceRules.Fail(failures, PartField, AdminReferenceErrors.Required);
         }
-
-        if (values.PartTypeId is not null && !partIds.Contains(values.PartTypeId.Value))
+        else if (values.PartTypeId is not null && values.ResourceTypeId is not null)
         {
-            AdminReferenceRules.Fail(failures, PartField, AdminReferenceErrors.Unknown);
+            AdminReferenceRules.Fail(failures, ResourceField, AdminReferenceErrors.NotApplicable);
         }
 
-        if (values.ResourceTypeId is not null && !resourceIds.Contains(values.ResourceTypeId.Value))
+        if (values.PartTypeId is { } partTypeId)
         {
-            AdminReferenceRules.Fail(failures, ResourceField, AdminReferenceErrors.Unknown);
+            CheckPart(failures, PartField, partTypeId, partsById, archivedGroupIds, storedPartIds);
+        }
+
+        if (values.ResourceTypeId is { } resourceTypeId)
+        {
+            CheckResource(failures, ResourceField, resourceTypeId, resourcesById, storedResourceIds);
         }
 
         if (values.OutputQuantity is null or < 1)
@@ -927,29 +986,40 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), stored?.ImageKey, cancellationToken)
             .ConfigureAwait(false);
 
-        List<SubjectRequirement> requirements = [];
+        // The ingredients are the cost of a unit: at least one, each a resource or a part, each
+        // once.
+        HashSet<(int? ResourceTypeId, int? PartTypeId)> seenIngredients = [];
         int index = 0;
 
         foreach (IngredientValues ingredient in values.Ingredients ?? [])
         {
-            string path = AdminReferenceRules.PathOf(IngredientsField, index, "amount");
+            string resourcePath = AdminReferenceRules.PathOf(IngredientsField, index, "resource_type_id");
+            string partPath = AdminReferenceRules.PathOf(IngredientsField, index, "part_type_id");
 
             if (ingredient.Amount is null or < 1)
             {
-                AdminReferenceRules.Fail(failures, path, ingredient.Amount is null ? AdminReferenceErrors.Required : AdminReferenceErrors.OutOfBounds);
+                AdminReferenceRules.Fail(failures, AdminReferenceRules.PathOf(IngredientsField, index, "amount"), ingredient.Amount is null ? AdminReferenceErrors.Required : AdminReferenceErrors.OutOfBounds);
             }
 
             if (ingredient.ResourceTypeId is null && ingredient.PartTypeId is null)
             {
-                AdminReferenceRules.Fail(failures, AdminReferenceRules.PathOf(IngredientsField, index, "resource_type_id"), AdminReferenceErrors.Required);
+                AdminReferenceRules.Fail(failures, resourcePath, AdminReferenceErrors.Required);
             }
-            else if (ingredient.ResourceTypeId is { } resourceTypeId && !resourceIds.Contains(resourceTypeId))
+            else if (ingredient.ResourceTypeId is not null && ingredient.PartTypeId is not null)
             {
-                AdminReferenceRules.Fail(failures, AdminReferenceRules.PathOf(IngredientsField, index, "resource_type_id"), AdminReferenceErrors.Unknown);
+                AdminReferenceRules.Fail(failures, partPath, AdminReferenceErrors.NotApplicable);
             }
-            else if (ingredient.PartTypeId is { } partTypeId && !partIds.Contains(partTypeId))
+            else if (!seenIngredients.Add((ingredient.ResourceTypeId, ingredient.PartTypeId)))
             {
-                AdminReferenceRules.Fail(failures, AdminReferenceRules.PathOf(IngredientsField, index, "part_type_id"), AdminReferenceErrors.Unknown);
+                AdminReferenceRules.Fail(failures, ingredient.ResourceTypeId is null ? partPath : resourcePath, AdminReferenceErrors.Duplicate);
+            }
+            else if (ingredient.ResourceTypeId is { } ingredientResourceId)
+            {
+                CheckResource(failures, resourcePath, ingredientResourceId, resourcesById, storedResourceIds);
+            }
+            else if (ingredient.PartTypeId is { } ingredientPartId)
+            {
+                CheckPart(failures, partPath, ingredientPartId, partsById, archivedGroupIds, storedPartIds);
             }
 
             index++;
@@ -957,11 +1027,14 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
 
         if ((values.Ingredients ?? []).Count == 0)
         {
-            AdminReferenceRules.Fail(failures, IngredientsField, AdminReferenceErrors.Required);
+            AdminReferenceRules.Fail(failures, IngredientsField, AdminReferenceErrors.CostMissing);
         }
 
-        // The requirements of the recipe use the shared field, so the same kinds of
-        // requirement are offered as for the buildings.
+        // The requirements of the recipe use the shared field and «only the race X», so the same
+        // kinds of requirement are offered as for the buildings.
+        List<SubjectRequirement> requirements = [];
+        IReadOnlySet<int> technologyIds = await _technologies.GetTechnologyIdsAsync(cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<RaceDto> races = await _world.GetRacesAsync(cancellationToken).ConfigureAwait(false);
         int requirementIndex = 0;
 
         foreach (RequirementValues requirement in values.Requirements ?? [])
@@ -970,8 +1043,6 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
 
             if (requirement.RequirementType == ProductionRequirementTypes.Race)
             {
-                IReadOnlyList<RaceDto> races = await _world.GetRacesAsync(cancellationToken).ConfigureAwait(false);
-
                 if (requirement.TargetId is not { } raceId || !races.Any(race => race.Id == raceId))
                 {
                     AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Unknown);
@@ -984,25 +1055,57 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                         new RequirementDefinition(ProductionRequirementTypes.Race, raceId, 0)));
                 }
             }
-            else
+            else if (RequirementAdminFields.Check(failures, path, requirement.RequirementType, requirement.TargetId, requirement.TargetLevel, buildingIds, technologyIds, resourcesById.Keys) is { } definition)
             {
-                IReadOnlyDictionary<int, string> buildingNameKeys = await _planets.GetBuildingNameKeysAsync(cancellationToken).ConfigureAwait(false);
-                HashSet<int> buildingIds = [.. buildingNameKeys.Keys];
-
-                if (RequirementAdminFields.Check(failures, path, requirement.RequirementType, requirement.TargetId, requirement.TargetLevel, buildingIds, EmptyIds, resourceIds) is { } definition)
-                {
-                    requirements.Add(new SubjectRequirement(stored?.Id ?? 0, 1, definition));
-                }
+                requirements.Add(new SubjectRequirement(stored?.Id ?? 0, 1, definition));
             }
 
             requirementIndex++;
         }
 
-        _ = groupIds;
+        if (requirements.GroupBy(requirement => (requirement.Requirement.RequirementType, requirement.Requirement.TargetId)).Any(group => group.Count() > 1))
+        {
+            AdminReferenceRules.Fail(failures, RequirementsField, AdminReferenceErrors.Duplicate);
+        }
 
         AdminReferenceRules.ThrowIfInvalid(failures);
 
         return requirements;
+    }
+
+    private static void CheckPart(
+        Dictionary<string, List<string>> failures,
+        string path,
+        int partTypeId,
+        Dictionary<int, PartTypeEntity> partsById,
+        HashSet<int> archivedGroupIds,
+        HashSet<int> storedPartIds)
+    {
+        if (!partsById.TryGetValue(partTypeId, out PartTypeEntity? part))
+        {
+            AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Unknown);
+        }
+        else if ((part.IsArchived || archivedGroupIds.Contains(part.PartGroupId)) && !storedPartIds.Contains(partTypeId))
+        {
+            AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Archived);
+        }
+    }
+
+    private static void CheckResource(
+        Dictionary<string, List<string>> failures,
+        string path,
+        int resourceTypeId,
+        Dictionary<int, ResourceTypeFact> resourcesById,
+        HashSet<int> storedResourceIds)
+    {
+        if (!resourcesById.TryGetValue(resourceTypeId, out ResourceTypeFact? resource))
+        {
+            AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Unknown);
+        }
+        else if (resource.IsArchived && !storedResourceIds.Contains(resourceTypeId))
+        {
+            AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Archived);
+        }
     }
 
     private static void Apply(PartGroupEntity group, GroupValues values)
@@ -1077,30 +1180,72 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         }
     }
 
-    private async Task LockAsync(int id, CancellationToken cancellationToken)
+    private async Task<PartGroupEntity> LockGroupAsync(int id, CancellationToken cancellationToken)
     {
+        // The row is locked first, so two changes of one row compare their versions one after
+        // the other and the second one meets the new version (task 00023, decision 5).
         await _dbContext.Database
             .ExecuteSqlAsync($"SELECT 1 FROM part_group WHERE id = {id} FOR UPDATE", cancellationToken)
             .ConfigureAwait(false);
+
+        return await _dbContext.PartGroups.SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false)
+            ?? throw new AdminReferenceException(GameErrorCodes.NotFound);
     }
 
-    private Task<PartGroupEntity> LoadGroupAsync(int id, CancellationToken cancellationToken) =>
-        _dbContext.PartGroups.SingleAsync(entry => entry.Id == id, cancellationToken);
+    private async Task<PartTypeEntity> LockPartAsync(int id, CancellationToken cancellationToken)
+    {
+        await _dbContext.Database
+            .ExecuteSqlAsync($"SELECT 1 FROM part_type WHERE id = {id} FOR UPDATE", cancellationToken)
+            .ConfigureAwait(false);
 
-    private Task<PartGroupEntity> LockGroupAsync(int id, CancellationToken cancellationToken) =>
-        _dbContext.PartGroups.FromSql($"SELECT * FROM part_group WHERE id = {id} FOR UPDATE").SingleAsync(cancellationToken);
+        return await _dbContext.PartTypes.Include(entry => entry.AttributeIds).SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false)
+            ?? throw new AdminReferenceException(GameErrorCodes.NotFound);
+    }
 
-    private Task<PartTypeEntity> LoadPartAsync(int id, CancellationToken cancellationToken) =>
-        _dbContext.PartTypes.Include(entry => entry.AttributeIds).SingleAsync(entry => entry.Id == id, cancellationToken);
+    private async Task<RecipeEntity> LockRecipeAsync(int id, CancellationToken cancellationToken)
+    {
+        await _dbContext.Database
+            .ExecuteSqlAsync($"SELECT 1 FROM recipe WHERE id = {id} FOR UPDATE", cancellationToken)
+            .ConfigureAwait(false);
 
-    private Task<PartTypeEntity> LockPartAsync(int id, CancellationToken cancellationToken) =>
-        _dbContext.PartTypes.FromSql($"SELECT * FROM part_type WHERE id = {id} FOR UPDATE").Include(entry => entry.AttributeIds).SingleAsync(cancellationToken);
+        return await _dbContext.Recipes.Include(entry => entry.IngredientIds).SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false)
+            ?? throw new AdminReferenceException(GameErrorCodes.NotFound);
+    }
 
-    private Task<RecipeEntity> LoadRecipeAsync(int id, CancellationToken cancellationToken) =>
-        _dbContext.Recipes.Include(entry => entry.IngredientIds).SingleAsync(entry => entry.Id == id, cancellationToken);
+    private static List<object?> IngredientsOf(RecipeEntity recipe) =>
+    [
+        .. recipe.IngredientIds
+            .OrderBy(ingredient => ingredient.Id)
+            .Select(ingredient => (object?)new Dictionary<string, object?>
+            {
+                ["resource_type_id"] = ingredient.ResourceTypeId,
+                ["part_type_id"] = ingredient.PartTypeId,
+                ["amount"] = ingredient.Amount,
+            }),
+    ];
 
-    private Task<RecipeEntity> LockRecipeAsync(int id, CancellationToken cancellationToken) =>
-        _dbContext.Recipes.FromSql($"SELECT * FROM recipe WHERE id = {id} FOR UPDATE").Include(entry => entry.IngredientIds).SingleAsync(cancellationToken);
+    private static List<object?> AttributesOf(PartTypeEntity part) =>
+    [
+        .. part.AttributeIds
+            .OrderBy(attribute => attribute.Id)
+            .Select(attribute => (object?)new Dictionary<string, object?>
+            {
+                ["attribute_key"] = attribute.AttributeKey,
+                ["number_value"] = attribute.NumberValue,
+                ["code_value"] = attribute.CodeValue,
+                ["text_value"] = attribute.TextValue,
+            }),
+    ];
+
+    private static List<object?> RequirementsOf(IReadOnlyList<RequirementDefinition> requirements) =>
+    [
+        .. requirements.Select(requirement => (object?)new Dictionary<string, object?>
+        {
+            ["requirement_type"] = requirement.RequirementType,
+            ["target_id"] = requirement.TargetId,
+            ["target_level"] = requirement.TargetLevel,
+        }),
+    ];
 
     /// <summary>
     /// Drops the copy of the catalog after the change is committed, so a player sees it at

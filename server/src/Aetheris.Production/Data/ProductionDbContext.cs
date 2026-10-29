@@ -159,7 +159,11 @@ public sealed class ProductionDbContext : DbContext
         modelBuilder.Entity<PartStockEntity>(entity =>
         {
             entity.ToTable("part_stock");
-            entity.HasIndex(e => new { e.PlanetId, e.PartTypeId, e.MarkLevel, e.HasRaceBonus, e.ConditionPercent }).IsUnique();
+            // The new parts of one kind are one stack; a damaged part is a row of its own, so
+            // two damaged parts of the same condition are two rows (task 00013, decision 2.13).
+            entity.HasIndex(e => new { e.PlanetId, e.PartTypeId, e.MarkLevel, e.HasRaceBonus, e.ConditionPercent })
+                .IsUnique()
+                .HasFilter("condition_percent = 100");
             entity.HasIndex(e => e.SectorId);
             entity.ToTable(table => table.HasCheckConstraint("ck_part_stock_condition", "condition_percent >= 1 AND condition_percent <= 100"));
             entity.ToTable(table => table.HasCheckConstraint("ck_part_stock_quantity", "quantity >= 0"));

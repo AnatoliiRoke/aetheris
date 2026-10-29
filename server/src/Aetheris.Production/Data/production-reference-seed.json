@@ -1136,12 +1136,12 @@
       "race": null
     },
     {
-      "code": "recipe_1",
+      "code": "recipe_6",
       "part": "part_1",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 60,
-      "sort_order": 1,
+      "sort_order": 6,
       "name": {
         "uk": "Корпус «Шершня» Mk I",
         "en": "Hull \"Wasp\" Mk I"
@@ -1164,12 +1164,12 @@
       "race": null
     },
     {
-      "code": "recipe_2",
+      "code": "recipe_7",
       "part": "part_2",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 90,
-      "sort_order": 2,
+      "sort_order": 7,
       "name": {
         "uk": "Корпус «Шершня» Mk II",
         "en": "Hull \"Wasp\" Mk II"
@@ -1192,12 +1192,12 @@
       "race": null
     },
     {
-      "code": "recipe_3",
+      "code": "recipe_8",
       "part": "part_3",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 138,
-      "sort_order": 3,
+      "sort_order": 8,
       "name": {
         "uk": "Корпус «Шершня» Mk III",
         "en": "Hull \"Wasp\" Mk III"
@@ -1220,12 +1220,12 @@
       "race": null
     },
     {
-      "code": "recipe_4",
+      "code": "recipe_9",
       "part": "part_4",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 70,
-      "sort_order": 4,
+      "sort_order": 9,
       "name": {
         "uk": "Реактивний двигун Mk I",
         "en": "Reaction engine Mk I"
@@ -1248,12 +1248,12 @@
       "race": "race_1"
     },
     {
-      "code": "recipe_5",
+      "code": "recipe_10",
       "part": "part_5",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 105,
-      "sort_order": 5,
+      "sort_order": 10,
       "name": {
         "uk": "Реактивний двигун Mk II",
         "en": "Reaction engine Mk II"
@@ -1276,12 +1276,12 @@
       "race": null
     },
     {
-      "code": "recipe_6",
+      "code": "recipe_11",
       "part": "part_6",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 161,
-      "sort_order": 6,
+      "sort_order": 11,
       "name": {
         "uk": "Реактивний двигун Mk III",
         "en": "Reaction engine Mk III"
@@ -1304,12 +1304,12 @@
       "race": null
     },
     {
-      "code": "recipe_7",
+      "code": "recipe_12",
       "part": "part_7",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 55,
-      "sort_order": 7,
+      "sort_order": 12,
       "name": {
         "uk": "Хімічний генератор Mk I",
         "en": "Chemical generator Mk I"
@@ -1332,12 +1332,12 @@
       "race": null
     },
     {
-      "code": "recipe_8",
+      "code": "recipe_13",
       "part": "part_8",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 82,
-      "sort_order": 8,
+      "sort_order": 13,
       "name": {
         "uk": "Хімічний генератор Mk II",
         "en": "Chemical generator Mk II"
@@ -1360,12 +1360,12 @@
       "race": null
     },
     {
-      "code": "recipe_9",
+      "code": "recipe_14",
       "part": "part_9",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 126,
-      "sort_order": 9,
+      "sort_order": 14,
       "name": {
         "uk": "Хімічний генератор Mk III",
         "en": "Chemical generator Mk III"
@@ -1388,12 +1388,12 @@
       "race": null
     },
     {
-      "code": "recipe_10",
+      "code": "recipe_15",
       "part": "part_10",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 50,
-      "sort_order": 10,
+      "sort_order": 15,
       "name": {
         "uk": "Життєзабезпечення Mk I",
         "en": "Life support Mk I"
@@ -1416,12 +1416,12 @@
       "race": null
     },
     {
-      "code": "recipe_11",
+      "code": "recipe_16",
       "part": "part_11",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 75,
-      "sort_order": 11,
+      "sort_order": 16,
       "name": {
         "uk": "Життєзабезпечення Mk II",
         "en": "Life support Mk II"
@@ -1444,12 +1444,12 @@
       "race": null
     },
     {
-      "code": "recipe_12",
+      "code": "recipe_17",
       "part": "part_12",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 115,
-      "sort_order": 12,
+      "sort_order": 17,
       "name": {
         "uk": "Життєзабезпечення Mk III",
         "en": "Life support Mk III"
@@ -1472,12 +1472,12 @@
       "race": null
     },
     {
-      "code": "recipe_13",
+      "code": "recipe_18",
       "part": "part_13",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 65,
-      "sort_order": 13,
+      "sort_order": 18,
       "name": {
         "uk": "Легкий лазер Mk I",
         "en": "Light laser Mk I"
@@ -1504,12 +1504,12 @@
       "race": "race_3"
     },
     {
-      "code": "recipe_14",
+      "code": "recipe_19",
       "part": "part_14",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 98,
-      "sort_order": 14,
+      "sort_order": 19,
       "name": {
         "uk": "Легкий лазер Mk II",
         "en": "Light laser Mk II"
@@ -1536,12 +1536,12 @@
       "race": null
     },
     {
-      "code": "recipe_15",
+      "code": "recipe_20",
       "part": "part_15",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 150,
-      "sort_order": 15,
+      "sort_order": 20,
       "name": {
         "uk": "Легкий лазер Mk III",
         "en": "Light laser Mk III"
@@ -1568,12 +1568,12 @@
       "race": null
     },
     {
-      "code": "recipe_16",
+      "code": "recipe_21",
       "part": "part_16",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 60,
-      "sort_order": 16,
+      "sort_order": 21,
       "name": {
         "uk": "Сталеві плити Mk I",
         "en": "Steel plates Mk I"
@@ -1596,12 +1596,12 @@
       "race": "race_2"
     },
     {
-      "code": "recipe_17",
+      "code": "recipe_22",
       "part": "part_17",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 90,
-      "sort_order": 17,
+      "sort_order": 22,
       "name": {
         "uk": "Сталеві плити Mk II",
         "en": "Steel plates Mk II"
@@ -1624,12 +1624,12 @@
       "race": null
     },
     {
-      "code": "recipe_18",
+      "code": "recipe_23",
       "part": "part_18",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 138,
-      "sort_order": 18,
+      "sort_order": 23,
       "name": {
         "uk": "Сталеві плити Mk III",
         "en": "Steel plates Mk III"
@@ -1652,12 +1652,12 @@
       "race": null
     },
     {
-      "code": "recipe_19",
+      "code": "recipe_24",
       "part": "part_19",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 60,
-      "sort_order": 19,
+      "sort_order": 24,
       "name": {
         "uk": "Радар Mk I",
         "en": "Radar Mk I"
@@ -1684,12 +1684,12 @@
       "race": "race_4"
     },
     {
-      "code": "recipe_20",
+      "code": "recipe_25",
       "part": "part_20",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 90,
-      "sort_order": 20,
+      "sort_order": 25,
       "name": {
         "uk": "Радар Mk II",
         "en": "Radar Mk II"
@@ -1716,12 +1716,12 @@
       "race": null
     },
     {
-      "code": "recipe_21",
+      "code": "recipe_26",
       "part": "part_21",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 138,
-      "sort_order": 21,
+      "sort_order": 26,
       "name": {
         "uk": "Радар Mk III",
         "en": "Radar Mk III"
@@ -1748,12 +1748,12 @@
       "race": null
     },
     {
-      "code": "recipe_22",
+      "code": "recipe_27",
       "part": "part_22",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 60,
-      "sort_order": 22,
+      "sort_order": 27,
       "name": {
         "uk": "Бур Mk I",
         "en": "Drill Mk I"
@@ -1780,12 +1780,12 @@
       "race": "race_2"
     },
     {
-      "code": "recipe_23",
+      "code": "recipe_28",
       "part": "part_23",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 90,
-      "sort_order": 23,
+      "sort_order": 28,
       "name": {
         "uk": "Бур Mk II",
         "en": "Drill Mk II"
@@ -1812,12 +1812,12 @@
       "race": null
     },
     {
-      "code": "recipe_24",
+      "code": "recipe_29",
       "part": "part_24",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 138,
-      "sort_order": 24,
+      "sort_order": 29,
       "name": {
         "uk": "Бур Mk III",
         "en": "Drill Mk III"
@@ -1844,12 +1844,12 @@
       "race": null
     },
     {
-      "code": "recipe_25",
+      "code": "recipe_30",
       "part": "part_25",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 45,
-      "sort_order": 25,
+      "sort_order": 30,
       "name": {
         "uk": "Вантажний відсік Mk I",
         "en": "Cargo bay Mk I"
@@ -1872,12 +1872,12 @@
       "race": "race_3"
     },
     {
-      "code": "recipe_26",
+      "code": "recipe_31",
       "part": "part_26",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 68,
-      "sort_order": 26,
+      "sort_order": 31,
       "name": {
         "uk": "Вантажний відсік Mk II",
         "en": "Cargo bay Mk II"
@@ -1900,12 +1900,12 @@
       "race": null
     },
     {
-      "code": "recipe_27",
+      "code": "recipe_32",
       "part": "part_27",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 103,
-      "sort_order": 27,
+      "sort_order": 32,
       "name": {
         "uk": "Вантажний відсік Mk III",
         "en": "Cargo bay Mk III"
@@ -1928,12 +1928,12 @@
       "race": null
     },
     {
-      "code": "recipe_28",
+      "code": "recipe_33",
       "part": "part_28",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 80,
-      "sort_order": 28,
+      "sort_order": 33,
       "name": {
         "uk": "Командунний модуль Mk I",
         "en": "Command module Mk I"
@@ -1960,12 +1960,12 @@
       "race": null
     },
     {
-      "code": "recipe_29",
+      "code": "recipe_34",
       "part": "part_29",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 120,
-      "sort_order": 29,
+      "sort_order": 34,
       "name": {
         "uk": "Командунний модуль Mk II",
         "en": "Command module Mk II"
@@ -1992,12 +1992,12 @@
       "race": null
     },
     {
-      "code": "recipe_30",
+      "code": "recipe_35",
       "part": "part_30",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 184,
-      "sort_order": 30,
+      "sort_order": 35,
       "name": {
         "uk": "Командунний модуль Mk III",
         "en": "Command module Mk III"
@@ -2024,12 +2024,12 @@
       "race": null
     },
     {
-      "code": "recipe_31",
+      "code": "recipe_36",
       "part": "part_31",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 30,
-      "sort_order": 31,
+      "sort_order": 36,
       "name": {
         "uk": "Снаряди Mk I",
         "en": "Shells Mk I"
@@ -2052,12 +2052,12 @@
       "race": null
     },
     {
-      "code": "recipe_32",
+      "code": "recipe_37",
       "part": "part_32",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 45,
-      "sort_order": 32,
+      "sort_order": 37,
       "name": {
         "uk": "Снаряди Mk II",
         "en": "Shells Mk II"
@@ -2080,12 +2080,12 @@
       "race": null
     },
     {
-      "code": "recipe_33",
+      "code": "recipe_38",
       "part": "part_33",
       "factory": "building_13",
       "output_quantity": 1,
       "duration_seconds": 69,
-      "sort_order": 33,
+      "sort_order": 38,
       "name": {
         "uk": "Снаряди Mk III",
         "en": "Shells Mk III"

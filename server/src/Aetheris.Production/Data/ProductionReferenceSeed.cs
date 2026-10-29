@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using Aetheris.Core.Data;
 using Aetheris.Core.Text;
@@ -105,16 +104,17 @@ public static class ProductionReferenceSeed
 
             factoryIds[factory] = buildingTypeId;
         }
-        Dictionary<string, int> groupIds = [];
+
+        // The codes of the file only link the rows of the file, so each must name one row.
+        EnsureUnique(data.PartGroups.Select(group => group.Code), "group of the parts");
+        EnsureUnique(data.Parts.Select(part => part.Code), "part");
+        EnsureUnique(data.Recipes.Select(recipe => recipe.Code), "recipe");
+
         Dictionary<string, int> partGroupIds = [];
-        Dictionary<string, int> partIds = [];
         Dictionary<string, int> partTypeIds = [];
 
-        // The counter is raised above the numbers of the starting data, so a row added later
-        // never gets a number that is already taken.
-        await RaiseAsync(codes, ProductionTextKeys.PartGroupCodeGroup, data.PartGroups.Select(group => group.Code), cancellationToken).ConfigureAwait(false);
-        await RaiseAsync(codes, ProductionTextKeys.PartTypeCodeGroup, data.Parts.Select(part => part.Code), cancellationToken).ConfigureAwait(false);
-        await RaiseAsync(codes, ProductionTextKeys.RecipeCodeGroup, data.Recipes.Select(recipe => recipe.Code), cancellationToken).ConfigureAwait(false);
+        // Every row takes the next code of the counter of the server, and the keys of its texts
+        // are built from that code (documentation/tech/09, sections 3.2 and 4.1).
 
         foreach (SeedPartGroup group in data.PartGroups)
         {
@@ -123,14 +123,13 @@ public static class ProductionReferenceSeed
             PartGroupEntity entity = new()
             {
                 Code = code,
-                NameKey = ProductionTextKeys.GroupName(group.Code),
-                DescriptionKey = ProductionTextKeys.GroupDescription(group.Code),
+                NameKey = ProductionTextKeys.GroupName(code),
+                DescriptionKey = ProductionTextKeys.GroupDescription(code),
                 SortOrder = group.SortOrder,
             };
 
             dbContext.PartGroups.Add(entity);
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            groupIds[group.Code] = entity.Id;
             partGroupIds[group.Code] = entity.Id;
 
             await texts.AddMissingAsync(
@@ -149,8 +148,8 @@ public static class ProductionReferenceSeed
             PartTypeEntity entity = new()
             {
                 Code = code,
-                NameKey = ProductionTextKeys.PartName(part.Code),
-                DescriptionKey = ProductionTextKeys.PartDescription(part.Code),
+                NameKey = ProductionTextKeys.PartName(code),
+                DescriptionKey = ProductionTextKeys.PartDescription(code),
                 PartGroupId = partGroupIds[part.Group],
                 MarkLevel = part.MarkLevel,
                 SortOrder = part.SortOrder,
@@ -169,7 +168,6 @@ public static class ProductionReferenceSeed
 
             dbContext.PartTypes.Add(entity);
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            partIds[part.Code] = entity.Id;
             partTypeIds[part.Code] = entity.Id;
 
             await texts.AddMissingAsync(
@@ -190,8 +188,8 @@ public static class ProductionReferenceSeed
             RecipeEntity entity = new()
             {
                 Code = code,
-                NameKey = ProductionTextKeys.RecipeName(recipe.Code),
-                DescriptionKey = ProductionTextKeys.RecipeDescription(recipe.Code),
+                NameKey = ProductionTextKeys.RecipeName(code),
+                DescriptionKey = ProductionTextKeys.RecipeDescription(code),
                 OutputQuantity = recipe.OutputQuantity,
                 DurationSeconds = recipe.DurationSeconds,
                 SortOrder = recipe.SortOrder,
@@ -244,10 +242,21 @@ public static class ProductionReferenceSeed
                 continue;
             }
 
-            List<RequirementDefinition> definitions = [.. recipe.Requirements.Select(requirement => new RequirementDefinition(
-                requirement.Type,
-                requirement.TargetLevel,
-                requirement.TargetLevel))];
+            List<RequirementDefinition> definitions = [];
+
+            foreach (SeedRequirement requirement in recipe.Requirements)
+            {
+                // The target is named by its neutral code and becomes the identifier of the row.
+                int targetId = requirement.Type switch
+                {
+                    RequirementTypes.BuildingLevel => await planets.FindBuildingTypeIdAsync(requirement.Target, cancellationToken).ConfigureAwait(false)
+                        ?? throw new InvalidOperationException($"The building '{requirement.Target}' of the starting data does not exist."),
+                    ProductionRequirementTypes.Race => raceIds[requirement.Target],
+                    _ => throw new InvalidOperationException($"The starting data names the requirement type '{requirement.Type}', which it cannot resolve."),
+                };
+
+                definitions.Add(new RequirementDefinition(requirement.Type, targetId, requirement.TargetLevel));
+            }
 
             if (recipe.Race is not null)
             {
@@ -269,28 +278,12 @@ public static class ProductionReferenceSeed
         return true;
     }
 
-    /// <summary>
-    /// Raises the counter of the codes of a group above the numbers the starting data takes,
-    /// so a row added later never gets a number that is already taken.
-    /// </summary>
-    /// <param name="codes">The counters of the neutral codes.</param>
-    /// <param name="group">The group of the codes.</param>
-    /// <param name="seedCodes">The codes of the starting data.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task that completes when the counter is raised.</returns>
-    public static Task RaiseAsync(ICodeSequence codes, string group, IEnumerable<string> seedCodes, CancellationToken cancellationToken)
+    private static void EnsureUnique(IEnumerable<string> codes, string kind)
     {
-        ArgumentNullException.ThrowIfNull(codes);
-        ArgumentNullException.ThrowIfNull(seedCodes);
-
-        string prefix = group + "_";
-        int taken = seedCodes
-            .Where(code => code.StartsWith(prefix, StringComparison.Ordinal))
-            .Select(code => int.TryParse(code.AsSpan(prefix.Length), NumberStyles.None, CultureInfo.InvariantCulture, out int number) ? number : 0)
-            .DefaultIfEmpty(0)
-            .Max();
-
-        return codes.RaiseAsync(group, taken, cancellationToken);
+        if (codes.GroupBy(code => code, StringComparer.Ordinal).FirstOrDefault(group => group.Count() > 1) is { } duplicate)
+        {
+            throw new InvalidOperationException($"The starting data names the {kind} '{duplicate.Key}' twice.");
+        }
     }
 
     /// <summary>

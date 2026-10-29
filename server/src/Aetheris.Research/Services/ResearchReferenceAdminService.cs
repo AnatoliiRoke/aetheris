@@ -76,6 +76,7 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
     private readonly IPlanetsModule _planets;
     private readonly IRequirementsModule _requirements;
     private readonly TechnologyCatalogCache _catalogCache;
+    private readonly IReadOnlyList<ITechnologyUnlockTargets> _unlockTargets;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResearchReferenceAdminService"/> class.
@@ -89,6 +90,7 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
     /// <param name="planets">The bodies module, for the buildings.</param>
     /// <param name="requirements">The common requirements module.</param>
     /// <param name="catalogCache">The catalog of the technologies in memory.</param>
+    /// <param name="unlockTargets">The subjects of the other modules a technology may open.</param>
     public ResearchReferenceAdminService(
         ResearchDbContext dbContext,
         ResearchUnitOfWork unitOfWork,
@@ -98,7 +100,8 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
         IWorldModule world,
         IPlanetsModule planets,
         IRequirementsModule requirements,
-        TechnologyCatalogCache catalogCache)
+        TechnologyCatalogCache catalogCache,
+        IEnumerable<ITechnologyUnlockTargets> unlockTargets)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -109,6 +112,7 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
         ArgumentNullException.ThrowIfNull(planets);
         ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(catalogCache);
+        ArgumentNullException.ThrowIfNull(unlockTargets);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -119,6 +123,7 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
         _planets = planets;
         _requirements = requirements;
         _catalogCache = catalogCache;
+        _unlockTargets = [.. unlockTargets];
     }
 
     /// <summary>
@@ -180,7 +185,11 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
                                 "unlock_kind",
                                 AdminReferenceFieldTypes.Select,
                                 LabelPrefix + "field.unlock_kind",
-                                Options: [new(TechnologyUnlockKinds.BuildingType, LabelPrefix + "unlock." + TechnologyUnlockKinds.BuildingType, RequirementReferenceKinds.Building)]),
+                                Options:
+                                [
+                                    new(TechnologyUnlockKinds.BuildingType, LabelPrefix + "unlock." + TechnologyUnlockKinds.BuildingType, RequirementReferenceKinds.Building),
+                                    new(TechnologyUnlockKinds.Recipe, LabelPrefix + "unlock." + TechnologyUnlockKinds.Recipe, RequirementReferenceKinds.Recipe),
+                                ]),
                             new("unlock_target_id", AdminReferenceFieldTypes.Reference, LabelPrefix + "field.unlock_target", ReferenceKindFrom: "unlock_kind"),
                             new("value", AdminReferenceFieldTypes.Number, LabelPrefix + "field.value", IsRequired: true, Minimum: 0, IsDecimal: true),
                         ]),
@@ -695,6 +704,15 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
         HashSet<int> buildingIds = [.. (await _planets.GetBuildingNameKeysAsync(cancellationToken).ConfigureAwait(false)).Keys];
         HashSet<int> technologyIds = [.. await _dbContext.Technologies.AsNoTracking().Select(technology => technology.Id).ToListAsync(cancellationToken).ConfigureAwait(false)];
 
+        // The effect «opens» names a building or a subject of a module that registered its kind;
+        // the modules, the ship classes and the rest stay closed until their reference kinds exist.
+        Dictionary<string, HashSet<int>> unlockTargetIds = new(StringComparer.Ordinal) { [TechnologyUnlockKinds.BuildingType] = buildingIds };
+
+        foreach (ITechnologyUnlockTargets targets in _unlockTargets)
+        {
+            unlockTargetIds[targets.UnlockKind] = [.. (await targets.GetNameKeysAsync(cancellationToken).ConfigureAwait(false)).Keys];
+        }
+
         // A technology is never its own requirement.
         if (stored is not null)
         {
@@ -712,7 +730,7 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
             }
 
             CheckCosts(failures, AdminReferenceRules.PathOf(LevelsField, index, CostsField), level.Costs ?? [], resourcesById, storedResourceIds);
-            CheckEffects(failures, AdminReferenceRules.PathOf(LevelsField, index, EffectsField), level.Effects ?? [], buildingIds);
+            CheckEffects(failures, AdminReferenceRules.PathOf(LevelsField, index, EffectsField), level.Effects ?? [], unlockTargetIds);
 
             foreach ((RequirementValues requirement, int requirementIndex) in (level.Requirements ?? []).Select((requirement, position) => (requirement, position)))
             {
@@ -768,7 +786,7 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
         }
     }
 
-    private static void CheckEffects(Dictionary<string, List<string>> failures, string path, List<TechnologyEffectValues> effects, HashSet<int> buildingIds)
+    private static void CheckEffects(Dictionary<string, List<string>> failures, string path, List<TechnologyEffectValues> effects, Dictionary<string, HashSet<int>> unlockTargetIds)
     {
         foreach (TechnologyEffectValues effect in effects)
         {
@@ -781,13 +799,13 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
 
             if (effect.EffectType == TechnologyEffectTypes.Unlocks)
             {
-                // Only the buildings exist yet; the modules, the recipes and the ship classes come
-                // with their own tasks and their own reference kinds.
-                if (effect.UnlockKind != TechnologyUnlockKinds.BuildingType)
+                // The buildings and the kinds the other modules registered may be opened; the
+                // modules and the ship classes come with their own tasks and reference kinds.
+                if (effect.UnlockKind is null || !unlockTargetIds.TryGetValue(effect.UnlockKind, out HashSet<int>? targetIds))
                 {
                     AdminReferenceRules.Fail(failures, path, effect.UnlockKind is null ? AdminReferenceErrors.Required : AdminReferenceErrors.NotApplicable);
                 }
-                else if (effect.UnlockTargetId is not { } buildingId || !buildingIds.Contains(buildingId))
+                else if (effect.UnlockTargetId is not { } targetId || !targetIds.Contains(targetId))
                 {
                     AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Unknown);
                 }
@@ -805,28 +823,38 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
     }
 
     /// <summary>
-    /// Writes the requirements of a technology, and closes every building a level opens until the
-    /// level is learned, like the starting data does.
+    /// Writes the requirements of a technology, and closes every building or subject of another
+    /// module a level opens until the level is learned, like the starting data does.
     /// </summary>
     private async Task WriteRequirementsAsync(TechnologyEntity technology, List<SubjectRequirement> requirements, CancellationToken cancellationToken)
     {
         await _requirements.ReplaceAsync(RequirementSubjectTypes.Technology, technology.Id, requirements, cancellationToken).ConfigureAwait(false);
 
-        foreach ((int buildingTypeId, int level) in technology.LevelIds
-            .SelectMany(level => level.EffectIds
-                .Where(effect => effect.EffectType == TechnologyEffectTypes.Unlocks && effect.UnlockKind == TechnologyUnlockKinds.BuildingType && effect.UnlockTargetId is not null)
-                .Select(effect => (BuildingTypeId: effect.UnlockTargetId!.Value, level.Level)))
-            .GroupBy(entry => entry.BuildingTypeId)
-            .Select(group => (group.Key, group.Min(entry => entry.Level))))
+        Dictionary<string, string> subjectTypes = new(StringComparer.Ordinal) { [TechnologyUnlockKinds.BuildingType] = RequirementSubjectTypes.BuildingType };
+
+        foreach (ITechnologyUnlockTargets targets in _unlockTargets)
         {
-            IReadOnlyList<RequirementDefinition> existing = await _requirements.GetAsync(RequirementSubjectTypes.BuildingType, buildingTypeId, int.MaxValue, cancellationToken)
+            subjectTypes[targets.UnlockKind] = targets.RequirementSubjectType;
+        }
+
+        foreach ((string subjectType, int subjectId, int level) in technology.LevelIds
+            .SelectMany(level => level.EffectIds
+                .Where(effect => effect.EffectType == TechnologyEffectTypes.Unlocks
+                    && effect.UnlockKind is not null
+                    && subjectTypes.ContainsKey(effect.UnlockKind)
+                    && effect.UnlockTargetId is not null)
+                .Select(effect => (SubjectType: subjectTypes[effect.UnlockKind!], SubjectId: effect.UnlockTargetId!.Value, level.Level)))
+            .GroupBy(entry => (entry.SubjectType, entry.SubjectId))
+            .Select(group => (group.Key.SubjectType, group.Key.SubjectId, group.Min(entry => entry.Level))))
+        {
+            IReadOnlyList<RequirementDefinition> existing = await _requirements.GetAsync(subjectType, subjectId, int.MaxValue, cancellationToken)
                 .ConfigureAwait(false);
 
             if (!existing.Any(requirement => requirement.RequirementType == RequirementTypes.TechnologyLevel && requirement.TargetId == technology.Id))
             {
                 await _requirements.AddAsync(
-                    RequirementSubjectTypes.BuildingType,
-                    buildingTypeId,
+                    subjectType,
+                    subjectId,
                     1,
                     [new RequirementDefinition(RequirementTypes.TechnologyLevel, technology.Id, level)],
                     cancellationToken).ConfigureAwait(false);
@@ -842,6 +870,11 @@ public sealed class ResearchReferenceAdminService : IAdminReferenceService
         _catalogCache.Invalidate();
         _planets.InvalidateCatalog();
         _texts.Invalidate();
+
+        foreach (ITechnologyUnlockTargets targets in _unlockTargets)
+        {
+            targets.InvalidateCatalog();
+        }
     }
 
     private async Task<TechnologyEntity> LockTechnologyAsync(int id, CancellationToken cancellationToken) =>
