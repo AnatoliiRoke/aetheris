@@ -112,8 +112,10 @@ public sealed class NeutralCodeMigrationTests
             Assert.Equal("Склад мінералів", await TextAsync(connectionString, "planets.building.building_8.name", "uk"));
             Assert.Equal(6, await ScalarAsync<int>(connectionString, $"""SELECT building_type_id AS "Value" FROM building_level WHERE id = 60"""));
 
-            Assert.Equal(13, await ScalarAsync<int>(connectionString, $"""SELECT last_number AS "Value" FROM code_sequence WHERE code_group = 'resource'"""));
-            Assert.Equal(5, await ScalarAsync<int>(connectionString, $"""SELECT last_number AS "Value" FROM code_sequence WHERE code_group = 'resource_group'"""));
+            // The counters are above every number that is taken: the produced goods of the
+            // production module added their group and their five resources (task 00013).
+            Assert.Equal(17, await ScalarAsync<int>(connectionString, $"""SELECT last_number AS "Value" FROM code_sequence WHERE code_group = 'resource'"""));
+            Assert.Equal(6, await ScalarAsync<int>(connectionString, $"""SELECT last_number AS "Value" FROM code_sequence WHERE code_group = 'resource_group'"""));
             Assert.Equal(8, await ScalarAsync<int>(connectionString, $"""SELECT last_number AS "Value" FROM code_sequence WHERE code_group = 'building'"""));
         }
         finally

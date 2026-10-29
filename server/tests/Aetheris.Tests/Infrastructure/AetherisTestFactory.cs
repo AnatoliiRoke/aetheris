@@ -283,6 +283,14 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
                 $$;
                 """)
             .ConfigureAwait(false);
+
+        // TRUNCATE bypasses the change tracker, so the context still holds the entities of
+        // the rows that were just removed. The next seed would add them a second time and
+        // the database would refuse the duplicate keys.
+        foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry entry in dbContext.ChangeTracker.Entries())
+        {
+            entry.State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+        }
     }
 
     private static void RemoveDatabaseRegistrations(IServiceCollection services)

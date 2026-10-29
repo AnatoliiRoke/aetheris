@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -290,7 +291,10 @@ public sealed class NeutralCodeTests
             ResourceTypeEntity resource = await world.ResourceTypes.AsNoTracking().SingleAsync(entry => entry.Id == resourceId, Token);
             code = resource.Code;
 
-            Assert.Equal("resource_13", code);
+            // The code comes from the counter of the server and is never given twice, so the
+            // test checks the shape of the code and not its number: the number depends on the
+            // resources that exist at that moment (task 00013).
+            Assert.Matches("^resource_[0-9]+$", code);
             Assert.Equal(groupId, resource.ResourceGroupId);
 
             LocalizationPack english = await scope.ServiceProvider.GetRequiredService<ILocalizationTexts>().GetPackAsync("en", Token);
@@ -322,9 +326,16 @@ public sealed class NeutralCodeTests
 
             Assert.Equal(parallelCount, codes.Distinct(StringComparer.Ordinal).Count());
             Assert.DoesNotContain(code, codes);
-            Assert.Equal(
-                Enumerable.Range(14, parallelCount).Select(number => "resource_" + number).Order(StringComparer.Ordinal),
-                codes.Order(StringComparer.Ordinal));
+            Assert.All(codes, value => Assert.Matches("^resource_[0-9]+$", value));
+
+            // The codes follow one another, so the counter of the server gives every row its
+            // own number and never the same one twice (task 00013).
+            int[] numbers = [.. codes
+                .Select(value => int.Parse(value["resource_".Length..], CultureInfo.InvariantCulture))
+                .OrderBy(number => number)];
+
+            Assert.Equal(numbers[0] + parallelCount - 1, numbers[^1]);
+            Assert.Equal(numbers.Length, numbers.Distinct().Count());
         }
     }
 

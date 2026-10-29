@@ -27,6 +27,7 @@ public sealed class ModuleIsolationTests
         "Aetheris.World",
         "Aetheris.Requirements",
         "Aetheris.Research",
+        "Aetheris.Production",
     ];
 
     /// <summary>
@@ -39,6 +40,7 @@ public sealed class ModuleIsolationTests
     {
         ["Aetheris.Planets"] = ["Aetheris.World", "Aetheris.Requirements"],
         ["Aetheris.Research"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements"],
+        ["Aetheris.Production"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research"],
     };
 
     private readonly AetherisTestFactory _factory;
@@ -69,6 +71,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.World")]
     [InlineData("Aetheris.Requirements")]
     [InlineData("Aetheris.Research")]
+    [InlineData("Aetheris.Production")]
     public void A_module_does_not_reference_another_module(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -168,6 +171,7 @@ public sealed class ModuleIsolationTests
         Assert.NotNull(services.GetService<Aetheris.World.IWorldModule>());
         Assert.NotNull(services.GetService<Aetheris.Requirements.IRequirementsModule>());
         Assert.NotNull(services.GetService<Aetheris.Research.IResearchModule>());
+        Assert.NotNull(services.GetService<Aetheris.Production.IProductionModule>());
     }
 
     /// <summary>
