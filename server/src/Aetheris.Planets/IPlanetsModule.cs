@@ -96,6 +96,51 @@ public interface IPlanetsModule
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the level of a building type on a body of a player: the level of the factory
+    /// that makes a part, for example (task 00013, decision 2.7).
+    /// </summary>
+    /// <param name="buildingTypeId">The building type.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The level of the building, or zero when the body has no building of the type.</returns>
+    Task<int> GetBuildingLevelByTypeAsync(
+        int buildingTypeId,
+        long planetId,
+        string? playerId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the level of one building of a body by the row of the building: the level of the
+    /// factory that makes a part, for example (task 00013, decision 2.7).
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="planetBuildingId">The building.</param>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The level of the building and the type it is of, or zero when the body has no such building.</returns>
+    Task<PlanetBuildingLevelById> GetBuildingLevelByIdAsync(
+        long planetId,
+        long planetBuildingId,
+        string? playerId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the buildings of a body that are of the given types, with their rows and their
+    /// levels: the factories of a body, for example (task 00013, decision 2.7).
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="buildingTypeIds">The types of the buildings to look for.</param>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The buildings of the body that are of the given types.</returns>
+    Task<IReadOnlyList<PlanetBuildingLevelById>> GetBuildingsByTypesAsync(
+        long planetId,
+        IReadOnlyCollection<int> buildingTypeIds,
+        string? playerId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the localisation keys of the names of the building types, for the modules that
     /// name a building they open (task 00012, decision 9).
     /// </summary>
@@ -109,3 +154,11 @@ public interface IPlanetsModule
     /// </summary>
     void InvalidateCatalog();
 }
+
+/// <summary>
+/// A building of a body with its level and its type (task 00013).
+/// </summary>
+/// <param name="PlanetBuildingId">The building.</param>
+/// <param name="BuildingTypeId">The type of the building.</param>
+/// <param name="Level">The level of the building.</param>
+public sealed record PlanetBuildingLevelById(long PlanetBuildingId, int BuildingTypeId, int Level);

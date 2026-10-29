@@ -28,6 +28,9 @@ public static class TechnologyEffectTypes
     /// <summary>The technology shortens the construction time.</summary>
     public const string ConstructionTime = "construction_time";
 
+    /// <summary>The technology shortens the production time (task 00013, decision 14).</summary>
+    public const string ProductionTime = "production_time";
+
     /// <summary>The technology raises the capacity of the storages.</summary>
     public const string StorageCapacity = "storage_capacity";
 
@@ -46,6 +49,7 @@ public static class TechnologyEffectTypes
         MetalProduction,
         CrystalProduction,
         ConstructionTime,
+        ProductionTime,
         StorageCapacity,
         EnergyOutput,
         PopulationMax,

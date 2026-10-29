@@ -1,6 +1,7 @@
 using Aetheris.Core.Time;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Data;
+using Aetheris.Planets.Data.Entities;
 using Aetheris.Requirements;
 using Aetheris.Requirements.Services;
 using Aetheris.World;
@@ -267,6 +268,109 @@ public sealed class PlanetQueryService
         BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
 
         return catalog.Types.ToDictionary(type => type.Id, type => type.NameKey);
+    }
+
+    /// <summary>
+    /// Gets the level of a building type on a body of a player.
+    /// </summary>
+    /// <param name="buildingTypeId">The building type.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The level of the building, or zero when the body has no building of the type.</returns>
+    public async Task<int> GetBuildingLevelByTypeAsync(
+        int buildingTypeId,
+        long planetId,
+        string? playerId,
+        CancellationToken cancellationToken)
+    {
+        IQueryable<PlanetBuildingEntity> buildings = _dbContext.PlanetBuildings
+            .Where(building => building.PlanetId == planetId && building.BuildingTypeId == buildingTypeId);
+
+        if (playerId is not null)
+        {
+            buildings = buildings.Where(building => _dbContext.PlanetStates
+                .Any(state => state.PlanetId == building.PlanetId && state.OwnerPlayerId == playerId));
+        }
+
+        return await buildings.AsNoTracking()
+            .Select(building => building.Level)
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Gets the level of one building of a body and the type it is of.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="planetBuildingId">The building.</param>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The building, or a record with zero level when the body has none.</returns>
+    public async Task<PlanetBuildingLevelById> GetBuildingLevelByIdAsync(
+        long planetId,
+        long planetBuildingId,
+        string? playerId,
+        CancellationToken cancellationToken)
+    {
+        IQueryable<PlanetBuildingEntity> buildings = _dbContext.PlanetBuildings
+            .Where(building => building.PlanetId == planetId && building.Id == planetBuildingId);
+
+        if (playerId is not null)
+        {
+            buildings = buildings.Where(building => _dbContext.PlanetStates
+                .Any(state => state.PlanetId == building.PlanetId && state.OwnerPlayerId == playerId));
+        }
+
+        PlanetBuildingEntity? building = await buildings.AsNoTracking()
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return building is null
+            ? new PlanetBuildingLevelById(planetBuildingId, 0, 0)
+            : new PlanetBuildingLevelById(building.Id, building.BuildingTypeId, building.Level);
+    }
+
+    /// <summary>
+    /// Gets the buildings of a body that are of the given types.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="buildingTypeIds">The types of the buildings to look for.</param>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The buildings of the body that are of the given types.</returns>
+    public async Task<IReadOnlyList<PlanetBuildingLevelById>> GetBuildingsByTypesAsync(
+        long planetId,
+        IReadOnlyCollection<int> buildingTypeIds,
+        string? playerId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(buildingTypeIds);
+
+        if (buildingTypeIds.Count == 0)
+        {
+            return [];
+        }
+
+        IQueryable<PlanetBuildingEntity> buildings = _dbContext.PlanetBuildings
+            .Where(building => building.PlanetId == planetId && buildingTypeIds.Contains(building.BuildingTypeId));
+
+        if (playerId is not null)
+        {
+            buildings = buildings.Where(building => _dbContext.PlanetStates
+                .Any(state => state.PlanetId == building.PlanetId && state.OwnerPlayerId == playerId));
+        }
+
+        List<PlanetBuildingEntity> rows = await buildings.AsNoTracking()
+            .OrderBy(building => building.BuildingTypeId)
+            .ThenBy(building => building.Id)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return
+        [
+            .. rows.Select(building => new PlanetBuildingLevelById(building.Id, building.BuildingTypeId, building.Level))
+        ];
     }
 
     /// <summary>

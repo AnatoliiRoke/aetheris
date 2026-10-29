@@ -21,6 +21,8 @@ using Aetheris.Host.Scheduling;
 using Aetheris.Host.Security;
 using Aetheris.Market;
 using Aetheris.Planets;
+using Aetheris.Production;
+using Aetheris.Production.Data;
 using Aetheris.Rating;
 using Aetheris.Requirements;
 using Aetheris.Requirements.Data;
@@ -196,6 +198,9 @@ PlanetsModule.Register(builder.Services);
 // The Research module reads the bodies module, so it comes after it.
 builder.Services.AddResearchModule();
 
+// The Production module reads the bodies and the research modules, so it comes after them.
+builder.Services.AddProductionModule();
+
 WebApplication app = builder.Build();
 
 // ---------------------------------------------------------------------------------------------
@@ -234,6 +239,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     await PlanetsModule.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await RequirementsDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await ResearchDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
+    await ProductionDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
 
@@ -269,6 +275,10 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     // The Research module fills its tables once the bodies module has its own reference
     // data, because a research starts on a body (task 00012).
     await scope.ServiceProvider.GetRequiredService<IResearchModule>().EnsureAsync().ConfigureAwait(false);
+
+    // The Production module fills its tables once the bodies and the research modules have
+    // their own reference data, because a factory stands on a body (task 00013).
+    await scope.ServiceProvider.GetRequiredService<IProductionModule>().EnsureAsync().ConfigureAwait(false);
 }
 
 if (AdminCommandLine.IsCommand(args))
@@ -300,6 +310,7 @@ app.MapReferenceImageEndpoints();
 app.MapWorldEndpoints();
 PlanetsModule.MapEndpoints(app);
 ResearchServiceCollectionExtensions.MapEndpoints(app);
+ProductionServiceCollectionExtensions.MapEndpoints(app);
 app.MapCommands();
 
 await app.RunAsync().ConfigureAwait(false);

@@ -86,6 +86,10 @@ public sealed class WorldModule : IWorldModule
         _allocator.AllocateAsync(playerId, null, cancellationToken);
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<RaceDto>> GetRacesAsync(CancellationToken cancellationToken = default) =>
+        await _civilizations.GetRacesAsync(cancellationToken).ConfigureAwait(false);
+
+    /// <inheritdoc />
     public Task<CivilizationSummary?> GetCivilizationAsync(string playerId, CancellationToken cancellationToken = default) =>
         _civilizations.GetAsync(playerId, cancellationToken);
 

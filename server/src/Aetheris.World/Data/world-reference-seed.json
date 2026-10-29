@@ -43,6 +43,18 @@
         "uk": "Унікальні кристали, які трапляються лише в астероїдних полях.",
         "en": "Unique crystals found only in asteroid fields."
       }
+    },
+    {
+      "code": "resource_group_6",
+      "allowed_on_planet": true,
+      "name": {
+        "uk": "Вироблена продукція",
+        "en": "Produced goods"
+      },
+      "description": {
+        "uk": "Матеріали, зроблені з сировини на заводах.",
+        "en": "The materials made from raw materials in the factories."
+      }
     }
   ],
   "resources": [
@@ -188,6 +200,66 @@
       "description": {
         "uk": "Унікальний ресурс астероїдних полів.",
         "en": "A unique resource of asteroid fields."
+      }
+    },
+    {
+      "code": "resource_13",
+      "group": "resource_group_6",
+      "name": {
+        "uk": "Будматеріали",
+        "en": "Building materials"
+      },
+      "description": {
+        "uk": "Плити й балки для будівель і корпусів.",
+        "en": "The plates and the beams for the buildings and the hulls."
+      }
+    },
+    {
+      "code": "resource_14",
+      "group": "resource_group_6",
+      "name": {
+        "uk": "Оптоволокно",
+        "en": "Optical fibre"
+      },
+      "description": {
+        "uk": "Нитки світла для сенсорів і зв'язку.",
+        "en": "The threads of light for the sensors and the communication."
+      }
+    },
+    {
+      "code": "resource_15",
+      "group": "resource_group_6",
+      "name": {
+        "uk": "Мікропроцесори",
+        "en": "Microprocessors"
+      },
+      "description": {
+        "uk": "Серце будь-якої електроніки.",
+        "en": "The heart of any electronics."
+      }
+    },
+    {
+      "code": "resource_16",
+      "group": "resource_group_6",
+      "name": {
+        "uk": "Композити",
+        "en": "Composites"
+      },
+      "description": {
+        "uk": "Міцні матеріали для важких корпусів і броні.",
+        "en": "The strong materials for the heavy hulls and the armour."
+      }
+    },
+    {
+      "code": "resource_17",
+      "group": "resource_group_6",
+      "name": {
+        "uk": "Енергострижні",
+        "en": "Power strips"
+      },
+      "description": {
+        "uk": "Джерела енергії для генераторів.",
+        "en": "The sources of energy for the generators."
       }
     }
   ],

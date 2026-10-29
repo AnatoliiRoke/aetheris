@@ -13,6 +13,7 @@ using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Localization;
 using Aetheris.Host.Security;
 using Aetheris.Planets;
+using Aetheris.Production;
 using Aetheris.Research;
 using Aetheris.World.Api;
 using FluentValidation;
@@ -234,6 +235,7 @@ public static class AdminEndpoints
         secured.MapReferenceImageAdminEndpoints();
         PlanetsModule.MapAdminEndpoints(secured);
         ResearchServiceCollectionExtensions.MapAdminEndpoints(secured);
+        ProductionServiceCollectionExtensions.MapAdminEndpoints(secured);
     }
 
     private static async Task<IResult> SignInAsync(

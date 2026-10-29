@@ -262,8 +262,8 @@
         "en": "Industrial automation"
       },
       "description": {
-        "uk": "Будівлі будуються швидше.",
-        "en": "The buildings are built faster."
+        "uk": "Прискорює будівництво й виробництво.",
+        "en": "Speeds up the construction and the production."
       },
       "duration_seconds": {
         "base": 780,
@@ -288,6 +288,13 @@
       "effects": [
         {
           "type": "construction_time",
+          "growth": {
+            "base": 0.95,
+            "growth": 0.98
+          }
+        },
+        {
+          "type": "production_time",
           "growth": {
             "base": 0.95,
             "growth": 0.98

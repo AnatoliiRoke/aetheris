@@ -54,6 +54,10 @@ public static class ResearchServiceCollectionExtensions
         services.RemoveAll<ITechnologyLevels>();
         services.AddScoped<ITechnologyLevels, TechnologyLevelsService>();
 
+        // The multipliers of the production are a rule of the research, so the production
+        // module reads them through this contract (task 00013, decision 14).
+        services.AddScoped<IProductionMultipliers, ProductionMultipliersService>();
+
         return services;
     }
 

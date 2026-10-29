@@ -76,6 +76,13 @@ public interface IWorldModule
     Task<StartPlanetResult> AllocateStartPlanetAsync(string playerId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the races of the world with their identifiers and their codes (task 00013).
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The races.</returns>
+    Task<IReadOnlyList<RaceDto>> GetRacesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the civilization of a player: the race and the home body chosen at the first step
     /// of the game (task 00006, decision 9).
     /// </summary>

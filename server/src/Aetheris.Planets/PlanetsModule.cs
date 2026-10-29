@@ -156,5 +156,29 @@ public sealed class PlanetsModule : IPlanetsModule
         _queries.GetBuildingNameKeysAsync(cancellationToken);
 
     /// <inheritdoc />
+    public async Task<int> GetBuildingLevelByTypeAsync(
+        int buildingTypeId,
+        long planetId,
+        string? playerId,
+        CancellationToken cancellationToken = default) =>
+        await _queries.GetBuildingLevelByTypeAsync(buildingTypeId, planetId, playerId, cancellationToken).ConfigureAwait(false);
+
+    /// <inheritdoc />
+    public async Task<PlanetBuildingLevelById> GetBuildingLevelByIdAsync(
+        long planetId,
+        long planetBuildingId,
+        string? playerId,
+        CancellationToken cancellationToken = default) =>
+        await _queries.GetBuildingLevelByIdAsync(planetId, planetBuildingId, playerId, cancellationToken).ConfigureAwait(false);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<PlanetBuildingLevelById>> GetBuildingsByTypesAsync(
+        long planetId,
+        IReadOnlyCollection<int> buildingTypeIds,
+        string? playerId,
+        CancellationToken cancellationToken = default) =>
+        await _queries.GetBuildingsByTypesAsync(planetId, buildingTypeIds, playerId, cancellationToken).ConfigureAwait(false);
+
+    /// <inheritdoc />
     public void InvalidateCatalog() => _queries.InvalidateCatalog();
 }
