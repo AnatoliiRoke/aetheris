@@ -6,6 +6,7 @@ import { createGameApi } from './api/gameApi';
 import { HttpClient } from './api/http';
 import { mockContentApi } from './api/mockContentApi';
 import { createPlanetApi } from './api/planetApi';
+import { createProductionApi } from './api/productionApi';
 import { createResearchApi } from './api/researchApi';
 import { createTextsApi } from './api/textsApi';
 import { I18nProvider } from './i18n/I18nProvider';
@@ -172,6 +173,7 @@ export default function App() {
       content: mockContentApi,
       game: createGameApi(http),
       planets: createPlanetApi(http),
+      production: createProductionApi(http),
       research: createResearchApi(http),
       texts: createTextsApi(http),
     };

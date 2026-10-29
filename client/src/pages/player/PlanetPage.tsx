@@ -9,6 +9,7 @@ import { useSession } from '../../session/useSession';
 import { useTexts } from '../../texts/useTexts';
 import { BuildingCard, EnergyPanel, QueuePanel, ResourcesPanel } from './PlanetPanels';
 import { PlayerLayout } from './PlayerLayout';
+import { ProductionPanel } from './ProductionPanel';
 import { namer, reasonText, secondsLeft } from './planetText';
 import { useNow, usePlanet } from './usePlanet';
 
@@ -102,6 +103,7 @@ export function PlanetPage() {
             <EnergyPanel planet={planet} />
           </div>
           <ResourcesPanel planet={planet} names={names} />
+          <ProductionPanel planetId={civilization.planetId} />
           <section className="panel" aria-labelledby="planet-buildings">
             <h2 className="panel__title" id="planet-buildings">
               {t('planet.buildings')}

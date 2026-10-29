@@ -1,0 +1,148 @@
+import type { HttpClient } from './http';
+import { camelize } from './planetApi';
+
+/**
+ * A factory of a body with its recipes, its queue and the storage of the parts
+ * (task 00013).
+ */
+export interface ProductionFactory {
+  planetId: number;
+  planetBuildingId: number;
+  factoryLevel: number;
+  recipes: ProductionRecipe[];
+  queue: ProductionOrder[];
+  storage: ProductionStorage;
+  gameNow: string;
+}
+
+/**
+ * A factory of a body, without its recipes.
+ */
+export interface ProductionFactorySummary {
+  planetId: number;
+  planetBuildingId: number;
+  buildingTypeId: number;
+  level: number;
+  nameKey: string;
+}
+
+/**
+ * A recipe of a factory with the reasons why it is not available.
+ */
+export interface ProductionRecipe {
+  recipeId: number;
+  code: string;
+  nameKey: string;
+  descriptionKey: string;
+  buildingTypeId: number | null;
+  partTypeId: number | null;
+  resourceTypeId: number | null;
+  outputQuantity: number;
+  durationSeconds: number;
+  isAvailable: boolean;
+  reasons: ProductionReason[];
+}
+
+/**
+ * A reason why a recipe is not available.
+ */
+export interface ProductionReason {
+  code: string;
+  targetId: number;
+  targetLevel: number;
+}
+
+/**
+ * A batch of a queue.
+ */
+export interface ProductionOrder {
+  orderId: number;
+  recipeId: number;
+  quantity: number;
+  producedQuantity: number;
+  position: number;
+  startsAt: string | null;
+  nextUnitAt: string | null;
+  finishesAt: string | null;
+  isBlocked: boolean;
+}
+
+/**
+ * The storage of the parts of a body.
+ */
+export interface ProductionStorage {
+  capacity: number;
+  stored: number;
+  fullAt: string | null;
+}
+
+/**
+ * The storage of the parts of a body with the stacks it holds.
+ */
+export interface ProductionStock {
+  planetId: number;
+  stacks: ProductionStack[];
+  storage: ProductionStorage;
+  gameNow: string;
+}
+
+/**
+ * A stack of the parts on a body.
+ */
+export interface ProductionStack {
+  partTypeId: number;
+  markLevel: number;
+  hasRaceBonus: boolean;
+  conditionPercent: number;
+  quantity: number;
+}
+
+/**
+ * The endpoints of the production module: the reads of the factories and the stock, and the
+ * commands of the queue. The server checks every rule; the client only shows them.
+ */
+export interface ProductionApi {
+  factories(planetId: number): Promise<ProductionFactorySummary[]>;
+  factory(planetId: number, planetBuildingId: number): Promise<ProductionFactory>;
+  stock(planetId: number): Promise<ProductionStock>;
+  enqueue(planetId: number, planetBuildingId: number, recipeId: number, quantity: number): Promise<ProductionFactory>;
+  cancel(planetId: number, planetBuildingId: number, orderId: number): Promise<ProductionFactory>;
+}
+
+const prefix = '/api/v1/production';
+
+/**
+ * The endpoints of the production module over HTTP.
+ */
+export function createProductionApi(http: HttpClient): ProductionApi {
+  return {
+    async factories(planetId) {
+      return camelize<ProductionFactorySummary[]>(await http.get<unknown>(`${prefix}/factories?planet_id=${planetId}`));
+    },
+    async factory(planetId, planetBuildingId) {
+      return camelize<ProductionFactory>(await http.get<unknown>(`${prefix}/factories/${planetBuildingId}?planet_id=${planetId}`));
+    },
+    async stock(planetId) {
+      return camelize<ProductionStock>(await http.get<unknown>(`${prefix}/stock?planet_id=${planetId}`));
+    },
+    async enqueue(planetId, planetBuildingId, recipeId, quantity) {
+      return camelize<ProductionFactory>(
+        await http.command<unknown>(`${prefix}/enqueue`, {
+          planet_id: planetId,
+          planet_building_id: planetBuildingId,
+          recipe_id: recipeId,
+          quantity,
+        }),
+      );
+    },
+    async cancel(planetId, planetBuildingId, orderId) {
+      return camelize<ProductionFactory>(
+        await http.command<unknown>(`${prefix}/cancel`, {
+          planet_id: planetId,
+          planet_building_id: planetBuildingId,
+          order_id: orderId,
+        }),
+      );
+    },
+  };
+}

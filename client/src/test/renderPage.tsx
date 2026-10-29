@@ -7,6 +7,7 @@ import type { ContentApi } from '../api/contentApi';
 import type { GameApi, Race } from '../api/gameApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
+import type { ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionStock } from '../api/productionApi';
 import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
 
@@ -75,6 +76,10 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'research.branch.economy.name': 'Економіка',
     'research.technology.tech_1.name': 'Глибинний видобуток',
     'research.technology.tech_1.description': 'Шахти видобувають більше металів.',
+    'production.recipe.recipe_1.name': 'Будматеріали',
+    'production.recipe.recipe_1.description': 'Плити й балки з сировини.',
+    'production.recipe.recipe_2.name': 'Корпусний модуль',
+    'production.recipe.recipe_2.description': 'Модуль корпусу корабля.',
   },
   en: {
     'world.race.race_1.name': 'Terrans',
@@ -84,6 +89,10 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'research.branch.economy.name': 'Economy',
     'research.technology.tech_1.name': 'Deep extraction',
     'research.technology.tech_1.description': 'The mines extract more metals.',
+    'production.recipe.recipe_1.name': 'Building materials',
+    'production.recipe.recipe_1.description': 'The plates and beams from the raw materials.',
+    'production.recipe.recipe_2.name': 'Hull module',
+    'production.recipe.recipe_2.description': 'A module of the hull of a ship.',
   },
 };
 
@@ -300,6 +309,95 @@ export function fakeResearchApi(overrides: Partial<ResearchApi> = {}): ResearchA
 }
 
 /**
+ * A production API whose every method is a spy; a test overrides what it needs.
+ */
+export function fakeProductionApi(overrides: Partial<ProductionApi> = {}): ProductionApi {
+  return {
+    factories: vi.fn().mockResolvedValue(sampleProductionFactories()),
+    factory: vi.fn().mockResolvedValue(sampleProductionFactory()),
+    stock: vi.fn().mockResolvedValue(sampleProductionStock()),
+    enqueue: vi.fn().mockResolvedValue(sampleProductionFactory()),
+    cancel: vi.fn().mockResolvedValue(sampleProductionFactory()),
+    ...overrides,
+  };
+}
+
+/**
+ * A factory of a body for the tests (task 00013).
+ */
+export function sampleProductionFactory(overrides: Partial<ProductionFactory> = {}): ProductionFactory {
+  return {
+    planetId: 10,
+    planetBuildingId: 500,
+    factoryLevel: 1,
+    recipes: [
+      {
+        recipeId: 1,
+        code: 'recipe_1',
+        nameKey: 'production.recipe.recipe_1.name',
+        descriptionKey: 'production.recipe.recipe_1.description',
+        buildingTypeId: 13,
+        partTypeId: null,
+        resourceTypeId: 13,
+        outputQuantity: 1,
+        durationSeconds: 60,
+        isAvailable: true,
+        reasons: [],
+      },
+      {
+        recipeId: 2,
+        code: 'recipe_2',
+        nameKey: 'production.recipe.recipe_2.name',
+        descriptionKey: 'production.recipe.recipe_2.description',
+        buildingTypeId: 13,
+        partTypeId: 3,
+        resourceTypeId: null,
+        outputQuantity: 1,
+        durationSeconds: 120,
+        isAvailable: false,
+        reasons: [{ code: 'production_requirement_technology', targetId: 5, targetLevel: 1 }],
+      },
+    ],
+    queue: [
+      {
+        orderId: 700,
+        recipeId: 1,
+        quantity: 3,
+        producedQuantity: 1,
+        position: 1,
+        startsAt: '2026-10-26T11:59:00Z',
+        nextUnitAt: '2026-10-26T12:00:00Z',
+        finishesAt: '2026-10-26T12:02:00Z',
+        isBlocked: false,
+      },
+    ],
+    storage: { capacity: 100, stored: 5, fullAt: null },
+    gameNow: '2026-10-26T12:00:00Z',
+    ...overrides,
+  };
+}
+
+/**
+ * The list of the factories of a body for the tests.
+ */
+export function sampleProductionFactories(): ProductionFactorySummary[] {
+  return [{ planetId: 10, planetBuildingId: 500, buildingTypeId: 13, level: 1, nameKey: 'planets.building.building_13.name' }];
+}
+
+/**
+ * The stock of the parts of a body for the tests.
+ */
+export function sampleProductionStock(overrides: Partial<ProductionStock> = {}): ProductionStock {
+  return {
+    planetId: 10,
+    stacks: [{ partTypeId: 3, markLevel: 2, hasRaceBonus: true, conditionPercent: 100, quantity: 4 }],
+    storage: { capacity: 100, stored: 4, fullAt: null },
+    gameNow: '2026-10-26T12:00:00Z',
+    ...overrides,
+  };
+}
+
+/**
  * A signed-in account for the tests.
  */
 export function signedInMe(overrides: Partial<Me> = {}): Me {
@@ -319,7 +417,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
  */
 export function renderPage(
   path: string,
-  options: { auth?: AuthApi; content?: ContentApi; game?: GameApi; planets?: PlanetApi; research?: ResearchApi; texts?: TextsApi } = {},
+  options: { auth?: AuthApi; content?: ContentApi; game?: GameApi; planets?: PlanetApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi } = {},
 ): RenderResult & { api: Api } {
   window.history.replaceState(null, '', path);
 
@@ -328,6 +426,7 @@ export function renderPage(
     content: options.content ?? mockContentApi,
     game: options.game ?? fakeGameApi(),
     planets: options.planets ?? fakePlanetApi(),
+    production: options.production ?? fakeProductionApi(),
     research: options.research ?? fakeResearchApi(),
     texts: options.texts ?? fakeTextsApi(),
   };
