@@ -1,0 +1,307 @@
+{
+  "types": [
+    {
+      "key": "terraforming",
+      "handler": "terraforming",
+      "refunds_input": false,
+      "sort_order": 10,
+      "name": {
+        "uk": "Тераформінг",
+        "en": "Terraforming"
+      },
+      "description": {
+        "uk": "Пристрій робить родовища планети багатими.",
+        "en": "A device makes the deposits of a body rich."
+      }
+    },
+    {
+      "key": "recycling",
+      "handler": "recycling",
+      "refunds_input": true,
+      "sort_order": 20,
+      "name": {
+        "uk": "Розбирання",
+        "en": "Recycling"
+      },
+      "description": {
+        "uk": "Фабрика утилізації розбирає деталі й повертає частину ресурсів.",
+        "en": "The recycling factory takes the parts apart and returns a share of the resources."
+      }
+    },
+    {
+      "key": "matter_conversion",
+      "handler": "matter_conversion",
+      "refunds_input": true,
+      "sort_order": 30,
+      "name": {
+        "uk": "Перетворення матерії",
+        "en": "Matter conversion"
+      },
+      "description": {
+        "uk": "Перетворювач перетворює сировину в сировину тієї ж групи.",
+        "en": "The converter turns one raw material into another of the same group."
+      }
+    },
+    {
+      "key": "ship_repair",
+      "handler": "ship_repair",
+      "refunds_input": true,
+      "sort_order": 40,
+      "name": {
+        "uk": "Ремонт корабля",
+        "en": "Ship repair"
+      },
+      "description": {
+        "uk": "Майстерня лагодить корпус корабля й усі його модулі.",
+        "en": "The workshop repairs the hull of a ship and all its modules."
+      }
+    },
+    {
+      "key": "module_replacement",
+      "handler": "module_replacement",
+      "refunds_input": true,
+      "sort_order": 50,
+      "name": {
+        "uk": "Заміна модуля",
+        "en": "Module replacement"
+      },
+      "description": {
+        "uk": "Заміна знімає пошкоджений модуль і ставить новий зі складу.",
+        "en": "The replacement takes a damaged module off and puts a new one from the storage."
+      }
+    },
+    {
+      "key": "module_repair",
+      "handler": "module_repair",
+      "refunds_input": true,
+      "sort_order": 60,
+      "name": {
+        "uk": "Ремонт модуля",
+        "en": "Module repair"
+      },
+      "description": {
+        "uk": "Ремонтний цех повертає пошкодженому модулю повну справність.",
+        "en": "The repair shop gives a damaged module its full condition back."
+      }
+    }
+  ],
+  "recipes": [
+    {
+      "key": "terraforming_body",
+      "type": "terraforming",
+      "building_class": "production",
+      "source_group": null,
+      "target_group": null,
+      "duration_seconds": 3600,
+      "ship_stub": "ship_on_orbit",
+      "sort_order": 10,
+      "name": {
+        "uk": "Тераформінг планети",
+        "en": "Terraforming of a body"
+      },
+      "description": {
+        "uk": "Пристрій на орбіті робить родовища планети багатими.",
+        "en": "A device on the orbit makes the deposits of the body rich."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_13",
+          "part": null,
+          "amount": 4
+        },
+        {
+          "resource": "resource_15",
+          "part": null,
+          "amount": 2
+        }
+      ],
+      "requirements": []
+    },
+    {
+      "key": "recycle_part",
+      "type": "recycling",
+      "building_class": "recycling",
+      "source_group": null,
+      "target_group": null,
+      "duration_seconds": 900,
+      "ship_stub": null,
+      "sort_order": 20,
+      "name": {
+        "uk": "Розбирання деталі",
+        "en": "Recycling of a part"
+      },
+      "description": {
+        "uk": "Фабрика утилізації розбирає деталь і повертає частину ресурсів.",
+        "en": "The recycling factory takes a part apart and returns a share of the resources."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_13",
+          "part": null,
+          "amount": 1
+        }
+      ],
+      "requirements": []
+    },
+    {
+      "key": "convert_matter",
+      "type": "matter_conversion",
+      "building_class": "converter",
+      "source_group": "resource_group_1",
+      "target_group": "resource_group_1",
+      "duration_seconds": 600,
+      "ship_stub": null,
+      "sort_order": 30,
+      "name": {
+        "uk": "Перетворення матерії",
+        "en": "Matter conversion"
+      },
+      "description": {
+        "uk": "Перетворювач перетворює сировину в сировину тієї ж групи.",
+        "en": "The converter turns one raw material into another of the same group."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 2
+        }
+      ],
+      "requirements": []
+    },
+    {
+      "key": "repair_ship",
+      "type": "ship_repair",
+      "building_class": "orbital_workshop",
+      "source_group": null,
+      "target_group": null,
+      "duration_seconds": 1800,
+      "ship_stub": "ship_on_orbit",
+      "sort_order": 40,
+      "name": {
+        "uk": "Ремонт корабля",
+        "en": "Repair of a ship"
+      },
+      "description": {
+        "uk": "Майстерня лагодить корпус корабля й усі його модулі.",
+        "en": "The workshop repairs the hull of the ship and all its modules."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_15",
+          "part": null,
+          "amount": 1
+        }
+      ],
+      "requirements": []
+    },
+    {
+      "key": "replace_module",
+      "type": "module_replacement",
+      "building_class": "orbital_workshop",
+      "source_group": null,
+      "target_group": null,
+      "duration_seconds": 600,
+      "ship_stub": "ship_on_orbit",
+      "sort_order": 50,
+      "name": {
+        "uk": "Заміна модуля",
+        "en": "Replacement of a module"
+      },
+      "description": {
+        "uk": "Знятий модуль потрапляє на склад як пошкоджена деталь.",
+        "en": "The module that comes off goes to the storage as a damaged part."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_13",
+          "part": null,
+          "amount": 2
+        }
+      ],
+      "requirements": []
+    },
+    {
+      "key": "repair_module",
+      "type": "module_repair",
+      "building_class": "module_repair",
+      "source_group": null,
+      "target_group": null,
+      "duration_seconds": 300,
+      "ship_stub": null,
+      "sort_order": 60,
+      "name": {
+        "uk": "Ремонт модуля",
+        "en": "Repair of a module"
+      },
+      "description": {
+        "uk": "Ремонтний цех повертає пошкодженому модулю повну справність.",
+        "en": "The repair shop gives a damaged module its full condition back."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_13",
+          "part": null,
+          "amount": 1
+        }
+      ],
+      "requirements": []
+    }
+  ],
+  "params": [
+    {
+      "type": "terraforming",
+      "kind": "range",
+      "level_source": "building",
+      "level_target": null,
+      "level": 1,
+      "value": 1.4,
+      "value_max": 1.9,
+      "sort_order": 10,
+      "name": {
+        "uk": "Діапазон багатства",
+        "en": "Range of the richness"
+      },
+      "description": {
+        "uk": "Найнижчий і найвищий множник родовищ після тераформінгу.",
+        "en": "The lowest and the highest multiplier of the deposits after the terraforming."
+      }
+    },
+    {
+      "type": "recycling",
+      "kind": "scaling",
+      "level_source": "building",
+      "level_target": null,
+      "level": 1,
+      "value": 0.4,
+      "value_max": null,
+      "sort_order": 10,
+      "name": {
+        "uk": "Частка повернення",
+        "en": "Share of the return"
+      },
+      "description": {
+        "uk": "Частка ресурсів, яку фабрика утилізації повертає, за рівнем.",
+        "en": "The share of the resources the recycling factory returns, by the level."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "value_by_level",
+      "level_source": "technology",
+      "level_target": null,
+      "level": 1,
+      "value": 0.3,
+      "value_max": null,
+      "sort_order": 10,
+      "name": {
+        "uk": "Вихід перетворення",
+        "en": "Output of the conversion"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, за рівнем технології.",
+        "en": "The share of the raw material that is left after the conversion, by the level."
+      }
+    }
+  ]
+}

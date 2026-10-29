@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Aetheris.Processes</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!--
+    The module of the processes reads the bodies module for the levels of the buildings and
+    the balance of the resources, the production module for the parts and their condition, the
+    research module for the levels of the technologies, and the world module for the deposits
+    and the owner of a body. The dependencies go one way only.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
+    <ProjectReference Include="..\Aetheris.Planets\Aetheris.Planets.csproj" />
+    <ProjectReference Include="..\Aetheris.Production\Aetheris.Production.csproj" />
+    <ProjectReference Include="..\Aetheris.Requirements\Aetheris.Requirements.csproj" />
+    <ProjectReference Include="..\Aetheris.Research\Aetheris.Research.csproj" />
+    <ProjectReference Include="..\Aetheris.World\Aetheris.World.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\process-reference-seed.json" LogicalName="Aetheris.Processes.reference-seed.json" />
+    <EmbeddedResource Include="Data\admin-reference-texts.json" LogicalName="Aetheris.Processes.admin-reference-texts.json" />
+  </ItemGroup>
+
+</Project>
