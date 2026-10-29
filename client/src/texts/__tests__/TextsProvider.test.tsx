@@ -4,7 +4,7 @@ import { ApiContext, type Api } from '../../api/context';
 import { mockContentApi } from '../../api/mockContentApi';
 import type { TextsApi } from '../../api/textsApi';
 import { I18nProvider } from '../../i18n/I18nProvider';
-import { fakeAuthApi, fakeGameApi, fakePlanetApi, fakeProductionApi, fakeResearchApi } from '../../test/renderPage';
+import { fakeAuthApi, fakeGameApi, fakePlanetApi, fakeProcessesApi, fakeProductionApi, fakeResearchApi } from '../../test/renderPage';
 import { TextsProvider } from '../TextsProvider';
 import { useTexts } from '../useTexts';
 
@@ -21,7 +21,7 @@ function Names({ keys }: { keys: string[] }) {
 }
 
 function renderTexts(texts: TextsApi, keys: string[], language: 'uk' | 'en' = 'en') {
-  const api: Api = { auth: fakeAuthApi(), content: mockContentApi, game: fakeGameApi(), planets: fakePlanetApi(), production: fakeProductionApi(), research: fakeResearchApi(), texts };
+  const api: Api = { auth: fakeAuthApi(), content: mockContentApi, game: fakeGameApi(), planets: fakePlanetApi(), processes: fakeProcessesApi(), production: fakeProductionApi(), research: fakeResearchApi(), texts };
 
   return render(
     <I18nProvider initialLanguage={language}>

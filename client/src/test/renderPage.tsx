@@ -7,6 +7,7 @@ import type { ContentApi } from '../api/contentApi';
 import type { GameApi, Race } from '../api/gameApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
+import type { ProcessBuilding, ProcessBuildingSummary, ProcessesApi } from '../api/processesApi';
 import type { ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionStock } from '../api/productionApi';
 import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
@@ -73,6 +74,7 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'planets.building.building_1.description': 'Головна будівля планети.',
     'planets.building.building_2.name': 'Науковий центр',
     'planets.building.building_5.name': 'Шахта заліза',
+    'planets.building.building_20.name': 'Фабрика утилізації',
     'research.branch.economy.name': 'Економіка',
     'research.technology.tech_1.name': 'Глибинний видобуток',
     'research.technology.tech_1.description': 'Шахти видобувають більше металів.',
@@ -81,6 +83,12 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'production.recipe.recipe_2.name': 'Корпусний модуль',
     'production.recipe.recipe_2.description': 'Модуль корпусу корабля.',
     'production.part_type.part_3.name': 'Корпус «Оса» Мк. II',
+    'processes.process_type.terraforming.name': 'Тераформінг',
+    'processes.process_type.recycling.name': 'Розбирання',
+    'processes.process_recipe.recipe_1.name': 'Тераформування планети',
+    'processes.process_recipe.recipe_1.description': 'Пристрій на орбіті робить родовища багатими.',
+    'processes.process_recipe.recipe_2.name': 'Розбирання деталі',
+    'processes.process_recipe.recipe_2.description': 'Деталь розбирається на ресурси.',
   },
   en: {
     'world.race.race_1.name': 'Terrans',
@@ -94,6 +102,13 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'production.recipe.recipe_1.description': 'The plates and beams from the raw materials.',
     'production.recipe.recipe_2.name': 'Hull module',
     'production.recipe.recipe_2.description': 'A module of the hull of a ship.',
+    'planets.building.building_20.name': 'Recycling factory',
+    'processes.process_type.terraforming.name': 'Terraforming',
+    'processes.process_type.recycling.name': 'Recycling',
+    'processes.process_recipe.recipe_1.name': 'Terraforming of the planet',
+    'processes.process_recipe.recipe_1.description': 'The device on the orbit makes the deposits rich.',
+    'processes.process_recipe.recipe_2.name': 'Recycling of a part',
+    'processes.process_recipe.recipe_2.description': 'The part is taken apart into resources.',
   },
 };
 
@@ -405,6 +420,87 @@ export function sampleProductionStock(overrides: Partial<ProductionStock> = {}):
 }
 
 /**
+ * A processes API whose every method is a spy; a test overrides what it needs.
+ */
+export function fakeProcessesApi(overrides: Partial<ProcessesApi> = {}): ProcessesApi {
+  return {
+    buildings: vi.fn().mockResolvedValue(sampleProcessesBuildings()),
+    building: vi.fn().mockResolvedValue(sampleProcessesBuilding()),
+    enqueue: vi.fn().mockResolvedValue(sampleProcessesBuilding()),
+    cancel: vi.fn().mockResolvedValue(sampleProcessesBuilding()),
+    ...overrides,
+  };
+}
+
+/**
+ * A building of a body that runs a process, with its recipes and its queue (task 00014).
+ */
+export function sampleProcessesBuilding(overrides: Partial<ProcessBuilding> = {}): ProcessBuilding {
+  return {
+    planetId: 10,
+    planetBuildingId: 600,
+    buildingTypeId: 20,
+    buildingLevel: 1,
+    recipes: [
+      {
+        recipeId: 1,
+        code: 'recipe_1',
+        nameKey: 'processes.process_recipe.recipe_1.name',
+        descriptionKey: 'processes.process_recipe.recipe_1.description',
+        processTypeNameKey: 'processes.process_type.terraforming.name',
+        buildingTypeId: 20,
+        sourceGroupId: null,
+        targetGroupId: null,
+        durationSeconds: 3600,
+        shipStub: 'ship_on_orbit',
+        isAvailable: true,
+        reasons: [],
+        imageKey: null,
+        ingredients: [{ resourceTypeId: 1, partTypeId: null, amount: 4 }],
+      },
+      {
+        recipeId: 2,
+        code: 'recipe_2',
+        nameKey: 'processes.process_recipe.recipe_2.name',
+        descriptionKey: 'processes.process_recipe.recipe_2.description',
+        processTypeNameKey: 'processes.process_type.recycling.name',
+        buildingTypeId: 20,
+        sourceGroupId: null,
+        targetGroupId: null,
+        durationSeconds: 900,
+        shipStub: null,
+        isAvailable: false,
+        reasons: [{ code: 'processes_requirement_building_level', targetId: 1, targetLevel: 2, targetNameKey: 'planets.building.building_1.name' }],
+        imageKey: null,
+        ingredients: [{ resourceTypeId: null, partTypeId: 3, amount: 1 }],
+      },
+    ],
+    queue: [
+      {
+        orderId: 800,
+        recipeId: 1,
+        quantity: 2,
+        producedQuantity: 1,
+        position: 1,
+        startsAt: '2026-10-26T11:59:00Z',
+        nextUnitAt: '2026-10-26T12:00:00Z',
+        finishesAt: '2026-10-26T12:01:00Z',
+        isBlocked: false,
+      },
+    ],
+    gameNow: '2026-10-26T12:00:00Z',
+    ...overrides,
+  };
+}
+
+/**
+ * The list of the buildings of a body that run a process for the tests.
+ */
+export function sampleProcessesBuildings(): ProcessBuildingSummary[] {
+  return [{ planetId: 10, planetBuildingId: 600, buildingTypeId: 20, level: 1, nameKey: 'planets.building.building_20.name' }];
+}
+
+/**
  * A signed-in account for the tests.
  */
 export function signedInMe(overrides: Partial<Me> = {}): Me {
@@ -424,7 +520,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
  */
 export function renderPage(
   path: string,
-  options: { auth?: AuthApi; content?: ContentApi; game?: GameApi; planets?: PlanetApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi } = {},
+  options: { auth?: AuthApi; content?: ContentApi; game?: GameApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi } = {},
 ): RenderResult & { api: Api } {
   window.history.replaceState(null, '', path);
 
@@ -433,6 +529,7 @@ export function renderPage(
     content: options.content ?? mockContentApi,
     game: options.game ?? fakeGameApi(),
     planets: options.planets ?? fakePlanetApi(),
+    processes: options.processes ?? fakeProcessesApi(),
     production: options.production ?? fakeProductionApi(),
     research: options.research ?? fakeResearchApi(),
     texts: options.texts ?? fakeTextsApi(),

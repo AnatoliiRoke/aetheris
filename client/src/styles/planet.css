@@ -43,6 +43,13 @@
 .production-block .queue-list { margin: 0; }
 .production-block .building-grid { margin: 0; }
 
+/* The processes of a body: the queue of the building, its recipes and the storage of the
+   parts (task 00014). Only the tokens of tokens.css and the components of ui-art/05. */
+.processes-block { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-5); }
+.processes-block .panel__title { margin: 0; }
+.processes-block .queue-list { margin: 0; }
+.processes-block .building-grid { margin: 0; }
+
 @media (max-width: 480px) {
   .storage-row { grid-template-columns: 1fr max-content; }
   .storage-row__meter { grid-column: 1 / -1; }

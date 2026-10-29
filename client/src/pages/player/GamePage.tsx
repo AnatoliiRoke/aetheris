@@ -8,6 +8,7 @@ import { useSession } from '../../session/useSession';
 import { useTexts } from '../../texts/useTexts';
 import { formatDuration, namer, secondsLeft } from './planetText';
 import { PlayerLayout } from './PlayerLayout';
+import { ProcessesPanel } from './ProcessesPanel';
 import { ProductionPanel } from './ProductionPanel';
 import { ResearchPanel } from './ResearchPanel';
 import { useNow, usePlanet } from './usePlanet';
@@ -61,6 +62,7 @@ export function GamePage() {
       {me.civilization && confirmed ? <QueueSummary planetId={me.civilization.planetId} /> : null}
       {me.civilization && confirmed ? <ResearchPanel planetId={me.civilization.planetId} /> : null}
       {me.civilization && confirmed ? <ProductionPanel planetId={me.civilization.planetId} /> : null}
+      {me.civilization && confirmed ? <ProcessesPanel planetId={me.civilization.planetId} /> : null}
       <section className="panel" aria-labelledby="sections-title">
         <h2 className="panel__title" id="sections-title">
           {t('player.game.sections')}

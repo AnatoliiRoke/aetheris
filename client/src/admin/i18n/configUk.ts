@@ -145,4 +145,8 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.production.queue.base_slots.description': 'Місць у черзі заводу, разом із тим, що виробляється.',
   'config.production.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черги заводу.',
   'config.production.catalog.cache_seconds.description': 'Скільки секунд таблиці виробництва тримаються в пам’яті сервера до повторного читання.',
+
+  'config.processes.queue.base_slots.description': 'Місць у черзі процесу, разом із тим, що виконується.',
+  'config.processes.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черги процесу.',
+  'config.processes.catalog.cache_seconds.description': 'Скільки секунд таблиці процесів тримаються в пам’яті сервера до повторного читання.',
 };
