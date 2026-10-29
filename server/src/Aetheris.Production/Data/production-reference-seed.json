@@ -1,0 +1,2185 @@
+{
+  "part_groups": [
+    {
+      "code": "part_group_1",
+      "sort_order": 1,
+      "name": {
+        "uk": "Корпуси",
+        "en": "Hulls"
+      },
+      "description": {
+        "uk": "Корпуси кораблів: основа кожного флоту.",
+        "en": "The hulls of the ships: the base of every fleet."
+      }
+    },
+    {
+      "code": "part_group_2",
+      "sort_order": 2,
+      "name": {
+        "uk": "Двигуни",
+        "en": "Engines"
+      },
+      "description": {
+        "uk": "Двигуни та двигунні відсіки.",
+        "en": "The engines and the engine bays."
+      }
+    },
+    {
+      "code": "part_group_3",
+      "sort_order": 3,
+      "name": {
+        "uk": "Генератори",
+        "en": "Generators"
+      },
+      "description": {
+        "uk": "Генератори та генераторні відсіки.",
+        "en": "The generators and the generator bays."
+      }
+    },
+    {
+      "code": "part_group_4",
+      "sort_order": 4,
+      "name": {
+        "uk": "Життєзабезпечення",
+        "en": "Life support"
+      },
+      "description": {
+        "uk": "Життєзабезпечення та бортовий комп'ютер.",
+        "en": "The life support and the ship computer."
+      }
+    },
+    {
+      "code": "part_group_5",
+      "sort_order": 5,
+      "name": {
+        "uk": "Зброя",
+        "en": "Weapons"
+      },
+      "description": {
+        "uk": "Зброя та турелі.",
+        "en": "The weapons and the turrets."
+      }
+    },
+    {
+      "code": "part_group_6",
+      "sort_order": 6,
+      "name": {
+        "uk": "Захист",
+        "en": "Protection"
+      },
+      "description": {
+        "uk": "Броня та щити.",
+        "en": "The armour and the shields."
+      }
+    },
+    {
+      "code": "part_group_7",
+      "sort_order": 7,
+      "name": {
+        "uk": "Сенсори та РЕБ",
+        "en": "Sensors and jamming"
+      },
+      "description": {
+        "uk": "Сенсори, РЕБ і маскування.",
+        "en": "The sensors, the jamming and the masking."
+      }
+    },
+    {
+      "code": "part_group_8",
+      "sort_order": 8,
+      "name": {
+        "uk": "Видобуток",
+        "en": "Mining"
+      },
+      "description": {
+        "uk": "Бури та газозбирачі.",
+        "en": "The drills and the gas collectors."
+      }
+    },
+    {
+      "code": "part_group_9",
+      "sort_order": 9,
+      "name": {
+        "uk": "Логістика",
+        "en": "Logistics"
+      },
+      "description": {
+        "uk": "Вантажні відсіки, ангари та перевантажувачі.",
+        "en": "The cargo bays, the hangars and the transporters."
+      }
+    },
+    {
+      "code": "part_group_10",
+      "sort_order": 10,
+      "name": {
+        "uk": "Спеціальні модулі",
+        "en": "Special modules"
+      },
+      "description": {
+        "uk": "Командування, уламки, абордаж, будівництво.",
+        "en": "The command, the wreckage, the boarding and the construction."
+      }
+    },
+    {
+      "code": "part_group_11",
+      "sort_order": 11,
+      "name": {
+        "uk": "Боєприпаси",
+        "en": "Ammunition"
+      },
+      "description": {
+        "uk": "Снаряди, торпеди й ракети.",
+        "en": "The shells, the torpedoes and the missiles."
+      }
+    },
+    {
+      "code": "part_group_12",
+      "sort_order": 12,
+      "name": {
+        "uk": "Вироблені ресурси",
+        "en": "Produced resources"
+      },
+      "description": {
+        "uk": "Матеріали, зроблені з сировини на заводах.",
+        "en": "The materials made from raw materials in the factories."
+      }
+    }
+  ],
+  "parts": [
+    {
+      "code": "part_1",
+      "group": "part_group_1",
+      "mark_level": 1,
+      "sort_order": 1,
+      "name": {
+        "uk": "Корпус «Шершня» Mk I",
+        "en": "Hull \"Wasp\" Mk I"
+      },
+      "description": {
+        "uk": "Легкий корпус для розвідників і дронів.",
+        "en": "A light hull for the scouts and the drones."
+      },
+      "attributes": {
+        "slot_size": {
+          "code": "compact"
+        },
+        "mass": {
+          "number": 40.0
+        }
+      }
+    },
+    {
+      "code": "part_2",
+      "group": "part_group_1",
+      "mark_level": 2,
+      "sort_order": 2,
+      "name": {
+        "uk": "Корпус «Шершня» Mk II",
+        "en": "Hull \"Wasp\" Mk II"
+      },
+      "description": {
+        "uk": "Легкий корпус для розвідників і дронів.",
+        "en": "A light hull for the scouts and the drones."
+      },
+      "attributes": {
+        "slot_size": {
+          "code": "compact"
+        },
+        "mass": {
+          "number": 46.0
+        }
+      }
+    },
+    {
+      "code": "part_3",
+      "group": "part_group_1",
+      "mark_level": 3,
+      "sort_order": 3,
+      "name": {
+        "uk": "Корпус «Шершня» Mk III",
+        "en": "Hull \"Wasp\" Mk III"
+      },
+      "description": {
+        "uk": "Легкий корпус для розвідників і дронів.",
+        "en": "A light hull for the scouts and the drones."
+      },
+      "attributes": {
+        "slot_size": {
+          "code": "compact"
+        },
+        "mass": {
+          "number": 52.0
+        }
+      }
+    },
+    {
+      "code": "part_4",
+      "group": "part_group_2",
+      "mark_level": 1,
+      "sort_order": 4,
+      "name": {
+        "uk": "Реактивний двигун Mk I",
+        "en": "Reaction engine Mk I"
+      },
+      "description": {
+        "uk": "Дешевий двигун на дейтерії для легких кораблів.",
+        "en": "A cheap deuterium engine for the light ships."
+      },
+      "attributes": {
+        "energy": {
+          "number": 10.0
+        },
+        "mass": {
+          "number": 25.0
+        },
+        "slot_size": {
+          "code": "heavy"
+        }
+      }
+    },
+    {
+      "code": "part_5",
+      "group": "part_group_2",
+      "mark_level": 2,
+      "sort_order": 5,
+      "name": {
+        "uk": "Реактивний двигун Mk II",
+        "en": "Reaction engine Mk II"
+      },
+      "description": {
+        "uk": "Дешевий двигун на дейтерії для легких кораблів.",
+        "en": "A cheap deuterium engine for the light ships."
+      },
+      "attributes": {
+        "energy": {
+          "number": 11.5
+        },
+        "mass": {
+          "number": 28.75
+        },
+        "slot_size": {
+          "code": "heavy"
+        }
+      }
+    },
+    {
+      "code": "part_6",
+      "group": "part_group_2",
+      "mark_level": 3,
+      "sort_order": 6,
+      "name": {
+        "uk": "Реактивний двигун Mk III",
+        "en": "Reaction engine Mk III"
+      },
+      "description": {
+        "uk": "Дешевий двигун на дейтерії для легких кораблів.",
+        "en": "A cheap deuterium engine for the light ships."
+      },
+      "attributes": {
+        "energy": {
+          "number": 13.0
+        },
+        "mass": {
+          "number": 32.5
+        },
+        "slot_size": {
+          "code": "heavy"
+        }
+      }
+    },
+    {
+      "code": "part_7",
+      "group": "part_group_3",
+      "mark_level": 1,
+      "sort_order": 7,
+      "name": {
+        "uk": "Хімічний генератор Mk I",
+        "en": "Chemical generator Mk I"
+      },
+      "description": {
+        "uk": "Незвичайний генератор для транспортів і дронів.",
+        "en": "A small generator for the transports and the drones."
+      },
+      "attributes": {
+        "energy": {
+          "number": 15.0
+        },
+        "mass": {
+          "number": 20.0
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_8",
+      "group": "part_group_3",
+      "mark_level": 2,
+      "sort_order": 8,
+      "name": {
+        "uk": "Хімічний генератор Mk II",
+        "en": "Chemical generator Mk II"
+      },
+      "description": {
+        "uk": "Незвичайний генератор для транспортів і дронів.",
+        "en": "A small generator for the transports and the drones."
+      },
+      "attributes": {
+        "energy": {
+          "number": 17.25
+        },
+        "mass": {
+          "number": 23.0
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_9",
+      "group": "part_group_3",
+      "mark_level": 3,
+      "sort_order": 9,
+      "name": {
+        "uk": "Хімічний генератор Mk III",
+        "en": "Chemical generator Mk III"
+      },
+      "description": {
+        "uk": "Незвичайний генератор для транспортів і дронів.",
+        "en": "A small generator for the transports and the drones."
+      },
+      "attributes": {
+        "energy": {
+          "number": 19.5
+        },
+        "mass": {
+          "number": 26.0
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_10",
+      "group": "part_group_4",
+      "mark_level": 1,
+      "sort_order": 10,
+      "name": {
+        "uk": "Життєзабезпечення Mk I",
+        "en": "Life support Mk I"
+      },
+      "description": {
+        "uk": "Підтримує екіпаж корабля.",
+        "en": "Keeps the crew of the ship alive."
+      },
+      "attributes": {
+        "crew": {
+          "number": 20.0
+        },
+        "energy": {
+          "number": 5.0
+        },
+        "mass": {
+          "number": 15.0
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_11",
+      "group": "part_group_4",
+      "mark_level": 2,
+      "sort_order": 11,
+      "name": {
+        "uk": "Життєзабезпечення Mk II",
+        "en": "Life support Mk II"
+      },
+      "description": {
+        "uk": "Підтримує екіпаж корабля.",
+        "en": "Keeps the crew of the ship alive."
+      },
+      "attributes": {
+        "crew": {
+          "number": 23.0
+        },
+        "energy": {
+          "number": 5.75
+        },
+        "mass": {
+          "number": 17.25
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_12",
+      "group": "part_group_4",
+      "mark_level": 3,
+      "sort_order": 12,
+      "name": {
+        "uk": "Життєзабезпечення Mk III",
+        "en": "Life support Mk III"
+      },
+      "description": {
+        "uk": "Підтримує екіпаж корабля.",
+        "en": "Keeps the crew of the ship alive."
+      },
+      "attributes": {
+        "crew": {
+          "number": 26.0
+        },
+        "energy": {
+          "number": 6.5
+        },
+        "mass": {
+          "number": 19.5
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_13",
+      "group": "part_group_5",
+      "mark_level": 1,
+      "sort_order": 13,
+      "name": {
+        "uk": "Легкий лазер Mk I",
+        "en": "Light laser Mk I"
+      },
+      "description": {
+        "uk": "Дешевий точний лазер для легких кораблів.",
+        "en": "A cheap and precise laser for the light ships."
+      },
+      "attributes": {
+        "damage": {
+          "number": 10.0
+        },
+        "damage_kind": {
+          "code": "energy"
+        },
+        "range": {
+          "number": 300.0
+        },
+        "energy": {
+          "number": 8.0
+        },
+        "mass": {
+          "number": 10.0
+        },
+        "slot_size": {
+          "code": "compact"
+        }
+      }
+    },
+    {
+      "code": "part_14",
+      "group": "part_group_5",
+      "mark_level": 2,
+      "sort_order": 14,
+      "name": {
+        "uk": "Легкий лазер Mk II",
+        "en": "Light laser Mk II"
+      },
+      "description": {
+        "uk": "Дешевий точний лазер для легких кораблів.",
+        "en": "A cheap and precise laser for the light ships."
+      },
+      "attributes": {
+        "damage": {
+          "number": 11.5
+        },
+        "damage_kind": {
+          "code": "energy"
+        },
+        "range": {
+          "number": 345.0
+        },
+        "energy": {
+          "number": 9.2
+        },
+        "mass": {
+          "number": 11.5
+        },
+        "slot_size": {
+          "code": "compact"
+        }
+      }
+    },
+    {
+      "code": "part_15",
+      "group": "part_group_5",
+      "mark_level": 3,
+      "sort_order": 15,
+      "name": {
+        "uk": "Легкий лазер Mk III",
+        "en": "Light laser Mk III"
+      },
+      "description": {
+        "uk": "Дешевий точний лазер для легких кораблів.",
+        "en": "A cheap and precise laser for the light ships."
+      },
+      "attributes": {
+        "damage": {
+          "number": 13.0
+        },
+        "damage_kind": {
+          "code": "energy"
+        },
+        "range": {
+          "number": 390.0
+        },
+        "energy": {
+          "number": 10.4
+        },
+        "mass": {
+          "number": 13.0
+        },
+        "slot_size": {
+          "code": "compact"
+        }
+      }
+    },
+    {
+      "code": "part_16",
+      "group": "part_group_6",
+      "mark_level": 1,
+      "sort_order": 16,
+      "name": {
+        "uk": "Сталеві плити Mk I",
+        "en": "Steel plates Mk I"
+      },
+      "description": {
+        "uk": "Базова пасивна броня для легких і середніх кораблів.",
+        "en": "The basic passive armour for the light and middle ships."
+      },
+      "attributes": {
+        "mass": {
+          "number": 30.0
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_17",
+      "group": "part_group_6",
+      "mark_level": 2,
+      "sort_order": 17,
+      "name": {
+        "uk": "Сталеві плити Mk II",
+        "en": "Steel plates Mk II"
+      },
+      "description": {
+        "uk": "Базова пасивна броня для легких і середніх кораблів.",
+        "en": "The basic passive armour for the light and middle ships."
+      },
+      "attributes": {
+        "mass": {
+          "number": 34.5
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_18",
+      "group": "part_group_6",
+      "mark_level": 3,
+      "sort_order": 18,
+      "name": {
+        "uk": "Сталеві плити Mk III",
+        "en": "Steel plates Mk III"
+      },
+      "description": {
+        "uk": "Базова пасивна броня для легких і середніх кораблів.",
+        "en": "The basic passive armour for the light and middle ships."
+      },
+      "attributes": {
+        "mass": {
+          "number": 39.0
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_19",
+      "group": "part_group_7",
+      "mark_level": 1,
+      "sort_order": 19,
+      "name": {
+        "uk": "Радар Mk I",
+        "en": "Radar Mk I"
+      },
+      "description": {
+        "uk": "Виявляє ворожі флоти заздалегідь.",
+        "en": "Finds the hostile fleets in advance."
+      },
+      "attributes": {
+        "energy": {
+          "number": 6.0
+        },
+        "mass": {
+          "number": 8.0
+        },
+        "slot_size": {
+          "code": "compact"
+        }
+      }
+    },
+    {
+      "code": "part_20",
+      "group": "part_group_7",
+      "mark_level": 2,
+      "sort_order": 20,
+      "name": {
+        "uk": "Радар Mk II",
+        "en": "Radar Mk II"
+      },
+      "description": {
+        "uk": "Виявляє ворожі флоти заздалегідь.",
+        "en": "Finds the hostile fleets in advance."
+      },
+      "attributes": {
+        "energy": {
+          "number": 6.9
+        },
+        "mass": {
+          "number": 9.2
+        },
+        "slot_size": {
+          "code": "compact"
+        }
+      }
+    },
+    {
+      "code": "part_21",
+      "group": "part_group_7",
+      "mark_level": 3,
+      "sort_order": 21,
+      "name": {
+        "uk": "Радар Mk III",
+        "en": "Radar Mk III"
+      },
+      "description": {
+        "uk": "Виявляє ворожі флоти заздалегідь.",
+        "en": "Finds the hostile fleets in advance."
+      },
+      "attributes": {
+        "energy": {
+          "number": 7.8
+        },
+        "mass": {
+          "number": 10.4
+        },
+        "slot_size": {
+          "code": "compact"
+        }
+      }
+    },
+    {
+      "code": "part_22",
+      "group": "part_group_8",
+      "mark_level": 1,
+      "sort_order": 22,
+      "name": {
+        "uk": "Бур Mk I",
+        "en": "Drill Mk I"
+      },
+      "description": {
+        "uk": "Видобуває метали з надр планети.",
+        "en": "Extracts the metals from the ground of the body."
+      },
+      "attributes": {
+        "energy": {
+          "number": 12.0
+        },
+        "mass": {
+          "number": 25.0
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_23",
+      "group": "part_group_8",
+      "mark_level": 2,
+      "sort_order": 23,
+      "name": {
+        "uk": "Бур Mk II",
+        "en": "Drill Mk II"
+      },
+      "description": {
+        "uk": "Видобуває метали з надр планети.",
+        "en": "Extracts the metals from the ground of the body."
+      },
+      "attributes": {
+        "energy": {
+          "number": 13.8
+        },
+        "mass": {
+          "number": 28.75
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_24",
+      "group": "part_group_8",
+      "mark_level": 3,
+      "sort_order": 24,
+      "name": {
+        "uk": "Бур Mk III",
+        "en": "Drill Mk III"
+      },
+      "description": {
+        "uk": "Видобуває метали з надр планети.",
+        "en": "Extracts the metals from the ground of the body."
+      },
+      "attributes": {
+        "energy": {
+          "number": 15.6
+        },
+        "mass": {
+          "number": 32.5
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_25",
+      "group": "part_group_9",
+      "mark_level": 1,
+      "sort_order": 25,
+      "name": {
+        "uk": "Вантажний відсік Mk I",
+        "en": "Cargo bay Mk I"
+      },
+      "description": {
+        "uk": "Місце для вантажу, деталей і боєприпасів.",
+        "en": "A place for the cargo, the parts and the ammunition."
+      },
+      "attributes": {
+        "mass": {
+          "number": 12.0
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_26",
+      "group": "part_group_9",
+      "mark_level": 2,
+      "sort_order": 26,
+      "name": {
+        "uk": "Вантажний відсік Mk II",
+        "en": "Cargo bay Mk II"
+      },
+      "description": {
+        "uk": "Місце для вантажу, деталей і боєприпасів.",
+        "en": "A place for the cargo, the parts and the ammunition."
+      },
+      "attributes": {
+        "mass": {
+          "number": 13.8
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_27",
+      "group": "part_group_9",
+      "mark_level": 3,
+      "sort_order": 27,
+      "name": {
+        "uk": "Вантажний відсік Mk III",
+        "en": "Cargo bay Mk III"
+      },
+      "description": {
+        "uk": "Місце для вантажу, деталей і боєприпасів.",
+        "en": "A place for the cargo, the parts and the ammunition."
+      },
+      "attributes": {
+        "mass": {
+          "number": 15.6
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_28",
+      "group": "part_group_10",
+      "mark_level": 1,
+      "sort_order": 28,
+      "name": {
+        "uk": "Командунний модуль Mk I",
+        "en": "Command module Mk I"
+      },
+      "description": {
+        "uk": "Місце для командира корабля.",
+        "en": "A place for the commander of the ship."
+      },
+      "attributes": {
+        "crew": {
+          "number": 3.0
+        },
+        "energy": {
+          "number": 10.0
+        },
+        "mass": {
+          "number": 18.0
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_29",
+      "group": "part_group_10",
+      "mark_level": 2,
+      "sort_order": 29,
+      "name": {
+        "uk": "Командунний модуль Mk II",
+        "en": "Command module Mk II"
+      },
+      "description": {
+        "uk": "Місце для командира корабля.",
+        "en": "A place for the commander of the ship."
+      },
+      "attributes": {
+        "crew": {
+          "number": 3.45
+        },
+        "energy": {
+          "number": 11.5
+        },
+        "mass": {
+          "number": 20.7
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_30",
+      "group": "part_group_10",
+      "mark_level": 3,
+      "sort_order": 30,
+      "name": {
+        "uk": "Командунний модуль Mk III",
+        "en": "Command module Mk III"
+      },
+      "description": {
+        "uk": "Місце для командира корабля.",
+        "en": "A place for the commander of the ship."
+      },
+      "attributes": {
+        "crew": {
+          "number": 3.9
+        },
+        "energy": {
+          "number": 13.0
+        },
+        "mass": {
+          "number": 23.4
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
+    },
+    {
+      "code": "part_31",
+      "group": "part_group_11",
+      "mark_level": 1,
+      "sort_order": 31,
+      "name": {
+        "uk": "Снаряди Mk I",
+        "en": "Shells Mk I"
+      },
+      "description": {
+        "uk": "Боєприпаси кінетичних гармат і артилерії.",
+        "en": "The ammunition of the kinetic guns and the artillery."
+      },
+      "attributes": {
+        "damage": {
+          "number": 6.0
+        },
+        "damage_kind": {
+          "code": "kinetic"
+        },
+        "mass": {
+          "number": 2.0
+        }
+      }
+    },
+    {
+      "code": "part_32",
+      "group": "part_group_11",
+      "mark_level": 2,
+      "sort_order": 32,
+      "name": {
+        "uk": "Снаряди Mk II",
+        "en": "Shells Mk II"
+      },
+      "description": {
+        "uk": "Боєприпаси кінетичних гармат і артилерії.",
+        "en": "The ammunition of the kinetic guns and the artillery."
+      },
+      "attributes": {
+        "damage": {
+          "number": 6.9
+        },
+        "damage_kind": {
+          "code": "kinetic"
+        },
+        "mass": {
+          "number": 2.3
+        }
+      }
+    },
+    {
+      "code": "part_33",
+      "group": "part_group_11",
+      "mark_level": 3,
+      "sort_order": 33,
+      "name": {
+        "uk": "Снаряди Mk III",
+        "en": "Shells Mk III"
+      },
+      "description": {
+        "uk": "Боєприпаси кінетичних гармат і артилерії.",
+        "en": "The ammunition of the kinetic guns and the artillery."
+      },
+      "attributes": {
+        "damage": {
+          "number": 7.8
+        },
+        "damage_kind": {
+          "code": "kinetic"
+        },
+        "mass": {
+          "number": 2.6
+        }
+      }
+    }
+  ],
+  "recipes": [
+    {
+      "code": "recipe_1",
+      "resource": "resource_13",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 40,
+      "sort_order": 1,
+      "name": {
+        "uk": "Будматеріали",
+        "en": "Building materials"
+      },
+      "description": {
+        "uk": "Плити й балки для будівель і корпусів.",
+        "en": "The plates and the beams for the buildings and the hulls."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 4
+        },
+        {
+          "resource": "resource_3",
+          "amount": 1
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_2",
+      "resource": "resource_14",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 50,
+      "sort_order": 2,
+      "name": {
+        "uk": "Оптоволокно",
+        "en": "Optical fibre"
+      },
+      "description": {
+        "uk": "Нитки світла для сенсорів і зв'язку.",
+        "en": "Threads of light for the sensors and the communication."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_5",
+          "amount": 3
+        },
+        {
+          "resource": "resource_6",
+          "amount": 1
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_3",
+      "resource": "resource_15",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 70,
+      "sort_order": 3,
+      "name": {
+        "uk": "Мікропроцесори",
+        "en": "Microprocessors"
+      },
+      "description": {
+        "uk": "Серце будь-якої електроніки.",
+        "en": "The heart of any electronics."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_6",
+          "amount": 2
+        },
+        {
+          "resource": "resource_14",
+          "amount": 2
+        },
+        {
+          "resource": "resource_3",
+          "amount": 1
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_4",
+      "resource": "resource_16",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 90,
+      "sort_order": 4,
+      "name": {
+        "uk": "Композити",
+        "en": "Composites"
+      },
+      "description": {
+        "uk": "Міцні матеріали для важких корпусів і броні.",
+        "en": "Strong materials for the heavy hulls and the armour."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_2",
+          "amount": 3
+        },
+        {
+          "resource": "resource_13",
+          "amount": 2
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_5",
+      "resource": "resource_17",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 80,
+      "sort_order": 5,
+      "name": {
+        "uk": "Енергострижні",
+        "en": "Power strips"
+      },
+      "description": {
+        "uk": "Джерела енергії для генераторів.",
+        "en": "The sources of energy for the generators."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_7",
+          "amount": 2
+        },
+        {
+          "resource": "resource_15",
+          "amount": 1
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_1",
+      "part": "part_1",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 60,
+      "sort_order": 1,
+      "name": {
+        "uk": "Корпус «Шершня» Mk I",
+        "en": "Hull \"Wasp\" Mk I"
+      },
+      "description": {
+        "uk": "Легкий корпус для розвідників і дронів.",
+        "en": "A light hull for the scouts and the drones."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 12
+        },
+        {
+          "resource": "resource_13",
+          "amount": 4
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_2",
+      "part": "part_2",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 90,
+      "sort_order": 2,
+      "name": {
+        "uk": "Корпус «Шершня» Mk II",
+        "en": "Hull \"Wasp\" Mk II"
+      },
+      "description": {
+        "uk": "Легкий корпус для розвідників і дронів.",
+        "en": "A light hull for the scouts and the drones."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 22
+        },
+        {
+          "resource": "resource_13",
+          "amount": 7
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_3",
+      "part": "part_3",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 138,
+      "sort_order": 3,
+      "name": {
+        "uk": "Корпус «Шершня» Mk III",
+        "en": "Hull \"Wasp\" Mk III"
+      },
+      "description": {
+        "uk": "Легкий корпус для розвідників і дронів.",
+        "en": "A light hull for the scouts and the drones."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 38
+        },
+        {
+          "resource": "resource_13",
+          "amount": 13
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_4",
+      "part": "part_4",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 70,
+      "sort_order": 4,
+      "name": {
+        "uk": "Реактивний двигун Mk I",
+        "en": "Reaction engine Mk I"
+      },
+      "description": {
+        "uk": "Дешевий двигун на дейтерії для легких кораблів.",
+        "en": "A cheap deuterium engine for the light ships."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_8",
+          "amount": 6
+        },
+        {
+          "resource": "resource_15",
+          "amount": 2
+        }
+      ],
+      "requirements": [],
+      "race": "race_1"
+    },
+    {
+      "code": "recipe_5",
+      "part": "part_5",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 105,
+      "sort_order": 5,
+      "name": {
+        "uk": "Реактивний двигун Mk II",
+        "en": "Reaction engine Mk II"
+      },
+      "description": {
+        "uk": "Дешевий двигун на дейтерії для легких кораблів.",
+        "en": "A cheap deuterium engine for the light ships."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_8",
+          "amount": 11
+        },
+        {
+          "resource": "resource_15",
+          "amount": 4
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_6",
+      "part": "part_6",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 161,
+      "sort_order": 6,
+      "name": {
+        "uk": "Реактивний двигун Mk III",
+        "en": "Reaction engine Mk III"
+      },
+      "description": {
+        "uk": "Дешевий двигун на дейтерії для легких кораблів.",
+        "en": "A cheap deuterium engine for the light ships."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_8",
+          "amount": 19
+        },
+        {
+          "resource": "resource_15",
+          "amount": 6
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_7",
+      "part": "part_7",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 55,
+      "sort_order": 7,
+      "name": {
+        "uk": "Хімічний генератор Mk I",
+        "en": "Chemical generator Mk I"
+      },
+      "description": {
+        "uk": "Незвичайний генератор для транспортів і дронів.",
+        "en": "A small generator for the transports and the drones."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_3",
+          "amount": 6
+        },
+        {
+          "resource": "resource_17",
+          "amount": 1
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_8",
+      "part": "part_8",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 82,
+      "sort_order": 8,
+      "name": {
+        "uk": "Хімічний генератор Mk II",
+        "en": "Chemical generator Mk II"
+      },
+      "description": {
+        "uk": "Незвичайний генератор для транспортів і дронів.",
+        "en": "A small generator for the transports and the drones."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_3",
+          "amount": 11
+        },
+        {
+          "resource": "resource_17",
+          "amount": 2
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_9",
+      "part": "part_9",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 126,
+      "sort_order": 9,
+      "name": {
+        "uk": "Хімічний генератор Mk III",
+        "en": "Chemical generator Mk III"
+      },
+      "description": {
+        "uk": "Незвичайний генератор для транспортів і дронів.",
+        "en": "A small generator for the transports and the drones."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_3",
+          "amount": 19
+        },
+        {
+          "resource": "resource_17",
+          "amount": 3
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_10",
+      "part": "part_10",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 50,
+      "sort_order": 10,
+      "name": {
+        "uk": "Життєзабезпечення Mk I",
+        "en": "Life support Mk I"
+      },
+      "description": {
+        "uk": "Підтримує екіпаж корабля.",
+        "en": "Keeps the crew of the ship alive."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_13",
+          "amount": 3
+        },
+        {
+          "resource": "resource_15",
+          "amount": 1
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_11",
+      "part": "part_11",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 75,
+      "sort_order": 11,
+      "name": {
+        "uk": "Життєзабезпечення Mk II",
+        "en": "Life support Mk II"
+      },
+      "description": {
+        "uk": "Підтримує екіпаж корабля.",
+        "en": "Keeps the crew of the ship alive."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_13",
+          "amount": 5
+        },
+        {
+          "resource": "resource_15",
+          "amount": 2
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_12",
+      "part": "part_12",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 115,
+      "sort_order": 12,
+      "name": {
+        "uk": "Життєзабезпечення Mk III",
+        "en": "Life support Mk III"
+      },
+      "description": {
+        "uk": "Підтримує екіпаж корабля.",
+        "en": "Keeps the crew of the ship alive."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_13",
+          "amount": 10
+        },
+        {
+          "resource": "resource_15",
+          "amount": 3
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_13",
+      "part": "part_13",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 65,
+      "sort_order": 13,
+      "name": {
+        "uk": "Легкий лазер Mk I",
+        "en": "Light laser Mk I"
+      },
+      "description": {
+        "uk": "Дешевий точний лазер для легких кораблів.",
+        "en": "A cheap and precise laser for the light ships."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_3",
+          "amount": 4
+        },
+        {
+          "resource": "resource_6",
+          "amount": 2
+        },
+        {
+          "resource": "resource_15",
+          "amount": 2
+        }
+      ],
+      "requirements": [],
+      "race": "race_3"
+    },
+    {
+      "code": "recipe_14",
+      "part": "part_14",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 98,
+      "sort_order": 14,
+      "name": {
+        "uk": "Легкий лазер Mk II",
+        "en": "Light laser Mk II"
+      },
+      "description": {
+        "uk": "Дешевий точний лазер для легких кораблів.",
+        "en": "A cheap and precise laser for the light ships."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_3",
+          "amount": 7
+        },
+        {
+          "resource": "resource_6",
+          "amount": 4
+        },
+        {
+          "resource": "resource_15",
+          "amount": 4
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_15",
+      "part": "part_15",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 150,
+      "sort_order": 15,
+      "name": {
+        "uk": "Легкий лазер Mk III",
+        "en": "Light laser Mk III"
+      },
+      "description": {
+        "uk": "Дешевий точний лазер для легких кораблів.",
+        "en": "A cheap and precise laser for the light ships."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_3",
+          "amount": 13
+        },
+        {
+          "resource": "resource_6",
+          "amount": 6
+        },
+        {
+          "resource": "resource_15",
+          "amount": 6
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_16",
+      "part": "part_16",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 60,
+      "sort_order": 16,
+      "name": {
+        "uk": "Сталеві плити Mk I",
+        "en": "Steel plates Mk I"
+      },
+      "description": {
+        "uk": "Базова пасивна броня для легких і середніх кораблів.",
+        "en": "The basic passive armour for the light and middle ships."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 8
+        },
+        {
+          "resource": "resource_13",
+          "amount": 2
+        }
+      ],
+      "requirements": [],
+      "race": "race_2"
+    },
+    {
+      "code": "recipe_17",
+      "part": "part_17",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 90,
+      "sort_order": 17,
+      "name": {
+        "uk": "Сталеві плити Mk II",
+        "en": "Steel plates Mk II"
+      },
+      "description": {
+        "uk": "Базова пасивна броня для легких і середніх кораблів.",
+        "en": "The basic passive armour for the light and middle ships."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 14
+        },
+        {
+          "resource": "resource_13",
+          "amount": 4
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_18",
+      "part": "part_18",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 138,
+      "sort_order": 18,
+      "name": {
+        "uk": "Сталеві плити Mk III",
+        "en": "Steel plates Mk III"
+      },
+      "description": {
+        "uk": "Базова пасивна броня для легких і середніх кораблів.",
+        "en": "The basic passive armour for the light and middle ships."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 26
+        },
+        {
+          "resource": "resource_13",
+          "amount": 6
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_19",
+      "part": "part_19",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 60,
+      "sort_order": 19,
+      "name": {
+        "uk": "Радар Mk I",
+        "en": "Radar Mk I"
+      },
+      "description": {
+        "uk": "Виявляє ворожі флоти заздалегідь.",
+        "en": "Finds the hostile fleets in advance."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_5",
+          "amount": 4
+        },
+        {
+          "resource": "resource_14",
+          "amount": 2
+        },
+        {
+          "resource": "resource_15",
+          "amount": 1
+        }
+      ],
+      "requirements": [],
+      "race": "race_4"
+    },
+    {
+      "code": "recipe_20",
+      "part": "part_20",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 90,
+      "sort_order": 20,
+      "name": {
+        "uk": "Радар Mk II",
+        "en": "Radar Mk II"
+      },
+      "description": {
+        "uk": "Виявляє ворожі флоти заздалегідь.",
+        "en": "Finds the hostile fleets in advance."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_5",
+          "amount": 7
+        },
+        {
+          "resource": "resource_14",
+          "amount": 4
+        },
+        {
+          "resource": "resource_15",
+          "amount": 2
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_21",
+      "part": "part_21",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 138,
+      "sort_order": 21,
+      "name": {
+        "uk": "Радар Mk III",
+        "en": "Radar Mk III"
+      },
+      "description": {
+        "uk": "Виявляє ворожі флоти заздалегідь.",
+        "en": "Finds the hostile fleets in advance."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_5",
+          "amount": 13
+        },
+        {
+          "resource": "resource_14",
+          "amount": 6
+        },
+        {
+          "resource": "resource_15",
+          "amount": 3
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_22",
+      "part": "part_22",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 60,
+      "sort_order": 22,
+      "name": {
+        "uk": "Бур Mk I",
+        "en": "Drill Mk I"
+      },
+      "description": {
+        "uk": "Видобуває метали з надр планети.",
+        "en": "Extracts the metals from the ground of the body."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 6
+        },
+        {
+          "resource": "resource_2",
+          "amount": 2
+        },
+        {
+          "resource": "resource_13",
+          "amount": 2
+        }
+      ],
+      "requirements": [],
+      "race": "race_2"
+    },
+    {
+      "code": "recipe_23",
+      "part": "part_23",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 90,
+      "sort_order": 23,
+      "name": {
+        "uk": "Бур Mk II",
+        "en": "Drill Mk II"
+      },
+      "description": {
+        "uk": "Видобуває метали з надр планети.",
+        "en": "Extracts the metals from the ground of the body."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 11
+        },
+        {
+          "resource": "resource_2",
+          "amount": 4
+        },
+        {
+          "resource": "resource_13",
+          "amount": 4
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_24",
+      "part": "part_24",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 138,
+      "sort_order": 24,
+      "name": {
+        "uk": "Бур Mk III",
+        "en": "Drill Mk III"
+      },
+      "description": {
+        "uk": "Видобуває метали з надр планети.",
+        "en": "Extracts the metals from the ground of the body."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 19
+        },
+        {
+          "resource": "resource_2",
+          "amount": 6
+        },
+        {
+          "resource": "resource_13",
+          "amount": 6
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_25",
+      "part": "part_25",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 45,
+      "sort_order": 25,
+      "name": {
+        "uk": "Вантажний відсік Mk I",
+        "en": "Cargo bay Mk I"
+      },
+      "description": {
+        "uk": "Місце для вантажу, деталей і боєприпасів.",
+        "en": "A place for the cargo, the parts and the ammunition."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 5
+        },
+        {
+          "resource": "resource_13",
+          "amount": 3
+        }
+      ],
+      "requirements": [],
+      "race": "race_3"
+    },
+    {
+      "code": "recipe_26",
+      "part": "part_26",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 68,
+      "sort_order": 26,
+      "name": {
+        "uk": "Вантажний відсік Mk II",
+        "en": "Cargo bay Mk II"
+      },
+      "description": {
+        "uk": "Місце для вантажу, деталей і боєприпасів.",
+        "en": "A place for the cargo, the parts and the ammunition."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 9
+        },
+        {
+          "resource": "resource_13",
+          "amount": 5
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_27",
+      "part": "part_27",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 103,
+      "sort_order": 27,
+      "name": {
+        "uk": "Вантажний відсік Mk III",
+        "en": "Cargo bay Mk III"
+      },
+      "description": {
+        "uk": "Місце для вантажу, деталей і боєприпасів.",
+        "en": "A place for the cargo, the parts and the ammunition."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 16
+        },
+        {
+          "resource": "resource_13",
+          "amount": 10
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_28",
+      "part": "part_28",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 80,
+      "sort_order": 28,
+      "name": {
+        "uk": "Командунний модуль Mk I",
+        "en": "Command module Mk I"
+      },
+      "description": {
+        "uk": "Місце для командира корабля.",
+        "en": "A place for the commander of the ship."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_13",
+          "amount": 4
+        },
+        {
+          "resource": "resource_15",
+          "amount": 2
+        },
+        {
+          "resource": "resource_17",
+          "amount": 1
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_29",
+      "part": "part_29",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 120,
+      "sort_order": 29,
+      "name": {
+        "uk": "Командунний модуль Mk II",
+        "en": "Command module Mk II"
+      },
+      "description": {
+        "uk": "Місце для командира корабля.",
+        "en": "A place for the commander of the ship."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_13",
+          "amount": 7
+        },
+        {
+          "resource": "resource_15",
+          "amount": 4
+        },
+        {
+          "resource": "resource_17",
+          "amount": 2
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_30",
+      "part": "part_30",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 184,
+      "sort_order": 30,
+      "name": {
+        "uk": "Командунний модуль Mk III",
+        "en": "Command module Mk III"
+      },
+      "description": {
+        "uk": "Місце для командира корабля.",
+        "en": "A place for the commander of the ship."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_13",
+          "amount": 13
+        },
+        {
+          "resource": "resource_15",
+          "amount": 6
+        },
+        {
+          "resource": "resource_17",
+          "amount": 3
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_31",
+      "part": "part_31",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 30,
+      "sort_order": 31,
+      "name": {
+        "uk": "Снаряди Mk I",
+        "en": "Shells Mk I"
+      },
+      "description": {
+        "uk": "Боєприпаси кінетичних гармат і артилерії.",
+        "en": "The ammunition of the kinetic guns and the artillery."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 3
+        },
+        {
+          "resource": "resource_13",
+          "amount": 1
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_32",
+      "part": "part_32",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 45,
+      "sort_order": 32,
+      "name": {
+        "uk": "Снаряди Mk II",
+        "en": "Shells Mk II"
+      },
+      "description": {
+        "uk": "Боєприпаси кінетичних гармат і артилерії.",
+        "en": "The ammunition of the kinetic guns and the artillery."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 5
+        },
+        {
+          "resource": "resource_13",
+          "amount": 2
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_33",
+      "part": "part_33",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 69,
+      "sort_order": 33,
+      "name": {
+        "uk": "Снаряди Mk III",
+        "en": "Shells Mk III"
+      },
+      "description": {
+        "uk": "Боєприпаси кінетичних гармат і артилерії.",
+        "en": "The ammunition of the kinetic guns and the artillery."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 10
+        },
+        {
+          "resource": "resource_13",
+          "amount": 3
+        }
+      ],
+      "requirements": [],
+      "race": null
+    }
+  ],
+  "race_bonuses": [
+    {
+      "race": "race_1",
+      "group": "part_group_2",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_1",
+      "group": "part_group_9",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_1",
+      "group": "part_group_10",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_2",
+      "group": "part_group_6",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_2",
+      "group": "part_group_8",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_2",
+      "group": "part_group_4",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_3",
+      "group": "part_group_5",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_3",
+      "group": "part_group_9",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_3",
+      "group": "part_group_1",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_4",
+      "group": "part_group_7",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_4",
+      "group": "part_group_6",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    },
+    {
+      "race": "race_4",
+      "group": "part_group_4",
+      "multiplier": 1.1,
+      "is_exclusive": false
+    }
+  ]
+}

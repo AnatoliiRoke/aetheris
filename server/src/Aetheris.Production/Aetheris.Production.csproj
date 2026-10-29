@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Aetheris.Production</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!--
+    The module of the production reads the bodies module through IPlanetsModule, for the
+    levels of the factories, and keeps the requirements of its recipes in the common
+    requirements module. The dependencies go one way only.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
+    <ProjectReference Include="..\Aetheris.Planets\Aetheris.Planets.csproj" />
+    <ProjectReference Include="..\Aetheris.Requirements\Aetheris.Requirements.csproj" />
+    <ProjectReference Include="..\Aetheris.Research\Aetheris.Research.csproj" />
+    <ProjectReference Include="..\Aetheris.World\Aetheris.World.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\production-reference-seed.json" LogicalName="Aetheris.Production.reference-seed.json" />
+    <EmbeddedResource Include="Data\admin-reference-texts.json" LogicalName="Aetheris.Production.admin-reference-texts.json" />
+  </ItemGroup>
+
+</Project>
