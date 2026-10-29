@@ -54,7 +54,8 @@ export PATH="$HOME/.dotnet:$PATH"
 │   │   ├── Aetheris.Admin/     ┘
 │   │   ├── Aetheris.World/         ← генерація всесвіту
 │   │   ├── Aetheris.Requirements/  ← спільна таблиця вимог
-│   │   └── Aetheris.Research/      ← технології та черга досліджень
+│   │   ├── Aetheris.Research/      ← технології та черга досліджень
+│   │   └── Aetheris.Production/    ← рецепти, заводи, склад деталей
 │   ├── analyzers/          ← власні Roslyn-аналізатори (AETHERIS001)
 │   └── tests/
 │       ├── Aetheris.Tests/         ← xunit v3, тести сервера
@@ -622,9 +623,12 @@ dotnet ef migrations add <Назва> --project src/Aetheris.Requirements --star
 
 # Нова міграція модуля технологій (технології, рівні, ефекти, черга досліджень)
 dotnet ef migrations add <Назва> --project src/Aetheris.Research --startup-project src/Aetheris.Host --context ResearchDbContext --output-dir Data/Migrations
+
+# Нова міграція модуля виробництва (групи деталей, деталі, рецепти, черга заводів, склад)
+dotnet ef migrations add <Назва> --project src/Aetheris.Production --startup-project src/Aetheris.Host --context ProductionDbContext --output-dir Data/Migrations
 ```
 
-Сервер застосовує міграції ядра і модулів World, Planets, Requirements та Research сам при старті. Усі набори пишуть
+Сервер застосовує міграції ядра і модулів World, Planets, Requirements, Research та Production сам при старті. Усі набори пишуть
 історію в спільну таблицю `__EFMigrationsHistory`.
 
 ### Модуль Planets (задача 00011)
@@ -640,6 +644,29 @@ dotnet ef migrations add <Назва> --project src/Aetheris.Research --startup-
 подій (`planets.construction_complete`).
 
 Імена таблиць і колонок — `snake_case`, як описано в `documentation/tech/03-model-danykh.md`.
+
+### Модуль Production (задача 00013)
+
+`server/src/Aetheris.Production` володіє рецептами, деталями й чергою заводів: групи деталей
+(`part_group`), типи деталей з атрибутами (`part_type`, `part_attribute`), рецепти з інгредієнтами
+(`recipe`, `recipe_ingredient`), партії в черці (`production_order`), склад деталей (`part_stock`,
+`part_storage`) і расові бонуси до груп деталей (`race_part_bonus`). Світ, планети, дослідження й
+вимоги він читає лише через контракти `IWorldModule`, `IPlanetsModule`, `IRequirementsModule` і
+`IResearchModule`; залежності односторонні: Production → {World, Planets, Requirements, Research}.
+
+Стартові дані — `Data/production-reference-seed.json` (12 груп, 33 деталі, 38 рецептів, 89
+інгредієнтів, 12 расових бонусів); сид бере нейтральні коди з лічильника сервера, а не з файлу,
+і записується лише в порожню таблицю рецептів, тому зміни з адмінки не перезаписує. Параметри
+`production.*` (місця черги заводу, платні місця, кеш таблиць) — у `config_parameter`.
+
+Читання: `GET /api/v1/production/factories`, `/factories/{planetBuildingId}`, `/stock`; команди:
+`POST /api/v1/production/enqueue` і `/cancel`. Партія списує інгредієнти на всю кількість одразу,
+скасування повертає 100%; одиниці з'являються на складі по одній, виробництво спиняється при
+заповненому складі й відновлюється після звільнення місця. Черга окрема на кожен завод.
+
+Новий елемент каталогу (деталь, рецепт, група) додається **лише записом у базу**: коди видає
+лічильник сервера, назви й описи живуть у `localization_text`, а вимоги — у спільному модулі
+вимог. Клієнт при цьому не змінюється.
 
 ---
 
