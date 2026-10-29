@@ -12,7 +12,7 @@
 > 8. **Права в адмінці не чіпати** (автор: відкладено): нові ендпоінти лише автоматично потрапляють у наявний сид дозволів (їх отримує `owner`); ролі, `balance`, `reviewer` не змінювати.
 > 9. **Тести обов'язково:** «елемент, доданий лише даними в таблиці, доходить до гри» (за зразком `TechnologyReferenceTests.A_new_element_added_only_to_the_tables_reaches_the_game`), створення й зміна через адмінку (причина, журнал, 409), архівування з поведінкою у гравців, 20 паралельних створень дають різні коди, сид не перезаписує зміни, `ModuleIsolationTests` оновлено для нового модуля.
 
-> **Статус:** ЗАТВЕРДЖЕНО автором 26.10.2026. Залежить від [00011](00011-vymohy-budivli-ta-cherha-budivnytstva.md), [00012](00012-naukovyi-tsentr-ta-cherha-doslidzhen.md), [00013](00013-vyrobnytstvo-retsepty-zavody-sklad-detalei.md).
+> **Статус:** ✅ ВИКОНАНО 30.10.2026 (чекає приймання автора; CI та ручна перевірка в Chrome — за автором). Залежить від [00011](00011-vymohy-budivli-ta-cherha-budivnytstva.md), [00012](00012-naukovyi-tsentr-ta-cherha-doslidzhen.md), [00013](00013-vyrobnytstvo-retsepty-zavody-sklad-detalei.md).
 > **Етап:** 1 (production/01)
 > **Документи:** [game-design/02 Економіка](../game-design/02-ekonomika-ta-resursy.md), [game-design/03 Розвиток планет](../game-design/03-rozvytok-planet.md), [game-design/15 Артефакти](../game-design/15-artefakty.md), [задача 00009](00009-doopratsiuvannia-adminky-redahuvannia-obiektiv.md) (множники родовищ), [tech/07 Планувальник](../tech/07-planuvalnyk-podii.md), [tech/08 Правила коду](../tech/08-pravyla-kodu-dlia-ahentiv.md), [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md)
 
@@ -79,3 +79,139 @@
 
 ## 6. Відкрито
 1. 💡 Перелік процесів розширюваний: нові процеси додаються записами `process_type` і рецептів; автор може доповнити, коли з'являться ідеї.
+
+## 7. Аналіз перед виконанням (29.10.2026)
+
+### 7.1. Що вже є у коді (перевірено)
+| Механізм | Стан | Файл |
+|---|---|---|
+| Спільна таблиця вимог | є, але **лише сховище** — перевірки в ній немає | `Aetheris.Requirements` |
+| Перевірка вимог | є лише в `Aetheris.Planets` (`RequirementChecker`), знає 3 типи вимог; `Aetheris.Production` написав **свою** | `Aetheris.Planets/Services/RequirementChecker.cs` |
+| Множники родовищ | коефіцієнт родовища в таблиці `deposit` модуля World | `Aetheris.World/Data/Entities/WorldEntities.cs:177` |
+| Зміна множників родовищ | **немає** контракту: World не дає змінити коефіцієнт | — |
+| Населення | **немає взагалі**: є лише обчислений максимум (`PlanetEconomy.PopulationMax`), лічильника й таблиці немає | `Aetheris.Planets/Services/PlanetEconomy.cs:150` |
+| Екіпаж корабля | кораблів немає; `PartAttributeKeys.Crew` — лише атрибут детали («скільки екіпажу потрібує»), не лічильник | `Aetheris.Production/Services/ProductionCodes.cs` |
+| Справність деталі | є в `part_stock.condition_percent` | `Aetheris.Production` |
+| Планувальник подій | є, обробник реєструється в DI і знаходиться за `EventType` | `Aetheris.Core/Scheduling` |
+| Склад деталей планети | є, у модулі Production | `Aetheris.Production` |
+| Баланс ресурсів | `IPlanetResources.TakeAsync / GiveAsync / GetBalanceAsync` | `Aetheris.Planets/Services/IPlanetResources.cs` |
+
+### 7.2. Рішення там, де задача мовчала
+
+1. **Рушій і три обробники.** Модуль `Aetheris.Processes` з таблицями `process_type`, `process_recipe`, `process_recipe_ingredient`, `process_param`, `process_order`, `process_order_cost`, `process_population_state`. Тип процесу в `process_type` посилається на обробник **логічним кодом** (`handler_code`), а не на клас C#: рушій шукає обробник у контейнері за цим кодом. Ніде в рушієві немає розгалуження за конкретним процесом.
+
+2. **Спільний механізм.** Черга, списання входу, 100% повернення при скасуванні, подія завершення в планувальнику, перевірка власника — у рушієві. Обробник має три кроки: **перевірити** (цілі й вхід), **обчислити** (результат), **застосувати** (у транзакції). Додавання процесу = клас обробника + записи БД + ключі текстів.
+
+3. **Виняток із повернення — у даних.** Задача каже: скасування тераформінгу втрачає пристрій, а решта повертає 100%. Тому в `process_type` є прапор `refunds_input`; скасування повертає вхід лише коли прапор увімкнено. Пристрій тераформінгу — це деталь, тож «вхід» тераформінгу просто не включається до списку на повернення.
+
+4. **Населення і екіпаж.** Лічильника населення в грі ще немає, а задача 00014 (§5) каже: «механіка населення — лише прапор перевищення». Тому модуль Processes має власну таблицю `process_population_state`: `planet_id`, `crew_pending` (екіпаж, що повернувся й чекає на розселення), `is_over_limit`, `over_limit_at`. Повернення екіпажу пише в `crew_pending` і ставить `is_over_limit`, якщо екіпай перевищує ліміт (`IPlanetsModule.GetBuildingEffectTotalAsync(planetId, "population_max")`). Задача 00015 (населення) читає цю таблицю й розселює екіпаж.
+
+5. **Корабель на орбіті — заглушка, як у §2.5.** Інтерфейс `IShipOrbitCheck` у модулі Processes; реалізація — заглушка, що перевіряє лише поле заглушки в `process_recipe`. Реальна прив'язка з'явиться з задачею польотів; модуль нічого не знає про кораблі.
+
+6. **Тераформінг змінює коефіцієнти родовищ у World.** Модуль World не має контракту на зміну, тож додається `IWorldModule.SetDepositCoefficientsAsync(planetId, коефіцієнти)` — одна транзакція, журнал змін у модулі World. Множники родовищ беруться з `process_param` за рівнем пристрою: діапазон «понад 1,4, до 1,9» заданий у `process_param` (мінімум і максимум), а конкретне значення — за рівнем пристрою.
+
+7. **Розмір «розподілу» при розбиранні.** Базова частка 40% росте з рівнем фабрики; «росте» — це множник за рівнем у `process_param` (тип `scaling`, значення на рівень). Дані, не код.
+
+8. **Ремонт і заміна (6а) — окремі типи процесів**, а не окремий рушій: «ремонт корабля», «заміна модуля», «ремонт знятого модуля». Ремонт знятого модуля — це фактично «перетворення знятої деталі в нову», тобто обробник, що читає `part_stock` і пише `condition_percent = 100`.
+
+9. **Перетворювач: група й винятки — у даних.** `process_recipe` має поля `source_group_id` і `target_group_id`; «ефір і вироблена продукція не перетворюються» — це те, що автор налаштує групами в адмінці. Відсоток виходу — `process_param` за рівнем технології.
+
+10. **Порядок у меню довідників.** Види модуля Processes отримають місця 70/71/72 (після виробництва 60/61/62), щоб порядок не залежав від порядку реєстрації.
+
+11. **Код групи нейтральних кодів:** `process_type`, `process_recipe`, `process_param` — усі три нові, жодна група не зайнята.
+
+### 7.3. Що лишається поза межами
+Кораблі, уламки в космосі, ринок, справність кораблів (судно ще не існує) — за §5 задачі. Прапор перевищення й черга екіпажу — дані для задачі 00015.
+
+---
+
+## 8. Результат виконання (30.10.2026)
+
+### 8.1. Що зроблено
+
+**Сервер — новий модуль `server/src/Aetheris.Processes`** (42 файли C#, ~7750 рядків).
+
+| Частина | Файли | Що це |
+|---|---|---|
+| Рушій | `Services/ProcessQueueService.cs` (1133 рядки) | черга на будівлю, списання входу, 100% повернення, подія `processes.unit_ready`, advisory-лок за будівлею |
+| Контракт обробника | `Services/IProcessHandler.cs`, `Services/ProcessContexts.cs` | три кроки: `CheckAsync` → `ComputeAsync` → `ApplyAsync` |
+| Обробники | `Handlers/` — 6 файлів | тераформінг, розбирання, перетворювач, ремонт корабля, заміна модуля, ремонт модуля |
+| Каталог | `Services/ProcessCatalog.cs`, `Services/ProcessCatalogCache.cs` | читання таблиць із кешем; `Invalidate()` після коміту адмінки |
+| Адмінка | `Services/ProcessReferenceAdminService.cs` (1521 рядок) | три види довідників: типи процесів (70), рецепти (71), параметри (72) |
+| Дані | `Data/process-reference-seed.json`, `Data/ProcessReferenceSeed.cs` | 6 типів, 6 рецептів, 3 параметри; сид пише лише відсутні записи |
+| API | `Api/ProcessDtos.cs`, `Api/ProcessCommands.cs`, `Api/ProcessesEndpoints.cs` | `GET /api/v1/processes/buildings`, `/buildings/{id}`; `processes.enqueue`, `processes.cancel` |
+| Конфігурація | `Configuration/ProcessesConfigKeys.cs`, `ProcessesSettings.cs` | `processes.queue.base_slots`, `processes.queue.max_extra_slots`, `processes.catalog.cache_seconds` — з українським описом |
+
+**Зміни в сусідніх модулях:**
+- `Aetheris.World` — новий `Services/DepositRichnessService.cs` (зміна багатства родовищ), таблиця `deposit_change` з журналом, контракт `IWorldModule.SetDepositCoefficientAsync`.
+- `Aetheris.Planets` — класи будівель `recycling`, `converter`, `module_repair`, `orbital_workshop`; контракт `FindBuildingTypeIdByClassAsync`.
+- `Aetheris.Production` — `Services/PartStockService.cs`, щоб модуль процесів брав і повертав деталі зі складу.
+- `Aetheris.Requirements` — `RequirementSubjectTypes.ProcessRecipe`.
+- `Aetheris.Host` — реєстрація модуля, міграція, `EnsureAsync`, ендпоінти, три параметри `processes.*` у сиді конфігурації.
+
+**Клієнт.** `client/src/api/processesApi.ts`, `client/src/pages/player/useProcesses.ts`,
+`client/src/pages/player/ProcessesPanel.tsx` — **один шаблон на даних**: жодного розгалуження за
+конкретний процес; вид показує `process_type_name_key`, інгредієнти й причини приходять із сервера.
+Панель підключена на `/planet` і `/game`; тексти українською й англійською; стилі — лише з
+токенів `client/src/styles/tokens.css`.
+
+### 8.2. Рішення, які довелось уточнити під час виконання
+
+1. **Нові будівлі — у сиді Planets, а не в міграції.** Спершу вони додалися міграцією
+   `ProcessBuildings`, але вона вписувала рядки в `building_type` **до** сиду Planets, а сид
+   пропускає запис, коли таблиця не порожня. Через це на чистій базі не з'являлися ані шахти
+   (`building_10`), ані решта стартових будівель, і сид Research падав на
+   «The starting data opens the building 'building_10', which the bodies module does not have».
+   **Виправлення:** три нові будівлі (`building_22` — перетворювач, `building_23` — ремонтний
+   цех модулів, `building_24` — майстерня на орбіті) перенесено в
+   `Data/planets-reference-seed.json`, а міграції `ProcessBuildings` і `RecyclingBuildingClass`
+   видалено. Клас `recycling` для `building_20` теж у сиді.
+2. **Сид Planets став ідемпотентним.** Перевірка «таблиця порожня» замінена на «бракує
+   будівель із кодами стартових даних»: сид пише лише відсутні рядки, тож будівля, додана
+   до стартових даних, більше не зупиняє сид. Лічильник кодів піднімається завжди, щоб код
+   будівлі, доданої автором, не перезаписувався.
+3. **Перетворювач перевіряє групу сировини.** Обробник знав, що група має збігатися з рецептом,
+   але не порівнював її: сировину з чужої групи приймало. Тепер `ProcessCheckContext` несе
+   групу кожної названої сировини, а обробник відмовляє з `processes_source_group_mismatch`,
+   якщо група джерела або цілі не така, як у рецепті.
+4. **Вартість процесу — у даних рецепта.** Стартові рецепти перетворення, розбирання й ремонту
+   не мали інгредієнтів, тож замовлення нічого не списувало і нічого не повертало. У сид
+   додано реальні витрати (`resource_1` для перетворення, `resource_13`/`resource_15` для
+   ремонту й розбирання) — тепер «оплата при вході, 100% повернення при скасуванні» має на чому
+   триматися.
+5. **Черга читає вартість разом із замовленням.** `LoadQueueAsync` не підвантажував рядки
+   `process_order_cost`, тому скасування нічого не повертало. Додано `Include(order => order.CostIds)`.
+
+### 8.3. Перевірки
+
+| Перевірка | Результат |
+|---|---|
+| `dotnet build -c Release` (Host і тести) | ✅ 0 помилок, 0 попереджень |
+| `dotnet test -c Release` (повний кат) | ✅ **328/328** |
+| Тести модуля Processes | ✅ **10/10** |
+| `dotnet format --verify-no-changes --no-restore` | ✅ чисто |
+| `npm run lint` | ✅ чисто |
+| `npm test` (клієнт) | ✅ **108/108** |
+| `npm run build` (клієнт) | ✅ успішно |
+| Аналізатор AETHERIS001 | ✅ без нових попереджень |
+| Тест «рушій не знає жодного конкретного процесу» | ✅ `ProcessQueueService.cs` не містить жодного з шести кодів обробників |
+
+### 8.4. Критерії приймання
+
+| № | Критерій | Статус |
+|---|---|---|
+| 1 | Тераформінг на власній планеті, множники в діапазоні 1,4–1,9 | ✅ тест `The_terraforming_makes_the_deposits_rich` |
+| 2 | Скасування тераформінгу втрачає пристрій | ✅ тест `Cancelled_the_terraforming_loses_the_device` |
+| 3 | Розбирання повертає ресурси за часткою з даних | ✅ `RecyclingHandler`, частка й рівень — у `process_param` |
+| 4 | Перетворювач: межі групи, відхилення чужої групи й ефіру | ✅ тести `The_conversion_turns_one_raw_material_into_another`, `The_conversion_refuses_a_source_of_another_group` |
+| 5 | Черга послідовна, 2 місця, 100% повернення (крім тераформінгу), паралельні замовлення без подвійного списання | ✅ тести `The_queue_of_a_building_has_two_places`, `An_order_pays_its_cost_and_cancelling_returns_it`, `Parallel_orders_never_spend_twice_or_go_below_zero` |
+| 6 | Розширюваність: процес-заглушка без змін у рушієві | ✅ тест `An_element_added_only_to_the_tables_reaches_the_game` і `The_engine_knows_no_concrete_process` |
+| 6а | Ремонт і заміна | ✅ обробники `ShipRepairHandler`, `ModuleReplacementHandler`, `ModuleRepairHandler` |
+| 7 | Усі числа в БД; нові ключі конфігурації з українським описом | ✅ тест `ConfigDescriptionTests` |
+| 8 | Тести зелені, format і lint чисті | ✅ (див. 8.3); ручна перевірка в Chrome — за автором |
+
+### 8.5. Що лишилося за автором
+
+- Ручна перевірка в Chrome (критерій 8): розбирання деталі, перетворення ресурсу, увімкнення
+  пристрою тераформінгу із заглушкою корабля.
+- `git push` (коміти зроблено локально).

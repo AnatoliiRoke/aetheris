@@ -626,9 +626,13 @@ dotnet ef migrations add <Назва> --project src/Aetheris.Research --startup-
 
 # Нова міграція модуля виробництва (групи деталей, деталі, рецепти, черга заводів, склад)
 dotnet ef migrations add <Назва> --project src/Aetheris.Production --startup-project src/Aetheris.Host --context ProductionDbContext --output-dir Data/Migrations
+
+# Нова міграція модуля процесів (види процесів, рецепти, параметри, черга, склад екіпажу)
+dotnet ef migrations add <Назва> --project src/Aetheris.Processes --startup-project src/Aetheris.Host --context ProcessesDbContext --output-dir Data/Migrations
 ```
 
-Сервер застосовує міграції ядра і модулів World, Planets, Requirements, Research та Production сам при старті. Усі набори пишуть
+Сервер застосовує міграції ядра і модулів World, Planets, Requirements, Research, Production та
+Processes сам при старті. Усі набори пишуть
 історію в спільну таблицю `__EFMigrationsHistory`.
 
 ### Модуль Planets (задача 00011)
@@ -667,6 +671,42 @@ dotnet ef migrations add <Назва> --project src/Aetheris.Production --startu
 Новий елемент каталогу (деталь, рецепт, група) додається **лише записом у базу**: коди видає
 лічильник сервера, назви й описи живуть у `localization_text`, а вимоги — у спільному модулі
 вимог. Клієнт при цьому не змінюється.
+
+### Модуль Processes (задача 00014)
+
+`server/src/Aetheris.Processes` володіє планетними процесами: тераформінгом, розбиранням,
+перетворенням матерії, ремонтом корабля й модулів та заміною модуля. Таблиці: `process_type`
+(вид процесу з логічним кодом обробника й прапорцем `refunds_input`), `process_recipe` (рецепт
+із класом будівлі, групами сировини й тривалістю), `process_recipe_ingredient`,
+`process_param` (числа механізму: діапазон, частка, відсоток за рівнем), `process_order`,
+`process_order_cost`, `process_queue_state` і `process_population_state` (черга екіпажу та прапор
+перевищення — її читає задача 00015).
+
+**Рушій не знає жодного конкретного процесу.** Вид процесу посилається на обробника логічним
+кодом (`handler_code`), а рушій знаходить обробника в контейнері за цим кодом. Обробник має три
+кроки: `CheckAsync` (перевірити цілі й вхід), `ComputeAsync` (обчислити результат) і
+`ApplyAsync` (застосувати в транзакції). Новий процес — це клас обробника, записи в базі й
+ключі текстів; рушій і клієнт не змінюються.
+
+Спільний механізм один: черга на будівлю (2 місця + платні), списання входу на всю кількість
+одразу, 100% повернення при скасуванні — окрім видів, у яких `refunds_input = false`
+(тераформінг втрачає пристрій), подія завершення в планувальнику (`processes.unit_ready`).
+Виняток із повернення, частки, діапазони й відсотки — у даних (`process_type`, `process_param`),
+а не в коді.
+
+Клас будівлі (`converter`, `recycling`, `module_repair`, `orbital_workshop`) — спосіб модуля
+знайти будівлю, у якій працює процес, без коду в його власному коді. Стартові дані —
+`Data/process-reference-seed.json`; сид пише лише відсутні записи й не перезаписує зміни з
+адмінки. Параметри `processes.*` (місця черги, платні місця, кеш таблиць) — у
+`config_parameter`.
+
+Тераформінг змінює коефіцієнти родовищ через `IWorldModule.SetDepositCoefficientAsync`; журнал
+змін — у таблиці `deposit_change` модуля World. Корабель на орбіті — заглушка
+(`ship_stub` у рецепті), реальна прив'язка прийде з задачею польотів.
+
+Читання: `GET /api/v1/processes/buildings`, `/buildings/{planetBuildingId}`; команди:
+`POST /api/v1/processes/enqueue` і `/cancel`. Види довідників у адмінці: «Типи процесів»,
+«Рецепти процесів», «Параметри процесів».
 
 ---
 
