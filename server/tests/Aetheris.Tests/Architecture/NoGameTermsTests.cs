@@ -37,7 +37,7 @@ public sealed partial class NoGameTermsTests
     /// The prefixes that a seeded parameter key may have: the neutral test parameters, the
     /// parameters of the core mechanisms and those of the modules with their own definitions.
     /// </summary>
-    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world.", "admin.", "planets.", "research.", "production."];
+    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world.", "admin.", "planets.", "research.", "production.", "processes."];
 
     /// <summary>
     /// The folders, relative to the server root, where the words of the game domain are
@@ -54,7 +54,9 @@ public sealed partial class NoGameTermsTests
         Path.Combine("src", "Aetheris.Research") + Path.DirectorySeparatorChar,
         Path.Combine("tests", "Aetheris.Tests", "Research") + Path.DirectorySeparatorChar,
         Path.Combine("src", "Aetheris.Production") + Path.DirectorySeparatorChar,
+        Path.Combine("src", "Aetheris.Processes") + Path.DirectorySeparatorChar,
         Path.Combine("tests", "Aetheris.Tests", "Production") + Path.DirectorySeparatorChar,
+        Path.Combine("tests", "Aetheris.Tests", "Processes") + Path.DirectorySeparatorChar,
     ];
 
     /// <summary>
