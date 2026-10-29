@@ -44,6 +44,18 @@ public static class BuildingClasses
 
     /// <summary>A building that joins the distant systems.</summary>
     public const string Portal = "portal";
+
+    /// <summary>A building that recycles the parts and the wrecks (task 00014).</summary>
+    public const string Recycling = "recycling";
+
+    /// <summary>A building that turns one raw material into another (task 00014).</summary>
+    public const string Converter = "converter";
+
+    /// <summary>A building that repairs the modules that were taken off a ship (task 00014).</summary>
+    public const string ModuleRepair = "module_repair";
+
+    /// <summary>A building that repairs the ships on the orbit of the body (task 00014).</summary>
+    public const string OrbitalWorkshop = "orbital_workshop";
 }
 
 /// <summary>The classes a building type may have.</summary>
@@ -64,6 +76,10 @@ public static class BuildingClassValues
         BuildingClasses.Sensor,
         BuildingClasses.Defence,
         BuildingClasses.Portal,
+        BuildingClasses.Recycling,
+        BuildingClasses.Converter,
+        BuildingClasses.ModuleRepair,
+        BuildingClasses.OrbitalWorkshop,
     ];
 
     /// <summary>

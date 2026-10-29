@@ -193,6 +193,40 @@ public sealed class DepositEntity
 }
 
 /// <summary>
+/// A change of the coefficient of a deposit of a body, in the journal of the world (task
+/// 00014, decision 2).
+/// </summary>
+public sealed class DepositChangeEntity
+{
+    /// <summary>Gets or sets the primary key.</summary>
+    public long Id { get; set; }
+
+    /// <summary>Gets or sets the body the deposit belongs to.</summary>
+    public long PlanetId { get; set; }
+
+    /// <summary>Gets or sets the sector of the body.</summary>
+    public int SectorId { get; set; }
+
+    /// <summary>Gets or sets the resource of the deposit.</summary>
+    public int ResourceId { get; set; }
+
+    /// <summary>Gets or sets the coefficient before the change.</summary>
+    public decimal OldCoefficient { get; set; }
+
+    /// <summary>Gets or sets the coefficient after the change.</summary>
+    public decimal NewCoefficient { get; set; }
+
+    /// <summary>Gets or sets why the deposit changed.</summary>
+    public string Reason { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets who changed the deposit.</summary>
+    public string ActorId { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the moment of the change.</summary>
+    public DateTimeOffset At { get; set; }
+}
+
+/// <summary>
 /// An asteroid field: a total mass and a constant composition (task 00004, decision 18).
 /// </summary>
 public sealed class AsteroidFieldEntity

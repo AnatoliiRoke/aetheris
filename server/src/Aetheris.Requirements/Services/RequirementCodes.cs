@@ -24,8 +24,8 @@ public static class RequirementTypes
 /// The kinds of subjects that can be closed by requirements (task 00011, decision 3).
 /// </summary>
 /// <remarks>
-/// Building types and technologies use the mechanism now; modules, recipes and ship classes
-/// bring their rows with their tasks.
+/// Building types and technologies use the mechanism now; modules, recipes, process recipes
+/// and ship classes bring their rows with their tasks.
 /// </remarks>
 public static class RequirementSubjectTypes
 {
@@ -40,6 +40,9 @@ public static class RequirementSubjectTypes
 
     /// <summary>A production recipe.</summary>
     public const string Recipe = "recipe";
+
+    /// <summary>A recipe of a planet process (task 00014).</summary>
+    public const string ProcessRecipe = "process_recipe";
 
     /// <summary>A ship class.</summary>
     public const string ShipClass = "ship_class";

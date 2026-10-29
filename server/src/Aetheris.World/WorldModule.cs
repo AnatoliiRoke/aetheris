@@ -17,6 +17,7 @@ public sealed class WorldModule : IWorldModule
     private readonly FieldService _fields;
     private readonly WorldQueryService _queries;
     private readonly GenerationRunService _runs;
+    private readonly DepositRichnessService _deposits;
     private readonly IGameConfig _config;
 
     /// <summary>
@@ -36,6 +37,7 @@ public sealed class WorldModule : IWorldModule
         FieldService fields,
         WorldQueryService queries,
         GenerationRunService runs,
+        DepositRichnessService deposits,
         IGameConfig config)
     {
         ArgumentNullException.ThrowIfNull(generation);
@@ -44,6 +46,7 @@ public sealed class WorldModule : IWorldModule
         ArgumentNullException.ThrowIfNull(fields);
         ArgumentNullException.ThrowIfNull(queries);
         ArgumentNullException.ThrowIfNull(runs);
+        ArgumentNullException.ThrowIfNull(deposits);
         ArgumentNullException.ThrowIfNull(config);
 
         _generation = generation;
@@ -52,6 +55,7 @@ public sealed class WorldModule : IWorldModule
         _fields = fields;
         _queries = queries;
         _runs = runs;
+        _deposits = deposits;
         _config = config;
     }
 
@@ -124,6 +128,15 @@ public sealed class WorldModule : IWorldModule
     /// <inheritdoc />
     public Task<IReadOnlyDictionary<int, long>> TakeLegacyStorageAsync(long planetId, CancellationToken cancellationToken = default) =>
         _civilizations.TakeLegacyStorageAsync(planetId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<int> SetDepositCoefficientAsync(
+        long planetId,
+        decimal coefficient,
+        string actorId,
+        string reason,
+        CancellationToken cancellationToken = default) =>
+        _deposits.SetCoefficientAsync(planetId, coefficient, actorId, reason, cancellationToken);
 
     /// <inheritdoc />
     public Task<int> AssignStartBuildingAsync(int buildingTypeId, int level, CancellationToken cancellationToken = default) =>

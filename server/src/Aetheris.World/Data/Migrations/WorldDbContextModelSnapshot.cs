@@ -227,6 +227,65 @@ namespace Aetheris.World.Data.Migrations
                     b.ToTable("celestial_object_type", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.World.Data.Entities.DepositChangeEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ActorId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("actor_id");
+
+                    b.Property<DateTimeOffset>("At")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("at");
+
+                    b.Property<decimal>("NewCoefficient")
+                        .HasPrecision(12, 6)
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("new_coefficient");
+
+                    b.Property<decimal>("OldCoefficient")
+                        .HasPrecision(12, 6)
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("old_coefficient");
+
+                    b.Property<long>("PlanetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("planet_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("ResourceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<int>("SectorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("sector_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_deposit_change");
+
+                    b.HasIndex("SectorId")
+                        .HasDatabaseName("ix_deposit_change_sector_id");
+
+                    b.HasIndex("PlanetId", "At")
+                        .HasDatabaseName("ix_deposit_change_planet_id_at");
+
+                    b.ToTable("deposit_change", (string)null);
+                });
+
             modelBuilder.Entity("Aetheris.World.Data.Entities.DepositEntity", b =>
                 {
                     b.Property<long>("Id")

@@ -205,6 +205,23 @@ public sealed class PlanetQueryService
     }
 
     /// <summary>
+    /// Finds the identifier of a building type by its class.
+    /// </summary>
+    /// <param name="buildingClass">The class of the building type.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The identifier, or <see langword="null"/> when no building has the class.</returns>
+    public Task<int?> FindBuildingTypeIdByClassAsync(string buildingClass, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(buildingClass);
+
+        return _dbContext.BuildingTypes.AsNoTracking()
+            .Where(type => type.BuildingClass == buildingClass)
+            .OrderBy(type => type.Id)
+            .Select(type => (int?)type.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <summary>
     /// Gets every body of a player with the level of its building of a class (task 00012,
     /// decisions 5 and 5a).
     /// </summary>

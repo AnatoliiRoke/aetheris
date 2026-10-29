@@ -92,6 +92,9 @@ public sealed class WorldDbContext : DbContext
     /// <summary>Gets the deposits.</summary>
     public DbSet<DepositEntity> Deposits => Set<DepositEntity>();
 
+    /// <summary>Gets the changes of the coefficients of the deposits.</summary>
+    public DbSet<DepositChangeEntity> DepositChanges => Set<DepositChangeEntity>();
+
     /// <summary>Gets the asteroid fields.</summary>
     public DbSet<AsteroidFieldEntity> Fields => Set<AsteroidFieldEntity>();
 
@@ -283,6 +286,17 @@ public sealed class WorldDbContext : DbContext
             entity.HasIndex(e => new { e.PlanetId, e.ResourceId }).IsUnique();
             entity.HasIndex(e => e.SectorId);
             entity.HasOne<ResourceTypeEntity>().WithMany().HasForeignKey(e => e.ResourceId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DepositChangeEntity>(entity =>
+        {
+            entity.ToTable("deposit_change");
+            entity.Property(e => e.OldCoefficient).HasPrecision(CoefficientPrecision, CoefficientScale);
+            entity.Property(e => e.NewCoefficient).HasPrecision(CoefficientPrecision, CoefficientScale);
+            entity.Property(e => e.Reason).HasMaxLength(NameLength);
+            entity.Property(e => e.ActorId).HasMaxLength(PlayerIdLength);
+            entity.HasIndex(e => new { e.PlanetId, e.At });
+            entity.HasIndex(e => e.SectorId);
         });
 
         modelBuilder.Entity<AsteroidFieldEntity>(entity =>

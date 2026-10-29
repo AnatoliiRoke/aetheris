@@ -811,7 +811,7 @@
     {
       "code": "building_20",
       "sort_order": 20,
-      "building_class": "production",
+      "building_class": "recycling",
       "is_start_building": false,
       "name": {
         "uk": "Фабрика утилізації",
@@ -885,6 +885,120 @@
           "type": "energy_consumption",
           "base": 2,
           "growth": 1.2
+        }
+      ],
+      "requirements": []
+    },
+    {
+      "code": "building_22",
+      "sort_order": 22,
+      "building_class": "converter",
+      "is_start_building": false,
+      "name": {
+        "uk": "Перетворювач матерії",
+        "en": "Matter converter"
+      },
+      "description": {
+        "uk": "Перетворює сировину в сировину тієї ж групи.",
+        "en": "Turns one raw material into another of the same group."
+      },
+      "duration_seconds": {
+        "base": 360,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "base": 1400,
+          "growth": 1.7
+        },
+        {
+          "resource": "resource_5",
+          "base": 600,
+          "growth": 1.7
+        }
+      ],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 6,
+          "growth": 1.3
+        }
+      ],
+      "requirements": []
+    },
+    {
+      "code": "building_23",
+      "sort_order": 23,
+      "building_class": "module_repair",
+      "is_start_building": false,
+      "name": {
+        "uk": "Ремонтний цех модулів",
+        "en": "Module repair shop"
+      },
+      "description": {
+        "uk": "Повертає пошкодженим модулям повну справність.",
+        "en": "Gives the damaged modules their full condition back."
+      },
+      "duration_seconds": {
+        "base": 240,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "base": 900,
+          "growth": 1.7
+        },
+        {
+          "resource": "resource_5",
+          "base": 300,
+          "growth": 1.7
+        }
+      ],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 4,
+          "growth": 1.3
+        }
+      ],
+      "requirements": []
+    },
+    {
+      "code": "building_24",
+      "sort_order": 24,
+      "building_class": "orbital_workshop",
+      "is_start_building": false,
+      "name": {
+        "uk": "Майстерня на орбіті",
+        "en": "Orbital workshop"
+      },
+      "description": {
+        "uk": "Лагодить кораблі, що стоять на орбіті планети.",
+        "en": "Repairs the ships that stand on the orbit of the body."
+      },
+      "duration_seconds": {
+        "base": 280,
+        "growth": 1.6
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "base": 1100,
+          "growth": 1.7
+        },
+        {
+          "resource": "resource_5",
+          "base": 450,
+          "growth": 1.7
+        }
+      ],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 5,
+          "growth": 1.3
         }
       ],
       "requirements": []

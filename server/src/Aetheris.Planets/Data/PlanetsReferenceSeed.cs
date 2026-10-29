@@ -87,16 +87,31 @@ public static class PlanetsReferenceSeed
         ArgumentNullException.ThrowIfNull(codes);
         ArgumentNullException.ThrowIfNull(requirements);
 
-        if (resources.Resources.Count == 0 || await dbContext.BuildingTypes.AnyAsync(cancellationToken).ConfigureAwait(false))
+        if (resources.Resources.Count == 0)
         {
             return false;
         }
 
         PlanetsSeedData seed = Load();
+
+        // The seed writes only the buildings that are missing, so a database that already
+        // holds some of them still gets the rest. The check is on the codes of the starting
+        // data and not on the emptiness of the table: a building that someone added before
+        // the starting data was written must not stop the seed (task 00014, decision 3.1).
+        HashSet<string> startingCodes = [.. seed.BuildingTypes.Select(type => type.Code)];
+
+        List<string> existingCodes = await dbContext.BuildingTypes
+            .Where(type => startingCodes.Contains(type.Code))
+            .Select(type => type.Code)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        List<SeedBuildingType> missingTypes = [.. seed.BuildingTypes.Where(type => !existingCodes.Contains(type.Code))];
+
         Dictionary<string, int> resourceIds = resources.Resources.ToDictionary(resource => resource.Code, resource => resource.Id, StringComparer.Ordinal);
         Dictionary<string, int> groupIds = resources.Groups.ToDictionary(group => group.Code, group => group.Id, StringComparer.Ordinal);
 
-        Dictionary<string, BuildingTypeEntity> types = seed.BuildingTypes.ToDictionary(
+        Dictionary<string, BuildingTypeEntity> types = missingTypes.ToDictionary(
             type => type.Code,
             type => new BuildingTypeEntity
             {
@@ -131,10 +146,18 @@ public static class PlanetsReferenceSeed
         dbContext.BuildingTypes.AddRange(types.Values);
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+        // The requirements of a building may name another building of the starting data,
+        // and that building may have been written by an earlier run, so the ids of all of
+        // them are read from the table.
+        Dictionary<string, int> typeIds = await dbContext.BuildingTypes
+            .Where(type => startingCodes.Contains(type.Code))
+            .ToDictionaryAsync(type => type.Code, type => type.Id, StringComparer.Ordinal, cancellationToken)
+            .ConfigureAwait(false);
+
         // The requirements live in the common requirements module, so the seed adds them
         // through its contract and never through the tables of that module. The requirements
         // of one type are grouped by the level they apply from.
-        foreach ((string code, SeedBuildingType type) in seed.BuildingTypes.Select(type => (type.Code, type)))
+        foreach ((string code, SeedBuildingType type) in missingTypes.Select(type => (type.Code, type)))
         {
             if (type.Requirements.Count == 0)
             {
@@ -145,13 +168,13 @@ public static class PlanetsReferenceSeed
             {
                 await requirements.AddAsync(
                     RequirementSubjectTypes.BuildingType,
-                    types[code].Id,
+                    typeIds[code],
                     group.Key,
                     [.. group.Select(requirement => new RequirementDefinition(
                         requirement.Type,
                         requirement.Type switch
                         {
-                            RequirementTypes.BuildingLevel => types[requirement.Target].Id,
+                            RequirementTypes.BuildingLevel => typeIds[requirement.Target],
                             RequirementTypes.Deposit => resourceIds[requirement.Target],
                             _ => throw new InvalidOperationException($"The starting data names the requirement type '{requirement.Type}', which it cannot resolve."),
                         },
@@ -170,7 +193,7 @@ public static class PlanetsReferenceSeed
 
         await WorldReferenceSeed.RaiseAsync(codes, PlanetsTextKeys.CodeGroup, seed.BuildingTypes.Select(type => type.Code), cancellationToken).ConfigureAwait(false);
 
-        return true;
+        return missingTypes.Count > 0;
     }
 }
 

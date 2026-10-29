@@ -141,6 +141,10 @@ public sealed class PlanetsModule : IPlanetsModule
         _queries.GetBuildingLevelAsync(buildingClass, planetId, playerId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<int?> FindBuildingTypeIdByClassAsync(string buildingClass, CancellationToken cancellationToken = default) =>
+        _queries.FindBuildingTypeIdByClassAsync(buildingClass, cancellationToken);
+
+    /// <inheritdoc />
     public Task<int?> FindBuildingTypeIdAsync(string code, CancellationToken cancellationToken = default) =>
         _queries.FindBuildingTypeIdAsync(code, cancellationToken);
 

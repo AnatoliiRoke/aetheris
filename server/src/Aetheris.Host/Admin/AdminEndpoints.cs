@@ -13,6 +13,7 @@ using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Localization;
 using Aetheris.Host.Security;
 using Aetheris.Planets;
+using Aetheris.Processes;
 using Aetheris.Production;
 using Aetheris.Research;
 using Aetheris.World.Api;
@@ -236,6 +237,7 @@ public static class AdminEndpoints
         PlanetsModule.MapAdminEndpoints(secured);
         ResearchServiceCollectionExtensions.MapAdminEndpoints(secured);
         ProductionServiceCollectionExtensions.MapAdminEndpoints(secured);
+        ProcessesServiceCollectionExtensions.MapAdminEndpoints(secured);
     }
 
     private static async Task<IResult> SignInAsync(

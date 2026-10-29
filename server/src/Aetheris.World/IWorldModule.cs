@@ -159,6 +159,23 @@ public interface IWorldModule
     Task<IReadOnlyDictionary<int, long>> TakeLegacyStorageAsync(long planetId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Sets the coefficient of every deposit of a body and writes the change in the journal
+    /// of the world: the terraforming makes the body rich (task 00014, decision 2).
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="coefficient">The new coefficient of the deposits.</param>
+    /// <param name="actorId">Who changed the deposits.</param>
+    /// <param name="reason">Why the deposits changed.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The number of the deposits that changed.</returns>
+    Task<int> SetDepositCoefficientAsync(
+        long planetId,
+        decimal coefficient,
+        string actorId,
+        string reason,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Sets the start building of every race that has none yet (task 00011).
     /// </summary>
     /// <param name="buildingTypeId">The building type.</param>

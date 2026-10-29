@@ -47,6 +47,7 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<IWorldModule, WorldModule>();
         services.AddScoped<IScheduledEventHandler, FieldRespawnHandler>();
         services.AddScoped<GenerationRunService>();
+        services.AddScoped<DepositRichnessService>();
         services.AddScoped<WorldAdminQueryService>();
         services.AddScoped<WorldAdminEditService>();
         services.AddScoped<WorldReferenceAdminService>();

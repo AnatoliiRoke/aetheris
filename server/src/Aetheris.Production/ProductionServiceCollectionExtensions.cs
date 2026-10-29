@@ -38,6 +38,7 @@ public static class ProductionServiceCollectionExtensions
         services.AddScoped<ProductionUnitOfWork>();
         services.AddScoped<ProductionBootstrapService>();
         services.AddScoped<ProductionQueueService>();
+        services.AddScoped<PartStockService>();
         services.AddScoped<IProductionModule, ProductionModule>();
         services.AddScoped<IScheduledEventHandler, ProductionUnitReadyHandler>();
         services.AddScoped<ProductionReferenceAdminService>();

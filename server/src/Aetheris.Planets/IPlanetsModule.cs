@@ -83,6 +83,18 @@ public interface IPlanetsModule
     Task<int?> FindBuildingTypeIdAsync(string code, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Finds the identifier of a building type by its class.
+    /// </summary>
+    /// <param name="buildingClass">The class of the building type, one of <see cref="Services.BuildingClasses"/>.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The identifier, or <see langword="null"/> when no building has the class.</returns>
+    /// <remarks>
+    /// The class comes from the data of the other modules, so it is looked up and never
+    /// written in the code (documentation/tech/09, section 3.1).
+    /// </remarks>
+    Task<int?> FindBuildingTypeIdByClassAsync(string buildingClass, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets every body of a player with the level of its building of a class: the bodies a
     /// research can start from, for example (task 00012, decisions 5 and 5a).
     /// </summary>
