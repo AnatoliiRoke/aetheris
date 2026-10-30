@@ -1,25 +1,57 @@
+using System.Net;
+using System.Text.Json;
 using Aetheris.Core.Errors;
+using Aetheris.Core.Scheduling;
+using Aetheris.Host.Data;
+using Aetheris.Host.Data.Entities;
+using Aetheris.Host.Scheduling;
+using Aetheris.Planets.Data;
 using Aetheris.Planets.Services;
 using Aetheris.Processes;
 using Aetheris.Processes.Api;
-using Aetheris.Processes.Configuration;
 using Aetheris.Processes.Data;
 using Aetheris.Processes.Data.Entities;
+using Aetheris.Processes.Events;
 using Aetheris.Processes.Services;
+using Aetheris.Production.Data.Entities;
+using Aetheris.Production.Services;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.Planets;
+using Aetheris.World.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aetheris.Tests.Processes;
 
 /// <summary>
-/// Tests of the processes: the recipes, the queue of a building, the conversion of matter,
-/// the terraforming and the recycling (task 00014).
+/// Tests of the processes: the conversion of matter, the recycling, the terraforming, the
+/// repair and the replacement, the queue of a building, its events and its owner (task 00014).
 /// </summary>
 [Collection(DatabaseCollection.Name)]
-public sealed class ProcessesTests
+public sealed partial class ProcessesTests
 {
+    private const string Fuel = "resource_group_3";
+
+    private const string Deuterium = "resource_9";
+
+    private const string Plasma = "resource_10";
+
+    private const string Ether = "resource_11";
+
+    private const string Quartzite = "resource_5";
+
+    private const string BuildingMaterials = "resource_13";
+
+    private const string ConversionTechnology = "tech_18";
+
+    private const string Hull = "part_1";
+
+    private const string Engine = "part_4";
+
+    private const string LifeSupport = "part_10";
+
+    private const string TerraformingDevice = "part_34";
+
     private readonly AetherisTestFactory _factory;
 
     /// <summary>
@@ -43,401 +75,947 @@ public sealed class ProcessesTests
     [Fact]
     public async Task The_processes_are_data_and_the_closed_ones_say_why()
     {
-        await ResetAsync();
+        await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await ProcessesTestData.BuildAsync(player, scope.ServiceProvider, BuildingClasses.Converter);
+        long buildingId = await ProcessesTestData.BuildAsync(player, scope.ServiceProvider, BuildingClasses.Recycling);
 
         IProcessesModule processes = scope.ServiceProvider.GetRequiredService<IProcessesModule>();
         ProcessBuildingDto building = await processes.GetBuildingAsync(player.Account.UserId, player.PlanetId, buildingId, Token);
 
-        Assert.NotEmpty(building.Recipes);
+        ProcessRecipeDto recipe = Assert.Single(building.Recipes);
+        Assert.Equal(ProcessPartSubjects.Any, recipe.PartSubject);
+        Assert.False(recipe.NeedsShip);
 
-        // The recipe of the converter is closed, because the source and the target of the
-        // conversion are not named yet.
-        Assert.All(
-            building.Recipes.Where(recipe => !recipe.IsAvailable),
-            recipe => Assert.NotEmpty(recipe.Reasons));
+        // A requirement the player does not meet closes the recipe with its reason.
+        ProcessRecipeInfo info = await ProcessesTestData.RecipeOfAsync(scope.ServiceProvider, ProcessHandlerCodes.Recycling);
+        int buildingTypeId = (await PlanetsTestData.TypeAsync(scope.ServiceProvider, "building_3")).Id;
+        await scope.ServiceProvider.GetRequiredService<Aetheris.Requirements.IRequirementsModule>().AddAsync(
+            Aetheris.Requirements.Services.RequirementSubjectTypes.ProcessRecipe,
+            info.Id,
+            1,
+            [new Aetheris.Requirements.Services.RequirementDefinition(Aetheris.Requirements.Services.RequirementTypes.BuildingLevel, buildingTypeId, 50)],
+            Token);
+        scope.ServiceProvider.GetRequiredService<ProcessCatalogCache>().Invalidate();
+
+        ProcessRecipeDto closed = Assert.Single((await processes.GetBuildingAsync(player.Account.UserId, player.PlanetId, buildingId, Token)).Recipes);
+        Assert.False(closed.IsAvailable);
+        ProcessReasonDto reason = Assert.Single(closed.Reasons);
+        Assert.Equal(ProcessErrorCodes.RequirementBuildingLevel, reason.Code);
+        Assert.Equal(50, reason.TargetLevel);
+        Assert.NotNull(reason.TargetNameKey);
     }
 
     /// <summary>
-    /// An order pays its whole cost at once and cancelling it returns the cost in full
-    /// (task 00014, criterion 5).
+    /// The conversion takes the source of the whole batch at once and gives the source times the
+    /// percentage of the level of the technology; a higher level gives more (task 00014,
+    /// criterion 4).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task An_order_pays_its_cost_and_cancelling_returns_it()
+    public async Task The_conversion_gives_the_percentage_of_the_level_of_the_technology()
     {
-        await ResetAsync();
+        await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
 
-        long buildingId = await ProcessesTestData.BuildAsync(player, scope.ServiceProvider, BuildingClasses.OrbitalWorkshop);
-        await ProcessesTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+        await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
 
-        IProcessesModule processes = scope.ServiceProvider.GetRequiredService<IProcessesModule>();
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
+        int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
+        int targetId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
 
-        // The kind of the process that refunds its input, so the cost comes back in full.
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(scope.ServiceProvider, ProcessHandlerCodes.ShipRepair);
-        int resourceTypeId = recipe.IngredientIds.First(ingredient => ingredient.ResourceTypeId is not null).ResourceTypeId!.Value;
+        long sourceBefore = await ProcessesTestData.BalanceAsync(player, services, sourceId);
+        long targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
 
-        long before = await ProcessesTestData.BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(10, sourceId, targetId), Token);
 
-        ProcessBuildingDto queued = await processes.EnqueueAsync(
-            player.Account.UserId,
-            player.PlanetId,
-            buildingId,
-            recipe.Id,
-            new ProcessOrderRequest(2),
-            Token);
+        // The source of the whole batch is paid when the order enters the queue.
+        Assert.Equal(sourceBefore - 10, await ProcessesTestData.BalanceAsync(player, services, sourceId));
+        Assert.Equal(targetBefore, await ProcessesTestData.BalanceAsync(player, services, targetId));
 
-        Assert.Single(queued.Queue);
+        Assert.Equal(10, await ProcessesTestData.CompleteAsync(player, services, buildingId));
 
-        long after = await ProcessesTestData.BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
+        // The first level keeps 30 per cent of the source.
+        Assert.Equal(targetBefore + 3, await ProcessesTestData.BalanceAsync(player, services, targetId));
 
-        Assert.Equal(before - (recipe.IngredientIds.First(ingredient => ingredient.ResourceTypeId == resourceTypeId).Amount * 2), after);
+        await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 10);
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(10, sourceId, targetId), Token);
+        await ProcessesTestData.CompleteAsync(player, services, buildingId);
 
-        ProcessBuildingDto cancelled = await processes.CancelAsync(
-            player.Account.UserId,
-            player.PlanetId,
-            buildingId,
-            queued.Queue[0].OrderId,
-            Token);
+        // The highest level keeps 80 per cent of the source.
+        Assert.Equal(targetBefore + 3 + 8, await ProcessesTestData.BalanceAsync(player, services, targetId));
+        Assert.Equal(sourceBefore - 20, await ProcessesTestData.BalanceAsync(player, services, sourceId));
 
-        Assert.Empty(cancelled.Queue);
+        // The level of the converter only makes a unit quicker, by the multiplier of its level.
+        ProcessParamInfo factor = (await ProcessesTestData.CatalogAsync(services)).ParamAt(recipe.ProcessTypeId, ProcessParamKinds.DurationFactor, ProcessLevelSources.Building, null, 10)!;
+        await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter, 10);
+        ProcessBuildingDto quick = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(10, sourceId, targetId), Token);
+        ProcessOrderDto order = quick.Queue[0];
 
-        long restored = await ProcessesTestData.BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
-
-        Assert.Equal(before, restored);
+        Assert.True(factor.Value < 1m);
+        Assert.Equal((long)decimal.Ceiling(recipe.DurationSeconds * factor.Value), (long)(order.NextUnitAt!.Value - order.StartsAt!.Value).TotalSeconds);
+        await ProcessesTestData.CompleteAsync(player, services, buildingId);
+        Assert.Equal(targetBefore + 3 + 8 + 8, await ProcessesTestData.BalanceAsync(player, services, targetId));
     }
 
     /// <summary>
-    /// Cancelling the terraforming loses the device: the kind of the process does not refund
-    /// its input (task 00014, criterion 2).
+    /// The conversion refuses a source of another group, the ether, a produced good, a target
+    /// of another group, the same resource and a player without the technology, and nothing is
+    /// spent (task 00014, criterion 4).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_conversion_refuses_what_it_may_not_convert()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
+        int deuterium = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
+        int plasma = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        int ether = await ProcessesTestData.ResourceIdAsync(services, Ether);
+        int quartzite = await ProcessesTestData.ResourceIdAsync(services, Quartzite);
+        int produced = await ProcessesTestData.ResourceIdAsync(services, BuildingMaterials);
+
+        // Without the technology the conversion would burn the source, so it is refused.
+        Assert.Equal(ProcessErrorCodes.RequirementTechnology, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, plasma)));
+
+        await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
+        long before = await ProcessesTestData.BalanceAsync(player, services, deuterium);
+
+        Assert.Equal(ProcessErrorCodes.SourceGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, ether, plasma)));
+        Assert.Equal(ProcessErrorCodes.SourceGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, produced, plasma)));
+        Assert.Equal(ProcessErrorCodes.TargetGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, ether)));
+        Assert.Equal(ProcessErrorCodes.TargetGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, quartzite)));
+        Assert.Equal(ProcessErrorCodes.SameSourceAndTarget, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, deuterium)));
+        Assert.Equal(ProcessErrorCodes.QuantityInvalid, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(0, deuterium, plasma)));
+        Assert.Equal(ProcessErrorCodes.QuantityInvalid, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(long.MaxValue, deuterium, plasma)));
+
+        Assert.Equal(before, await ProcessesTestData.BalanceAsync(player, services, deuterium));
+        Assert.Empty(await ProcessesTestData.OrdersAsync(player, services, buildingId));
+    }
+
+    /// <summary>
+    /// Cancelling an order returns the input of the units it has not made in full, and the
+    /// units made keep theirs (task 00014, criterion 5).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task Cancelling_returns_the_input_of_the_units_not_made()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+        await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 10);
+
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
+        int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
+        int targetId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        long before = await ProcessesTestData.BalanceAsync(player, services, sourceId);
+
+        // A whole order that is cancelled at once returns everything.
+        ProcessBuildingDto first = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(10, sourceId, targetId), Token);
+        await processes.CancelAsync(player.Account.UserId, player.PlanetId, buildingId, first.Queue[0].OrderId, Token);
+        Assert.Equal(before, await ProcessesTestData.BalanceAsync(player, services, sourceId));
+
+        // An order that made four units of ten returns the source of the six left.
+        ProcessBuildingDto second = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(10, sourceId, targetId), Token);
+        ProcessOrderDto order = second.Queue[0];
+        long unitSeconds = (long)(order.NextUnitAt!.Value - order.StartsAt!.Value).TotalSeconds;
+        await services.GetRequiredService<ProcessQueueService>()
+            .CompleteDueAsync(player.Account.UserId, player.PlanetId, buildingId, order.StartsAt.Value.AddSeconds(unitSeconds * 4), Token);
+
+        ProcessOrderEntity made = Assert.Single(await ProcessesTestData.OrdersAsync(player, services, buildingId));
+        Assert.Equal(4, made.ProducedQuantity);
+
+        await processes.CancelAsync(player.Account.UserId, player.PlanetId, buildingId, order.OrderId, Token);
+
+        Assert.Equal(before - 4, await ProcessesTestData.BalanceAsync(player, services, sourceId));
+        Assert.Empty(await ProcessesTestData.OrdersAsync(player, services, buildingId));
+    }
+
+    /// <summary>
+    /// The recycling returns the share of the cost of a part by its recipe, the share grows with
+    /// the level of the factory and a damaged part gives in proportion to its condition (task
+    /// 00014, criteria 3 and 6a).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_recycling_returns_the_share_of_the_recipe_by_the_level_and_the_condition()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+
+        PartFacts hull = await ProcessesTestData.PartAsync(services, Hull);
+        await ProcessesTestData.PutPartsAsync(player, services, hull.PartTypeId, PartCondition.Full, 4);
+        await ProcessesTestData.PutPartsAsync(player, services, hull.PartTypeId, PartCondition.Full / 2, 2);
+
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Recycling);
+        Dictionary<int, long> before = await BalancesAsync(player, services, hull.ResourceCost.Keys);
+
+        // Two new hulls at the first level of the factory give 40 per cent of their recipe.
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(2, PartTypeId: hull.PartTypeId), Token);
+        Assert.Equal(2, await ProcessesTestData.PartsAsync(player, services, hull.PartTypeId, PartCondition.Full));
+        await ProcessesTestData.CompleteAsync(player, services, buildingId);
+
+        Dictionary<int, long> afterNew = await BalancesAsync(player, services, hull.ResourceCost.Keys);
+        Assert.All(hull.ResourceCost, cost => Assert.Equal(before[cost.Key] + (long)decimal.Floor(2 * cost.Value * 0.40m), afterNew[cost.Key]));
+
+        // Two hulls of half a condition give a half of it.
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(2, PartTypeId: hull.PartTypeId, PartConditionPercent: PartCondition.Full / 2), Token);
+        await ProcessesTestData.CompleteAsync(player, services, buildingId);
+
+        Dictionary<int, long> afterDamaged = await BalancesAsync(player, services, hull.ResourceCost.Keys);
+        Assert.All(hull.ResourceCost, cost => Assert.Equal(afterNew[cost.Key] + (long)decimal.Floor(2 * cost.Value * 0.40m * 0.5m), afterDamaged[cost.Key]));
+        Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, hull.PartTypeId, PartCondition.Full / 2));
+
+        // The tenth level of the factory gives 50 per cent.
+        await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling, 10);
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(2, PartTypeId: hull.PartTypeId), Token);
+        await ProcessesTestData.CompleteAsync(player, services, buildingId);
+
+        Dictionary<int, long> afterLevel = await BalancesAsync(player, services, hull.ResourceCost.Keys);
+        Assert.All(hull.ResourceCost, cost => Assert.Equal(afterDamaged[cost.Key] + (long)decimal.Floor(2 * cost.Value * 0.50m), afterLevel[cost.Key]));
+        Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, hull.PartTypeId, PartCondition.Full));
+
+        // A part the storage does not hold is refused and nothing is spent.
+        Assert.Equal(
+            ProcessErrorCodes.PartMissing,
+            await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(1, PartTypeId: hull.PartTypeId)));
+    }
+
+    /// <summary>
+    /// The crew of the recycled parts comes back in full; a crew over the limit of the body
+    /// raises the flag of the decline and is not refused (task 00014, criterion 3).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_recycling_returns_the_crew_and_marks_the_body_over_the_limit()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+
+        PartFacts lifeSupport = await ProcessesTestData.PartAsync(services, LifeSupport);
+        Assert.True(lifeSupport.Crew > 0);
+
+        long limit = await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>()
+            .GetBuildingEffectTotalAsync(player.PlanetId, BuildingEffectTypes.PopulationMax, Token);
+        long quantity = (long)decimal.Floor(limit / lifeSupport.Crew) + 1;
+        await ProcessesTestData.PutPartsAsync(player, services, lifeSupport.PartTypeId, PartCondition.Full, quantity);
+
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Recycling);
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(quantity, PartTypeId: lifeSupport.PartTypeId), Token);
+        await ProcessesTestData.CompleteAsync(player, services, buildingId);
+
+        ProcessPopulationStateEntity state = await services.GetRequiredService<ProcessesDbContext>().ProcessPopulationStates.AsNoTracking()
+            .SingleAsync(entry => entry.PlanetId == player.PlanetId, Token);
+
+        Assert.Equal((long)decimal.Floor(quantity * lifeSupport.Crew), state.CrewPending);
+        Assert.True(state.CrewPending > limit);
+        Assert.True(state.IsOverLimit);
+        Assert.NotNull(state.OverLimitAt);
+    }
+
+    /// <summary>
+    /// The terraforming takes the device of the storage, needs a ship on the orbit and one
+    /// unit, and makes the deposits rich in the range of the data without lowering a richer
+    /// deposit; the body keeps its type, its size and its buildings (task 00014, criterion 1).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_terraforming_spends_the_device_and_makes_the_deposits_rich()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Production);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+        int poor = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, "resource_1", 1.0m);
+        int rich = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, "resource_3", 1.85m);
+
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Terraforming);
+        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        ShipsOnOrbitStub ships = services.GetRequiredService<ShipsOnOrbitStub>();
+
+        // Without the device in the storage the order is refused.
+        Assert.Equal(ProcessErrorCodes.PartMissing, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(1)));
+
+        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 2);
+
+        // One device makes one body rich once, and a ship turns it on.
+        Assert.Equal(ProcessErrorCodes.QuantityInvalid, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(2)));
+        ships.Place(player.Account.UserId, player.PlanetId, null);
+        Assert.Equal(ProcessErrorCodes.NoShipOnOrbit, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(1)));
+        ships.Place(player.Account.UserId, player.PlanetId, new ShipOnOrbit([]));
+
+        WorldDbContext world = services.GetRequiredService<WorldDbContext>();
+        Aetheris.World.Data.Entities.PlanetEntity body = await world.Planets.AsNoTracking().Include(entry => entry.CelestialObject).SingleAsync(entry => entry.Id == player.PlanetId, Token);
+        List<(int BuildingTypeId, int Level)> buildings = await BuildingsAsync(player, services);
+
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(1), Token);
+        Assert.Equal(1, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
+
+        await ProcessesTestData.CompleteAsync(player, services, buildingId);
+
+        Dictionary<int, decimal> deposits = await world.Deposits.AsNoTracking()
+            .Where(entry => entry.PlanetId == player.PlanetId)
+            .ToDictionaryAsync(entry => entry.ResourceId, entry => entry.Coefficient, Token);
+
+        // The poor deposit becomes rich, the richer one keeps its richness.
+        Assert.True(deposits[poor] > 1.4m && deposits[poor] <= 1.9m);
+        Assert.Equal(1.85m, deposits[rich]);
+        Assert.All(deposits.Values, coefficient => Assert.True(coefficient > 1.4m && coefficient <= 1.9m));
+        Assert.NotEmpty(await world.DepositChanges.AsNoTracking().Where(change => change.PlanetId == player.PlanetId).ToListAsync(Token));
+
+        // The device is spent; the type, the size and the buildings of the body stay.
+        Assert.Equal(1, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
+        Aetheris.World.Data.Entities.PlanetEntity after = await world.Planets.AsNoTracking().Include(entry => entry.CelestialObject).SingleAsync(entry => entry.Id == player.PlanetId, Token);
+        Assert.Equal(body.CelestialObject!.ObjectTypeId, after.CelestialObject!.ObjectTypeId);
+        Assert.Equal(body.SizeClassId, after.SizeClassId);
+        Assert.Equal(body.Size, after.Size);
+        Assert.Equal(buildings, await BuildingsAsync(player, services));
+    }
+
+    /// <summary>
+    /// Cancelling the terraforming loses the device and leaves the deposits as they were (task
+    /// 00014, criterion 2).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
     public async Task Cancelling_the_terraforming_loses_the_device()
     {
-        await ResetAsync();
+        await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
 
-        long buildingId = await ProcessesTestData.BuildAsync(player, scope.ServiceProvider, BuildingClasses.Production);
-        await ProcessesTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Production);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+        int poor = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, "resource_1", 1.0m);
+        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 1);
 
-        IProcessesModule processes = scope.ServiceProvider.GetRequiredService<IProcessesModule>();
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Terraforming);
 
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(scope.ServiceProvider, ProcessHandlerCodes.Terraforming);
-        int resourceTypeId = recipe.IngredientIds.First(ingredient => ingredient.ResourceTypeId is not null).ResourceTypeId!.Value;
-
-        long before = await ProcessesTestData.BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
-
-        ProcessBuildingDto queued = await processes.EnqueueAsync(
-            player.Account.UserId,
-            player.PlanetId,
-            buildingId,
-            recipe.Id,
-            new ProcessOrderRequest(1),
-            Token);
-
+        ProcessBuildingDto queued = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(1), Token);
         await processes.CancelAsync(player.Account.UserId, player.PlanetId, buildingId, queued.Queue[0].OrderId, Token);
 
-        long after = await ProcessesTestData.BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
-
-        // The device is lost, so the cost does not come back.
-        Assert.True(after < before);
+        Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
+        Assert.Equal(1.0m, (await services.GetRequiredService<WorldDbContext>().Deposits.AsNoTracking().SingleAsync(entry => entry.PlanetId == player.PlanetId && entry.ResourceId == poor, Token)).Coefficient);
     }
 
     /// <summary>
-    /// The queue of a building has two places and follows one another (task 00014,
-    /// criterion 5).
+    /// The repair of a ship repairs the hull and every module with one order; its cost and its
+    /// time follow the condition the parts lost (task 00014, criterion 6a).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_queue_of_a_building_has_two_places()
+    public async Task The_repair_of_a_ship_repairs_everything_for_the_lost_condition()
     {
-        await ResetAsync();
+        await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
 
-        long buildingId = await ProcessesTestData.BuildAsync(player, scope.ServiceProvider, BuildingClasses.Production);
-        await ProcessesTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.OrbitalWorkshop);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
 
-        IProcessesModule processes = scope.ServiceProvider.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(scope.ServiceProvider, ProcessHandlerCodes.Terraforming);
+        PartFacts hull = await ProcessesTestData.PartAsync(services, Hull);
+        PartFacts engine = await ProcessesTestData.PartAsync(services, Engine);
+        ShipsOnOrbitStub ships = services.GetRequiredService<ShipsOnOrbitStub>();
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.ShipRepair);
 
-        ProcessBuildingDto first = await processes.EnqueueAsync(
-            player.Account.UserId,
-            player.PlanetId,
-            buildingId,
-            recipe.Id,
-            new ProcessOrderRequest(1),
-            Token);
+        // A ship with nothing damaged has nothing to repair.
+        ships.Place(player.Account.UserId, player.PlanetId, new ShipOnOrbit([new ShipPart(hull.PartTypeId, 1, false, PartCondition.Full)]));
+        Assert.Equal(ProcessErrorCodes.NothingToRepair, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(1)));
 
-        Assert.Single(first.Queue);
+        ships.Place(player.Account.UserId, player.PlanetId, new ShipOnOrbit(
+        [
+            new ShipPart(hull.PartTypeId, 1, false, 50),
+            new ShipPart(engine.PartTypeId, 1, false, 80),
+        ]));
 
-        await processes.EnqueueAsync(
-            player.Account.UserId,
-            player.PlanetId,
-            buildingId,
-            recipe.Id,
-            new ProcessOrderRequest(1),
-            Token);
+        HashSet<int> resourceIds = [.. hull.ResourceCost.Keys, .. engine.ResourceCost.Keys];
+        Dictionary<int, long> before = await BalancesAsync(player, services, resourceIds);
 
-        GameException refused = await Assert.ThrowsAsync<GameException>(() => processes.EnqueueAsync(
-            player.Account.UserId,
-            player.PlanetId,
-            buildingId,
-            recipe.Id,
-            new ProcessOrderRequest(1),
-            Token));
+        ProcessBuildingDto queued = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(1), Token);
 
-        Assert.Equal(ProcessErrorCodes.QueueFull, refused.Code);
+        // The cost is the share of the cost of a new part times the lost condition, summed.
+        Dictionary<int, long> paid = await BalancesAsync(player, services, resourceIds);
+        foreach (int resourceId in resourceIds)
+        {
+            decimal expected = (hull.ResourceCost.GetValueOrDefault(resourceId) * 0.3m * 0.5m) + (engine.ResourceCost.GetValueOrDefault(resourceId) * 0.3m * 0.2m);
+            Assert.Equal(before[resourceId] - (long)decimal.Ceiling(expected), paid[resourceId]);
+        }
+
+        // The time is the time of the recipe times the summed lost condition.
+        ProcessOrderDto order = queued.Queue[0];
+        Assert.Equal((long)decimal.Ceiling(recipe.DurationSeconds * 0.7m), (long)(order.NextUnitAt!.Value - order.StartsAt!.Value).TotalSeconds);
+
+        await ProcessesTestData.CompleteAsync(player, services, buildingId);
+
+        ShipOnOrbit repaired = (await ships.FindAsync(player.Account.UserId, player.PlanetId, Token))!;
+        Assert.All(repaired.Parts, part => Assert.Equal(PartCondition.Full, part.ConditionPercent));
     }
 
     /// <summary>
-    /// The conversion turns one raw material into another of the same group, and the output
-    /// is the percentage of the level of the technology (task 00014, criterion 4).
+    /// The replacement of a module is quicker than the repair, takes a new module of the
+    /// storage and puts the damaged one to the storage; the repair shop gives a damaged part
+    /// of the storage its full condition back (task 00014, criterion 6a).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_conversion_turns_one_raw_material_into_another()
+    public async Task The_replacement_and_the_repair_of_a_module_keep_the_parts()
     {
-        await ResetAsync();
+        await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
 
-        long buildingId = await ProcessesTestData.BuildAsync(player, scope.ServiceProvider, BuildingClasses.Converter);
-        await ProcessesTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        long workshopId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.OrbitalWorkshop);
+        long shopId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.ModuleRepair);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
 
-        IProcessesModule processes = scope.ServiceProvider.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(scope.ServiceProvider, ProcessHandlerCodes.MatterConversion);
+        PartFacts engine = await ProcessesTestData.PartAsync(services, Engine);
+        ShipsOnOrbitStub ships = services.GetRequiredService<ShipsOnOrbitStub>();
+        ships.Place(player.Account.UserId, player.PlanetId, new ShipOnOrbit([new ShipPart(engine.PartTypeId, 1, false, 40)]));
+        await ProcessesTestData.PutPartsAsync(player, services, engine.PartTypeId, PartCondition.Full, 1);
 
-        int sourceId = await ProcessesTestData.ResourceIdAsync(scope.ServiceProvider, "resource_1");
-        int targetId = await ProcessesTestData.ResourceIdAsync(scope.ServiceProvider, "resource_2");
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo replacement = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.ModuleReplacement);
+        ProcessRecipeInfo shipRepair = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.ShipRepair);
+        ProcessRecipeInfo moduleRepair = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.ModuleRepair);
 
-        long before = await ProcessesTestData.BalanceAsync(player, scope.ServiceProvider, targetId);
+        // A kind of a module the ship does not carry damaged is refused.
+        PartFacts hull = await ProcessesTestData.PartAsync(services, Hull);
+        Assert.Equal(ProcessErrorCodes.ModuleNotOnShip, await RefusedAsync(processes, player, workshopId, replacement.Id, new ProcessOrderRequest(1, PartTypeId: hull.PartTypeId)));
 
-        await processes.EnqueueAsync(
-            player.Account.UserId,
-            player.PlanetId,
-            buildingId,
-            recipe.Id,
-            new ProcessOrderRequest(10, sourceId, targetId),
-            Token);
+        ProcessBuildingDto queued = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, workshopId, replacement.Id, new ProcessOrderRequest(1, PartTypeId: engine.PartTypeId), Token);
+        ProcessOrderDto order = queued.Queue[0];
 
-        await ProcessesTestData.CompleteAsync(player, scope.ServiceProvider, buildingId);
+        // The replacement is quicker than the repair of the same ship.
+        long replacementSeconds = (long)(order.NextUnitAt!.Value - order.StartsAt!.Value).TotalSeconds;
+        Assert.True(replacementSeconds < decimal.Ceiling(shipRepair.DurationSeconds * 0.6m));
+        Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, engine.PartTypeId, PartCondition.Full));
 
-        long after = await ProcessesTestData.BalanceAsync(player, scope.ServiceProvider, targetId);
+        await ProcessesTestData.CompleteAsync(player, services, workshopId);
 
-        // The player has no technology of the conversion, so nothing is made.
-        Assert.Equal(before, after);
+        // The damaged module is in the storage, the ship carries the new one.
+        Assert.Equal(1, await ProcessesTestData.PartsAsync(player, services, engine.PartTypeId, 40));
+        ShipPart installed = Assert.Single((await ships.FindAsync(player.Account.UserId, player.PlanetId, Token))!.Parts);
+        Assert.Equal(PartCondition.Full, installed.ConditionPercent);
+
+        // The repair shop repairs the module that came off: the cost and the time follow the
+        // lost condition, and the part comes back with its full condition.
+        await ProcessesTestData.PutPartsAsync(player, services, engine.PartTypeId, 40, 1);
+        Dictionary<int, long> before = await BalancesAsync(player, services, engine.ResourceCost.Keys);
+
+        Assert.Equal(ProcessErrorCodes.PartNotDamaged, await RefusedAsync(processes, player, shopId, moduleRepair.Id, new ProcessOrderRequest(2, PartTypeId: engine.PartTypeId)));
+
+        ProcessBuildingDto repairing = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, shopId, moduleRepair.Id, new ProcessOrderRequest(2, PartTypeId: engine.PartTypeId, PartConditionPercent: 40), Token);
+        ProcessOrderDto repairOrder = repairing.Queue[0];
+        Assert.Equal((long)decimal.Ceiling(moduleRepair.DurationSeconds * 0.6m), (long)(repairOrder.NextUnitAt!.Value - repairOrder.StartsAt!.Value).TotalSeconds);
+
+        Dictionary<int, long> paid = await BalancesAsync(player, services, engine.ResourceCost.Keys);
+        Assert.All(engine.ResourceCost, cost => Assert.Equal(before[cost.Key] - (long)decimal.Ceiling(cost.Value * 0.3m * 0.6m * 2), paid[cost.Key]));
+
+        await ProcessesTestData.CompleteAsync(player, services, shopId);
+
+        Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, engine.PartTypeId, 40));
+        Assert.Equal(2, await ProcessesTestData.PartsAsync(player, services, engine.PartTypeId, PartCondition.Full));
     }
 
     /// <summary>
-    /// The conversion refuses a source that is not in the group the recipe takes (task 00014,
-    /// criterion 4).
+    /// The queue of a building has two places from the data, and an order starts when the one
+    /// before it ends (task 00014, criterion 5).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_conversion_refuses_a_source_of_another_group()
+    public async Task The_queue_has_two_places_and_runs_one_order_after_another()
     {
-        await ResetAsync();
+        await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
 
-        long buildingId = await ProcessesTestData.BuildAsync(player, scope.ServiceProvider, BuildingClasses.Converter);
-        await ProcessesTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+        await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
 
-        IProcessesModule processes = scope.ServiceProvider.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(scope.ServiceProvider, ProcessHandlerCodes.MatterConversion);
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
+        ProcessOrderRequest request = new(3, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Plasma));
 
-        // The ether is in another group, so the conversion refuses it.
-        int sourceId = await ProcessesTestData.ResourceIdAsync(scope.ServiceProvider, "resource_11");
-        int targetId = await ProcessesTestData.ResourceIdAsync(scope.ServiceProvider, "resource_2");
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
+        ProcessBuildingDto two = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
 
-        GameException refused = await Assert.ThrowsAsync<GameException>(() => processes.EnqueueAsync(
-            player.Account.UserId,
-            player.PlanetId,
-            buildingId,
-            recipe.Id,
-            new ProcessOrderRequest(10, sourceId, targetId),
-            Token));
+        Assert.Equal(2, two.Queue.Count);
+        Assert.NotNull(two.Queue[0].StartsAt);
+        Assert.Null(two.Queue[1].StartsAt);
+        Assert.Equal(ProcessErrorCodes.QueueFull, await RefusedAsync(processes, player, buildingId, recipe.Id, request));
 
-        Assert.Equal(ProcessErrorCodes.SourceGroupMismatch, refused.Code);
+        DateTimeOffset firstEnd = two.Queue[0].FinishesAt!.Value;
+        await services.GetRequiredService<ProcessQueueService>().CompleteDueAsync(player.Account.UserId, player.PlanetId, buildingId, firstEnd, Token);
+
+        // The second order starts at the end of the first one, not at the moment of the read.
+        ProcessOrderEntity second = Assert.Single(await ProcessesTestData.OrdersAsync(player, services, buildingId));
+        Assert.Equal(two.Queue[1].OrderId, second.Id);
+        Assert.Equal(firstEnd, second.StartsAt);
+        Assert.Equal(1, second.Position);
     }
 
     /// <summary>
-    /// Twenty parallel orders never spend the same resources twice and never leave the
-    /// balance below zero (task 00014, criterion 5).
+    /// The event of a ready unit makes it and plans the event of the next unit, so the queue
+    /// goes on without a read of the player; a repeated delivery of the same event changes
+    /// nothing, and a new scope finds the queue where the last one left it (task 00014,
+    /// section 3.1).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_ready_event_makes_the_unit_plans_the_next_and_a_repeated_event_changes_nothing()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        long buildingId;
+        long orderId;
+        int targetId;
+        long targetBefore;
+
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            IServiceProvider services = scope.ServiceProvider;
+            buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
+            await ProcessesTestData.GiveEveryResourceAsync(player, services);
+            await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 10);
+
+            ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
+            targetId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+            targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
+
+            ProcessBuildingDto queued = await services.GetRequiredService<IProcessesModule>().EnqueueAsync(
+                player.Account.UserId,
+                player.PlanetId,
+                buildingId,
+                recipe.Id,
+                new ProcessOrderRequest(2, await ProcessesTestData.ResourceIdAsync(services, Deuterium), targetId),
+                Token);
+            orderId = queued.Queue[0].OrderId;
+        }
+
+        // The first event is the one of the first unit.
+        ScheduledEventEntity first = await PendingEventAsync(orderId, 0);
+
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            await HandleAsync(scope.ServiceProvider, first);
+            Assert.Equal(1, (await ProcessesTestData.OrdersAsync(player, scope.ServiceProvider, buildingId)).Single().ProducedQuantity);
+
+            // The same event delivered once more makes nothing.
+            await HandleAsync(scope.ServiceProvider, first);
+            Assert.Equal(1, (await ProcessesTestData.OrdersAsync(player, scope.ServiceProvider, buildingId)).Single().ProducedQuantity);
+        }
+
+        // The event of the second unit is planned by the first one.
+        ScheduledEventEntity second = await PendingEventAsync(orderId, 1);
+
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            scope.ServiceProvider.GetRequiredService<ProcessCatalogCache>().Invalidate();
+            await HandleAsync(scope.ServiceProvider, second);
+
+            Assert.Empty(await ProcessesTestData.OrdersAsync(player, scope.ServiceProvider, buildingId));
+            Assert.Equal(targetBefore + 1, await ProcessesTestData.BalanceAsync(player, scope.ServiceProvider, targetId));
+        }
+    }
+
+    /// <summary>
+    /// Twenty parallel orders of two buildings that take the same parts of the storage never
+    /// spend them twice and never leave a balance below zero (task 00014, criterion 5).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
     public async Task Parallel_orders_never_spend_twice_or_go_below_zero()
     {
         const int parallelCount = 20;
+        const int damaged = 50;
 
-        await ResetAsync();
+        await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
-        using IServiceScope scope = _factory.Services.CreateScope();
+        long recyclingId;
+        long shopId;
+        PartFacts engine;
+        ProcessRecipeInfo recycling;
+        ProcessRecipeInfo repair;
 
-        long buildingId = await ProcessesTestData.BuildAsync(player, scope.ServiceProvider, BuildingClasses.Production);
-        await ProcessesTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            IServiceProvider services = scope.ServiceProvider;
+            recyclingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling);
+            shopId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.ModuleRepair);
+            await ProcessesTestData.GiveEveryResourceAsync(player, services);
+            engine = await ProcessesTestData.PartAsync(services, Engine);
+            await ProcessesTestData.PutPartsAsync(player, services, engine.PartTypeId, damaged, 5);
+            recycling = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Recycling);
+            repair = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.ModuleRepair);
+        }
 
-        IProcessesModule processes = scope.ServiceProvider.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(scope.ServiceProvider, ProcessHandlerCodes.Terraforming);
-        int resourceTypeId = recipe.IngredientIds.First(ingredient => ingredient.ResourceTypeId is not null).ResourceTypeId!.Value;
+        ProcessOrderRequest request = new(1, PartTypeId: engine.PartTypeId, PartConditionPercent: damaged);
+        Task<bool>[] tasks =
+        [
+            .. Enumerable.Range(0, parallelCount).Select(index => index % 2 == 0
+                ? TryEnqueueAsync(player, recyclingId, recycling.Id, request)
+                : TryEnqueueAsync(player, shopId, repair.Id, request)),
+        ];
 
-        long before = await ProcessesTestData.BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
+        bool[] accepted = await Task.WhenAll(tasks);
 
-        Task<ProcessBuildingDto>[] tasks = [.. Enumerable.Range(0, parallelCount).Select(index =>
-            EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, index))];
+        using IServiceScope check = _factory.Services.CreateScope();
 
-        ProcessBuildingDto[] results = await Task.WhenAll(tasks);
+        // Every building has two places, so four orders take four parts of the five.
+        Assert.Equal(4, accepted.Count(value => value));
+        Assert.Equal(1, await ProcessesTestData.PartsAsync(player, check.ServiceProvider, engine.PartTypeId, damaged));
+        Assert.Equal(2, (await ProcessesTestData.OrdersAsync(player, check.ServiceProvider, recyclingId)).Count);
+        Assert.Equal(2, (await ProcessesTestData.OrdersAsync(player, check.ServiceProvider, shopId)).Count);
 
-        // The queue of a building has two places, so the rest is refused.
-        Assert.Equal(2, results.Count(result => result.Queue.Count > 0));
-
-        long after = await ProcessesTestData.BalanceAsync(player, scope.ServiceProvider, resourceTypeId);
-
-        Assert.True(after >= 0);
-        Assert.Equal(before - (recipe.IngredientIds.First(ingredient => ingredient.ResourceTypeId == resourceTypeId).Amount * 2), after);
+        PartStorageEntity storage = await check.ServiceProvider.GetRequiredService<Aetheris.Production.Data.ProductionDbContext>().PartStorages.AsNoTracking()
+            .SingleAsync(entry => entry.PlanetId == player.PlanetId, Token);
+        Assert.Equal(1, storage.Quantity);
+        Assert.All(
+            await check.ServiceProvider.GetRequiredService<PlanetsDbContext>().PlanetResources.AsNoTracking().Where(row => row.PlanetId == player.PlanetId).ToListAsync(Token),
+            row => Assert.True(row.Amount >= 0));
     }
 
     /// <summary>
-    /// The terraforming makes the deposits of the body rich, and the device is spent (task
-    /// 00014, criterion 1).
+    /// Another player can neither read a building of the colony, nor order a process in it,
+    /// nor cancel its order, by the module and by the commands; the order stays (task 00014,
+    /// documentation/tech/09, section 10.1).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_terraforming_makes_the_deposits_rich()
+    public async Task Another_player_can_neither_read_nor_order_nor_cancel()
     {
-        await ResetAsync();
-        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer owner = await PlanetsTestData.FoundAsync(_factory);
+        using PlanetsTestPlayer stranger = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
 
-        long buildingId = await ProcessesTestData.BuildAsync(player, scope.ServiceProvider, BuildingClasses.Production);
-        await ProcessesTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        long buildingId = await ProcessesTestData.BuildAsync(owner, services, BuildingClasses.Converter);
+        await ProcessesTestData.GiveEveryResourceAsync(owner, services);
+        await ProcessesTestData.GiveEveryResourceAsync(stranger, services);
+        await ProcessesTestData.LearnAsync(owner, services, ConversionTechnology, 1);
+        await ProcessesTestData.LearnAsync(stranger, services, ConversionTechnology, 1);
 
-        IProcessesModule processes = scope.ServiceProvider.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(scope.ServiceProvider, ProcessHandlerCodes.Terraforming);
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
+        ProcessOrderRequest request = new(2, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Plasma));
+        ProcessBuildingDto queued = await processes.EnqueueAsync(owner.Account.UserId, owner.PlanetId, buildingId, recipe.Id, request, Token);
+        long orderId = queued.Queue[0].OrderId;
 
-        Aetheris.World.Api.PlanetFacts? before = await scope.ServiceProvider.GetRequiredService<Aetheris.World.IWorldModule>()
-            .GetPlanetFactsAsync(player.PlanetId, Token);
+        GameException read = await Assert.ThrowsAsync<GameException>(() => processes.GetBuildingAsync(stranger.Account.UserId, owner.PlanetId, buildingId, Token));
+        Assert.Equal(ProcessErrorCodes.PlanetUnknown, read.Code);
+        GameException list = await Assert.ThrowsAsync<GameException>(() => processes.GetBuildingsAsync(stranger.Account.UserId, owner.PlanetId, Token));
+        Assert.Equal(ProcessErrorCodes.PlanetUnknown, list.Code);
+        GameException order = await Assert.ThrowsAsync<GameException>(() => processes.EnqueueAsync(stranger.Account.UserId, owner.PlanetId, buildingId, recipe.Id, request, Token));
+        Assert.Equal(ProcessErrorCodes.PlanetUnknown, order.Code);
+        GameException cancel = await Assert.ThrowsAsync<GameException>(() => processes.CancelAsync(stranger.Account.UserId, owner.PlanetId, buildingId, orderId, Token));
+        Assert.Equal(ProcessErrorCodes.PlanetUnknown, cancel.Code);
 
-        Assert.NotNull(before);
-        Assert.NotEmpty(before!.Deposits);
-        Assert.All(before.Deposits, deposit => Assert.True(deposit.Coefficient < 1.4m));
+        // The commands check the owner of the body from the session, before the module.
+        using HttpResponseMessage enqueue = await TestAccounts.SendCommandAsync(
+            stranger.Client,
+            EnqueueProcessCommand.RoutePath,
+            new Dictionary<string, object?>
+            {
+                ["planet_id"] = owner.PlanetId,
+                ["planet_building_id"] = buildingId,
+                ["recipe_id"] = recipe.Id,
+                ["quantity"] = 2,
+                ["source_resource_type_id"] = request.SourceResourceTypeId,
+                ["target_resource_type_id"] = request.TargetResourceTypeId,
+            },
+            "stranger-enqueue");
+        using HttpResponseMessage cancelled = await TestAccounts.SendCommandAsync(
+            stranger.Client,
+            CancelProcessCommand.RoutePath,
+            new Dictionary<string, object?> { ["planet_id"] = owner.PlanetId, ["planet_building_id"] = buildingId, ["order_id"] = orderId },
+            "stranger-cancel");
 
-        await processes.EnqueueAsync(
-            player.Account.UserId,
-            player.PlanetId,
-            buildingId,
-            recipe.Id,
-            new ProcessOrderRequest(1),
+        // The owner reaches the same command, so the refusal above is the one of the owner.
+        using HttpResponseMessage own = await TestAccounts.SendCommandAsync(
+            owner.Client,
+            CancelProcessCommand.RoutePath,
+            new Dictionary<string, object?> { ["planet_id"] = owner.PlanetId, ["planet_building_id"] = buildingId, ["order_id"] = 0 },
+            "owner-cancel");
+        using HttpResponseMessage reading = await stranger.Client.GetAsync(
+            $"{ProcessesEndpoints.Prefix}/buildings/{buildingId}?planet_id={owner.PlanetId}",
             Token);
 
-        await ProcessesTestData.CompleteAsync(player, scope.ServiceProvider, buildingId);
+        // The owner reads the building by the same address the client uses.
+        using HttpResponseMessage ownReading = await owner.Client.GetAsync(
+            $"{ProcessesEndpoints.Prefix}/buildings/{buildingId}?planet_id={owner.PlanetId}",
+            Token);
+        using HttpResponseMessage ownList = await owner.Client.GetAsync(
+            $"{ProcessesEndpoints.Prefix}/buildings?planet_id={owner.PlanetId}",
+            Token);
+        Assert.Equal(HttpStatusCode.OK, ownReading.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, ownList.StatusCode);
 
-        Aetheris.World.Api.PlanetFacts? after = await scope.ServiceProvider.GetRequiredService<Aetheris.World.IWorldModule>()
-            .GetPlanetFactsAsync(player.PlanetId, Token);
+        Assert.NotEqual(HttpStatusCode.OK, enqueue.StatusCode);
+        Assert.NotEqual(HttpStatusCode.OK, cancelled.StatusCode);
+        Assert.NotEqual(HttpStatusCode.OK, reading.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, own.StatusCode);
 
-        Assert.NotNull(after);
-        Assert.NotEmpty(after!.Deposits);
-        Assert.All(after.Deposits, deposit => Assert.InRange(deposit.Coefficient, 1.4m, 1.9m));
+        ProcessOrderEntity kept = Assert.Single(await ProcessesTestData.OrdersAsync(owner, services, buildingId));
+        Assert.Equal(orderId, kept.Id);
     }
 
     /// <summary>
-    /// An element added only to the tables reaches the game, without the seed and without the
-    /// admin panel (task 00014, criterion 6).
+    /// An archived recipe and a recipe of an archived kind are not ordered, but the order of
+    /// the queue that makes it finishes; the archive reaches the player at once although the
+    /// catalog lives in memory for an hour (task 00023, decisions 5 and 10a.6).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task An_element_added_only_to_the_tables_reaches_the_game()
+    public async Task An_archived_recipe_is_not_ordered_but_its_order_finishes()
     {
-        await ResetAsync();
+        await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+        await AetherisTestFactory.SetParameterAsync(services, Aetheris.Processes.Configuration.ProcessesConfigKeys.CatalogCacheSeconds, "3600");
 
-        ProcessesDbContext dbContext = scope.ServiceProvider.GetRequiredService<ProcessesDbContext>();
+        try
+        {
+            long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
+            await ProcessesTestData.GiveEveryResourceAsync(player, services);
+            await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
 
+            IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+            ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
+            ProcessOrderRequest request = new(1, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Plasma));
+            await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
+
+            ProcessReferenceAdminService admin = services.GetRequiredService<ProcessReferenceAdminService>();
+            ProcessRecipeEntity stored = await services.GetRequiredService<ProcessesDbContext>().ProcessRecipes.AsNoTracking().SingleAsync(entry => entry.Id == recipe.Id, Token);
+            await admin.SetArchivedAsync(ProcessReferenceAdminService.ProcessRecipeKind, recipe.Id, true, new Aetheris.Core.Admin.AdminReferenceInput(stored.Version, "test", EmptyValues()), Token);
+
+            Assert.Equal(ProcessErrorCodes.RecipeArchived, await RefusedAsync(processes, player, buildingId, recipe.Id, request));
+
+            // The order that makes it finishes, and the queue keeps the name of what it makes.
+            ProcessBuildingDto building = await processes.GetBuildingAsync(player.Account.UserId, player.PlanetId, buildingId, Token);
+            Assert.False(building.Recipes.Single(entry => entry.RecipeId == recipe.Id).IsAvailable);
+            Assert.Equal(1, await ProcessesTestData.CompleteAsync(player, services, buildingId));
+
+            ProcessTypeEntity type = await services.GetRequiredService<ProcessesDbContext>().ProcessTypes.AsNoTracking().SingleAsync(entry => entry.Id == recipe.ProcessTypeId, Token);
+            ProcessRecipeInfo other = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, "resource_group_1");
+            await admin.SetArchivedAsync(ProcessReferenceAdminService.ProcessTypeKind, type.Id, true, new Aetheris.Core.Admin.AdminReferenceInput(type.Version, "test", EmptyValues()), Token);
+
+            Assert.Equal(
+                ProcessErrorCodes.TypeArchived,
+                await RefusedAsync(processes, player, buildingId, other.Id, new ProcessOrderRequest(1, await ProcessesTestData.ResourceIdAsync(services, "resource_1"), await ProcessesTestData.ResourceIdAsync(services, "resource_2"))));
+        }
+        finally
+        {
+            await AetherisTestFactory.SetParameterAsync(services, Aetheris.Processes.Configuration.ProcessesConfigKeys.CatalogCacheSeconds, "0");
+        }
+    }
+
+    /// <summary>
+    /// A new process is one class of a handler and rows of the tables: the engine runs it
+    /// without a change, and the engine names no concrete process (task 00014, criterion 6).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_new_process_is_one_handler_and_rows_without_a_change_of_the_engine()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+        int gift = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        int buildingTypeId = (await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>().FindBuildingTypeIdByClassAsync(BuildingClasses.Converter, Token))!.Value;
+
+        ProcessesDbContext dbContext = services.GetRequiredService<ProcessesDbContext>();
         ProcessTypeEntity type = new()
         {
             Code = "process_type_900",
             NameKey = "processes.process_type.process_type_900.name",
             DescriptionKey = "processes.process_type.process_type_900.description",
-            HandlerCode = ProcessHandlerCodes.MatterConversion,
+            HandlerCode = StubHandler.Code,
             RefundsInput = true,
             SortOrder = 900,
         };
-
         dbContext.ProcessTypes.Add(type);
         await dbContext.SaveChangesAsync(Token);
 
-        scope.ServiceProvider.GetRequiredService<ProcessCatalogCache>().Invalidate();
+        ProcessRecipeEntity recipe = new()
+        {
+            Code = "process_recipe_900",
+            NameKey = "processes.process_recipe.process_recipe_900.name",
+            DescriptionKey = "processes.process_recipe.process_recipe_900.description",
+            ProcessTypeId = type.Id,
+            BuildingTypeId = buildingTypeId,
+            DurationSeconds = 10,
+            SortOrder = 900,
+        };
+        dbContext.ProcessRecipes.Add(recipe);
+        await dbContext.SaveChangesAsync(Token);
+        services.GetRequiredService<ProcessCatalogCache>().Invalidate();
 
-        ProcessCatalog catalog = await scope.ServiceProvider.GetRequiredService<ProcessCatalogCache>()
-            .GetAsync(dbContext, scope.ServiceProvider.GetRequiredService<Aetheris.Requirements.IRequirementsModule>(), Token);
+        // The engine is the one of the module, with one more handler in the container.
+        ProcessQueueService engine = new(
+            dbContext,
+            services.GetRequiredService<ProcessesUnitOfWork>(),
+            services.GetRequiredService<ProcessCatalogCache>(),
+            services.GetRequiredService<Aetheris.Planets.IPlanetsModule>(),
+            services.GetRequiredService<IPlanetResources>(),
+            services.GetRequiredService<PartStockService>(),
+            services.GetRequiredService<ITechnologyLevels>(),
+            services.GetRequiredService<Aetheris.Requirements.IRequirementsModule>(),
+            services.GetRequiredService<Aetheris.World.IWorldModule>(),
+            services.GetRequiredService<IEventScheduler>(),
+            services.GetRequiredService<Aetheris.Core.Configuration.IGameConfig>(),
+            services.GetRequiredService<Aetheris.Core.Time.IGameClock>(),
+            [.. services.GetServices<IProcessHandler>(), new StubHandler(gift)]);
 
-        Assert.NotNull(catalog.FindType(type.Id));
+        long before = await ProcessesTestData.BalanceAsync(player, services, gift);
+        ProcessBuildingDto building = await engine.ReadBuildingAsync(player.Account.UserId, player.PlanetId, buildingId, Token);
+        Assert.True(building.Recipes.Single(entry => entry.RecipeId == recipe.Id).IsAvailable);
 
-        // The code of the row is in the code of the program nowhere.
-        string sources = Path.Combine(ServerRoot(), "src", "Aetheris.Processes");
-        Assert.False(File.ReadAllText(Path.Combine(sources, "Data", "process-reference-seed.json")).Contains("process_type_900", StringComparison.Ordinal));
+        ProcessBuildingDto queued = await engine.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(3), Token);
+        await engine.CompleteDueAsync(player.Account.UserId, player.PlanetId, buildingId, queued.Queue[0].FinishesAt!.Value, Token);
+
+        Assert.Equal(before + (3 * StubHandler.Gift), await ProcessesTestData.BalanceAsync(player, services, gift));
+
+        // The engine reads the handler of a kind by its code and names no concrete process.
+        string source = File.ReadAllText(Path.Combine(ServerRoot(), "src", "Aetheris.Processes", "Services", "ProcessQueueService.cs"));
+        Assert.All(ProcessHandlerCodes.All, handlerCode => Assert.DoesNotContain(handlerCode, source, StringComparison.Ordinal));
+        Assert.DoesNotContain("Handlers", source, StringComparison.Ordinal);
+
+        // Every handler of the starting data has a class in the container.
+        List<IProcessHandler> handlers = [.. services.GetServices<IProcessHandler>()];
+        Assert.All(ProcessHandlerCodes.All, handlerCode => Assert.Contains(handlers, handler => handler.HandlerCode == handlerCode));
     }
 
     /// <summary>
-    /// The engine of the processes knows no concrete process: a kind of a process names its
-    /// handler by a logical code, and the engine finds the handler in the container (task
-    /// 00014, criterion 6).
+    /// The module of the processes holds no number of a rule of the game: the shares, the steps,
+    /// the ranges and the times are rows of the tables, and the only numeric constants are the
+    /// lengths of the columns and the places of the kinds in the menu of the admin panel (task
+    /// 00014, criterion 7).
     /// </summary>
-    /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_engine_knows_no_concrete_process()
+    public void The_module_holds_no_number_of_a_rule_of_the_game()
     {
-        await ResetAsync();
-        using IServiceScope scope = _factory.Services.CreateScope();
+        string module = Path.Combine(ServerRoot(), "src", "Aetheris.Processes");
+        string[] allowed = ["CodeLength", "NameLength", "ProcessTypeSortOrder", "ProcessRecipeSortOrder", "ProcessParamSortOrder"];
 
-        ProcessQueueService queue = scope.ServiceProvider.GetRequiredService<ProcessQueueService>();
+        List<string> constants =
+        [
+            .. Directory.EnumerateFiles(module, "*.cs", SearchOption.AllDirectories)
+                .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                    && !path.Contains($"{Path.DirectorySeparatorChar}Migrations{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+                .SelectMany(path => File.ReadLines(path))
+                .Select(line => NumericConstantPattern().Match(line))
+                .Where(match => match.Success)
+                .Select(match => match.Groups["name"].Value)
+                .Where(name => !allowed.Contains(name, StringComparer.Ordinal)),
+        ];
 
-        List<IProcessHandler> handlers = [.. scope.ServiceProvider.GetServices<IProcessHandler>()];
-
-        // Every handler of the starting data has a class, and the engine finds them by their
-        // logical code.
-        foreach (string handlerCode in ProcessHandlerCodes.All)
-        {
-            Assert.Contains(handlers, handler => string.Equals(handler.HandlerCode, handlerCode, StringComparison.Ordinal));
-        }
-
-        // The engine reads the handler of a kind by its code and not by the name of the kind.
-        string engine = File.ReadAllText(Path.Combine(ServerRoot(), "src", "Aetheris.Processes", "Services", "ProcessQueueService.cs"));
-
-        foreach (string handlerCode in ProcessHandlerCodes.All)
-        {
-            Assert.DoesNotContain(handlerCode, engine, StringComparison.Ordinal);
-        }
+        Assert.Empty(constants);
     }
 
-    private async Task<ProcessBuildingDto> EnqueueAsync(
-        string playerId,
-        long planetId,
+    [System.Text.RegularExpressions.GeneratedRegex(@"\bconst\s+(?:int|long|decimal|double|float)\s+(?<name>\w+)")]
+    private static partial System.Text.RegularExpressions.Regex NumericConstantPattern();
+
+    private static async Task<string> RefusedAsync(
+        IProcessesModule processes,
+        PlanetsTestPlayer player,
         long buildingId,
         int recipeId,
-        int index)
+        ProcessOrderRequest request)
     {
-        using IServiceScope scope = _factory.Services.CreateScope();
+        GameException refused = await Assert.ThrowsAsync<GameException>(() => processes.EnqueueAsync(
+            player.Account.UserId,
+            player.PlanetId,
+            buildingId,
+            recipeId,
+            request,
+            Token));
 
-        try
+        return refused.Code;
+    }
+
+    private static async Task<Dictionary<int, long>> BalancesAsync(PlanetsTestPlayer player, IServiceProvider services, IEnumerable<int> resourceIds)
+    {
+        Dictionary<int, long> balances = [];
+
+        foreach (int resourceId in resourceIds)
         {
-            return await scope.ServiceProvider.GetRequiredService<IProcessesModule>()
-                .EnqueueAsync(playerId, planetId, buildingId, recipeId, new ProcessOrderRequest(1), Token);
+            balances[resourceId] = await ProcessesTestData.BalanceAsync(player, services, resourceId);
         }
-        catch (GameException exception) when (exception.Code == ProcessErrorCodes.QueueFull)
-        {
-            return new ProcessBuildingDto(planetId, buildingId, 0, 0, [], [], default);
-        }
+
+        return balances;
+    }
+
+    private static async Task<List<(int BuildingTypeId, int Level)>> BuildingsAsync(PlanetsTestPlayer player, IServiceProvider services) =>
+        [
+            .. (await services.GetRequiredService<PlanetsDbContext>().PlanetBuildings.AsNoTracking()
+                .Where(entry => entry.PlanetId == player.PlanetId)
+                .OrderBy(entry => entry.BuildingTypeId)
+                .ToListAsync(Token))
+                .Select(entry => (entry.BuildingTypeId, entry.Level)),
+        ];
+
+    private static async Task HandleAsync(IServiceProvider services, ScheduledEventEntity scheduled)
+    {
+        ProcessReadyHandler handler = services.GetServices<IScheduledEventHandler>().OfType<ProcessReadyHandler>().Single();
+
+        await handler.HandleAsync(new ScheduledEvent(scheduled.Id, scheduled.SectorId, scheduled.Type, scheduled.RunAt, scheduled.Payload), Token);
+    }
+
+    private static JsonElement EmptyValues()
+    {
+        using JsonDocument document = JsonDocument.Parse("{}");
+
+        return document.RootElement.Clone();
     }
 
     private static string ServerRoot()
@@ -452,12 +1030,59 @@ public sealed class ProcessesTests
         return directory ?? throw new InvalidOperationException("The root of the server was not found.");
     }
 
-    private async Task ResetAsync()
+    private async Task<ScheduledEventEntity> PendingEventAsync(long orderId, long produced)
     {
-        await PlanetsTestData.ResetAsync(_factory);
-
         using IServiceScope scope = _factory.Services.CreateScope();
-        await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, ProcessesConfigKeys.CatalogCacheSeconds, "0");
-        await scope.ServiceProvider.GetRequiredService<IProcessesModule>().EnsureAsync(Token);
+        string key = ProcessQueueService.CompleteEventType + ":" + orderId + ":" + produced;
+
+        return await scope.ServiceProvider.GetRequiredService<AetherisDbContext>().ScheduledEvents.AsNoTracking()
+            .SingleAsync(entry => entry.DedupeKey == key && entry.Status == ScheduledEventStatus.Pending, Token);
+    }
+
+    private async Task<bool> TryEnqueueAsync(PlanetsTestPlayer player, long buildingId, int recipeId, ProcessOrderRequest request)
+    {
+        using IServiceScope scope = _factory.Services.CreateScope();
+
+        try
+        {
+            await scope.ServiceProvider.GetRequiredService<IProcessesModule>()
+                .EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipeId, request, Token);
+
+            return true;
+        }
+        catch (GameException exception) when (exception.Code is ProcessErrorCodes.QueueFull or ProcessErrorCodes.PartMissing)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// A process that is not in the starting data: one class that gives a resource for every
+    /// unit.
+    /// </summary>
+    /// <param name="resourceTypeId">The resource the process gives.</param>
+    private sealed class StubHandler(int resourceTypeId = 0) : IProcessHandler
+    {
+        /// <summary>The logical code of the stub.</summary>
+        public const string Code = "test_stub";
+
+        /// <summary>What one unit gives.</summary>
+        public const long Gift = 7;
+
+        public string HandlerCode => Code;
+
+        public string PartSubject => ProcessPartSubjects.None;
+
+        public Task<IReadOnlyList<ProcessReason>> CheckAsync(ProcessCheckContext context, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<ProcessReason>>([]);
+
+        public Task<ProcessInput> InputAsync(ProcessCheckContext context, CancellationToken cancellationToken) =>
+            Task.FromResult(ProcessInput.None);
+
+        public Task<ProcessResult> ComputeAsync(ProcessApplyContext context, CancellationToken cancellationToken) =>
+            Task.FromResult(new ProcessResult(new Dictionary<int, long> { [resourceTypeId] = Gift }, []));
+
+        public Task ApplyAsync(ProcessApplyContext context, ProcessResult result, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
     }
 }
