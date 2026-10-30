@@ -47,7 +47,9 @@ public static class WorldTestData
 
         return new WorldReferenceData(
             seed.ResourceGroups.Select(group => new ReferenceResourceGroup(groupIds[group.Code], group.Code, group.AllowedOnPlanet)),
-            seed.Resources.Select(resource => new ReferenceResource(resourceIds[resource.Code], resource.Code, groupIds[resource.Group])),
+            seed.Resources
+                .Where(resource => resource.Group is not null)
+                .Select(resource => new ReferenceResource(resourceIds[resource.Code], resource.Code, groupIds[resource.Group!])),
             seed.ObjectTypes.Select(type => new ReferenceObjectType(
                 typeIds[type.Code],
                 type.Code,

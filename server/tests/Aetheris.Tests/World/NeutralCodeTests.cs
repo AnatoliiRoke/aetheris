@@ -366,6 +366,7 @@ public sealed class NeutralCodeTests
     {
         reason = Reason,
         resource_group_id = groupId,
+        scope = ResourceScopes.Planet,
         name = new Dictionary<string, string> { ["uk"] = ukrainian, ["en"] = english },
         description = description
             ? new Dictionary<string, string> { ["uk"] = ukrainian + " опис", ["en"] = english + " description" }

@@ -37,12 +37,21 @@ public sealed class ModuleIsolationTests
     /// requirements of its own subjects in the common requirements module (task 00012). The
     /// dependencies go one way only.
     /// </summary>
+    /// <remarks>
+    /// The economy module of task 00015 reads the world for the currencies and is read by the
+    /// bodies and the research modules for the contracts it declares: the bodies module gives
+    /// it the effects of its structures and the research module gives it the bonuses of its
+    /// studies, so the economy module depends on neither of them. The queues of the bodies,
+    /// the research, the production and the processes read the economy module too, to pay the
+    /// costs that belong to the civilization.
+    /// </remarks>
     private static readonly Dictionary<string, string[]> AllowedReferences = new(StringComparer.Ordinal)
     {
-        ["Aetheris.Planets"] = ["Aetheris.World", "Aetheris.Requirements"],
-        ["Aetheris.Research"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements"],
-        ["Aetheris.Production"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research"],
-        ["Aetheris.Processes"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research", "Aetheris.Production"],
+        ["Aetheris.Economy"] = ["Aetheris.World"],
+        ["Aetheris.Planets"] = ["Aetheris.World", "Aetheris.Requirements", "Aetheris.Economy"],
+        ["Aetheris.Research"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Economy"],
+        ["Aetheris.Production"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research", "Aetheris.Economy"],
+        ["Aetheris.Processes"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research", "Aetheris.Production", "Aetheris.Economy"],
     };
 
     private readonly AetherisTestFactory _factory;
@@ -107,6 +116,8 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.World")]
     [InlineData("Aetheris.Requirements")]
     [InlineData("Aetheris.Research")]
+    [InlineData("Aetheris.Production")]
+    [InlineData("Aetheris.Processes")]
     public void A_module_exposes_exactly_one_public_contract(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -138,6 +149,8 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.World")]
     [InlineData("Aetheris.Requirements")]
     [InlineData("Aetheris.Research")]
+    [InlineData("Aetheris.Production")]
+    [InlineData("Aetheris.Processes")]
     public void The_public_contract_follows_the_naming_convention(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -179,16 +192,21 @@ public sealed class ModuleIsolationTests
     }
 
     /// <summary>
-    /// The modules are registered as singletons, so the same instance is returned every time.
+    /// The modules that keep no tables of their own are registered as singletons, so the same
+    /// instance is returned every time.
     /// </summary>
+    /// <remarks>
+    /// The modules with tables of their own are scoped: they work on the context of the
+    /// request, which lives in the scope (task 00015).
+    /// </remarks>
     [Fact]
     public void The_modules_are_registered_as_singletons()
     {
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        Aetheris.Economy.IEconomyModule first = services.GetRequiredService<Aetheris.Economy.IEconomyModule>();
-        Aetheris.Economy.IEconomyModule second = services.GetRequiredService<Aetheris.Economy.IEconomyModule>();
+        Aetheris.Fleet.IFleetModule first = services.GetRequiredService<Aetheris.Fleet.IFleetModule>();
+        Aetheris.Fleet.IFleetModule second = services.GetRequiredService<Aetheris.Fleet.IFleetModule>();
 
         Assert.Same(first, second);
     }

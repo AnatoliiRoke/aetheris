@@ -57,6 +57,8 @@ public sealed partial class NoGameTermsTests
         Path.Combine("src", "Aetheris.Processes") + Path.DirectorySeparatorChar,
         Path.Combine("tests", "Aetheris.Tests", "Production") + Path.DirectorySeparatorChar,
         Path.Combine("tests", "Aetheris.Tests", "Processes") + Path.DirectorySeparatorChar,
+        Path.Combine("src", "Aetheris.Economy") + Path.DirectorySeparatorChar,
+        Path.Combine("tests", "Aetheris.Tests", "Economy") + Path.DirectorySeparatorChar,
     ];
 
     /// <summary>
@@ -132,7 +134,10 @@ public sealed partial class NoGameTermsTests
         Assert.False(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Host", "Program.cs")));
         Assert.False(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Core", "Commands", "Command.cs")));
         Assert.True(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Planets", "PlanetsModule.cs")));
-        Assert.False(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Economy", "EconomyModule.cs")));
+
+        // The economy module holds the rules of the population and the credits since task
+        // 00015, so it is a module of the game domain like the bodies module.
+        Assert.True(IsWorldDomainFile(serverRoot, Path.Combine(serverRoot, "src", "Aetheris.Economy", "EconomyModule.cs")));
         Assert.Contains(
             Path.Combine(serverRoot, "src", "Aetheris.Host", "Program.cs"),
             EnumerateScannedFiles(serverRoot));

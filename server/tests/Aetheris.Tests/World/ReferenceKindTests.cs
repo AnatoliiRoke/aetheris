@@ -310,6 +310,7 @@ public sealed class ReferenceKindTests
     {
         image_key = imageKey,
         resource_group_id = groupId,
+        scope = ResourceScopes.Planet,
         name = ReferenceAdmin.Texts(ukrainian, english),
         description = ReferenceAdmin.Texts(ukrainian + " опис", english + " description"),
     };

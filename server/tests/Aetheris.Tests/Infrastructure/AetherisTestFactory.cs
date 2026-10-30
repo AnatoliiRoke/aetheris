@@ -1,5 +1,7 @@
 using Aetheris.Core.Commands;
+using Aetheris.Core.Randomness;
 using Aetheris.Core.Security;
+using Aetheris.Economy.Data;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
@@ -143,6 +145,11 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
             services.AddSingleton<IAccountEmailSender>(Emails);
             services.AddSingleton<ILogEventSink>(Logs);
 
+            // The rolls of the game ask this source, so a test makes them repeatable.
+            services.RemoveAll<IRandomSource>();
+            services.AddSingleton<ScriptedRandomSource>();
+            services.AddSingleton<IRandomSource>(serviceProvider => serviceProvider.GetRequiredService<ScriptedRandomSource>());
+
             // The example of a new protected request: one class and this one line
             // (task 00002, acceptance criterion 10).
             services.AddCommand<TestNoteCommand>();
@@ -163,6 +170,7 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
         await dbContext.Database.MigrateAsync();
         await WorldDatabase.MigrateAsync(ConnectionString);
         await PlanetsModule.MigrateAsync(ConnectionString);
+        await EconomyDatabase.MigrateAsync(ConnectionString);
 
         await ResetDatabaseAsync(scope.ServiceProvider);
     }
