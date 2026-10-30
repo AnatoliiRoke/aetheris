@@ -265,7 +265,7 @@
 |---|---|
 | `dotnet build -c Release` (Host і тести) | ✅ 0 помилок, 0 попереджень |
 | Тести модуля World (новий `OwnedPlanetsTests`) | ✅ **3/3** |
-| `dotnet test -c Release` (повний кат) | ✅ **367/367** |
+| `dotnet test -c Release` (повний кат) | ✅ **403/403** |
 | `dotnet format --verify-no-changes --no-restore` | ✅ чисто |
 | `npm run lint` | ✅ чистий |
 | `npm test` (клієнт) | ✅ **134/134** (21 файл) |
