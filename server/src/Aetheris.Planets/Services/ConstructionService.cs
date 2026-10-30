@@ -207,19 +207,37 @@ public sealed class ConstructionService
                     .. session.Queue.Where(entry => entry.BuildingTypeId == cancelled.BuildingTypeId && entry.TargetLevel >= cancelled.TargetLevel),
                 ];
 
+                // The cost returns to the balances it was paid from: the resources of the body to
+                // the body and the currencies to the balance of the civilization (task 00015).
+                Dictionary<int, long> refund = removed
+                    .SelectMany(item => item.CostIds)
+                    .GroupBy(cost => cost.ResourceTypeId)
+                    .ToDictionary(group => group.Key, group => group.Sum(cost => cost.Amount));
+
                 foreach (ConstructionQueueItemEntity item in removed)
                 {
-                    foreach (ConstructionQueueCostEntity cost in item.CostIds)
-                    {
-                        session.Give(cost.ResourceTypeId, cost.Amount);
-                    }
-
                     session.Queue.Remove(item);
                     _dbContext.QueueItems.Remove(item);
                 }
 
+                SplitCosts split = await _costs.SplitAsync(refund, cancellationToken).ConfigureAwait(false);
+
+                foreach ((int resourceTypeId, long amount) in split.PlanetResources)
+                {
+                    session.Give(resourceTypeId, amount);
+                }
+
                 session.Renumber();
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                // The balance of the civilization is the last lock of the request, after the body.
+                if (split.Currencies.Count > 0)
+                {
+                    string ownerPlayerId = session.State.OwnerPlayerId
+                        ?? throw new GameException(PlanetsErrorCodes.PlanetUnknown, "The body has no owner.");
+
+                    await _economy.GiveAsync(ownerPlayerId, split.Currencies, cancellationToken).ConfigureAwait(false);
+                }
 
                 if (headRemoved && session.Queue.Count > 0)
                 {
@@ -344,15 +362,21 @@ public sealed class ConstructionService
                     .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
 
+                // Every body is locked before any of them is changed: a completion calls the economy,
+                // which locks the balances of the civilization, and the balances are the last lock
+                // of a request, so a body is never locked after them.
+                List<PlanetSession> sessions = [];
+
                 foreach (long planetId in planetIds)
                 {
-                    PlanetSession? session = await TryOpenAsync(planetId, cancellationToken).ConfigureAwait(false);
-
-                    if (session is null)
+                    if (await TryOpenAsync(planetId, cancellationToken).ConfigureAwait(false) is { } session)
                     {
-                        continue;
+                        sessions.Add(session);
                     }
+                }
 
+                foreach (PlanetSession session in sessions)
+                {
                     await CompleteDueAsync(session, moment, cancellationToken).ConfigureAwait(false);
                     session.FixTo(moment);
                 }
@@ -424,7 +448,7 @@ public sealed class ConstructionService
 
         PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
 
-        return new PlanetSession(
+        PlanetSession session = new(
             _dbContext,
             await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false),
             PlanetsSettings.From(_config),
@@ -436,6 +460,14 @@ public sealed class ConstructionService
             (facts?.Deposits ?? []).ToDictionary(deposit => deposit.ResourceTypeId, deposit => deposit.Coefficient),
             await _technologies.GetLevelsAsync(state.OwnerPlayerId, cancellationToken).ConfigureAwait(false),
             await _technologies.GetBonusesAsync(state.OwnerPlayerId, cancellationToken).ConfigureAwait(false));
+
+        // The costs in a currency are checked against the balance of the civilization.
+        if (state.OwnerPlayerId is { } ownerPlayerId)
+        {
+            session.Currencies = await _economy.GetBalancesAsync(ownerPlayerId, cancellationToken).ConfigureAwait(false);
+        }
+
+        return session;
     }
 
     private async Task<int> CompleteDueAsync(PlanetSession session, DateTimeOffset now, CancellationToken cancellationToken)
@@ -462,6 +494,15 @@ public sealed class ConstructionService
             DateTimeOffset finishedAt = head.FinishesAt.Value;
 
             session.FixTo(finishedAt);
+
+            // The new level may raise the largest population or the speed it grows with, so the
+            // population and the credits of the civilization are counted to the end of the
+            // construction with the buildings as they were (documentation/tech/09, section 5.2).
+            if (session.State.OwnerPlayerId is { } ownerPlayerId)
+            {
+                await _economy.FixPlayerAsync(ownerPlayerId, finishedAt, cancellationToken).ConfigureAwait(false);
+            }
+
             session.SetLevel(head.BuildingTypeId, head.TargetLevel);
             session.Queue.RemoveAt(0);
             _dbContext.QueueItems.Remove(head);

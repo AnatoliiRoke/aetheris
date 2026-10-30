@@ -47,6 +47,18 @@ public sealed class EconomyModule : IEconomyModule
         _service.GetBalanceAsync(playerId, resourceTypeId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<IReadOnlyDictionary<int, long>> GetBalancesAsync(string playerId, CancellationToken cancellationToken = default) =>
+        _service.GetBalancesAsync(playerId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<bool> TryTakePopulationAsync(string playerId, long planetId, long amount, CancellationToken cancellationToken = default) =>
+        _service.TryTakePopulationAsync(playerId, planetId, amount, cancellationToken);
+
+    /// <inheritdoc />
+    public Task GivePopulationAsync(string playerId, long planetId, long amount, CancellationToken cancellationToken = default) =>
+        _service.GivePopulationAsync(playerId, planetId, amount, cancellationToken);
+
+    /// <inheritdoc />
     public Task TakeAsync(string playerId, IReadOnlyDictionary<int, long> amounts, CancellationToken cancellationToken = default) =>
         _service.TakeAsync(playerId, amounts, cancellationToken);
 

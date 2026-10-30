@@ -313,8 +313,8 @@
         "en": "Demography"
       },
       "description": {
-        "uk": "Планета вміщає більше населення.",
-        "en": "The planet holds a larger population."
+        "uk": "Планета вміщає більше населення, і населення зростає швидше.",
+        "en": "The planet holds a larger population, and the population grows faster."
       },
       "duration_seconds": {
         "base": 900,
@@ -339,6 +339,13 @@
       "effects": [
         {
           "type": "population_max",
+          "growth": {
+            "base": 1.05,
+            "growth": 1.02
+          }
+        },
+        {
+          "type": "population_growth_bonus",
           "growth": {
             "base": 1.05,
             "growth": 1.02
@@ -895,6 +902,50 @@
           "growth": {
             "base": 1,
             "growth": 1
+          }
+        }
+      ]
+    },
+    {
+      "code": "tech_19",
+      "branch": "branch_1",
+      "sort_order": 19,
+      "max_level": 10,
+      "research_center_level": 5,
+      "name": {
+        "uk": "Фінансове планування",
+        "en": "Financial planning"
+      },
+      "description": {
+        "uk": "Населення приносить більше кредитів.",
+        "en": "The population brings more credits."
+      },
+      "duration_seconds": {
+        "base": 600,
+        "growth": 1.8
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 300,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 150,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": [
+        {
+          "type": "credit_income_bonus",
+          "growth": {
+            "base": 1.05,
+            "growth": 1.02
           }
         }
       ]

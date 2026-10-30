@@ -21,7 +21,7 @@ public static class PopulationRules
     private const decimal Percent = 100m;
 
     /// <summary>
-    /// Brings the population of a body from one moment to another.
+    /// Brings the population of a body from one moment to another, in whole inhabitants.
     /// </summary>
     /// <param name="amount">The population at <paramref name="from"/>.</param>
     /// <param name="maximum">The largest population the body may have.</param>
@@ -32,23 +32,39 @@ public static class PopulationRules
     /// <remarks>
     /// The population grows linearly to the largest population and stops there; above it the
     /// population dies down with the speed it is given, also linearly, and never goes below
-    /// the largest population. The fraction of an inhabitant is left out, so the population is
-    /// a whole number of inhabitants.
+    /// the largest population. The growth counts whole inhabitants that have been born and the
+    /// decline whole inhabitants that have died, so the population is a whole number.
     /// </remarks>
     public static long Accumulate(long amount, long maximum, decimal growthPerHour, DateTimeOffset from, DateTimeOffset to)
+    {
+        decimal exact = AccumulateExact(amount, maximum, growthPerHour, from, to);
+
+        return Settle(exact, growthPerHour < 0m).Amount;
+    }
+
+    /// <summary>
+    /// Brings the population of a body from one moment to another, with the fraction of an
+    /// inhabitant the speed has not yet made a whole one.
+    /// </summary>
+    /// <param name="amount">The population at <paramref name="from"/>, with its fraction.</param>
+    /// <param name="maximum">The largest population the body may have.</param>
+    /// <param name="growthPerHour">How many inhabitants the population grows with in an hour; it is negative when the population dies down.</param>
+    /// <param name="from">The moment of the population.</param>
+    /// <param name="to">The moment to bring it to.</param>
+    /// <returns>The population at <paramref name="to"/>.</returns>
+    public static decimal AccumulateExact(decimal amount, long maximum, decimal growthPerHour, DateTimeOffset from, DateTimeOffset to)
     {
         if (maximum < 0)
         {
             maximum = 0;
         }
 
-        if (amount < 0)
+        if (amount < 0m)
         {
-            amount = 0;
+            amount = 0m;
         }
 
-        decimal elapsedTicks = to > from ? (to - from).Ticks : 0;
-        decimal hours = elapsedTicks / TicksPerHour;
+        decimal hours = Hours(from, to);
 
         if (hours <= 0m)
         {
@@ -57,36 +73,54 @@ public static class PopulationRules
 
         if (growthPerHour >= 0m)
         {
-            long room = Math.Max(maximum - amount, 0);
-            long added = (long)decimal.Floor(growthPerHour * hours);
+            decimal room = Math.Max(maximum - amount, 0m);
 
-            return amount + Math.Min(added, room);
+            return amount + Math.Min(growthPerHour * hours, room);
         }
 
-        long above = Math.Max(amount - maximum, 0);
-        long removed = (long)decimal.Floor(-growthPerHour * hours);
+        decimal above = Math.Max(amount - maximum, 0m);
 
-        return amount - Math.Min(removed, above);
+        return amount - Math.Min(-growthPerHour * hours, above);
     }
 
     /// <summary>
-    /// Gets the speed the population of a body grows or dies down with, in an hour.
+    /// Splits a population with a fraction into the whole inhabitants and the fraction left.
+    /// </summary>
+    /// <param name="exact">The population with its fraction.</param>
+    /// <param name="declining">Whether the population dies down: an inhabitant dies only when the whole of it has gone, so the fraction is counted from above.</param>
+    /// <returns>The whole inhabitants and the fraction, so their sum is <paramref name="exact"/>.</returns>
+    public static (long Amount, decimal Fraction) Settle(decimal exact, bool declining)
+    {
+        long amount = (long)(declining ? decimal.Ceiling(exact) : decimal.Floor(exact));
+
+        return (amount, exact - amount);
+    }
+
+    /// <summary>
+    /// Gets the speed a population has at its start: it dies down above the largest population
+    /// and grows below it.
+    /// </summary>
+    /// <param name="amount">The population, with its fraction.</param>
+    /// <param name="maximum">The largest population the body may have.</param>
+    /// <param name="growthPerHour">The speed of the growth.</param>
+    /// <param name="declinePerHour">The speed of the decline, a negative number.</param>
+    /// <returns>The speed in an hour.</returns>
+    public static decimal SpeedAt(decimal amount, long maximum, decimal growthPerHour, decimal declinePerHour) =>
+        amount > maximum ? declinePerHour : growthPerHour;
+
+    /// <summary>
+    /// Gets the speed the population of a body grows with, in an hour.
     /// </summary>
     /// <param name="maximum">The largest population the body may have.</param>
     /// <param name="growthPercent">The share of the largest population the population grows with in an hour.</param>
-    /// <param name="growthMultiplier">The multiplier the technologies give the speed.</param>
-    /// <param name="declinePerHour">How many inhabitants die in an hour above the largest population.</param>
-    /// <returns>The speed; it is negative when the population is above the largest population.</returns>
+    /// <param name="growthMultiplier">The multiplier of the speed.</param>
+    /// <returns>The speed; it is never negative.</returns>
     /// <remarks>
-    /// Below the largest population the population grows with a share of it; above it the
-    /// population dies down with the speed it is given. The growth is not applied above the
-    /// largest population, because the population there only dies down.
+    /// The speed is a share of the largest population, so a body that can hold nobody does not
+    /// grow. Above the largest population the population dies down instead; see
+    /// <see cref="DeclinePerHour"/>.
     /// </remarks>
-    public static decimal GrowthPerHour(
-        long maximum,
-        decimal growthPercent,
-        decimal growthMultiplier,
-        decimal declinePerHour)
+    public static decimal GrowthPerHour(long maximum, decimal growthPercent, decimal growthMultiplier)
     {
         if (maximum <= 0)
         {
@@ -129,4 +163,13 @@ public static class PopulationRules
 
         return TimeSpan.FromTicks((long)decimal.Ceiling(hours * TicksPerHour));
     }
+
+    /// <summary>
+    /// Gets the length of an interval in hours; an interval that goes back is empty.
+    /// </summary>
+    /// <param name="from">The start.</param>
+    /// <param name="to">The end.</param>
+    /// <returns>The hours.</returns>
+    internal static decimal Hours(DateTimeOffset from, DateTimeOffset to) =>
+        to > from ? (to - from).Ticks / TicksPerHour : 0m;
 }

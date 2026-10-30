@@ -25,10 +25,21 @@ public sealed class CivilizationBalanceEntity
     /// <summary>Gets or sets the currency of the balance.</summary>
     public int ResourceTypeId { get; set; }
 
-    /// <summary>Gets or sets the amount of the currency.</summary>
+    /// <summary>Gets or sets the whole amount of the currency at the moment of the last count.</summary>
     public long Amount { get; set; }
 
-    /// <summary>Gets or sets the moment of game time the balance was last counted at.</summary>
+    /// <summary>
+    /// Gets or sets the part of a unit the income had made at the moment of the last count; it
+    /// is kept so a balance that is counted often loses no fraction of its income.
+    /// </summary>
+    public decimal AmountFraction { get; set; }
+
+    /// <summary>
+    /// Gets or sets the moment of game time the balance was last counted at. The amount holds the
+    /// income of every body up to the moment its own population was last counted, and the
+    /// moments of the bodies and of the balances of a civilization are brought together by every
+    /// change.
+    /// </summary>
     public DateTimeOffset UpdatedAt { get; set; }
 
     /// <summary>

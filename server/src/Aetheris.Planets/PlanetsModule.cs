@@ -77,6 +77,10 @@ public sealed class PlanetsModule : IPlanetsModule
         // The economy module asks for the effects of the buildings of a body; the contract is
         // declared by the economy module and implemented here (task 00015).
         services.AddScoped<IEconomyBuildingEffects, EconomyBuildingEffects>();
+
+        // The world asks before the scope of a resource changes whether the stocks and the costs of
+        // the bodies name it (task 00015).
+        services.AddScoped<IResourceUsage, PlanetsResourceUsage>();
         services.AddScoped<IScheduledEventHandler, ConstructionCompleteHandler>();
         services.AddScoped<PlanetsReferenceAdminService>();
         services.AddScoped<IAdminReferenceService>(serviceProvider => serviceProvider.GetRequiredService<PlanetsReferenceAdminService>());

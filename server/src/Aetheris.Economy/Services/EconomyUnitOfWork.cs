@@ -9,8 +9,18 @@ namespace Aetheris.Economy.Services;
 /// its own (task 00015).
 /// </summary>
 /// <remarks>
-/// The order of the locks is fixed, so two commands of two players never wait for each
-/// other: the population of a body is locked first, then the balance of a currency.
+/// <para>
+/// The order of the locks is fixed, so two commands of one civilization never wait for each other
+/// in a circle: the rows of the population of its bodies are locked first, by the identifier of the
+/// body, and then its balances, by the identifier of the currency. Every change of a balance locks
+/// the populations too, since it counts the income of the bodies into the balance; a reader locks
+/// nothing. A module that holds a lock of its own (the state of a body, the queue of the research)
+/// takes it before it calls the economy, so the economy is always the last lock of a request.
+/// </para>
+/// <para>
+/// A change inside a transaction that already exists joins it. The unit is not meant to be
+/// nested: a piece of work does not start another unit.
+/// </para>
 /// </remarks>
 public sealed class EconomyUnitOfWork
 {

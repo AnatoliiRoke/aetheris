@@ -1,8 +1,6 @@
 using System.Security.Claims;
 using Aetheris.Core.Security;
-using Aetheris.Core.Time;
 using Aetheris.Economy.Services;
-using Aetheris.World;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -33,37 +31,18 @@ public static class EconomyEndpoints
             .RequireAuthorization(SecurityPolicies.Player)
             .RequireRateLimiting(RateLimitGroups.Command);
 
-        // The populations of the bodies of the player and the balances of the currencies.
+        // The populations of the bodies of the player and the balances of the currencies, counted
+        // in one pass with the bonuses and the effects read once.
         economy.MapGet("/", async (
             ClaimsPrincipal user,
             EconomyService service,
-            IWorldModule world,
-            IGameClock clock,
             CancellationToken cancellationToken) =>
         {
-            string playerId = PlayerId(user);
-
-            IReadOnlyList<PopulationFacts> populations = await service
-                .GetPopulationsAsync(playerId, cancellationToken)
+            EconomyOverviewDto overview = await service
+                .GetOverviewAsync(PlayerId(user), cancellationToken)
                 .ConfigureAwait(false);
 
-            World.Api.ResourceCatalog catalog = await world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
-
-            List<CurrencyBalanceFacts> balances = [];
-
-            foreach (World.Api.ResourceTypeFact currency in catalog.Resources
-                .Where(resource => string.Equals(resource.Scope, World.Data.Entities.ResourceScopes.Civilization, StringComparison.Ordinal)))
-            {
-                CurrencyBalanceFacts balance = await service
-                    .GetBalanceAsync(playerId, currency.Id, cancellationToken)
-                    .ConfigureAwait(false);
-
-                balances.Add(balance);
-            }
-
-            return Results.Json(
-                new EconomyOverviewDto(populations, balances, clock.GameNow),
-                EconomyJson.Options);
+            return Results.Json(overview, EconomyJson.Options);
         });
 
         // The population of one body of the player.

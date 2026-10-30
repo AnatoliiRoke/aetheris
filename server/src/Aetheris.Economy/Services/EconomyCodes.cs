@@ -6,18 +6,13 @@ namespace Aetheris.Economy.Services;
 /// <remarks>
 /// The codes are read by the program, so they are stable and readable. The numbers of the
 /// rules of the game are not here: they live in the configuration and in the data
-/// (documentation/tech/09, section 3.4).
+/// (documentation/tech/09, section 3.4). The bodies and the research modules take the codes of
+/// their effects from here, so a code cannot differ between the modules.
 /// </remarks>
 public static class EconomyCodes
 {
-    /// <summary>The code of the group of the codes of the balances of the civilizations.</summary>
-    public const string BalanceCodeGroup = "civilization_balance";
-
-    /// <summary>The prefix of the keys of the texts of the balances.</summary>
-    public const string BalanceTextPrefix = "economy.balance";
-
     /// <summary>
-    /// The effect of a building that raises the largest population of a body.
+    /// The effect of a building or a technology that raises the largest population of a body.
     /// </summary>
     public const string PopulationMaxEffect = "population_max";
 

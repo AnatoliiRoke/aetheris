@@ -57,6 +57,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     private readonly ICodeSequence _codes;
     private readonly ILocalizationTexts _texts;
     private readonly IAdminReferenceImages _images;
+    private readonly IReadOnlyList<IResourceUsage> _usages;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WorldReferenceAdminService"/> class.
@@ -66,24 +67,28 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <param name="codes">The counters of the neutral codes.</param>
     /// <param name="texts">The texts of the game data.</param>
     /// <param name="images">The pictures of the server.</param>
+    /// <param name="usages">The modules that hold data of a resource, asked before its scope changes.</param>
     public WorldReferenceAdminService(
         WorldDbContext dbContext,
         WorldUnitOfWork unitOfWork,
         ICodeSequence codes,
         ILocalizationTexts texts,
-        IAdminReferenceImages images)
+        IAdminReferenceImages images,
+        IEnumerable<IResourceUsage> usages)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(codes);
         ArgumentNullException.ThrowIfNull(texts);
         ArgumentNullException.ThrowIfNull(images);
+        ArgumentNullException.ThrowIfNull(usages);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
         _codes = codes;
         _texts = texts;
         _images = images;
+        _usages = [.. usages];
     }
 
     /// <summary>
@@ -478,15 +483,53 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 AdminReferenceRules.Fail(failures, GroupField, AdminReferenceErrors.Required);
             }
         }
+        else if (string.Equals(values.Scope, ResourceScopes.Civilization, StringComparison.Ordinal))
+        {
+            // The groups sort the resources of the bodies for the storage and the generation of the
+            // world; a currency of a civilization in a group would reach their input.
+            AdminReferenceRules.Fail(failures, GroupField, AdminReferenceErrors.CurrencyHasNoGroup);
+        }
         else if (group.IsArchived && group.Id != stored?.ResourceGroupId)
         {
             AdminReferenceRules.Fail(failures, GroupField, AdminReferenceErrors.Archived);
+        }
+
+        // The stocks, the balances and the costs of a resource were written for its scope, so a
+        // resource that is in use keeps it.
+        if (stored is not null
+            && ResourceScopes.IsKnown(values.Scope)
+            && !string.Equals(stored.Scope, values.Scope, StringComparison.Ordinal)
+            && await IsResourceInUseAsync(stored.Id, cancellationToken).ConfigureAwait(false))
+        {
+            AdminReferenceRules.Fail(failures, ScopeField, AdminReferenceErrors.ScopeInUse);
         }
 
         await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), stored?.ImageKey, cancellationToken)
             .ConfigureAwait(false);
 
         AdminReferenceRules.ThrowIfInvalid(failures);
+    }
+
+    private async Task<bool> IsResourceInUseAsync(int resourceTypeId, CancellationToken cancellationToken)
+    {
+        // The data of the world itself: the deposits of the bodies, the generation rules and the
+        // starting amounts of the races.
+        if (await _dbContext.Deposits.AsNoTracking().AnyAsync(entry => entry.ResourceId == resourceTypeId, cancellationToken).ConfigureAwait(false)
+            || await _dbContext.Rules.AsNoTracking().AnyAsync(entry => entry.ResourceId == resourceTypeId, cancellationToken).ConfigureAwait(false)
+            || await _dbContext.RaceStartResources.AsNoTracking().AnyAsync(entry => entry.ResourceTypeId == resourceTypeId, cancellationToken).ConfigureAwait(false))
+        {
+            return true;
+        }
+
+        foreach (IResourceUsage usage in _usages)
+        {
+            if (await usage.IsUsedAsync(resourceTypeId, cancellationToken).ConfigureAwait(false))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async Task<ResourceTypeEntity> LockResourceAsync(int id, CancellationToken cancellationToken) =>

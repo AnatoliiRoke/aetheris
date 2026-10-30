@@ -1,4 +1,5 @@
 using Aetheris.Core.Time;
+using Aetheris.Economy.Services;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.World.Services;
@@ -14,13 +15,16 @@ namespace Aetheris.Planets.Services;
 /// <remarks>
 /// The world calls both extension points in the transaction of the civilization step; the
 /// changes here join it. The start resources come first, so the state row exists when the
-/// start building is placed.
+/// start building is placed. The home body is a colony from this moment, so its row of the
+/// population is written in the same transaction through the contract of the economy module
+/// (task 00015); a later colonization writes the row the same way.
 /// </remarks>
 public sealed class PlanetStartPackage : IHomePlanetStore, IStartBuildingPlacer
 {
     private readonly PlanetsDbContext _dbContext;
     private readonly PlanetsUnitOfWork _unitOfWork;
     private readonly IGameClock _clock;
+    private readonly IColonyRegistry _colonies;
     private readonly ILogger<PlanetStartPackage> _logger;
 
     /// <summary>
@@ -29,17 +33,25 @@ public sealed class PlanetStartPackage : IHomePlanetStore, IStartBuildingPlacer
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="unitOfWork">The transaction of the request.</param>
     /// <param name="clock">The game clock.</param>
+    /// <param name="colonies">The rows of the population of the colonies.</param>
     /// <param name="logger">The logger.</param>
-    public PlanetStartPackage(PlanetsDbContext dbContext, PlanetsUnitOfWork unitOfWork, IGameClock clock, ILogger<PlanetStartPackage> logger)
+    public PlanetStartPackage(
+        PlanetsDbContext dbContext,
+        PlanetsUnitOfWork unitOfWork,
+        IGameClock clock,
+        IColonyRegistry colonies,
+        ILogger<PlanetStartPackage> logger)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(colonies);
         ArgumentNullException.ThrowIfNull(logger);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
         _clock = clock;
+        _colonies = colonies;
         _logger = logger;
     }
 
@@ -58,6 +70,9 @@ public sealed class PlanetStartPackage : IHomePlanetStore, IStartBuildingPlacer
             {
                 await EnsureStateAsync(planetId, sectorId, playerId, cancellationToken).ConfigureAwait(false);
                 await AddResourcesAsync(planetId, sectorId, amounts, cancellationToken).ConfigureAwait(false);
+
+                // The body is a colony of the player from now on: its population is counted from here.
+                await _colonies.FoundAsync(playerId, planetId, sectorId, cancellationToken).ConfigureAwait(false);
 
                 return true;
             },
@@ -81,9 +96,15 @@ public sealed class PlanetStartPackage : IHomePlanetStore, IStartBuildingPlacer
     {
         ArgumentNullException.ThrowIfNull(planetIds);
 
-        // The buildings, the queue, the balance and the storage states go with the state row.
+        // The buildings, the queue, the balance and the storage states go with the state row, and
+        // the population goes with the colony.
         return _unitOfWork.RunAsync(
-            () => _dbContext.PlanetStates.Where(state => planetIds.Contains(state.PlanetId)).ExecuteDeleteAsync(cancellationToken),
+            async () =>
+            {
+                await _colonies.ReleaseAsync(planetIds, cancellationToken).ConfigureAwait(false);
+
+                return await _dbContext.PlanetStates.Where(state => planetIds.Contains(state.PlanetId)).ExecuteDeleteAsync(cancellationToken).ConfigureAwait(false);
+            },
             cancellationToken);
     }
 

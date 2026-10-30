@@ -40,9 +40,14 @@ public sealed class EconomyDbContext : DbContext
         {
             entity.ToTable("planet_population");
             entity.HasKey(e => e.PlanetId);
+
+            // The key is the identifier of the body, kept here; the table does not number it.
+            entity.Property(e => e.PlanetId).HasColumnName("planet_id").ValueGeneratedNever();
+            entity.HasIndex(e => e.OwnerPlayerId);
             entity.Property(e => e.SectorId).HasColumnName("sector_id");
             entity.Property(e => e.OwnerPlayerId).HasColumnName("owner_player_id");
             entity.Property(e => e.Amount).HasColumnName("amount");
+            entity.Property(e => e.AmountFraction).HasColumnName("amount_fraction");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
             entity.ToTable(table => table.HasCheckConstraint("ck_planet_population_amount", "amount >= 0"));
         });
@@ -50,10 +55,12 @@ public sealed class EconomyDbContext : DbContext
         modelBuilder.Entity<CivilizationBalanceEntity>(entity =>
         {
             entity.ToTable("civilization_balance");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.HasIndex(e => new { e.PlayerId, e.ResourceTypeId }).IsUnique();
             entity.Property(e => e.PlayerId).HasColumnName("player_id");
             entity.Property(e => e.ResourceTypeId).HasColumnName("resource_type_id");
             entity.Property(e => e.Amount).HasColumnName("amount");
+            entity.Property(e => e.AmountFraction).HasColumnName("amount_fraction");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
             entity.Property(e => e.Version).HasColumnName("version");
             entity.ToTable(table => table.HasCheckConstraint("ck_civilization_balance_amount", "amount >= 0"));

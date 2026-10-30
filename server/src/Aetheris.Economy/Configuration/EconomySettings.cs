@@ -14,6 +14,9 @@ public sealed record EconomySettings
     /// <summary>Gets how many inhabitants die in an hour above the largest population.</summary>
     public decimal PopulationDeclinePerHour { get; init; }
 
+    /// <summary>Gets how many inhabitants a body has the moment it becomes a colony.</summary>
+    public long PopulationInitial { get; init; }
+
     /// <summary>Gets how many credits one inhabitant brings to the civilization in an hour.</summary>
     public decimal CreditsPerInhabitant { get; init; }
 
@@ -30,6 +33,7 @@ public sealed record EconomySettings
         {
             PopulationGrowthPercent = ReadDecimal(config, EconomyConfigKeys.PopulationGrowthPercent),
             PopulationDeclinePerHour = ReadDecimal(config, EconomyConfigKeys.PopulationDeclinePerHour),
+            PopulationInitial = (long)ReadDecimal(config, EconomyConfigKeys.PopulationInitial),
             CreditsPerInhabitant = ReadDecimal(config, EconomyConfigKeys.CreditsPerInhabitant),
         };
     }

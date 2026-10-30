@@ -1044,7 +1044,13 @@
           "growth": 1.2
         }
       ],
-      "requirements": []
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_2",
+          "target_level": 1
+        }
+      ]
     }
   ]
 }

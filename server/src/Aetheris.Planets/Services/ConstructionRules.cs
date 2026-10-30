@@ -17,6 +17,7 @@ namespace Aetheris.Planets.Services;
 /// <param name="TechnologyLevels">The technologies of the owner.</param>
 /// <param name="Bonuses">The bonuses of the technologies.</param>
 /// <param name="Now">The moment of game time.</param>
+/// <param name="CurrencyAmounts">The balances of the currencies of the civilization of the owner, by currency: a cost in a currency is checked against them and not against the body.</param>
 public sealed record PlanetFigures(
     long PlanetId,
     int ExtraQueueSlots,
@@ -27,7 +28,8 @@ public sealed record PlanetFigures(
     IReadOnlyDictionary<int, decimal> Deposits,
     IReadOnlyDictionary<int, int> TechnologyLevels,
     PlanetBonuses Bonuses,
-    DateTimeOffset Now)
+    DateTimeOffset Now,
+    IReadOnlyDictionary<int, long>? CurrencyAmounts = null)
 {
     /// <summary>
     /// Gets the levels once every queued building is done.
@@ -183,7 +185,12 @@ public static class ConstructionRules
 
         foreach ((int resourceTypeId, long amount) in info?.Costs ?? new Dictionary<int, long>())
         {
-            long shortBy = amount - figures.Amounts.GetValueOrDefault(resourceTypeId);
+            // A currency of the civilization is paid from the balance of the civilization and
+            // every other resource from the balance of the body (task 00015, decision 5).
+            long available = figures.CurrencyAmounts is { } currencies && currencies.TryGetValue(resourceTypeId, out long currency)
+                ? currency
+                : figures.Amounts.GetValueOrDefault(resourceTypeId);
+            long shortBy = amount - available;
 
             if (shortBy > 0)
             {

@@ -7,6 +7,7 @@ using Aetheris.Processes.Data;
 using Aetheris.Processes.Events;
 using Aetheris.Processes.Handlers;
 using Aetheris.Processes.Services;
+using Aetheris.World.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +41,7 @@ public static class ProcessesServiceCollectionExtensions
         services.AddScoped<ProcessesUnitOfWork>();
         services.AddScoped<ProcessesBootstrapService>();
         services.AddScoped<ProcessQueueService>();
+        services.AddScoped<IResourceUsage, ProcessesResourceUsage>();
         services.AddScoped<IProcessesModule, ProcessesModule>();
         services.AddScoped<IScheduledEventHandler, ProcessReadyHandler>();
         services.AddScoped<ProcessReferenceAdminService>();

@@ -1,7 +1,7 @@
 namespace Aetheris.Economy.Services;
 
 /// <summary>
-/// The effects of the buildings of a body, for the module of the economy (task 00015,
+/// The effects of the buildings of the bodies, for the module of the economy (task 00015,
 /// decision 2).
 /// </summary>
 /// <remarks>
@@ -13,11 +13,20 @@ namespace Aetheris.Economy.Services;
 public interface IEconomyBuildingEffects
 {
     /// <summary>
-    /// Gets the sum of the effects of a kind of the buildings of a body.
+    /// Gets what the buildings and the technologies of the owner give the economy of bodies, in
+    /// one read for all of them.
     /// </summary>
-    /// <param name="planetId">The body.</param>
-    /// <param name="effectType">The kind of the effect, one of <see cref="EconomyCodes"/>.</param>
+    /// <param name="planetIds">The bodies.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The sum of the values of the effect.</returns>
-    Task<long> GetEffectTotalAsync(long planetId, string effectType, CancellationToken cancellationToken = default);
+    /// <returns>The effects by body; a body that is not in the answer has no effects.</returns>
+    Task<IReadOnlyDictionary<long, PlanetEconomyEffects>> GetAsync(
+        IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// What the buildings of a body give its economy (task 00015).
+/// </summary>
+/// <param name="PopulationMax">The largest population of the body, with the bonus of the technologies of its owner: the one count the bodies module shows too.</param>
+/// <param name="PopulationGrowthEffect">The sum of the growth effects of the buildings of the body; a body without such a building has zero.</param>
+public sealed record PlanetEconomyEffects(long PopulationMax, long PopulationGrowthEffect);

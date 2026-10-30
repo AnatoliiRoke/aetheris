@@ -77,6 +77,12 @@ public sealed class PlanetSession
     public List<ConstructionQueueItemEntity> Queue { get; }
 
     /// <summary>
+    /// Gets or sets the balances of the currencies of the civilization of the owner of the body, by
+    /// currency. The costs in a currency are checked against them (task 00015).
+    /// </summary>
+    public IReadOnlyDictionary<int, long> Currencies { get; set; } = new Dictionary<int, long>();
+
+    /// <summary>
     /// Gets the levels of the buildings by type.
     /// </summary>
     /// <returns>The levels.</returns>
@@ -211,7 +217,8 @@ public sealed class PlanetSession
             _deposits,
             _technologyLevels,
             _bonuses,
-            now);
+            now,
+            Currencies);
     }
 
     /// <summary>

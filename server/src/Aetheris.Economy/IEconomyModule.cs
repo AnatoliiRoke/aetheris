@@ -54,6 +54,38 @@ public interface IEconomyModule
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the balances of all the currencies of a civilization at a moment of game time.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The amounts by currency; a currency the player has none of is there with zero.</returns>
+    Task<IReadOnlyDictionary<int, long>> GetBalancesAsync(string playerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Tries to take inhabitants of a body, for the crew of a ship: all of them or none, in one
+    /// change that two crews never share.
+    /// </summary>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="amount">How many inhabitants to take.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when the inhabitants are taken, <see langword="false"/> when the body has fewer of them and nothing is taken.</returns>
+    /// <exception cref="Core.Errors.GameException">The body is not a colony of the player, or the amount is negative.</exception>
+    Task<bool> TryTakePopulationAsync(string playerId, long planetId, long amount, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gives inhabitants back to a body, for a crew that returns. A population above the largest
+    /// population is not refused: it dies down.
+    /// </summary>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="amount">How many inhabitants to give back.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the inhabitants are given back.</returns>
+    /// <exception cref="Core.Errors.GameException">The body is not a colony of the player, or the amount is negative.</exception>
+    Task GivePopulationAsync(string playerId, long planetId, long amount, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Takes the amounts from the balance of a currency of a civilization. The balance never
     /// goes below zero.
     /// </summary>

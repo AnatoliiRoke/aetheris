@@ -5,25 +5,19 @@ namespace Aetheris.Economy.Services;
 /// </summary>
 /// <remarks>
 /// The credits of a civilization are the integral of the population of its bodies over the
-/// time, so the income of a body is not constant: the population grows and dies down, and
-/// the largest population may change in the middle of an interval. The rules are a pure
-/// function of the population and the time, so they can be checked without a database.
+/// time, so the income of a body is not constant: the population grows and dies down and stops
+/// at the largest population in the middle of an interval. The rules are a pure function of the
+/// population and the time, so they can be checked without a database.
 /// </remarks>
 public static class CreditRules
 {
     /// <summary>
-    /// The number of the ticks in an hour, used to turn a speed into an amount.
+    /// The number the square of a time is divided by in the area under a line.
     /// </summary>
-    private const decimal TicksPerHour = (decimal)TimeSpan.TicksPerHour;
+    private const decimal Two = 2m;
 
     /// <summary>
-    /// The number the average of the two ends of an interval is divided by, so the average of
-    /// the population of a body over the interval is the area of a trapezoid.
-    /// </summary>
-    private const decimal AverageDivisor = 2m;
-
-    /// <summary>
-    /// Brings the credits of a civilization from one moment to another.
+    /// Brings the credits of a civilization from one moment to another, in whole credits.
     /// </summary>
     /// <param name="amount">The credits at <paramref name="from"/>.</param>
     /// <param name="population">The population of the body at <paramref name="from"/>.</param>
@@ -34,9 +28,8 @@ public static class CreditRules
     /// <param name="to">The moment to bring them to.</param>
     /// <returns>The credits at <paramref name="to"/>.</returns>
     /// <remarks>
-    /// The population grows linearly, so the integral of the population over the time is the
-    /// area of a trapezoid: the average of the population at the ends of the interval times
-    /// its length. The fraction of a credit is left out, so the balance is a whole number.
+    /// The fraction of a credit is left out. The service keeps the fraction between its counts
+    /// (see <see cref="Earned"/>), so a balance that is counted often loses nothing.
     /// </remarks>
     public static long Accumulate(
         long amount,
@@ -45,30 +38,88 @@ public static class CreditRules
         decimal growthPerHour,
         decimal creditsPerInhabitant,
         DateTimeOffset from,
+        DateTimeOffset to) =>
+        amount + (long)decimal.Floor(Earned(population, maximum, growthPerHour, creditsPerInhabitant, from, to));
+
+    /// <summary>
+    /// Gets the credits a body earns over an interval, with their fraction.
+    /// </summary>
+    /// <param name="population">The population of the body at <paramref name="from"/>, with its fraction.</param>
+    /// <param name="maximum">The largest population the body may have.</param>
+    /// <param name="growthPerHour">The speed of the population at <paramref name="from"/>: positive below the largest population, negative above it.</param>
+    /// <param name="creditsPerInhabitant">How many credits one inhabitant brings in an hour.</param>
+    /// <param name="from">The start of the interval.</param>
+    /// <param name="to">The end of the interval.</param>
+    /// <returns>The credits.</returns>
+    /// <remarks>
+    /// <para>
+    /// The population changes linearly until it reaches the largest population and then stays
+    /// there, so the integral has two parts: the area under the line until the population meets
+    /// the largest population, and the constant population after that. A population that grows
+    /// to the limit and a population that dies down to it are the same case from two sides.
+    /// </para>
+    /// <para>
+    /// The speed and the largest population are the ones of the whole interval: the service counts
+    /// the balance up to every change of them.
+    /// </para>
+    /// </remarks>
+    public static decimal Earned(
+        decimal population,
+        long maximum,
+        decimal growthPerHour,
+        decimal creditsPerInhabitant,
+        DateTimeOffset from,
         DateTimeOffset to)
     {
-        decimal elapsedTicks = to > from ? (to - from).Ticks : 0;
-        decimal hours = elapsedTicks / TicksPerHour;
+        decimal hours = PopulationRules.Hours(from, to);
 
         if (hours <= 0m)
         {
-            return amount;
+            return 0m;
         }
 
-        long populationAtEnd = PopulationRules.Accumulate(population, maximum, growthPerHour, from, to);
-        decimal average = (population + populationAtEnd) / AverageDivisor;
-        decimal earned = average * creditsPerInhabitant * hours;
+        if (population < 0m)
+        {
+            population = 0m;
+        }
 
-        return amount + (long)decimal.Floor(earned);
+        // How far the population is from the largest population in the direction it moves.
+        decimal distance = growthPerHour >= 0m ? maximum - population : population - maximum;
+
+        decimal personHours;
+
+        if (growthPerHour == 0m || distance <= 0m)
+        {
+            // The population does not move: it is at the limit or has no speed.
+            personHours = population * hours;
+        }
+        else
+        {
+            decimal hoursToLimit = distance / Math.Abs(growthPerHour);
+
+            if (hoursToLimit >= hours)
+            {
+                // The population is on its line the whole interval.
+                personHours = (population * hours) + (growthPerHour * hours * hours / Two);
+            }
+            else
+            {
+                // The population is on its line until the limit and constant after it.
+                personHours = (population * hoursToLimit)
+                    + (growthPerHour * hoursToLimit * hoursToLimit / Two)
+                    + (maximum * (hours - hoursToLimit));
+            }
+        }
+
+        return personHours * creditsPerInhabitant;
     }
 
     /// <summary>
     /// Gets the income of the credits of a body in an hour.
     /// </summary>
     /// <param name="population">The population of the body now.</param>
-    /// <param name="creditsPerInhabitant">How many credits one inhabitant brings in an hour.</param>
-    /// <param name="incomeMultiplier">The multiplier the technologies give the income.</param>
+    /// <param name="creditsPerInhabitant">How many credits one inhabitant brings in an hour, with the multiplier of the technologies already in it.</param>
     /// <returns>The income in an hour.</returns>
-    public static decimal IncomePerHour(long population, decimal creditsPerInhabitant, decimal incomeMultiplier) =>
-        population * creditsPerInhabitant * incomeMultiplier;
+    public static decimal IncomePerHour(long population, decimal creditsPerInhabitant) =>
+        population * creditsPerInhabitant;
 }

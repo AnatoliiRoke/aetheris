@@ -13,8 +13,9 @@ namespace Aetheris.Economy.Api;
 /// </summary>
 /// <remarks>
 /// The trade currency comes only from the trade until the market arrives, so an
-/// administrator gives it and takes it with a reason; the journal of the admin panel keeps
-/// the old and the new amount.
+/// administrator gives it and takes it with a reason. The journal of the admin panel is written
+/// by the filter of the admin group after the answer, from the target, the old and the new amount
+/// the endpoint hands it; a refused change is journaled as rejected.
 /// </remarks>
 public static class EconomyAdminEndpoints
 {
@@ -40,7 +41,7 @@ public static class EconomyAdminEndpoints
             EconomyService service,
             CancellationToken cancellationToken) =>
         {
-            IReadOnlyList<CurrencyBalanceFacts> balances = await service
+            IReadOnlyList<AdminBalanceFacts> balances = await service
                 .ReadBalancesAsync(playerId, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -81,9 +82,12 @@ public static class EconomyAdminEndpoints
             {
                 return Results.Json(
                     new { error = exception.Code },
-                    statusCode: exception.Code == GameErrorCodes.NotFound
-                        ? StatusCodes.Status404NotFound
-                        : StatusCodes.Status400BadRequest);
+                    statusCode: exception.Code switch
+                    {
+                        GameErrorCodes.NotFound => StatusCodes.Status404NotFound,
+                        AdminReferenceErrors.VersionConflict => StatusCodes.Status409Conflict,
+                        _ => StatusCodes.Status400BadRequest,
+                    });
             }
         })
             .WithName("admin.economy_balance_updated");

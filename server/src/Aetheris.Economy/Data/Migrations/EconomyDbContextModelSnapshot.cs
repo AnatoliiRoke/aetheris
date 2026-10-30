@@ -26,13 +26,18 @@ namespace Aetheris.Economy.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<long>("Amount")
                         .HasColumnType("bigint")
                         .HasColumnName("amount");
+
+                    b.Property<decimal>("AmountFraction")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount_fraction");
 
                     b.Property<string>("PlayerId")
                         .IsRequired()
@@ -65,14 +70,16 @@ namespace Aetheris.Economy.Data.Migrations
             modelBuilder.Entity("Aetheris.Economy.Data.Entities.PlanetPopulationEntity", b =>
                 {
                     b.Property<long>("PlanetId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("PlanetId"));
+                        .HasColumnType("bigint")
+                        .HasColumnName("planet_id");
 
                     b.Property<long>("Amount")
                         .HasColumnType("bigint")
                         .HasColumnName("amount");
+
+                    b.Property<decimal>("AmountFraction")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount_fraction");
 
                     b.Property<string>("OwnerPlayerId")
                         .HasColumnType("text")
@@ -87,6 +94,8 @@ namespace Aetheris.Economy.Data.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("PlanetId");
+
+                    b.HasIndex("OwnerPlayerId");
 
                     b.ToTable("planet_population", null, t =>
                         {

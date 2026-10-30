@@ -8,6 +8,7 @@ using Aetheris.Research.Api;
 using Aetheris.Research.Data;
 using Aetheris.Research.Events;
 using Aetheris.Research.Services;
+using Aetheris.World.Services;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -59,6 +60,7 @@ public static class ResearchServiceCollectionExtensions
         // credits; the contract is declared by the economy module and implemented here
         // (task 00015).
         services.AddScoped<IEconomyTechnologyBonuses, EconomyTechnologyBonuses>();
+        services.AddScoped<IResourceUsage, ResearchResourceUsage>();
 
         // The multipliers of the production are a rule of the research, so the production
         // module reads them through this contract (task 00013, decision 14).

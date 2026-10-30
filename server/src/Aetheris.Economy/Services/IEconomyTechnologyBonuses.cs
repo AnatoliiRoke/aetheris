@@ -21,14 +21,13 @@ public interface IEconomyTechnologyBonuses
 /// <summary>
 /// The bonuses the technologies of a player give the economy (task 00015).
 /// </summary>
-/// <param name="PopulationMaxMultiplier">The multiplier of the largest population of a body.</param>
 /// <param name="PopulationGrowthMultiplier">The multiplier of the speed the population grows with.</param>
 /// <param name="CreditIncomeMultiplier">The multiplier of the income of the credits.</param>
 /// <remarks>
 /// Every multiplier is a separate bonus of the technologies, so a technology changes only the
-/// parameter it belongs to. A multiplier of one changes nothing.
+/// parameter it belongs to. A multiplier of one changes nothing. The multiplier of the largest
+/// population is not here: the bodies module applies it, so the largest population is counted once.
 /// </remarks>
 public sealed record EconomyBonuses(
-    decimal PopulationMaxMultiplier = 1m,
     decimal PopulationGrowthMultiplier = 1m,
     decimal CreditIncomeMultiplier = 1m);

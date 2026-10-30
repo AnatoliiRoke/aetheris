@@ -21,8 +21,16 @@ public sealed class PlanetPopulationEntity
     /// <summary>Gets or sets the owner of the body.</summary>
     public string? OwnerPlayerId { get; set; }
 
-    /// <summary>Gets or sets the number of the inhabitants at the moment of the last count.</summary>
+    /// <summary>Gets or sets the number of the whole inhabitants at the moment of the last count.</summary>
     public long Amount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the part of an inhabitant the speed of the growth or of the decline had made
+    /// at the moment of the last count; the sum with <see cref="Amount"/> is the exact population.
+    /// A count that is made often must not lose the parts, or a slow growth would never add an
+    /// inhabitant.
+    /// </summary>
+    public decimal AmountFraction { get; set; }
 
     /// <summary>Gets or sets the moment of game time the population was last counted at.</summary>
     public DateTimeOffset UpdatedAt { get; set; }

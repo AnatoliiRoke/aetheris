@@ -18,6 +18,9 @@ public static class EconomyErrorCodes
     /// <summary>The currency is not a currency of a civilization.</summary>
     public const string NotACurrency = "economy_not_a_currency";
 
-    /// <summary>The amount of a currency cannot be negative.</summary>
+    /// <summary>The amount of a currency or of the population cannot be negative.</summary>
     public const string NegativeAmount = "economy_negative_amount";
+
+    /// <summary>A change of a balance by nothing is not a change.</summary>
+    public const string ZeroAmount = "economy_zero_amount";
 }

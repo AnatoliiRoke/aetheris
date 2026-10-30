@@ -37,18 +37,21 @@ public static class TechnologyEffectTypes
     /// <summary>The technology raises the energy the buildings produce.</summary>
     public const string EnergyOutput = "energy_output";
 
-    /// <summary>The technology raises the largest population of the body.</summary>
-    public const string PopulationMax = "population_max";
+    /// <summary>
+    /// The technology raises the largest population of the body. The three codes of the economy
+    /// effects are the ones of the economy module, so the modules cannot differ on them.
+    /// </summary>
+    public const string PopulationMax = Aetheris.Economy.Services.EconomyCodes.PopulationMaxEffect;
 
     /// <summary>
     /// The technology raises the speed the population of the body grows with (task 00015).
     /// </summary>
-    public const string PopulationGrowthBonus = "population_growth_bonus";
+    public const string PopulationGrowthBonus = Aetheris.Economy.Services.EconomyCodes.PopulationGrowthBonusEffect;
 
     /// <summary>
     /// The technology raises the income of the credits of the civilization (task 00015).
     /// </summary>
-    public const string CreditIncomeBonus = "credit_income_bonus";
+    public const string CreditIncomeBonus = Aetheris.Economy.Services.EconomyCodes.CreditIncomeBonusEffect;
 
     /// <summary>
     /// Gets every effect kind, in the order of the form of the admin panel (task 00023).

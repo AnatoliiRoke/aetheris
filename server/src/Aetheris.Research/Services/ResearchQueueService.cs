@@ -251,13 +251,26 @@ public sealed class ResearchQueueService
                 Renumber(queue);
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+                // Every body is locked before the balance of the civilization, whatever the number of
+                // bodies: the resources go back to the bodies in the order of their identifiers and
+                // the currencies go back to the balance of the civilization in one change at the
+                // end, so the economy is the last lock of the request and two cancellations never
+                // wait for each other in a circle (documentation/tech/09, section 5.3).
+                Dictionary<int, long> currencyRefunds = [];
+
                 foreach ((long refundPlanetId, Dictionary<int, long> amounts) in refunds)
                 {
                     SplitCosts split = await _costs.SplitAsync(amounts, cancellationToken).ConfigureAwait(false);
 
                     await _resources.GiveAsync(refundPlanetId, playerId, split.PlanetResources, cancellationToken).ConfigureAwait(false);
-                    await _economy.GiveAsync(playerId, split.Currencies, cancellationToken).ConfigureAwait(false);
+
+                    foreach ((int currencyId, long amount) in split.Currencies)
+                    {
+                        currencyRefunds[currencyId] = currencyRefunds.GetValueOrDefault(currencyId) + amount;
+                    }
                 }
+
+                await _economy.GiveAsync(playerId, currencyRefunds, cancellationToken).ConfigureAwait(false);
 
                 if (headRemoved)
                 {
@@ -342,6 +355,11 @@ public sealed class ResearchQueueService
             // every body is brought to the end of the research first, and the moment
             // its storage is full is computed again after the change.
             await _resources.FixPlayerAsync(playerId, finishedAt, cancellationToken).ConfigureAwait(false);
+
+            // A technology may raise the speed the population grows with and the income of the
+            // credits, so the population and the credits of the civilization are counted to the end
+            // of the research with the bonuses as they were.
+            await _economy.FixPlayerAsync(playerId, finishedAt, cancellationToken).ConfigureAwait(false);
             await LearnAsync(playerId, head, cancellationToken).ConfigureAwait(false);
 
             queue.RemoveAt(0);

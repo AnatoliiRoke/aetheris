@@ -1,5 +1,4 @@
 using Aetheris.World;
-using Aetheris.World.Data.Entities;
 
 namespace Aetheris.Economy.Services;
 
@@ -56,10 +55,7 @@ public sealed class CostSplitter
 
             // A resource that is not in the catalog lies on a body: the scope of a resource is
             // known from the reference table, and a resource that is not there is a planet one.
-            bool isCurrency = resource is not null
-                && string.Equals(resource.Scope, ResourceScopes.Civilization, StringComparison.Ordinal);
-
-            if (isCurrency)
+            if (resource is { IsCivilizationScope: true })
             {
                 currencies[resourceTypeId] = amount;
             }

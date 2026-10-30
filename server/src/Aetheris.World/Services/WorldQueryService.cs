@@ -377,6 +377,23 @@ public sealed class WorldQueryService
     }
 
     /// <summary>
+    /// Gets the bodies a player owns.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bodies in the order of their identifiers.</returns>
+    public async Task<IReadOnlyList<OwnedPlanet>> GetOwnedPlanetsAsync(string playerId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        return await _dbContext.Planets.AsNoTracking()
+            .Where(planet => planet.OwnerPlayerId == playerId)
+            .OrderBy(planet => planet.Id)
+            .Select(planet => new OwnedPlanet(planet.Id, planet.SectorId))
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Gets the resource types and their groups.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>

@@ -64,7 +64,9 @@ public static class WorldReferenceSeed
 
         if (await dbContext.ResourceGroups.AnyAsync(cancellationToken).ConfigureAwait(false))
         {
-            return false;
+            // The tables are not empty, so the starting data is not written again; only the
+            // resources of the starting data that this database does not have yet are added.
+            return await SeedMissingResourcesAsync(dbContext, texts, codes, cancellationToken).ConfigureAwait(false);
         }
 
         ReferenceSeedData seed = Load();
@@ -170,6 +172,69 @@ public static class WorldReferenceSeed
         await RaiseAsync(codes, WorldCodeGroups.ObjectType, seed.ObjectTypes.Select(type => type.Code), cancellationToken).ConfigureAwait(false);
         await RaiseAsync(codes, WorldCodeGroups.SizeClass, seed.SizeClasses.Select(size => size.Code), cancellationToken).ConfigureAwait(false);
         await RaiseAsync(codes, WorldCodeGroups.RuleGroup, seed.RuleGroups.Select(group => group.Code), cancellationToken).ConfigureAwait(false);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Adds the resources of the starting data that a database does not have, by their codes.
+    /// </summary>
+    /// <param name="dbContext">The world context.</param>
+    /// <param name="texts">The texts of the game data.</param>
+    /// <param name="codes">The counters of the neutral codes.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when a resource was added.</returns>
+    /// <remarks>
+    /// A database made before a resource joined the starting data (the credits of task 00015) still
+    /// gets it, like the buildings of the bodies module do. A resource that is already there is not
+    /// touched, so what an administrator changed stays; a resource whose group is not in the database
+    /// is left out, since the group is not the business of this step.
+    /// </remarks>
+    private static async Task<bool> SeedMissingResourcesAsync(WorldDbContext dbContext, ILocalizationTexts texts, ICodeSequence codes, CancellationToken cancellationToken)
+    {
+        ReferenceSeedData seed = Load();
+        HashSet<string> startingCodes = [.. seed.Resources.Select(resource => resource.Code)];
+
+        HashSet<string> existingCodes = [.. await dbContext.ResourceTypes.AsNoTracking()
+            .Where(resource => startingCodes.Contains(resource.Code))
+            .Select(resource => resource.Code)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false)];
+
+        Dictionary<string, int> groupIds = await dbContext.ResourceGroups.AsNoTracking()
+            .ToDictionaryAsync(group => group.Code, group => group.Id, StringComparer.Ordinal, cancellationToken)
+            .ConfigureAwait(false);
+
+        List<SeedResource> missing =
+        [
+            .. seed.Resources.Where(resource =>
+                !existingCodes.Contains(resource.Code)
+                && (resource.Group is null || groupIds.ContainsKey(resource.Group))),
+        ];
+
+        if (missing.Count == 0)
+        {
+            return false;
+        }
+
+        dbContext.ResourceTypes.AddRange(missing.Select(resource => new ResourceTypeEntity
+        {
+            Code = resource.Code,
+            NameKey = WorldTextKeys.Name(WorldTextKeys.Resource, resource.Code),
+            DescriptionKey = WorldTextKeys.Description(WorldTextKeys.Resource, resource.Code),
+            ImageKey = resource.ImageKey,
+            ResourceGroupId = resource.Group is null ? null : groupIds[resource.Group],
+            Scope = resource.Scope,
+        }));
+
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        await texts.AddMissingAsync(
+            [.. missing.SelectMany(resource => SeedTexts.Of(WorldTextKeys.Resource, resource.Code, resource.Name, resource.Description))],
+            SeedTexts.Author,
+            cancellationToken).ConfigureAwait(false);
+
+        await RaiseAsync(codes, WorldCodeGroups.Resource, missing.Select(resource => resource.Code), cancellationToken).ConfigureAwait(false);
 
         return true;
     }

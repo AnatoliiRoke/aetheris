@@ -1,4 +1,5 @@
 using System.Globalization;
+using Aetheris.Core.Admin;
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Time;
@@ -6,6 +7,8 @@ using Aetheris.Economy.Api;
 using Aetheris.Economy.Configuration;
 using Aetheris.Economy.Data;
 using Aetheris.Economy.Data.Entities;
+using Aetheris.World;
+using Aetheris.World.Api;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aetheris.Economy.Services;
@@ -22,16 +25,23 @@ namespace Aetheris.Economy.Services;
 /// </para>
 /// <para>
 /// The credits belong to the whole civilization and are the integral of the population of its
-/// bodies over the time, so they are counted when they are read and written back at the same
-/// moment as the population they come from.
+/// bodies over the time. A read counts <c>balance + the integral of every body from the moment
+/// of its own population</c> and writes nothing. A change fixes the populations of all bodies and
+/// the balances of the civilization to one moment first: it adds the integral of every body to the
+/// balance and moves the population and the balance to that moment, so the income is counted once
+/// and with the rates that held until the moment. The parts of an inhabitant and of a credit that
+/// the count has not yet made whole are kept in the rows, so a count that is made often loses
+/// nothing.
 /// </para>
 /// </remarks>
 public sealed class EconomyService
 {
     private readonly EconomyDbContext _dbContext;
     private readonly EconomyUnitOfWork _unitOfWork;
+    private readonly ColonyRegistry _colonies;
     private readonly IGameConfig _config;
     private readonly IGameClock _clock;
+    private readonly IWorldModule _world;
     private readonly IEconomyBuildingEffects _buildingEffects;
     private readonly IEconomyTechnologyBonuses _technologyBonuses;
 
@@ -40,44 +50,68 @@ public sealed class EconomyService
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="unitOfWork">The transaction of the module.</param>
+    /// <param name="colonies">The rows of the population of the colonies.</param>
     /// <param name="config">The configuration of the game.</param>
     /// <param name="clock">The game clock.</param>
+    /// <param name="world">The world, for the currencies, the bodies of a player and the civilizations.</param>
     /// <param name="buildingEffects">The effects of the buildings of the bodies.</param>
     /// <param name="technologyBonuses">The bonuses the technologies give the economy.</param>
     public EconomyService(
         EconomyDbContext dbContext,
         EconomyUnitOfWork unitOfWork,
+        ColonyRegistry colonies,
         IGameConfig config,
         IGameClock clock,
+        IWorldModule world,
         IEconomyBuildingEffects buildingEffects,
         IEconomyTechnologyBonuses technologyBonuses)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(colonies);
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(buildingEffects);
         ArgumentNullException.ThrowIfNull(technologyBonuses);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
+        _colonies = colonies;
         _config = config;
         _clock = clock;
+        _world = world;
         _buildingEffects = buildingEffects;
         _technologyBonuses = technologyBonuses;
     }
 
     /// <summary>
-    /// Fills the tables of the module with the starting data when they are empty.
+    /// Writes the rows of the population of the colonies that have none: the home bodies of the
+    /// civilizations made before the module.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task that completes when the data is written.</returns>
+    /// <returns>A task that completes when the rows are written.</returns>
     /// <remarks>
-    /// The module has no starting data of its own: the population of a body starts empty and
-    /// grows, and the balance of a currency starts at zero. The method exists so the host
-    /// starts the modules the same way and a future starting data has one place to go.
+    /// Every colony that appears later gets its row from the module that makes it, and a colony
+    /// that has none (a body that changed hands, say) gets it when it is first read or changed.
     /// </remarks>
-    public Task EnsureAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public async Task EnsureAsync(CancellationToken cancellationToken = default)
+    {
+        HashSet<long> known = [.. await _dbContext.PlanetPopulations.AsNoTracking()
+            .Select(row => row.PlanetId)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false)];
+
+        foreach (CivilizationHome home in await _world.GetCivilizationHomesAsync(cancellationToken).ConfigureAwait(false))
+        {
+            if (known.Contains(home.PlanetId))
+            {
+                continue;
+            }
+
+            await _colonies.FoundAsync(home.PlayerId, home.PlanetId, home.SectorId, cancellationToken).ConfigureAwait(false);
+        }
+    }
 
     /// <summary>
     /// Gets the population of a body of a player at a moment of game time.
@@ -90,24 +124,42 @@ public sealed class EconomyService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        DateTimeOffset now = _clock.GameNow;
+        DateTimeOffset now = EconomyTime.Normalize(_clock.GameNow);
 
         // The population of a body is read by its owner only, so the body of another player
         // is not known to the caller (documentation/tech/09, section 7.2).
-        PlanetPopulationEntity? row = await _dbContext.PlanetPopulations
-            .AsNoTracking()
-            .Where(entry => entry.PlanetId == planetId && entry.OwnerPlayerId == playerId)
-            .FirstOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false);
+        PlanetPopulationEntity? row = await FindRowAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
 
         if (row is null)
         {
-            return null;
+            PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
+
+            if (facts is null || !string.Equals(facts.OwnerPlayerId, playerId, StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            // The body is a colony of the player that has no row yet: it gets one now.
+            await _unitOfWork.RunAsync(
+                async () =>
+                {
+                    await _colonies.EnsureAsync(playerId, [new OwnedPlanet(planetId, facts.SectorId)], cancellationToken).ConfigureAwait(false);
+
+                    return true;
+                },
+                cancellationToken).ConfigureAwait(false);
+
+            row = await FindRowAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+
+            if (row is null)
+            {
+                return null;
+            }
         }
 
-        PopulationSnapshot snapshot = await SnapshotAsync(row, now, cancellationToken).ConfigureAwait(false);
+        Rates rates = await RatesAsync(playerId, [planetId], cancellationToken).ConfigureAwait(false);
 
-        return snapshot.Facts;
+        return View(row, rates, now).Facts;
     }
 
     /// <summary>
@@ -120,24 +172,44 @@ public sealed class EconomyService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        DateTimeOffset now = _clock.GameNow;
+        return (await GetOverviewAsync(playerId, cancellationToken).ConfigureAwait(false)).Populations;
+    }
 
-        List<PlanetPopulationEntity> rows = await _dbContext.PlanetPopulations
-            .AsNoTracking()
-            .Where(entry => entry.OwnerPlayerId == playerId)
-            .OrderBy(entry => entry.PlanetId)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+    /// <summary>
+    /// Gets the economy of a player at a moment of game time: the populations of its bodies and the
+    /// balances of its currencies, counted in one pass.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The populations and the balances.</returns>
+    public async Task<EconomyOverviewDto> GetOverviewAsync(string playerId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        List<PopulationFacts> facts = [];
+        DateTimeOffset now = EconomyTime.Normalize(_clock.GameNow);
 
-        foreach (PlanetPopulationEntity row in rows)
+        // The read of a colony that has no row writes it: a new transaction when the call has
+        // none, the one of the request otherwise.
+        IReadOnlyList<OwnedPlanet> missing = await MissingColoniesAsync(playerId, cancellationToken).ConfigureAwait(false);
+
+        if (missing.Count > 0)
         {
-            PopulationSnapshot snapshot = await SnapshotAsync(row, now, cancellationToken).ConfigureAwait(false);
-            facts.Add(snapshot.Facts);
+            await _unitOfWork.RunAsync(
+                async () =>
+                {
+                    await _colonies.EnsureAsync(playerId, missing, cancellationToken).ConfigureAwait(false);
+
+                    return true;
+                },
+                cancellationToken).ConfigureAwait(false);
         }
 
-        return facts;
+        Snapshot snapshot = await SnapshotAsync(playerId, now, cancellationToken).ConfigureAwait(false);
+
+        return new EconomyOverviewDto(
+            [.. snapshot.Views.Select(view => view.Facts)],
+            [.. snapshot.CurrencyIds.Select(currencyId => snapshot.Balance(playerId, currencyId))],
+            now);
     }
 
     /// <summary>
@@ -154,11 +226,30 @@ public sealed class EconomyService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        DateTimeOffset now = _clock.GameNow;
+        Snapshot snapshot = await SnapshotAsync(playerId, EconomyTime.Normalize(_clock.GameNow), cancellationToken).ConfigureAwait(false);
 
-        (long amount, decimal income) = await BalanceAsync(playerId, resourceTypeId, now, cancellationToken).ConfigureAwait(false);
+        if (!snapshot.CurrencyIds.Contains(resourceTypeId))
+        {
+            throw new GameException(EconomyErrorCodes.NotACurrency, "The resource is not a currency of a civilization.");
+        }
 
-        return new CurrencyBalanceFacts(playerId, resourceTypeId, amount, income);
+        return snapshot.Balance(playerId, resourceTypeId);
+    }
+
+    /// <summary>
+    /// Gets the balances of all the currencies of a civilization, for the bodies module that checks
+    /// a cost against them.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The amounts by currency; a currency the player has none of is there with zero.</returns>
+    public async Task<IReadOnlyDictionary<int, long>> GetBalancesAsync(string playerId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        Snapshot snapshot = await SnapshotAsync(playerId, EconomyTime.Normalize(_clock.GameNow), cancellationToken).ConfigureAwait(false);
+
+        return snapshot.CurrencyIds.ToDictionary(currencyId => currencyId, currencyId => snapshot.Balance(playerId, currencyId).Amount);
     }
 
     /// <summary>
@@ -166,31 +257,25 @@ public sealed class EconomyService
     /// </summary>
     /// <param name="playerId">The player.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The balances.</returns>
-    public async Task<IReadOnlyList<CurrencyBalanceFacts>> ReadBalancesAsync(string playerId, CancellationToken cancellationToken)
+    /// <returns>The balances with the versions of their rows.</returns>
+    public async Task<IReadOnlyList<AdminBalanceFacts>> ReadBalancesAsync(string playerId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        DateTimeOffset now = _clock.GameNow;
+        Snapshot snapshot = await SnapshotAsync(playerId, EconomyTime.Normalize(_clock.GameNow), cancellationToken).ConfigureAwait(false);
 
-        List<int> currencyIds = await _dbContext.CivilizationBalances.AsNoTracking()
-            .Where(entry => entry.PlayerId == playerId)
-            .Select(entry => entry.ResourceTypeId)
-            .Distinct()
-            .Order()
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        return
+        [
+            .. snapshot.CurrencyIds.Select(currencyId =>
+            {
+                CurrencyBalanceFacts balance = snapshot.Balance(playerId, currencyId);
 
-        List<CurrencyBalanceFacts> balances = [];
+                // A balance that has no row yet is made with the first version.
+                int version = snapshot.Rows.FirstOrDefault(row => row.ResourceTypeId == currencyId)?.Version ?? 1;
 
-        foreach (int currencyId in currencyIds)
-        {
-            balances.Add(await GetBalanceAsync(playerId, currencyId, cancellationToken).ConfigureAwait(false));
-        }
-
-        _ = now;
-
-        return balances;
+                return new AdminBalanceFacts(playerId, currencyId, balance.Amount, balance.IncomePerHour, version);
+            }),
+        ];
     }
 
     /// <summary>
@@ -202,8 +287,10 @@ public sealed class EconomyService
     /// <returns>The change that was applied.</returns>
     /// <remarks>
     /// The balance never goes below zero, so an administrator takes less than the balance has.
-    /// The change is in the transaction of the request, so the journal of the admin panel and
-    /// the balance are committed together.
+    /// The income of the civilization is fixed into the balance first, so the amount the journal
+    /// keeps as the old one is the whole balance the administrator saw. The journal of the admin
+    /// panel is written by its own filter of the request, which receives the old and the new
+    /// amount from this answer; the balance and the journal are committed with the request.
     /// </remarks>
     public async Task<AdminBalanceChange> ChangeBalanceAsync(
         string playerId,
@@ -215,13 +302,33 @@ public sealed class EconomyService
 
         if (request.Amount == 0)
         {
-            throw new EconomyAdminException(EconomyErrorCodes.NegativeAmount, "The amount of a currency cannot be zero.");
+            throw new EconomyAdminException(EconomyErrorCodes.ZeroAmount, "The amount of a currency cannot be zero.");
+        }
+
+        if (!(await CurrencyIdsAsync(cancellationToken).ConfigureAwait(false)).Contains(request.ResourceTypeId))
+        {
+            throw new EconomyAdminException(EconomyErrorCodes.NotACurrency, "The resource is not a currency of a civilization.");
+        }
+
+        // The balance of a civilization is a balance of a player who has one.
+        if (await _world.GetCivilizationAsync(playerId, cancellationToken).ConfigureAwait(false) is null)
+        {
+            throw new EconomyAdminException(GameErrorCodes.NotFound, "The player has no civilization.");
         }
 
         return await _unitOfWork.RunAsync(
             async () =>
             {
-                CivilizationBalanceEntity row = await BalanceRowAsync(playerId, request.ResourceTypeId, cancellationToken).ConfigureAwait(false);
+                Locked locked = await LockAsync(playerId, await CurrencyIdsAsync(cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+
+                await FixAsync(playerId, locked, _clock.GameNow, cancellationToken).ConfigureAwait(false);
+
+                CivilizationBalanceEntity row = locked.Balances.Single(entry => entry.ResourceTypeId == request.ResourceTypeId);
+
+                if (request.Version is { } expectedVersion && expectedVersion != row.Version)
+                {
+                    throw new EconomyAdminException(AdminReferenceErrors.VersionConflict, "The balance changed since it was read.");
+                }
 
                 long before = row.Amount;
                 long after = before + request.Amount;
@@ -232,6 +339,7 @@ public sealed class EconomyService
                 }
 
                 row.Amount = after;
+                row.Version++;
 
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -272,6 +380,74 @@ public sealed class EconomyService
         ChangeAsync(playerId, amounts, give: true, cancellationToken);
 
     /// <summary>
+    /// Takes inhabitants of a body, for a crew: all of them or none.
+    /// </summary>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="amount">How many inhabitants to take.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when the inhabitants are taken, <see langword="false"/> when the body has fewer of them and nothing is taken.</returns>
+    /// <exception cref="GameException">The body is not a colony of the player, or the amount is negative.</exception>
+    public async Task<bool> TryTakePopulationAsync(string playerId, long planetId, long amount, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        if (amount < 0)
+        {
+            throw new GameException(EconomyErrorCodes.NegativeAmount, "The number of the inhabitants cannot be negative.");
+        }
+
+        return await _unitOfWork.RunAsync(
+            async () =>
+            {
+                // The count and the change are made under the lock of the population of the
+                // player, so two crews never take the same inhabitants.
+                PlanetPopulationEntity row = await LockedPopulationAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+
+                if (row.Amount < amount)
+                {
+                    return false;
+                }
+
+                row.Amount -= amount;
+
+                return true;
+            },
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Gives inhabitants back to a body, for a crew that returns. The population above the largest
+    /// population is not refused: it dies down.
+    /// </summary>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="amount">How many inhabitants to give back.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the inhabitants are given back.</returns>
+    /// <exception cref="GameException">The body is not a colony of the player, or the amount is negative.</exception>
+    public async Task GivePopulationAsync(string playerId, long planetId, long amount, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        if (amount < 0)
+        {
+            throw new GameException(EconomyErrorCodes.NegativeAmount, "The number of the inhabitants cannot be negative.");
+        }
+
+        await _unitOfWork.RunAsync(
+            async () =>
+            {
+                PlanetPopulationEntity row = await LockedPopulationAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+
+                row.Amount += amount;
+
+                return true;
+            },
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Brings the balances and the populations of a civilization to a moment with the rates as
     /// they are.
     /// </summary>
@@ -279,6 +455,12 @@ public sealed class EconomyService
     /// <param name="moment">The moment of game time.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the balances are fixed.</returns>
+    /// <remarks>
+    /// The module that changes a rate (a building that raises the largest population, a technology
+    /// that raises the income) calls this just before the change, so the change applies from that
+    /// moment on. A moment before the last count of a body changes nothing: the rows never go back
+    /// in time.
+    /// </remarks>
     public Task FixPlayerAsync(string playerId, DateTimeOffset moment, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
@@ -286,25 +468,9 @@ public sealed class EconomyService
         return _unitOfWork.RunAsync(
             async () =>
             {
-                DateTimeOffset to = moment;
+                Locked locked = await LockAsync(playerId, await CurrencyIdsAsync(cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
 
-                List<PlanetPopulationEntity> rows = await _dbContext.PlanetPopulations
-                    .Where(entry => entry.OwnerPlayerId == playerId)
-                    .OrderBy(entry => entry.PlanetId)
-                    .ToListAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                foreach (PlanetPopulationEntity row in rows)
-                {
-                    await FixPopulationAsync(row, to, cancellationToken).ConfigureAwait(false);
-                }
-
-                List<int> currencyIds = await CurrenciesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (int currencyId in currencyIds)
-                {
-                    await FixBalanceAsync(playerId, currencyId, to, cancellationToken).ConfigureAwait(false);
-                }
+                await FixAsync(playerId, locked, moment, cancellationToken).ConfigureAwait(false);
 
                 return true;
             },
@@ -320,33 +486,37 @@ public sealed class EconomyService
         ArgumentException.ThrowIfNullOrEmpty(playerId);
         ArgumentNullException.ThrowIfNull(amounts);
 
-        if (amounts.Count == 0)
+        if (amounts.Any(entry => entry.Value < 0))
+        {
+            throw new GameException(EconomyErrorCodes.NegativeAmount, "The amount of a currency cannot be negative.");
+        }
+
+        List<KeyValuePair<int, long>> changes = [.. amounts.Where(entry => entry.Value > 0).OrderBy(entry => entry.Key)];
+
+        if (changes.Count == 0)
         {
             return;
         }
 
-        DateTimeOffset now = _clock.GameNow;
-
         await _unitOfWork.RunAsync(
             async () =>
             {
-                foreach ((int resourceTypeId, long amount) in amounts.OrderBy(entry => entry.Key))
+                List<int> currencyIds = await CurrencyIdsAsync(cancellationToken).ConfigureAwait(false);
+
+                if (changes.Any(entry => !currencyIds.Contains(entry.Key)))
                 {
-                    if (amount < 0)
-                    {
-                        throw new GameException(EconomyErrorCodes.NegativeAmount, "The amount of a currency cannot be negative.");
-                    }
+                    throw new GameException(EconomyErrorCodes.NotACurrency, "The resource is not a currency of a civilization.");
+                }
 
-                    if (amount == 0)
-                    {
-                        continue;
-                    }
+                Locked locked = await LockAsync(playerId, currencyIds, cancellationToken).ConfigureAwait(false);
 
-                    CivilizationBalanceEntity row = await BalanceRowAsync(playerId, resourceTypeId, cancellationToken).ConfigureAwait(false);
+                // The balance is counted to the moment of the change before it changes, so the
+                // income the player earned since the last change is in the balance.
+                await FixAsync(playerId, locked, _clock.GameNow, cancellationToken).ConfigureAwait(false);
 
-                    // The balance is counted to the moment of the change before it changes, so
-                    // the income the player earned since the last change is in the balance.
-                    await FixBalanceAsync(row, now, cancellationToken).ConfigureAwait(false);
+                foreach ((int resourceTypeId, long amount) in changes)
+                {
+                    CivilizationBalanceEntity row = locked.Balances.Single(entry => entry.ResourceTypeId == resourceTypeId);
 
                     if (give)
                     {
@@ -368,209 +538,258 @@ public sealed class EconomyService
             cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task<(long Amount, decimal Income)> BalanceAsync(
-        string playerId,
-        int resourceTypeId,
-        DateTimeOffset now,
-        CancellationToken cancellationToken)
+    private async Task<PlanetPopulationEntity> LockedPopulationAsync(string playerId, long planetId, CancellationToken cancellationToken)
     {
-        CivilizationBalanceEntity row = await BalanceRowAsync(playerId, resourceTypeId, cancellationToken).ConfigureAwait(false);
+        Locked locked = await LockAsync(playerId, await CurrencyIdsAsync(cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
 
-        decimal income = await IncomeAsync(playerId, now, cancellationToken).ConfigureAwait(false);
+        // The count is made first, so the credits the inhabitants earned until now stay with
+        // them and the change of the number applies from now on.
+        await FixAsync(playerId, locked, _clock.GameNow, cancellationToken).ConfigureAwait(false);
 
-        long amount = row.Amount;
+        return locked.Populations.FirstOrDefault(entry => entry.PlanetId == planetId)
+            ?? throw new GameException(EconomyErrorCodes.PlanetUnknown, "The body is not a colony of the player.");
+    }
 
-        // The balance is counted without writing it, so a read does not change the database.
-        foreach (PlanetPopulationEntity population in await PopulationsAsync(playerId, cancellationToken).ConfigureAwait(false))
+    /// <summary>
+    /// Locks the rows of a civilization in the one order every change takes them in: the
+    /// populations by the identifier of the body, then the balances by the identifier of the
+    /// currency (see <see cref="EconomyUnitOfWork"/>).
+    /// </summary>
+    private async Task<Locked> LockAsync(string playerId, IReadOnlyList<int> currencyIds, CancellationToken cancellationToken)
+    {
+        // A colony that has no row yet gets it before the rows are locked. The call is already
+        // inside the transaction of the change, so the row is written in it.
+        await _colonies.EnsureAsync(playerId, await MissingColoniesAsync(playerId, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+
+        List<PlanetPopulationEntity> populations = await _dbContext.PlanetPopulations
+            .FromSql($"SELECT * FROM planet_population WHERE owner_player_id = {playerId} ORDER BY planet_id FOR UPDATE")
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        // A row that does not exist cannot be locked, so the missing balances are written first
+        // with INSERT ... ON CONFLICT: two first changes of one civilization write one row and then
+        // wait for it one after another, and never fail on the unique index.
+        HashSet<int> known = [.. await _dbContext.CivilizationBalances.AsNoTracking()
+            .Where(row => row.PlayerId == playerId)
+            .Select(row => row.ResourceTypeId)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false)];
+
+        DateTimeOffset now = EconomyTime.Normalize(_clock.GameNow);
+
+        foreach (int currencyId in currencyIds.Where(currencyId => !known.Contains(currencyId)).Order())
         {
-            PopulationSnapshot snapshot = await SnapshotAsync(population, now, cancellationToken).ConfigureAwait(false);
-            amount = CreditRules.Accumulate(
-                amount,
-                snapshot.Amount,
-                snapshot.Maximum,
-                snapshot.GrowthPerHour,
-                snapshot.CreditsPerInhabitant,
-                population.UpdatedAt,
-                now);
+            await _dbContext.Database.ExecuteSqlAsync(
+                $"""
+                INSERT INTO civilization_balance (player_id, resource_type_id, amount, amount_fraction, updated_at, version)
+                VALUES ({playerId}, {currencyId}, 0, 0, {now}, 1)
+                ON CONFLICT (player_id, resource_type_id) DO NOTHING
+                """,
+                cancellationToken).ConfigureAwait(false);
         }
 
-        return (amount, income);
+        List<CivilizationBalanceEntity> balances = await _dbContext.CivilizationBalances
+            .FromSql($"SELECT * FROM civilization_balance WHERE player_id = {playerId} ORDER BY resource_type_id FOR UPDATE")
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return new Locked(populations, balances);
     }
 
-    private async Task FixBalanceAsync(string playerId, int resourceTypeId, DateTimeOffset now, CancellationToken cancellationToken)
+    /// <summary>
+    /// Brings the locked populations and balances to one moment: the income of every body since its
+    /// own count goes into the balances, and every row gets the moment.
+    /// </summary>
+    private async Task FixAsync(string playerId, Locked locked, DateTimeOffset moment, CancellationToken cancellationToken)
     {
-        CivilizationBalanceEntity row = await BalanceRowAsync(playerId, resourceTypeId, cancellationToken).ConfigureAwait(false);
+        DateTimeOffset target = EconomyTime.Normalize(moment);
 
-        await FixBalanceAsync(row, now, cancellationToken).ConfigureAwait(false);
-    }
-
-    private async Task FixBalanceAsync(CivilizationBalanceEntity row, DateTimeOffset now, CancellationToken cancellationToken)
-    {
-        DateTimeOffset from = row.UpdatedAt;
-        DateTimeOffset to = now > from ? now : from;
-
-        long amount = row.Amount;
-
-        foreach (PlanetPopulationEntity population in await PopulationsAsync(row.PlayerId, cancellationToken).ConfigureAwait(false))
+        // The rows never go back in time: a body counted later than the moment keeps its count
+        // and the moment moves to it.
+        foreach (PlanetPopulationEntity row in locked.Populations)
         {
-            PopulationSnapshot snapshot = await SnapshotAsync(population, from, cancellationToken).ConfigureAwait(false);
-
-            amount = CreditRules.Accumulate(
-                amount,
-                snapshot.Amount,
-                snapshot.Maximum,
-                snapshot.GrowthPerHour,
-                snapshot.CreditsPerInhabitant,
-                population.UpdatedAt,
-                to);
+            if (row.UpdatedAt > target)
+            {
+                target = row.UpdatedAt;
+            }
         }
 
-        row.Amount = amount;
-        row.UpdatedAt = to;
+        Rates rates = await RatesAsync(playerId, [.. locked.Populations.Select(row => row.PlanetId)], cancellationToken).ConfigureAwait(false);
+        decimal earned = 0m;
+
+        foreach (PlanetPopulationEntity row in locked.Populations)
+        {
+            PopulationView view = View(row, rates, target);
+
+            earned += view.Earned;
+            row.Amount = view.Amount;
+            row.AmountFraction = view.Fraction;
+            row.UpdatedAt = target;
+        }
+
+        foreach (CivilizationBalanceEntity row in locked.Balances)
+        {
+            decimal exact = row.Amount + row.AmountFraction + earned;
+            long amount = (long)decimal.Floor(exact);
+
+            row.Amount = amount;
+            row.AmountFraction = exact - amount;
+            row.UpdatedAt = row.UpdatedAt > target ? row.UpdatedAt : target;
+        }
     }
 
-    private async Task FixPopulationAsync(PlanetPopulationEntity row, DateTimeOffset now, CancellationToken cancellationToken)
+    /// <summary>
+    /// Gets the bodies a player owns in the world that have no row of the population yet.
+    /// </summary>
+    private async Task<IReadOnlyList<OwnedPlanet>> MissingColoniesAsync(string playerId, CancellationToken cancellationToken)
     {
-        PopulationSnapshot snapshot = await SnapshotAsync(row, now, cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<OwnedPlanet> owned = await _world.GetOwnedPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
-        row.Amount = snapshot.Amount;
-        row.UpdatedAt = now;
+        if (owned.Count == 0)
+        {
+            return owned;
+        }
+
+        HashSet<long> known = [.. await _dbContext.PlanetPopulations.AsNoTracking()
+            .Where(row => row.OwnerPlayerId == playerId)
+            .Select(row => row.PlanetId)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false)];
+
+        return [.. owned.Where(planet => !known.Contains(planet.PlanetId))];
     }
 
-    private async Task<PopulationSnapshot> SnapshotAsync(
-        PlanetPopulationEntity row,
-        DateTimeOffset now,
-        CancellationToken cancellationToken)
+    private Task<PlanetPopulationEntity?> FindRowAsync(string playerId, long planetId, CancellationToken cancellationToken) =>
+        _dbContext.PlanetPopulations.AsNoTracking()
+            .Where(entry => entry.PlanetId == planetId && entry.OwnerPlayerId == playerId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    /// <summary>
+    /// Reads the rows of a player and counts them to a moment, without locking or writing.
+    /// </summary>
+    private async Task<Snapshot> SnapshotAsync(string playerId, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        EconomySettings settings = EconomySettings.From(_config);
-        EconomyBonuses bonuses = await _technologyBonuses.GetBonusesAsync(row.OwnerPlayerId, cancellationToken).ConfigureAwait(false);
+        List<PlanetPopulationEntity> populations = await _dbContext.PlanetPopulations.AsNoTracking()
+            .Where(entry => entry.OwnerPlayerId == playerId)
+            .OrderBy(entry => entry.PlanetId)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
-        long maximum = await MaximumAsync(row, bonuses, cancellationToken).ConfigureAwait(false);
+        List<CivilizationBalanceEntity> rows = await _dbContext.CivilizationBalances.AsNoTracking()
+            .Where(entry => entry.PlayerId == playerId)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
-        // The buildings of the body may raise the speed the population grows with, so the
-        // bonus of the buildings and the bonus of the technologies are multiplied (task 00015).
-        decimal buildingBonus = await BuildingGrowthMultiplierAsync(row.PlanetId, cancellationToken).ConfigureAwait(false);
+        Rates rates = await RatesAsync(playerId, [.. populations.Select(row => row.PlanetId)], cancellationToken).ConfigureAwait(false);
+        List<int> currencyIds = await CurrencyIdsAsync(cancellationToken).ConfigureAwait(false);
 
-        decimal growth = PopulationRules.GrowthPerHour(
-            maximum,
-            settings.PopulationGrowthPercent,
-            bonuses.PopulationGrowthMultiplier * buildingBonus,
-            settings.PopulationDeclinePerHour);
-
-        decimal decline = PopulationRules.DeclinePerHour(settings.PopulationDeclinePerHour);
-
-        // The population grows until the largest population and dies down above it, so the
-        // speed depends on where the population is.
-        bool overLimitAtStart = row.Amount > maximum;
-        decimal speedAtStart = overLimitAtStart ? decline : growth;
-
-        long amount = PopulationRules.Accumulate(row.Amount, maximum, speedAtStart, row.UpdatedAt, now);
-
-        // The speed and the warning are the ones of the moment now, and not of the moment of
-        // the last count, so a population that died down under the limit grows again.
-        bool overLimit = amount > maximum;
-        decimal speed = overLimit ? decline : growth;
-
-        decimal creditsPerInhabitant = settings.CreditsPerInhabitant * bonuses.CreditIncomeMultiplier;
-
-        return new PopulationSnapshot(
-            amount,
-            maximum,
-            speed,
-            overLimit,
-            creditsPerInhabitant,
-            new PopulationFacts(
-                row.PlanetId,
-                amount,
-                maximum,
-                speed,
-                overLimit,
-                PopulationRules.TimeToMaximum(amount, maximum, speed)));
+        return new Snapshot([.. populations.Select(row => View(row, rates, now))], rows, currencyIds);
     }
 
-    private async Task<decimal> BuildingGrowthMultiplierAsync(long planetId, CancellationToken cancellationToken)
-    {
-        long effect = await _buildingEffects.GetEffectTotalAsync(planetId, EconomyCodes.PopulationGrowthBonusEffect, cancellationToken).ConfigureAwait(false);
-
-        return effect > 0 ? effect : 1m;
-    }
-
-    private async Task<long> MaximumAsync(
-        PlanetPopulationEntity row,
-        EconomyBonuses bonuses,
-        CancellationToken cancellationToken)
-    {
-        long effect = await _buildingEffects.GetEffectTotalAsync(row.PlanetId, EconomyCodes.PopulationMaxEffect, cancellationToken).ConfigureAwait(false);
-
-        return (long)decimal.Floor(effect * bonuses.PopulationMaxMultiplier);
-    }
-
-    private async Task<decimal> IncomeAsync(string playerId, DateTimeOffset now, CancellationToken cancellationToken)
+    /// <summary>
+    /// Reads what sets the speed of the population and of the income of a player, once for all its
+    /// bodies: the parameters, the bonuses of the technologies and the effects of the buildings.
+    /// </summary>
+    private async Task<Rates> RatesAsync(string playerId, IReadOnlyCollection<long> planetIds, CancellationToken cancellationToken)
     {
         EconomySettings settings = EconomySettings.From(_config);
         EconomyBonuses bonuses = await _technologyBonuses.GetBonusesAsync(playerId, cancellationToken).ConfigureAwait(false);
+        IReadOnlyDictionary<long, PlanetEconomyEffects> effects = planetIds.Count == 0
+            ? new Dictionary<long, PlanetEconomyEffects>()
+            : await _buildingEffects.GetAsync(planetIds, cancellationToken).ConfigureAwait(false);
 
-        decimal income = 0m;
-
-        foreach (PlanetPopulationEntity population in await PopulationsAsync(playerId, cancellationToken).ConfigureAwait(false))
-        {
-            PopulationSnapshot snapshot = await SnapshotAsync(population, now, cancellationToken).ConfigureAwait(false);
-
-            income += CreditRules.IncomePerHour(
-                snapshot.Amount,
-                snapshot.CreditsPerInhabitant,
-                bonuses.CreditIncomeMultiplier);
-        }
-
-        _ = settings;
-
-        return income;
+        return new Rates(settings, bonuses, effects);
     }
 
-    private Task<List<PlanetPopulationEntity>> PopulationsAsync(string playerId, CancellationToken cancellationToken) =>
-        _dbContext.PlanetPopulations
-            .Where(entry => entry.OwnerPlayerId == playerId)
-            .OrderBy(entry => entry.PlanetId)
-            .ToListAsync(cancellationToken);
+    private async Task<List<int>> CurrencyIdsAsync(CancellationToken cancellationToken) =>
+        [.. (await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false)).Resources
+            .Where(resource => resource.IsCivilizationScope)
+            .Select(resource => resource.Id)
+            .Order()];
 
     /// <summary>
-    /// Gets the row of the balance of a currency and locks it, so two commands that change the
-    /// same balance wait for each other and never spend the same currency twice
-    /// (documentation/tech/09, section 5.3).
+    /// Counts the population of a row to a moment, with the credits it earned meanwhile.
     /// </summary>
-    /// <param name="playerId">The player.</param>
-    /// <param name="resourceTypeId">The currency.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The row of the balance; a new row when the balance does not exist yet.</returns>
-    private async Task<CivilizationBalanceEntity> BalanceRowAsync(string playerId, int resourceTypeId, CancellationToken cancellationToken)
+    private static PopulationView View(PlanetPopulationEntity row, Rates rates, DateTimeOffset moment)
     {
-        CivilizationBalanceEntity? row = (await _dbContext.CivilizationBalances
-            .FromSql($"SELECT * FROM civilization_balance WHERE player_id = {playerId} AND resource_type_id = {resourceTypeId} FOR UPDATE")
-            .ToListAsync(cancellationToken).ConfigureAwait(false)).FirstOrDefault();
+        PlanetEconomyEffects effects = rates.Effects.GetValueOrDefault(row.PlanetId) ?? new PlanetEconomyEffects(0, 0);
+        long maximum = effects.PopulationMax;
 
-        if (row is not null)
-        {
-            return row;
-        }
+        // The buildings of the body may raise the speed the population grows with, so the effect
+        // of the buildings and the bonus of the technologies are multiplied (task 00015).
+        decimal buildingMultiplier = effects.PopulationGrowthEffect > 0 ? effects.PopulationGrowthEffect : 1m;
+        decimal growth = PopulationRules.GrowthPerHour(
+            maximum,
+            rates.Settings.PopulationGrowthPercent,
+            rates.Bonuses.PopulationGrowthMultiplier * buildingMultiplier);
+        decimal decline = PopulationRules.DeclinePerHour(rates.Settings.PopulationDeclinePerHour);
 
-        row = new CivilizationBalanceEntity
-        {
-            PlayerId = playerId,
-            ResourceTypeId = resourceTypeId,
-            Amount = 0,
-            UpdatedAt = _clock.GameNow,
-        };
+        // The population grows until the largest population and dies down above it, so the
+        // speed of the interval is the one of the population at its start.
+        decimal start = row.Amount + row.AmountFraction;
+        decimal speedAtStart = PopulationRules.SpeedAt(start, maximum, growth, decline);
+        DateTimeOffset to = moment > row.UpdatedAt ? moment : row.UpdatedAt;
 
-        _dbContext.CivilizationBalances.Add(row);
+        decimal exact = PopulationRules.AccumulateExact(start, maximum, speedAtStart, row.UpdatedAt, to);
+        (long amount, decimal fraction) = PopulationRules.Settle(exact, speedAtStart < 0m);
+        decimal earned = CreditRules.Earned(start, maximum, speedAtStart, rates.CreditsPerInhabitant, row.UpdatedAt, to);
 
-        return row;
+        // The speed and the warning are the ones of the moment, and not of the last count, so a
+        // population that died down under the limit grows again.
+        bool overLimit = amount > maximum;
+        decimal speed = overLimit ? decline : growth;
+
+        return new PopulationView(
+            amount,
+            fraction,
+            earned,
+            new PopulationFacts(row.PlanetId, amount, maximum, speed, overLimit, PopulationRules.TimeToMaximum(amount, maximum, speed)),
+            CreditRules.IncomePerHour(amount, rates.CreditsPerInhabitant));
     }
 
-    private async Task<List<int>> CurrenciesAsync(CancellationToken cancellationToken) =>
-        await _dbContext.CivilizationBalances
-            .AsNoTracking()
-            .Select(entry => entry.ResourceTypeId)
-            .Distinct()
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+    /// <summary>
+    /// What sets the speed of the population and of the income of a player.
+    /// </summary>
+    private sealed record Rates(
+        EconomySettings Settings,
+        EconomyBonuses Bonuses,
+        IReadOnlyDictionary<long, PlanetEconomyEffects> Effects)
+    {
+        /// <summary>Gets how many credits an inhabitant brings in an hour: the parameter with the bonus of the technologies.</summary>
+        public decimal CreditsPerInhabitant => Settings.CreditsPerInhabitant * Bonuses.CreditIncomeMultiplier;
+    }
+
+    /// <summary>
+    /// The population of a body counted to a moment.
+    /// </summary>
+    private sealed record PopulationView(long Amount, decimal Fraction, decimal Earned, PopulationFacts Facts, decimal Income);
+
+    /// <summary>
+    /// The rows of a civilization, locked.
+    /// </summary>
+    private sealed record Locked(List<PlanetPopulationEntity> Populations, List<CivilizationBalanceEntity> Balances);
+
+    /// <summary>
+    /// The rows of a civilization counted to a moment, for a read.
+    /// </summary>
+    private sealed record Snapshot(
+        IReadOnlyList<PopulationView> Views,
+        IReadOnlyList<CivilizationBalanceEntity> Rows,
+        IReadOnlyList<int> CurrencyIds)
+    {
+        /// <summary>
+        /// Gets the balance of a currency: the stored amount and the credits every body earned since its
+        /// own count.
+        /// </summary>
+        /// <param name="playerId">The player.</param>
+        /// <param name="currencyId">The currency.</param>
+        /// <returns>The balance.</returns>
+        public CurrencyBalanceFacts Balance(string playerId, int currencyId)
+        {
+            CivilizationBalanceEntity? row = Rows.FirstOrDefault(entry => entry.ResourceTypeId == currencyId);
+            decimal exact = (row?.Amount ?? 0) + (row?.AmountFraction ?? 0m) + Views.Sum(view => view.Earned);
+
+            return new CurrencyBalanceFacts(playerId, currencyId, (long)decimal.Floor(exact), Views.Sum(view => view.Income));
+        }
+    }
 }

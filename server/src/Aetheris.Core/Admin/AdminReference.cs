@@ -98,6 +98,12 @@ public static class AdminReferenceErrors
     /// <summary>A player has a level the change would remove, or has it in a queue.</summary>
     public const string LevelsInUse = "levels_in_use";
 
+    /// <summary>A module holds data of the row, so its scope cannot change.</summary>
+    public const string ScopeInUse = "scope_in_use";
+
+    /// <summary>A currency of a civilization does not lie on a body, so it has no group.</summary>
+    public const string CurrencyHasNoGroup = "currency_has_no_group";
+
     /// <summary>
     /// Gets the codes of the rules of the levels and the archive (task 00023, decisions 5 and 6):
     /// a refusal by one of them answers 422, a refusal of the form of a value answers 400 like the
@@ -112,6 +118,7 @@ public static class AdminReferenceErrors
         RequirementsMissing,
         StateUnchanged,
         LevelsInUse,
+        ScopeInUse,
     };
 }
 

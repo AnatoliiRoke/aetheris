@@ -7,6 +7,7 @@ using Aetheris.Production.Data;
 using Aetheris.Production.Events;
 using Aetheris.Production.Services;
 using Aetheris.Research.Services;
+using Aetheris.World.Services;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -39,6 +40,7 @@ public static class ProductionServiceCollectionExtensions
         services.AddScoped<ProductionBootstrapService>();
         services.AddScoped<ProductionQueueService>();
         services.AddScoped<PartStockService>();
+        services.AddScoped<IResourceUsage, ProductionResourceUsage>();
         services.AddScoped<IProductionModule, ProductionModule>();
         services.AddScoped<IScheduledEventHandler, ProductionUnitReadyHandler>();
         services.AddScoped<ProductionReferenceAdminService>();

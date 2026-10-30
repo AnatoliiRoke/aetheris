@@ -1,177 +1,48 @@
 {
   "permissions": [
-    {
-      "code": "admin.ping",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.me",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.sign_out",
-      "kind": "action"
-    },
-    {
-      "code": "admin.config_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.config_history_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.config_changed",
-      "kind": "action"
-    },
-    {
-      "code": "admin.config_rolled_back",
-      "kind": "action"
-    },
-    {
-      "code": "admin.clock_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.clock_changed",
-      "kind": "action"
-    },
-    {
-      "code": "admin.audit_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.player_email_changed",
-      "kind": "action"
-    },
-    {
-      "code": "admin.player_access_log_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_reference_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_sectors_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_systems_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_objects_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_fields_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_sector_stats",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_sector_added",
-      "kind": "action"
-    },
-    {
-      "code": "admin.world_sector_regenerated",
-      "kind": "action"
-    },
-    {
-      "code": "admin.world_generation_estimated",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_generation_started",
-      "kind": "action"
-    },
-    {
-      "code": "admin.world_generation_runs_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_generation_run_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_field_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_field_updated",
-      "kind": "action"
-    },
-    {
-      "code": "admin.world_object_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_object_updated",
-      "kind": "action"
-    },
-    {
-      "code": "admin.world_system_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_system_updated",
-      "kind": "action"
-    },
-    {
-      "code": "admin.world_object_types_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_object_type_updated",
-      "kind": "action"
-    },
-    {
-      "code": "admin.world_generation_rules_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.world_generation_rule_added",
-      "kind": "action"
-    },
-    {
-      "code": "admin.world_generation_rule_updated",
-      "kind": "action"
-    },
-    {
-      "code": "admin.world_generation_rule_group_updated",
-      "kind": "action"
-    },
-    {
-      "code": "admin.world_reference_row_added",
-      "kind": "action"
-    },
-    {
-      "code": "admin.texts_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.text_updated",
-      "kind": "action"
-    },
-    {
-      "code": "admin.reference_kinds_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.reference_image_uploaded",
-      "kind": "action"
-    },
-    {
-      "code": "admin.economy_balances_read",
-      "kind": "screen"
-    },
-    {
-      "code": "admin.economy_balance_updated",
-      "kind": "action"
-    }
+    { "code": "admin.ping", "kind": "screen" },
+    { "code": "admin.me", "kind": "screen" },
+    { "code": "admin.sign_out", "kind": "action" },
+    { "code": "admin.config_read", "kind": "screen" },
+    { "code": "admin.config_history_read", "kind": "screen" },
+    { "code": "admin.config_changed", "kind": "action" },
+    { "code": "admin.config_rolled_back", "kind": "action" },
+    { "code": "admin.clock_read", "kind": "screen" },
+    { "code": "admin.clock_changed", "kind": "action" },
+    { "code": "admin.audit_read", "kind": "screen" },
+    { "code": "admin.player_email_changed", "kind": "action" },
+    { "code": "admin.player_access_log_read", "kind": "screen" },
+    { "code": "admin.world_reference_read", "kind": "screen" },
+    { "code": "admin.world_sectors_read", "kind": "screen" },
+    { "code": "admin.world_systems_read", "kind": "screen" },
+    { "code": "admin.world_objects_read", "kind": "screen" },
+    { "code": "admin.world_fields_read", "kind": "screen" },
+    { "code": "admin.world_sector_stats", "kind": "screen" },
+    { "code": "admin.world_sector_added", "kind": "action" },
+    { "code": "admin.world_sector_regenerated", "kind": "action" },
+    { "code": "admin.world_generation_estimated", "kind": "screen" },
+    { "code": "admin.world_generation_started", "kind": "action" },
+    { "code": "admin.world_generation_runs_read", "kind": "screen" },
+    { "code": "admin.world_generation_run_read", "kind": "screen" },
+    { "code": "admin.world_field_read", "kind": "screen" },
+    { "code": "admin.world_field_updated", "kind": "action" },
+    { "code": "admin.world_object_read", "kind": "screen" },
+    { "code": "admin.world_object_updated", "kind": "action" },
+    { "code": "admin.world_system_read", "kind": "screen" },
+    { "code": "admin.world_system_updated", "kind": "action" },
+    { "code": "admin.world_object_types_read", "kind": "screen" },
+    { "code": "admin.world_object_type_updated", "kind": "action" },
+    { "code": "admin.world_generation_rules_read", "kind": "screen" },
+    { "code": "admin.world_generation_rule_added", "kind": "action" },
+    { "code": "admin.world_generation_rule_updated", "kind": "action" },
+    { "code": "admin.world_generation_rule_group_updated", "kind": "action" },
+    { "code": "admin.world_reference_row_added", "kind": "action" },
+    { "code": "admin.texts_read", "kind": "screen" },
+    { "code": "admin.text_updated", "kind": "action" },
+    { "code": "admin.reference_kinds_read", "kind": "screen" },
+    { "code": "admin.reference_image_uploaded", "kind": "action" },
+    { "code": "admin.economy_balances_read", "kind": "screen" },
+    { "code": "admin.economy_balance_updated", "kind": "action" }
   ],
   "roles": [
     {

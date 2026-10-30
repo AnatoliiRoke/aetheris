@@ -51,7 +51,6 @@ public sealed class EconomyTechnologyBonuses : IEconomyTechnologyBonuses
 
         TechnologyCatalog catalog = await _catalogCache.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
 
-        decimal populationMax = decimal.One;
         decimal populationGrowth = decimal.One;
         decimal creditIncome = decimal.One;
 
@@ -68,9 +67,6 @@ public sealed class EconomyTechnologyBonuses : IEconomyTechnologyBonuses
             {
                 switch (effect.EffectType)
                 {
-                    case TechnologyEffectTypes.PopulationMax:
-                        populationMax *= effect.Value;
-                        break;
                     case TechnologyEffectTypes.PopulationGrowthBonus:
                         populationGrowth *= effect.Value;
                         break;
@@ -78,12 +74,13 @@ public sealed class EconomyTechnologyBonuses : IEconomyTechnologyBonuses
                         creditIncome *= effect.Value;
                         break;
                     default:
-                        // The other effects change no parameter of the economy.
+                        // The other effects change no parameter of the economy; the technologies
+                        // that raise the largest population are counted by the bodies module.
                         break;
                 }
             }
         }
 
-        return new EconomyBonuses(populationMax, populationGrowth, creditIncome);
+        return new EconomyBonuses(populationGrowth, creditIncome);
     }
 }

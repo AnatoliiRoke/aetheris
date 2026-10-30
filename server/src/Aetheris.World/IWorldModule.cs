@@ -136,6 +136,14 @@ public interface IWorldModule
     Task<PlanetFacts?> GetPlanetFactsAsync(long planetId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the bodies a player owns: the home body and the colonies.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bodies in the order of their identifiers.</returns>
+    Task<IReadOnlyList<OwnedPlanet>> GetOwnedPlanetsAsync(string playerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the resource types and their groups.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
