@@ -109,7 +109,7 @@ export function PlanetPage() {
           <PopulationPanel planetId={civilization.planetId} />
           <ProductionPanel planetId={civilization.planetId} />
           <ProcessesPanel planetId={civilization.planetId} />
-          <TerraformingPanel planetId={civilization.planetId} />
+          <TerraformingPanel />
           <section className="panel" aria-labelledby="planet-buildings">
             <h2 className="panel__title" id="planet-buildings">
               {t('planet.buildings')}

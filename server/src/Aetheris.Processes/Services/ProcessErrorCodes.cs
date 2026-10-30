@@ -92,4 +92,10 @@ public static class ProcessErrorCodes
 
     /// <summary>The body the device is turned on at is terraformed already: a body is terraformed once.</summary>
     public const string TargetTerraformed = "processes_target_terraformed";
+
+    /// <summary>The type of the body the device is turned on at may not be colonized, a gas giant for example: only a body that may be settled is terraformed.</summary>
+    public const string TargetNotColonizable = "processes_target_not_colonizable";
+
+    /// <summary>The hold of the ship that stands by the body does not carry the device.</summary>
+    public const string DeviceNotInHold = "processes_device_not_in_hold";
 }

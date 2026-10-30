@@ -13,8 +13,10 @@ using Aetheris.Processes.Data;
 using Aetheris.Processes.Data.Entities;
 using Aetheris.Processes.Events;
 using Aetheris.Processes.Services;
+using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
+using Aetheris.Research.Data;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.Planets;
 using Microsoft.EntityFrameworkCore;
@@ -306,12 +308,14 @@ public sealed partial class ProcessesTests
     }
 
     /// <summary>
-    /// The crew of the recycled parts comes back in full; a crew over the limit of the body
-    /// raises the flag of the decline and is not refused (task 00014, criterion 3).
+    /// A part has no crew, so taking it apart returns none: only the resources of the recipe
+    /// come back, even when the parts carry the attribute of the crew and the batch is larger
+    /// than the limit of the population of the body, and the module keeps no state of a returned
+    /// crew (task 00014, section 11).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_recycling_returns_the_crew_and_marks_the_body_over_the_limit()
+    public async Task The_recycling_of_a_part_returns_no_crew()
     {
         await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -321,26 +325,232 @@ public sealed partial class ProcessesTests
         long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling);
         await ProcessesTestData.GiveEveryResourceAsync(player, services);
 
+        // The life support is the part that carries the attribute of the crew.
         PartFacts lifeSupport = await ProcessesTestData.PartAsync(services, LifeSupport);
-        Assert.True(lifeSupport.Crew > 0);
+        ProductionDbContext production = services.GetRequiredService<ProductionDbContext>();
+        Assert.True(await production.PartAttributes.AsNoTracking().AnyAsync(
+            attribute => attribute.PartTypeId == lifeSupport.PartTypeId && attribute.AttributeKey == PartAttributeKeys.Crew && attribute.NumberValue > 0,
+            Token));
 
         long limit = await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>()
             .GetBuildingEffectTotalAsync(player.PlanetId, BuildingEffectTypes.PopulationMax, Token);
-        long quantity = (long)decimal.Floor(limit / lifeSupport.Crew) + 1;
+        long quantity = limit + 1;
         await ProcessesTestData.PutPartsAsync(player, services, lifeSupport.PartTypeId, PartCondition.Full, quantity);
 
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Recycling);
+        Dictionary<int, long> before = await BalancesAsync(player, services, lifeSupport.ResourceCost.Keys);
+
         await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(quantity, PartTypeId: lifeSupport.PartTypeId), Token);
+        Assert.Equal(quantity, await ProcessesTestData.CompleteAsync(player, services, buildingId));
+
+        // The resources come back by the share of the recipe and nothing else comes back: the
+        // module keeps no table of a returned crew any more.
+        Dictionary<int, long> after = await BalancesAsync(player, services, lifeSupport.ResourceCost.Keys);
+        Assert.All(lifeSupport.ResourceCost, cost => Assert.Equal(before[cost.Key] + (long)decimal.Floor(quantity * cost.Value * 0.40m), after[cost.Key]));
+        Assert.DoesNotContain(
+            services.GetRequiredService<ProcessesDbContext>().Model.GetEntityTypes(),
+            entityType => entityType.GetTableName()?.Contains("population", StringComparison.Ordinal) == true);
+        Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, lifeSupport.PartTypeId, PartCondition.Full));
+    }
+
+    /// <summary>
+    /// A part that is made of other parts is taken apart alone: only the resources of its own
+    /// recipe come back, and the parts that went into it stay in the storage as items of their
+    /// own, neither taken nor added (task 00014, section 11).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_composite_part_is_taken_apart_alone_and_the_nested_parts_stay()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+
+        // The engine is made of two hulls besides its own resources.
+        PartFacts hull = await ProcessesTestData.PartAsync(services, Hull);
+        int engineId = (await ProcessesTestData.PartAsync(services, Engine)).PartTypeId;
+        ProductionDbContext production = services.GetRequiredService<ProductionDbContext>();
+        int recipeId = await production.Recipes.AsNoTracking().Where(entry => entry.PartTypeId == engineId).Select(entry => entry.Id).SingleAsync(Token);
+        production.RecipeIngredients.Add(new RecipeIngredientEntity { RecipeId = recipeId, PartTypeId = hull.PartTypeId, Amount = 2 });
+        await production.SaveChangesAsync(Token);
+
+        PartFacts engine = await ProcessesTestData.PartAsync(services, Engine);
+        await ProcessesTestData.PutPartsAsync(player, services, engine.PartTypeId, PartCondition.Full, 1);
+        await ProcessesTestData.PutPartsAsync(player, services, hull.PartTypeId, PartCondition.Full, 3);
+
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Recycling);
+        HashSet<int> resourceIds = [.. engine.ResourceCost.Keys, .. hull.ResourceCost.Keys];
+        Dictionary<int, long> before = await BalancesAsync(player, services, resourceIds);
+
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(1, PartTypeId: engine.PartTypeId), Token);
         await ProcessesTestData.CompleteAsync(player, services, buildingId);
+        Dictionary<int, long> after = await BalancesAsync(player, services, resourceIds);
 
-        ProcessPopulationStateEntity state = await services.GetRequiredService<ProcessesDbContext>().ProcessPopulationStates.AsNoTracking()
-            .SingleAsync(entry => entry.PlanetId == player.PlanetId, Token);
+        // Only the engine went into the recycling, and only its own resources came back.
+        Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, engine.PartTypeId, PartCondition.Full));
+        Assert.Equal(3, await ProcessesTestData.PartsAsync(player, services, hull.PartTypeId, PartCondition.Full));
+        Assert.Single(await production.PartStocks.AsNoTracking().Where(stack => stack.PlanetId == player.PlanetId && stack.PartTypeId == hull.PartTypeId).ToListAsync(Token));
+        Assert.All(engine.ResourceCost, cost => Assert.Equal(before[cost.Key] + (long)decimal.Floor(cost.Value * 0.40m), after[cost.Key]));
+        Assert.All(hull.ResourceCost.Keys.Except(engine.ResourceCost.Keys), resourceId => Assert.Equal(before[resourceId], after[resourceId]));
+    }
 
-        Assert.Equal((long)decimal.Floor(quantity * lifeSupport.Crew), state.CrewPending);
-        Assert.True(state.CrewPending > limit);
-        Assert.True(state.IsOverLimit);
-        Assert.NotNull(state.OverLimitAt);
+    /// <summary>
+    /// An archived parameter stops working at once for the new orders, while an order that is
+    /// already in the queue is finished with the values it was made with (task 00014, section
+    /// 11); the catalog lives in memory for an hour, yet the archive reaches the next order.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task An_archived_parameter_changes_no_order_in_the_queue_and_stops_the_new_ones()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+        await AetherisTestFactory.SetParameterAsync(services, Aetheris.Processes.Configuration.ProcessesConfigKeys.CatalogCacheSeconds, "3600");
+
+        try
+        {
+            long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
+            await ProcessesTestData.GiveEveryResourceAsync(player, services);
+            int technologyId = await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
+
+            IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+            ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
+            int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
+            int targetId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+            ProcessOrderRequest request = new(10, sourceId, targetId);
+            long targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
+
+            // The order is made while the first step of the technology holds: 30 per cent.
+            ProcessCatalog catalog = await ProcessesTestData.CatalogAsync(services);
+            ProcessParamInfo step = catalog.ParamAt(recipe.ProcessTypeId, ProcessParamKinds.ValueByLevel, ProcessLevelSources.Technology, technologyId, 1)!;
+            await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
+
+            // The step is archived at once: the next order of the same kind is refused.
+            ProcessReferenceAdminService admin = services.GetRequiredService<ProcessReferenceAdminService>();
+            ProcessParamEntity stored = await services.GetRequiredService<ProcessesDbContext>().ProcessParams.AsNoTracking().SingleAsync(entry => entry.Id == step.Id, Token);
+            await admin.SetArchivedAsync(ProcessReferenceAdminService.ProcessParamKind, step.Id, true, new Aetheris.Core.Admin.AdminReferenceInput(stored.Version, "test", EmptyValues()), Token);
+
+            Assert.Equal(ProcessErrorCodes.RequirementTechnology, await RefusedAsync(processes, player, buildingId, recipe.Id, request));
+            Assert.Single(await ProcessesTestData.OrdersAsync(player, services, buildingId));
+
+            // The order in the queue is finished with the values it was made with: 30 per cent
+            // of the ten units of the source, though the step is archived now.
+            Assert.Equal(10, await ProcessesTestData.CompleteAsync(player, services, buildingId));
+            Assert.Equal(targetBefore + 3, await ProcessesTestData.BalanceAsync(player, services, targetId));
+            Assert.Empty(await ProcessesTestData.OrdersAsync(player, services, buildingId));
+        }
+        finally
+        {
+            await AetherisTestFactory.SetParameterAsync(services, Aetheris.Processes.Configuration.ProcessesConfigKeys.CatalogCacheSeconds, "0");
+        }
+    }
+
+    /// <summary>
+    /// An order goes by the real levels it was made at: a level of the technology or of the
+    /// building that is reached while the order waits in the queue does not change what it gives
+    /// (task 00014, section 11).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task An_order_keeps_the_real_levels_it_was_made_at()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long converterId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
+        long recyclerId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling);
+        await ProcessesTestData.GiveEveryResourceAsync(player, services);
+        await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
+
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+        ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
+        int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
+        int targetId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        long targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
+
+        PartFacts hull = await ProcessesTestData.PartAsync(services, Hull);
+        await ProcessesTestData.PutPartsAsync(player, services, hull.PartTypeId, PartCondition.Full, 2);
+        ProcessRecipeInfo recycling = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Recycling);
+        Dictionary<int, long> hullBefore = await BalancesAsync(player, services, hull.ResourceCost.Keys);
+
+        // Both orders are made at the first levels: the technology at 1 and the factory at 1.
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(10, sourceId, targetId), Token);
+        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, recyclerId, recycling.Id, new ProcessOrderRequest(2, PartTypeId: hull.PartTypeId), Token);
+
+        // The levels rise while the orders wait; the orders keep the levels they were made at.
+        await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 10);
+        await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling, 10);
+
+        await ProcessesTestData.CompleteAsync(player, services, converterId);
+        await ProcessesTestData.CompleteAsync(player, services, recyclerId);
+
+        Assert.Equal(targetBefore + 3, await ProcessesTestData.BalanceAsync(player, services, targetId));
+        Dictionary<int, long> hullAfter = await BalancesAsync(player, services, hull.ResourceCost.Keys);
+        Assert.All(hull.ResourceCost, cost => Assert.Equal(hullBefore[cost.Key] + (long)decimal.Floor(2 * cost.Value * 0.40m), hullAfter[cost.Key]));
+    }
+
+    /// <summary>
+    /// The matter converter is opened by the technology of the matter conversion, as data of
+    /// the common table of the requirements: without the technology the building is closed and
+    /// names it, and the first level of it opens the building (task 00014, section 11).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task Without_the_technology_the_converter_is_not_available()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        Aetheris.Planets.IPlanetsModule planets = services.GetRequiredService<Aetheris.Planets.IPlanetsModule>();
+        int converterTypeId = (await planets.FindBuildingTypeIdByClassAsync(BuildingClasses.Converter, Token))!.Value;
+        int technologyId = await services.GetRequiredService<ResearchDbContext>().Technologies.AsNoTracking()
+            .Where(technology => technology.Code == ConversionTechnology)
+            .Select(technology => technology.Id)
+            .SingleAsync(Token);
+
+        // The building is closed until the technology is learned, and the reason names it.
+        Aetheris.Planets.Api.AvailabilityDto closed = await planets.CheckRequirementsAsync(
+            Aetheris.Requirements.Services.RequirementSubjectTypes.BuildingType,
+            converterTypeId,
+            1,
+            player.PlanetId,
+            player.Account.UserId,
+            Token);
+        Assert.False(closed.IsAvailable);
+        Aetheris.Planets.Api.RequirementDto reason = Assert.Single(closed.UnmetRequirements);
+        Assert.Equal(Aetheris.Requirements.Services.RequirementTypes.TechnologyLevel, reason.RequirementType);
+        Assert.Equal(technologyId, reason.TargetId);
+        Assert.Equal(1, reason.TargetLevel);
+
+        // The data hold the opening once, at the minimal level of the technology, and not again
+        // on every level it has.
+        List<int> openingLevels = await services.GetRequiredService<ResearchDbContext>().TechnologyLevels.AsNoTracking()
+            .Where(level => level.TechnologyId == technologyId && level.EffectIds.Any(effect => effect.UnlockTargetId == converterTypeId))
+            .Select(level => level.Level)
+            .ToListAsync(Token);
+        Assert.Equal([1], openingLevels);
+
+        // The first level of the technology opens it, and a higher level changes nothing.
+        await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
+        Assert.True((await planets.CheckRequirementsAsync(
+            Aetheris.Requirements.Services.RequirementSubjectTypes.BuildingType,
+            converterTypeId,
+            1,
+            player.PlanetId,
+            player.Account.UserId,
+            Token)).IsAvailable);
     }
 
     /// <summary>

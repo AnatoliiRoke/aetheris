@@ -53,11 +53,14 @@ public sealed class ProcessesDbContext : DbContext
     /// <summary>Gets the ingredients the records of the queues paid for.</summary>
     public DbSet<ProcessOrderCostEntity> ProcessOrderCosts => Set<ProcessOrderCostEntity>();
 
-    /// <summary>Gets the states of the population the processes changed.</summary>
-    public DbSet<ProcessPopulationStateEntity> ProcessPopulationStates => Set<ProcessPopulationStateEntity>();
-
     /// <summary>Gets the extra places of the queues of the processes.</summary>
     public DbSet<ProcessQueueStateEntity> ProcessQueueStates => Set<ProcessQueueStateEntity>();
+
+    /// <summary>Gets the levels of the technologies the orders in the queues were made at.</summary>
+    public DbSet<ProcessOrderTechnologyEntity> ProcessOrderTechnologies => Set<ProcessOrderTechnologyEntity>();
+
+    /// <summary>Gets the snapshots of the parameters the orders in the queues were made with.</summary>
+    public DbSet<ProcessOrderParamEntity> ProcessOrderParams => Set<ProcessOrderParamEntity>();
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -146,11 +149,21 @@ public sealed class ProcessesDbContext : DbContext
             entity.ToTable(table => table.HasCheckConstraint("ck_process_order_cost_amount", "amount >= 0"));
         });
 
-        modelBuilder.Entity<ProcessPopulationStateEntity>(entity =>
+        modelBuilder.Entity<ProcessOrderTechnologyEntity>(entity =>
         {
-            entity.ToTable("process_population_state");
-            entity.HasIndex(e => e.PlanetId).IsUnique();
-            entity.ToTable(table => table.HasCheckConstraint("ck_process_population_state_crew", "crew_pending >= 0"));
+            entity.ToTable("process_order_technology");
+            entity.HasIndex(e => e.ProcessOrderId);
+            entity.HasOne<ProcessOrderEntity>().WithMany(e => e.TechnologyIds).HasForeignKey(e => e.ProcessOrderId).OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint("ck_process_order_technology_level", "level >= 0"));
+        });
+
+        modelBuilder.Entity<ProcessOrderParamEntity>(entity =>
+        {
+            entity.ToTable("process_order_param");
+            entity.Property(e => e.ParamKind).HasMaxLength(CodeLength);
+            entity.Property(e => e.LevelSource).HasMaxLength(CodeLength);
+            entity.HasIndex(e => e.ProcessOrderId);
+            entity.HasOne<ProcessOrderEntity>().WithMany(e => e.ParamIds).HasForeignKey(e => e.ProcessOrderId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ProcessQueueStateEntity>(entity =>

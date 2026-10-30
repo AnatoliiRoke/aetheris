@@ -6,7 +6,7 @@ namespace Aetheris.Processes.Handlers;
 
 /// <summary>
 /// The handler of the recycling: the factory takes the parts of the storage apart and returns
-/// a share of their resources (task 00014, decision 3).
+/// a share of their resources (task 00014, decision 3 and section 11).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -17,8 +17,11 @@ namespace Aetheris.Processes.Handlers;
 /// no bonuses of the artifacts.
 /// </para>
 /// <para>
-/// The crew of the parts comes back in full and waits in the state of the population; the
-/// population task settles it.
+/// A part or a module has no crew, so taking it apart returns none: the crew comes aboard only
+/// when a ship is assembled, and the recycling of a whole ship is a process of its own that this
+/// task does not hold (task 00014, section 11). A part that is made of other parts is taken
+/// apart alone: the parts inside it stay in the storage as items of their own, and only the
+/// resources of its own recipe come back.
 /// </para>
 /// </remarks>
 public sealed class RecyclingHandler : IProcessHandler
@@ -109,10 +112,7 @@ public sealed class RecyclingHandler : IProcessHandler
             }
         }
 
-        // The crew of the parts comes back in full (task 00014, decision 3).
-        long crew = ProcessUnits.Portion(stacks.Sum(stack => stack.Quantity) * facts.Crew, context.Quantity, context.UnitIndex);
-
-        return new ProcessResult(resources, [], crew);
+        return new ProcessResult(resources, []);
     }
 
     /// <inheritdoc />

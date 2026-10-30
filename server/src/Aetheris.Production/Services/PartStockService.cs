@@ -302,15 +302,9 @@ public sealed class PartStockService
             }
         }
 
-        decimal crew = part.Attributes.TryGetValue(PartAttributeKeys.Crew, out PartAttributeInfo? attribute)
-            ? attribute.NumberValue ?? decimal.Zero
-            : decimal.Zero;
+        bool isTerraformingDevice = part.Attributes.ContainsKey(PartAttributeKeys.TerraformingDevice);
 
-        decimal? terraformingMultiplier = part.Attributes.TryGetValue(PartAttributeKeys.TerraformingMultiplier, out PartAttributeInfo? device)
-            ? device.NumberValue
-            : null;
-
-        return new PartFacts(part.Id, part.Code, part.NameKey, part.MarkLevel, part.IsArchived, crew, cost, terraformingMultiplier);
+        return new PartFacts(part.Id, part.Code, part.NameKey, part.MarkLevel, part.IsArchived, cost, isTerraformingDevice);
     }
 
     /// <summary>
@@ -470,15 +464,13 @@ public sealed record PartStackInfo(int PartTypeId, int MarkLevel, bool HasRaceBo
 /// <param name="NameKey">The key of the name of the part.</param>
 /// <param name="MarkLevel">The mark level of the part.</param>
 /// <param name="IsArchived">Whether the part is archived.</param>
-/// <param name="Crew">The crew the part carries, from its attribute.</param>
 /// <param name="ResourceCost">The resources of one part by the recipe that makes it, by the resource.</param>
-/// <param name="TerraformingMultiplier">The multiplier of the deposits the part gives as a device of the terraforming, or <see langword="null"/> when the part is no such device.</param>
+/// <param name="IsTerraformingDevice">Whether the part is a one-shot device of the terraforming, by its mark in the attributes (task 00014, section 11).</param>
 public sealed record PartFacts(
     int PartTypeId,
     string Code,
     string NameKey,
     int MarkLevel,
     bool IsArchived,
-    decimal Crew,
     IReadOnlyDictionary<int, decimal> ResourceCost,
-    decimal? TerraformingMultiplier = null);
+    bool IsTerraformingDevice = false);

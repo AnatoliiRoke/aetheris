@@ -189,6 +189,40 @@ public sealed class WorldQueryService
     }
 
     /// <summary>
+    /// Gets the bodies among the given ones that are free and may be colonized.
+    /// </summary>
+    /// <param name="planetIds">The bodies.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The free bodies that may be colonized, in the order of their identifiers.</returns>
+    public async Task<IReadOnlyList<FreePlanetDto>> GetFreePlanetsByIdsAsync(
+        IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(planetIds);
+
+        long[] ids = [.. planetIds.Distinct()];
+
+        return await _dbContext.Planets.AsNoTracking()
+            .Where(planet => ids.Contains(planet.Id) && planet.OwnerPlayerId == null)
+            .Join(_dbContext.Objects, planet => planet.CelestialObjectId, entry => entry.Id, (planet, entry) => new { planet, entry })
+            .Join(_dbContext.ObjectTypes, pair => pair.entry.ObjectTypeId, type => type.Id, (pair, type) => new { pair.planet, pair.entry, type })
+            .Where(row => row.type.IsColonizable)
+            .OrderBy(row => row.planet.Id)
+            .Select(row => new FreePlanetDto(
+                row.planet.Id,
+                row.entry.Id,
+                row.planet.SystemId,
+                row.planet.SectorId,
+                row.entry.ObjectTypeId,
+                row.entry.Orbit,
+                row.entry.Name,
+                row.planet.SizeClassId,
+                row.planet.Size,
+                row.planet.IsTerraformed))
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Gets the open free bodies of a sector that a player may take.
     /// </summary>
     /// <param name="playerId">The player.</param>
@@ -320,15 +354,26 @@ public sealed class WorldQueryService
             .Include(entry => entry.DepositIds)
             .SingleOrDefaultAsync(entry => entry.Id == planetId, cancellationToken).ConfigureAwait(false);
 
-        return planet is null
-            ? null
-            : new PlanetFacts(
-                planet.Id,
-                planet.SectorId,
-                planet.OwnerPlayerId,
-                planet.Name,
-                [.. planet.DepositIds.Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))],
-                planet.IsTerraformed);
+        if (planet is null)
+        {
+            return null;
+        }
+
+        // Whether the body may be settled is a fact of the type of the body, a column of the
+        // table of the types, so a gas giant is told by its data and never by its code.
+        bool isColonizable = await _dbContext.Objects.AsNoTracking()
+            .Where(entry => entry.Id == planet.CelestialObjectId)
+            .Join(_dbContext.ObjectTypes, entry => entry.ObjectTypeId, type => type.Id, (entry, type) => type.IsColonizable)
+            .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+        return new PlanetFacts(
+            planet.Id,
+            planet.SectorId,
+            planet.OwnerPlayerId,
+            planet.Name,
+            [.. planet.DepositIds.Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))],
+            planet.IsTerraformed,
+            isColonizable);
     }
 
     /// <summary>

@@ -203,14 +203,16 @@ public sealed class CancelProcessCommand : Command<CancelProcessCommand.Request,
 }
 
 /// <summary>
-/// Turns a one-shot device of the terraforming on at a free body (task 00014, section 9).
+/// Turns a one-shot device from the hold of a ship on at a free body (task 00014, sections 9
+/// and 11).
 /// </summary>
 /// <remarks>
-/// The client names the colony the ship takes the device from, the free body and the device.
-/// The pipeline checks that the colony belongs to the player of the session, so the device of
-/// another player is never spent; the server checks every rule of the target and spends the
-/// device in the transaction of the command. The terraforming is no order of a queue: nothing
-/// is cancelled and the device never comes back.
+/// The client names the free body, the ship that stands by it and the device in the hold of that
+/// ship; nothing here names a colony, because the terraforming comes only from a ship. The
+/// ships module answers only for the ships of the player of the session, so the device of
+/// another player is never spent. The server checks every rule of the target and spends the
+/// device in the transaction of the command. The terraforming is no order of a
+/// queue: nothing is cancelled and the device never comes back.
 /// </remarks>
 public sealed class TerraformCommand : Command<TerraformCommand.Request, JsonElement>
 {
@@ -248,19 +250,9 @@ public sealed class TerraformCommand : Command<TerraformCommand.Request, JsonEle
     {
         ArgumentNullException.ThrowIfNull(rules);
 
-        rules.RuleFor(request => request.PlanetId).NotNull().GreaterThan(0);
         rules.RuleFor(request => request.TargetPlanetId).NotNull().GreaterThan(0);
+        rules.RuleFor(request => request.ShipId).NotNull().GreaterThan(0);
         rules.RuleFor(request => request.PartTypeId).NotNull().GreaterThan(0);
-    }
-
-    /// <inheritdoc />
-    public override OwnedObjectReference? GetTarget(Request request)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-
-        // The owned object is the colony that holds the device; the target body is free and
-        // has no owner to check.
-        return new(PlanetOwnerResolver.Type, request.PlanetId!.Value.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <inheritdoc />
@@ -271,8 +263,8 @@ public sealed class TerraformCommand : Command<TerraformCommand.Request, JsonEle
         TerraformingResultDto result = await _terraforming
             .LaunchAsync(
                 context.PlayerId,
-                request.PlanetId!.Value,
                 request.TargetPlanetId!.Value,
+                request.ShipId!.Value,
                 request.PartTypeId!.Value,
                 cancellationToken)
             .ConfigureAwait(false);
@@ -281,13 +273,13 @@ public sealed class TerraformCommand : Command<TerraformCommand.Request, JsonEle
     }
 
     /// <summary>
-    /// The request: the colony, the free body and the device.
+    /// The request: the free body, the ship and the device.
     /// </summary>
-    /// <param name="PlanetId">The colony the ship takes the device from.</param>
     /// <param name="TargetPlanetId">The free body the device is turned on at.</param>
+    /// <param name="ShipId">The ship that stands by the body and carries the device in its hold.</param>
     /// <param name="PartTypeId">The device.</param>
     public sealed record Request(
-        [property: JsonPropertyName("planet_id")] long? PlanetId,
         [property: JsonPropertyName("target_planet_id")] long? TargetPlanetId,
+        [property: JsonPropertyName("ship_id")] long? ShipId,
         [property: JsonPropertyName("part_type_id")] int? PartTypeId);
 }

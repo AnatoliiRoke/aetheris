@@ -132,11 +132,16 @@ public sealed class WorldModule : IWorldModule
     /// <inheritdoc />
     public Task<TerraformResult> TerraformAsync(
         long planetId,
-        decimal coefficient,
+        decimal multiplierMin,
+        decimal multiplierMax,
         string actorId,
         string reason,
         CancellationToken cancellationToken = default) =>
-        _deposits.TerraformAsync(planetId, coefficient, actorId, reason, cancellationToken);
+        _deposits.TerraformAsync(planetId, multiplierMin, multiplierMax, actorId, reason, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<FreePlanetDto>> GetFreePlanetsByIdsAsync(IReadOnlyCollection<long> planetIds, CancellationToken cancellationToken = default) =>
+        _queries.GetFreePlanetsByIdsAsync(planetIds, cancellationToken);
 
     /// <inheritdoc />
     public Task<IReadOnlyList<FreePlanetDto>> GetFreePlanetsAsync(string playerId, int sectorId, CancellationToken cancellationToken = default) =>

@@ -83,6 +83,10 @@ namespace Aetheris.Processes.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<int?>("BuildingLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("building_level");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -90,6 +94,10 @@ namespace Aetheris.Processes.Data.Migrations
                     b.Property<DateTimeOffset?>("FinishesAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("finishes_at");
+
+                    b.Property<bool>("HasParamSnapshot")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_param_snapshot");
 
                     b.Property<bool>("IsBlocked")
                         .HasColumnType("boolean")
@@ -170,6 +178,97 @@ namespace Aetheris.Processes.Data.Migrations
                             t.HasCheckConstraint("ck_process_order_quantity", "quantity > 0");
 
                             t.HasCheckConstraint("ck_process_order_unit_seconds", "unit_seconds >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Aetheris.Processes.Data.Entities.ProcessOrderParamEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
+
+                    b.Property<string>("LevelSource")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("level_source");
+
+                    b.Property<int?>("LevelTargetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("level_target_id");
+
+                    b.Property<string>("ParamKind")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("param_kind");
+
+                    b.Property<long>("ProcessOrderId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("process_order_id");
+
+                    b.Property<int>("ProcessParamId")
+                        .HasColumnType("integer")
+                        .HasColumnName("process_param_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("numeric")
+                        .HasColumnName("value");
+
+                    b.Property<decimal?>("ValueMax")
+                        .HasColumnType("numeric")
+                        .HasColumnName("value_max");
+
+                    b.HasKey("Id")
+                        .HasName("pk_process_order_param");
+
+                    b.HasIndex("ProcessOrderId")
+                        .HasDatabaseName("ix_process_order_param_process_order_id");
+
+                    b.ToTable("process_order_param", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Processes.Data.Entities.ProcessOrderTechnologyEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
+
+                    b.Property<long>("ProcessOrderId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("process_order_id");
+
+                    b.Property<int>("TechnologyId")
+                        .HasColumnType("integer")
+                        .HasColumnName("technology_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_process_order_technology");
+
+                    b.HasIndex("ProcessOrderId")
+                        .HasDatabaseName("ix_process_order_technology_process_order_id");
+
+                    b.ToTable("process_order_technology", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_process_order_technology_level", "level >= 0");
                         });
                 });
 
@@ -260,44 +359,6 @@ namespace Aetheris.Processes.Data.Migrations
                     b.ToTable("process_param", null, t =>
                         {
                             t.HasCheckConstraint("ck_process_param_level", "level >= 1");
-                        });
-                });
-
-            modelBuilder.Entity("Aetheris.Processes.Data.Entities.ProcessPopulationStateEntity", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("CrewPending")
-                        .HasColumnType("bigint")
-                        .HasColumnName("crew_pending");
-
-                    b.Property<bool>("IsOverLimit")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_over_limit");
-
-                    b.Property<DateTimeOffset?>("OverLimitAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("over_limit_at");
-
-                    b.Property<long>("PlanetId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("planet_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_process_population_state");
-
-                    b.HasIndex("PlanetId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_process_population_state_planet_id");
-
-                    b.ToTable("process_population_state", null, t =>
-                        {
-                            t.HasCheckConstraint("ck_process_population_state_crew", "crew_pending >= 0");
                         });
                 });
 
@@ -543,6 +604,26 @@ namespace Aetheris.Processes.Data.Migrations
                         .HasConstraintName("fk_process_order_cost_process_order_process_order_id");
                 });
 
+            modelBuilder.Entity("Aetheris.Processes.Data.Entities.ProcessOrderParamEntity", b =>
+                {
+                    b.HasOne("Aetheris.Processes.Data.Entities.ProcessOrderEntity", null)
+                        .WithMany("ParamIds")
+                        .HasForeignKey("ProcessOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_process_order_param_process_order_process_order_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Processes.Data.Entities.ProcessOrderTechnologyEntity", b =>
+                {
+                    b.HasOne("Aetheris.Processes.Data.Entities.ProcessOrderEntity", null)
+                        .WithMany("TechnologyIds")
+                        .HasForeignKey("ProcessOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_process_order_technology_process_order_process_order_id");
+                });
+
             modelBuilder.Entity("Aetheris.Processes.Data.Entities.ProcessParamEntity", b =>
                 {
                     b.HasOne("Aetheris.Processes.Data.Entities.ProcessTypeEntity", null)
@@ -576,6 +657,10 @@ namespace Aetheris.Processes.Data.Migrations
             modelBuilder.Entity("Aetheris.Processes.Data.Entities.ProcessOrderEntity", b =>
                 {
                     b.Navigation("CostIds");
+
+                    b.Navigation("ParamIds");
+
+                    b.Navigation("TechnologyIds");
                 });
 
             modelBuilder.Entity("Aetheris.Processes.Data.Entities.ProcessRecipeEntity", b =>

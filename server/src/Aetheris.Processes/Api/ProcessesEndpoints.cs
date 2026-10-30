@@ -62,15 +62,15 @@ public static class ProcessesEndpoints
             return Results.Json(building, ProcessesJson.Options);
         });
 
-        // The terraforming a ship may start from a colony: the devices and the free bodies.
+        // The terraforming a ship may start: the free bodies with the ships by them and the
+        // devices in their holds. No colony is named: it comes only from a ship.
         processes.MapGet("/terraforming", async (
-            [FromQuery(Name = "planet_id")] long planetId,
             ClaimsPrincipal user,
             TerraformingHandler terraforming,
             CancellationToken cancellationToken) =>
         {
             TerraformingDto state = await terraforming
-                .ReadAsync(PlayerId(user), planetId, cancellationToken)
+                .ReadAsync(PlayerId(user), cancellationToken)
                 .ConfigureAwait(false);
 
             return Results.Json(state, ProcessesJson.Options);

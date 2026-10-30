@@ -107,16 +107,14 @@ public sealed record ProcessPartInput(int PartTypeId, int ConditionPercent, long
 
 /// <summary>
 /// What one unit of an order of a process gives: the resources and the parts that go to the
-/// body and the crew that comes back (task 00014).
+/// body (task 00014).
 /// </summary>
 /// <param name="Resources">The resources that go to the balance of the body.</param>
 /// <param name="Parts">The parts that go to the storage of the body.</param>
-/// <param name="Crew">The crew that came back and waits to be settled by the population task.</param>
 /// <param name="EndsProcess">Whether the unit ends the whole order, for the processes that make one thing at a time.</param>
 public sealed record ProcessResult(
     IReadOnlyDictionary<int, long> Resources,
     IReadOnlyList<PartStackAdded> Parts,
-    long Crew = 0,
     bool EndsProcess = false)
 {
     /// <summary>

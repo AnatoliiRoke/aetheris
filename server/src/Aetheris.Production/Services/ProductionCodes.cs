@@ -124,10 +124,12 @@ public static class PartAttributeKeys
     public const string Mass = "mass";
 
     /// <summary>
-    /// The multiplier of the deposits a one-shot device gives a free body; a part with this
-    /// attribute is a device of the terraforming (task 00014, section 9).
+    /// The mark of a one-shot device of the terraforming: a part with this attribute is such a
+    /// device, and the attribute holds no value. The multiplier of the deposits is rolled by the
+    /// world for every deposit in the range of the configuration, so the part does not give it
+    /// (task 00014, section 11).
     /// </summary>
-    public const string TerraformingMultiplier = "terraforming_multiplier";
+    public const string TerraformingDevice = "terraforming_device";
 
     /// <summary>
     /// Gets every key of an attribute, in the order of the form of the admin panel.
@@ -141,7 +143,7 @@ public static class PartAttributeKeys
         Range,
         SlotSize,
         Mass,
-        TerraformingMultiplier,
+        TerraformingDevice,
     ];
 }
 

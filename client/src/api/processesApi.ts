@@ -99,30 +99,19 @@ export interface ProcessOrderRequest {
 }
 
 /**
- * The terraforming a ship may start from a colony (task 00014, section 9): the devices of the
- * storage of the colony, the free bodies the player sees and the range of the multiplier.
+ * The terraforming a ship may start (task 00014, sections 9 and 11): the free bodies that may be
+ * settled with a ship of the player by them, the devices in the holds of those ships, and the
+ * range of the multiplier every deposit rolls in. It comes only from a ship, so no colony is named.
  */
 export interface TerraformingState {
-  planetId: number;
-  devices: TerraformingDevice[];
   targets: TerraformingTarget[];
   multiplierMin: number;
   multiplierMax: number;
 }
 
 /**
- * A one-shot device of the terraforming in the storage of the colony.
- */
-export interface TerraformingDevice {
-  partTypeId: number;
-  nameKey: string;
-  markLevel: number;
-  multiplier: number;
-  quantity: number;
-}
-
-/**
- * A free body a device may be turned on at.
+ * A free body a device may be turned on at, with the ships of the player that stand by it and
+ * carry a device.
  */
 export interface TerraformingTarget {
   planetId: number;
@@ -131,6 +120,34 @@ export interface TerraformingTarget {
   orbit: number | null;
   name: string;
   isTerraformed: boolean;
+  shipIds: TerraformingShip[];
+}
+
+/**
+ * A ship of the player by a body with the one-shot devices in its hold.
+ */
+export interface TerraformingShip {
+  shipId: number;
+  devices: TerraformingDevice[];
+}
+
+/**
+ * A one-shot device of the terraforming in the hold of a ship.
+ */
+export interface TerraformingDevice {
+  partTypeId: number;
+  nameKey: string;
+  markLevel: number;
+  quantity: number;
+}
+
+/**
+ * A deposit that became richer, with the multiplier of its own roll.
+ */
+export interface TerraformedDeposit {
+  resourceTypeId: number;
+  oldCoefficient: number;
+  newCoefficient: number;
 }
 
 /**
@@ -138,9 +155,10 @@ export interface TerraformingTarget {
  */
 export interface TerraformingResult {
   targetPlanetId: number;
+  shipId: number;
   partTypeId: number;
-  multiplier: number;
   changedDeposits: number;
+  depositIds: TerraformedDeposit[];
   terraforming: TerraformingState;
 }
 
@@ -160,8 +178,8 @@ export interface ProcessesApi {
     request?: ProcessOrderRequest,
   ): Promise<ProcessBuilding>;
   cancel(planetId: number, planetBuildingId: number, orderId: number): Promise<ProcessBuilding>;
-  terraforming(planetId: number): Promise<TerraformingState>;
-  terraform(planetId: number, targetPlanetId: number, partTypeId: number): Promise<TerraformingResult>;
+  terraforming(): Promise<TerraformingState>;
+  terraform(targetPlanetId: number, shipId: number, partTypeId: number): Promise<TerraformingResult>;
 }
 
 const prefix = '/api/v1/processes';
@@ -200,14 +218,14 @@ export function createProcessesApi(http: HttpClient): ProcessesApi {
         }),
       );
     },
-    async terraforming(planetId) {
-      return camelize<TerraformingState>(await http.get<unknown>(`${prefix}/terraforming?planet_id=${planetId}`));
+    async terraforming() {
+      return camelize<TerraformingState>(await http.get<unknown>(`${prefix}/terraforming`));
     },
-    async terraform(planetId, targetPlanetId, partTypeId) {
+    async terraform(targetPlanetId, shipId, partTypeId) {
       return camelize<TerraformingResult>(
         await http.command<unknown>(`${prefix}/terraform`, {
-          planet_id: planetId,
           target_planet_id: targetPlanetId,
+          ship_id: shipId,
           part_type_id: partTypeId,
         }),
       );

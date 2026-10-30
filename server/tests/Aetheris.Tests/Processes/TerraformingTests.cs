@@ -20,9 +20,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Aetheris.Tests.Processes;
 
 /// <summary>
-/// Tests of the terraforming started by a ship (task 00014, section 9): a one-shot device of
-/// the storage of a colony makes the deposits of a free body rich, once, and the body stays
-/// free for whoever colonizes it.
+/// Tests of the terraforming started by a ship (task 00014, sections 9 and 11): a one-shot
+/// device from the hold of a ship that stands by a free body that may be settled makes every
+/// deposit of the body rich by a roll of its own, once, and the body stays free for whoever
+/// colonizes it.
 /// </summary>
 [Collection(DatabaseCollection.Name)]
 public sealed class TerraformingTests
@@ -32,6 +33,10 @@ public sealed class TerraformingTests
     private const string Iron = "resource_1";
 
     private const string Copper = "resource_3";
+
+    private const string Deuterium = "resource_9";
+
+    private const long ShipId = 1;
 
     private readonly AetherisTestFactory _factory;
 
@@ -48,14 +53,19 @@ public sealed class TerraformingTests
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
+    private ShipsOnOrbitStub Ships => _factory.Services.GetRequiredService<ShipsOnOrbitStub>();
+
+    private ScriptedRandomSource Rolls => _factory.Services.GetRequiredService<ScriptedRandomSource>();
+
     /// <summary>
-    /// A device of the storage of a colony makes the deposits of a free body rich in the range
-    /// of the data without lowering a richer deposit; the device is spent at the start and
-    /// never comes back, the body is marked and keeps its type, its size and its free state.
+    /// A device from the hold of a ship makes every poor deposit of a free body rich, each by a
+    /// roll of its own in the range of the data, without lowering a richer deposit; the device
+    /// leaves the hold at the start and never comes back, the storage of the colony is not
+    /// touched, the body is marked and keeps its type, its size and its free state.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_device_makes_a_free_body_rich_and_is_spent()
+    public async Task The_device_from_the_hold_makes_every_deposit_rich_by_its_own_roll_and_is_spent()
     {
         await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -63,40 +73,66 @@ public sealed class TerraformingTests
         IServiceProvider services = scope.ServiceProvider;
 
         long targetId = await FreeBodyAsync(services, player);
-        int poor = await PlanetsTestData.SetDepositAsync(services, targetId, Iron, 1.0m);
-        int rich = await PlanetsTestData.SetDepositAsync(services, targetId, Copper, 1.85m);
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
-        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 2);
-
         WorldDbContext world = services.GetRequiredService<WorldDbContext>();
+        await world.Deposits.Where(entry => entry.PlanetId == targetId).ExecuteDeleteAsync(Token);
+        int firstPoor = await PlanetsTestData.SetDepositAsync(services, targetId, Iron, 1.0m);
+        int secondPoor = await PlanetsTestData.SetDepositAsync(services, targetId, Copper, 1.0m);
+        int rich = await PlanetsTestData.SetDepositAsync(services, targetId, Deuterium, 1.85m);
+        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+
+        // The storage of the colony holds devices too, and none of them may be taken.
+        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 2);
+        PlaceShip(services, player, targetId, ShipId, device.PartTypeId, 2);
+
         PlanetEntity before = await world.Planets.AsNoTracking().Include(entry => entry.CelestialObject).SingleAsync(entry => entry.Id == targetId, Token);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
 
-        // The colony offers its devices and the free body before the start.
-        await WithMapOpenAsync(services, async () =>
-        {
-            TerraformingDto offered = await processes.GetTerraformingAsync(player.Account.UserId, player.PlanetId, Token);
-            TerraformingDeviceDto stored = Assert.Single(offered.Devices);
-            Assert.Equal(device.PartTypeId, stored.PartTypeId);
-            Assert.Equal(2, stored.Quantity);
-            Assert.False(Assert.Single(offered.Targets, target => target.PlanetId == targetId).IsTerraformed);
-        });
+        // The player is offered the free body a ship stands by, with the device in its hold; no
+        // colony takes part, and the map needs no opening, because the ship sees its body.
+        TerraformingDto offered = await processes.GetTerraformingAsync(player.Account.UserId, Token);
+        TerraformingTargetDto target = Assert.Single(offered.Targets);
+        Assert.Equal(targetId, target.PlanetId);
+        TerraformingShipDto ship = Assert.Single(target.ShipIds);
+        Assert.Equal(ShipId, ship.ShipId);
+        TerraformingDeviceDto held = Assert.Single(ship.Devices);
+        Assert.Equal(device.PartTypeId, held.PartTypeId);
+        Assert.Equal(2, held.Quantity);
+        Assert.False(target.IsTerraformed);
 
-        TerraformingResultDto result = await processes.TerraformAsync(player.Account.UserId, player.PlanetId, targetId, device.PartTypeId, Token);
+        // The three deposits are rolled in the order of their resources: the lowest, the middle
+        // and a quarter of the way up the range of the configuration.
+        List<int> ordered = [.. new[] { firstPoor, secondPoor, rich }.Order()];
+        double[] rolls = [0.0, 0.5, 0.25];
+        Rolls.Script(rolls);
+
+        TerraformingResultDto result = await processes.TerraformAsync(player.Account.UserId, targetId, ShipId, device.PartTypeId, Token);
 
         Dictionary<int, decimal> deposits = await world.Deposits.AsNoTracking()
             .Where(entry => entry.PlanetId == targetId)
             .ToDictionaryAsync(entry => entry.ResourceId, entry => entry.Coefficient, Token);
 
-        // The poor deposit becomes rich in the range, the richer one keeps its richness.
-        Assert.Equal(device.TerraformingMultiplier, result.Multiplier);
-        Assert.True(deposits[poor] > 1.4m && deposits[poor] <= 1.9m);
-        Assert.Equal(1.85m, deposits[rich]);
-        Assert.NotEmpty(await world.DepositChanges.AsNoTracking().Where(change => change.PlanetId == targetId).ToListAsync(Token));
+        decimal low = 1.4m;
+        decimal span = 0.5m;
+        Dictionary<int, decimal> rolled = ordered.Select((resourceId, index) => (resourceId, multiplier: low + ((decimal)rolls[index] * span)))
+            .ToDictionary(entry => entry.resourceId, entry => entry.multiplier);
 
-        // One device is spent at the start: nothing is in a queue, so nothing gives it back.
-        Assert.Equal(1, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
-        Assert.Equal(1, Assert.Single(result.Terraforming.Devices).Quantity);
+        // Each poor deposit got the multiplier of its own roll, and the two differ.
+        Assert.Equal(rolled[firstPoor], deposits[firstPoor]);
+        Assert.Equal(rolled[secondPoor], deposits[secondPoor]);
+        Assert.NotEqual(deposits[firstPoor], deposits[secondPoor]);
+        Assert.All(new[] { firstPoor, secondPoor }, resourceId => Assert.InRange(deposits[resourceId], 1.4m, 1.9m));
+
+        // The rich deposit was below its roll nowhere: it keeps its richness.
+        Assert.Equal(1.85m, deposits[rich]);
+        Assert.Equal(2, result.ChangedDeposits);
+        Assert.Equal(2, result.DepositIds.Count);
+        Assert.All(result.DepositIds, changed => Assert.Equal(deposits[changed.ResourceTypeId], changed.NewCoefficient));
+        Assert.Equal(2, await world.DepositChanges.AsNoTracking().CountAsync(change => change.PlanetId == targetId, Token));
+
+        // One device left the hold at the start; the storage of the colony and the queues are
+        // untouched, so nothing gives the device back.
+        Assert.Equal(1, Ships.CargoOf(player.Account.UserId, targetId, ShipId, device.PartTypeId));
+        Assert.Equal(2, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
         Assert.Empty(await services.GetRequiredService<Aetheris.Processes.Data.ProcessesDbContext>().ProcessOrders.AsNoTracking().ToListAsync(Token));
 
         // The body is marked, stays free and keeps its type and its size.
@@ -109,8 +145,96 @@ public sealed class TerraformingTests
     }
 
     /// <summary>
-    /// A colony is no target: the device stays in the storage and the deposits stay as they
-    /// were.
+    /// The range of the multiplier comes from the two keys of the configuration, so a roll of
+    /// zero gives the lowest multiplier and a roll near one gives a multiplier near the highest.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_rolls_follow_the_range_of_the_configuration()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long targetId = await FreeBodyAsync(services, player);
+        WorldDbContext world = services.GetRequiredService<WorldDbContext>();
+        await world.Deposits.Where(entry => entry.PlanetId == targetId).ExecuteDeleteAsync(Token);
+        int first = await PlanetsTestData.SetDepositAsync(services, targetId, Iron, 1.0m);
+        int second = await PlanetsTestData.SetDepositAsync(services, targetId, Copper, 1.0m);
+        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PlaceShip(services, player, targetId, ShipId, device.PartTypeId, 1);
+        string lowest = ProcessesConfigKeys.Definitions.Single(definition => definition.Key == ProcessesConfigKeys.TerraformingMultiplierMin).DefaultValue;
+        string highest = ProcessesConfigKeys.Definitions.Single(definition => definition.Key == ProcessesConfigKeys.TerraformingMultiplierMax).DefaultValue;
+
+        try
+        {
+            await AetherisTestFactory.SetParameterAsync(services, ProcessesConfigKeys.TerraformingMultiplierMin, "2");
+            await AetherisTestFactory.SetParameterAsync(services, ProcessesConfigKeys.TerraformingMultiplierMax, "3");
+            Rolls.Script(0.0, 0.5);
+
+            await services.GetRequiredService<IProcessesModule>()
+                .TerraformAsync(player.Account.UserId, targetId, ShipId, device.PartTypeId, Token);
+
+            Dictionary<int, decimal> deposits = await world.Deposits.AsNoTracking()
+                .Where(entry => entry.PlanetId == targetId)
+                .ToDictionaryAsync(entry => entry.ResourceId, entry => entry.Coefficient, Token);
+            int lower = Math.Min(first, second);
+            int upper = Math.Max(first, second);
+
+            Assert.Equal(2.0m, deposits[lower]);
+            Assert.Equal(2.5m, deposits[upper]);
+        }
+        finally
+        {
+            await AetherisTestFactory.SetParameterAsync(services, ProcessesConfigKeys.TerraformingMultiplierMin, lowest);
+            await AetherisTestFactory.SetParameterAsync(services, ProcessesConfigKeys.TerraformingMultiplierMax, highest);
+        }
+    }
+
+    /// <summary>
+    /// The device comes from the hold of the ship that stands by the target and from nowhere
+    /// else: a device in the storage of the colony is not enough, a ship whose hold is empty
+    /// refuses, and the ship that is named is the one that is charged.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_device_is_taken_from_the_named_hold_and_never_from_the_storage()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long targetId = await FreeBodyAsync(services, player);
+        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+
+        // The storage of the colony holds devices, and the only ship by the target has an empty hold.
+        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 3);
+        PlaceShip(services, player, targetId, ShipId, device.PartTypeId, 0);
+
+        Assert.Equal(ProcessErrorCodes.DeviceNotInHold, await RefusedAsync(processes, player, targetId, ShipId, device.PartTypeId));
+        Assert.Equal(3, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
+        Assert.False((await services.GetRequiredService<IWorldModule>().GetPlanetFactsAsync(targetId, Token))!.IsTerraformed);
+
+        // A second ship carries the device: naming the first one still refuses, naming the second
+        // one charges its hold and nothing else.
+        Ships.Add(player.Account.UserId, targetId, new ShipOnOrbit([]) { ShipId = ShipId + 1, Cargo = [new ShipCargoPart(device.PartTypeId, 1)] });
+
+        Assert.Equal(ProcessErrorCodes.DeviceNotInHold, await RefusedAsync(processes, player, targetId, ShipId, device.PartTypeId));
+        Assert.Equal(ProcessErrorCodes.NoShipOnOrbit, await RefusedAsync(processes, player, targetId, ShipId + 100, device.PartTypeId));
+
+        TerraformingResultDto result = await processes.TerraformAsync(player.Account.UserId, targetId, ShipId + 1, device.PartTypeId, Token);
+
+        Assert.Equal(ShipId + 1, result.ShipId);
+        Assert.Equal(0, Ships.CargoOf(player.Account.UserId, targetId, ShipId + 1, device.PartTypeId));
+        Assert.Equal(0, Ships.CargoOf(player.Account.UserId, targetId, ShipId, device.PartTypeId));
+        Assert.Equal(3, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
+    }
+
+    /// <summary>
+    /// A colony is no target: the device stays in the hold and the deposits stay as they were.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
@@ -123,22 +247,62 @@ public sealed class TerraformingTests
         IServiceProvider services = scope.ServiceProvider;
 
         PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
-        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 1);
+        PlaceShip(services, player, neighbour.PlanetId, ShipId, device.PartTypeId, 1);
+        PlaceShip(services, player, player.PlanetId, ShipId, device.PartTypeId, 1);
         int poor = await PlanetsTestData.SetDepositAsync(services, neighbour.PlanetId, Iron, 1.0m);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
 
         // Another player's colony and the own colony are both colonies.
-        Assert.Equal(ProcessErrorCodes.TargetColonized, await RefusedAsync(processes, player, neighbour.PlanetId, device.PartTypeId));
-        Assert.Equal(ProcessErrorCodes.TargetColonized, await RefusedAsync(processes, player, player.PlanetId, device.PartTypeId));
+        Assert.Equal(ProcessErrorCodes.TargetColonized, await RefusedAsync(processes, player, neighbour.PlanetId, ShipId, device.PartTypeId));
+        Assert.Equal(ProcessErrorCodes.TargetColonized, await RefusedAsync(processes, player, player.PlanetId, ShipId, device.PartTypeId));
 
-        Assert.Equal(1, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
+        Assert.Equal(1, Ships.CargoOf(player.Account.UserId, neighbour.PlanetId, ShipId, device.PartTypeId));
+        Assert.Equal(1, Ships.CargoOf(player.Account.UserId, player.PlanetId, ShipId, device.PartTypeId));
         WorldDbContext world = services.GetRequiredService<WorldDbContext>();
         Assert.Equal(1.0m, (await world.Deposits.AsNoTracking().SingleAsync(entry => entry.PlanetId == neighbour.PlanetId && entry.ResourceId == poor, Token)).Coefficient);
         Assert.False((await world.Planets.AsNoTracking().SingleAsync(entry => entry.Id == neighbour.PlanetId, Token)).IsTerraformed);
     }
 
     /// <summary>
-    /// A body is terraformed once: a second device is refused and stays in the storage.
+    /// A gas giant is no target: its type may not be colonized, which the data of the type say
+    /// and no code of the body, so the device stays in the hold and nothing changes.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_gas_giant_is_refused()
+    {
+        await ProcessesTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        WorldDbContext world = services.GetRequiredService<WorldDbContext>();
+        long giantId = await world.Planets.AsNoTracking()
+            .Where(planet => planet.OwnerPlayerId == null)
+            .Join(world.Objects, planet => planet.CelestialObjectId, entry => entry.Id, (planet, entry) => new { planet, entry })
+            .Join(world.ObjectTypes, pair => pair.entry.ObjectTypeId, type => type.Id, (pair, type) => new { pair.planet, type })
+            .Where(row => !row.type.IsColonizable)
+            .OrderBy(row => row.planet.Id)
+            .Select(row => row.planet.Id)
+            .FirstAsync(Token);
+
+        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PlaceShip(services, player, giantId, ShipId, device.PartTypeId, 1);
+        List<decimal> deposits = await world.Deposits.AsNoTracking().Where(entry => entry.PlanetId == giantId).Select(entry => entry.Coefficient).ToListAsync(Token);
+        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
+
+        Assert.False((await services.GetRequiredService<IWorldModule>().GetPlanetFactsAsync(giantId, Token))!.IsColonizable);
+        Assert.Equal(ProcessErrorCodes.TargetNotColonizable, await RefusedAsync(processes, player, giantId, ShipId, device.PartTypeId));
+
+        // The device stays in the hold, the body is not marked and its deposits are the same.
+        Assert.Equal(1, Ships.CargoOf(player.Account.UserId, giantId, ShipId, device.PartTypeId));
+        Assert.False((await world.Planets.AsNoTracking().SingleAsync(entry => entry.Id == giantId, Token)).IsTerraformed);
+        Assert.Equal(deposits, await world.Deposits.AsNoTracking().Where(entry => entry.PlanetId == giantId).Select(entry => entry.Coefficient).ToListAsync(Token));
+        Assert.Empty(await world.DepositChanges.AsNoTracking().Where(change => change.PlanetId == giantId).ToListAsync(Token));
+    }
+
+    /// <summary>
+    /// A body is terraformed once: a second device is refused and stays in the hold.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
@@ -151,18 +315,18 @@ public sealed class TerraformingTests
 
         long targetId = await FreeBodyAsync(services, player);
         PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
-        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 2);
+        PlaceShip(services, player, targetId, ShipId, device.PartTypeId, 2);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
 
         int poor = await PlanetsTestData.SetDepositAsync(services, targetId, Iron, 1.0m);
-        TerraformingResultDto first = await processes.TerraformAsync(player.Account.UserId, player.PlanetId, targetId, device.PartTypeId, Token);
+        TerraformingResultDto first = await processes.TerraformAsync(player.Account.UserId, targetId, ShipId, device.PartTypeId, Token);
         await PlanetsTestData.SetDepositAsync(services, targetId, Iron, 1.0m);
 
-        Assert.Equal(ProcessErrorCodes.TargetTerraformed, await RefusedAsync(processes, player, targetId, device.PartTypeId));
+        Assert.Equal(ProcessErrorCodes.TargetTerraformed, await RefusedAsync(processes, player, targetId, ShipId, device.PartTypeId));
 
         // The second device stays, and the deposits are not raised again.
         WorldDbContext world = services.GetRequiredService<WorldDbContext>();
-        Assert.Equal(1, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
+        Assert.Equal(1, Ships.CargoOf(player.Account.UserId, targetId, ShipId, device.PartTypeId));
         Assert.Equal(first.ChangedDeposits, await world.DepositChanges.AsNoTracking().CountAsync(change => change.PlanetId == targetId, Token));
         Assert.Equal(1.0m, (await world.Deposits.AsNoTracking().SingleAsync(entry => entry.PlanetId == targetId && entry.ResourceId == poor, Token)).Coefficient);
     }
@@ -184,11 +348,11 @@ public sealed class TerraformingTests
         long targetId = await FreeBodyAsync(services, player);
         int sectorId = (await services.GetRequiredService<IWorldModule>().GetPlanetFactsAsync(targetId, Token))!.SectorId;
         PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
-        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 1);
-        await ProcessesTestData.PutPartsAsync(other, services, device.PartTypeId, PartCondition.Full, 1);
+        PlaceShip(services, player, targetId, ShipId, device.PartTypeId, 1);
+        PlaceShip(services, other, targetId, ShipId, device.PartTypeId, 1);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
 
-        await processes.TerraformAsync(player.Account.UserId, player.PlanetId, targetId, device.PartTypeId, Token);
+        await processes.TerraformAsync(player.Account.UserId, targetId, ShipId, device.PartTypeId, Token);
 
         // The other player finds the body among the free bodies to colonize, marked as terraformed.
         await WithMapOpenAsync(services, async () =>
@@ -204,15 +368,15 @@ public sealed class TerraformingTests
         // The mark belongs to the body and not to the player: the other player cannot terraform
         // it again, and nobody owns it.
         GameException again = await Assert.ThrowsAsync<GameException>(() =>
-            processes.TerraformAsync(other.Account.UserId, other.PlanetId, targetId, device.PartTypeId, Token));
+            processes.TerraformAsync(other.Account.UserId, targetId, ShipId, device.PartTypeId, Token));
         Assert.Equal(ProcessErrorCodes.TargetTerraformed, again.Code);
-        Assert.Equal(1, await ProcessesTestData.PartsAsync(other, services, device.PartTypeId, PartCondition.Full));
+        Assert.Equal(1, Ships.CargoOf(other.Account.UserId, targetId, ShipId, device.PartTypeId));
     }
 
     /// <summary>
-    /// The device of another player is never spent: the colony that holds it is checked from
-    /// the session, by the module and by the pipeline of the command; a ship that is not the
-    /// player's own does not turn a device on; a part that is no device is refused.
+    /// The device of another player is never spent: a ship that is not the player's own does not
+    /// turn a device on, and the list of the player shows the ships of the player only; a part
+    /// that is no device is refused. The terraforming names no colony at all.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
@@ -227,65 +391,54 @@ public sealed class TerraformingTests
         long targetId = await FreeBodyAsync(services, owner);
         PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
         PartFacts hull = await ProcessesTestData.PartAsync(services, "part_1");
-        await ProcessesTestData.PutPartsAsync(owner, services, device.PartTypeId, PartCondition.Full, 1);
-        await ProcessesTestData.PutPartsAsync(stranger, services, device.PartTypeId, PartCondition.Full, 1);
-        await ProcessesTestData.PutPartsAsync(stranger, services, hull.PartTypeId, PartCondition.Full, 1);
+        PlaceShip(services, owner, targetId, ShipId, device.PartTypeId, 1);
+        Ships.Place(stranger.Account.UserId, targetId, new ShipOnOrbit([]) { ShipId = ShipId + 1, Cargo = [new ShipCargoPart(device.PartTypeId, 1), new ShipCargoPart(hull.PartTypeId, 1)] });
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
 
-        // The colony of another player.
-        GameException module = await Assert.ThrowsAsync<GameException>(() =>
-            processes.TerraformAsync(stranger.Account.UserId, owner.PlanetId, targetId, device.PartTypeId, Token));
-        Assert.Equal(ProcessErrorCodes.PlanetUnknown, module.Code);
-        GameException reading = await Assert.ThrowsAsync<GameException>(() =>
-            processes.GetTerraformingAsync(stranger.Account.UserId, owner.PlanetId, Token));
-        Assert.Equal(ProcessErrorCodes.PlanetUnknown, reading.Code);
+        // The stranger sees the ships of the stranger only, so the body of the owner is not offered.
+        TerraformingDto reading = await processes.GetTerraformingAsync(stranger.Account.UserId, Token);
+        Assert.DoesNotContain(reading.Targets.SelectMany(entry => entry.ShipIds), entry => entry.ShipId == ShipId);
 
         using HttpResponseMessage foreign = await TestAccounts.SendCommandAsync(
             stranger.Client,
             TerraformCommand.RoutePath,
-            new Dictionary<string, object?> { ["planet_id"] = owner.PlanetId, ["target_planet_id"] = targetId, ["part_type_id"] = device.PartTypeId },
+            new Dictionary<string, object?> { ["target_planet_id"] = targetId, ["ship_id"] = ShipId, ["part_type_id"] = device.PartTypeId },
             "stranger-terraform");
-        Assert.Equal(HttpStatusCode.Forbidden, foreign.StatusCode);
-        Assert.Equal(GameErrorCodes.NotYourObject, await TestAccounts.ReadErrorAsync(foreign));
-        Assert.Equal(1, await ProcessesTestData.PartsAsync(owner, services, device.PartTypeId, PartCondition.Full));
+        Assert.NotEqual(HttpStatusCode.OK, foreign.StatusCode);
+        Assert.Equal(1, Ships.CargoOf(owner.Account.UserId, targetId, ShipId, device.PartTypeId));
 
-        // Only the own ship turns a device on: the stranger has none by the body.
-        ShipsOnOrbitStub ships = services.GetRequiredService<ShipsOnOrbitStub>();
+        // Only the own ship turns a device on: the stranger names the ship of the owner and the
+        // ships module knows no such ship of the stranger.
+        Assert.Equal(ProcessErrorCodes.NoShipOnOrbit, await RefusedAsync(processes, stranger, targetId, ShipId, device.PartTypeId));
+        Ships.Place(stranger.Account.UserId, targetId, null);
+        Assert.Equal(ProcessErrorCodes.NoShipOnOrbit, await RefusedAsync(processes, stranger, targetId, ShipId + 1, device.PartTypeId));
+        Ships.Place(stranger.Account.UserId, targetId, new ShipOnOrbit([]) { ShipId = ShipId + 1, Cargo = [new ShipCargoPart(device.PartTypeId, 1), new ShipCargoPart(hull.PartTypeId, 1)] });
 
-        try
-        {
-            ships.Place(stranger.Account.UserId, targetId, null);
-            Assert.Equal(ProcessErrorCodes.NoShipOnOrbit, await RefusedAsync(processes, stranger, targetId, device.PartTypeId));
-        }
-        finally
-        {
-            ships.Place(stranger.Account.UserId, targetId, new ShipOnOrbit([]));
-        }
+        // A part that is no device turns nothing on, even when the hold carries it.
+        Assert.Equal(ProcessErrorCodes.DeviceMissing, await RefusedAsync(processes, stranger, targetId, ShipId + 1, hull.PartTypeId));
+        Assert.Equal(1, Ships.CargoOf(stranger.Account.UserId, targetId, ShipId + 1, device.PartTypeId));
+        Assert.Equal(1, Ships.CargoOf(stranger.Account.UserId, targetId, ShipId + 1, hull.PartTypeId));
 
-        // A part that is no device turns nothing on.
-        Assert.Equal(ProcessErrorCodes.DeviceMissing, await RefusedAsync(processes, stranger, targetId, hull.PartTypeId));
-        Assert.Equal(1, await ProcessesTestData.PartsAsync(stranger, services, device.PartTypeId, PartCondition.Full));
-        Assert.Equal(1, await ProcessesTestData.PartsAsync(stranger, services, hull.PartTypeId, PartCondition.Full));
-
-        // The owner reaches the same command with the own colony.
+        // The owner reaches the same command with the own ship.
         using HttpResponseMessage own = await TestAccounts.SendCommandAsync(
             owner.Client,
             TerraformCommand.RoutePath,
-            new Dictionary<string, object?> { ["planet_id"] = owner.PlanetId, ["target_planet_id"] = targetId, ["part_type_id"] = device.PartTypeId },
+            new Dictionary<string, object?> { ["target_planet_id"] = targetId, ["ship_id"] = ShipId, ["part_type_id"] = device.PartTypeId },
             "owner-terraform");
         Assert.Equal(HttpStatusCode.OK, own.StatusCode);
         using JsonDocument body = JsonDocument.Parse(await own.Content.ReadAsStringAsync(Token));
         Assert.Equal(targetId, body.RootElement.GetProperty("target_planet_id").GetInt64());
-        Assert.Equal(0, await ProcessesTestData.PartsAsync(owner, services, device.PartTypeId, PartCondition.Full));
+        Assert.Equal(ShipId, body.RootElement.GetProperty("ship_id").GetInt64());
+        Assert.Equal(0, Ships.CargoOf(owner.Account.UserId, targetId, ShipId, device.PartTypeId));
     }
 
     /// <summary>
-    /// The multiplier of a device must lie in the range of the configuration; a device out of
-    /// it is refused and stays.
+    /// The range of the configuration must be a range: a highest multiplier below the lowest is
+    /// refused and the device stays.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task A_device_out_of_the_range_of_the_data_is_refused()
+    public async Task A_range_that_is_no_range_is_refused()
     {
         await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -294,15 +447,15 @@ public sealed class TerraformingTests
 
         long targetId = await FreeBodyAsync(services, player);
         PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
-        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 1);
+        PlaceShip(services, player, targetId, ShipId, device.PartTypeId, 1);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         string highest = ProcessesConfigKeys.Definitions.Single(definition => definition.Key == ProcessesConfigKeys.TerraformingMultiplierMax).DefaultValue;
 
         try
         {
-            await AetherisTestFactory.SetParameterAsync(services, ProcessesConfigKeys.TerraformingMultiplierMax, "1.5");
-            Assert.Equal(ProcessErrorCodes.ParamMissing, await RefusedAsync(processes, player, targetId, device.PartTypeId));
-            Assert.Equal(1, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
+            await AetherisTestFactory.SetParameterAsync(services, ProcessesConfigKeys.TerraformingMultiplierMax, "1.0");
+            Assert.Equal(ProcessErrorCodes.ParamMissing, await RefusedAsync(processes, player, targetId, ShipId, device.PartTypeId));
+            Assert.Equal(1, Ships.CargoOf(player.Account.UserId, targetId, ShipId, device.PartTypeId));
             Assert.False((await services.GetRequiredService<IWorldModule>().GetPlanetFactsAsync(targetId, Token))!.IsTerraformed);
         }
         finally
@@ -312,8 +465,8 @@ public sealed class TerraformingTests
     }
 
     /// <summary>
-    /// Twenty starts on one body at once, by two players with devices of their own, give
-    /// exactly one terraforming and spend exactly one device.
+    /// Twenty starts on one body at once, by two players with ships of their own, give exactly
+    /// one terraforming and spend exactly one device.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
@@ -336,7 +489,7 @@ public sealed class TerraformingTests
 
             foreach (PlanetsTestPlayer player in players)
             {
-                await ProcessesTestData.PutPartsAsync(player, services, deviceId, PartCondition.Full, parallelCount / players.Length);
+                PlaceShip(services, player, targetId, ShipId, deviceId, parallelCount / players.Length);
             }
         }
 
@@ -346,12 +499,7 @@ public sealed class TerraformingTests
         Assert.Equal(1, outcomes.Count(outcome => outcome));
 
         using IServiceScope check = _factory.Services.CreateScope();
-        long left = 0;
-
-        foreach (PlanetsTestPlayer player in players)
-        {
-            left += await ProcessesTestData.PartsAsync(player, check.ServiceProvider, deviceId, PartCondition.Full);
-        }
+        long left = players.Sum(player => Ships.CargoOf(player.Account.UserId, targetId, ShipId, deviceId));
 
         Assert.Equal(parallelCount - 1, left);
         Assert.True((await check.ServiceProvider.GetRequiredService<IWorldModule>().GetPlanetFactsAsync(targetId, Token))!.IsTerraformed);
@@ -372,7 +520,7 @@ public sealed class TerraformingTests
         IServiceProvider services = scope.ServiceProvider;
 
         Dictionary<int, PartFacts> devices = (await services.GetRequiredService<PartStockService>().GetPartFactsAsync(Token)).Values
-            .Where(part => part.TerraformingMultiplier is not null)
+            .Where(part => part.IsTerraformingDevice)
             .ToDictionary(part => part.PartTypeId);
         Assert.NotEmpty(devices);
 
@@ -399,13 +547,28 @@ public sealed class TerraformingTests
         Assert.DoesNotContain(await processes.GetBuildingsAsync(player.Account.UserId, player.PlanetId, Token), summary => summary.PlanetBuildingId == factoryId);
     }
 
-    private static async Task<string> RefusedAsync(IProcessesModule processes, PlanetsTestPlayer player, long targetId, int partTypeId)
+    private static async Task<string> RefusedAsync(IProcessesModule processes, PlanetsTestPlayer player, long targetId, long shipId, int partTypeId)
     {
         GameException refused = await Assert.ThrowsAsync<GameException>(() =>
-            processes.TerraformAsync(player.Account.UserId, player.PlanetId, targetId, partTypeId, Token));
+            processes.TerraformAsync(player.Account.UserId, targetId, shipId, partTypeId, Token));
 
         return refused.Code;
     }
+
+    /// <summary>
+    /// Places a ship of the player by a body with a part in its hold.
+    /// </summary>
+    /// <param name="services">The services of the request.</param>
+    /// <param name="player">The player.</param>
+    /// <param name="planetId">The body the ship stands by.</param>
+    /// <param name="shipId">The ship.</param>
+    /// <param name="partTypeId">The part in the hold.</param>
+    /// <param name="quantity">How many parts the hold carries.</param>
+    private static void PlaceShip(IServiceProvider services, PlanetsTestPlayer player, long planetId, long shipId, int partTypeId, long quantity) =>
+        services.GetRequiredService<ShipsOnOrbitStub>().Place(
+            player.Account.UserId,
+            planetId,
+            new ShipOnOrbit([]) { ShipId = shipId, Cargo = quantity > 0 ? [new ShipCargoPart(partTypeId, quantity)] : [] });
 
     /// <summary>
     /// The first free body of the sector of the colony that may be colonized, the one the list
@@ -449,7 +612,7 @@ public sealed class TerraformingTests
         try
         {
             await scope.ServiceProvider.GetRequiredService<IProcessesModule>()
-                .TerraformAsync(player.Account.UserId, player.PlanetId, targetId, deviceId, Token);
+                .TerraformAsync(player.Account.UserId, targetId, ShipId, deviceId, Token);
 
             return true;
         }

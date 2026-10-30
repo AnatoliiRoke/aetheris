@@ -195,7 +195,7 @@ public static class ResearchReferenceSeed
                         CostIds = [.. technology.Costs.Select(cost => new TechnologyLevelCostEntity { ResourceTypeId = resourceIds[cost.Resource], Amount = ValueAt(cost.Growth, level) })],
                         EffectIds =
                         [
-                            .. technology.Effects.Select(effect => new TechnologyLevelEffectEntity
+                            .. technology.Effects.Where(effect => effect.Level is null || effect.Level == level).Select(effect => new TechnologyLevelEffectEntity
                             {
                                 EffectType = effect.Type,
                                 UnlockKind = effect.UnlockKind,
@@ -229,7 +229,7 @@ public static class ResearchReferenceSeed
                     RequirementSubjectTypes.BuildingType,
                     buildingTypeId,
                     1,
-                    [new RequirementDefinition(RequirementTypes.TechnologyLevel, technology.Id, 1)],
+                    [new RequirementDefinition(RequirementTypes.TechnologyLevel, technology.Id, effect.Level ?? 1)],
                     cancellationToken).ConfigureAwait(false);
             }
         }
@@ -328,14 +328,14 @@ public sealed record SeedTechnologyCost(string Resource, SeedGrowth Growth);
 /// <param name="Type">The kind of the effect.</param>
 /// <param name="UnlockKind">The kind of the subject the effect opens.</param>
 /// <param name="UnlockTarget">The neutral code of the subject the effect opens.</param>
-/// <param name="Base">The value at the first level.</param>
-/// <param name="Growth">The multiplier per level.</param>
-/// <param name="Step">The amount added per level.</param>
+/// <param name="Growth">The growth of the value of the effect with the level.</param>
+/// <param name="Level">The only level the effect belongs to, or <see langword="null"/> for every level. An effect that opens a subject belongs to the minimal level that opens it, and that level is the requirement of the subject.</param>
 public sealed record SeedTechnologyEffect(
     string Type,
     string? UnlockKind = null,
     string? UnlockTarget = null,
-    SeedGrowth? Growth = null);
+    SeedGrowth? Growth = null,
+    int? Level = null);
 
 /// <summary>The growth of a value with the level.</summary>
 /// <remarks>The value at a level is <c>base × growth^(level − 1) + step × (level − 1)</c>.</remarks>

@@ -1,6 +1,7 @@
 using Aetheris.Core.Admin;
 using Aetheris.Core.Commands;
 using Aetheris.Core.Data;
+using Aetheris.Core.Randomness;
 using Aetheris.Core.Scheduling;
 using Aetheris.Core.Security;
 using Aetheris.World.Api;
@@ -9,6 +10,7 @@ using Aetheris.World.Events;
 using Aetheris.World.Services;
 using Aetheris.World.Visibility;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Aetheris.World;
 
@@ -48,6 +50,9 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<IScheduledEventHandler, FieldRespawnHandler>();
         services.AddScoped<GenerationRunService>();
         services.AddScoped<DepositRichnessService>();
+
+        // The roll of the multiplier of a terraformed deposit; a test replaces the source.
+        services.TryAddSingleton<IRandomSource, SystemRandomSource>();
         services.AddScoped<WorldAdminQueryService>();
         services.AddScoped<WorldAdminEditService>();
         services.AddScoped<WorldReferenceAdminService>();

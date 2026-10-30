@@ -3,7 +3,6 @@ using Aetheris.Core.Errors;
 using Aetheris.Processes.Api;
 using Aetheris.Processes.Configuration;
 using Aetheris.Processes.Services;
-using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
 using Aetheris.World;
 using Aetheris.World.Api;
@@ -11,8 +10,8 @@ using Aetheris.World.Api;
 namespace Aetheris.Processes.Handlers;
 
 /// <summary>
-/// The terraforming: a ship turns a one-shot device on at a free body, and the deposits of the
-/// body become rich (task 00014, section 9).
+/// The terraforming: a ship turns a one-shot device from its hold on at a free body, and the
+/// deposits of the body become rich (task 00014, sections 9 and 11).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -21,15 +20,16 @@ namespace Aetheris.Processes.Handlers;
 /// at once, and the device is spent at the start; nothing gives it back.
 /// </para>
 /// <para>
-/// Until the task of the flights the device comes from the storage of a colony of the player
-/// and the ship by the target is the stub <see cref="IShipsOnOrbit"/>, as before the change.
-/// Only a free body without a colony is a target, and only once: the world marks the body as
-/// terraformed, and the body stays free for whoever colonizes it.
+/// The device is cargo of one named ship that stands by the target, never a part of the
+/// storage of a colony (task 00010, the general rule of the cargo). Until the task of the
+/// fleet the ships are the stub <see cref="IShipsOnOrbit"/>. Only a free body that may be
+/// settled is a target, so a gas giant is refused by the data of its type, and only once: the
+/// world marks the body as terraformed, and the body stays free for whoever colonizes it.
 /// </para>
 /// <para>
-/// A part is a device when it has the attribute of the multiplier of the deposits; the
-/// multiplier must lie in the range of the configuration. The type of the body, its size and
-/// its buildings do not change.
+/// A part is a device when it carries the mark of the device in its attributes. The multiplier
+/// is no attribute of the part: the world rolls one for every deposit in the range of the
+/// configuration. The type of the body, its size and its buildings do not change.
 /// </para>
 /// </remarks>
 public sealed class TerraformingHandler
@@ -49,8 +49,8 @@ public sealed class TerraformingHandler
     /// Initializes a new instance of the <see cref="TerraformingHandler"/> class.
     /// </summary>
     /// <param name="world">The world module, for the bodies and their deposits.</param>
-    /// <param name="ships">The ships on the orbit of the bodies.</param>
-    /// <param name="parts">The storage of the parts of the production module.</param>
+    /// <param name="ships">The ships on the orbit of the bodies, with their holds.</param>
+    /// <param name="parts">The facts of the parts of the production module, to tell a device.</param>
     /// <param name="unitOfWork">The transaction of the module.</param>
     /// <param name="config">The configuration of the game, for the range of the multiplier.</param>
     public TerraformingHandler(
@@ -74,80 +74,100 @@ public sealed class TerraformingHandler
     }
 
     /// <summary>
-    /// Reads the terraforming a player may start from a colony: the devices of its storage and
-    /// the free bodies of its sector the player sees.
+    /// Reads the terraforming a player may start: the free bodies that may be settled with a
+    /// ship of the player by them, and the devices in the holds of those ships. The terraforming
+    /// belongs to the ships, not to a colony, so nothing here names a colony.
     /// </summary>
     /// <param name="playerId">The player.</param>
-    /// <param name="planetId">The colony the ship takes the device from.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The terraforming of the colony.</returns>
-    /// <exception cref="GameException">The body is not a colony of the player.</exception>
-    public async Task<TerraformingDto> ReadAsync(string playerId, long planetId, CancellationToken cancellationToken)
+    /// <returns>The terraforming of the player.</returns>
+    public async Task<TerraformingDto> ReadAsync(string playerId, CancellationToken cancellationToken)
     {
-        PlanetFacts colony = await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
         ProcessesSettings settings = ProcessesSettings.From(_config);
+        IReadOnlyDictionary<int, PartFacts> parts = await _parts.GetPartFactsAsync(cancellationToken).ConfigureAwait(false);
 
-        List<PartFacts> devices =
-        [
-            .. (await _parts.GetPartFactsAsync(cancellationToken).ConfigureAwait(false)).Values
-                .Where(part => part.TerraformingMultiplier is not null)
-                .OrderBy(part => part.PartTypeId),
-        ];
-
-        IReadOnlyList<PartStackInfo> stacks = await _parts
-            .ReadAsync(planetId, [.. devices.Select(device => device.PartTypeId)], cancellationToken)
+        // The bodies the ships of the player stand by; a ship sees the body it stands by.
+        IReadOnlyDictionary<long, IReadOnlyList<ShipOnOrbit>> shipsByBody = await _ships
+            .ListAllAsync(playerId, cancellationToken)
             .ConfigureAwait(false);
 
-        // A device of the storage is a new part: the start takes a new one, like the processes do.
-        List<TerraformingDeviceDto> stored =
-        [
-            .. devices
-                .Select(device => new TerraformingDeviceDto(
-                    device.PartTypeId,
-                    device.NameKey,
-                    device.MarkLevel,
-                    device.TerraformingMultiplier!.Value,
-                    stacks.Where(stack => stack.PartTypeId == device.PartTypeId && stack.ConditionPercent >= PartCondition.Full).Sum(stack => stack.Quantity)))
-                .Where(device => device.Quantity > 0),
-        ];
+        IReadOnlyList<FreePlanetDto> free = await _world
+            .GetFreePlanetsByIdsAsync([.. shipsByBody.Keys], cancellationToken)
+            .ConfigureAwait(false);
 
-        IReadOnlyList<FreePlanetDto> free = await _world.GetFreePlanetsAsync(playerId, colony.SectorId, cancellationToken).ConfigureAwait(false);
+        List<TerraformingTargetDto> targets = [];
 
-        return new TerraformingDto(
-            planetId,
-            stored,
-            [.. free.Select(body => new TerraformingTargetDto(body.PlanetId, body.SystemId, body.ObjectTypeId, body.Orbit, body.Name, body.IsTerraformed))],
-            settings.TerraformingMultiplierMin,
-            settings.TerraformingMultiplierMax);
+        foreach (FreePlanetDto body in free)
+        {
+            List<TerraformingShipDto> ships = [];
+
+            foreach (ShipOnOrbit ship in shipsByBody.GetValueOrDefault(body.PlanetId) ?? [])
+            {
+                // The hold carries many things; only the devices are the terraforming's.
+                List<TerraformingDeviceDto> devices =
+                [
+                    .. ship.Cargo
+                        .Where(cargo => cargo.Quantity > 0 && parts.TryGetValue(cargo.PartTypeId, out PartFacts? facts) && facts.IsTerraformingDevice)
+                        .OrderBy(cargo => cargo.PartTypeId)
+                        .Select(cargo => new TerraformingDeviceDto(
+                            cargo.PartTypeId,
+                            parts[cargo.PartTypeId].NameKey,
+                            parts[cargo.PartTypeId].MarkLevel,
+                            cargo.Quantity)),
+                ];
+
+                if (devices.Count > 0)
+                {
+                    ships.Add(new TerraformingShipDto(ship.ShipId, devices));
+                }
+            }
+
+            targets.Add(new TerraformingTargetDto(
+                body.PlanetId,
+                body.SystemId,
+                body.ObjectTypeId,
+                body.Orbit,
+                body.Name,
+                body.IsTerraformed,
+                ships));
+        }
+
+        return new TerraformingDto(targets, settings.TerraformingMultiplierMin, settings.TerraformingMultiplierMax);
     }
 
     /// <summary>
-    /// Turns a device of the storage of a colony on at a free body: the device is spent and the
-    /// deposits of the body become rich, in one transaction.
+    /// Turns a device from the hold of a ship on at the free body the ship stands by: the
+    /// device is spent and every deposit of the body rolls its own multiplier, in one
+    /// transaction.
     /// </summary>
     /// <param name="playerId">The player, from the session.</param>
-    /// <param name="planetId">The colony the ship takes the device from.</param>
     /// <param name="targetPlanetId">The free body.</param>
+    /// <param name="shipId">The ship whose hold carries the device.</param>
     /// <param name="partTypeId">The device.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The outcome with the terraforming of the colony after the change.</returns>
     /// <exception cref="GameException">A rule of the terraforming is not met; nothing changes.</exception>
     public async Task<TerraformingResultDto> LaunchAsync(
         string playerId,
-        long planetId,
         long targetPlanetId,
+        long shipId,
         int partTypeId,
         CancellationToken cancellationToken)
     {
-        (decimal multiplier, int changed) = await _unitOfWork.RunAsync(
+        TerraformResult result = await _unitOfWork.RunAsync(
             async () =>
             {
-                await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
-
                 // The world checks the target again under the lock of its row; this check only
                 // gives the player the reason before anything is taken.
                 PlanetFacts target = await _world.GetPlanetFactsAsync(targetPlanetId, cancellationToken).ConfigureAwait(false)
                     ?? throw new GameException(ProcessErrorCodes.TargetUnknown, "The body does not exist.");
+
+                if (!target.IsColonizable)
+                {
+                    throw new GameException(ProcessErrorCodes.TargetNotColonizable, "Only a body that may be settled is terraformed.");
+                }
 
                 if (target.OwnerPlayerId is not null)
                 {
@@ -159,75 +179,72 @@ public sealed class TerraformingHandler
                     throw new GameException(ProcessErrorCodes.TargetTerraformed, "The body is terraformed already.");
                 }
 
-                // The ship that turns the device on stands by the body.
-                if (await _ships.FindAsync(playerId, targetPlanetId, cancellationToken).ConfigureAwait(false) is null)
-                {
-                    throw new GameException(ProcessErrorCodes.NoShipOnOrbit, "No ship of the player stands by the body.");
-                }
+                // The ship that turns the device on is one of the player's own and stands by
+                // the body; the device is in its hold and nowhere else.
+                IReadOnlyDictionary<long, IReadOnlyList<ShipOnOrbit>> shipsByBody = await _ships
+                    .ListAsync(playerId, [targetPlanetId], cancellationToken)
+                    .ConfigureAwait(false);
+
+                ShipOnOrbit ship = shipsByBody.GetValueOrDefault(targetPlanetId)?.FirstOrDefault(entry => entry.ShipId == shipId)
+                    ?? throw new GameException(ProcessErrorCodes.NoShipOnOrbit, "The ship of the player does not stand by the body.");
 
                 IReadOnlyDictionary<int, PartFacts> parts = await _parts.GetPartFactsAsync(cancellationToken).ConfigureAwait(false);
 
-                if (!parts.TryGetValue(partTypeId, out PartFacts? device) || device.TerraformingMultiplier is not { } value)
+                if (!parts.TryGetValue(partTypeId, out PartFacts? device) || !device.IsTerraformingDevice)
                 {
                     throw new GameException(ProcessErrorCodes.DeviceMissing, "The part is no device of the terraforming.");
                 }
 
+                if (ship.Cargo.Where(cargo => cargo.PartTypeId == partTypeId).Sum(cargo => cargo.Quantity) < 1)
+                {
+                    throw new GameException(ProcessErrorCodes.DeviceNotInHold, "The hold of the ship carries no such device.");
+                }
+
                 ProcessesSettings settings = ProcessesSettings.From(_config);
 
-                if (value <= settings.TerraformingMultiplierMin || value > settings.TerraformingMultiplierMax)
+                if (settings.TerraformingMultiplierMin <= decimal.Zero || settings.TerraformingMultiplierMax < settings.TerraformingMultiplierMin)
                 {
-                    throw new GameException(ProcessErrorCodes.ParamMissing, "The multiplier of the device is out of the range of the configuration.");
+                    throw new GameException(ProcessErrorCodes.ParamMissing, "The range of the multiplier of the configuration is not valid.");
                 }
 
-                // The device is spent at the start: the storage is locked first, then the body,
-                // so two starts of one colony wait for each other and never cross.
-                try
-                {
-                    await _parts.TakeStackAsync(planetId, partTypeId, PartCondition.Full, 1, cancellationToken).ConfigureAwait(false);
-                }
-                catch (GameException exception) when (exception.Code == ProductionErrorCodes.PartMissing)
-                {
-                    throw new GameException(ProcessErrorCodes.PartMissing, "The storage of the colony holds no such device.");
-                }
-
-                TerraformResult result = await _world
-                    .TerraformAsync(targetPlanetId, value, playerId, Reason, cancellationToken)
+                // The world locks the body first, so two starts on one body wait for each other;
+                // the device leaves the hold only when the body took the terraforming, and a
+                // refusal of either rolls the transaction back, so nothing is half done.
+                TerraformResult terraformed = await _world
+                    .TerraformAsync(targetPlanetId, settings.TerraformingMultiplierMin, settings.TerraformingMultiplierMax, playerId, Reason, cancellationToken)
                     .ConfigureAwait(false);
 
-                // A refusal of the world rolls the transaction back, so the device stays.
-                return result.Outcome switch
+                switch (terraformed.Outcome)
                 {
-                    TerraformOutcomes.Done => (value, result.ChangedDeposits),
-                    TerraformOutcomes.Colonized => throw new GameException(ProcessErrorCodes.TargetColonized, "Only a free body is terraformed."),
-                    TerraformOutcomes.AlreadyTerraformed => throw new GameException(ProcessErrorCodes.TargetTerraformed, "The body is terraformed already."),
-                    _ => throw new GameException(ProcessErrorCodes.TargetUnknown, "The body does not exist."),
-                };
+                    case TerraformOutcomes.Done:
+                        break;
+                    case TerraformOutcomes.NotColonizable:
+                        throw new GameException(ProcessErrorCodes.TargetNotColonizable, "Only a body that may be settled is terraformed.");
+                    case TerraformOutcomes.Colonized:
+                        throw new GameException(ProcessErrorCodes.TargetColonized, "Only a free body is terraformed.");
+                    case TerraformOutcomes.AlreadyTerraformed:
+                        throw new GameException(ProcessErrorCodes.TargetTerraformed, "The body is terraformed already.");
+                    default:
+                        throw new GameException(ProcessErrorCodes.TargetUnknown, "The body does not exist.");
+                }
+
+                if (!await _ships.TakeCargoAsync(playerId, targetPlanetId, shipId, partTypeId, 1, cancellationToken).ConfigureAwait(false))
+                {
+                    throw new GameException(ProcessErrorCodes.DeviceNotInHold, "The hold of the ship carries no such device.");
+                }
+
+                return terraformed;
             },
             cancellationToken).ConfigureAwait(false);
 
-        TerraformingDto terraforming = await ReadAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        TerraformingDto terraforming = await ReadAsync(playerId, cancellationToken).ConfigureAwait(false);
 
-        return new TerraformingResultDto(targetPlanetId, partTypeId, multiplier, changed, terraforming);
-    }
-
-    /// <summary>
-    /// Checks that the body is a colony of the player, from the facts of the world and never
-    /// from the word of the client.
-    /// </summary>
-    /// <param name="playerId">The player.</param>
-    /// <param name="planetId">The body.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The facts of the body.</returns>
-    /// <exception cref="GameException">The body is not a colony of the player.</exception>
-    private async Task<PlanetFacts> EnsureOwnedAsync(string playerId, long planetId, CancellationToken cancellationToken)
-    {
-        PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
-
-        if (facts is null || !string.Equals(facts.OwnerPlayerId, playerId, StringComparison.Ordinal))
-        {
-            throw new GameException(ProcessErrorCodes.PlanetUnknown, "The body is not a colony of the player.");
-        }
-
-        return facts;
+        return new TerraformingResultDto(
+            targetPlanetId,
+            shipId,
+            partTypeId,
+            result.ChangedDeposits,
+            [.. result.Deposits.Select(deposit => new TerraformedDepositDto(deposit.ResourceTypeId, deposit.OldCoefficient, deposit.NewCoefficient))],
+            terraforming);
     }
 }

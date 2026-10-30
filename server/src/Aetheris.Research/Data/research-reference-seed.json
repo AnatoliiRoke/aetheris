@@ -863,8 +863,8 @@
         "en": "Matter conversion"
       },
       "description": {
-        "uk": "Перетворювач матерії зберігає більшу частку сировини.",
-        "en": "The matter converter keeps a larger share of the raw material."
+        "uk": "Відкриває: перетворювач матерії. Перетворювач зберігає більшу частку сировини.",
+        "en": "Unlocks: matter converter. The converter keeps a larger share of the raw material."
       },
       "duration_seconds": {
         "base": 900,
@@ -886,7 +886,18 @@
           }
         }
       ],
-      "effects": []
+      "effects": [
+        {
+          "type": "unlocks",
+          "unlock_kind": "building_type",
+          "unlock_target": "building_22",
+          "level": 1,
+          "growth": {
+            "base": 1,
+            "growth": 1
+          }
+        }
+      ]
     }
   ]
 }

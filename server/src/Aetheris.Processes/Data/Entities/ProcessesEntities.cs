@@ -132,6 +132,76 @@ public sealed class ProcessOrderEntity
 
     /// <summary>Gets or sets the costs of the order, kept for the refund when it is cancelled.</summary>
     public List<ProcessOrderCostEntity> CostIds { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets whether the order carries the snapshot of the parameters of its kind taken
+    /// when it entered the queue (task 00014, section 11). An order without the snapshot reads
+    /// the parameters of the catalog as they are now.
+    /// </summary>
+    public bool HasParamSnapshot { get; set; }
+
+    /// <summary>
+    /// Gets or sets the level of the building the order runs in, as it was when the order
+    /// entered the queue (task 00014, section 11), or <see langword="null"/> for an order made
+    /// before the snapshot, which reads the level of the building as it is now. A level that is
+    /// being built is not reached yet, so the level here is the real one.
+    /// </summary>
+    public int? BuildingLevel { get; set; }
+
+    /// <summary>
+    /// Gets or sets the levels of the technologies of the player as they were when the order
+    /// entered the queue (task 00014, section 11); they belong to the snapshot of
+    /// <see cref="BuildingLevel"/>.
+    /// </summary>
+    public List<ProcessOrderTechnologyEntity> TechnologyIds { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the snapshot of the parameters of the kind of the process, taken when the
+    /// order entered the queue: a parameter archived or changed later does not change what the
+    /// order gives (task 00014, section 11).
+    /// </summary>
+    public List<ProcessOrderParamEntity> ParamIds { get; set; } = [];
+}
+
+/// <summary>
+/// A parameter of a process as it was when an order entered the queue (task 00014, section 11).
+/// </summary>
+/// <remarks>
+/// The row is a copy of the values, not a link: a later change of the parameter in the admin
+/// panel, or its archiving, does not reach an order that is already in the queue, while a new
+/// order takes the parameters that hold at its own moment.
+/// </remarks>
+public sealed class ProcessOrderParamEntity
+{
+    /// <summary>Gets or sets the primary key.</summary>
+    public long Id { get; set; }
+
+    /// <summary>Gets or sets the order the snapshot belongs to.</summary>
+    public long ProcessOrderId { get; set; }
+
+    /// <summary>Gets or sets the parameter the values were copied from, kept to keep the order of the rows.</summary>
+    public int ProcessParamId { get; set; }
+
+    /// <summary>Gets or sets the logical code of the kind of the parameter.</summary>
+    public string ParamKind { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets what the level belongs to: a building, a technology or a part.</summary>
+    public string LevelSource { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the thing whose level the parameter follows.</summary>
+    public int? LevelTargetId { get; set; }
+
+    /// <summary>Gets or sets the level the parameter starts at.</summary>
+    public int Level { get; set; } = 1;
+
+    /// <summary>Gets or sets the value of the parameter.</summary>
+    public decimal Value { get; set; }
+
+    /// <summary>Gets or sets the second value of the parameter, for the ranges.</summary>
+    public decimal? ValueMax { get; set; }
+
+    /// <summary>Gets or sets the place of the parameter in the lists.</summary>
+    public int SortOrder { get; set; }
 }
 
 /// <summary>
@@ -184,30 +254,20 @@ public sealed class ProcessQueueStateEntity
 }
 
 /// <summary>
-/// The state of the population of a body that the processes changed: the crew that came back
-/// and waits for the population task to settle it, and the flag that the crew is over the
-/// limit (task 00014, decision 3).
+/// The real level of a technology of the player when an order entered the queue (task 00014,
+/// section 11).
 /// </summary>
-/// <remarks>
-/// The population itself is the task of 00015, so this table holds only what the processes
-/// produce and the flag the population task reads.
-/// </remarks>
-public sealed class ProcessPopulationStateEntity
+public sealed class ProcessOrderTechnologyEntity
 {
     /// <summary>Gets or sets the primary key.</summary>
     public long Id { get; set; }
 
-    /// <summary>Gets or sets the body the state belongs to.</summary>
-    public long PlanetId { get; set; }
+    /// <summary>Gets or sets the order the level belongs to.</summary>
+    public long ProcessOrderId { get; set; }
 
-    /// <summary>
-    /// Gets or sets the crew that came back and waits to be settled by the population task.
-    /// </summary>
-    public long CrewPending { get; set; }
+    /// <summary>Gets or sets the technology.</summary>
+    public int TechnologyId { get; set; }
 
-    /// <summary>Gets or sets whether the crew is over the limit of the body.</summary>
-    public bool IsOverLimit { get; set; }
-
-    /// <summary>Gets or sets the moment the crew went over the limit.</summary>
-    public DateTimeOffset? OverLimitAt { get; set; }
+    /// <summary>Gets or sets the level the player had reached.</summary>
+    public int Level { get; set; }
 }

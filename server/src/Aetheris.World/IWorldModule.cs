@@ -159,23 +159,35 @@ public interface IWorldModule
     Task<IReadOnlyDictionary<int, long>> TakeLegacyStorageAsync(long planetId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Terraforms a free body: raises the coefficient of every poorer deposit to the value, marks
-    /// the body as terraformed and writes the change in the journal of the world (task 00014,
-    /// section 9). A colony and a body terraformed before are refused and change nothing; the
-    /// body stays free and gets no owner.
+    /// Terraforms a free body that may be settled: rolls a multiplier in the range for every
+    /// deposit, separately, raises the deposits that are poorer than their roll, marks the body
+    /// as terraformed and writes the change in the journal of the world (task 00014, sections 9
+    /// and 11). A colony, a body that may not be colonized and a body terraformed before are
+    /// refused and change nothing; the body stays free and gets no owner.
     /// </summary>
     /// <param name="planetId">The body.</param>
-    /// <param name="coefficient">The new coefficient of the deposits.</param>
+    /// <param name="multiplierMin">The lowest multiplier of the roll.</param>
+    /// <param name="multiplierMax">The highest multiplier of the roll.</param>
     /// <param name="actorId">Who terraformed the body.</param>
     /// <param name="reason">Why the deposits changed.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The outcome and the number of the deposits that changed.</returns>
+    /// <returns>The outcome and the deposits that changed.</returns>
     Task<TerraformResult> TerraformAsync(
         long planetId,
-        decimal coefficient,
+        decimal multiplierMin,
+        decimal multiplierMax,
         string actorId,
         string reason,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the bodies among the given ones that are free and may be colonized, whatever sector
+    /// they are in. The caller says which bodies it may show: a ship that stands by a body sees it.
+    /// </summary>
+    /// <param name="planetIds">The bodies.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The free bodies that may be colonized, in the order of their identifiers.</returns>
+    Task<IReadOnlyList<FreePlanetDto>> GetFreePlanetsByIdsAsync(IReadOnlyCollection<long> planetIds, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the free bodies of a sector that a player sees and may colonize, at most one page.

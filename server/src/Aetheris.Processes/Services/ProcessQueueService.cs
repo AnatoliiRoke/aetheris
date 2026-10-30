@@ -286,6 +286,43 @@ public sealed class ProcessQueueService
                     UnitSeconds = unitSeconds,
                     Position = queue.Count + 1,
                     CreatedAt = now,
+
+                    // The real levels of the building and of the technologies are fixed with the
+                    // order: what is being built or learned up to a level has not reached it,
+                    // so the order goes by the level that is real now (task 00014, section 11).
+                    BuildingLevel = building.Level,
+                    TechnologyIds =
+                    [
+                        .. requirementContext.TechnologyLevels
+                            .Where(technology => technology.Value > 0)
+                            .OrderBy(technology => technology.Key)
+                            .Select(technology => new ProcessOrderTechnologyEntity
+                            {
+                                TechnologyId = technology.Key,
+                                Level = technology.Value,
+                            }),
+                    ],
+
+                    // The parameters that hold now are copied into the order, so an archived or
+                    // changed parameter reaches new orders at once and never the ones in the
+                    // queue (task 00014, section 11).
+                    HasParamSnapshot = true,
+                    ParamIds =
+                    [
+                        .. catalog.ParametersOf(processType.Id)
+                            .Where(parameter => !parameter.IsArchived)
+                            .Select(parameter => new ProcessOrderParamEntity
+                            {
+                                ProcessParamId = parameter.Id,
+                                ParamKind = parameter.ParamKind,
+                                LevelSource = parameter.LevelSource,
+                                LevelTargetId = parameter.LevelTargetId,
+                                Level = parameter.Level,
+                                Value = parameter.Value,
+                                ValueMax = parameter.ValueMax,
+                                SortOrder = parameter.SortOrder,
+                            }),
+                    ],
                     CostIds =
                     [
                         .. resourceCosts.OrderBy(cost => cost.Key).Select(cost => new ProcessOrderCostEntity
@@ -597,9 +634,11 @@ public sealed class ProcessQueueService
                 processType,
                 head.Quantity,
                 head.ProducedQuantity + 1,
-                building.Level,
-                await _technologies.GetLevelsAsync(playerId, cancellationToken).ConfigureAwait(false),
-                catalog,
+                head.BuildingLevel ?? building.Level,
+                head.BuildingLevel is null
+                    ? await _technologies.GetLevelsAsync(playerId, cancellationToken).ConfigureAwait(false)
+                    : (IReadOnlyDictionary<int, int>)head.TechnologyIds.ToDictionary(technology => technology.TechnologyId, technology => technology.Level),
+                OrderCatalog(catalog, processType, head),
                 new ProcessOrderRequest(
                     head.Quantity,
                     head.SourceResourceTypeId,
@@ -619,11 +658,6 @@ public sealed class ProcessQueueService
             if (result.Resources.Count > 0)
             {
                 await _resources.GiveAsync(planetId, playerId, result.Resources, cancellationToken).ConfigureAwait(false);
-            }
-
-            if (result.Crew > 0)
-            {
-                await AddCrewAsync(planetId, result.Crew, cancellationToken).ConfigureAwait(false);
             }
 
             head.ProducedQuantity++;
@@ -653,6 +687,38 @@ public sealed class ProcessQueueService
 
         return made;
     }
+
+    /// <summary>
+    /// The catalog an order is finished with: the parameters the order was made with when it
+    /// carries them, the parameters of the catalog as they are now when it does not.
+    /// </summary>
+    /// <param name="catalog">The catalog of the processes.</param>
+    /// <param name="processType">The kind of the process of the order.</param>
+    /// <param name="order">The order.</param>
+    /// <returns>The catalog the handler reads its parameters from.</returns>
+    private static ProcessCatalog OrderCatalog(ProcessCatalog catalog, ProcessTypeInfo processType, ProcessOrderEntity order) =>
+        order.HasParamSnapshot
+            ? catalog.WithOrderParameters(
+                processType.Id,
+                [
+                    .. order.ParamIds
+                        .OrderBy(parameter => parameter.ProcessParamId)
+                        .Select(parameter => new ProcessParamInfo(
+                            parameter.ProcessParamId,
+                            string.Empty,
+                            string.Empty,
+                            string.Empty,
+                            processType.Id,
+                            parameter.ParamKind,
+                            parameter.LevelSource,
+                            parameter.LevelTargetId,
+                            parameter.Level,
+                            parameter.Value,
+                            parameter.ValueMax,
+                            false,
+                            parameter.SortOrder)),
+                ])
+            : catalog;
 
     /// <summary>
     /// Starts the first order of the queue, if it is not started yet.
@@ -1214,44 +1280,11 @@ public sealed class ProcessQueueService
             .Where(order => order.PlanetId == planetId && order.PlanetBuildingId == planetBuildingId)
             .OrderBy(order => order.Position)
             .ThenBy(order => order.Id)
-            .Include(order => order.CostIds);
+            .Include(order => order.CostIds)
+            .Include(order => order.ParamIds)
+            .Include(order => order.TechnologyIds);
 
         return await (tracked ? orders : orders.AsNoTracking()).ToListAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Writes the crew that came back into the state of the population of the body and
-    /// raises the flag when it is over the limit (task 00014, decision 3).
-    /// </summary>
-    /// <param name="planetId">The body.</param>
-    /// <param name="crew">How many crew came back.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task that completes when the crew is written.</returns>
-    private async Task AddCrewAsync(long planetId, long crew, CancellationToken cancellationToken)
-    {
-        ProcessPopulationStateEntity? state = await _dbContext.ProcessPopulationStates
-            .SingleOrDefaultAsync(entry => entry.PlanetId == planetId, cancellationToken)
-            .ConfigureAwait(false);
-
-        if (state is null)
-        {
-            state = new ProcessPopulationStateEntity { PlanetId = planetId };
-            _dbContext.ProcessPopulationStates.Add(state);
-        }
-
-        state.CrewPending += crew;
-
-        long limit = await _planets.GetBuildingEffectTotalAsync(planetId, BuildingEffectTypes.PopulationMax, cancellationToken).ConfigureAwait(false);
-
-        // The crew over the limit is not refused: it stays, and the flag starts the slow
-        // decline to the limit the population task applies.
-        if (state.CrewPending > limit && !state.IsOverLimit)
-        {
-            state.IsOverLimit = true;
-            state.OverLimitAt = _clock.GameNow;
-        }
-
-        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

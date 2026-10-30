@@ -5,7 +5,7 @@ namespace Aetheris.Processes;
 
 /// <summary>
 /// The public contract of the processes module (task 00014): the kinds of the processes,
-/// their recipes, the queues of the buildings and the state of the population.
+/// their recipes, the queues of the buildings and the terraforming a ship starts.
 /// </summary>
 /// <remarks>
 /// Modules communicate only through public interfaces (documentation/tech/01, section 8).
@@ -90,33 +90,33 @@ public interface IProcessesModule
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets the terraforming a player may start from a colony: the devices of its storage and
-    /// the free bodies the player sees (task 00014, section 9).
+    /// Gets the terraforming a player may start: the free bodies that may be settled with a ship
+    /// of the player by them, and the devices in the holds of those ships (task 00014, sections 9
+    /// and 11). The terraforming comes only from a ship, so no colony is named.
     /// </summary>
     /// <param name="playerId">The player.</param>
-    /// <param name="planetId">The colony the ship takes the device from.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The terraforming of the colony.</returns>
+    /// <returns>The terraforming of the player.</returns>
     Task<TerraformingDto> GetTerraformingAsync(
         string playerId,
-        long planetId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Turns a one-shot device on at a free body: the device is spent and the deposits of the
-    /// body become rich. A colony and a body terraformed before are refused (task 00014,
-    /// section 9).
+    /// Turns a one-shot device from the hold of a ship on at the free body the ship stands by:
+    /// the device is spent and every deposit of the body gets a multiplier of its own. A colony,
+    /// a body that may not be settled and a body terraformed before are refused (task 00014,
+    /// sections 9 and 11). The device is never taken from the storage of a colony.
     /// </summary>
     /// <param name="playerId">The player.</param>
-    /// <param name="planetId">The colony the ship takes the device from.</param>
-    /// <param name="targetPlanetId">The free body.</param>
+    /// <param name="targetPlanetId">The free body the ship stands by.</param>
+    /// <param name="shipId">The ship whose hold carries the device.</param>
     /// <param name="partTypeId">The device.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The outcome with the terraforming of the colony after the change.</returns>
+    /// <returns>The outcome with the terraforming of the player after the change.</returns>
     Task<TerraformingResultDto> TerraformAsync(
         string playerId,
-        long planetId,
         long targetPlanetId,
+        long shipId,
         int partTypeId,
         CancellationToken cancellationToken = default);
 }

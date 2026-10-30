@@ -75,16 +75,15 @@ public sealed class ProcessesModule : IProcessesModule
     /// <inheritdoc />
     public Task<TerraformingDto> GetTerraformingAsync(
         string playerId,
-        long planetId,
         CancellationToken cancellationToken = default) =>
-        _terraforming.ReadAsync(playerId, planetId, cancellationToken);
+        _terraforming.ReadAsync(playerId, cancellationToken);
 
     /// <inheritdoc />
     public Task<TerraformingResultDto> TerraformAsync(
         string playerId,
-        long planetId,
         long targetPlanetId,
+        long shipId,
         int partTypeId,
         CancellationToken cancellationToken = default) =>
-        _terraforming.LaunchAsync(playerId, planetId, targetPlanetId, partTypeId, cancellationToken);
+        _terraforming.LaunchAsync(playerId, targetPlanetId, shipId, partTypeId, cancellationToken);
 }

@@ -259,13 +259,15 @@ public sealed record CivilizationSummary(
 /// <param name="Name">The name the owner gave the body.</param>
 /// <param name="Deposits">The deposits with their coefficients.</param>
 /// <param name="IsTerraformed">Whether the body is terraformed already (task 00014, section 9).</param>
+/// <param name="IsColonizable">Whether the type of the body may be colonized; a gas giant may not (task 00014, section 11).</param>
 public sealed record PlanetFacts(
     long PlanetId,
     int SectorId,
     string? OwnerPlayerId,
     string? Name,
     IReadOnlyList<PlanetDepositFact> Deposits,
-    bool IsTerraformed = false);
+    bool IsTerraformed = false,
+    bool IsColonizable = true);
 
 /// <summary>A deposit of a body: the resource and the richness coefficient.</summary>
 /// <param name="ResourceTypeId">The resource.</param>
@@ -315,11 +317,24 @@ public static class TerraformOutcomes
     /// <summary>The body is a colony: only a free body is terraformed.</summary>
     public const string Colonized = "colonized";
 
+    /// <summary>The type of the body may not be colonized, a gas giant for example: only a body that may be settled is terraformed (task 00014, section 11).</summary>
+    public const string NotColonizable = "not_colonizable";
+
     /// <summary>The body is terraformed already: a body is terraformed once.</summary>
     public const string AlreadyTerraformed = "already_terraformed";
 }
 
-/// <summary>The outcome of the terraforming of a body (task 00014, section 9).</summary>
+/// <summary>A deposit that became richer by the terraforming of a body (task 00014, section 11).</summary>
+/// <param name="ResourceTypeId">The resource of the deposit.</param>
+/// <param name="OldCoefficient">The coefficient before.</param>
+/// <param name="NewCoefficient">The coefficient the roll gave the deposit.</param>
+public sealed record TerraformedDeposit(int ResourceTypeId, decimal OldCoefficient, decimal NewCoefficient);
+
+/// <summary>The outcome of the terraforming of a body (task 00014, sections 9 and 11).</summary>
 /// <param name="Outcome">The outcome, one of <see cref="TerraformOutcomes"/>.</param>
-/// <param name="ChangedDeposits">The number of the deposits that became richer.</param>
-public sealed record TerraformResult(string Outcome, int ChangedDeposits);
+/// <param name="Deposits">The deposits that became richer, each with the coefficient of its own roll.</param>
+public sealed record TerraformResult(string Outcome, IReadOnlyList<TerraformedDeposit> Deposits)
+{
+    /// <summary>Gets the number of the deposits that became richer.</summary>
+    public int ChangedDeposits => Deposits.Count;
+}

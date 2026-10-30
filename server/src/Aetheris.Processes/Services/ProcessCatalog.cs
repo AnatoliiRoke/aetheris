@@ -79,6 +79,26 @@ public sealed class ProcessCatalog
         [.. Parameters.Where(parameter => parameter.ProcessTypeId == processTypeId)];
 
     /// <summary>
+    /// Makes the catalog an order of the queue looks at: the same catalog, with the parameters
+    /// of one kind of a process replaced by the ones the order was made with, so a parameter
+    /// archived or changed after the order entered the queue does not change what it gives
+    /// (task 00014, section 11).
+    /// </summary>
+    /// <param name="processTypeId">The kind of the process of the order.</param>
+    /// <param name="orderParameters">The parameters the order was made with.</param>
+    /// <returns>The catalog of the order.</returns>
+    public ProcessCatalog WithOrderParameters(int processTypeId, IReadOnlyList<ProcessParamInfo> orderParameters)
+    {
+        ArgumentNullException.ThrowIfNull(orderParameters);
+
+        return new ProcessCatalog(
+            Types,
+            Recipes,
+            [.. Parameters.Where(parameter => parameter.ProcessTypeId != processTypeId), .. orderParameters],
+            Requirements);
+    }
+
+    /// <summary>
     /// Finds the step of a parameter of a kind of a process that holds at a level: the row with
     /// the highest level that the source has reached. An archived row is out of effect.
     /// </summary>
