@@ -4,10 +4,11 @@ import { AppProviders, Pages } from '../App';
 import type { AuthApi, Me } from '../api/authApi';
 import type { Api } from '../api/context';
 import type { ContentApi } from '../api/contentApi';
+import type { CurrencyBalanceFacts, EconomyApi, EconomyOverview, PopulationFacts } from '../api/economyApi';
 import type { GameApi, Race } from '../api/gameApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
-import type { ProcessBuilding, ProcessBuildingSummary, ProcessesApi, TerraformingState } from '../api/processesApi';
+import type { ProcessBuilding, ProcessBuildingSummary, ProcessesApi, TerraformingState, TerraformingTarget } from '../api/processesApi';
 import type { ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionStock } from '../api/productionApi';
 import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
@@ -69,6 +70,7 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'world.race.race_4.name': 'Нексари',
     'world.resource.resource_1.name': 'Залізо',
     'world.resource.resource_3.name': 'Мідь',
+    'world.resource.resource_18.name': 'Кредити',
     'world.resource_group.resource_group_1.name': 'Видобувні',
     'planets.building.building_1.name': 'Адміністративний центр',
     'planets.building.building_1.description': 'Головна будівля планети.',
@@ -95,6 +97,7 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'world.race.race_1.name': 'Terrans',
     'world.race.race_2.name': 'Kvarr',
     'world.resource.resource_1.name': 'Iron',
+    'world.resource.resource_18.name': 'Credits',
     'planets.building.building_1.name': 'Administrative center',
     'research.branch.economy.name': 'Economy',
     'research.technology.tech_1.name': 'Deep extraction',
@@ -249,6 +252,7 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
     resourceTypes: [
       { id: 1, code: 'resource_1', nameKey: 'world.resource.resource_1.name', resourceGroupId: 1 },
       { id: 3, code: 'resource_3', nameKey: 'world.resource.resource_3.name', resourceGroupId: 1 },
+      { id: 18, code: 'resource_18', nameKey: 'world.resource.resource_18.name', resourceGroupId: null },
     ],
     resourceGroups: [{ id: 1, code: 'resource_group_1', nameKey: 'world.resource_group.resource_group_1.name', resourceGroupId: null }],
     ...overrides,
@@ -321,6 +325,59 @@ export function fakeResearchApi(overrides: Partial<ResearchApi> = {}): ResearchA
     tree: vi.fn().mockResolvedValue(sampleResearchTree()),
     enqueue: vi.fn().mockResolvedValue(sampleResearchTree()),
     cancel: vi.fn().mockResolvedValue(sampleResearchTree()),
+    ...overrides,
+  };
+}
+
+/**
+ * The population of a body for the tests (task 00015): it grows to the largest population
+ * of the body and reaches it in three minutes and twenty seconds.
+ */
+export function samplePopulation(overrides: Partial<PopulationFacts> = {}): PopulationFacts {
+  return {
+    planetId: 10,
+    amount: 750,
+    maximum: 900,
+    growthPerHour: 45,
+    overLimit: false,
+    timeToMaximum: '0:03:20',
+    ...overrides,
+  };
+}
+
+/**
+ * The balance of the credits of a civilization for the tests (task 00015).
+ */
+export function sampleBalance(overrides: Partial<CurrencyBalanceFacts> = {}): CurrencyBalanceFacts {
+  return {
+    playerId: 'user-1',
+    resourceTypeId: 18,
+    amount: 234,
+    incomePerHour: 25,
+    ...overrides,
+  };
+}
+
+/**
+ * The economy of a player for the tests (task 00015): the population of one body and the
+ * balance of the credits.
+ */
+export function sampleEconomyOverview(overrides: Partial<EconomyOverview> = {}): EconomyOverview {
+  return {
+    populations: [samplePopulation()],
+    balances: [sampleBalance()],
+    gameNow: '2026-10-26T12:00:00Z',
+    ...overrides,
+  };
+}
+
+/**
+ * An economy API whose every method is a spy; a test overrides what it needs.
+ */
+export function fakeEconomyApi(overrides: Partial<EconomyApi> = {}): EconomyApi {
+  return {
+    overview: vi.fn().mockResolvedValue(sampleEconomyOverview()),
+    population: vi.fn().mockResolvedValue(samplePopulation()),
     ...overrides,
   };
 }
@@ -432,26 +489,56 @@ export function fakeProcessesApi(overrides: Partial<ProcessesApi> = {}): Process
     terraforming: vi.fn().mockResolvedValue(sampleTerraforming()),
     terraform: vi.fn().mockResolvedValue({
       targetPlanetId: 70,
+      shipId: 5,
       partTypeId: 34,
-      multiplier: 1.6,
-      changedDeposits: 3,
-      terraforming: sampleTerraforming({ devices: [] }),
+      changedDeposits: 2,
+      depositIds: [
+        { resourceTypeId: 1, oldCoefficient: 1.1, newCoefficient: 1.5 },
+        { resourceTypeId: 3, oldCoefficient: 1.2, newCoefficient: 1.8 },
+      ],
+      terraforming: sampleTerraforming({ targets: [sampleTerraformingTarget({ isTerraformed: true, shipIds: [] })] }),
     }),
     ...overrides,
   };
 }
 
 /**
- * The terraforming of a colony for the tests (task 00014, section 9): one device in the storage,
- * a free body and a body that is terraformed already.
+ * A free body a device may be turned on at, with the ships of the player that stand by it and
+ * carry a device (task 00014, section 11).
+ */
+export function sampleTerraformingTarget(overrides: Partial<TerraformingTarget> = {}): TerraformingTarget {
+  return {
+    planetId: 70,
+    systemId: 3,
+    objectTypeId: 2,
+    orbit: 4,
+    name: 'Kepler-4',
+    isTerraformed: false,
+    shipIds: [
+      {
+        shipId: 5,
+        devices: [{ partTypeId: 34, nameKey: 'production.part_type.part_34.name', markLevel: 1, quantity: 2 }],
+      },
+    ],
+    ...overrides,
+  };
+}
+
+/**
+ * The terraforming of a player for the tests (task 00014, sections 9 and 11): a free body with a
+ * ship by it, a free body that is terraformed already and the range of the multiplier.
  */
 export function sampleTerraforming(overrides: Partial<TerraformingState> = {}): TerraformingState {
   return {
-    planetId: 10,
-    devices: [{ partTypeId: 34, nameKey: 'production.part_type.part_34.name', markLevel: 1, multiplier: 1.6, quantity: 1 }],
     targets: [
-      { planetId: 70, systemId: 3, objectTypeId: 2, orbit: 4, name: 'Kepler-4', isTerraformed: false },
-      { planetId: 71, systemId: 3, objectTypeId: 2, orbit: 5, name: 'Kepler-5', isTerraformed: true },
+      sampleTerraformingTarget(),
+      sampleTerraformingTarget({
+        planetId: 71,
+        orbit: 5,
+        name: 'Kepler-5',
+        isTerraformed: true,
+        shipIds: [],
+      }),
     ],
     multiplierMin: 1.4,
     multiplierMax: 1.9,
@@ -550,13 +637,14 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
  */
 export function renderPage(
   path: string,
-  options: { auth?: AuthApi; content?: ContentApi; game?: GameApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi } = {},
+  options: { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; game?: GameApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi } = {},
 ): RenderResult & { api: Api } {
   window.history.replaceState(null, '', path);
 
   const api: Api = {
     auth: options.auth ?? fakeAuthApi(),
     content: options.content ?? mockContentApi,
+    economy: options.economy ?? fakeEconomyApi(),
     game: options.game ?? fakeGameApi(),
     planets: options.planets ?? fakePlanetApi(),
     processes: options.processes ?? fakeProcessesApi(),
