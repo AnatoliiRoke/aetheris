@@ -308,6 +308,32 @@ public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int? 
 /// <param name="SectorId">The sector of the body.</param>
 public sealed record OwnedPlanet(long PlanetId, int SectorId);
 
+/// <summary>
+/// A body of a player with everything the screen of the civilization shows about it
+/// (task 00010, section 7.4): the name, the type, the place in the galaxy and the deposits.
+/// </summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="Name">The name the owner gave the body.</param>
+/// <param name="ObjectTypeId">The type of the body; the client reads the name and the picture of the type from the reference table.</param>
+/// <param name="SectorId">The sector of the body.</param>
+/// <param name="SystemId">The system of the body.</param>
+/// <param name="Orbit">The orbit of the body in the system, if it has one.</param>
+/// <param name="SizeClassId">The size class of the body.</param>
+/// <param name="Size">The size of the body.</param>
+/// <param name="IsTerraformed">Whether the body is terraformed already (task 00014, section 9).</param>
+/// <param name="Deposits">The deposits of the body with their coefficients.</param>
+public sealed record OwnedPlanetDto(
+    long PlanetId,
+    string? Name,
+    int ObjectTypeId,
+    int SectorId,
+    long SystemId,
+    int? Orbit,
+    int SizeClassId,
+    int Size,
+    bool IsTerraformed,
+    IReadOnlyList<PlanetDepositFact> Deposits);
+
 /// <summary>The home body of a civilization with the start building of its race.</summary>
 /// <param name="PlanetId">The home body.</param>
 /// <param name="SectorId">The sector.</param>

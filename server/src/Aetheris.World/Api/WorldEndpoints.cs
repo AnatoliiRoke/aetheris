@@ -73,6 +73,11 @@ public static class WorldEndpoints
         world.MapGet("/reference", async (WorldQueryService queries, CancellationToken cancellationToken) =>
             Results.Json(await queries.GetReferenceAsync(cancellationToken).ConfigureAwait(false), WorldJson.Options));
 
+        // The bodies of the player with everything the screen of the civilization shows about
+        // them (task 00010, section 7.4). Only the bodies of the caller are returned.
+        world.MapGet("/planets", async (ClaimsPrincipal user, WorldQueryService queries, CancellationToken cancellationToken) =>
+            Results.Json(await queries.GetOwnedPlanetsDetailedAsync(PlayerId(user), cancellationToken).ConfigureAwait(false), WorldJson.Options));
+
         world.MapGet("/sectors", async (WorldQueryService queries, CancellationToken cancellationToken) =>
             Results.Json(await queries.GetSectorsAsync(cancellationToken).ConfigureAwait(false), WorldJson.Options));
 

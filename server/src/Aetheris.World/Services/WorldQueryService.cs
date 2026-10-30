@@ -394,6 +394,59 @@ public sealed class WorldQueryService
     }
 
     /// <summary>
+    /// Gets the bodies of a player with everything the screen of the civilization shows about
+    /// them: the name, the type, the place in the galaxy and the deposits (task 00010,
+    /// section 7.4).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bodies of the player, in the order of their identifiers.</returns>
+    public async Task<IReadOnlyList<OwnedPlanetDto>> GetOwnedPlanetsDetailedAsync(
+        string playerId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        List<PlanetEntity> bodies = await _dbContext.Planets.AsNoTracking()
+            .Include(planet => planet.DepositIds)
+            .Where(planet => planet.OwnerPlayerId == playerId)
+            .OrderBy(planet => planet.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        if (bodies.Count == 0)
+        {
+            return [];
+        }
+
+        // The type of a body is a column of the object it is, so the types come from the
+        // objects of the bodies and never from the code of the type.
+        Dictionary<long, CelestialObjectEntity> objects = await _dbContext.Objects.AsNoTracking()
+            .Where(entry => bodies.Select(planet => planet.CelestialObjectId).Contains(entry.Id))
+            .ToDictionaryAsync(entry => entry.Id, cancellationToken)
+            .ConfigureAwait(false);
+
+        return
+        [
+            .. bodies.Select(body =>
+            {
+                CelestialObjectEntity celestial = objects[body.CelestialObjectId];
+
+                return new OwnedPlanetDto(
+                    body.Id,
+                    body.Name,
+                    celestial.ObjectTypeId,
+                    body.SectorId,
+                    body.SystemId,
+                    celestial.Orbit,
+                    body.SizeClassId,
+                    body.Size,
+                    body.IsTerraformed,
+                    [.. body.DepositIds.OrderBy(deposit => deposit.ResourceId).Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))]);
+            })
+        ];
+    }
+
+    /// <summary>
     /// Gets the resource types and their groups.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
