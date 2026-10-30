@@ -1,13 +1,60 @@
+using Aetheris.Economy.Api;
+using Aetheris.Economy.Services;
+
 namespace Aetheris.Economy;
 
 /// <summary>
-/// Stub implementation of the Economy module.
+/// The economy module: the population of the bodies and the balances of the civilizations
+/// (task 00015).
 /// </summary>
 /// <remarks>
-/// Task 00001 creates the module skeleton only; the game logic arrives with later tasks.
+/// The module reads the buildings of the bodies module and the levels of the technologies of
+/// the research module through the contracts those modules implement for it, so the
+/// dependencies go one way only.
 /// </remarks>
 public sealed class EconomyModule : IEconomyModule
 {
+    private readonly EconomyService _service;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EconomyModule"/> class.
+    /// </summary>
+    /// <param name="service">The service of the population and the balances.</param>
+    public EconomyModule(EconomyService service)
+    {
+        ArgumentNullException.ThrowIfNull(service);
+
+        _service = service;
+    }
+
     /// <inheritdoc />
     public string ModuleName => "Economy";
+
+    /// <inheritdoc />
+    public Task EnsureAsync(CancellationToken cancellationToken = default) =>
+        _service.EnsureAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public Task<PopulationFacts?> GetPopulationAsync(string playerId, long planetId, CancellationToken cancellationToken = default) =>
+        _service.GetPopulationAsync(playerId, planetId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<PopulationFacts>> GetPopulationsAsync(string playerId, CancellationToken cancellationToken = default) =>
+        _service.GetPopulationsAsync(playerId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<CurrencyBalanceFacts> GetBalanceAsync(string playerId, int resourceTypeId, CancellationToken cancellationToken = default) =>
+        _service.GetBalanceAsync(playerId, resourceTypeId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task TakeAsync(string playerId, IReadOnlyDictionary<int, long> amounts, CancellationToken cancellationToken = default) =>
+        _service.TakeAsync(playerId, amounts, cancellationToken);
+
+    /// <inheritdoc />
+    public Task GiveAsync(string playerId, IReadOnlyDictionary<int, long> amounts, CancellationToken cancellationToken = default) =>
+        _service.GiveAsync(playerId, amounts, cancellationToken);
+
+    /// <inheritdoc />
+    public Task FixPlayerAsync(string playerId, DateTimeOffset moment, CancellationToken cancellationToken = default) =>
+        _service.FixPlayerAsync(playerId, moment, cancellationToken);
 }
