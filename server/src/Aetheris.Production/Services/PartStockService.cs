@@ -306,7 +306,11 @@ public sealed class PartStockService
             ? attribute.NumberValue ?? decimal.Zero
             : decimal.Zero;
 
-        return new PartFacts(part.Id, part.Code, part.NameKey, part.MarkLevel, part.IsArchived, crew, cost);
+        decimal? terraformingMultiplier = part.Attributes.TryGetValue(PartAttributeKeys.TerraformingMultiplier, out PartAttributeInfo? device)
+            ? device.NumberValue
+            : null;
+
+        return new PartFacts(part.Id, part.Code, part.NameKey, part.MarkLevel, part.IsArchived, crew, cost, terraformingMultiplier);
     }
 
     /// <summary>
@@ -468,6 +472,7 @@ public sealed record PartStackInfo(int PartTypeId, int MarkLevel, bool HasRaceBo
 /// <param name="IsArchived">Whether the part is archived.</param>
 /// <param name="Crew">The crew the part carries, from its attribute.</param>
 /// <param name="ResourceCost">The resources of one part by the recipe that makes it, by the resource.</param>
+/// <param name="TerraformingMultiplier">The multiplier of the deposits the part gives as a device of the terraforming, or <see langword="null"/> when the part is no such device.</param>
 public sealed record PartFacts(
     int PartTypeId,
     string Code,
@@ -475,4 +480,5 @@ public sealed record PartFacts(
     int MarkLevel,
     bool IsArchived,
     decimal Crew,
-    IReadOnlyDictionary<int, decimal> ResourceCost);
+    IReadOnlyDictionary<int, decimal> ResourceCost,
+    decimal? TerraformingMultiplier = null);

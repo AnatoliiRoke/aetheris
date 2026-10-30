@@ -124,6 +124,12 @@ public static class PartAttributeKeys
     public const string Mass = "mass";
 
     /// <summary>
+    /// The multiplier of the deposits a one-shot device gives a free body; a part with this
+    /// attribute is a device of the terraforming (task 00014, section 9).
+    /// </summary>
+    public const string TerraformingMultiplier = "terraforming_multiplier";
+
+    /// <summary>
     /// Gets every key of an attribute, in the order of the form of the admin panel.
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -135,6 +141,7 @@ public static class PartAttributeKeys
         Range,
         SlotSize,
         Mass,
+        TerraformingMultiplier,
     ];
 }
 

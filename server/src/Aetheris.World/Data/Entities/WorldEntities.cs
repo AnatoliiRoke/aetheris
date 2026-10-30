@@ -161,6 +161,12 @@ public sealed class PlanetEntity
     /// <summary>Gets or sets the name the owner gave the body, or <see langword="null"/>.</summary>
     public string? Name { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether a device of a ship has made the deposits of the body rich: a body
+    /// is terraformed only once, whoever colonizes it later (task 00014, section 9).
+    /// </summary>
+    public bool IsTerraformed { get; set; }
+
     /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
     public int Version { get; set; } = 1;
 

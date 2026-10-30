@@ -1,20 +1,6 @@
 {
   "types": [
     {
-      "key": "terraforming",
-      "handler": "terraforming",
-      "refunds_input": false,
-      "sort_order": 10,
-      "name": {
-        "uk": "Тераформінг",
-        "en": "Terraforming"
-      },
-      "description": {
-        "uk": "Пристрій робить родовища планети багатими.",
-        "en": "A device makes the deposits of a body rich."
-      }
-    },
-    {
       "key": "recycling",
       "handler": "recycling",
       "refunds_input": true,
@@ -86,32 +72,6 @@
     }
   ],
   "recipes": [
-    {
-      "key": "terraforming_body",
-      "type": "terraforming",
-      "building_class": "production",
-      "source_group": null,
-      "target_group": null,
-      "duration_seconds": 3600,
-      "ship_stub": "ship_on_orbit",
-      "sort_order": 10,
-      "name": {
-        "uk": "Тераформінг планети",
-        "en": "Terraforming of a body"
-      },
-      "description": {
-        "uk": "Корабель на орбіті вмикає пристрій зі складу, і родовища планети стають багатими.",
-        "en": "A ship on the orbit turns a device of the storage on and the deposits of the body become rich."
-      },
-      "ingredients": [
-        {
-          "resource": null,
-          "part": "part_34",
-          "amount": 1
-        }
-      ],
-      "requirements": []
-    },
     {
       "key": "recycle_part",
       "type": "recycling",
@@ -254,42 +214,6 @@
     }
   ],
   "params": [
-    {
-      "type": "terraforming",
-      "kind": "range",
-      "level_source": "part",
-      "level_target": null,
-      "level": 1,
-      "value": 1.4,
-      "value_max": 1.9,
-      "sort_order": 10,
-      "name": {
-        "uk": "Багатий діапазон",
-        "en": "Rich range"
-      },
-      "description": {
-        "uk": "Множник родовищ після тераформінгу лежить понад нижнім значенням і не вище верхнього.",
-        "en": "The multiplier of the deposits after the terraforming lies above the lowest value and not above the highest one."
-      }
-    },
-    {
-      "type": "terraforming",
-      "kind": "value_by_level",
-      "level_source": "part",
-      "level_target": null,
-      "level": 1,
-      "value": 1.6,
-      "value_max": null,
-      "sort_order": 20,
-      "name": {
-        "uk": "Множник родовищ, пристрій Mk I",
-        "en": "Deposit multiplier, device Mk I"
-      },
-      "description": {
-        "uk": "Множник родовищ, який дає пристрій цього рівня.",
-        "en": "The multiplier of the deposits a device of this level gives."
-      }
-    },
     {
       "type": "recycling",
       "kind": "value_by_level",

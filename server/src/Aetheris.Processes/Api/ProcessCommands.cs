@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Aetheris.Core.Commands;
 using Aetheris.Core.Errors;
+using Aetheris.Processes.Handlers;
 using Aetheris.Processes.Services;
 using Aetheris.World;
 using FluentValidation;
@@ -121,8 +122,7 @@ public sealed class EnqueueProcessCommand : Command<EnqueueProcessCommand.Reques
 /// decision 1).
 /// </summary>
 /// <remarks>
-/// The kind of the process says whether the cost comes back: the device of the terraforming
-/// is lost when the order is cancelled.
+/// The kind of the process says whether the cost comes back.
 /// </remarks>
 public sealed class CancelProcessCommand : Command<CancelProcessCommand.Request, JsonElement>
 {
@@ -200,4 +200,94 @@ public sealed class CancelProcessCommand : Command<CancelProcessCommand.Request,
         [property: JsonPropertyName("planet_id")] long? PlanetId,
         [property: JsonPropertyName("planet_building_id")] long? PlanetBuildingId,
         [property: JsonPropertyName("order_id")] long? OrderId);
+}
+
+/// <summary>
+/// Turns a one-shot device of the terraforming on at a free body (task 00014, section 9).
+/// </summary>
+/// <remarks>
+/// The client names the colony the ship takes the device from, the free body and the device.
+/// The pipeline checks that the colony belongs to the player of the session, so the device of
+/// another player is never spent; the server checks every rule of the target and spends the
+/// device in the transaction of the command. The terraforming is no order of a queue: nothing
+/// is cancelled and the device never comes back.
+/// </remarks>
+public sealed class TerraformCommand : Command<TerraformCommand.Request, JsonElement>
+{
+    /// <summary>
+    /// The route of the command.
+    /// </summary>
+    public const string RoutePath = "/api/v1/processes/terraform";
+
+    /// <summary>
+    /// The action code of the command.
+    /// </summary>
+    public const string Code = "processes.terraform";
+
+    private readonly TerraformingHandler _terraforming;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TerraformCommand"/> class.
+    /// </summary>
+    /// <param name="terraforming">The terraforming started by a ship.</param>
+    public TerraformCommand(TerraformingHandler terraforming)
+    {
+        ArgumentNullException.ThrowIfNull(terraforming);
+
+        _terraforming = terraforming;
+    }
+
+    /// <inheritdoc />
+    public override string Route => RoutePath;
+
+    /// <inheritdoc />
+    public override string ActionCode => Code;
+
+    /// <inheritdoc />
+    public override void DefineRules(AbstractValidator<Request> rules)
+    {
+        ArgumentNullException.ThrowIfNull(rules);
+
+        rules.RuleFor(request => request.PlanetId).NotNull().GreaterThan(0);
+        rules.RuleFor(request => request.TargetPlanetId).NotNull().GreaterThan(0);
+        rules.RuleFor(request => request.PartTypeId).NotNull().GreaterThan(0);
+    }
+
+    /// <inheritdoc />
+    public override OwnedObjectReference? GetTarget(Request request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        // The owned object is the colony that holds the device; the target body is free and
+        // has no owner to check.
+        return new(PlanetOwnerResolver.Type, request.PlanetId!.Value.ToString(CultureInfo.InvariantCulture));
+    }
+
+    /// <inheritdoc />
+    public override async Task<JsonElement> ExecuteAsync(Request request, CommandContext context, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        TerraformingResultDto result = await _terraforming
+            .LaunchAsync(
+                context.PlayerId,
+                request.PlanetId!.Value,
+                request.TargetPlanetId!.Value,
+                request.PartTypeId!.Value,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return JsonSerializer.SerializeToElement(result, ProcessesJson.Options);
+    }
+
+    /// <summary>
+    /// The request: the colony, the free body and the device.
+    /// </summary>
+    /// <param name="PlanetId">The colony the ship takes the device from.</param>
+    /// <param name="TargetPlanetId">The free body the device is turned on at.</param>
+    /// <param name="PartTypeId">The device.</param>
+    public sealed record Request(
+        [property: JsonPropertyName("planet_id")] long? PlanetId,
+        [property: JsonPropertyName("target_planet_id")] long? TargetPlanetId,
+        [property: JsonPropertyName("part_type_id")] int? PartTypeId);
 }

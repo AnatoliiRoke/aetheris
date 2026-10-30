@@ -21,6 +21,7 @@
   "admin.reference.attribute.range": { "uk": "Дальність", "en": "Range" },
   "admin.reference.attribute.slot_size": { "uk": "Розмір слота", "en": "Slot size" },
   "admin.reference.attribute.mass": { "uk": "Маса", "en": "Mass" },
+  "admin.reference.attribute.terraforming_multiplier": { "uk": "Множник родовищ (пристрій тераформінгу)", "en": "Deposit multiplier (terraforming device)" },
   "admin.reference.damage_kind.energy": { "uk": "Енергетичний", "en": "Energy" },
   "admin.reference.damage_kind.thermal": { "uk": "Термічний", "en": "Thermal" },
   "admin.reference.damage_kind.kinetic": { "uk": "Кінетичний", "en": "Kinetic" },

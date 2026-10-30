@@ -159,22 +159,32 @@ public interface IWorldModule
     Task<IReadOnlyDictionary<int, long>> TakeLegacyStorageAsync(long planetId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Raises the coefficient of every deposit of a body that is below the value and writes the
-    /// change in the journal of the world: the terraforming makes the body rich, and a deposit
-    /// that is already richer keeps its richness (task 00014, decision 2).
+    /// Terraforms a free body: raises the coefficient of every poorer deposit to the value, marks
+    /// the body as terraformed and writes the change in the journal of the world (task 00014,
+    /// section 9). A colony and a body terraformed before are refused and change nothing; the
+    /// body stays free and gets no owner.
     /// </summary>
     /// <param name="planetId">The body.</param>
     /// <param name="coefficient">The new coefficient of the deposits.</param>
-    /// <param name="actorId">Who changed the deposits.</param>
+    /// <param name="actorId">Who terraformed the body.</param>
     /// <param name="reason">Why the deposits changed.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The number of the deposits that changed.</returns>
-    Task<int> SetDepositCoefficientAsync(
+    /// <returns>The outcome and the number of the deposits that changed.</returns>
+    Task<TerraformResult> TerraformAsync(
         long planetId,
         decimal coefficient,
         string actorId,
         string reason,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the free bodies of a sector that a player sees and may colonize, at most one page.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="sectorId">The sector.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The free bodies.</returns>
+    Task<IReadOnlyList<FreePlanetDto>> GetFreePlanetsAsync(string playerId, int sectorId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sets the start building of every race that has none yet (task 00011).

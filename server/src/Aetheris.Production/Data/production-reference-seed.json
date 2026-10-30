@@ -1008,6 +1008,9 @@
         },
         "slot_size": {
           "code": "standard"
+        },
+        "terraforming_multiplier": {
+          "number": 1.6
         }
       }
     }

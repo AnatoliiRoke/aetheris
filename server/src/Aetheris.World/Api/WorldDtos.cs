@@ -171,6 +171,7 @@ public sealed record SystemContentDto(
 /// <param name="Name">The name.</param>
 /// <param name="SizeClassId">The size class.</param>
 /// <param name="Size">The size.</param>
+/// <param name="IsTerraformed">Whether the body is terraformed already; it stays free for everyone (task 00014, section 9).</param>
 public sealed record FreePlanetDto(
     long PlanetId,
     long CelestialObjectId,
@@ -180,7 +181,8 @@ public sealed record FreePlanetDto(
     int? Orbit,
     string Name,
     int SizeClassId,
-    int Size);
+    int Size,
+    bool IsTerraformed = false);
 
 /// <summary>A row of a reference table, for the client to name the identifiers.</summary>
 /// <param name="Id">The identifier.</param>
@@ -256,12 +258,14 @@ public sealed record CivilizationSummary(
 /// <param name="OwnerPlayerId">The owner, or <see langword="null"/> for a free body.</param>
 /// <param name="Name">The name the owner gave the body.</param>
 /// <param name="Deposits">The deposits with their coefficients.</param>
+/// <param name="IsTerraformed">Whether the body is terraformed already (task 00014, section 9).</param>
 public sealed record PlanetFacts(
     long PlanetId,
     int SectorId,
     string? OwnerPlayerId,
     string? Name,
-    IReadOnlyList<PlanetDepositFact> Deposits);
+    IReadOnlyList<PlanetDepositFact> Deposits,
+    bool IsTerraformed = false);
 
 /// <summary>A deposit of a body: the resource and the richness coefficient.</summary>
 /// <param name="ResourceTypeId">The resource.</param>
@@ -295,3 +299,26 @@ public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int R
 /// <param name="StartBuildingTypeId">The start building of the race, if one is set.</param>
 /// <param name="StartBuildingLevel">The level of the start building.</param>
 public sealed record CivilizationHome(long PlanetId, int SectorId, string PlayerId, int? StartBuildingTypeId, int StartBuildingLevel);
+
+/// <summary>
+/// The logical codes of the outcome of the terraforming of a body (task 00014, section 9).
+/// </summary>
+public static class TerraformOutcomes
+{
+    /// <summary>The deposits of the body became rich and the body is marked as terraformed.</summary>
+    public const string Done = "done";
+
+    /// <summary>The body does not exist.</summary>
+    public const string Unknown = "unknown";
+
+    /// <summary>The body is a colony: only a free body is terraformed.</summary>
+    public const string Colonized = "colonized";
+
+    /// <summary>The body is terraformed already: a body is terraformed once.</summary>
+    public const string AlreadyTerraformed = "already_terraformed";
+}
+
+/// <summary>The outcome of the terraforming of a body (task 00014, section 9).</summary>
+/// <param name="Outcome">The outcome, one of <see cref="TerraformOutcomes"/>.</param>
+/// <param name="ChangedDeposits">The number of the deposits that became richer.</param>
+public sealed record TerraformResult(string Outcome, int ChangedDeposits);

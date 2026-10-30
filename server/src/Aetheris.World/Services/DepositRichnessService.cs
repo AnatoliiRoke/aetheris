@@ -1,4 +1,5 @@
 using Aetheris.Core.Time;
+using Aetheris.World.Api;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -6,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Aetheris.World.Services;
 
 /// <summary>
-/// Changes the richness of the deposits of a body and writes the change in the journal of the
-/// world (task 00014, decision 2).
+/// Terraforms a free body: makes its deposits rich, marks it and writes the change in the
+/// journal of the world (task 00014, section 9).
 /// </summary>
 /// <remarks>
 /// The deposits belong to the world module, so another module that makes a body rich asks
@@ -37,15 +38,17 @@ public sealed class DepositRichnessService
     }
 
     /// <summary>
-    /// Sets the coefficient of every deposit of a body and writes the change in the journal.
+    /// Terraforms a free body: raises the coefficient of every poorer deposit, marks the body as
+    /// terraformed and writes the change in the journal, all in one transaction (task 00014,
+    /// section 9).
     /// </summary>
     /// <param name="planetId">The body.</param>
     /// <param name="coefficient">The new coefficient of the deposits.</param>
-    /// <param name="actorId">Who changed the deposits.</param>
+    /// <param name="actorId">Who terraformed the body.</param>
     /// <param name="reason">Why the deposits changed.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The number of the deposits that changed.</returns>
-    public Task<int> SetCoefficientAsync(
+    /// <returns>The outcome: a colony or a body terraformed before is refused and keeps its deposits.</returns>
+    public Task<TerraformResult> TerraformAsync(
         long planetId,
         decimal coefficient,
         string actorId,
@@ -54,8 +57,30 @@ public sealed class DepositRichnessService
         _unitOfWork.RunAsync(
             async () =>
             {
-                // The rows of the deposits are locked, so two changes of one body never write
-                // over each other.
+                // The row of the body is locked first, so two devices on one body wait for each
+                // other and only the first one finds the body not terraformed.
+                PlanetEntity? planet = await _dbContext.Planets
+                    .FromSql($"SELECT * FROM planet WHERE id = {planetId} FOR UPDATE")
+                    .SingleOrDefaultAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (planet is null)
+                {
+                    return new TerraformResult(TerraformOutcomes.Unknown, 0);
+                }
+
+                // Only a free body is terraformed: it stays free, and its owner is the one who
+                // colonizes it later.
+                if (planet.OwnerPlayerId is not null)
+                {
+                    return new TerraformResult(TerraformOutcomes.Colonized, 0);
+                }
+
+                if (planet.IsTerraformed)
+                {
+                    return new TerraformResult(TerraformOutcomes.AlreadyTerraformed, 0);
+                }
+
                 List<DepositEntity> deposits = await _dbContext.Deposits
                     .FromSql($"SELECT * FROM deposit WHERE planet_id = {planetId} ORDER BY resource_id FOR UPDATE")
                     .ToListAsync(cancellationToken)
@@ -89,15 +114,12 @@ public sealed class DepositRichnessService
                     });
                 }
 
-                if (changes.Count == 0)
-                {
-                    return 0;
-                }
-
+                planet.IsTerraformed = true;
+                planet.Version++;
                 _dbContext.DepositChanges.AddRange(changes);
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                return changes.Count;
+                return new TerraformResult(TerraformOutcomes.Done, changes.Count);
             },
             cancellationToken);
 }

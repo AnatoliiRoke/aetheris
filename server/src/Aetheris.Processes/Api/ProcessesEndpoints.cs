@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Security;
+using Aetheris.Processes.Handlers;
 using Aetheris.Processes.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -59,6 +60,20 @@ public static class ProcessesEndpoints
                 .ConfigureAwait(false);
 
             return Results.Json(building, ProcessesJson.Options);
+        });
+
+        // The terraforming a ship may start from a colony: the devices and the free bodies.
+        processes.MapGet("/terraforming", async (
+            [FromQuery(Name = "planet_id")] long planetId,
+            ClaimsPrincipal user,
+            TerraformingHandler terraforming,
+            CancellationToken cancellationToken) =>
+        {
+            TerraformingDto state = await terraforming
+                .ReadAsync(PlayerId(user), planetId, cancellationToken)
+                .ConfigureAwait(false);
+
+            return Results.Json(state, ProcessesJson.Options);
         });
 
         return endpoints;

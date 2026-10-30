@@ -677,6 +677,10 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("celestial_object_id");
 
+                    b.Property<bool>("IsTerraformed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_terraformed");
+
                     b.Property<string>("Name")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")

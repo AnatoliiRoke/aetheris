@@ -81,6 +81,15 @@ public static class ProcessErrorCodes
     /// <summary>The part the order names is not damaged, so there is nothing to repair.</summary>
     public const string PartNotDamaged = "processes_part_not_damaged";
 
-    /// <summary>The recipe of the process names no device the process takes.</summary>
+    /// <summary>The part the player named is no device of the terraforming.</summary>
     public const string DeviceMissing = "processes_device_missing";
+
+    /// <summary>The body the device is turned on at does not exist.</summary>
+    public const string TargetUnknown = "processes_target_unknown";
+
+    /// <summary>The body the device is turned on at is a colony: only a free body is terraformed.</summary>
+    public const string TargetColonized = "processes_target_colonized";
+
+    /// <summary>The body the device is turned on at is terraformed already: a body is terraformed once.</summary>
+    public const string TargetTerraformed = "processes_target_terraformed";
 }

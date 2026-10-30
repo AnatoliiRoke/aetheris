@@ -88,4 +88,35 @@ public interface IProcessesModule
         long planetBuildingId,
         long orderId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the terraforming a player may start from a colony: the devices of its storage and
+    /// the free bodies the player sees (task 00014, section 9).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The colony the ship takes the device from.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The terraforming of the colony.</returns>
+    Task<TerraformingDto> GetTerraformingAsync(
+        string playerId,
+        long planetId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Turns a one-shot device on at a free body: the device is spent and the deposits of the
+    /// body become rich. A colony and a body terraformed before are refused (task 00014,
+    /// section 9).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The colony the ship takes the device from.</param>
+    /// <param name="targetPlanetId">The free body.</param>
+    /// <param name="partTypeId">The device.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The outcome with the terraforming of the colony after the change.</returns>
+    Task<TerraformingResultDto> TerraformAsync(
+        string playerId,
+        long planetId,
+        long targetPlanetId,
+        int partTypeId,
+        CancellationToken cancellationToken = default);
 }

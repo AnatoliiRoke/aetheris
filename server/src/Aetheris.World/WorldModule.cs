@@ -130,13 +130,17 @@ public sealed class WorldModule : IWorldModule
         _civilizations.TakeLegacyStorageAsync(planetId, cancellationToken);
 
     /// <inheritdoc />
-    public Task<int> SetDepositCoefficientAsync(
+    public Task<TerraformResult> TerraformAsync(
         long planetId,
         decimal coefficient,
         string actorId,
         string reason,
         CancellationToken cancellationToken = default) =>
-        _deposits.SetCoefficientAsync(planetId, coefficient, actorId, reason, cancellationToken);
+        _deposits.TerraformAsync(planetId, coefficient, actorId, reason, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<FreePlanetDto>> GetFreePlanetsAsync(string playerId, int sectorId, CancellationToken cancellationToken = default) =>
+        _queries.GetFreePlanetsAsync(playerId, sectorId, null, cancellationToken);
 
     /// <inheritdoc />
     public Task<int> AssignStartBuildingAsync(int buildingTypeId, int level, CancellationToken cancellationToken = default) =>

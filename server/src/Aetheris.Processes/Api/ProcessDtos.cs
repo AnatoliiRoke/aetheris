@@ -114,3 +114,66 @@ public sealed record ProcessOrderDto(
     DateTimeOffset? NextUnitAt,
     DateTimeOffset? FinishesAt,
     bool IsBlocked);
+
+/// <summary>
+/// The terraforming a player may start from a colony (task 00014, section 9): the devices of
+/// the storage of the colony, the free bodies the player sees and the range of the multiplier.
+/// </summary>
+/// <param name="PlanetId">The colony the ship takes the device from.</param>
+/// <param name="Devices">The devices of the terraforming in the storage of the colony.</param>
+/// <param name="Targets">The free bodies of the sector the player sees.</param>
+/// <param name="MultiplierMin">The lowest multiplier of the deposits, which a device must be above.</param>
+/// <param name="MultiplierMax">The highest multiplier of the deposits, which a device may reach.</param>
+public sealed record TerraformingDto(
+    long PlanetId,
+    IReadOnlyList<TerraformingDeviceDto> Devices,
+    IReadOnlyList<TerraformingTargetDto> Targets,
+    decimal MultiplierMin,
+    decimal MultiplierMax);
+
+/// <summary>
+/// A device of the terraforming in the storage of a colony.
+/// </summary>
+/// <param name="PartTypeId">The kind of the part.</param>
+/// <param name="NameKey">The localisation key of the name of the part.</param>
+/// <param name="MarkLevel">The mark level of the part.</param>
+/// <param name="Multiplier">The multiplier of the deposits the device gives.</param>
+/// <param name="Quantity">How many new devices of the kind the storage holds.</param>
+public sealed record TerraformingDeviceDto(
+    int PartTypeId,
+    string NameKey,
+    int MarkLevel,
+    decimal Multiplier,
+    long Quantity);
+
+/// <summary>
+/// A free body a device of the terraforming may be turned on at.
+/// </summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="SystemId">The star system of the body.</param>
+/// <param name="ObjectTypeId">The type of the body.</param>
+/// <param name="Orbit">The orbit of the body.</param>
+/// <param name="Name">The name of the body.</param>
+/// <param name="IsTerraformed">Whether the body is terraformed already.</param>
+public sealed record TerraformingTargetDto(
+    long PlanetId,
+    long SystemId,
+    int ObjectTypeId,
+    int? Orbit,
+    string Name,
+    bool IsTerraformed);
+
+/// <summary>
+/// The outcome of a device of the terraforming turned on at a free body.
+/// </summary>
+/// <param name="TargetPlanetId">The body that is terraformed.</param>
+/// <param name="PartTypeId">The device that is spent.</param>
+/// <param name="Multiplier">The multiplier of the deposits the device gave.</param>
+/// <param name="ChangedDeposits">The number of the deposits that became richer.</param>
+/// <param name="Terraforming">The terraforming of the colony after the change.</param>
+public sealed record TerraformingResultDto(
+    long TargetPlanetId,
+    int PartTypeId,
+    decimal Multiplier,
+    int ChangedDeposits,
+    TerraformingDto Terraforming);

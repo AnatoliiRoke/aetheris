@@ -21,7 +21,6 @@
   "admin.reference.field.resource": { "uk": "Ресурс", "en": "Resource" },
   "admin.reference.field.part": { "uk": "Деталь", "en": "Part" },
   "admin.reference.field.amount": { "uk": "Кількість", "en": "Amount" },
-  "admin.reference.handler.terraforming": { "uk": "Тераформінг", "en": "Terraforming" },
   "admin.reference.handler.recycling": { "uk": "Розбирання", "en": "Recycling" },
   "admin.reference.handler.matter_conversion": { "uk": "Перетворення матерії", "en": "Matter conversion" },
   "admin.reference.handler.ship_repair": { "uk": "Ремонт корабля", "en": "Ship repair" },

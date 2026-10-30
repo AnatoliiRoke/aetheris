@@ -17,6 +17,12 @@ public sealed record ProcessesSettings
     /// <summary>Gets how long the tables of the processes stay in memory.</summary>
     public TimeSpan CatalogCacheDuration { get; init; }
 
+    /// <summary>Gets the lowest multiplier of the deposits after the terraforming, which a device must be above.</summary>
+    public decimal TerraformingMultiplierMin { get; init; }
+
+    /// <summary>Gets the highest multiplier of the deposits after the terraforming, which a device may reach.</summary>
+    public decimal TerraformingMultiplierMax { get; init; }
+
     /// <summary>
     /// Reads the settings of the module from the configuration of the game.
     /// </summary>
@@ -31,6 +37,8 @@ public sealed record ProcessesSettings
             QueueBaseSlots = ReadInt32(config, ProcessesConfigKeys.QueueBaseSlots),
             QueueMaxExtraSlots = ReadInt32(config, ProcessesConfigKeys.QueueMaxExtraSlots),
             CatalogCacheDuration = TimeSpan.FromSeconds(ReadInt64(config, ProcessesConfigKeys.CatalogCacheSeconds)),
+            TerraformingMultiplierMin = ReadDecimal(config, ProcessesConfigKeys.TerraformingMultiplierMin),
+            TerraformingMultiplierMax = ReadDecimal(config, ProcessesConfigKeys.TerraformingMultiplierMax),
         };
     }
 
@@ -40,6 +48,11 @@ public sealed record ProcessesSettings
             : long.Parse(Default(key), NumberStyles.Integer, CultureInfo.InvariantCulture);
 
     private static int ReadInt32(IGameConfig config, string key) => (int)ReadInt64(config, key);
+
+    private static decimal ReadDecimal(IGameConfig config, string key) =>
+        decimal.TryParse(config.GetRaw(key), NumberStyles.Number, CultureInfo.InvariantCulture, out decimal value)
+            ? value
+            : decimal.Parse(Default(key), NumberStyles.Number, CultureInfo.InvariantCulture);
 
     private static string Default(string key) =>
         ProcessesConfigKeys.Definitions.First(definition => string.Equals(definition.Key, key, StringComparison.Ordinal)).DefaultValue;

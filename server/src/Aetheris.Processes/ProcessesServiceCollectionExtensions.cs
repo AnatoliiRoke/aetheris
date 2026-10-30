@@ -47,15 +47,19 @@ public static class ProcessesServiceCollectionExtensions
 
         // The handlers of the kinds of the processes: a new process is a class and a row, so
         // the engine finds the handler by its logical code (task 00014, decision 6).
-        services.AddScoped<IProcessHandler, TerraformingHandler>();
         services.AddScoped<IProcessHandler, RecyclingHandler>();
         services.AddScoped<IProcessHandler, MatterConversionHandler>();
         services.AddScoped<IProcessHandler, ShipRepairHandler>();
         services.AddScoped<IProcessHandler, ModuleReplacementHandler>();
         services.AddScoped<IProcessHandler, ModuleRepairHandler>();
 
+        // The terraforming is started by a ship and is no process of the queue of a building
+        // (task 00014, section 9), so it is a service of its own and not a handler.
+        services.AddScoped<TerraformingHandler>();
+
         services.AddCommand<EnqueueProcessCommand>();
         services.AddCommand<CancelProcessCommand>();
+        services.AddCommand<TerraformCommand>();
 
         return services;
     }

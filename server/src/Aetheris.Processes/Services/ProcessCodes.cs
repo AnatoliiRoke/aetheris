@@ -80,9 +80,6 @@ public static class ProcessTextKeys
 /// </remarks>
 public static class ProcessHandlerCodes
 {
-    /// <summary>The handler of the terraforming of a body.</summary>
-    public const string Terraforming = "terraforming";
-
     /// <summary>The handler of the recycling of a part.</summary>
     public const string Recycling = "recycling";
 
@@ -103,7 +100,6 @@ public static class ProcessHandlerCodes
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
     [
-        Terraforming,
         Recycling,
         MatterConversion,
         ShipRepair,
@@ -130,14 +126,13 @@ public static class ProcessParamKinds
 {
     /// <summary>
     /// The value of the parameter by the level of its source: the output of the conversion by
-    /// the level of the technology, the share of the recycling by the level of the factory, the
-    /// multiplier of the deposits by the level of the device.
+    /// the level of the technology, the share of the recycling by the level of the factory.
     /// </summary>
     public const string ValueByLevel = "value_by_level";
 
     /// <summary>
     /// The range of the parameter: the lowest value, which the result must be above, and the
-    /// highest value, which the result may reach (the rich deposits of a body, for example).
+    /// highest value, which the result may reach.
     /// </summary>
     public const string Range = "range";
 
@@ -169,7 +164,7 @@ public static class ProcessLevelSources
     /// <summary>The level of a technology of the player, named by the parameter.</summary>
     public const string Technology = "technology";
 
-    /// <summary>The mark level of the part the process takes, the device of the terraforming for example.</summary>
+    /// <summary>The mark level of the part the process takes.</summary>
     public const string Part = "part";
 
     /// <summary>

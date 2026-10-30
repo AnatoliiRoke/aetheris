@@ -1,4 +1,5 @@
 using Aetheris.Processes.Api;
+using Aetheris.Processes.Handlers;
 using Aetheris.Processes.Services;
 
 namespace Aetheris.Processes;
@@ -11,19 +12,23 @@ public sealed class ProcessesModule : IProcessesModule
 {
     private readonly ProcessesBootstrapService _bootstrap;
     private readonly ProcessQueueService _queue;
+    private readonly TerraformingHandler _terraforming;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProcessesModule"/> class.
     /// </summary>
     /// <param name="bootstrap">The preparation of the module.</param>
     /// <param name="queue">The queue of the processes.</param>
-    public ProcessesModule(ProcessesBootstrapService bootstrap, ProcessQueueService queue)
+    /// <param name="terraforming">The terraforming started by a ship.</param>
+    public ProcessesModule(ProcessesBootstrapService bootstrap, ProcessQueueService queue, TerraformingHandler terraforming)
     {
         ArgumentNullException.ThrowIfNull(bootstrap);
         ArgumentNullException.ThrowIfNull(queue);
+        ArgumentNullException.ThrowIfNull(terraforming);
 
         _bootstrap = bootstrap;
         _queue = queue;
+        _terraforming = terraforming;
     }
 
     /// <inheritdoc />
@@ -66,4 +71,20 @@ public sealed class ProcessesModule : IProcessesModule
         long orderId,
         CancellationToken cancellationToken = default) =>
         _queue.CancelAsync(playerId, planetId, planetBuildingId, orderId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<TerraformingDto> GetTerraformingAsync(
+        string playerId,
+        long planetId,
+        CancellationToken cancellationToken = default) =>
+        _terraforming.ReadAsync(playerId, planetId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<TerraformingResultDto> TerraformAsync(
+        string playerId,
+        long planetId,
+        long targetPlanetId,
+        int partTypeId,
+        CancellationToken cancellationToken = default) =>
+        _terraforming.LaunchAsync(playerId, planetId, targetPlanetId, partTypeId, cancellationToken);
 }

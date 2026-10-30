@@ -224,7 +224,8 @@ public sealed class WorldQueryService
                 row.entry.Orbit,
                 row.entry.Name,
                 row.planet.SizeClassId,
-                row.planet.Size))
+                row.planet.Size,
+                row.planet.IsTerraformed))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -326,7 +327,8 @@ public sealed class WorldQueryService
                 planet.SectorId,
                 planet.OwnerPlayerId,
                 planet.Name,
-                [.. planet.DepositIds.Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))]);
+                [.. planet.DepositIds.Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))],
+                planet.IsTerraformed);
     }
 
     /// <summary>

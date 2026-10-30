@@ -1,8 +1,8 @@
 namespace Aetheris.Processes.Data.Entities;
 
 /// <summary>
-/// A kind of process: terraforming, recycling, the conversion of matter, the repair of a
-/// ship (task 00014, section 3.1).
+/// A kind of process: recycling, the conversion of matter, the repair of a ship (task 00014,
+/// section 3.1). The terraforming is started by a ship and is no kind of process (section 9).
 /// </summary>
 /// <remarks>
 /// The row names the handler of the process by a logical code, so the engine of the processes
@@ -32,8 +32,8 @@ public sealed class ProcessTypeEntity
     public string HandlerCode { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets whether cancelling an order of this kind returns its input in full. The
-    /// device of the terraforming is lost when the order is cancelled (task 00014, decision 2).
+    /// Gets or sets whether cancelling an order of this kind returns its input in full (task
+    /// 00014, decision 2).
     /// </summary>
     public bool RefundsInput { get; set; } = true;
 

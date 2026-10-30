@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 namespace Aetheris.Processes.Services;
 
 /// <summary>
-/// The ship of a player on the orbit of a body, for the processes that need one: the device of
-/// the terraforming, the repair of a ship and the replacement of a module (task 00014,
-/// decision 5).
+/// The ship of a player on the orbit of a body, for what needs one: the device of the
+/// terraforming by a free body, the repair of a ship and the replacement of a module (task
+/// 00014, decision 5 and section 9).
 /// </summary>
 /// <remarks>
 /// The ships and the flights do not exist yet, so the processes ask this interface and never

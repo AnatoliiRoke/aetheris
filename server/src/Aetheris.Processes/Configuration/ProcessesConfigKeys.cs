@@ -29,6 +29,18 @@ public static class ProcessesConfigKeys
     public const string OverLimitDeclinePerHour = "processes.population.over_limit_decline_per_hour";
 
     /// <summary>
+    /// The lowest multiplier of the deposits after the terraforming: the multiplier of a device
+    /// must be above it (task 00014, section 9).
+    /// </summary>
+    public const string TerraformingMultiplierMin = "processes.terraforming.multiplier_min";
+
+    /// <summary>
+    /// The highest multiplier of the deposits after the terraforming: the multiplier of a device
+    /// may reach it (task 00014, section 9).
+    /// </summary>
+    public const string TerraformingMultiplierMax = "processes.terraforming.multiplier_max";
+
+    /// <summary>
     /// Gets the definitions of the parameters with their starting values and bounds.
     /// </summary>
     public static IReadOnlyList<ConfigParameterDefinition> Definitions { get; } =
@@ -37,5 +49,7 @@ public static class ProcessesConfigKeys
         new(QueueMaxExtraSlots, "2", "0", "100", "Найбільша кількість платних місць, доданих до черги процесу."),
         new(CatalogCacheSeconds, "30", "0", "86400", "Скільки секунд таблиці процесів залишаються в пам'яті сервера перед повторним читанням."),
         new(OverLimitDeclinePerHour, "1", "0", "1000000", "Скільки людей понад ліміт планети вимирає за ігрову годину, коли екіпаж розібраного корабля перевищив ліміт населення."),
+        new(TerraformingMultiplierMin, "1.4", "0", "1000", "Нижня межа множника родовищ після тераформінгу: множник пристрою має бути більшим за неї."),
+        new(TerraformingMultiplierMax, "1.9", "0", "1000", "Верхня межа множника родовищ після тераформінгу: множник пристрою може її досягати."),
     ];
 }
