@@ -176,7 +176,7 @@
 | Таблиці | `planet_population`, `civilization_balance` | міграції `InitialEconomy` і `BalanceVersion` |
 | Контракти | `IEconomyModule`, `IEconomyBuildingEffects`, `IEconomyTechnologyBonuses` | публічний контракт і два «джерела» |
 | Розщеплення вартості | `Services/CostSplitter.cs` | одна точка, де черга дізнається, що ресурс — валюта |
-| Конфігурація | `Configuration/EconomyConfigKeys.cs` | `economy.population.growth_percent`, `economy.population.decline_per_hour`, `economy.credits.per_inhabitant` — з українським описом |
+| Конфігурація | `Configuration/EconomyConfigKeys.cs` | `economy.population.growth_percent`, `economy.population.decline_per_hour`, `economy.credits.per_inhabitant` — з українським описом; ключі додані до `ConfigSeed`, тож потрапляють у базу й в адмінку |
 | API | `Api/EconomyEndpoints.cs`, `Api/EconomyAdminEndpoints.cs` | читання для гравця і видача валюти в адмінці |
 
 **Зміни в сусідніх модулях:**
@@ -237,6 +237,18 @@
 7. **Блокування рядка балансу.** Перша реалізація читала баланс звичайним запитом, тому
    20 паралельних списань усі прочитали однакову суму й останній записав свою.
    **Виправлено:** рядок балансу береться з `FOR UPDATE` (як рядок тіла в Planets).
+
+8. **Параметри `economy.*` не доходили до бази.** Визначення параметрів модуля були, але
+   `ConfigSeed.Definitions` не включав їх, тож у свіжій базі параметрів не було взагалі: модуль
+   читав стандартні значення, а адмінка не могла їх змінити.
+   **Виправлено:** `EconomyConfigKeys.Definitions` додано до `ConfigSeed`, а українські описи
+   ключів — до `client/src/admin/i18n/configUk.ts` (критерій 6 перевіряє тест
+   `ConfigDescriptionTests`).
+
+9. **Знімок моделі World не оновлювався.** Міграції `ResourceScope` і `ResourceGroupOptional`
+   були, а `WorldDbContextModelSnapshot.cs` — ні: наступна міграція, згенерована з дерева, не
+   знала б про колонку `scope`.
+   **Виправлено:** знімок оновлено разом із міграціями.
 
 ### 8.3. Перевірки
 
