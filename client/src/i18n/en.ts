@@ -389,6 +389,7 @@ export const en: Messages = {
   'planet.effect.energy_output': 'Energy: +{value}',
   'planet.effect.energy_consumption': 'Uses energy: {value}',
   'planet.effect.population_max': 'Population up to {value}',
+  'planet.effect.population_growth_bonus': 'Population growth ×{value}',
   'planet.effect.level_cap': 'Other buildings up to level {value}',
 
   'reason.planets_requirement_unmet': 'Requirements not met',

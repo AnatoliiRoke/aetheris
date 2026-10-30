@@ -153,6 +153,8 @@ export const configDescriptionsUk: Record<string, string> = {
     'Відсоток від найбільшого населення, на який населення зростає за годину.',
   'config.economy.population.decline_per_hour.description':
     'Скільки мешканців зменшується за годину, коли населення вище за найбільше.',
+  'config.economy.population.initial.description':
+    'Скільки мешканців має планета в момент, коли стає колонією гравця.',
   'config.economy.credits.per_inhabitant.description':
     'Скільки кредитів приносить один мешканець цивілізації за годину.',
   'config.processes.terraforming.multiplier_min.description':

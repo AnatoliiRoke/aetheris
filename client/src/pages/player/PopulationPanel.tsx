@@ -50,10 +50,10 @@ export function PopulationPanel({ planetId }: { planetId: number }) {
 
 /**
  * A fact of the server as a number; a value without data is a placeholder, never a made-up
- * number (task 00010).
+ * number (task 00010). A real zero is a number too: a body without inhabitants has none.
  */
 function showValue(value: number | null | undefined, language: Language): string {
-  if (value === null || value === undefined || !Number.isFinite(value) || value === 0) {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
     return '—';
   }
 
@@ -64,7 +64,7 @@ function showValue(value: number | null | undefined, language: Language): string
  * The speed of the population: it grows or it dies down, and the sign says which one.
  */
 function growthText(growth: number | null | undefined, language: Language): string {
-  if (growth === null || growth === undefined || !Number.isFinite(growth) || growth === 0) {
+  if (growth === null || growth === undefined || !Number.isFinite(growth)) {
     return '—';
   }
 
@@ -74,12 +74,13 @@ function growthText(growth: number | null | undefined, language: Language): stri
 }
 
 /**
- * The time to the largest population as the server sends it: `[-][d.]hh:mm:ss`.
+ * The time to the largest population as the server sends it: `[-][d.]hh:mm:ss[.fffffff]`. No time
+ * means the population never reaches the largest one; a time of zero means it is there already.
  */
 function timeText(value: string | null | undefined, language: Language): string {
   const seconds = timeToSeconds(value);
 
-  if (seconds === null || seconds === 0) {
+  if (seconds === null) {
     return '—';
   }
 
@@ -87,25 +88,27 @@ function timeText(value: string | null | undefined, language: Language): string 
 }
 
 /**
- * The seconds of the time span of the server, or `null` when the text is not a time span.
+ * The seconds of the time span of the server, or `null` when the text is not a time span. The
+ * server counts the time in ticks, so the seconds may carry a fraction of up to seven digits.
  */
 function timeToSeconds(value: string | null | undefined): number | null {
   if (!value) {
     return null;
   }
 
-  const parts = /^(-)?(?:(\d+)\.)?(\d{1,2}):(\d{2}):(\d{2})$/.exec(value);
+  const parts = /^(-)?(?:(\d+)\.)?(\d{1,2}):(\d{2}):(\d{2})(?:\.(\d{1,7}))?$/.exec(value);
 
   if (!parts) {
     return null;
   }
 
-  const [, sign, days, hours, minutes, seconds] = parts;
+  const [, sign, days, hours, minutes, seconds, fraction] = parts;
   const total =
     Number(days ?? 0) * secondsPerDay +
     Number(hours) * secondsPerHour +
     Number(minutes) * secondsPerMinute +
-    Number(seconds);
+    Number(seconds) +
+    Number(`0.${fraction ?? '0'}`);
 
   return sign === '-' ? -total : total;
 }

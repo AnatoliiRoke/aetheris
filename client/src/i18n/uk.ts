@@ -387,6 +387,7 @@ export const uk = {
   'planet.effect.energy_output': 'Енергія: +{value}',
   'planet.effect.energy_consumption': 'Споживає енергії: {value}',
   'planet.effect.population_max': 'Населення до {value}',
+  'planet.effect.population_growth_bonus': 'Приріст населення ×{value}',
   'planet.effect.level_cap': 'Інші будівлі до рівня {value}',
 
   'reason.planets_requirement_unmet': 'Не виконано вимоги',

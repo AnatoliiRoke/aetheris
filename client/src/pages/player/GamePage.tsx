@@ -172,7 +172,7 @@ function Credits({ planetId }: { planetId: number }) {
         const name = (nameKey ? text(nameKey) : undefined) ?? t('economy.currency', { id: balance.resourceTypeId });
         const amount = shortValue(balance.amount, language);
         const incomeValue = shortValue(balance.incomePerHour, language);
-        const income = incomeValue === '—' ? '—' : `+${incomeValue}${t('economy.perHourShort')}`;
+        const income = incomeValue === '—' ? '—' : `${balance.incomePerHour > 0 ? '+' : ''}${incomeValue}${t('economy.perHourShort')}`;
         const title = `${name}: ${fullValue(balance.amount, language)} (${t('economy.income')}: ${balance.incomePerHour > 0 ? '+' : ''}${fullValue(balance.incomePerHour, language)})`;
 
         return (
@@ -189,7 +189,7 @@ function Credits({ planetId }: { planetId: number }) {
  * A number of the server in the short form of the language; the full value stays in the hint.
  */
 function shortValue(value: number, language: Language): string {
-  if (!Number.isFinite(value) || value === 0) {
+  if (!Number.isFinite(value)) {
     return '—';
   }
 
@@ -201,10 +201,11 @@ function shortValue(value: number, language: Language): string {
 
 /**
  * A number of the server in the full form of the language; a value without data is a
- * placeholder, never a made-up number (task 00010).
+ * placeholder, never a made-up number (task 00010). A real zero is a number: an empty balance
+ * is shown as zero.
  */
 function fullValue(value: number, language: Language): string {
-  if (!Number.isFinite(value) || value === 0) {
+  if (!Number.isFinite(value)) {
     return '—';
   }
 

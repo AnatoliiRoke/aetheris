@@ -29,6 +29,8 @@ const editErrorKeys: Record<string, AdminMessageKey> = {
   cost_missing: 'admin.edit.error.costMissing',
   requirements_missing: 'admin.edit.error.requirementsMissing',
   levels_in_use: 'admin.edit.error.levelsInUse',
+  scope_in_use: 'admin.edit.error.scopeInUse',
+  currency_has_no_group: 'admin.edit.error.currencyHasNoGroup',
   state_unchanged: 'admin.edit.error.stateUnchanged',
   invalid: 'admin.edit.error.invalid',
   image_type_refused: 'admin.edit.error.imageTypeRefused',
