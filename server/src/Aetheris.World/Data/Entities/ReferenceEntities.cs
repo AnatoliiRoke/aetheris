@@ -54,6 +54,13 @@ public sealed class ResourceTypeEntity
     /// </summary>
     public string Scope { get; set; } = ResourceScopes.Planet;
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the population of the civilization brings this
+    /// currency: only a currency with the flag earns the income of the inhabitants, the other
+    /// currencies of the civilization are changed by the deals only (task 00015).
+    /// </summary>
+    public bool EarnsPopulationIncome { get; set; }
+
     /// <summary>Gets or sets the localisation key of the name.</summary>
     public string NameKey { get; set; } = string.Empty;
 

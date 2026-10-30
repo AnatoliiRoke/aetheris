@@ -627,9 +627,13 @@ public sealed class EconomyService
             row.UpdatedAt = target;
         }
 
+        // Only a currency that is flagged in the reference table earns the income of the
+        // population; the other currencies of the civilization are left as they are.
+        HashSet<int> incomeCurrencyIds = [.. await IncomeCurrencyIdsAsync(cancellationToken).ConfigureAwait(false)];
+
         foreach (CivilizationBalanceEntity row in locked.Balances)
         {
-            decimal exact = row.Amount + row.AmountFraction + earned;
+            decimal exact = row.Amount + row.AmountFraction + (incomeCurrencyIds.Contains(row.ResourceTypeId) ? earned : 0m);
             long amount = (long)decimal.Floor(exact);
 
             row.Amount = amount;
@@ -683,7 +687,9 @@ public sealed class EconomyService
         Rates rates = await RatesAsync(playerId, [.. populations.Select(row => row.PlanetId)], cancellationToken).ConfigureAwait(false);
         List<int> currencyIds = await CurrencyIdsAsync(cancellationToken).ConfigureAwait(false);
 
-        return new Snapshot([.. populations.Select(row => View(row, rates, now))], rows, currencyIds);
+        List<int> incomeCurrencyIds = await IncomeCurrencyIdsAsync(cancellationToken).ConfigureAwait(false);
+
+        return new Snapshot([.. populations.Select(row => View(row, rates, now))], rows, currencyIds, incomeCurrencyIds);
     }
 
     /// <summary>
@@ -704,6 +710,16 @@ public sealed class EconomyService
     private async Task<List<int>> CurrencyIdsAsync(CancellationToken cancellationToken) =>
         [.. (await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false)).Resources
             .Where(resource => resource.IsCivilizationScope)
+            .Select(resource => resource.Id)
+            .Order()];
+
+    /// <summary>
+    /// Gets the currencies the population of a civilization brings: the currencies of the scope of
+    /// the civilization that carry the flag of the income in the reference table.
+    /// </summary>
+    private async Task<List<int>> IncomeCurrencyIdsAsync(CancellationToken cancellationToken) =>
+        [.. (await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false)).Resources
+            .Where(resource => resource.IsCivilizationScope && resource.EarnsPopulationIncome)
             .Select(resource => resource.Id)
             .Order()];
 
@@ -775,7 +791,8 @@ public sealed class EconomyService
     private sealed record Snapshot(
         IReadOnlyList<PopulationView> Views,
         IReadOnlyList<CivilizationBalanceEntity> Rows,
-        IReadOnlyList<int> CurrencyIds)
+        IReadOnlyList<int> CurrencyIds,
+        IReadOnlyList<int> IncomeCurrencyIds)
     {
         /// <summary>
         /// Gets the balance of a currency: the stored amount and the credits every body earned since its
@@ -787,9 +804,10 @@ public sealed class EconomyService
         public CurrencyBalanceFacts Balance(string playerId, int currencyId)
         {
             CivilizationBalanceEntity? row = Rows.FirstOrDefault(entry => entry.ResourceTypeId == currencyId);
-            decimal exact = (row?.Amount ?? 0) + (row?.AmountFraction ?? 0m) + Views.Sum(view => view.Earned);
+            bool earns = IncomeCurrencyIds.Contains(currencyId);
+            decimal exact = (row?.Amount ?? 0) + (row?.AmountFraction ?? 0m) + (earns ? Views.Sum(view => view.Earned) : 0m);
 
-            return new CurrencyBalanceFacts(playerId, currencyId, (long)decimal.Floor(exact), Views.Sum(view => view.Income));
+            return new CurrencyBalanceFacts(playerId, currencyId, (long)decimal.Floor(exact), earns ? Views.Sum(view => view.Income) : 0m);
         }
     }
 }

@@ -273,7 +273,8 @@
         "uk": "Внутрішня валюта цивілізації: населення планет приносить їх, а вони йдуть на будівництво, розвиток і виробництво.",
         "en": "The inner currency of the civilization: the population of the bodies brings them, and they pay for the construction, the research and the production."
       },
-      "scope": "civilization"
+      "scope": "civilization",
+      "earns_population_income": true
     }
   ],
   "object_types": [

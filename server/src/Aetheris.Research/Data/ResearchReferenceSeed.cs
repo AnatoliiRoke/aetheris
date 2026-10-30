@@ -26,7 +26,8 @@ namespace Aetheris.Research.Data;
 /// <para>
 /// Every technology and every branch has a neutral code and its texts in every language
 /// (task 00022, task 00023). The seed writes the branches only while their table is empty and
-/// the technologies only while theirs is, so it never overwrites a change of the admin panel.
+/// adds the technologies that are missing by their codes (task 00015), so it never overwrites a
+/// change of the admin panel and never changes a code.
 /// </para>
 /// </remarks>
 public static class ResearchReferenceSeed
@@ -85,7 +86,7 @@ public static class ResearchReferenceSeed
     }
 
     /// <summary>
-    /// Writes the starting data when the technology table is empty.
+    /// Writes the technologies of the starting data that the database does not have.
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="resources">The resource catalog of the world.</param>
@@ -142,14 +143,32 @@ public static class ResearchReferenceSeed
             await dbContext.TechnologyBranches.Select(branch => branch.Code).ToListAsync(cancellationToken).ConfigureAwait(false),
             cancellationToken).ConfigureAwait(false);
 
-        if (resources.Resources.Count == 0 || await dbContext.Technologies.AnyAsync(cancellationToken).ConfigureAwait(false))
+        if (resources.Resources.Count == 0)
         {
             return false;
         }
 
+        // The seed writes only the technologies that are missing, by their codes, so a database
+        // made before a technology joined the starting data still gets it, with its levels and
+        // effects. A technology that is already there is not touched, so what an administrator
+        // changed stays. A technology whose branch is not in the database is left out: the branch
+        // is not the business of this step.
+        HashSet<string> startingCodes = [.. seed.Technologies.Select(technology => technology.Code)];
+
+        HashSet<string> existingCodes = [.. await dbContext.Technologies.AsNoTracking()
+            .Where(technology => startingCodes.Contains(technology.Code))
+            .Select(technology => technology.Code)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false)];
+
         Dictionary<string, int> branchIds = await dbContext.TechnologyBranches
             .ToDictionaryAsync(branch => branch.Code, branch => branch.Id, StringComparer.Ordinal, cancellationToken)
             .ConfigureAwait(false);
+
+        List<SeedTechnology> missingTechnologies =
+        [
+            .. seed.Technologies.Where(technology => !existingCodes.Contains(technology.Code) && branchIds.ContainsKey(technology.Branch)),
+        ];
 
         Dictionary<string, int> resourceIds = resources.Resources.ToDictionary(resource => resource.Code, resource => resource.Id, StringComparer.Ordinal);
 
@@ -157,7 +176,7 @@ public static class ResearchReferenceSeed
         // so the codes are looked up before the rows are written.
         Dictionary<string, int> unlockIds = [];
 
-        foreach (string code in seed.Technologies
+        foreach (string code in missingTechnologies
             .SelectMany(technology => technology.Effects)
             .Where(effect => effect.UnlockKind == TechnologyUnlockKinds.BuildingType)
             .Select(effect => effect.UnlockTarget)
@@ -175,7 +194,7 @@ public static class ResearchReferenceSeed
             unlockIds[code] = buildingTypeId.Value;
         }
 
-        Dictionary<string, TechnologyEntity> technologies = seed.Technologies.ToDictionary(
+        Dictionary<string, TechnologyEntity> technologies = missingTechnologies.ToDictionary(
             technology => technology.Code,
             technology => new TechnologyEntity
             {
@@ -213,7 +232,7 @@ public static class ResearchReferenceSeed
 
         // A technology that opens a building closes it until the technology is learned, so the
         // requirement of the building lives in the common requirements module.
-        foreach ((SeedTechnology seedTechnology, TechnologyEntity technology) in seed.Technologies
+        foreach ((SeedTechnology seedTechnology, TechnologyEntity technology) in missingTechnologies
             .Select(seedTechnology => (seedTechnology, technologies[seedTechnology.Code])))
         {
             foreach (SeedTechnologyEffect effect in seedTechnology.Effects.Where(effect => effect.Type == TechnologyEffectTypes.Unlocks))
@@ -244,7 +263,7 @@ public static class ResearchReferenceSeed
 
         await WorldReferenceSeed.RaiseAsync(codes, ResearchTextKeys.CodeGroup, seed.Technologies.Select(technology => technology.Code), cancellationToken).ConfigureAwait(false);
 
-        return true;
+        return missingTechnologies.Count > 0;
     }
 }
 

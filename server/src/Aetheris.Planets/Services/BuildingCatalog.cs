@@ -108,7 +108,7 @@ public sealed record BuildingLevelInfo(
 /// <param name="ResourceTypeId">The resource of a production effect.</param>
 /// <param name="ResourceGroupId">The resource group of a storage effect.</param>
 /// <param name="Value">The value at the level.</param>
-public sealed record BuildingEffectInfo(string EffectType, int? ResourceTypeId, int? ResourceGroupId, long Value);
+public sealed record BuildingEffectInfo(string EffectType, int? ResourceTypeId, int? ResourceGroupId, decimal Value);
 
 /// <summary>A requirement of a subject.</summary>
 /// <param name="Id">The requirement.</param>

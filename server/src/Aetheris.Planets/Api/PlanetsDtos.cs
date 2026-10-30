@@ -140,7 +140,7 @@ public sealed record ResourceAmountDto(int ResourceTypeId, long Amount);
 /// <param name="ResourceTypeId">The resource of a production effect.</param>
 /// <param name="ResourceGroupId">The group of a storage effect.</param>
 /// <param name="Value">The value at the level.</param>
-public sealed record EffectDto(string EffectType, int? ResourceTypeId, int? ResourceGroupId, long Value);
+public sealed record EffectDto(string EffectType, int? ResourceTypeId, int? ResourceGroupId, decimal Value);
 
 /// <summary>A requirement that is not met.</summary>
 /// <param name="RequirementId">The requirement.</param>

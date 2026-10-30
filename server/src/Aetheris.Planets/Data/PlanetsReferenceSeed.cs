@@ -64,6 +64,30 @@ public static class PlanetsReferenceSeed
     }
 
     /// <summary>
+    /// Gets the value of an effect at a level: the value the starting data names for the level
+    /// when it lists them, otherwise the value of the growth formula.
+    /// </summary>
+    /// <param name="effect">The effect of the starting data.</param>
+    /// <param name="level">The level, from 1.</param>
+    /// <returns>The value, with its fraction.</returns>
+    /// <remarks>
+    /// A list of values is for an effect that does not grow by a formula (a multiplier that rises
+    /// by uneven steps): the value of every level is written in the data. A level past the end of
+    /// the list keeps the last value.
+    /// </remarks>
+    public static decimal EffectValueAt(SeedEffect effect, int level)
+    {
+        ArgumentNullException.ThrowIfNull(effect);
+
+        if (effect.Values is { Count: > 0 } values)
+        {
+            return values[Math.Min(level, values.Count) - 1];
+        }
+
+        return ValueAt(effect, level);
+    }
+
+    /// <summary>
     /// Writes the starting data when the building table is empty.
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
@@ -135,7 +159,7 @@ public static class PlanetsReferenceSeed
                                 EffectType = effect.Type,
                                 ResourceTypeId = effect.Resource is null ? null : resourceIds[effect.Resource],
                                 ResourceGroupId = effect.Group is null ? null : groupIds[effect.Group],
-                                Value = ValueAt(effect, level),
+                                Value = EffectValueAt(effect, level),
                             }),
                         ],
                     }),
@@ -284,6 +308,12 @@ public sealed record SeedEffect : SeedGrowth
 
     /// <summary>Gets the code of the resource group of a storage effect.</summary>
     public string? Group { get; init; }
+
+    /// <summary>
+    /// Gets the value of every level, from the first, for an effect that has no growth formula;
+    /// the values have a fraction. When it is empty the value comes from the growth formula.
+    /// </summary>
+    public IReadOnlyList<decimal>? Values { get; init; }
 }
 
 /// <summary>A requirement of the starting data.</summary>

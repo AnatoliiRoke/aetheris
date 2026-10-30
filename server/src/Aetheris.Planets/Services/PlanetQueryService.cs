@@ -305,9 +305,10 @@ public sealed class PlanetQueryService
             .ToDictionaryAsync(building => building.BuildingTypeId, building => building.Level, cancellationToken)
             .ConfigureAwait(false);
 
-        return PlanetEconomy.Effects(catalog, levels)
+        // The effects counted here (room, limits) are whole numbers; a fraction is cut.
+        return (long)decimal.Floor(PlanetEconomy.Effects(catalog, levels)
             .Where(entry => string.Equals(entry.Effect.EffectType, effectType, StringComparison.Ordinal))
-            .Sum(entry => entry.Effect.Value);
+            .Sum(entry => entry.Effect.Value));
     }
 
     /// <summary>

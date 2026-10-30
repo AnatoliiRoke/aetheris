@@ -18,7 +18,7 @@ public static class EconomyConfigKeys
     /// <summary>How many inhabitants die in an hour above the largest population.</summary>
     public const string PopulationDeclinePerHour = "economy.population.decline_per_hour";
 
-    /// <summary>How many inhabitants a body has the moment it becomes a colony.</summary>
+    /// <summary>How many inhabitants a body has the moment it becomes a colony: the population of the start capital of a civilization.</summary>
     public const string PopulationInitial = "economy.population.initial";
 
     /// <summary>How many credits one inhabitant brings to the civilization in an hour.</summary>
@@ -31,7 +31,7 @@ public static class EconomyConfigKeys
     [
         new(PopulationGrowthPercent, "5", "0", "100", "Відсоток від найбільшого населення, на який населення зростає за годину."),
         new(PopulationDeclinePerHour, "1", "0", "1000", "Скільки мешканців зменшується за годину, коли населення вище за найбільше."),
-        new(PopulationInitial, "0", "0", "1000000000", "Скільки мешканців має планета в момент, коли стає колонією гравця."),
+        new(PopulationInitial, "50", "0", "1000000000", "Стартове населення: скільки мешканців має перша планета гравця в момент заснування цивілізації (частина обов’язкового стартового капіталу) і кожна нова колонія."),
         new(CreditsPerInhabitant, "1", "0", "1000", "Скільки кредитів приносить один мешканець цивілізації за годину."),
     ];
 }

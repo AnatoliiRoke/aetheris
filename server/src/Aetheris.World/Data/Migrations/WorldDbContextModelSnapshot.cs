@@ -1046,6 +1046,10 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("description_key");
 
+                    b.Property<bool>("EarnsPopulationIncome")
+                        .HasColumnType("boolean")
+                        .HasColumnName("earns_population_income");
+
                     b.Property<string>("ImageKey")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")

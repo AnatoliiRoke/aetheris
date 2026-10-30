@@ -132,7 +132,7 @@ public static class PlanetEconomy
             }
             else if (effect.EffectType == BuildingEffectTypes.EnergyConsumption)
             {
-                consumption += effect.Value;
+                consumption += (long)decimal.Floor(effect.Value);
             }
         }
 
@@ -179,7 +179,7 @@ public static class PlanetEconomy
 
         return Effects(catalog, levels)
             .Where(entry => entry.Effect.EffectType == BuildingEffectTypes.LevelCap && entry.BuildingTypeId != buildingType.Id)
-            .Select(entry => entry.Effect.Value)
+            .Select(entry => (long)decimal.Floor(entry.Effect.Value))
             .DefaultIfEmpty(0)
             .Max();
     }

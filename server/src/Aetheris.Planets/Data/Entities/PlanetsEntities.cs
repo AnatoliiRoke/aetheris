@@ -121,8 +121,11 @@ public sealed class BuildingLevelEffectEntity
     /// <summary>Gets or sets the resource group of a storage effect.</summary>
     public int? ResourceGroupId { get; set; }
 
-    /// <summary>Gets or sets the value.</summary>
-    public long Value { get; set; }
+    /// <summary>
+    /// Gets or sets the value. It has a fraction, so a multiplier such as the speed of the
+    /// population growth lies in the data for every level without a loss (task 00015).
+    /// </summary>
+    public decimal Value { get; set; }
 }
 
 /// <summary>

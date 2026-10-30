@@ -40,6 +40,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
     private const string ScopeField = "scope";
 
+    private const string EarnsPopulationIncomeField = "earns_population_income";
+
     private const string LabelPrefix = "admin.reference.";
 
     /// <summary>The place of the resources in the menu of the reference kinds.</summary>
@@ -120,6 +122,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 IsRequired: true,
                 InList: true,
                 Options: [.. ResourceScopes.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "scope." + value))]),
+            new(EarnsPopulationIncomeField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.earns_population_income", InList: true),
         ]);
 
     /// <summary>
@@ -167,7 +170,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     resource.ImageKey,
                     resource.IsArchived,
                     resource.Version,
-                    new Dictionary<string, object?> { [GroupField] = resource.ResourceGroupId, [ScopeField] = resource.Scope }))],
+                    new Dictionary<string, object?> { [GroupField] = resource.ResourceGroupId, [ScopeField] = resource.Scope, [EarnsPopulationIncomeField] = resource.EarnsPopulationIncome }))],
             ResourceGroupKind => [.. (await _dbContext.ResourceGroups.AsNoTracking().OrderBy(group => group.Id).ToListAsync(cancellationToken).ConfigureAwait(false))
                 .Select(group => new AdminReferenceRow(
                     group.Id,
@@ -338,6 +341,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     DescriptionKey = WorldTextKeys.Description(WorldTextKeys.Resource, code),
                     ImageKey = AdminReferenceRules.ImageKey(values.ImageKey),
                     Scope = values.Scope,
+                    EarnsPopulationIncome = values.EarnsPopulationIncome,
                 };
 
                 _dbContext.ResourceTypes.Add(resource);
@@ -370,6 +374,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
                 resource.ResourceGroupId = values.ResourceGroupId;
                 resource.Scope = values.Scope;
+                resource.EarnsPopulationIncome = values.EarnsPopulationIncome;
                 resource.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
                 resource.Version++;
 
@@ -551,18 +556,21 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <param name="Description">The description by language.</param>
     /// <param name="ResourceGroupId">The group.</param>
     /// <param name="ImageKey">The key of the picture.</param>
+    /// <param name="Scope">Where the resource lies.</param>
+    /// <param name="EarnsPopulationIncome">Whether the population of a civilization brings this currency.</param>
     private sealed record ResourceValues(
         Dictionary<string, string>? Name,
         Dictionary<string, string>? Description,
         int? ResourceGroupId,
         string? ImageKey,
-        string Scope)
+        string Scope,
+        bool EarnsPopulationIncome = false)
     {
         public static ResourceValues Of(ResourceTypeEntity resource, IReadOnlyList<LocalizationPack> packs) =>
-            new(AdminReferenceRules.TextsOf(packs, resource.NameKey), AdminReferenceRules.TextsOf(packs, resource.DescriptionKey), resource.ResourceGroupId, resource.ImageKey, resource.Scope);
+            new(AdminReferenceRules.TextsOf(packs, resource.NameKey), AdminReferenceRules.TextsOf(packs, resource.DescriptionKey), resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome);
 
         public static ResourceValues Of(ResourceTypeEntity resource, (Dictionary<string, string> Name, Dictionary<string, string> Description) texts) =>
-            new(texts.Name, texts.Description, resource.ResourceGroupId, resource.ImageKey, resource.Scope);
+            new(texts.Name, texts.Description, resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome);
 
         public (Dictionary<string, string> Name, Dictionary<string, string> Description) Trimmed(ILocalizationTexts texts) =>
             (Trim(texts, Name), Trim(texts, Description));
@@ -574,6 +582,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             [AdminReferenceRules.DescriptionField] = Description,
             [GroupField] = ResourceGroupId,
             [ScopeField] = Scope,
+            [EarnsPopulationIncomeField] = EarnsPopulationIncome,
         };
     }
 

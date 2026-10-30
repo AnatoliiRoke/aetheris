@@ -83,8 +83,8 @@ namespace Aetheris.Planets.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("resource_type_id");
 
-                    b.Property<long>("Value")
-                        .HasColumnType("bigint")
+                    b.Property<decimal>("Value")
+                        .HasColumnType("numeric")
                         .HasColumnName("value");
 
                     b.HasKey("Id")

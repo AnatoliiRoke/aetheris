@@ -95,6 +95,7 @@ public static class WorldReferenceSeed
                 ImageKey = resource.ImageKey,
                 ResourceGroupId = resource.Group is null ? null : groups[resource.Group].Id,
                 Scope = resource.Scope,
+                EarnsPopulationIncome = resource.EarnsPopulationIncome,
             },
             StringComparer.Ordinal);
 
@@ -225,6 +226,7 @@ public static class WorldReferenceSeed
             ImageKey = resource.ImageKey,
             ResourceGroupId = resource.Group is null ? null : groupIds[resource.Group],
             Scope = resource.Scope,
+            EarnsPopulationIncome = resource.EarnsPopulationIncome,
         }));
 
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -439,13 +441,15 @@ public sealed record SeedResourceGroup(
 /// <param name="Description">The description by language, if any.</param>
 /// <param name="ImageKey">The key of the picture, if any.</param>
 /// <param name="Scope">Where the resource lies: on a body or in the whole civilization (task 00015).</param>
+/// <param name="EarnsPopulationIncome">Whether the population of a civilization brings this currency (task 00015).</param>
 public sealed record SeedResource(
     string Code,
     string? Group,
     IReadOnlyDictionary<string, string> Name,
     IReadOnlyDictionary<string, string>? Description = null,
     string? ImageKey = null,
-    string Scope = ResourceScopes.Planet);
+    string Scope = ResourceScopes.Planet,
+    bool EarnsPopulationIncome = false);
 
 /// <summary>An object type of the starting data.</summary>
 /// <param name="Code">The neutral code.</param>

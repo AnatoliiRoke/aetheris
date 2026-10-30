@@ -183,7 +183,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
                                 Options: [.. BuildingEffectTypes.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "building_effect." + value))]),
                             new("resource_type_id", AdminReferenceFieldTypes.Reference, LabelPrefix + "field.resource", ReferenceKind: "resource"),
                             new("resource_group_id", AdminReferenceFieldTypes.Reference, LabelPrefix + "field.resource_group", ReferenceKind: "resource_group"),
-                            new("value", AdminReferenceFieldTypes.Number, LabelPrefix + "field.value", IsRequired: true, Minimum: 0),
+                            new("value", AdminReferenceFieldTypes.Number, LabelPrefix + "field.value", IsRequired: true, Minimum: 0, IsDecimal: true),
                         ]),
                     RequirementAdminFields.Field,
                 ]),
@@ -775,7 +775,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
     /// <param name="ResourceTypeId">The resource of a production effect.</param>
     /// <param name="ResourceGroupId">The resource group of a storage effect.</param>
     /// <param name="Value">The value at the level.</param>
-    private sealed record EffectValues(string? EffectType, int? ResourceTypeId, int? ResourceGroupId, long? Value);
+    private sealed record EffectValues(string? EffectType, int? ResourceTypeId, int? ResourceGroupId, decimal? Value);
 
     /// <summary>A requirement of a level.</summary>
     /// <param name="RequirementType">The requirement type.</param>

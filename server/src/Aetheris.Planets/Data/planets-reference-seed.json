@@ -59,6 +59,11 @@
           "type": "energy_output",
           "base": 10,
           "growth": 1.25
+        },
+        {
+          "type": "population_max",
+          "base": 100,
+          "growth": 1.4
         }
       ],
       "requirements": []
@@ -1035,8 +1040,28 @@
       "effects": [
         {
           "type": "population_growth_bonus",
-          "base": 2,
-          "growth": 1.2
+          "values": [
+            1.2,
+            1.4,
+            1.6,
+            1.8,
+            2.0,
+            2.3,
+            2.6,
+            2.9,
+            3.2,
+            3.5,
+            3.8,
+            4.1,
+            4.4,
+            4.7,
+            5.0,
+            5.3,
+            5.6,
+            5.9,
+            6.2,
+            6.5
+          ]
         },
         {
           "type": "energy_consumption",
