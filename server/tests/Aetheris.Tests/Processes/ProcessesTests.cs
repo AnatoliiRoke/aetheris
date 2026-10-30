@@ -813,6 +813,8 @@ public sealed partial class ProcessesTests
             services.GetRequiredService<ProcessCatalogCache>(),
             services.GetRequiredService<Aetheris.Planets.IPlanetsModule>(),
             services.GetRequiredService<IPlanetResources>(),
+            services.GetRequiredService<Aetheris.Economy.IEconomyModule>(),
+            services.GetRequiredService<Aetheris.Economy.Services.CostSplitter>(),
             services.GetRequiredService<PartStockService>(),
             services.GetRequiredService<ITechnologyLevels>(),
             services.GetRequiredService<Aetheris.Requirements.IRequirementsModule>(),

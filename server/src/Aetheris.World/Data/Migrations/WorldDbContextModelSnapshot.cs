@@ -1061,9 +1061,15 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("name_key");
 
-                    b.Property<int>("ResourceGroupId")
+                    b.Property<int?>("ResourceGroupId")
                         .HasColumnType("integer")
                         .HasColumnName("resource_group_id");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("scope");
 
                     b.Property<int>("Version")
                         .HasColumnType("integer")
@@ -1547,7 +1553,6 @@ namespace Aetheris.World.Data.Migrations
                         .WithMany()
                         .HasForeignKey("ResourceGroupId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_resource_type_resource_group_resource_group_id");
                 });
 
