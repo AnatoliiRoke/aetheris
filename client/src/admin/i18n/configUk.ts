@@ -154,7 +154,7 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.economy.population.decline_per_hour.description':
     'Скільки мешканців зменшується за годину, коли населення вище за найбільше.',
   'config.economy.population.initial.description':
-    'Скільки мешканців має планета в момент, коли стає колонією гравця.',
+    'Стартове населення: скільки мешканців має перша планета гравця в момент заснування цивілізації (частина обов’язкового стартового капіталу) і кожна нова колонія.',
   'config.economy.credits.per_inhabitant.description':
     'Скільки кредитів приносить один мешканець цивілізації за годину.',
   'config.processes.terraforming.multiplier_min.description':
