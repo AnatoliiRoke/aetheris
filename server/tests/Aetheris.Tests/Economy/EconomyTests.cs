@@ -147,17 +147,18 @@ public sealed class EconomyTests
         DateTimeOffset now = scope.ServiceProvider.GetRequiredService<Aetheris.Core.Time.IGameClock>().GameNow;
 
         // The population and the balance were counted ten hours ago, so the income of the
-        // interval is in the balance now.
-        await EconomyTestData.SetPopulationAsync(scope.ServiceProvider, player.PlanetId, player.Account.UserId, 100, now.AddHours(-10));
+        // interval is in the balance now. The limit of the body is 200: 100 of the
+        // administrative centre of the first level and 100 of the residential complex.
+        await EconomyTestData.SetPopulationAsync(scope.ServiceProvider, player.PlanetId, player.Account.UserId, 200, now.AddHours(-10));
         await EconomyTestData.SetBalanceAsync(scope.ServiceProvider, player.Account.UserId, creditsId, 0, now.AddHours(-10));
 
         CurrencyBalanceFacts balance = await economy.GetBalanceAsync(player.Account.UserId, creditsId, Token);
 
-        // The population of the body is at its limit of a hundred, so the income of ten hours
-        // is a hundred credits in an hour times the ten hours.
-        Assert.Equal(100 * 10, balance.Amount);
+        // The population of the body is at its limit of 200, so the income of ten hours is
+        // 200 credits in an hour times the ten hours.
+        Assert.Equal(200 * 10, balance.Amount);
         Assert.True(balance.IncomePerHour > 0);
-        Assert.Equal(100, balance.IncomePerHour);
+        Assert.Equal(200, balance.IncomePerHour);
     }
 
     /// <summary>

@@ -47,7 +47,9 @@ public sealed class EconomyBonusTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        // The limit of the body is 100, so the base growth is 5 inhabitants in an hour.
+        // The limit of the body is 200 (100 of the administrative centre and 100 of the residential
+        // complex), so the base growth is 5 per cent of it, 10 inhabitants in an hour. The start of a
+        // civilization has 50 inhabitants, so the empty start is written explicitly.
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ResidentialComplex, 1);
 
         IEconomyModule economy = services.GetRequiredService<IEconomyModule>();
@@ -58,29 +60,29 @@ public sealed class EconomyBonusTests
         PopulationFacts? plain = await economy.GetPopulationAsync(player.Account.UserId, player.PlanetId, Token);
 
         Assert.NotNull(plain);
-        Assert.Equal(5m, plain!.GrowthPerHour);
-        Assert.Equal(5, plain.Amount);
+        Assert.Equal(10m, plain!.GrowthPerHour);
+        Assert.Equal(10, plain.Amount);
 
-        // The medical centre of the first level has the multiplier of its effect in the data; the
-        // growth in an hour is the limit times 5 per cent times that multiplier.
-        long bonus = await EconomyTestData.EffectValueAsync(
+        // The medical centre of the first level has the multiplier 1.2 in the data; the growth in an
+        // hour is the limit times 5 per cent times that multiplier: 200 * 0.05 * 1.2 = 12 inhabitants.
+        decimal bonus = await EconomyTestData.EffectValueAsync(
             services,
             EconomyTestData.MedicalCentreCode,
             1,
             EconomyCodes.PopulationGrowthBonusEffect);
 
-        Assert.True(bonus > 1);
+        Assert.Equal(1.2m, bonus);
 
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, EconomyTestData.MedicalCentreCode, 1);
         await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 0, now.AddHours(-1));
 
         PopulationFacts? boosted = await economy.GetPopulationAsync(player.Account.UserId, player.PlanetId, Token);
 
-        decimal expectedGrowth = 100m * 0.05m * bonus;
+        decimal expectedGrowth = 200m * 0.05m * bonus;
 
         Assert.NotNull(boosted);
         Assert.Equal(expectedGrowth, boosted!.GrowthPerHour);
-        Assert.Equal((long)expectedGrowth, boosted.Amount);
+        Assert.Equal(12, boosted.Amount);
         Assert.True(boosted.Amount > plain.Amount);
     }
 
@@ -104,8 +106,10 @@ public sealed class EconomyBonusTests
         IEconomyModule economy = services.GetRequiredService<IEconomyModule>();
         DateTimeOffset now = services.GetRequiredService<IGameClock>().GameNow;
 
-        // The technology multiplies the growth by 1.5: 100 * 0.05 * 1.5 = 7.5 inhabitants in an
-        // hour, 15 in two hours.
+        // The limit of every body is 200 (100 of the administrative centre and 100 of the
+        // residential complex). The technology multiplies the growth by 1.5: 200 * 0.05 * 1.5 = 15
+        // inhabitants in an hour, 30 in two hours. The start of a civilization has 50 inhabitants,
+        // so the empty start is written explicitly.
         await EconomyTestData.GiveTechnologyAsync(services, player.Account.UserId, TechnologyEffectTypes.PopulationGrowthBonus, 1.5m);
 
         await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 0, now.AddHours(-2));
@@ -115,13 +119,13 @@ public sealed class EconomyBonusTests
         PopulationFacts? theirs = await economy.GetPopulationAsync(other.Account.UserId, other.PlanetId, Token);
 
         Assert.NotNull(mine);
-        Assert.Equal(7.5m, mine!.GrowthPerHour);
-        Assert.Equal(15, mine.Amount);
+        Assert.Equal(15m, mine!.GrowthPerHour);
+        Assert.Equal(30, mine.Amount);
 
-        // The other player has not learned it: the base growth of 5 in an hour, 10 in two hours.
+        // The other player has not learned it: the base growth of 10 in an hour, 20 in two hours.
         Assert.NotNull(theirs);
-        Assert.Equal(5m, theirs!.GrowthPerHour);
-        Assert.Equal(10, theirs.Amount);
+        Assert.Equal(10m, theirs!.GrowthPerHour);
+        Assert.Equal(20, theirs.Amount);
     }
 
     /// <summary>
@@ -143,22 +147,22 @@ public sealed class EconomyBonusTests
         int creditsId = await EconomyTestData.CreditsIdAsync(services);
         DateTimeOffset now = services.GetRequiredService<IGameClock>().GameNow;
 
-        // The body is full at the limit of 100 for the ten hours: a hundred credits in an hour
-        // without the bonus.
-        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 100, now.AddHours(-10));
+        // The body is full at the limit of 200 (100 of the administrative centre and 100 of the
+        // residential complex) for the ten hours: 200 credits in an hour without the bonus.
+        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 200, now.AddHours(-10));
         await EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 0, now.AddHours(-10));
 
         CurrencyBalanceFacts plain = await economy.GetBalanceAsync(player.Account.UserId, creditsId, Token);
 
-        Assert.Equal(1000, plain.Amount);
-        Assert.Equal(100m, plain.IncomePerHour);
+        Assert.Equal(2000, plain.Amount);
+        Assert.Equal(200m, plain.IncomePerHour);
 
-        // The technology multiplies the income by 1.5: 150 credits in an hour, 1500 in ten hours.
+        // The technology multiplies the income by 1.5: 300 credits in an hour, 3000 in ten hours.
         await EconomyTestData.GiveTechnologyAsync(services, player.Account.UserId, TechnologyEffectTypes.CreditIncomeBonus, 1.5m);
 
         CurrencyBalanceFacts boosted = await economy.GetBalanceAsync(player.Account.UserId, creditsId, Token);
 
-        Assert.Equal(1500, boosted.Amount);
-        Assert.Equal(150m, boosted.IncomePerHour);
+        Assert.Equal(3000, boosted.Amount);
+        Assert.Equal(300m, boosted.IncomePerHour);
     }
 }

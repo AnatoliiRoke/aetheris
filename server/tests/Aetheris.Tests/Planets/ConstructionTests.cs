@@ -345,5 +345,5 @@ public sealed class ConstructionTests
         overview.Resources.SingleOrDefault(resource => resource.ResourceTypeId == resourceTypeId)?.Amount ?? 0;
 
     private static long Effect(BuildingTypeEntity type, int level, string effectType) =>
-        type.LevelIds.Single(entry => entry.Level == level).EffectIds.Where(effect => effect.EffectType == effectType).Sum(effect => effect.Value);
+        (long)type.LevelIds.Single(entry => entry.Level == level).EffectIds.Where(effect => effect.EffectType == effectType).Sum(effect => effect.Value);
 }

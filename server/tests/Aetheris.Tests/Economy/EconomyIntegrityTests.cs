@@ -129,15 +129,17 @@ public sealed class EconomyIntegrityTests
         IServiceProvider services = scope.ServiceProvider;
         IEconomyModule economy = services.GetRequiredService<IEconomyModule>();
 
-        // The body has no housing, so its limit is zero and the ten inhabitants do not change by growth.
-        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 10, services.GetRequiredService<IGameClock>().GameNow);
+        // The body has no housing, so its limit is 100 (the administrative centre of the first level),
+        // and the 110 inhabitants are above it: they die down by one in an hour, so they do not change
+        // during the test, and they do not grow, so no fraction of a newborn inhabitant is carried.
+        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 110, services.GetRequiredService<IGameClock>().GameNow);
 
         Assert.True(await economy.TryTakePopulationAsync(player.Account.UserId, player.PlanetId, 4, Token));
-        Assert.Equal(6, (await economy.GetPopulationAsync(player.Account.UserId, player.PlanetId, Token))!.Amount);
+        Assert.Equal(106, (await economy.GetPopulationAsync(player.Account.UserId, player.PlanetId, Token))!.Amount);
 
         // More than the body has is refused and nothing is taken.
-        Assert.False(await economy.TryTakePopulationAsync(player.Account.UserId, player.PlanetId, 7, Token));
-        Assert.Equal(6, (await economy.GetPopulationAsync(player.Account.UserId, player.PlanetId, Token))!.Amount);
+        Assert.False(await economy.TryTakePopulationAsync(player.Account.UserId, player.PlanetId, 107, Token));
+        Assert.Equal(106, (await economy.GetPopulationAsync(player.Account.UserId, player.PlanetId, Token))!.Amount);
 
         GameException foreign = await Assert.ThrowsAsync<GameException>(
             () => economy.TryTakePopulationAsync(stranger.Account.UserId, player.PlanetId, 1, Token));
@@ -149,12 +151,13 @@ public sealed class EconomyIntegrityTests
 
         Assert.Equal(EconomyErrorCodes.NegativeAmount, negative.Code);
 
-        // The crew comes back above the limit and is not refused: the population dies down later.
+        // The crew comes back above the limit and is not refused: 106 + 5 = 111 inhabitants, and the
+        // population dies down later.
         await economy.GivePopulationAsync(player.Account.UserId, player.PlanetId, 5, Token);
 
         PopulationFacts? back = await economy.GetPopulationAsync(player.Account.UserId, player.PlanetId, Token);
 
-        Assert.Equal(11, back!.Amount);
+        Assert.Equal(111, back!.Amount);
         Assert.True(back.OverLimit);
     }
 
@@ -242,8 +245,8 @@ public sealed class EconomyIntegrityTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ResidentialComplex, 1);
-
+        // The body has no residential complex: its limit is 100, the one of the administrative centre
+        // of the first level, so the growth of 5 per cent of it is 5 in an hour.
         IEconomyModule economy = services.GetRequiredService<IEconomyModule>();
         int creditsId = await EconomyTestData.CreditsIdAsync(services);
         DateTimeOffset start = ConstructionService.Normalize(services.GetRequiredService<IGameClock>().GameNow.AddHours(-1));
@@ -289,22 +292,24 @@ public sealed class EconomyIntegrityTests
         int creditsId = await EconomyTestData.CreditsIdAsync(services);
         DateTimeOffset start = ConstructionService.Normalize(services.GetRequiredService<IGameClock>().GameNow.AddHours(-10));
 
-        // The population is at the limit of 100 and the balance is empty ten hours ago.
-        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 100, start);
+        // The population is at the limit of 200 (100 of the administrative centre and 100 of the
+        // residential complex) and the balance is empty ten hours ago.
+        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 200, start);
         await EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 0, start);
 
         await economy.FixPlayerAsync(player.Account.UserId, start.AddHours(6), Token);
         await economy.FixPlayerAsync(player.Account.UserId, start.AddHours(3), Token);
         await economy.FixPlayerAsync(player.Account.UserId, start.AddHours(8), Token);
 
-        Assert.Equal(800, await EconomyTestData.BalanceAsync(services, player.Account.UserId, creditsId));
+        // Eight hours at 200 credits in an hour.
+        Assert.Equal(1600, await EconomyTestData.BalanceAsync(services, player.Account.UserId, creditsId));
 
         // Every read of the balance counts the same ten hours once, whatever the number of the reads.
         CurrencyBalanceFacts first = await economy.GetBalanceAsync(player.Account.UserId, creditsId, Token);
         CurrencyBalanceFacts second = await economy.GetBalanceAsync(player.Account.UserId, creditsId, Token);
 
-        Assert.Equal(1000, first.Amount);
-        Assert.Equal(1000, second.Amount);
+        Assert.Equal(2000, first.Amount);
+        Assert.Equal(2000, second.Amount);
     }
 
     /// <summary>
@@ -333,9 +338,10 @@ public sealed class EconomyIntegrityTests
             ironId = await PlanetsTestData.ResourceIdAsync(services, SeedCodes.Iron);
             start = ConstructionService.Normalize(services.GetRequiredService<IGameClock>().GameNow.AddHours(-10));
 
-            // The population is at the limit of 100 ten hours ago, so the balance has 1000 credits the
-            // administrator sees and the row has none yet.
-            await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 100, start);
+            // The population is at the limit of 200 (100 of the administrative centre and 100 of the
+            // residential complex) ten hours ago, so the balance has 2000 credits the administrator
+            // sees and the row has none yet.
+            await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 200, start);
             await EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 0, start);
         }
 
@@ -348,7 +354,7 @@ public sealed class EconomyIntegrityTests
 
         AdminBalanceFacts credits = balances!.Single(entry => entry.ResourceTypeId == creditsId);
 
-        Assert.Equal(1000, credits.Amount);
+        Assert.Equal(2000, credits.Amount);
 
         HttpResponseMessage given = await admin.PutAsJsonAsync(route, new { resource_type_id = creditsId, amount = 5, reason = "Подарунок", version = credits.Version }, Token);
 
@@ -362,8 +368,8 @@ public sealed class EconomyIntegrityTests
                 .FirstAsync(Token);
 
             // The old amount is the whole balance with the income, and not the amount of the row.
-            Assert.Equal("1000", audit.OldValue);
-            Assert.Equal("1005", audit.NewValue);
+            Assert.Equal("2000", audit.OldValue);
+            Assert.Equal("2005", audit.NewValue);
         }
 
         // The version of the row went up, so the old one is refused with 409 and nothing is written.
@@ -392,7 +398,7 @@ public sealed class EconomyIntegrityTests
 
         using IServiceScope after = _factory.Services.CreateScope();
 
-        Assert.Equal(1005, await EconomyTestData.BalanceAsync(after.ServiceProvider, player.Account.UserId, creditsId));
+        Assert.Equal(2005, await EconomyTestData.BalanceAsync(after.ServiceProvider, player.Account.UserId, creditsId));
     }
 
     /// <summary>

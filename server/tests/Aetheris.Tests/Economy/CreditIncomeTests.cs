@@ -126,15 +126,18 @@ public sealed class CreditIncomeTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        // The residential complex of the first level gives the limit of 100 inhabitants.
+        // The limit of the body is 200: 100 of the administrative centre of the first level and
+        // 100 of the residential complex of the first level.
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ResidentialComplex, 1);
 
         IEconomyModule economy = services.GetRequiredService<IEconomyModule>();
         int creditsId = await EconomyTestData.CreditsIdAsync(services);
         DateTimeOffset now = services.GetRequiredService<IGameClock>().GameNow;
 
-        // The population was empty ten hours ago and grows by 5 of the limit of 100 in an hour:
-        // it is 50 now, so the average of the interval is 25 and the balance is 250 credits.
+        // The population was empty ten hours ago (the start of a civilization has 50, so the empty
+        // start is written explicitly) and grows by 5 per cent of the limit of 200, which is 10
+        // in an hour: it is 100 now, so the average of the interval is 50 and the balance is 500
+        // credits.
         await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 0, now.AddHours(-10));
         await EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 0, now.AddHours(-10));
 
@@ -142,11 +145,11 @@ public sealed class CreditIncomeTests
         CurrencyBalanceFacts balance = await economy.GetBalanceAsync(player.Account.UserId, creditsId, Token);
 
         Assert.NotNull(population);
-        Assert.Equal(50, population!.Amount);
-        Assert.Equal(250, balance.Amount);
+        Assert.Equal(100, population!.Amount);
+        Assert.Equal(500, balance.Amount);
 
         // The income of the moment is the one of the population of the moment.
-        Assert.Equal(50, balance.IncomePerHour);
+        Assert.Equal(100, balance.IncomePerHour);
     }
 
     /// <summary>
@@ -168,16 +171,17 @@ public sealed class CreditIncomeTests
         int creditsId = await EconomyTestData.CreditsIdAsync(services);
         DateTimeOffset now = services.GetRequiredService<IGameClock>().GameNow;
 
-        // The population was empty thirty hours ago and reaches the limit of 100 after twenty
-        // hours (5 in an hour): the first twenty hours bring 1000 credits, the last ten hours at
-        // the limit bring 1000 credits.
+        // The population was empty thirty hours ago and reaches the limit of 200 after twenty
+        // hours (5 per cent of 200 is 10 in an hour): the first twenty hours bring
+        // 0.5 * 20 * 200 = 2000 credits, the last ten hours at the limit bring 200 * 10 = 2000
+        // credits.
         await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 0, now.AddHours(-30));
         await EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 0, now.AddHours(-30));
 
         CurrencyBalanceFacts balance = await economy.GetBalanceAsync(player.Account.UserId, creditsId, Token);
 
-        Assert.Equal(2000, balance.Amount);
-        Assert.Equal(100, balance.IncomePerHour);
+        Assert.Equal(4000, balance.Amount);
+        Assert.Equal(200, balance.IncomePerHour);
     }
 
     /// <summary>
@@ -198,15 +202,15 @@ public sealed class CreditIncomeTests
         int creditsId = await EconomyTestData.CreditsIdAsync(services);
         DateTimeOffset now = services.GetRequiredService<IGameClock>().GameNow;
 
-        // The population of 110 was counted twenty hours ago; it dies down by one in an hour,
-        // reaches the limit of 100 after ten hours (the average of 105 brings 1050 credits) and
-        // stays there for ten hours (1000 credits).
-        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 110, now.AddHours(-20));
+        // The population of 210 (ten above the limit of 200) was counted twenty hours ago; it dies
+        // down by one in an hour, reaches the limit of 200 after ten hours (the average of 205
+        // brings 2050 credits) and stays there for ten hours (2000 credits).
+        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 210, now.AddHours(-20));
         await EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 0, now.AddHours(-20));
 
         CurrencyBalanceFacts balance = await economy.GetBalanceAsync(player.Account.UserId, creditsId, Token);
 
-        Assert.Equal(2050, balance.Amount);
+        Assert.Equal(4050, balance.Amount);
     }
 
     /// <summary>
@@ -231,8 +235,9 @@ public sealed class CreditIncomeTests
         DateTimeOffset start = now.AddHours(-10);
         DateTimeOffset change = start.AddHours(6);
 
-        // The population is at the limit of 100 and the balance is empty ten hours ago.
-        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 100, start);
+        // The limit is 200 (100 of the administrative centre and 100 of the residential complex of
+        // the first level). The population is at it and the balance is empty ten hours ago.
+        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 200, start);
         await EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 0, start);
 
         // Six hours later the second level of the complex is built: the balance is fixed to that
@@ -241,24 +246,24 @@ public sealed class CreditIncomeTests
 
         long creditsBefore = await EconomyTestData.BalanceAsync(services, player.Account.UserId, creditsId);
 
-        // Six hours of 100 inhabitants bring 600 credits.
-        Assert.Equal(600, creditsBefore);
+        // Six hours of 200 inhabitants bring 1200 credits.
+        Assert.Equal(1200, creditsBefore);
 
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ResidentialComplex, 2);
 
-        // The new limit comes from the data of the level; the growth is 5 per cent of it in an
-        // hour, so in the remaining four hours the population grows from 100 to
-        // 100 + 4 * 0.05 * limit, and the income is the average of the two times four hours.
-        long limit = await EconomyTestData.EffectValueAsync(services, SeedCodes.ResidentialComplex, 2, EconomyCodes.PopulationMaxEffect);
+        // The second level of the complex has 140 in the data, so the new limit is 100 + 140 = 240.
+        decimal adminLimit = await EconomyTestData.EffectValueAsync(services, SeedCodes.AdminCenter, 1, EconomyCodes.PopulationMaxEffect);
+        decimal housingLimit = await EconomyTestData.EffectValueAsync(services, SeedCodes.ResidentialComplex, 2, EconomyCodes.PopulationMaxEffect);
 
-        Assert.True(limit > 100);
+        Assert.Equal(240m, adminLimit + housingLimit);
 
-        decimal populationAtEnd = 100m + (4m * 0.05m * limit);
-        long expectedAfter = (long)decimal.Floor((100m + populationAtEnd) / 2m * 4m);
-
+        // The growth is 5 per cent of 240, which is 12 in an hour, so the population grows from 200
+        // to the limit of 240 in 40 / 12 = 10/3 hours: the area of that part is the average of 220
+        // times 10/3 hours, 733.33 credits. The remaining 2/3 of the four hours the population is
+        // at the limit: 240 * 2/3 = 160 credits. The sum 893.33 is counted as 893 whole credits.
         CurrencyBalanceFacts balance = await economy.GetBalanceAsync(player.Account.UserId, creditsId, Token);
 
-        Assert.Equal(600 + expectedAfter, balance.Amount);
+        Assert.Equal(1200 + 893, balance.Amount);
     }
 
     /// <summary>
@@ -287,8 +292,10 @@ public sealed class CreditIncomeTests
         DateTimeOffset start = ConstructionService.Normalize(services.GetRequiredService<IGameClock>().GameNow.AddHours(-10));
         DateTimeOffset change = start.AddHours(6);
 
-        // The population is at the limit of 100 and the balance is empty ten hours ago.
-        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 100, start);
+        // The limit is 296: 196 of the administrative centre of the third level and 100 of the
+        // residential complex of the first level. The population is at it and the balance is empty
+        // ten hours ago.
+        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 296, start);
         await EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 0, start);
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, await BuildingsTests.RichBalanceAsync(services), start);
 
@@ -307,19 +314,21 @@ public sealed class CreditIncomeTests
             Assert.Equal(1, completed);
         }
 
-        // The limit of the second level grows the population by 5 per cent of it in an hour for the
-        // four hours that are left; the six hours before the end brought 600 credits.
-        long limit = await EconomyTestData.EffectValueAsync(services, SeedCodes.ResidentialComplex, 2, EconomyCodes.PopulationMaxEffect);
+        // The six hours before the end brought 296 * 6 = 1776 credits with the old limit. The second
+        // level of the complex has 140 in the data, so the new limit is 196 + 140 = 336 and the
+        // growth is 5 per cent of it, 16.8 in an hour: the population grows from 296 to 336 in
+        // 40 / 16.8 = 50/21 hours (the area is the average of 316 times 50/21, 752.38 credits) and
+        // stays at the limit for the remaining 34/21 of the four hours (336 * 34/21 = 544 credits).
+        // The sum 1296.38 is counted as 1296 whole credits.
+        decimal adminLimit = await EconomyTestData.EffectValueAsync(services, SeedCodes.AdminCenter, 3, EconomyCodes.PopulationMaxEffect);
+        decimal housingLimit = await EconomyTestData.EffectValueAsync(services, SeedCodes.ResidentialComplex, 2, EconomyCodes.PopulationMaxEffect);
 
-        Assert.True(limit > 100);
-
-        decimal populationAtEnd = 100m + (4m * 0.05m * limit);
-        long expectedAfter = (long)decimal.Floor((100m + populationAtEnd) / 2m * 4m);
+        Assert.Equal(336m, adminLimit + housingLimit);
 
         using IServiceScope check = _factory.Services.CreateScope();
         CurrencyBalanceFacts balance = await check.ServiceProvider.GetRequiredService<IEconomyModule>().GetBalanceAsync(player.Account.UserId, creditsId, Token);
 
-        Assert.Equal(600 + expectedAfter, balance.Amount);
+        Assert.Equal((296 * 6) + 1296, balance.Amount);
     }
 
     /// <summary>
@@ -343,10 +352,15 @@ public sealed class CreditIncomeTests
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ResidentialComplex, 1);
         await PlanetsTestData.SetLevelAsync(services, neighbour.PlanetId, SeedCodes.ResidentialComplex, 2);
 
-        long homeLimit = await EconomyTestData.EffectValueAsync(services, SeedCodes.ResidentialComplex, 1, EconomyCodes.PopulationMaxEffect);
-        long colonyLimit = await EconomyTestData.EffectValueAsync(services, SeedCodes.ResidentialComplex, 2, EconomyCodes.PopulationMaxEffect);
+        // Both bodies have the administrative centre of the first level, 100 inhabitants, and the
+        // residential complex adds 100 on the first level and 140 on the second: the limits of the
+        // bodies are 200 and 240.
+        decimal adminLimit = await EconomyTestData.EffectValueAsync(services, SeedCodes.AdminCenter, 1, EconomyCodes.PopulationMaxEffect);
+        long homeLimit = (long)(adminLimit + await EconomyTestData.EffectValueAsync(services, SeedCodes.ResidentialComplex, 1, EconomyCodes.PopulationMaxEffect));
+        long colonyLimit = (long)(adminLimit + await EconomyTestData.EffectValueAsync(services, SeedCodes.ResidentialComplex, 2, EconomyCodes.PopulationMaxEffect));
 
-        Assert.NotEqual(homeLimit, colonyLimit);
+        Assert.Equal(200, homeLimit);
+        Assert.Equal(240, colonyLimit);
 
         IEconomyModule economy = services.GetRequiredService<IEconomyModule>();
         int creditsId = await EconomyTestData.CreditsIdAsync(services);
@@ -354,7 +368,7 @@ public sealed class CreditIncomeTests
         DateTimeOffset start = now.AddHours(-10);
 
         // Both bodies are full: the home body brings its limit in credits in an hour, the colony
-        // its own, so ten hours bring ten times the sum of the limits.
+        // its own, so ten hours bring ten times the sum of the limits, 10 * (200 + 240) = 4400.
         await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, homeLimit, start);
         await EconomyTestData.SetPopulationAsync(services, neighbour.PlanetId, player.Account.UserId, colonyLimit, start);
         await EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 0, start);
@@ -389,24 +403,25 @@ public sealed class CreditIncomeTests
         IEconomyModule economy = services.GetRequiredService<IEconomyModule>();
         DateTimeOffset now = services.GetRequiredService<IGameClock>().GameNow;
 
-        // Counted an hour ago, 103 inhabitants above the limit of 100 are 102 now, still above.
-        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 103, now.AddHours(-1));
+        // The limit is 200 (100 of the administrative centre and 100 of the residential complex).
+        // Counted an hour ago, 203 inhabitants above the limit are 202 now, still above.
+        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 203, now.AddHours(-1));
 
         PopulationFacts? above = await economy.GetPopulationAsync(player.Account.UserId, player.PlanetId, Token);
 
         Assert.NotNull(above);
-        Assert.Equal(102, above!.Amount);
+        Assert.Equal(202, above!.Amount);
         Assert.True(above.OverLimit);
         Assert.Equal(-1m, above.GrowthPerHour);
 
-        // Counted three hours ago, they are 100 now: at the limit, with no warning and no
+        // Counted three hours ago, they are 200 now: at the limit, with no warning and no
         // decline, and the population needs no time to reach the limit.
-        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 103, now.AddHours(-3));
+        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 203, now.AddHours(-3));
 
         PopulationFacts? at = await economy.GetPopulationAsync(player.Account.UserId, player.PlanetId, Token);
 
         Assert.NotNull(at);
-        Assert.Equal(100, at!.Amount);
+        Assert.Equal(200, at!.Amount);
         Assert.False(at.OverLimit);
         Assert.True(at.GrowthPerHour >= 0m);
         Assert.Equal(TimeSpan.Zero, at.TimeToMaximum);

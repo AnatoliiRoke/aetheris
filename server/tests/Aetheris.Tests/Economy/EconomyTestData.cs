@@ -283,8 +283,8 @@ internal static class EconomyTestData
     /// <param name="buildingCode">The code of the building type.</param>
     /// <param name="level">The level.</param>
     /// <param name="effectType">The kind of the effect.</param>
-    /// <returns>The value of the effect.</returns>
-    internal static async Task<long> EffectValueAsync(IServiceProvider services, string buildingCode, int level, string effectType)
+    /// <returns>The value of the effect, with its fraction.</returns>
+    internal static async Task<decimal> EffectValueAsync(IServiceProvider services, string buildingCode, int level, string effectType)
     {
         Aetheris.Planets.Data.Entities.BuildingTypeEntity type = await PlanetsTestData.TypeAsync(services, buildingCode).ConfigureAwait(false);
 
