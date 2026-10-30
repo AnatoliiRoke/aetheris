@@ -275,28 +275,28 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
             "World ready: galaxy created {GalaxyCreated}, new sectors {Sectors}.",
             world.GalaxyCreated,
             world.CreatedSectorIds.Count);
+
+        // The Planets module fills its tables once the world has its reference data, and adopts
+        // the civilizations created before it (task 00011).
+        await scope.ServiceProvider.GetRequiredService<IPlanetsModule>().EnsureAsync().ConfigureAwait(false);
+
+        // The Research module fills its tables once the bodies module has its own reference
+        // data, because a research starts on a body (task 00012).
+        await scope.ServiceProvider.GetRequiredService<IResearchModule>().EnsureAsync().ConfigureAwait(false);
+
+        // The Production module fills its tables once the bodies and the research modules have
+        // their own reference data, because a factory stands on a body (task 00013).
+        await scope.ServiceProvider.GetRequiredService<IProductionModule>().EnsureAsync().ConfigureAwait(false);
+
+        // The Processes module fills its tables once the bodies, the research and the production
+        // modules have their own reference data, because a process runs on a body and works with
+        // the parts (task 00014).
+        await scope.ServiceProvider.GetRequiredService<IProcessesModule>().EnsureAsync().ConfigureAwait(false);
+
+        // The Economy module fills its tables once the bodies, the research and the world modules
+        // have their own reference data, because the numbers of the game live in them (task 00015).
+        await scope.ServiceProvider.GetRequiredService<IEconomyModule>().EnsureAsync().ConfigureAwait(false);
     }
-
-    // The Planets module fills its tables once the world has its reference data, and adopts
-    // the civilizations created before it (task 00011).
-    await scope.ServiceProvider.GetRequiredService<IPlanetsModule>().EnsureAsync().ConfigureAwait(false);
-
-    // The Research module fills its tables once the bodies module has its own reference
-    // data, because a research starts on a body (task 00012).
-    await scope.ServiceProvider.GetRequiredService<IResearchModule>().EnsureAsync().ConfigureAwait(false);
-
-    // The Production module fills its tables once the bodies and the research modules have
-    // their own reference data, because a factory stands on a body (task 00013).
-    await scope.ServiceProvider.GetRequiredService<IProductionModule>().EnsureAsync().ConfigureAwait(false);
-
-    // The Processes module fills its tables once the bodies, the research and the production
-    // modules have their own reference data, because a process runs on a body and works with
-    // the parts (task 00014).
-    await scope.ServiceProvider.GetRequiredService<IProcessesModule>().EnsureAsync().ConfigureAwait(false);
-
-    // The Economy module fills its tables once the bodies, the research and the world modules
-    // have their own reference data, because the numbers of the game live in them (task 00015).
-    await scope.ServiceProvider.GetRequiredService<IEconomyModule>().EnsureAsync().ConfigureAwait(false);
 }
 
 if (AdminCommandLine.IsCommand(args))
