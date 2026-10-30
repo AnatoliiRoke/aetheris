@@ -134,6 +134,7 @@ public sealed class ProcessesDbContext : DbContext
             entity.HasIndex(e => e.ProcessRecipeId);
             entity.ToTable(table => table.HasCheckConstraint("ck_process_order_quantity", "quantity > 0"));
             entity.ToTable(table => table.HasCheckConstraint("ck_process_order_produced", "produced_quantity >= 0 AND produced_quantity <= quantity"));
+            entity.ToTable(table => table.HasCheckConstraint("ck_process_order_unit_seconds", "unit_seconds >= 0"));
         });
 
         modelBuilder.Entity<ProcessOrderCostEntity>(entity =>

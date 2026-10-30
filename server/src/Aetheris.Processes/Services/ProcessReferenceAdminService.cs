@@ -103,26 +103,6 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
     /// <summary>The place of the parameters of the processes in the menu of the reference kinds.</summary>
     private const int ProcessParamSortOrder = 72;
 
-    /// <summary>
-    /// The kinds of the parameters of a process, in the order of the form of the admin panel.
-    /// </summary>
-    private static readonly IReadOnlyList<string> ParamKinds =
-    [
-        ProcessParamKinds.ValueByLevel,
-        ProcessParamKinds.Range,
-        ProcessParamKinds.Scaling,
-    ];
-
-    /// <summary>
-    /// The sources of the level a parameter follows, in the order of the form of the admin panel.
-    /// </summary>
-    private static readonly IReadOnlyList<string> LevelSources =
-    [
-        ProcessLevelSources.Building,
-        ProcessLevelSources.Technology,
-        ProcessLevelSources.Part,
-    ];
-
     /// <summary>The texts of the labels, read once from the embedded file.</summary>
     private static readonly IReadOnlyList<LocalizationTextEntry> Labels =
         AdminReferenceRules.LoadLabelTexts(typeof(ProcessReferenceAdminService).Assembly, LabelTextsResource);
@@ -158,6 +138,7 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
     private readonly IPlanetsModule _planets;
     private readonly IRequirementsModule _requirements;
     private readonly ITechnologyLevels _technologies;
+    private readonly PartStockService _parts;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProcessReferenceAdminService"/> class.
@@ -172,6 +153,7 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
     /// <param name="planets">The bodies module, for the buildings the processes run in.</param>
     /// <param name="requirements">The common requirements module.</param>
     /// <param name="technologies">The technologies, for the requirement of a recipe on a technology.</param>
+    /// <param name="parts">The parts of the production module, for the parts a recipe takes.</param>
     public ProcessReferenceAdminService(
         ProcessesDbContext dbContext,
         ProcessesUnitOfWork unitOfWork,
@@ -182,7 +164,8 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
         IWorldModule world,
         IPlanetsModule planets,
         IRequirementsModule requirements,
-        ITechnologyLevels technologies)
+        ITechnologyLevels technologies,
+        PartStockService parts)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -194,6 +177,7 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
         ArgumentNullException.ThrowIfNull(planets);
         ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(technologies);
+        ArgumentNullException.ThrowIfNull(parts);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -205,6 +189,7 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
         _planets = planets;
         _requirements = requirements;
         _technologies = technologies;
+        _parts = parts;
     }
 
     /// <summary>
@@ -332,17 +317,17 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
                 AdminReferenceFieldTypes.Select,
                 LabelPrefix + "field.param_kind",
                 IsRequired: true,
-                Options: [.. ParamKinds.Select(value => new AdminReferenceOption(value, LabelPrefix + "param_kind." + value))]),
+                Options: [.. ProcessParamKinds.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "param_kind." + value))]),
             new(
                 LevelSourceField,
                 AdminReferenceFieldTypes.Select,
                 LabelPrefix + "field.level_source",
                 IsRequired: true,
-                Options: [.. LevelSources.Select(value => new AdminReferenceOption(value, LabelPrefix + "level_source." + value))]),
-            new(LevelTargetField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.level_target", IsRequired: true, Minimum: 1),
+                Options: [.. ProcessLevelSources.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "level_source." + value))]),
+            new(LevelTargetField, AdminReferenceFieldTypes.Reference, LabelPrefix + "field.level_target", ReferenceKind: "technology"),
             new(LevelField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.level", IsRequired: true, Minimum: 1),
-            new(ValueField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.value", IsRequired: true, IsDecimal: true),
-            new(ValueMaxField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.value_max", IsDecimal: true),
+            new(ValueField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.value", IsRequired: true, InList: true, Minimum: 0, IsDecimal: true),
+            new(ValueMaxField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.value_max", Minimum: 0, IsDecimal: true),
             new(SortOrderField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.sort_order", IsRequired: true, Minimum: 0),
         ]);
 
@@ -981,6 +966,10 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
         HashSet<int> storedResourceIds = [.. (stored?.IngredientIds ?? [])
             .Where(ingredient => ingredient.ResourceTypeId is not null)
             .Select(ingredient => ingredient.ResourceTypeId!.Value)];
+        HashSet<int> storedPartIds = [.. (stored?.IngredientIds ?? [])
+            .Where(ingredient => ingredient.PartTypeId is not null)
+            .Select(ingredient => ingredient.PartTypeId!.Value)];
+        IReadOnlyDictionary<int, PartFacts> parts = await _parts.GetPartFactsAsync(cancellationToken).ConfigureAwait(false);
         HashSet<(int? ResourceTypeId, int? PartTypeId)> seenIngredients = [];
         int index = 0;
 
@@ -1015,7 +1004,7 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
             }
             else if (ingredient.PartTypeId is { } ingredientPartId)
             {
-                CheckPart(failures, partPath, ingredientPartId);
+                CheckPart(failures, partPath, ingredientPartId, parts, storedPartIds);
             }
 
             index++;
@@ -1084,7 +1073,7 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
         {
             AdminReferenceRules.Fail(failures, ParamKindField, AdminReferenceErrors.Required);
         }
-        else if (!ParamKinds.Contains(values.ParamKind, StringComparer.Ordinal))
+        else if (!ProcessParamKinds.All.Contains(values.ParamKind, StringComparer.Ordinal))
         {
             AdminReferenceRules.Fail(failures, ParamKindField, AdminReferenceErrors.Unknown);
         }
@@ -1093,18 +1082,27 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
         {
             AdminReferenceRules.Fail(failures, LevelSourceField, AdminReferenceErrors.Required);
         }
-        else if (!LevelSources.Contains(values.LevelSource, StringComparer.Ordinal))
+        else if (!ProcessLevelSources.All.Contains(values.LevelSource, StringComparer.Ordinal))
         {
             AdminReferenceRules.Fail(failures, LevelSourceField, AdminReferenceErrors.Unknown);
         }
-
-        if (values.LevelTargetId is null)
+        else if (values.LevelSource == ProcessLevelSources.Technology)
         {
-            AdminReferenceRules.Fail(failures, LevelTargetField, AdminReferenceErrors.Required);
+            // A technology is named by the parameter, so its level is the level of that
+            // technology of the player.
+            if (values.LevelTargetId is not { } technologyId)
+            {
+                AdminReferenceRules.Fail(failures, LevelTargetField, AdminReferenceErrors.Required);
+            }
+            else if (!(await _technologies.GetTechnologyIdsAsync(cancellationToken).ConfigureAwait(false)).Contains(technologyId))
+            {
+                AdminReferenceRules.Fail(failures, LevelTargetField, AdminReferenceErrors.Unknown);
+            }
         }
-        else if (values.LevelTargetId < 1)
+        else if (values.LevelTargetId is not null)
         {
-            AdminReferenceRules.Fail(failures, LevelTargetField, AdminReferenceErrors.OutOfBounds);
+            // The building and the part are the ones of the order, so they are not named.
+            AdminReferenceRules.Fail(failures, LevelTargetField, AdminReferenceErrors.NotApplicable);
         }
 
         if (values.Level is null)
@@ -1119,6 +1117,20 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
         if (values.Value is null)
         {
             AdminReferenceRules.Fail(failures, ValueField, AdminReferenceErrors.Required);
+        }
+        else if (values.Value < decimal.Zero)
+        {
+            AdminReferenceRules.Fail(failures, ValueField, AdminReferenceErrors.OutOfBounds);
+        }
+
+        if (values.ParamKind == ProcessParamKinds.Range && values.ValueMax is null)
+        {
+            // A range has its lowest and its highest value.
+            AdminReferenceRules.Fail(failures, ValueMaxField, AdminReferenceErrors.Required);
+        }
+        else if (values.ValueMax is { } highest && values.Value is { } lowest && highest < lowest)
+        {
+            AdminReferenceRules.Fail(failures, ValueMaxField, AdminReferenceErrors.OutOfBounds);
         }
 
         if (values.SortOrder is null or < 0)
@@ -1218,18 +1230,28 @@ public sealed class ProcessReferenceAdminService : IAdminReferenceService
     }
 
     /// <summary>
-    /// Checks the part an ingredient takes. The parts belong to the production module and it
-    /// has no contract that lists them, so the module checks the identifier and the module that
-    /// owns the parts checks the part itself.
+    /// Checks the part an ingredient takes: it must exist, and an archived part is kept by the
+    /// recipes that already take it but is not offered for a new one.
     /// </summary>
     /// <param name="failures">The failures.</param>
     /// <param name="path">The path of the field.</param>
     /// <param name="partTypeId">The part the administrator sent.</param>
-    private static void CheckPart(Dictionary<string, List<string>> failures, string path, int partTypeId)
+    /// <param name="parts">The parts that exist.</param>
+    /// <param name="storedPartIds">The parts the recipe already takes.</param>
+    private static void CheckPart(
+        Dictionary<string, List<string>> failures,
+        string path,
+        int partTypeId,
+        IReadOnlyDictionary<int, PartFacts> parts,
+        HashSet<int> storedPartIds)
     {
-        if (partTypeId < 1)
+        if (!parts.TryGetValue(partTypeId, out PartFacts? part))
         {
-            AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.OutOfBounds);
+            AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Unknown);
+        }
+        else if (part.IsArchived && !storedPartIds.Contains(partTypeId))
+        {
+            AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Archived);
         }
     }
 

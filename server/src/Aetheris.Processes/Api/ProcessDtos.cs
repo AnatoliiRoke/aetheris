@@ -10,6 +10,7 @@ namespace Aetheris.Processes.Api;
 /// <param name="Recipes">The recipes of the processes the building runs.</param>
 /// <param name="Queue">The orders of the queue.</param>
 /// <param name="GameNow">The moment of game time.</param>
+/// <param name="FullConditionPercent">The condition of a new part, in per cent, so the client tells a damaged part from a new one.</param>
 public sealed record ProcessBuildingDto(
     long PlanetId,
     long PlanetBuildingId,
@@ -17,7 +18,8 @@ public sealed record ProcessBuildingDto(
     int BuildingLevel,
     IReadOnlyList<ProcessRecipeDto> Recipes,
     IReadOnlyList<ProcessOrderDto> Queue,
-    DateTimeOffset GameNow);
+    DateTimeOffset GameNow,
+    int FullConditionPercent);
 
 /// <summary>
 /// A building of a body that runs a process, without its recipes.
@@ -46,7 +48,8 @@ public sealed record ProcessBuildingSummaryDto(
 /// <param name="SourceGroupId">The group of the resources the process takes.</param>
 /// <param name="TargetGroupId">The group of the resources the process gives.</param>
 /// <param name="DurationSeconds">How long one unit takes, in game seconds.</param>
-/// <param name="ShipStub">The stub of the ship on the orbit of the body.</param>
+/// <param name="NeedsShip">Whether the process needs a ship of the player on the orbit of the body.</param>
+/// <param name="PartSubject">The part an order names, one of the logical codes of the part subjects.</param>
 /// <param name="IsAvailable">Whether the recipe can be ordered.</param>
 /// <param name="Reasons">The reasons why it is not available.</param>
 /// <param name="ImageKey">The key of the image.</param>
@@ -61,7 +64,8 @@ public sealed record ProcessRecipeDto(
     int? SourceGroupId,
     int? TargetGroupId,
     long DurationSeconds,
-    string? ShipStub,
+    bool NeedsShip,
+    string PartSubject,
     bool IsAvailable,
     IReadOnlyList<ProcessReasonDto> Reasons,
     string? ImageKey,

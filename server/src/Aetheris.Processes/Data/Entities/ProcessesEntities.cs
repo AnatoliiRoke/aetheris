@@ -88,6 +88,30 @@ public sealed class ProcessOrderEntity
     /// <summary>Gets or sets how many units are already made.</summary>
     public long ProducedQuantity { get; set; }
 
+    /// <summary>
+    /// Gets or sets the resource the conversion takes, for the processes that convert one
+    /// resource into another.
+    /// </summary>
+    public int? SourceResourceTypeId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the resource the conversion gives, for the processes that convert one
+    /// resource into another.
+    /// </summary>
+    public int? TargetResourceTypeId { get; set; }
+
+    /// <summary>Gets or sets the part the process works on, for the recycling and the repair.</summary>
+    public int? PartTypeId { get; set; }
+
+    /// <summary>Gets or sets the condition of the part the process works on, in per cent.</summary>
+    public int? PartConditionPercent { get; set; }
+
+    /// <summary>
+    /// Gets or sets how long one unit of the order takes, in game seconds. It is fixed when the
+    /// order enters the queue, so a later change of the recipe does not move the order.
+    /// </summary>
+    public long UnitSeconds { get; set; }
+
     /// <summary>Gets or sets the place of the order in the queue.</summary>
     public int Position { get; set; }
 
@@ -127,6 +151,15 @@ public sealed class ProcessOrderCostEntity
 
     /// <summary>Gets or sets the part the cost took.</summary>
     public int? PartTypeId { get; set; }
+
+    /// <summary>Gets or sets the mark level of the part the cost took.</summary>
+    public int? MarkLevel { get; set; }
+
+    /// <summary>Gets or sets whether the part the cost took carries the bonus of the race.</summary>
+    public bool HasRaceBonus { get; set; }
+
+    /// <summary>Gets or sets the condition of the part the cost took, in per cent.</summary>
+    public int? ConditionPercent { get; set; }
 
     /// <summary>Gets or sets how many units the cost took.</summary>
     public long Amount { get; set; }

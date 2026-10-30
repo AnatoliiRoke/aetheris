@@ -79,33 +79,48 @@ public sealed class ProcessCatalog
         [.. Parameters.Where(parameter => parameter.ProcessTypeId == processTypeId)];
 
     /// <summary>
-    /// Finds a parameter of a kind of a process by its logical kind and the source of the
-    /// level it follows.
+    /// Finds the step of a parameter of a kind of a process that holds at a level: the row with
+    /// the highest level that the source has reached. An archived row is out of effect.
     /// </summary>
     /// <param name="processTypeId">The kind of the process.</param>
     /// <param name="paramKind">The logical kind of the parameter.</param>
     /// <param name="levelSource">The source of the level the parameter follows.</param>
-    /// <param name="levelTargetId">The thing whose level the parameter follows.</param>
-    /// <returns>The parameter, or <see langword="null"/> when it does not exist.</returns>
-    public ProcessParamInfo? FindParam(int processTypeId, string paramKind, string levelSource, int? levelTargetId) =>
-        Parameters.FirstOrDefault(parameter =>
-            parameter.ProcessTypeId == processTypeId
-            && string.Equals(parameter.ParamKind, paramKind, StringComparison.Ordinal)
-            && string.Equals(parameter.LevelSource, levelSource, StringComparison.Ordinal)
-            && parameter.LevelTargetId == levelTargetId);
+    /// <param name="levelTargetId">The thing whose level the parameter follows, or <see langword="null"/> for the building or the part of the order.</param>
+    /// <param name="level">The level the source has reached.</param>
+    /// <returns>The step, or <see langword="null"/> when no row holds at the level.</returns>
+    public ProcessParamInfo? ParamAt(int processTypeId, string paramKind, string levelSource, int? levelTargetId, int level) =>
+        Parameters
+            .Where(parameter => !parameter.IsArchived
+                && parameter.ProcessTypeId == processTypeId
+                && string.Equals(parameter.ParamKind, paramKind, StringComparison.Ordinal)
+                && string.Equals(parameter.LevelSource, levelSource, StringComparison.Ordinal)
+                && parameter.LevelTargetId == levelTargetId
+                && parameter.Level <= level)
+            .OrderByDescending(parameter => parameter.Level)
+            .ThenBy(parameter => parameter.SortOrder)
+            .ThenBy(parameter => parameter.Id)
+            .FirstOrDefault();
 
     /// <summary>
-    /// Gets the parameters of a kind of a process that follow the level of one thing.
+    /// Finds the thing whose level a parameter of a kind of a process follows, for the
+    /// parameters that name it: the technology of the conversion, for example.
     /// </summary>
     /// <param name="processTypeId">The kind of the process.</param>
-    /// <param name="levelSource">The source of the level the parameters follow.</param>
-    /// <param name="levelTargetId">The thing whose level the parameters follow.</param>
-    /// <returns>The parameters of the kind.</returns>
-    public IReadOnlyList<ProcessParamInfo> ParamsOfSource(int processTypeId, string levelSource, int? levelTargetId) =>
-        [.. Parameters.Where(parameter =>
-            parameter.ProcessTypeId == processTypeId
-            && string.Equals(parameter.LevelSource, levelSource, StringComparison.Ordinal)
-            && parameter.LevelTargetId == levelTargetId)];
+    /// <param name="paramKind">The logical kind of the parameter.</param>
+    /// <param name="levelSource">The source of the level the parameter follows.</param>
+    /// <returns>The thing, or <see langword="null"/> when no row names one.</returns>
+    public int? TargetOf(int processTypeId, string paramKind, string levelSource) =>
+        Parameters
+            .Where(parameter => !parameter.IsArchived
+                && parameter.ProcessTypeId == processTypeId
+                && string.Equals(parameter.ParamKind, paramKind, StringComparison.Ordinal)
+                && string.Equals(parameter.LevelSource, levelSource, StringComparison.Ordinal)
+                && parameter.LevelTargetId is not null)
+            .OrderBy(parameter => parameter.Level)
+            .ThenBy(parameter => parameter.SortOrder)
+            .ThenBy(parameter => parameter.Id)
+            .Select(parameter => parameter.LevelTargetId)
+            .FirstOrDefault();
 }
 
 /// <summary>
@@ -226,11 +241,15 @@ public sealed record ProcessRequirementInfo(
 /// <param name="TechnologyLevels">The levels of the technologies of the player.</param>
 /// <param name="BuildingNameKeys">The keys of the names of the buildings.</param>
 /// <param name="TechnologyNameKeys">The keys of the names of the technologies.</param>
+/// <param name="RaceId">The race of the player.</param>
+/// <param name="RaceNameKeys">The keys of the names of the races.</param>
 public sealed record ProcessRequirementContext(
     IReadOnlyDictionary<int, int> BuildingLevels,
     IReadOnlyDictionary<int, int> TechnologyLevels,
     IReadOnlyDictionary<int, string> BuildingNameKeys,
-    IReadOnlyDictionary<int, string> TechnologyNameKeys);
+    IReadOnlyDictionary<int, string> TechnologyNameKeys,
+    int RaceId,
+    IReadOnlyDictionary<int, string> RaceNameKeys);
 
 /// <summary>
 /// A requirement that is not met, with the reason for the client.

@@ -1,7 +1,9 @@
 using Aetheris.Core.Data;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
+using Aetheris.Planets.Services;
 using Aetheris.Processes.Data;
+using Aetheris.Production.Services;
 using Aetheris.Requirements;
 using Aetheris.Requirements.Services;
 using Aetheris.World;
@@ -27,6 +29,8 @@ public sealed class ProcessesBootstrapService
     private readonly ILocalizationTexts _texts;
     private readonly ICodeSequence _codes;
     private readonly IRequirementsModule _requirements;
+    private readonly PartStockService _parts;
+    private readonly ITechnologyLevels _technologies;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProcessesBootstrapService"/> class.
@@ -39,6 +43,8 @@ public sealed class ProcessesBootstrapService
     /// <param name="texts">The texts of the game data.</param>
     /// <param name="codes">The counters of the neutral codes.</param>
     /// <param name="requirements">The common requirements module.</param>
+    /// <param name="parts">The parts of the production module, for the parts the starting data name.</param>
+    /// <param name="technologies">The technologies, for the technologies the starting data name.</param>
     public ProcessesBootstrapService(
         ProcessesDbContext dbContext,
         ProcessesUnitOfWork unitOfWork,
@@ -47,7 +53,9 @@ public sealed class ProcessesBootstrapService
         IPlanetsModule planets,
         ILocalizationTexts texts,
         ICodeSequence codes,
-        IRequirementsModule requirements)
+        IRequirementsModule requirements,
+        PartStockService parts,
+        ITechnologyLevels technologies)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -57,6 +65,8 @@ public sealed class ProcessesBootstrapService
         ArgumentNullException.ThrowIfNull(texts);
         ArgumentNullException.ThrowIfNull(codes);
         ArgumentNullException.ThrowIfNull(requirements);
+        ArgumentNullException.ThrowIfNull(parts);
+        ArgumentNullException.ThrowIfNull(technologies);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -66,6 +76,8 @@ public sealed class ProcessesBootstrapService
         _texts = texts;
         _codes = codes;
         _requirements = requirements;
+        _parts = parts;
+        _technologies = technologies;
     }
 
     /// <summary>
@@ -77,9 +89,12 @@ public sealed class ProcessesBootstrapService
     {
         ResourceCatalog resources = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
         IReadOnlyList<RaceDto> races = await _world.GetRacesAsync(cancellationToken).ConfigureAwait(false);
+        Dictionary<string, int> partIds = (await _parts.GetPartFactsAsync(cancellationToken).ConfigureAwait(false)).Values
+            .ToDictionary(part => part.Code, part => part.PartTypeId, StringComparer.Ordinal);
+        IReadOnlyDictionary<string, int> technologyIds = await _technologies.GetTechnologyIdsByCodeAsync(cancellationToken).ConfigureAwait(false);
 
         bool seeded = await _unitOfWork.RunAsync(
-            () => ProcessReferenceSeed.SeedAsync(_dbContext, resources, races, _planets, _texts, _codes, _requirements, cancellationToken),
+            () => ProcessReferenceSeed.SeedAsync(_dbContext, resources, races, _planets, _texts, _codes, _requirements, partIds, technologyIds, cancellationToken),
             cancellationToken).ConfigureAwait(false);
 
         _catalogCache.Invalidate();

@@ -53,10 +53,14 @@ public sealed class EnqueueProcessCommand : Command<EnqueueProcessCommand.Reques
     {
         ArgumentNullException.ThrowIfNull(rules);
 
-        rules.RuleFor(request => request.PlanetId).NotNull();
+        rules.RuleFor(request => request.PlanetId).NotNull().GreaterThan(0);
         rules.RuleFor(request => request.PlanetBuildingId).NotNull().GreaterThan(0);
         rules.RuleFor(request => request.RecipeId).NotNull().GreaterThan(0);
         rules.RuleFor(request => request.Quantity).NotNull().GreaterThan(0);
+        rules.RuleFor(request => request.SourceResourceTypeId).GreaterThan(0).When(request => request.SourceResourceTypeId is not null);
+        rules.RuleFor(request => request.TargetResourceTypeId).GreaterThan(0).When(request => request.TargetResourceTypeId is not null);
+        rules.RuleFor(request => request.PartTypeId).GreaterThan(0).When(request => request.PartTypeId is not null);
+        rules.RuleFor(request => request.PartConditionPercent).GreaterThanOrEqualTo(0).When(request => request.PartConditionPercent is not null);
     }
 
     /// <inheritdoc />
@@ -83,7 +87,7 @@ public sealed class EnqueueProcessCommand : Command<EnqueueProcessCommand.Reques
                     request.SourceResourceTypeId,
                     request.TargetResourceTypeId,
                     request.PartTypeId,
-                    request.ShipStub),
+                    request.PartConditionPercent),
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -100,7 +104,7 @@ public sealed class EnqueueProcessCommand : Command<EnqueueProcessCommand.Reques
     /// <param name="SourceResourceTypeId">The resource the conversion takes.</param>
     /// <param name="TargetResourceTypeId">The resource the conversion gives.</param>
     /// <param name="PartTypeId">The part the process works on.</param>
-    /// <param name="ShipStub">The stub of the ship on the orbit of the body.</param>
+    /// <param name="PartConditionPercent">The condition of the part the process works on, in per cent.</param>
     public sealed record Request(
         [property: JsonPropertyName("planet_id")] long? PlanetId,
         [property: JsonPropertyName("planet_building_id")] long? PlanetBuildingId,
@@ -109,7 +113,7 @@ public sealed class EnqueueProcessCommand : Command<EnqueueProcessCommand.Reques
         [property: JsonPropertyName("source_resource_type_id")] int? SourceResourceTypeId = null,
         [property: JsonPropertyName("target_resource_type_id")] int? TargetResourceTypeId = null,
         [property: JsonPropertyName("part_type_id")] int? PartTypeId = null,
-        [property: JsonPropertyName("ship_stub")] string? ShipStub = null);
+        [property: JsonPropertyName("part_condition_percent")] int? PartConditionPercent = null);
 }
 
 /// <summary>
@@ -156,7 +160,7 @@ public sealed class CancelProcessCommand : Command<CancelProcessCommand.Request,
     {
         ArgumentNullException.ThrowIfNull(rules);
 
-        rules.RuleFor(request => request.PlanetId).NotNull();
+        rules.RuleFor(request => request.PlanetId).NotNull().GreaterThan(0);
         rules.RuleFor(request => request.PlanetBuildingId).NotNull().GreaterThan(0);
         rules.RuleFor(request => request.OrderId).NotNull().GreaterThan(0);
     }

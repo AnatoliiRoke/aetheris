@@ -5,18 +5,20 @@ using Aetheris.Production.Services;
 namespace Aetheris.Processes.Handlers;
 
 /// <summary>
-/// The handler of the recycling: the factory takes a part apart and returns a share of its
-/// resources (task 00014, decision 3).
+/// The handler of the recycling: the factory takes the parts of the storage apart and returns
+/// a share of their resources (task 00014, decision 3).
 /// </summary>
 /// <remarks>
 /// <para>
-/// The share comes from the parameters of the kind of the process and grows with the level of
-/// the factory. The share of a part is multiplied by its condition, so a damaged part gives
-/// less.
+/// The order takes the parts it names from the storage when it enters the queue. A unit
+/// returns the share of the cost of a part by the recipe that makes it, the produced
+/// materials included; the share comes from the parameters of the kind by the level of the
+/// factory and is multiplied by the condition of the part (task 00014, decision 7). There are
+/// no bonuses of the artifacts.
 /// </para>
 /// <para>
-/// The crew of the part comes back in full and waits in the state of the population; the
-/// population task settles it. There are no bonuses of the artifacts.
+/// The crew of the parts comes back in full and waits in the state of the population; the
+/// population task settles it.
 /// </para>
 /// </remarks>
 public sealed class RecyclingHandler : IProcessHandler
@@ -38,19 +40,44 @@ public sealed class RecyclingHandler : IProcessHandler
     public string HandlerCode => ProcessHandlerCodes.Recycling;
 
     /// <inheritdoc />
-    public Task<IReadOnlyList<ProcessReason>> CheckAsync(ProcessCheckContext context, CancellationToken cancellationToken)
+    public string PartSubject => ProcessPartSubjects.Any;
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ProcessReason>> CheckAsync(ProcessCheckContext context, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        if (context.Request.PartTypeId is not { } partTypeId
+            || !(await _parts.GetPartFactsAsync(cancellationToken).ConfigureAwait(false)).ContainsKey(partTypeId))
+        {
+            return [new ProcessReason(ProcessErrorCodes.PartMissing)];
+        }
+
+        if (context.Request.PartConditionPercent is < 0 or > PartCondition.Full)
+        {
+            return [new ProcessReason(ProcessErrorCodes.PartMissing)];
+        }
+
+        if (ProcessHandlerRules.BuildingShare(context.Catalog, context.ProcessType.Id, context.BuildingLevel) is null)
+        {
+            return [new ProcessReason(ProcessErrorCodes.ParamMissing)];
+        }
+
+        return [];
+    }
+
+    /// <inheritdoc />
+    public Task<ProcessInput> InputAsync(ProcessCheckContext context, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(context);
         _ = cancellationToken;
 
-        List<ProcessReason> reasons = [];
-
-        if (context.Request.PartTypeId is null)
-        {
-            reasons.Add(new ProcessReason(ProcessErrorCodes.PartMissing));
-        }
-
-        return Task.FromResult<IReadOnlyList<ProcessReason>>(reasons);
+        // The parts are taken from the storage for the whole batch when the order enters the
+        // queue, in the condition the player named.
+        return Task.FromResult(new ProcessInput(
+            new Dictionary<int, long>(),
+            [new ProcessPartInput(context.Request.PartTypeId!.Value, Condition(context.Request), context.Quantity)],
+            decimal.One));
     }
 
     /// <inheritdoc />
@@ -58,115 +85,51 @@ public sealed class RecyclingHandler : IProcessHandler
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        if (context.Request.PartTypeId is not { } partTypeId)
+        if (context.Request.PartTypeId is not { } partTypeId
+            || !(await _parts.GetPartFactsAsync(cancellationToken).ConfigureAwait(false)).TryGetValue(partTypeId, out PartFacts? facts))
         {
             return ProcessResult.Empty;
         }
 
-        IReadOnlyList<PartStackInfo> stacks = await _parts.ReadAsync(
-            context.PlanetId,
-            [partTypeId],
-            cancellationToken).ConfigureAwait(false);
+        decimal share = ProcessHandlerRules.BuildingShare(context.Catalog, context.ProcessType.Id, context.BuildingLevel) ?? decimal.Zero;
+        List<PartStackTaken> stacks = [.. ProcessHandlerRules.NamedStacks(context, Condition(context.Request))];
 
-        if (stacks.Count == 0)
-        {
-            return ProcessResult.Empty;
-        }
-
-        // The share of the factory comes from the parameters of the kind of the process: the
-        // base share grows with the level of the factory.
-        decimal share = Share(context);
-
+        // The return of the whole batch is counted first and split into its units, so the
+        // rounding of one unit is never lost.
         Dictionary<int, long> resources = [];
-        long crew = 0;
 
-        foreach (PartStackInfo stack in stacks)
+        foreach ((int resourceTypeId, decimal cost) in facts.ResourceCost)
         {
-            // The share of a part is multiplied by its condition, so a damaged part gives
-            // less (task 00014, decision 7).
-            decimal condition = stack.ConditionPercent / ProcessNumbers.PercentDivisor;
-            decimal partShare = share * condition;
+            decimal total = stacks.Sum(stack => stack.Quantity * cost * share * ProcessUnits.Kept(stack.ConditionPercent, PartCondition.Full));
+            long amount = ProcessUnits.Portion(total, context.Quantity, context.UnitIndex);
 
-            foreach (ProcessIngredientInfo ingredient in context.Recipe.IngredientIds)
+            if (amount > 0)
             {
-                if (ingredient.ResourceTypeId is not { } resourceTypeId)
-                {
-                    continue;
-                }
-
-                long amount = (long)decimal.Floor(ingredient.Amount * partShare * stack.Quantity);
-
-                if (amount > 0)
-                {
-                    resources[resourceTypeId] = resources.GetValueOrDefault(resourceTypeId) + amount;
-                }
+                resources[resourceTypeId] = amount;
             }
         }
 
-        // The crew of the part comes back in full (task 00014, decision 3).
-        crew = Crew(context);
+        // The crew of the parts comes back in full (task 00014, decision 3).
+        long crew = ProcessUnits.Portion(stacks.Sum(stack => stack.Quantity) * facts.Crew, context.Quantity, context.UnitIndex);
 
         return new ProcessResult(resources, [], crew);
     }
 
     /// <inheritdoc />
-    public Task ApplyAsync(ProcessApplyContext context, CancellationToken cancellationToken)
+    public Task ApplyAsync(ProcessApplyContext context, ProcessResult result, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(context);
         _ = cancellationToken;
 
-        // The part is taken from the storage by the engine, so the handler changes nothing
-        // else when the process finishes.
+        // The parts were taken from the storage when the order entered the queue, so the
+        // handler changes nothing else when a unit is ready.
         return Task.CompletedTask;
     }
 
     /// <summary>
-    /// The share of the resources the factory returns, by the level of the factory.
+    /// The condition of the parts the order names: a new part when the player named none.
     /// </summary>
-    /// <param name="context">The order and the catalog.</param>
-    /// <returns>The share, a number between zero and one.</returns>
-    private static decimal Share(ProcessApplyContext context)
-    {
-        ProcessParamInfo? scaling = context.Catalog
-            .ParamsOfSource(context.ProcessType.Id, ProcessLevelSources.Building, null)
-            .FirstOrDefault(parameter => string.Equals(parameter.ParamKind, ProcessParamKinds.Scaling, StringComparison.Ordinal));
-
-        if (scaling is null)
-        {
-            return 0m;
-        }
-
-        // The share grows with the level of the factory: every level above the first one adds
-        // the same step to the base share.
-        int levelsAbove = Math.Max(context.BuildingLevel - scaling.Level, 0);
-        decimal share = scaling.Value + (scaling.Value * levelsAbove * ProcessNumbers.ShareStep);
-
-        return Math.Clamp(share, 0m, 1m);
-    }
-
-    /// <summary>
-    /// The crew that comes back with the parts.
-    /// </summary>
-    /// <param name="context">The order and the catalog.</param>
-    /// <returns>The crew.</returns>
-    private static long Crew(ProcessApplyContext context)
-    {
-        long crew = 0;
-
-        foreach (ProcessIngredientInfo ingredient in context.Recipe.IngredientIds)
-        {
-            if (ingredient.PartTypeId is not { } partTypeId)
-            {
-                continue;
-            }
-
-            // The crew of a part is the attribute of the part; the part itself is not known
-            // to the handler, so the ingredient carries the number of the crew.
-            _ = partTypeId;
-
-            crew += ingredient.Amount;
-        }
-
-        return crew;
-    }
+    /// <param name="request">What the player asked for.</param>
+    /// <returns>The condition, in per cent.</returns>
+    private static int Condition(ProcessOrderRequest request) => request.PartConditionPercent ?? PartCondition.Full;
 }

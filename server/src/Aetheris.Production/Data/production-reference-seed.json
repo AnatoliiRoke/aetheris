@@ -988,6 +988,28 @@
           "number": 2.6
         }
       }
+    },
+    {
+      "code": "part_34",
+      "group": "part_group_10",
+      "mark_level": 1,
+      "sort_order": 34,
+      "name": {
+        "uk": "Пристрій тераформінгу Mk I",
+        "en": "Terraforming device Mk I"
+      },
+      "description": {
+        "uk": "Одноразовий пристрій: корабель на орбіті вмикає його, і родовища планети стають багатими.",
+        "en": "A one-shot device: a ship on the orbit turns it on and the deposits of the body become rich."
+      },
+      "attributes": {
+        "mass": {
+          "number": 30.0
+        },
+        "slot_size": {
+          "code": "standard"
+        }
+      }
     }
   ],
   "recipes": [
@@ -2102,6 +2124,38 @@
         {
           "resource": "resource_13",
           "amount": 3
+        }
+      ],
+      "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_39",
+      "part": "part_34",
+      "factory": "building_13",
+      "output_quantity": 1,
+      "duration_seconds": 1800,
+      "sort_order": 39,
+      "name": {
+        "uk": "Пристрій тераформінгу Mk I",
+        "en": "Terraforming device Mk I"
+      },
+      "description": {
+        "uk": "Дорогий одноразовий пристрій для тераформінгу планети.",
+        "en": "An expensive one-shot device for the terraforming of a body."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "amount": 200
+        },
+        {
+          "resource": "resource_13",
+          "amount": 60
+        },
+        {
+          "resource": "resource_15",
+          "amount": 40
         }
       ],
       "requirements": [],

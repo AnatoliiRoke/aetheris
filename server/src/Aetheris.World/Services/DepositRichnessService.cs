@@ -1,3 +1,4 @@
+using Aetheris.Core.Time;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -17,19 +18,22 @@ public sealed class DepositRichnessService
 {
     private readonly WorldDbContext _dbContext;
     private readonly WorldUnitOfWork _unitOfWork;
+    private readonly IGameClock _clock;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DepositRichnessService"/> class.
     /// </summary>
     /// <param name="dbContext">The world context.</param>
     /// <param name="unitOfWork">The transaction of the world module.</param>
-    public DepositRichnessService(WorldDbContext dbContext, WorldUnitOfWork unitOfWork)
+    public DepositRichnessService(WorldDbContext dbContext, WorldUnitOfWork unitOfWork, IGameClock clock)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
+        ArgumentNullException.ThrowIfNull(clock);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
+        _clock = clock;
     }
 
     /// <summary>
@@ -50,9 +54,10 @@ public sealed class DepositRichnessService
         _unitOfWork.RunAsync(
             async () =>
             {
+                // The rows of the deposits are locked, so two changes of one body never write
+                // over each other.
                 List<DepositEntity> deposits = await _dbContext.Deposits
-                    .Where(deposit => deposit.PlanetId == planetId)
-                    .OrderBy(deposit => deposit.ResourceId)
+                    .FromSql($"SELECT * FROM deposit WHERE planet_id = {planetId} ORDER BY resource_id FOR UPDATE")
                     .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
 
@@ -62,7 +67,9 @@ public sealed class DepositRichnessService
                 {
                     decimal before = deposit.Coefficient;
 
-                    if (before == coefficient)
+                    // A deposit that is already as rich or richer keeps its richness: the
+                    // change only raises the poor deposits.
+                    if (before >= coefficient)
                     {
                         continue;
                     }
@@ -78,7 +85,7 @@ public sealed class DepositRichnessService
                         NewCoefficient = coefficient,
                         Reason = reason,
                         ActorId = actorId,
-                        At = DateTimeOffset.UtcNow,
+                        At = _clock.GameNow,
                     });
                 }
 

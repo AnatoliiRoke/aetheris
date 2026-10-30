@@ -8,9 +8,10 @@ namespace Aetheris.Processes.Handlers;
 /// </summary>
 /// <remarks>
 /// The groups and the exceptions are in the data, so the author decides which resources may
-/// be converted: the ether and the produced goods are not converted. The percentage of the
-/// output comes from the level of the technology, and the level of the building only makes
-/// the process faster.
+/// be converted: the ether and the produced goods are not in a group a recipe converts. The
+/// order takes the source for the whole batch, and the output is the source times the
+/// percentage of the level of the technology the parameters of the kind name; the level of
+/// the building only makes the process faster.
 /// </remarks>
 public sealed class MatterConversionHandler : IProcessHandler
 {
@@ -18,58 +19,28 @@ public sealed class MatterConversionHandler : IProcessHandler
     public string HandlerCode => ProcessHandlerCodes.MatterConversion;
 
     /// <inheritdoc />
+    public string PartSubject => ProcessPartSubjects.None;
+
+    /// <inheritdoc />
     public Task<IReadOnlyList<ProcessReason>> CheckAsync(ProcessCheckContext context, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(context);
         _ = cancellationToken;
 
-        List<ProcessReason> reasons = [];
+        return Task.FromResult<IReadOnlyList<ProcessReason>>(Check(context));
+    }
 
-        if (context.Request.SourceResourceTypeId is null || context.Request.TargetResourceTypeId is null)
-        {
-            reasons.Add(new ProcessReason(ProcessErrorCodes.SourceGroupMismatch));
+    /// <inheritdoc />
+    public Task<ProcessInput> InputAsync(ProcessCheckContext context, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        _ = cancellationToken;
 
-            return Task.FromResult<IReadOnlyList<ProcessReason>>(reasons);
-        }
-
-        if (context.Request.SourceResourceTypeId == context.Request.TargetResourceTypeId)
-        {
-            reasons.Add(new ProcessReason(ProcessErrorCodes.SameSourceAndTarget));
-
-            return Task.FromResult<IReadOnlyList<ProcessReason>>(reasons);
-        }
-
-        // The recipe names the group of the source and the group of the target, so the
-        // exception of the ether and the produced goods lives in the data.
-        if (context.Recipe.SourceGroupId is not { } sourceGroupId
-            || context.Recipe.TargetGroupId is not { } targetGroupId)
-        {
-            reasons.Add(new ProcessReason(ProcessErrorCodes.SourceGroupMismatch));
-
-            return Task.FromResult<IReadOnlyList<ProcessReason>>(reasons);
-        }
-
-        // The source must be in the group the recipe takes, so a raw material of another
-        // group is refused before anything is spent.
-        if (!context.ResourceGroups.TryGetValue(context.Request.SourceResourceTypeId!.Value, out int sourceGroup)
-            || sourceGroup != sourceGroupId)
-        {
-            reasons.Add(new ProcessReason(ProcessErrorCodes.SourceGroupMismatch));
-
-            return Task.FromResult<IReadOnlyList<ProcessReason>>(reasons);
-        }
-
-        // The target must be in the group the recipe gives, so the conversion cannot make
-        // a raw material of another group.
-        if (!context.ResourceGroups.TryGetValue(context.Request.TargetResourceTypeId!.Value, out int targetGroup)
-            || targetGroup != targetGroupId)
-        {
-            reasons.Add(new ProcessReason(ProcessErrorCodes.SourceGroupMismatch));
-
-            return Task.FromResult<IReadOnlyList<ProcessReason>>(reasons);
-        }
-
-        return Task.FromResult<IReadOnlyList<ProcessReason>>(reasons);
+        // The source is paid for the whole batch when the order enters the queue.
+        return Task.FromResult(new ProcessInput(
+            new Dictionary<int, long> { [context.Request.SourceResourceTypeId!.Value] = context.Quantity },
+            [],
+            decimal.One));
     }
 
     /// <inheritdoc />
@@ -78,45 +49,23 @@ public sealed class MatterConversionHandler : IProcessHandler
         ArgumentNullException.ThrowIfNull(context);
         _ = cancellationToken;
 
-        if (context.Request.SourceResourceTypeId is not { } sourceResourceTypeId
-            || context.Request.TargetResourceTypeId is not { } targetResourceTypeId)
+        if (context.Request.TargetResourceTypeId is not { } targetResourceTypeId)
         {
             return Task.FromResult(ProcessResult.Empty);
         }
 
-        // The percentage of the output comes from the level of the technology, so the
-        // technology the player learned decides how much of the raw material is left.
-        decimal percentage = Percentage(context);
+        // Every unit is one unit of the source; the units together give the source of the
+        // batch times the percentage, so the rounding of one unit is never lost.
+        decimal percentage = Percentage(context.Catalog, context.ProcessType.Id, context.TechnologyLevels);
+        long amount = ProcessUnits.Portion(context.Quantity * percentage, context.Quantity, context.UnitIndex);
 
-        if (percentage <= 0m)
-        {
-            return Task.FromResult(ProcessResult.Empty);
-        }
-
-        Dictionary<int, long> resources = [];
-
-        foreach (ProcessIngredientInfo ingredient in context.Recipe.IngredientIds)
-        {
-            if (ingredient.ResourceTypeId is not { } resourceTypeId)
-            {
-                continue;
-            }
-
-            long amount = (long)decimal.Floor(ingredient.Amount * percentage * context.Quantity);
-
-            if (amount > 0)
-            {
-                resources[targetResourceTypeId] = resources.GetValueOrDefault(targetResourceTypeId) + amount;
-            }
-        }
-
-        _ = sourceResourceTypeId;
-
-        return Task.FromResult(new ProcessResult(resources, []));
+        return Task.FromResult(amount > 0
+            ? new ProcessResult(new Dictionary<int, long> { [targetResourceTypeId] = amount }, [])
+            : ProcessResult.Empty);
     }
 
     /// <inheritdoc />
-    public Task ApplyAsync(ProcessApplyContext context, CancellationToken cancellationToken)
+    public Task ApplyAsync(ProcessApplyContext context, ProcessResult result, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(context);
         _ = cancellationToken;
@@ -127,41 +76,105 @@ public sealed class MatterConversionHandler : IProcessHandler
     }
 
     /// <summary>
-    /// The percentage of the raw material that is left after the conversion, by the level of
-    /// the technology.
+    /// Checks the source and the target of the conversion and the level of the technology.
     /// </summary>
-    /// <param name="context">The order and the catalog.</param>
-    /// <returns>The percentage, a number between zero and one.</returns>
-    private static decimal Percentage(ProcessApplyContext context)
+    /// <param name="context">The order.</param>
+    /// <returns>The reasons the order is refused.</returns>
+    private static List<ProcessReason> Check(ProcessCheckContext context)
     {
-        ProcessParamInfo? parameter = context.Catalog
-            .ParamsOfSource(context.ProcessType.Id, ProcessLevelSources.Technology, null)
-            .FirstOrDefault(entry => string.Equals(entry.ParamKind, ProcessParamKinds.ValueByLevel, StringComparison.Ordinal));
-
-        if (parameter is null)
+        if (context.Request.SourceResourceTypeId is not { } sourceId
+            || context.Request.TargetResourceTypeId is not { } targetId)
         {
-            return 0m;
+            return [new ProcessReason(ProcessErrorCodes.SourceGroupMismatch)];
         }
 
-        // The technology the recipe needs has its own level; the higher the level, the more
-        // of the raw material is left.
-        int level = context.TechnologyLevels
-            .Where(entry => entry.Key == parameter.LevelTargetId)
-            .Select(entry => entry.Value)
-            .FirstOrDefault();
-
-        if (level <= 0)
+        if (sourceId == targetId)
         {
-            return 0m;
+            return [new ProcessReason(ProcessErrorCodes.SameSourceAndTarget)];
         }
 
-        int levelsAbove = Math.Max(level - parameter.Level, 0);
-        decimal step = parameter.ValueMax is { } maximum
-            ? (maximum - parameter.Value) / ProcessNumbers.ConversionLevels
-            : parameter.Value * ProcessNumbers.ConversionStep;
+        // The recipe names the group of the source and the group of the target, so a raw
+        // material of another group, the ether or a produced good is refused before anything
+        // is spent.
+        if (context.Recipe.SourceGroupId is not { } sourceGroupId
+            || !context.ResourceGroups.TryGetValue(sourceId, out int sourceGroup)
+            || sourceGroup != sourceGroupId)
+        {
+            return [new ProcessReason(ProcessErrorCodes.SourceGroupMismatch)];
+        }
 
-        decimal percentage = parameter.Value + (step * levelsAbove);
+        if (context.Recipe.TargetGroupId is not { } targetGroupId
+            || !context.ResourceGroups.TryGetValue(targetId, out int targetGroup)
+            || targetGroup != targetGroupId)
+        {
+            return [new ProcessReason(ProcessErrorCodes.TargetGroupMismatch)];
+        }
 
-        return Math.Clamp(percentage, 0m, 1m);
+        // Without the technology the conversion would only burn the source, so the order is
+        // refused and says which technology it waits for.
+        if (Percentage(context.Catalog, context.ProcessType.Id, context.RequirementContext.TechnologyLevels) <= decimal.Zero)
+        {
+            int? technologyId = context.Catalog.TargetOf(context.ProcessType.Id, ProcessParamKinds.ValueByLevel, ProcessLevelSources.Technology);
+
+            if (technologyId is null)
+            {
+                return [new ProcessReason(ProcessErrorCodes.ParamMissing)];
+            }
+
+            return
+            [
+                new ProcessReason(
+                    ProcessErrorCodes.RequirementTechnology,
+                    technologyId.Value,
+                    FirstLevel(context.Catalog, context.ProcessType.Id, technologyId.Value),
+                    context.RequirementContext.TechnologyNameKeys.GetValueOrDefault(technologyId.Value)),
+            ];
+        }
+
+        return [];
     }
+
+    /// <summary>
+    /// The percentage of the raw material that is left after the conversion, by the level of
+    /// the technology the parameters of the kind name.
+    /// </summary>
+    /// <param name="catalog">The catalog of the processes.</param>
+    /// <param name="processTypeId">The kind of the process.</param>
+    /// <param name="technologyLevels">The levels of the technologies of the player.</param>
+    /// <returns>The percentage, a number between zero and one.</returns>
+    private static decimal Percentage(ProcessCatalog catalog, int processTypeId, IReadOnlyDictionary<int, int> technologyLevels)
+    {
+        if (catalog.TargetOf(processTypeId, ProcessParamKinds.ValueByLevel, ProcessLevelSources.Technology) is not { } technologyId)
+        {
+            return decimal.Zero;
+        }
+
+        ProcessParamInfo? step = catalog.ParamAt(
+            processTypeId,
+            ProcessParamKinds.ValueByLevel,
+            ProcessLevelSources.Technology,
+            technologyId,
+            technologyLevels.GetValueOrDefault(technologyId));
+
+        return step is null ? decimal.Zero : Math.Clamp(step.Value, decimal.Zero, decimal.One);
+    }
+
+    /// <summary>
+    /// The first level of the technology that gives an output.
+    /// </summary>
+    /// <param name="catalog">The catalog of the processes.</param>
+    /// <param name="processTypeId">The kind of the process.</param>
+    /// <param name="technologyId">The technology.</param>
+    /// <returns>The level.</returns>
+    private static int FirstLevel(ProcessCatalog catalog, int processTypeId, int technologyId) =>
+        catalog.Parameters
+            .Where(parameter => !parameter.IsArchived
+                && parameter.ProcessTypeId == processTypeId
+                && parameter.LevelTargetId == technologyId
+                && string.Equals(parameter.ParamKind, ProcessParamKinds.ValueByLevel, StringComparison.Ordinal)
+                && string.Equals(parameter.LevelSource, ProcessLevelSources.Technology, StringComparison.Ordinal)
+                && parameter.Value > decimal.Zero)
+            .Select(parameter => parameter.Level)
+            .DefaultIfEmpty()
+            .Min();
 }

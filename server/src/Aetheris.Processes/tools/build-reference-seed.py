@@ -12,6 +12,14 @@ Run it from the folder of the module:
 import io
 import json
 import os
+import sys
+
+# The starting data is edited in Data/process-reference-seed.json directly since the repeated
+# review of task 00014: the numbers of this script are those of the first version (a fee
+# instead of the input of the order, no device of the terraforming, no steps of the levels),
+# so the script refuses to run instead of writing them over the file.
+if __name__ == "__main__":
+    sys.exit("This script is out of date: edit Data/process-reference-seed.json directly (task 00014).")
 
 # The neutral codes of the resources of the world. The script never reads the database: the
 # codes of the resources and the groups belong to the world module.

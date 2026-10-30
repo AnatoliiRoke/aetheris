@@ -100,19 +100,14 @@
         "en": "Terraforming of a body"
       },
       "description": {
-        "uk": "Пристрій на орбіті робить родовища планети багатими.",
-        "en": "A device on the orbit makes the deposits of the body rich."
+        "uk": "Корабель на орбіті вмикає пристрій зі складу, і родовища планети стають багатими.",
+        "en": "A ship on the orbit turns a device of the storage on and the deposits of the body become rich."
       },
       "ingredients": [
         {
-          "resource": "resource_13",
-          "part": null,
-          "amount": 4
-        },
-        {
-          "resource": "resource_15",
-          "part": null,
-          "amount": 2
+          "resource": null,
+          "part": "part_34",
+          "amount": 1
         }
       ],
       "requirements": []
@@ -131,42 +126,70 @@
         "en": "Recycling of a part"
       },
       "description": {
-        "uk": "Фабрика утилізації розбирає деталь і повертає частину ресурсів.",
-        "en": "The recycling factory takes a part apart and returns a share of the resources."
+        "uk": "Фабрика утилізації розбирає деталь зі складу й повертає частину ресурсів її рецепта.",
+        "en": "The recycling factory takes a part of the storage apart and returns a share of the resources of its recipe."
       },
-      "ingredients": [
-        {
-          "resource": "resource_13",
-          "part": null,
-          "amount": 1
-        }
-      ],
+      "ingredients": [],
       "requirements": []
     },
     {
-      "key": "convert_matter",
+      "key": "convert_metals",
       "type": "matter_conversion",
       "building_class": "converter",
       "source_group": "resource_group_1",
       "target_group": "resource_group_1",
-      "duration_seconds": 600,
+      "duration_seconds": 6,
       "ship_stub": null,
       "sort_order": 30,
       "name": {
-        "uk": "Перетворення матерії",
-        "en": "Matter conversion"
+        "uk": "Перетворення металів",
+        "en": "Conversion of the metals"
       },
       "description": {
-        "uk": "Перетворювач перетворює сировину в сировину тієї ж групи.",
-        "en": "The converter turns one raw material into another of the same group."
+        "uk": "Перетворювач перетворює один метал в інший.",
+        "en": "The converter turns one metal into another."
       },
-      "ingredients": [
-        {
-          "resource": "resource_1",
-          "part": null,
-          "amount": 2
-        }
-      ],
+      "ingredients": [],
+      "requirements": []
+    },
+    {
+      "key": "convert_minerals",
+      "type": "matter_conversion",
+      "building_class": "converter",
+      "source_group": "resource_group_2",
+      "target_group": "resource_group_2",
+      "duration_seconds": 6,
+      "ship_stub": null,
+      "sort_order": 31,
+      "name": {
+        "uk": "Перетворення мінералів",
+        "en": "Conversion of the minerals"
+      },
+      "description": {
+        "uk": "Перетворювач перетворює один мінерал в інший.",
+        "en": "The converter turns one mineral into another."
+      },
+      "ingredients": [],
+      "requirements": []
+    },
+    {
+      "key": "convert_fuel",
+      "type": "matter_conversion",
+      "building_class": "converter",
+      "source_group": "resource_group_3",
+      "target_group": "resource_group_3",
+      "duration_seconds": 6,
+      "ship_stub": null,
+      "sort_order": 32,
+      "name": {
+        "uk": "Перетворення пального",
+        "en": "Conversion of the fuel"
+      },
+      "description": {
+        "uk": "Перетворювач перетворює одне пальне в інше.",
+        "en": "The converter turns one fuel into another."
+      },
+      "ingredients": [],
       "requirements": []
     },
     {
@@ -183,16 +206,10 @@
         "en": "Repair of a ship"
       },
       "description": {
-        "uk": "Майстерня лагодить корпус корабля й усі його модулі.",
-        "en": "The workshop repairs the hull of the ship and all its modules."
+        "uk": "Майстерня лагодить корпус корабля й усі його модулі; вартість і час пропорційні втраченій справності.",
+        "en": "The workshop repairs the hull of the ship and all its modules; the cost and the time follow the lost condition."
       },
-      "ingredients": [
-        {
-          "resource": "resource_15",
-          "part": null,
-          "amount": 1
-        }
-      ],
+      "ingredients": [],
       "requirements": []
     },
     {
@@ -201,7 +218,7 @@
       "building_class": "orbital_workshop",
       "source_group": null,
       "target_group": null,
-      "duration_seconds": 600,
+      "duration_seconds": 300,
       "ship_stub": "ship_on_orbit",
       "sort_order": 50,
       "name": {
@@ -209,16 +226,10 @@
         "en": "Replacement of a module"
       },
       "description": {
-        "uk": "Знятий модуль потрапляє на склад як пошкоджена деталь.",
-        "en": "The module that comes off goes to the storage as a damaged part."
+        "uk": "Новий модуль зі складу стає на місце пошкодженого; знятий модуль потрапляє на склад як пошкоджена деталь.",
+        "en": "A new module of the storage takes the place of the damaged one; the module that comes off goes to the storage as a damaged part."
       },
-      "ingredients": [
-        {
-          "resource": "resource_13",
-          "part": null,
-          "amount": 2
-        }
-      ],
+      "ingredients": [],
       "requirements": []
     },
     {
@@ -227,7 +238,7 @@
       "building_class": "module_repair",
       "source_group": null,
       "target_group": null,
-      "duration_seconds": 300,
+      "duration_seconds": 600,
       "ship_stub": null,
       "sort_order": 60,
       "name": {
@@ -235,16 +246,10 @@
         "en": "Repair of a module"
       },
       "description": {
-        "uk": "Ремонтний цех повертає пошкодженому модулю повну справність.",
-        "en": "The repair shop gives a damaged module its full condition back."
+        "uk": "Ремонтний цех повертає пошкодженій деталі складу повну справність.",
+        "en": "The repair shop gives a damaged part of the storage its full condition back."
       },
-      "ingredients": [
-        {
-          "resource": "resource_13",
-          "part": null,
-          "amount": 1
-        }
-      ],
+      "ingredients": [],
       "requirements": []
     }
   ],
@@ -252,24 +257,42 @@
     {
       "type": "terraforming",
       "kind": "range",
-      "level_source": "building",
+      "level_source": "part",
       "level_target": null,
       "level": 1,
       "value": 1.4,
       "value_max": 1.9,
       "sort_order": 10,
       "name": {
-        "uk": "Діапазон багатства",
-        "en": "Range of the richness"
+        "uk": "Багатий діапазон",
+        "en": "Rich range"
       },
       "description": {
-        "uk": "Найнижчий і найвищий множник родовищ після тераформінгу.",
-        "en": "The lowest and the highest multiplier of the deposits after the terraforming."
+        "uk": "Множник родовищ після тераформінгу лежить понад нижнім значенням і не вище верхнього.",
+        "en": "The multiplier of the deposits after the terraforming lies above the lowest value and not above the highest one."
+      }
+    },
+    {
+      "type": "terraforming",
+      "kind": "value_by_level",
+      "level_source": "part",
+      "level_target": null,
+      "level": 1,
+      "value": 1.6,
+      "value_max": null,
+      "sort_order": 20,
+      "name": {
+        "uk": "Множник родовищ, пристрій Mk I",
+        "en": "Deposit multiplier, device Mk I"
+      },
+      "description": {
+        "uk": "Множник родовищ, який дає пристрій цього рівня.",
+        "en": "The multiplier of the deposits a device of this level gives."
       }
     },
     {
       "type": "recycling",
-      "kind": "scaling",
+      "kind": "value_by_level",
       "level_source": "building",
       "level_target": null,
       "level": 1,
@@ -277,30 +300,390 @@
       "value_max": null,
       "sort_order": 10,
       "name": {
-        "uk": "Частка повернення",
-        "en": "Share of the return"
+        "uk": "Частка повернення, рівень 1",
+        "en": "Share of the return, level 1"
       },
       "description": {
-        "uk": "Частка ресурсів, яку фабрика утилізації повертає, за рівнем.",
-        "en": "The share of the resources the recycling factory returns, by the level."
+        "uk": "Частка вартості деталі за рецептом, яку фабрика утилізації повертає з цього рівня.",
+        "en": "The share of the cost of a part by its recipe the recycling factory returns from this level."
+      }
+    },
+    {
+      "type": "recycling",
+      "kind": "value_by_level",
+      "level_source": "building",
+      "level_target": null,
+      "level": 5,
+      "value": 0.45,
+      "value_max": null,
+      "sort_order": 11,
+      "name": {
+        "uk": "Частка повернення, рівень 5",
+        "en": "Share of the return, level 5"
+      },
+      "description": {
+        "uk": "Частка вартості деталі за рецептом, яку фабрика утилізації повертає з цього рівня.",
+        "en": "The share of the cost of a part by its recipe the recycling factory returns from this level."
+      }
+    },
+    {
+      "type": "recycling",
+      "kind": "value_by_level",
+      "level_source": "building",
+      "level_target": null,
+      "level": 10,
+      "value": 0.5,
+      "value_max": null,
+      "sort_order": 12,
+      "name": {
+        "uk": "Частка повернення, рівень 10",
+        "en": "Share of the return, level 10"
+      },
+      "description": {
+        "uk": "Частка вартості деталі за рецептом, яку фабрика утилізації повертає з цього рівня.",
+        "en": "The share of the cost of a part by its recipe the recycling factory returns from this level."
+      }
+    },
+    {
+      "type": "recycling",
+      "kind": "value_by_level",
+      "level_source": "building",
+      "level_target": null,
+      "level": 15,
+      "value": 0.55,
+      "value_max": null,
+      "sort_order": 13,
+      "name": {
+        "uk": "Частка повернення, рівень 15",
+        "en": "Share of the return, level 15"
+      },
+      "description": {
+        "uk": "Частка вартості деталі за рецептом, яку фабрика утилізації повертає з цього рівня.",
+        "en": "The share of the cost of a part by its recipe the recycling factory returns from this level."
+      }
+    },
+    {
+      "type": "recycling",
+      "kind": "value_by_level",
+      "level_source": "building",
+      "level_target": null,
+      "level": 20,
+      "value": 0.6,
+      "value_max": null,
+      "sort_order": 14,
+      "name": {
+        "uk": "Частка повернення, рівень 20",
+        "en": "Share of the return, level 20"
+      },
+      "description": {
+        "uk": "Частка вартості деталі за рецептом, яку фабрика утилізації повертає з цього рівня.",
+        "en": "The share of the cost of a part by its recipe the recycling factory returns from this level."
       }
     },
     {
       "type": "matter_conversion",
       "kind": "value_by_level",
       "level_source": "technology",
+      "level_target": "tech_18",
+      "level": 1,
+      "value": 0.3,
+      "value_max": null,
+      "sort_order": 10,
+      "name": {
+        "uk": "Вихід перетворення, рівень 1",
+        "en": "Output of the conversion, level 1"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, з цього рівня технології.",
+        "en": "The share of the raw material that is left after the conversion, from this level of the technology."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "value_by_level",
+      "level_source": "technology",
+      "level_target": "tech_18",
+      "level": 2,
+      "value": 0.36,
+      "value_max": null,
+      "sort_order": 11,
+      "name": {
+        "uk": "Вихід перетворення, рівень 2",
+        "en": "Output of the conversion, level 2"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, з цього рівня технології.",
+        "en": "The share of the raw material that is left after the conversion, from this level of the technology."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "value_by_level",
+      "level_source": "technology",
+      "level_target": "tech_18",
+      "level": 3,
+      "value": 0.41,
+      "value_max": null,
+      "sort_order": 12,
+      "name": {
+        "uk": "Вихід перетворення, рівень 3",
+        "en": "Output of the conversion, level 3"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, з цього рівня технології.",
+        "en": "The share of the raw material that is left after the conversion, from this level of the technology."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "value_by_level",
+      "level_source": "technology",
+      "level_target": "tech_18",
+      "level": 4,
+      "value": 0.47,
+      "value_max": null,
+      "sort_order": 13,
+      "name": {
+        "uk": "Вихід перетворення, рівень 4",
+        "en": "Output of the conversion, level 4"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, з цього рівня технології.",
+        "en": "The share of the raw material that is left after the conversion, from this level of the technology."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "value_by_level",
+      "level_source": "technology",
+      "level_target": "tech_18",
+      "level": 5,
+      "value": 0.52,
+      "value_max": null,
+      "sort_order": 14,
+      "name": {
+        "uk": "Вихід перетворення, рівень 5",
+        "en": "Output of the conversion, level 5"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, з цього рівня технології.",
+        "en": "The share of the raw material that is left after the conversion, from this level of the technology."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "value_by_level",
+      "level_source": "technology",
+      "level_target": "tech_18",
+      "level": 6,
+      "value": 0.58,
+      "value_max": null,
+      "sort_order": 15,
+      "name": {
+        "uk": "Вихід перетворення, рівень 6",
+        "en": "Output of the conversion, level 6"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, з цього рівня технології.",
+        "en": "The share of the raw material that is left after the conversion, from this level of the technology."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "value_by_level",
+      "level_source": "technology",
+      "level_target": "tech_18",
+      "level": 7,
+      "value": 0.63,
+      "value_max": null,
+      "sort_order": 16,
+      "name": {
+        "uk": "Вихід перетворення, рівень 7",
+        "en": "Output of the conversion, level 7"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, з цього рівня технології.",
+        "en": "The share of the raw material that is left after the conversion, from this level of the technology."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "value_by_level",
+      "level_source": "technology",
+      "level_target": "tech_18",
+      "level": 8,
+      "value": 0.69,
+      "value_max": null,
+      "sort_order": 17,
+      "name": {
+        "uk": "Вихід перетворення, рівень 8",
+        "en": "Output of the conversion, level 8"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, з цього рівня технології.",
+        "en": "The share of the raw material that is left after the conversion, from this level of the technology."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "value_by_level",
+      "level_source": "technology",
+      "level_target": "tech_18",
+      "level": 9,
+      "value": 0.74,
+      "value_max": null,
+      "sort_order": 18,
+      "name": {
+        "uk": "Вихід перетворення, рівень 9",
+        "en": "Output of the conversion, level 9"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, з цього рівня технології.",
+        "en": "The share of the raw material that is left after the conversion, from this level of the technology."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "value_by_level",
+      "level_source": "technology",
+      "level_target": "tech_18",
+      "level": 10,
+      "value": 0.8,
+      "value_max": null,
+      "sort_order": 19,
+      "name": {
+        "uk": "Вихід перетворення, рівень 10",
+        "en": "Output of the conversion, level 10"
+      },
+      "description": {
+        "uk": "Частка сировини, яка лишається після перетворення, з цього рівня технології.",
+        "en": "The share of the raw material that is left after the conversion, from this level of the technology."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "duration_factor",
+      "level_source": "building",
+      "level_target": null,
+      "level": 1,
+      "value": 1.0,
+      "value_max": null,
+      "sort_order": 30,
+      "name": {
+        "uk": "Множник часу, рівень 1",
+        "en": "Time multiplier, level 1"
+      },
+      "description": {
+        "uk": "Множник часу одиниці перетворення з цього рівня перетворювача.",
+        "en": "The multiplier of the time of a unit of the conversion from this level of the converter."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "duration_factor",
+      "level_source": "building",
+      "level_target": null,
+      "level": 5,
+      "value": 0.9,
+      "value_max": null,
+      "sort_order": 31,
+      "name": {
+        "uk": "Множник часу, рівень 5",
+        "en": "Time multiplier, level 5"
+      },
+      "description": {
+        "uk": "Множник часу одиниці перетворення з цього рівня перетворювача.",
+        "en": "The multiplier of the time of a unit of the conversion from this level of the converter."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "duration_factor",
+      "level_source": "building",
+      "level_target": null,
+      "level": 10,
+      "value": 0.8,
+      "value_max": null,
+      "sort_order": 32,
+      "name": {
+        "uk": "Множник часу, рівень 10",
+        "en": "Time multiplier, level 10"
+      },
+      "description": {
+        "uk": "Множник часу одиниці перетворення з цього рівня перетворювача.",
+        "en": "The multiplier of the time of a unit of the conversion from this level of the converter."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "duration_factor",
+      "level_source": "building",
+      "level_target": null,
+      "level": 15,
+      "value": 0.7,
+      "value_max": null,
+      "sort_order": 33,
+      "name": {
+        "uk": "Множник часу, рівень 15",
+        "en": "Time multiplier, level 15"
+      },
+      "description": {
+        "uk": "Множник часу одиниці перетворення з цього рівня перетворювача.",
+        "en": "The multiplier of the time of a unit of the conversion from this level of the converter."
+      }
+    },
+    {
+      "type": "matter_conversion",
+      "kind": "duration_factor",
+      "level_source": "building",
+      "level_target": null,
+      "level": 20,
+      "value": 0.6,
+      "value_max": null,
+      "sort_order": 34,
+      "name": {
+        "uk": "Множник часу, рівень 20",
+        "en": "Time multiplier, level 20"
+      },
+      "description": {
+        "uk": "Множник часу одиниці перетворення з цього рівня перетворювача.",
+        "en": "The multiplier of the time of a unit of the conversion from this level of the converter."
+      }
+    },
+    {
+      "type": "ship_repair",
+      "kind": "value_by_level",
+      "level_source": "building",
       "level_target": null,
       "level": 1,
       "value": 0.3,
       "value_max": null,
       "sort_order": 10,
       "name": {
-        "uk": "Вихід перетворення",
-        "en": "Output of the conversion"
+        "uk": "Вартість ремонту корабля",
+        "en": "Cost of the repair of a ship"
       },
       "description": {
-        "uk": "Частка сировини, яка лишається після перетворення, за рівнем технології.",
-        "en": "The share of the raw material that is left after the conversion, by the level."
+        "uk": "Частка вартості нової деталі за повний ремонт; менша втрата справності коштує пропорційно менше.",
+        "en": "The share of the cost of a new part for a full repair; a smaller loss of the condition costs in proportion less."
+      }
+    },
+    {
+      "type": "module_repair",
+      "kind": "value_by_level",
+      "level_source": "building",
+      "level_target": null,
+      "level": 1,
+      "value": 0.3,
+      "value_max": null,
+      "sort_order": 10,
+      "name": {
+        "uk": "Вартість ремонту модуля",
+        "en": "Cost of the repair of a module"
+      },
+      "description": {
+        "uk": "Частка вартості нової деталі за повний ремонт; менша втрата справності коштує пропорційно менше.",
+        "en": "The share of the cost of a new part for a full repair; a smaller loss of the condition costs in proportion less."
       }
     }
   ]

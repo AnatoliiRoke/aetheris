@@ -56,6 +56,8 @@ public static class ProcessReferenceSeed
     /// <param name="texts">The texts of the game data.</param>
     /// <param name="codes">The counters of the neutral codes.</param>
     /// <param name="requirements">The common requirements module, for the requirements of the recipes.</param>
+    /// <param name="partIds">The parts of the production module by their neutral code.</param>
+    /// <param name="technologyIds">The technologies by their neutral code.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns><see langword="true"/> when the data was written.</returns>
     public static async Task<bool> SeedAsync(
@@ -66,6 +68,8 @@ public static class ProcessReferenceSeed
         ILocalizationTexts texts,
         ICodeSequence codes,
         IRequirementsModule requirements,
+        IReadOnlyDictionary<string, int> partIds,
+        IReadOnlyDictionary<string, int> technologyIds,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
@@ -75,6 +79,8 @@ public static class ProcessReferenceSeed
         ArgumentNullException.ThrowIfNull(texts);
         ArgumentNullException.ThrowIfNull(codes);
         ArgumentNullException.ThrowIfNull(requirements);
+        ArgumentNullException.ThrowIfNull(partIds);
+        ArgumentNullException.ThrowIfNull(technologyIds);
 
         // The seed runs while the recipes are empty, so it fills the gaps of a database that
         // was emptied by hand and never overwrites a change of the admin panel (task 00023,
@@ -196,7 +202,7 @@ public static class ProcessReferenceSeed
                 entity.IngredientIds.Add(new ProcessRecipeIngredientEntity
                 {
                     ResourceTypeId = ingredient.Resource is null ? null : resourceIds[ingredient.Resource],
-                    PartTypeId = ingredient.Part is null ? null : ingredient.Part,
+                    PartTypeId = ingredient.Part is null ? null : IdOf(partIds, ingredient.Part, "part"),
                     Amount = ingredient.Amount,
                 });
             }
@@ -216,7 +222,7 @@ public static class ProcessReferenceSeed
                 ProcessTypeId = typeIds[parameter.Type],
                 ParamKind = parameter.Kind,
                 LevelSource = parameter.LevelSource,
-                LevelTargetId = parameter.LevelTarget,
+                LevelTargetId = parameter.LevelTarget is null ? null : IdOf(technologyIds, parameter.LevelTarget, "technology"),
                 Level = parameter.Level,
                 Value = parameter.Value,
                 ValueMax = parameter.ValueMax,
@@ -260,6 +266,19 @@ public static class ProcessReferenceSeed
 
         return true;
     }
+
+    /// <summary>
+    /// Finds a row of another module the starting data names by its neutral code.
+    /// </summary>
+    /// <param name="ids">The rows by their code.</param>
+    /// <param name="code">The code the starting data names.</param>
+    /// <param name="kind">The kind of the row, for the message.</param>
+    /// <returns>The identifier of the row.</returns>
+    /// <exception cref="InvalidOperationException">The row does not exist.</exception>
+    private static int IdOf(IReadOnlyDictionary<string, int> ids, string code, string kind) =>
+        ids.TryGetValue(code, out int id)
+            ? id
+            : throw new InvalidOperationException($"The starting data of the processes name the {kind} '{code}', which does not exist.");
 
     /// <summary>
     /// Finds the key of a kind of a process in the starting data by its handler.
@@ -332,9 +351,9 @@ public sealed record SeedProcessRecipe(
 /// An ingredient of a recipe in the starting data.
 /// </summary>
 /// <param name="Resource">The neutral code of the resource the ingredient takes.</param>
-/// <param name="Part">The identifier of the kind of the part the ingredient takes.</param>
+/// <param name="Part">The neutral code of the part the ingredient takes.</param>
 /// <param name="Amount">How many units one unit of the process takes.</param>
-public sealed record SeedIngredient(string? Resource, int? Part, long Amount);
+public sealed record SeedIngredient(string? Resource, string? Part, long Amount);
 
 /// <summary>
 /// A requirement of a recipe in the starting data.
@@ -350,7 +369,7 @@ public sealed record SeedRequirement(string Type, int TargetId, int TargetLevel)
 /// <param name="Type">The key of the kind of the process.</param>
 /// <param name="Kind">The logical kind of the parameter.</param>
 /// <param name="LevelSource">The source of the level the parameter follows.</param>
-/// <param name="LevelTarget">The thing whose level the parameter follows.</param>
+/// <param name="LevelTarget">The neutral code of the technology whose level the parameter follows.</param>
 /// <param name="Level">The level the parameter starts at.</param>
 /// <param name="Value">The value of the parameter.</param>
 /// <param name="ValueMax">The second value of the parameter, for the ranges.</param>
@@ -361,7 +380,7 @@ public sealed record SeedProcessParam(
     string Type,
     string Kind,
     string LevelSource,
-    int? LevelTarget,
+    string? LevelTarget,
     int Level,
     decimal Value,
     decimal? ValueMax,

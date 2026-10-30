@@ -22,20 +22,21 @@ using Microsoft.EntityFrameworkCore;
 namespace Aetheris.Processes.Services;
 
 /// <summary>
-/// The engine of the processes: the queue of a building, the payment of the cost, the refund
+/// The engine of the processes: the queue of a building, the payment of the input, the refund
 /// when an order is cancelled and the completion of the orders (task 00014, section 3.1).
 /// </summary>
 /// <remarks>
 /// <para>
 /// The engine knows no concrete process. A kind of a process names its handler by a logical
 /// code, and the engine finds the handler in the container of dependencies by that code. The
-/// queue, the payment, the refund and the event of the completion are the same for every
-/// process.
+/// queue, the payment, the refund, the time of a unit and the event of the completion are the
+/// same for every process.
 /// </para>
 /// <para>
-/// The order of the locks is fixed: the state of the queue of the building first, then the
-/// balance of the resources, then the storage of the parts. Two orders of two bodies never
-/// wait for each other.
+/// Every change runs in one transaction and takes its locks in one fixed order: the queue of
+/// the building, the storage of the parts of the body, the balance of the resources of the
+/// body. The queue of a factory of the production module takes the same order, so two
+/// buildings of one body never wait for each other in a circle.
 /// </para>
 /// </remarks>
 public sealed class ProcessQueueService
@@ -70,7 +71,7 @@ public sealed class ProcessQueueService
     /// <param name="parts">The storage of the parts of the production module.</param>
     /// <param name="technologies">The levels of the technologies of the player.</param>
     /// <param name="requirements">The common requirements module.</param>
-    /// <param name="world">The world module, for the owner of a body.</param>
+    /// <param name="world">The world module, for the owner of a body, the resources and the races.</param>
     /// <param name="scheduler">The scheduler of the events.</param>
     /// <param name="config">The configuration of the game.</param>
     /// <param name="clock">The clock of the game.</param>
@@ -120,8 +121,8 @@ public sealed class ProcessQueueService
     }
 
     /// <summary>
-    /// Puts an order of a recipe in the queue of a building. The whole cost of the order is
-    /// paid at once, and cancelling it returns the cost in full.
+    /// Puts an order of a recipe in the queue of a building. The whole input of the order is
+    /// paid at once, and cancelling it returns what the order has not used.
     /// </summary>
     /// <param name="playerId">The player.</param>
     /// <param name="planetId">The body the process runs on.</param>
@@ -144,8 +145,8 @@ public sealed class ProcessQueueService
         return _unitOfWork.RunAsync(
             async () =>
             {
-                await LockQueueAsync(planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
-                List<ProcessOrderEntity> queue = await LoadQueueAsync(planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
+                PlanetFacts facts = await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+                List<ProcessOrderEntity> queue = await OpenAsync(facts, planetBuildingId, cancellationToken).ConfigureAwait(false);
 
                 // What is due is made first, so a finished order never holds a place.
                 await CompleteDueAsync(playerId, planetId, planetBuildingId, queue, _clock.GameNow, cancellationToken).ConfigureAwait(false);
@@ -166,10 +167,12 @@ public sealed class ProcessQueueService
                     throw new GameException(ProcessErrorCodes.RecipeArchived, "The recipe is archived.");
                 }
 
-                ProcessTypeInfo? processType = catalog.FindType(recipe.ProcessTypeId);
-                if (processType is null)
+                ProcessTypeInfo processType = catalog.FindType(recipe.ProcessTypeId)
+                    ?? throw new GameException(ProcessErrorCodes.TypeUnknown, "The kind of the process does not exist.");
+
+                if (processType.IsArchived)
                 {
-                    throw new GameException(ProcessErrorCodes.TypeUnknown, "The kind of the process does not exist.");
+                    throw new GameException(ProcessErrorCodes.TypeArchived, "The kind of the process is archived.");
                 }
 
                 if (recipe.BuildingTypeId is not { } buildingTypeId)
@@ -198,61 +201,91 @@ public sealed class ProcessQueueService
                 }
 
                 IProcessHandler handler = Handler(processType);
-
                 ProcessRequirementContext requirementContext = await RequirementContextAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
 
-                IReadOnlyList<ProcessReason> reasons = await handler.CheckAsync(
-                    new ProcessCheckContext(
-                        playerId,
-                        planetId,
-                        planetBuildingId,
-                        recipe,
-                        processType,
-                        request.Quantity,
-                        catalog.RequirementsOf(recipe.Id),
-                        requirementContext,
-                        request,
-                        await ResourceGroupsAsync(request, cancellationToken).ConfigureAwait(false)),
-                    cancellationToken).ConfigureAwait(false);
-
-                IReadOnlyList<ProcessReason> requirementReasons = UnmetReasons(catalog, recipe, requirementContext);
+                List<ProcessReason> requirementReasons = UnmetReasons(catalog, recipe, requirementContext);
 
                 if (requirementReasons.Count > 0)
                 {
                     throw new GameException(requirementReasons[0].Code, "A requirement of the process is not met.");
                 }
 
+                ProcessCheckContext checkContext = new(
+                    playerId,
+                    planetId,
+                    planetBuildingId,
+                    recipe,
+                    processType,
+                    request.Quantity,
+                    building.Level,
+                    requirementContext,
+                    request,
+                    await ResourceGroupsAsync(request, cancellationToken).ConfigureAwait(false),
+                    catalog);
+
+                IReadOnlyList<ProcessReason> reasons = await handler.CheckAsync(checkContext, cancellationToken).ConfigureAwait(false);
+
                 if (reasons.Count > 0)
                 {
                     throw new GameException(reasons[0].Code, "The process cannot start.");
                 }
 
-                // The cost is paid when the order enters the queue and returned in full when
-                // it leaves it.
-                Dictionary<int, long> resourceCosts = ResourceCosts(recipe, request.Quantity);
+                ProcessInput input = await handler.InputAsync(checkContext, cancellationToken).ConfigureAwait(false);
+
+                // The input is paid when the order enters the queue and returned when it
+                // leaves it: the parts first and the resources then, in the order of the locks.
+                Dictionary<int, long> resourceCosts = ResourceCosts(recipe, input, request.Quantity);
+                List<ProcessPartInput> partCosts = PartCosts(recipe, input, request.Quantity);
+                long unitSeconds = UnitSeconds(catalog, recipe, processType, input, building.Level);
+                DateTimeOffset now = _clock.GameNow;
+                CheckDuration(now, unitSeconds, request.Quantity);
+
+                List<PartStackTaken> taken = [];
+
+                try
+                {
+                    foreach (ProcessPartInput part in partCosts)
+                    {
+                        taken.AddRange(await _parts.TakeStackAsync(planetId, part.PartTypeId, part.ConditionPercent, part.Quantity, cancellationToken).ConfigureAwait(false));
+                    }
+                }
+                catch (GameException exception) when (exception.Code == ProductionErrorCodes.PartMissing)
+                {
+                    throw new GameException(ProcessErrorCodes.PartMissing, "The body lacks the parts the order takes.");
+                }
+
                 await _resources.TakeAsync(planetId, playerId, resourceCosts, cancellationToken).ConfigureAwait(false);
 
-                List<ProcessOrderCostEntity> partCosts = await TakePartsAsync(planetId, recipe, request.Quantity, cancellationToken).ConfigureAwait(false);
-
-                DateTimeOffset now = _clock.GameNow;
                 ProcessOrderEntity item = new()
                 {
                     PlanetId = planetId,
                     PlanetBuildingId = planetBuildingId,
-                    SectorId = await SectorOfAsync(planetId, cancellationToken).ConfigureAwait(false),
+                    SectorId = facts.SectorId,
                     ProcessRecipeId = recipeId,
                     Quantity = request.Quantity,
                     ProducedQuantity = 0,
+                    SourceResourceTypeId = request.SourceResourceTypeId,
+                    TargetResourceTypeId = request.TargetResourceTypeId,
+                    PartTypeId = request.PartTypeId,
+                    PartConditionPercent = request.PartConditionPercent,
+                    UnitSeconds = unitSeconds,
                     Position = queue.Count + 1,
                     CreatedAt = now,
                     CostIds =
                     [
-                        .. resourceCosts.Select(cost => new ProcessOrderCostEntity
+                        .. resourceCosts.OrderBy(cost => cost.Key).Select(cost => new ProcessOrderCostEntity
                         {
                             ResourceTypeId = cost.Key,
                             Amount = cost.Value,
                         }),
-                        .. partCosts,
+                        .. taken.Select(stack => new ProcessOrderCostEntity
+                        {
+                            PartTypeId = stack.PartTypeId,
+                            MarkLevel = stack.MarkLevel,
+                            HasRaceBonus = stack.HasRaceBonus,
+                            ConditionPercent = stack.ConditionPercent,
+                            Amount = stack.Quantity,
+                        }),
                     ],
                 };
 
@@ -263,14 +296,14 @@ public sealed class ProcessQueueService
                 await StartNextAsync(queue, now, cancellationToken).ConfigureAwait(false);
                 await ScheduleHeadAsync(queue, cancellationToken).ConfigureAwait(false);
 
-                return await ReadBuildingAsync(playerId, planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
+                return await BuildingDtoAsync(playerId, planetId, planetBuildingId, catalog, building, queue, cancellationToken).ConfigureAwait(false);
             },
             cancellationToken);
     }
 
     /// <summary>
-    /// Removes an order from the queue of a building and returns its cost, unless the kind of
-    /// the process does not refund it (task 00014, decision 2).
+    /// Removes an order from the queue of a building and returns the input of the units it has
+    /// not made, unless the kind of the process does not refund it (task 00014, decision 2).
     /// </summary>
     /// <param name="playerId">The player.</param>
     /// <param name="planetId">The body the process runs on.</param>
@@ -290,8 +323,8 @@ public sealed class ProcessQueueService
         return _unitOfWork.RunAsync(
             async () =>
             {
-                await LockQueueAsync(planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
-                List<ProcessOrderEntity> queue = await LoadQueueAsync(planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
+                PlanetFacts facts = await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+                List<ProcessOrderEntity> queue = await OpenAsync(facts, planetBuildingId, cancellationToken).ConfigureAwait(false);
                 await CompleteDueAsync(playerId, planetId, planetBuildingId, queue, _clock.GameNow, cancellationToken).ConfigureAwait(false);
 
                 ProcessOrderEntity cancelled = queue.FirstOrDefault(entry => entry.Id == orderId)
@@ -302,6 +335,8 @@ public sealed class ProcessQueueService
                 // The costs are read before the record is deleted, since a deleted record
                 // loses its cost rows.
                 List<ProcessOrderCostEntity> costs = [.. cancelled.CostIds];
+                long quantity = cancelled.Quantity;
+                long produced = cancelled.ProducedQuantity;
 
                 queue.Remove(cancelled);
                 _dbContext.ProcessOrders.Remove(cancelled);
@@ -313,10 +348,11 @@ public sealed class ProcessQueueService
                 ProcessTypeInfo? processType = recipe is null ? null : catalog.FindType(recipe.ProcessTypeId);
 
                 // A kind of a process that does not refund its input loses the device when
-                // the order is cancelled, so the data of the kind decides it.
+                // the order is cancelled, so the data of the kind decides it. The units already
+                // made keep their input, the rest comes back in full.
                 if (processType?.RefundsInput ?? true)
                 {
-                    await GiveBackAsync(planetId, playerId, costs, cancellationToken).ConfigureAwait(false);
+                    await GiveBackAsync(planetId, playerId, costs, quantity, produced, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (headRemoved)
@@ -326,13 +362,16 @@ public sealed class ProcessQueueService
 
                 await ScheduleHeadAsync(queue, cancellationToken).ConfigureAwait(false);
 
-                return await ReadBuildingAsync(playerId, planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
+                PlanetBuildingLevelById building = await _planets.GetBuildingLevelByIdAsync(planetId, planetBuildingId, playerId, cancellationToken).ConfigureAwait(false);
+
+                return await BuildingDtoAsync(playerId, planetId, planetBuildingId, catalog, building, queue, cancellationToken).ConfigureAwait(false);
             },
             cancellationToken);
     }
 
     /// <summary>
-    /// Completes every order of a building that is due at a moment.
+    /// Completes every order of a building that is due at a moment and plans the event of the
+    /// next unit.
     /// </summary>
     /// <param name="playerId">The owner of the body.</param>
     /// <param name="planetId">The body the process runs on.</param>
@@ -354,8 +393,8 @@ public sealed class ProcessQueueService
                     return 0;
                 }
 
-                await LockQueueAsync(planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
-                List<ProcessOrderEntity> queue = await LoadQueueAsync(planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
+                PlanetFacts facts = await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+                List<ProcessOrderEntity> queue = await OpenAsync(facts, planetBuildingId, cancellationToken).ConfigureAwait(false);
 
                 return await CompleteDueAsync(playerId, planetId, planetBuildingId, queue, now, cancellationToken).ConfigureAwait(false);
             },
@@ -378,56 +417,27 @@ public sealed class ProcessQueueService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        await CompleteDueAsync(playerId, planetId, planetBuildingId, _clock.GameNow, cancellationToken).ConfigureAwait(false);
+        // A player reads only the buildings of his own colonies, so a unit is never made in
+        // the name of another player.
+        await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
 
-        ProcessCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
-        List<ProcessOrderEntity> queue = await LoadQueueAsync(planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
         PlanetBuildingLevelById building = await _planets.GetBuildingLevelByIdAsync(
             planetId,
             planetBuildingId,
             playerId,
             cancellationToken).ConfigureAwait(false);
 
-        ProcessRequirementContext requirementContext = await RequirementContextAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
-
-        List<ProcessRecipeDto> recipes = [];
-
-        foreach (ProcessRecipeInfo recipe in catalog.Recipes)
+        if (building.Level <= 0)
         {
-            ProcessTypeInfo? processType = catalog.FindType(recipe.ProcessTypeId);
-
-            if (processType is null
-                || recipe.BuildingTypeId != building.BuildingTypeId
-                || recipe.IsArchived)
-            {
-                continue;
-            }
-
-            recipes.Add(await RecipeDtoAsync(catalog, recipe, processType, requirementContext, cancellationToken).ConfigureAwait(false));
+            throw new GameException(ProcessErrorCodes.BuildingMissing, "The body has no such building.");
         }
 
-        List<ProcessOrderDto> orders =
-        [
-            .. queue.Select(order => new ProcessOrderDto(
-                order.Id,
-                order.ProcessRecipeId,
-                order.Quantity,
-                order.ProducedQuantity,
-                order.Position,
-                order.StartsAt,
-                order.NextUnitAt,
-                order.FinishesAt,
-                order.IsBlocked))
-        ];
+        await CompleteDueAsync(playerId, planetId, planetBuildingId, _clock.GameNow, cancellationToken).ConfigureAwait(false);
 
-        return new ProcessBuildingDto(
-            planetId,
-            planetBuildingId,
-            building.BuildingTypeId,
-            building.Level,
-            recipes,
-            orders,
-            _clock.GameNow);
+        ProcessCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
+        List<ProcessOrderEntity> queue = await LoadQueueAsync(planetId, planetBuildingId, tracked: false, cancellationToken).ConfigureAwait(false);
+
+        return await BuildingDtoAsync(playerId, planetId, planetBuildingId, catalog, building, queue, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -444,12 +454,15 @@ public sealed class ProcessQueueService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
+        await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+
         ProcessCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
 
         // The types of the buildings are the types the recipes of the catalog name, so a new
-        // recipe opens a new building without a change in the code.
+        // recipe opens a new building without a change in the code. A building whose recipes
+        // are all archived stays listed, so its queue stays in sight.
         int[] buildingTypeIds = [.. catalog.Recipes
-            .Where(recipe => recipe.BuildingTypeId is not null && !recipe.IsArchived)
+            .Where(recipe => recipe.BuildingTypeId is not null)
             .Select(recipe => recipe.BuildingTypeId!.Value)
             .Distinct()
             .OrderBy(typeId => typeId)];
@@ -489,7 +502,24 @@ public sealed class ProcessQueueService
         ?? throw new GameException(ProcessErrorCodes.TypeUnknown, $"No handler is registered for the process '{processType.HandlerCode}'.");
 
     /// <summary>
-    /// Completes the orders of a queue that are due at a moment, one unit at a time.
+    /// Takes the locks of a change of a queue in their fixed order and reads the queue: the
+    /// queue of the building first, the storage of the parts of the body next.
+    /// </summary>
+    /// <param name="facts">The facts of the body.</param>
+    /// <param name="planetBuildingId">The building.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The queue of the building.</returns>
+    private async Task<List<ProcessOrderEntity>> OpenAsync(PlanetFacts facts, long planetBuildingId, CancellationToken cancellationToken)
+    {
+        await LockQueueAsync(planetBuildingId, cancellationToken).ConfigureAwait(false);
+        await _parts.LockAsync(facts.PlanetId, facts.SectorId, cancellationToken).ConfigureAwait(false);
+
+        return await LoadQueueAsync(facts.PlanetId, planetBuildingId, tracked: true, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Completes the orders of a queue that are due at a moment, one unit at a time, and plans
+    /// the event of the next unit.
     /// </summary>
     /// <param name="playerId">The owner of the body.</param>
     /// <param name="planetId">The body the process runs on.</param>
@@ -506,11 +536,6 @@ public sealed class ProcessQueueService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        if (queue.Count == 0)
-        {
-            return 0;
-        }
-
         int made = 0;
 
         while (queue.Count > 0)
@@ -535,15 +560,9 @@ public sealed class ProcessQueueService
             DateTimeOffset readyAt = head.NextUnitAt.Value;
             ProcessCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
             ProcessRecipeInfo? recipe = catalog.FindRecipe(head.ProcessRecipeId);
+            ProcessTypeInfo? processType = recipe is null ? null : catalog.FindType(recipe.ProcessTypeId);
 
-            if (recipe is null)
-            {
-                break;
-            }
-
-            ProcessTypeInfo? processType = catalog.FindType(recipe.ProcessTypeId);
-
-            if (processType is null)
+            if (recipe is null || processType is null)
             {
                 break;
             }
@@ -555,31 +574,36 @@ public sealed class ProcessQueueService
                 playerId,
                 cancellationToken).ConfigureAwait(false);
 
-            IReadOnlyDictionary<int, int> technologyLevels = await TechnologyLevelsAsync(playerId, cancellationToken).ConfigureAwait(false);
-
             ProcessApplyContext context = new(
                 playerId,
                 planetId,
                 planetBuildingId,
                 recipe,
                 processType,
-                1,
+                head.Quantity,
+                head.ProducedQuantity + 1,
                 building.Level,
-                technologyLevels,
+                await _technologies.GetLevelsAsync(playerId, cancellationToken).ConfigureAwait(false),
                 catalog,
-                new ProcessOrderRequest(head.Quantity));
+                new ProcessOrderRequest(
+                    head.Quantity,
+                    head.SourceResourceTypeId,
+                    head.TargetResourceTypeId,
+                    head.PartTypeId,
+                    head.PartConditionPercent),
+                TakenParts(head));
 
             ProcessResult result = await handler.ComputeAsync(context, cancellationToken).ConfigureAwait(false);
-            await handler.ApplyAsync(context with { Quantity = 1 }, cancellationToken).ConfigureAwait(false);
+            await handler.ApplyAsync(context, result, cancellationToken).ConfigureAwait(false);
+
+            if (result.Parts.Count > 0)
+            {
+                await _parts.AddAsync(planetId, result.Parts, cancellationToken).ConfigureAwait(false);
+            }
 
             if (result.Resources.Count > 0)
             {
                 await _resources.GiveAsync(planetId, playerId, result.Resources, cancellationToken).ConfigureAwait(false);
-            }
-
-            if (result.Parts.Count > 0)
-            {
-                await AddPartsAsync(planetId, result.Parts, cancellationToken).ConfigureAwait(false);
             }
 
             if (result.Crew > 0)
@@ -601,16 +625,16 @@ public sealed class ProcessQueueService
             }
             else
             {
-                long unitSeconds = await UnitSecondsAsync(context, cancellationToken).ConfigureAwait(false);
+                long unitSeconds = UnitSecondsOf(head, recipe);
                 head.NextUnitAt = readyAt.AddSeconds(unitSeconds);
-                head.FinishesAt = head.NextUnitAt.Value.AddSeconds(unitSeconds * Math.Max(head.Quantity - head.ProducedQuantity - 1, 0));
+                head.FinishesAt = head.NextUnitAt.Value.AddSeconds(unitSeconds * (head.Quantity - head.ProducedQuantity - 1));
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                // The moment of the check moves with the unit, so the next unit of the order
-                // is made too when it is due at the same moment.
-                now = head.NextUnitAt.Value;
             }
         }
+
+        // The next unit of the queue gets its event, so the queue goes on without a read of
+        // the player; an event that is already planned is not planned twice.
+        await ScheduleHeadAsync(queue, cancellationToken).ConfigureAwait(false);
 
         return made;
     }
@@ -641,19 +665,7 @@ public sealed class ProcessQueueService
             return false;
         }
 
-        ProcessApplyContext context = new(
-            string.Empty,
-            head.PlanetId,
-            head.PlanetBuildingId,
-            recipe,
-            catalog.FindType(recipe.ProcessTypeId) ?? new ProcessTypeInfo(0, string.Empty, string.Empty, string.Empty, null, string.Empty, true, false, 0),
-            head.Quantity,
-            0,
-            new Dictionary<int, int>(),
-            catalog,
-            new ProcessOrderRequest(head.Quantity));
-
-        long seconds = await UnitSecondsAsync(context, cancellationToken).ConfigureAwait(false);
+        long seconds = UnitSecondsOf(head, recipe);
         head.StartsAt = now;
         head.NextUnitAt = now.AddSeconds(seconds);
 
@@ -667,7 +679,9 @@ public sealed class ProcessQueueService
     }
 
     /// <summary>
-    /// Plans the event of the completion of the head of the queue.
+    /// Plans the event of the completion of the next unit of the head of the queue. The key of
+    /// the event names the order and its unit, so a repeated plan of the same unit is one event
+    /// and a repeated delivery of a done unit changes nothing.
     /// </summary>
     /// <param name="queue">The queue of the building.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -692,127 +706,286 @@ public sealed class ProcessQueueService
     }
 
     /// <summary>
-    /// The time of one unit of a process, in game seconds.
+    /// The time of one unit of an order, in game seconds: the time of the recipe times the work
+    /// of the handler times the multiplier of the building at its level, never below a second.
     /// </summary>
-    /// <param name="context">The order and the recipe.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <param name="catalog">The catalog of the processes.</param>
+    /// <param name="recipe">The recipe of the order.</param>
+    /// <param name="processType">The kind of the process.</param>
+    /// <param name="input">The input of the order.</param>
+    /// <param name="buildingLevel">The level of the building the process runs in.</param>
     /// <returns>The time of one unit.</returns>
-    private static async Task<long> UnitSecondsAsync(ProcessApplyContext context, CancellationToken cancellationToken)
+    private static long UnitSeconds(
+        ProcessCatalog catalog,
+        ProcessRecipeInfo recipe,
+        ProcessTypeInfo processType,
+        ProcessInput input,
+        int buildingLevel)
     {
-        _ = cancellationToken;
+        decimal factor = catalog.ParamAt(processType.Id, ProcessParamKinds.DurationFactor, ProcessLevelSources.Building, null, buildingLevel)?.Value
+            ?? decimal.One;
 
-        return context.Recipe.DurationSeconds;
+        try
+        {
+            long seconds = (long)decimal.Ceiling(recipe.DurationSeconds * Math.Max(input.WorkFactor, decimal.Zero) * Math.Max(factor, decimal.Zero));
+
+            return Math.Max(seconds, 1);
+        }
+        catch (OverflowException)
+        {
+            throw new GameException(ProcessErrorCodes.QuantityInvalid, "The order is too large.");
+        }
     }
 
     /// <summary>
-    /// The resources the order takes, by their resource.
+    /// The time of one unit of an order in the queue: the time fixed when it entered the queue.
+    /// </summary>
+    /// <param name="order">The order.</param>
+    /// <param name="recipe">The recipe of the order, for an order that has no time of its own.</param>
+    /// <returns>The time of one unit.</returns>
+    private static long UnitSecondsOf(ProcessOrderEntity order, ProcessRecipeInfo recipe) =>
+        order.UnitSeconds > 0 ? order.UnitSeconds : Math.Max(recipe.DurationSeconds, 1);
+
+    /// <summary>
+    /// Checks that the end of the whole order is a moment the game can hold.
+    /// </summary>
+    /// <param name="now">The moment of game time.</param>
+    /// <param name="unitSeconds">The time of one unit.</param>
+    /// <param name="quantity">How many units the order holds.</param>
+    /// <exception cref="GameException">The order is too large.</exception>
+    private static void CheckDuration(DateTimeOffset now, long unitSeconds, long quantity)
+    {
+        try
+        {
+            _ = now.AddSeconds(checked(unitSeconds * quantity));
+        }
+        catch (Exception exception) when (exception is OverflowException or ArgumentOutOfRangeException)
+        {
+            throw new GameException(ProcessErrorCodes.QuantityInvalid, "The order is too large.");
+        }
+    }
+
+    /// <summary>
+    /// The resources the whole order takes: the ingredients of the recipe for every unit and
+    /// the input the handler names.
     /// </summary>
     /// <param name="recipe">The recipe of the order.</param>
+    /// <param name="input">The input the handler names.</param>
     /// <param name="quantity">How many units the order holds.</param>
     /// <returns>The resources by their resource.</returns>
-    private static Dictionary<int, long> ResourceCosts(ProcessRecipeInfo recipe, long quantity)
+    /// <exception cref="GameException">The order is too large.</exception>
+    private static Dictionary<int, long> ResourceCosts(ProcessRecipeInfo recipe, ProcessInput input, long quantity)
     {
-        Dictionary<int, long> costs = [];
-
-        foreach (ProcessIngredientInfo ingredient in recipe.IngredientIds)
+        try
         {
-            if (ingredient.ResourceTypeId is not { } resourceTypeId)
+            Dictionary<int, long> costs = [];
+
+            foreach (ProcessIngredientInfo ingredient in recipe.IngredientIds.Where(ingredient => ingredient.ResourceTypeId is not null))
             {
-                continue;
+                int resourceTypeId = ingredient.ResourceTypeId!.Value;
+                costs[resourceTypeId] = checked(costs.GetValueOrDefault(resourceTypeId) + checked(ingredient.Amount * quantity));
             }
 
-            costs[resourceTypeId] = costs.GetValueOrDefault(resourceTypeId) + (ingredient.Amount * quantity);
-        }
+            foreach ((int resourceTypeId, long amount) in input.Resources)
+            {
+                costs[resourceTypeId] = checked(costs.GetValueOrDefault(resourceTypeId) + amount);
+            }
 
-        return costs;
+            return costs.Where(cost => cost.Value > 0).ToDictionary(cost => cost.Key, cost => cost.Value);
+        }
+        catch (OverflowException)
+        {
+            throw new GameException(ProcessErrorCodes.QuantityInvalid, "The order is too large.");
+        }
     }
 
     /// <summary>
-    /// Takes the parts the order needs from the storage of the body.
+    /// The parts the whole order takes: the parts of the recipe, new, for every unit and the
+    /// parts the handler names in their condition.
     /// </summary>
-    /// <param name="planetId">The body.</param>
     /// <param name="recipe">The recipe of the order.</param>
+    /// <param name="input">The input the handler names.</param>
     /// <param name="quantity">How many units the order holds.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The rows of the costs of the parts.</returns>
-    private async Task<List<ProcessOrderCostEntity>> TakePartsAsync(
-        long planetId,
-        ProcessRecipeInfo recipe,
-        long quantity,
-        CancellationToken cancellationToken)
+    /// <returns>The parts by their kind and condition.</returns>
+    /// <exception cref="GameException">The order is too large.</exception>
+    private static List<ProcessPartInput> PartCosts(ProcessRecipeInfo recipe, ProcessInput input, long quantity)
     {
-        Dictionary<int, long> needed = [];
-
-        foreach (ProcessIngredientInfo ingredient in recipe.IngredientIds)
+        try
         {
-            if (ingredient.PartTypeId is not { } partTypeId)
+            Dictionary<(int PartTypeId, int ConditionPercent), long> parts = [];
+
+            foreach (ProcessIngredientInfo ingredient in recipe.IngredientIds.Where(ingredient => ingredient.PartTypeId is not null))
             {
-                continue;
+                (int, int) key = (ingredient.PartTypeId!.Value, PartCondition.Full);
+                parts[key] = checked(parts.GetValueOrDefault(key) + checked(ingredient.Amount * quantity));
             }
 
-            needed[partTypeId] = needed.GetValueOrDefault(partTypeId) + (ingredient.Amount * quantity);
-        }
-
-        if (needed.Count == 0)
-        {
-            return [];
-        }
-
-        IReadOnlyList<PartStackTaken> taken = await _parts.TakeAsync(planetId, needed, cancellationToken).ConfigureAwait(false);
-
-        return
-        [
-            .. taken.Select(stack => new ProcessOrderCostEntity
+            foreach (ProcessPartInput part in input.Parts)
             {
-                PartTypeId = stack.PartTypeId,
-                Amount = stack.Quantity,
-            })
-        ];
+                (int, int) key = (part.PartTypeId, part.ConditionPercent);
+                parts[key] = checked(parts.GetValueOrDefault(key) + part.Quantity);
+            }
+
+            return
+            [
+                .. parts
+                    .Where(entry => entry.Value > 0)
+                    .OrderBy(entry => entry.Key.PartTypeId)
+                    .ThenBy(entry => entry.Key.ConditionPercent)
+                    .Select(entry => new ProcessPartInput(entry.Key.PartTypeId, entry.Key.ConditionPercent, entry.Value)),
+            ];
+        }
+        catch (OverflowException)
+        {
+            throw new GameException(ProcessErrorCodes.QuantityInvalid, "The order is too large.");
+        }
     }
 
     /// <summary>
-    /// Returns the cost of an order to the balance and the storage of the body.
+    /// The parts an order took from the storage, as they were.
+    /// </summary>
+    /// <param name="order">The order.</param>
+    /// <returns>The stacks the order took.</returns>
+    private static List<PartStackTaken> TakenParts(ProcessOrderEntity order) =>
+    [
+        .. order.CostIds
+            .Where(cost => cost.PartTypeId is not null)
+            .OrderBy(cost => cost.Id)
+            .Select(cost => new PartStackTaken(
+                cost.PartTypeId!.Value,
+                cost.MarkLevel ?? PartMarkLevels.First,
+                cost.HasRaceBonus,
+                cost.ConditionPercent ?? PartCondition.Full,
+                cost.Amount)),
+    ];
+
+    /// <summary>
+    /// Returns the input of the units an order has not made to the balance and the storage of
+    /// the body.
     /// </summary>
     /// <param name="planetId">The body.</param>
     /// <param name="playerId">The player.</param>
     /// <param name="costs">The rows of the costs of the order.</param>
+    /// <param name="quantity">How many units the order holds.</param>
+    /// <param name="produced">How many units the order made.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task that completes when the cost is returned.</returns>
+    /// <returns>A task that completes when the input is returned.</returns>
     private async Task GiveBackAsync(
         long planetId,
         string playerId,
         List<ProcessOrderCostEntity> costs,
+        long quantity,
+        long produced,
         CancellationToken cancellationToken)
     {
-        Dictionary<int, long> resources = [];
+        // The units made used the first stacks of every part, like the units took them, so what
+        // is left goes back to the stacks it came from.
+        List<PartStackAdded> parts = [];
 
-        foreach (ProcessOrderCostEntity cost in costs)
+        foreach (IGrouping<(int PartTypeId, int ConditionPercent), ProcessOrderCostEntity> group in costs
+            .Where(cost => cost.PartTypeId is not null)
+            .GroupBy(cost => (cost.PartTypeId!.Value, cost.ConditionPercent ?? PartCondition.Full)))
         {
-            if (cost.ResourceTypeId is { } resourceTypeId)
+            long total = group.Sum(cost => cost.Amount);
+            long used = total - ProcessUnits.Unused(total, quantity, produced);
+
+            foreach (ProcessOrderCostEntity cost in group.OrderBy(cost => cost.Id))
             {
-                resources[resourceTypeId] = resources.GetValueOrDefault(resourceTypeId) + cost.Amount;
+                long consumed = Math.Min(cost.Amount, used);
+                used -= consumed;
+
+                if (cost.Amount - consumed > 0)
+                {
+                    parts.Add(new PartStackAdded(
+                        cost.PartTypeId!.Value,
+                        cost.MarkLevel ?? PartMarkLevels.First,
+                        cost.HasRaceBonus,
+                        cost.ConditionPercent ?? PartCondition.Full,
+                        cost.Amount - consumed));
+                }
             }
         }
+
+        if (parts.Count > 0)
+        {
+            await _parts.AddAsync(planetId, parts, cancellationToken).ConfigureAwait(false);
+        }
+
+        Dictionary<int, long> resources = [];
+
+        foreach (ProcessOrderCostEntity cost in costs.Where(cost => cost.ResourceTypeId is not null))
+        {
+            int resourceTypeId = cost.ResourceTypeId!.Value;
+            resources[resourceTypeId] = resources.GetValueOrDefault(resourceTypeId) + ProcessUnits.Unused(cost.Amount, quantity, produced);
+        }
+
+        resources = resources.Where(entry => entry.Value > 0).ToDictionary(entry => entry.Key, entry => entry.Value);
 
         if (resources.Count > 0)
         {
             await _resources.GiveAsync(planetId, playerId, resources, cancellationToken).ConfigureAwait(false);
         }
+    }
 
-        List<ProcessOrderCostEntity> partCosts = [.. costs.Where(cost => cost.PartTypeId is not null)];
+    /// <summary>
+    /// Builds the building with its recipes and its queue for the client.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="planetBuildingId">The building.</param>
+    /// <param name="catalog">The catalog of the processes.</param>
+    /// <param name="building">The level and the type of the building.</param>
+    /// <param name="queue">The queue of the building.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The building with its queue.</returns>
+    private async Task<ProcessBuildingDto> BuildingDtoAsync(
+        string playerId,
+        long planetId,
+        long planetBuildingId,
+        ProcessCatalog catalog,
+        PlanetBuildingLevelById building,
+        List<ProcessOrderEntity> queue,
+        CancellationToken cancellationToken)
+    {
+        ProcessRequirementContext requirementContext = await RequirementContextAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        HashSet<int> queuedRecipeIds = [.. queue.Select(order => order.ProcessRecipeId)];
+        List<ProcessRecipeDto> recipes = [];
 
-        if (partCosts.Count > 0)
+        foreach (ProcessRecipeInfo recipe in catalog.Recipes.Where(recipe => recipe.BuildingTypeId == building.BuildingTypeId))
         {
-            Dictionary<(int PartTypeId, bool HasRaceBonus), long> parts = [];
+            ProcessTypeInfo? processType = catalog.FindType(recipe.ProcessTypeId);
 
-            foreach (ProcessOrderCostEntity cost in partCosts)
+            // An archived recipe is not offered, but the one an order of the queue still makes
+            // is listed, so the queue keeps the name of what it makes (task 00023, decision 5).
+            if (processType is null
+                || ((recipe.IsArchived || processType.IsArchived) && !queuedRecipeIds.Contains(recipe.Id)))
             {
-                (int, bool) key = (cost.PartTypeId!.Value, false);
-                parts[key] = parts.GetValueOrDefault(key) + cost.Amount;
+                continue;
             }
 
-            await _parts.GiveBackAsync(planetId, parts, PartCondition.Full, cancellationToken).ConfigureAwait(false);
+            recipes.Add(RecipeDto(catalog, recipe, processType, requirementContext));
         }
+
+        return new ProcessBuildingDto(
+            planetId,
+            planetBuildingId,
+            building.BuildingTypeId,
+            building.Level,
+            recipes,
+            [
+                .. queue.Select(order => new ProcessOrderDto(
+                    order.Id,
+                    order.ProcessRecipeId,
+                    order.Quantity,
+                    order.ProducedQuantity,
+                    order.Position,
+                    order.StartsAt,
+                    order.NextUnitAt,
+                    order.FinishesAt,
+                    order.IsBlocked))
+            ],
+            _clock.GameNow,
+            PartCondition.Full);
     }
 
     /// <summary>
@@ -829,24 +1002,23 @@ public sealed class ProcessQueueService
         CancellationToken cancellationToken)
     {
         PlanetOverviewDto? planet = await _planets.GetPlanetAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
-        IReadOnlyDictionary<int, string> buildingNameKeys = await _planets.GetBuildingNameKeysAsync(cancellationToken).ConfigureAwait(false);
-        IReadOnlyDictionary<int, int> technologyLevels = await TechnologyLevelsAsync(playerId, cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<RaceDto> races = await _world.GetRacesAsync(cancellationToken).ConfigureAwait(false);
+        CivilizationSummary? civilization = await _world.GetCivilizationAsync(playerId, cancellationToken).ConfigureAwait(false);
 
         Dictionary<int, int> buildingLevels = [];
 
-        if (planet is not null)
+        foreach (BuildingDto building in planet?.Buildings ?? [])
         {
-            foreach (BuildingDto building in planet.Buildings)
-            {
-                buildingLevels[building.BuildingTypeId] = building.Level;
-            }
+            buildingLevels[building.BuildingTypeId] = Math.Max(buildingLevels.GetValueOrDefault(building.BuildingTypeId), building.Level);
         }
 
         return new ProcessRequirementContext(
             buildingLevels,
-            technologyLevels,
-            buildingNameKeys,
-            await TechnologyNameKeysAsync(cancellationToken).ConfigureAwait(false));
+            await _technologies.GetLevelsAsync(playerId, cancellationToken).ConfigureAwait(false),
+            await _planets.GetBuildingNameKeysAsync(cancellationToken).ConfigureAwait(false),
+            await _technologies.GetTechnologyNameKeysAsync(cancellationToken).ConfigureAwait(false),
+            civilization?.RaceId ?? 0,
+            races.ToDictionary(race => race.Id, race => race.NameKey));
     }
 
     /// <summary>
@@ -870,10 +1042,11 @@ public sealed class ProcessQueueService
             return new Dictionary<int, int>();
         }
 
-        Aetheris.World.Api.ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
+        ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
 
+        // An archived resource keeps its balance, but no new conversion names it.
         return catalog.Resources
-            .Where(resource => resourceTypeIds.Contains(resource.Id))
+            .Where(resource => resourceTypeIds.Contains(resource.Id) && !resource.IsArchived)
             .ToDictionary(resource => resource.Id, resource => resource.ResourceGroupId);
     }
 
@@ -920,6 +1093,18 @@ public sealed class ProcessQueueService
 
                     break;
 
+                case ProductionRequirementTypes.Race:
+                    if (context.RaceId != requirement.TargetId)
+                    {
+                        reasons.Add(new ProcessReason(
+                            ProcessErrorCodes.RequirementRace,
+                            requirement.TargetId,
+                            requirement.TargetLevel,
+                            context.RaceNameKeys.GetValueOrDefault(requirement.TargetId)));
+                    }
+
+                    break;
+
                 default:
                     reasons.Add(new ProcessReason(
                         ProcessErrorCodes.RequirementUnknown,
@@ -939,22 +1124,25 @@ public sealed class ProcessQueueService
     /// <param name="recipe">The recipe.</param>
     /// <param name="processType">The kind of the process.</param>
     /// <param name="context">The levels and the names the requirements are checked against.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The record of the recipe.</returns>
-    private static async Task<ProcessRecipeDto> RecipeDtoAsync(
+    private ProcessRecipeDto RecipeDto(
         ProcessCatalog catalog,
         ProcessRecipeInfo recipe,
         ProcessTypeInfo processType,
-        ProcessRequirementContext context,
-        CancellationToken cancellationToken)
+        ProcessRequirementContext context)
     {
-        _ = cancellationToken;
-
         List<ProcessReason> reasons = UnmetReasons(catalog, recipe, context);
 
-        if (recipe.IsArchived)
+        if (recipe.IsArchived || processType.IsArchived)
         {
             reasons.Insert(0, new ProcessReason(ProcessErrorCodes.RecipeArchived, recipe.Id));
+        }
+
+        IProcessHandler? handler = _handlers.FirstOrDefault(entry => string.Equals(entry.HandlerCode, processType.HandlerCode, StringComparison.Ordinal));
+
+        if (handler is null)
+        {
+            reasons.Add(new ProcessReason(ProcessErrorCodes.TypeUnknown, processType.Id));
         }
 
         return new ProcessRecipeDto(
@@ -967,7 +1155,8 @@ public sealed class ProcessQueueService
             recipe.SourceGroupId,
             recipe.TargetGroupId,
             recipe.DurationSeconds,
-            recipe.ShipStub,
+            !string.IsNullOrEmpty(recipe.ShipStub),
+            handler?.PartSubject ?? ProcessPartSubjects.None,
             reasons.Count == 0,
             [
                 .. reasons.Select(reason => new ProcessReasonDto(
@@ -985,39 +1174,27 @@ public sealed class ProcessQueueService
             ]);
     }
 
+    /// <summary>
+    /// Reads the queue of a building in the order of its places.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="planetBuildingId">The building.</param>
+    /// <param name="tracked">Whether the queue is read for a change.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The queue of the building.</returns>
     private async Task<List<ProcessOrderEntity>> LoadQueueAsync(
         long planetId,
         long planetBuildingId,
-        CancellationToken cancellationToken) =>
-        [.. await _dbContext.ProcessOrders
-            .Where(order => order.PlanetId == planetId && order.PlanetBuildingId == planetBuildingId)
-            .OrderBy(order => order.Position)
-            .Include(order => order.CostIds)
-            .ToListAsync(cancellationToken).ConfigureAwait(false)];
-
-    /// <summary>
-    /// Puts the parts of a result into the storage of the body.
-    /// </summary>
-    /// <param name="planetId">The body.</param>
-    /// <param name="parts">The parts of the result.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task that completes when the parts are in the storage.</returns>
-    private async Task AddPartsAsync(
-        long planetId,
-        IReadOnlyList<ProcessPartResult> parts,
+        bool tracked,
         CancellationToken cancellationToken)
     {
-        List<PartStackAdded> added =
-        [
-            .. parts.Select(part => new PartStackAdded(
-                part.PartTypeId,
-                part.MarkLevel,
-                part.HasRaceBonus,
-                part.ConditionPercent,
-                part.Quantity))
-        ];
+        IQueryable<ProcessOrderEntity> orders = _dbContext.ProcessOrders
+            .Where(order => order.PlanetId == planetId && order.PlanetBuildingId == planetBuildingId)
+            .OrderBy(order => order.Position)
+            .ThenBy(order => order.Id)
+            .Include(order => order.CostIds);
 
-        await _parts.AddAsync(planetId, added, cancellationToken).ConfigureAwait(false);
+        return await (tracked ? orders : orders.AsNoTracking()).ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -1044,6 +1221,8 @@ public sealed class ProcessQueueService
 
         long limit = await _planets.GetBuildingEffectTotalAsync(planetId, BuildingEffectTypes.PopulationMax, cancellationToken).ConfigureAwait(false);
 
+        // The crew over the limit is not refused: it stays, and the flag starts the slow
+        // decline to the limit the population task applies.
         if (state.CrewPending > limit && !state.IsOverLimit)
         {
             state.IsOverLimit = true;
@@ -1054,66 +1233,64 @@ public sealed class ProcessQueueService
     }
 
     /// <summary>
-    /// The levels of the technologies of the player.
+    /// Checks that the body is a colony of the player, from the facts of the world and never
+    /// from the word of the client.
     /// </summary>
     /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The levels by technology.</returns>
-    private async Task<IReadOnlyDictionary<int, int>> TechnologyLevelsAsync(
-        string playerId,
-        CancellationToken cancellationToken) =>
-        await _technologies.GetLevelsAsync(playerId, cancellationToken).ConfigureAwait(false);
-
-    /// <summary>
-    /// The keys of the names of the technologies.
-    /// </summary>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The keys by technology.</returns>
-    private async Task<IReadOnlyDictionary<int, string>> TechnologyNameKeysAsync(
-        CancellationToken cancellationToken) =>
-        await _technologies.GetTechnologyNameKeysAsync(cancellationToken).ConfigureAwait(false);
-
-    private async Task LockQueueAsync(long planetId, long planetBuildingId, CancellationToken cancellationToken)
+    /// <returns>The facts of the body.</returns>
+    /// <exception cref="GameException">The body is not a colony of the player.</exception>
+    private async Task<PlanetFacts> EnsureOwnedAsync(string playerId, long planetId, CancellationToken cancellationToken)
     {
-        _ = planetId;
-        _ = planetBuildingId;
-        _ = cancellationToken;
+        PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
 
-        // The queue of a building is locked by the row of the state of the queue. The row is
-        // created on the first order, so the lock is taken in the same order for every
-        // building of every body.
-        await _dbContext.Database.ExecuteSqlRawAsync(
-            """
-            SELECT pg_advisory_xact_lock(hashtext('processes_queue:' || @p0::text));
-            """,
-            [planetBuildingId.ToString(CultureInfo.InvariantCulture)]).ConfigureAwait(false);
+        if (facts is null || !string.Equals(facts.OwnerPlayerId, playerId, StringComparison.Ordinal))
+        {
+            throw new GameException(ProcessErrorCodes.PlanetUnknown, "The body is not a colony of the player.");
+        }
+
+        return facts;
     }
 
+    /// <summary>
+    /// Locks the queue of a building for the rest of the transaction, so two changes of one
+    /// queue run one after the other.
+    /// </summary>
+    /// <param name="planetBuildingId">The building.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the queue is locked.</returns>
+    private async Task LockQueueAsync(long planetBuildingId, CancellationToken cancellationToken)
+    {
+        string key = "processes_queue:" + planetBuildingId.ToString(CultureInfo.InvariantCulture);
+
+        await _dbContext.Database
+            .ExecuteSqlAsync($"SELECT pg_advisory_xact_lock(hashtext({key}))", cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The places of the queue of a building: the base places of the configuration and the
+    /// paid ones, never more than the configuration allows.
+    /// </summary>
+    /// <param name="settings">The settings of the module.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="planetBuildingId">The building.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The number of the places.</returns>
     private async Task<int> SlotsAsync(
         ProcessesSettings settings,
         long planetId,
         long planetBuildingId,
         CancellationToken cancellationToken)
     {
-        _ = planetId;
-        _ = cancellationToken;
-
         int extra = await _dbContext.ProcessQueueStates
             .AsNoTracking()
             .Where(state => state.PlanetId == planetId && state.PlanetBuildingId == planetBuildingId)
             .Select(state => state.ExtraSlots)
             .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
-        int paid = Math.Clamp(extra, 0, settings.QueueMaxExtraSlots);
-
-        return settings.QueueBaseSlots + paid;
-    }
-
-    private async Task<int> SectorOfAsync(long planetId, CancellationToken cancellationToken)
-    {
-        PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
-
-        return facts?.SectorId ?? 0;
+        return settings.QueueBaseSlots + Math.Clamp(extra, 0, settings.QueueMaxExtraSlots);
     }
 
     private static void Renumber(List<ProcessOrderEntity> queue)

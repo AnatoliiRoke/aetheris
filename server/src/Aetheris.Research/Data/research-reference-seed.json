@@ -851,6 +851,42 @@
           }
         }
       ]
+    },
+    {
+      "code": "tech_18",
+      "branch": "branch_1",
+      "sort_order": 18,
+      "max_level": 10,
+      "research_center_level": 8,
+      "name": {
+        "uk": "Перетворення матерії",
+        "en": "Matter conversion"
+      },
+      "description": {
+        "uk": "Перетворювач матерії зберігає більшу частку сировини.",
+        "en": "The matter converter keeps a larger share of the raw material."
+      },
+      "duration_seconds": {
+        "base": 900,
+        "growth": 1.8
+      },
+      "costs": [
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 500,
+            "growth": 1.7
+          }
+        },
+        {
+          "resource": "resource_5",
+          "growth": {
+            "base": 250,
+            "growth": 1.7
+          }
+        }
+      ],
+      "effects": []
     }
   ]
 }

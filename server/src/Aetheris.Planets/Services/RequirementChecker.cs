@@ -131,6 +131,14 @@ public interface ITechnologyLevels
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The keys by technology.</returns>
     Task<IReadOnlyDictionary<int, string>> GetTechnologyNameKeysAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the technologies by their neutral code, for the starting data of the modules that
+    /// name a technology (task 00014).
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The identifiers of the technologies by their code.</returns>
+    Task<IReadOnlyDictionary<string, int>> GetTechnologyIdsByCodeAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -187,4 +195,8 @@ public sealed class NoTechnologyLevels : ITechnologyLevels
     /// <inheritdoc />
     public Task<IReadOnlyDictionary<int, string>> GetTechnologyNameKeysAsync(CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyDictionary<int, string>>(new Dictionary<int, string>());
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<string, int>> GetTechnologyIdsByCodeAsync(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyDictionary<string, int>>(new Dictionary<string, int>());
 }

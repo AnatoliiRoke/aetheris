@@ -62,4 +62,25 @@ public static class ProcessErrorCodes
 
     /// <summary>The level of the technology or of the building is too low for the process.</summary>
     public const string LevelTooLow = "processes_level_too_low";
+
+    /// <summary>The recipe is only for a race the player is not of.</summary>
+    public const string RequirementRace = "processes_requirement_race";
+
+    /// <summary>The kind of the process is archived, so no new order of it starts.</summary>
+    public const string TypeArchived = "processes_type_archived";
+
+    /// <summary>The data of the kind of the process lack a parameter the process needs, or hold a value out of its range.</summary>
+    public const string ParamMissing = "processes_param_missing";
+
+    /// <summary>The ship on the orbit has nothing damaged to repair.</summary>
+    public const string NothingToRepair = "processes_nothing_to_repair";
+
+    /// <summary>The ship on the orbit has no damaged module of the kind the order names.</summary>
+    public const string ModuleNotOnShip = "processes_module_not_on_ship";
+
+    /// <summary>The part the order names is not damaged, so there is nothing to repair.</summary>
+    public const string PartNotDamaged = "processes_part_not_damaged";
+
+    /// <summary>The recipe of the process names no device the process takes.</summary>
+    public const string DeviceMissing = "processes_device_missing";
 }

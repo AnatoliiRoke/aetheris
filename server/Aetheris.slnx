@@ -8,6 +8,8 @@
     <Project Path="src/Aetheris.Host/Aetheris.Host.csproj" />
     <Project Path="src/Aetheris.Market/Aetheris.Market.csproj" />
     <Project Path="src/Aetheris.Planets/Aetheris.Planets.csproj" />
+    <Project Path="src/Aetheris.Processes/Aetheris.Processes.csproj" />
+    <Project Path="src/Aetheris.Production/Aetheris.Production.csproj" />
     <Project Path="src/Aetheris.Rating/Aetheris.Rating.csproj" />
     <Project Path="src/Aetheris.Requirements/Aetheris.Requirements.csproj" />
     <Project Path="src/Aetheris.Research/Aetheris.Research.csproj" />

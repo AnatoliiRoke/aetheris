@@ -4,6 +4,7 @@ using Aetheris.Core.Security;
 using Aetheris.Processes.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
 namespace Aetheris.Processes.Api;
@@ -33,7 +34,7 @@ public static class ProcessesEndpoints
 
         // The buildings of a body that run a process, so the client can pick one.
         processes.MapGet("/buildings", async (
-            long planetId,
+            [FromQuery(Name = "planet_id")] long planetId,
             ClaimsPrincipal user,
             ProcessQueueService queue,
             CancellationToken cancellationToken) =>
@@ -47,7 +48,7 @@ public static class ProcessesEndpoints
 
         // One building with its recipes and its queue.
         processes.MapGet("/buildings/{planetBuildingId:long}", async (
-            long planetId,
+            [FromQuery(Name = "planet_id")] long planetId,
             long planetBuildingId,
             ClaimsPrincipal user,
             ProcessQueueService queue,

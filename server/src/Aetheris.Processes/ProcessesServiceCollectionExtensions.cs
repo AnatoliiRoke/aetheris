@@ -10,6 +10,7 @@ using Aetheris.Processes.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Aetheris.Processes;
 
@@ -31,6 +32,11 @@ public static class ProcessesServiceCollectionExtensions
             ProcessesDatabase.Configure(options, serviceProvider.GetRequiredService<IDatabaseSession>().Connection));
 
         services.AddSingleton<ProcessCatalogCache>();
+
+        // The ships on the orbit are a stub until the task of the flights (task 00014,
+        // decision 5); that task replaces the registration with the real ships.
+        services.TryAddSingleton<ShipsOnOrbitStub>();
+        services.TryAddSingleton<IShipsOnOrbit>(serviceProvider => serviceProvider.GetRequiredService<ShipsOnOrbitStub>());
         services.AddScoped<ProcessesUnitOfWork>();
         services.AddScoped<ProcessesBootstrapService>();
         services.AddScoped<ProcessQueueService>();

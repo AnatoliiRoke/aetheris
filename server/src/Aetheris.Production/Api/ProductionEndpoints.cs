@@ -4,6 +4,7 @@ using Aetheris.Core.Security;
 using Aetheris.Production.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
 namespace Aetheris.Production.Api;
@@ -33,7 +34,7 @@ public static class ProductionEndpoints
 
         // The factories of a body, so the client can pick one.
         production.MapGet("/factories", async (
-            long planetId,
+            [FromQuery(Name = "planet_id")] long planetId,
             ClaimsPrincipal user,
             ProductionQueueService queue,
             CancellationToken cancellationToken) =>
@@ -47,7 +48,7 @@ public static class ProductionEndpoints
 
         // One factory with its recipes, its queue and the storage of the parts.
         production.MapGet("/factories/{planetBuildingId:long}", async (
-            long planetId,
+            [FromQuery(Name = "planet_id")] long planetId,
             long planetBuildingId,
             ClaimsPrincipal user,
             ProductionQueueService queue,
@@ -62,7 +63,7 @@ public static class ProductionEndpoints
 
         // The storage of the parts of a body.
         production.MapGet("/stock", async (
-            long planetId,
+            [FromQuery(Name = "planet_id")] long planetId,
             ClaimsPrincipal user,
             ProductionQueueService queue,
             CancellationToken cancellationToken) =>

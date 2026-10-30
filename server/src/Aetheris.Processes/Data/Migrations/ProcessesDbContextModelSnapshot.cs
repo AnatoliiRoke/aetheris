@@ -35,6 +35,18 @@ namespace Aetheris.Processes.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("amount");
 
+                    b.Property<int?>("ConditionPercent")
+                        .HasColumnType("integer")
+                        .HasColumnName("condition_percent");
+
+                    b.Property<bool>("HasRaceBonus")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_race_bonus");
+
+                    b.Property<int?>("MarkLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("mark_level");
+
                     b.Property<int?>("PartTypeId")
                         .HasColumnType("integer")
                         .HasColumnName("part_type_id");
@@ -87,6 +99,14 @@ namespace Aetheris.Processes.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_unit_at");
 
+                    b.Property<int?>("PartConditionPercent")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_condition_percent");
+
+                    b.Property<int?>("PartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_type_id");
+
                     b.Property<long>("PlanetBuildingId")
                         .HasColumnType("bigint")
                         .HasColumnName("planet_building_id");
@@ -115,9 +135,21 @@ namespace Aetheris.Processes.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("sector_id");
 
+                    b.Property<int?>("SourceResourceTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("source_resource_type_id");
+
                     b.Property<DateTimeOffset?>("StartsAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("starts_at");
+
+                    b.Property<int?>("TargetResourceTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("target_resource_type_id");
+
+                    b.Property<long>("UnitSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("unit_seconds");
 
                     b.HasKey("Id")
                         .HasName("pk_process_order");
@@ -136,6 +168,8 @@ namespace Aetheris.Processes.Data.Migrations
                             t.HasCheckConstraint("ck_process_order_produced", "produced_quantity >= 0 AND produced_quantity <= quantity");
 
                             t.HasCheckConstraint("ck_process_order_quantity", "quantity > 0");
+
+                            t.HasCheckConstraint("ck_process_order_unit_seconds", "unit_seconds >= 0");
                         });
                 });
 

@@ -116,28 +116,46 @@ public static class ProcessHandlerCodes
 /// The logical codes of the kinds of the parameters of a process (task 00014, decision 6).
 /// </summary>
 /// <remarks>
+/// <para>
 /// The kinds are logical codes of the program, so a new process brings a new kind of the
 /// parameter and not a new column.
+/// </para>
+/// <para>
+/// A parameter is a step of a table by the level of its source: the row with the highest level
+/// that the source has reached holds the value, so the author adds a row for every level the
+/// value changes at.
+/// </para>
 /// </remarks>
 public static class ProcessParamKinds
 {
     /// <summary>
     /// The value of the parameter by the level of its source: the output of the conversion by
-    /// the level of the technology, for example.
+    /// the level of the technology, the share of the recycling by the level of the factory, the
+    /// multiplier of the deposits by the level of the device.
     /// </summary>
     public const string ValueByLevel = "value_by_level";
 
     /// <summary>
-    /// The range of the parameter: the lowest and the highest multiplier of the deposits of a
-    /// body, for example.
+    /// The range of the parameter: the lowest value, which the result must be above, and the
+    /// highest value, which the result may reach (the rich deposits of a body, for example).
     /// </summary>
     public const string Range = "range";
 
     /// <summary>
-    /// The multiplier of the parameter by the level of its source: the share of the recycling
-    /// that grows with the level of the factory, for example.
+    /// The multiplier of the time of a unit by the level of the building the process runs in,
+    /// so a higher building works faster.
     /// </summary>
-    public const string Scaling = "scaling";
+    public const string DurationFactor = "duration_factor";
+
+    /// <summary>
+    /// Gets every kind, in the order of the form of the admin panel.
+    /// </summary>
+    public static IReadOnlyList<string> All { get; } =
+    [
+        ValueByLevel,
+        Range,
+        DurationFactor,
+    ];
 }
 
 /// <summary>
@@ -145,41 +163,109 @@ public static class ProcessParamKinds
 /// </summary>
 public static class ProcessLevelSources
 {
-    /// <summary>The level of a building of the body.</summary>
+    /// <summary>The level of the building the process runs in.</summary>
     public const string Building = "building";
 
-    /// <summary>The level of a technology of the player.</summary>
+    /// <summary>The level of a technology of the player, named by the parameter.</summary>
     public const string Technology = "technology";
 
-    /// <summary>The level of a part of the storage.</summary>
+    /// <summary>The mark level of the part the process takes, the device of the terraforming for example.</summary>
     public const string Part = "part";
+
+    /// <summary>
+    /// Gets every source, in the order of the form of the admin panel.
+    /// </summary>
+    public static IReadOnlyList<string> All { get; } =
+    [
+        Building,
+        Technology,
+        Part,
+    ];
 }
 
 /// <summary>
-/// The numbers the handlers of the processes use (task 00014).
+/// The logical codes of the part an order names, so the client shows the right choice of the
+/// storage without knowing the process (task 00014, section 3.2).
+/// </summary>
+public static class ProcessPartSubjects
+{
+    /// <summary>The order names no part.</summary>
+    public const string None = "none";
+
+    /// <summary>The order names a part of the storage in any condition.</summary>
+    public const string Any = "any";
+
+    /// <summary>The order names a damaged part of the storage.</summary>
+    public const string Damaged = "damaged";
+
+    /// <summary>The order names a new part of the storage.</summary>
+    public const string New = "new";
+}
+
+/// <summary>
+/// The parts of the formulas of the processes that never change (task 00014).
 /// </summary>
 /// <remarks>
-/// The numbers of the rules of the game live in the tables and in the parameters; the ones
-/// that are left here are the parts of a formula that never change: the full condition of a
-/// part, the middle of a range and the step of a growth.
+/// The numbers of the rules of the game live in the tables and in the parameters; here are
+/// only the ways to split a whole order into its units.
 /// </remarks>
-public static class ProcessNumbers
+public static class ProcessUnits
 {
-    /// <summary>The condition of a new part, in per cent.</summary>
-    public const int FullConditionPercent = 100;
+    /// <summary>
+    /// The part of a whole amount of an order that one unit gives: the units together give the
+    /// whole amount rounded down, and no unit loses what the rounding of the others left.
+    /// </summary>
+    /// <param name="total">The amount of the whole order.</param>
+    /// <param name="quantity">How many units the order holds.</param>
+    /// <param name="unitIndex">The unit, counted from one.</param>
+    /// <returns>The amount of the unit.</returns>
+    public static long Portion(decimal total, long quantity, long unitIndex)
+    {
+        if (quantity <= 0 || unitIndex <= 0 || unitIndex > quantity || total <= decimal.Zero)
+        {
+            return 0;
+        }
 
-    /// <summary>The divisor that turns a percentage of a condition into a fraction.</summary>
-    public const int PercentDivisor = 100;
+        decimal before = decimal.Floor(total * (unitIndex - 1) / quantity);
+        decimal after = decimal.Floor(total * unitIndex / quantity);
 
-    /// <summary>The divisor of the middle of a range.</summary>
-    public const int RangeDivisor = 2;
+        return (long)(after - before);
+    }
 
-    /// <summary>The number of levels the range of the conversion spreads over.</summary>
-    public const int ConversionLevels = 10;
+    /// <summary>
+    /// The part of an amount that is left for the units an order has not made yet: the units
+    /// made keep their part rounded up, so a refund never gives more than was paid.
+    /// </summary>
+    /// <param name="amount">The amount the whole order paid.</param>
+    /// <param name="quantity">How many units the order holds.</param>
+    /// <param name="produced">How many units are made.</param>
+    /// <returns>The amount to return.</returns>
+    public static long Unused(long amount, long quantity, long produced)
+    {
+        if (quantity <= 0 || amount <= 0)
+        {
+            return 0;
+        }
 
-    /// <summary>The step of the growth of a share by one level, as a fraction.</summary>
-    public const decimal ShareStep = 0.1m;
+        long used = (long)decimal.Ceiling((decimal)amount * Math.Clamp(produced, 0, quantity) / quantity);
 
-    /// <summary>The step of the growth of the output of the conversion by one level, as a fraction.</summary>
-    public const decimal ConversionStep = 0.1m;
+        return amount - used;
+    }
+
+    /// <summary>
+    /// The fraction of a condition that a part lost.
+    /// </summary>
+    /// <param name="conditionPercent">The condition of the part, in per cent.</param>
+    /// <param name="fullPercent">The condition of a new part, in per cent.</param>
+    /// <returns>The lost fraction, between zero and one.</returns>
+    public static decimal Lost(int conditionPercent, int fullPercent) =>
+        fullPercent <= 0 ? decimal.Zero : Math.Clamp((decimal)(fullPercent - conditionPercent) / fullPercent, decimal.Zero, decimal.One);
+
+    /// <summary>
+    /// The fraction of a condition that a part keeps.
+    /// </summary>
+    /// <param name="conditionPercent">The condition of the part, in per cent.</param>
+    /// <param name="fullPercent">The condition of a new part, in per cent.</param>
+    /// <returns>The kept fraction, between zero and one.</returns>
+    public static decimal Kept(int conditionPercent, int fullPercent) => decimal.One - Lost(conditionPercent, fullPercent);
 }
