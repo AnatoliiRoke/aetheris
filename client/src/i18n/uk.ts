@@ -602,6 +602,7 @@ export const uk = {
   'civ.chatSoon': 'Глобальний чат з’явиться згодом.',
   'civ.nav.overview': 'Огляд',
   'civ.nav.planet': 'Планета',
+  'civ.nav.storage': 'Склад',
   'civ.nav.production': 'Виробництво',
   'civ.nav.shipyard': 'Верф',
   'civ.nav.fleets': 'Флоти',

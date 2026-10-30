@@ -604,6 +604,7 @@ export const en: Messages = {
   'civ.chatSoon': 'The global chat will come later.',
   'civ.nav.overview': 'Overview',
   'civ.nav.planet': 'Planet',
+  'civ.nav.storage': 'Storage',
   'civ.nav.production': 'Production',
   'civ.nav.shipyard': 'Shipyard',
   'civ.nav.fleets': 'Fleets',

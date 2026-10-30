@@ -13,6 +13,9 @@ export const routes = {
   resetPassword: '/reset-password',
   game: '/game',
   planet: '/planet',
+  planetBuild: '/planet/build',
+  planetResearch: '/planet/research',
+  planetStorage: '/planet/storage',
   civilization: '/civilization',
   account: '/account',
 } as const;
