@@ -21,6 +21,7 @@ import art12c from './images/art-12c.webp';
 import art12d from './images/art-12d.webp';
 import art12e from './images/art-12e.webp';
 import art12f from './images/art-12f.webp';
+import nebula from './images/nebula.webp';
 import type { NewsImage } from '../api/contentApi';
 
 /**
@@ -38,6 +39,7 @@ export const images = {
   planetTerra: art12a,
   planetGas: art12f,
   planetLava: art12b,
+  nebula,
   about: {
     planets: aboutPlanets,
     constructor: aboutConstructor,

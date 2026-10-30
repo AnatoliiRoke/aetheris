@@ -12,6 +12,7 @@ import type { ProcessBuilding, ProcessBuildingSummary, ProcessesApi, Terraformin
 import type { ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionStock } from '../api/productionApi';
 import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
+import type { OwnedPlanet, Reference, WorldApi, WorldReference } from '../api/worldApi';
 
 /**
  * An account API whose every method is a spy; a test overrides what it needs.
@@ -618,6 +619,72 @@ export function sampleProcessesBuildings(): ProcessBuildingSummary[] {
 }
 
 /**
+ * A row of a reference table for the tests (task 00010): the client reads the name and the
+ * picture of a body type from here.
+ */
+export function sampleReference(overrides: Partial<Reference> = {}): Reference {
+  return {
+    id: 1,
+    code: 'object_type_1',
+    nameKey: 'world.object_type.object_type_1.name',
+    descriptionKey: 'world.object_type.object_type_1.description',
+    groupCode: null,
+    groupId: null,
+    imageKey: null,
+    ...overrides,
+  };
+}
+
+/**
+ * The reference tables of the world for the tests (task 00010).
+ */
+export function sampleWorldReference(overrides: Partial<WorldReference> = {}): WorldReference {
+  return {
+    resourceGroups: [sampleReference({ id: 1, code: 'resource_group_1', nameKey: 'world.resource_group.resource_group_1.name' })],
+    resources: [
+      sampleReference({ id: 1, code: 'resource_1', nameKey: 'world.resource.resource_1.name', groupCode: 'resource_group_1', groupId: 1 }),
+      sampleReference({ id: 3, code: 'resource_3', nameKey: 'world.resource.resource_3.name', groupCode: 'resource_group_1', groupId: 1 }),
+    ],
+    objectTypes: [
+      sampleReference({ id: 5, code: 'object_type_5', nameKey: 'world.object_type.object_type_5.name', imageKey: 'art-12a' }),
+      sampleReference({ id: 10, code: 'object_type_10', nameKey: 'world.object_type.object_type_10.name', imageKey: 'art-12f' }),
+    ],
+    sizeClasses: [],
+    ...overrides,
+  };
+}
+
+/**
+ * A body of the player for the tests (task 00010).
+ */
+export function sampleOwnedPlanet(overrides: Partial<OwnedPlanet> = {}): OwnedPlanet {
+  return {
+    planetId: 10,
+    name: 'Nova',
+    objectTypeId: 5,
+    sectorId: 1,
+    systemId: 3,
+    orbit: 2,
+    sizeClassId: 1,
+    size: 4,
+    isTerraformed: false,
+    deposits: [{ resourceTypeId: 1, coefficient: 1.2 }],
+    ...overrides,
+  };
+}
+
+/**
+ * A world API whose every method is a spy; a test overrides what it needs (task 00010).
+ */
+export function fakeWorldApi(overrides: Partial<WorldApi> = {}): WorldApi {
+  return {
+    reference: vi.fn().mockResolvedValue(sampleWorldReference()),
+    planets: vi.fn().mockResolvedValue([sampleOwnedPlanet()]),
+    ...overrides,
+  };
+}
+
+/**
  * A signed-in account for the tests.
  */
 export function signedInMe(overrides: Partial<Me> = {}): Me {
@@ -637,7 +704,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
  */
 export function renderPage(
   path: string,
-  options: { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; game?: GameApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi } = {},
+  options: { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; game?: GameApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi } = {},
 ): RenderResult & { api: Api } {
   window.history.replaceState(null, '', path);
 
@@ -651,6 +718,7 @@ export function renderPage(
     production: options.production ?? fakeProductionApi(),
     research: options.research ?? fakeResearchApi(),
     texts: options.texts ?? fakeTextsApi(),
+    world: options.world ?? fakeWorldApi(),
   };
   const result = render(
     <AppProviders api={api}>

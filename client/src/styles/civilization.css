@@ -1,0 +1,188 @@
+/* AETHERIS — the screen of the civilization (task 00010). The layout of the design
+   `documentation/design/aetheris-civ`, with the tokens of `tokens.css` and no other values
+   (ui-art/05). */
+
+.civ {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-0);
+  color: var(--text-1);
+}
+
+.civ__body { flex: 1 1 auto; display: flex; align-items: stretch; min-width: 0; }
+
+/* ---------- top bar ---------- */
+.civ-topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: var(--space-4);
+  min-height: var(--header-h); padding-inline: var(--gutter);
+  border-bottom: 1px solid var(--border); background: rgba(7, 11, 22, 0.92);
+}
+.civ-topbar__id { display: flex; align-items: center; gap: var(--space-3); flex: 0 0 auto; }
+.brand { display: flex; align-items: center; gap: var(--space-2); text-decoration: none; color: var(--text-1); }
+.brand img { width: 28px; height: 28px; border-radius: var(--r-sm); object-fit: cover; }
+.brand b { font-weight: 700; letter-spacing: 0.04em; }
+.nick {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-1) var(--space-3); border-radius: var(--r-full);
+  border: 1px solid var(--border); background: var(--bg-2); font-weight: 600;
+}
+.civ-res { flex: 1 1 auto; display: flex; justify-content: center; gap: var(--space-5); min-width: 0; list-style: none; margin: 0; padding: 0; }
+.civ-res li { font-weight: 600; white-space: nowrap; }
+.civ-home { font-weight: 600; color: var(--text-soft); white-space: nowrap; }
+.civ-topbar__tools { display: flex; align-items: center; gap: var(--space-2); flex: 0 0 auto; }
+
+/* ---------- side menu ---------- */
+.civ-side {
+  position: sticky; top: var(--header-h); align-self: flex-start;
+  flex: 0 0 220px; width: 220px; min-height: calc(100vh - var(--header-h));
+  display: flex; flex-direction: column; gap: 2px;
+  padding: var(--space-4) var(--space-3); border-right: 1px solid var(--border);
+  background: rgba(11, 16, 32, 0.6);
+}
+.civ-nav {
+  display: flex; align-items: center; gap: var(--space-3);
+  min-height: 44px; padding-inline: var(--space-3); border-radius: var(--r-md);
+  text-decoration: none; font-weight: 500; color: var(--text-soft);
+}
+.civ-nav:hover { background: rgba(160, 190, 255, 0.06); }
+.civ-nav[aria-current="page"] { color: var(--text-1); font-weight: 600; background: rgba(46, 196, 196, 0.12); box-shadow: inset 3px 0 0 var(--accent); }
+.civ-nav.is-off { color: var(--text-2); cursor: default; }
+.civ-nav.is-off:hover { background: transparent; }
+.civ-nav-wrap { position: relative; display: flex; align-items: center; gap: var(--space-2); }
+.civ-nav-wrap .civ-nav { flex: 1 1 auto; }
+.civ-nav__label { flex: 1 1 auto; }
+.civ-nav__tag {
+  padding: 1px var(--space-2); border-radius: var(--r-full);
+  border: 1px solid var(--border-strong); font-size: var(--fs-small); color: var(--text-2); white-space: nowrap;
+}
+
+/* ---------- main ---------- */
+.civ__main { position: relative; flex: 1 1 auto; min-width: 0; padding: var(--space-5) var(--gutter); }
+.civ__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.22; pointer-events: none; z-index: 0; }
+.civ-main__in { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--space-4); }
+.civ-main__head h1 { font-size: var(--fs-h2); line-height: 1.2; }
+.civ-main__title { font-size: var(--fs-h3); font-weight: 600; color: var(--text-2); }
+.civ-main__title span { color: var(--text-2); font-weight: 600; }
+.civ-bodies { display: flex; flex-direction: column; gap: var(--space-4); }
+.civ-empty {
+  padding: var(--space-5); border: 1px dashed var(--border-strong); border-radius: var(--r-lg);
+  background: var(--bg-2); color: var(--text-2);
+}
+.civ-nickname { display: none; }
+
+/* ---------- the card of a body ---------- */
+.civ-body {
+  display: grid; grid-template-columns: 220px repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden;
+  background: var(--bg-2); box-shadow: var(--shadow-sm);
+}
+.civ-body.is-current { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.civ-body__id { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); background: var(--bg-1); border-right: 1px solid var(--border); }
+.civ-body__col { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); min-width: 0; }
+.civ-body__col + .civ-body__col, .civ-body__id + .civ-body__col { border-left: 1px solid var(--border); }
+.civ-label { font-size: var(--fs-small); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); }
+
+.body-id { display: flex; flex-direction: column; gap: var(--space-2); }
+.body-art {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  padding: var(--space-3); border-radius: var(--r-lg); background: var(--bg-2);
+}
+.body-art__image { width: 116px; height: 116px; object-fit: cover; border-radius: 50%; }
+.body-art__placeholder {
+  display: flex; align-items: center; justify-content: center;
+  width: 116px; height: 116px; border-radius: 50%; background: var(--bg-3);
+  color: var(--text-2); font-size: var(--fs-h3); font-weight: 700;
+}
+.body-sel {
+  position: absolute; top: var(--space-2); right: var(--space-2);
+  padding: 2px var(--space-2); border-radius: var(--r-full);
+  background: var(--accent); color: var(--on-accent); font-size: var(--fs-small); font-weight: 700;
+}
+.body-meta { display: flex; flex-direction: column; gap: var(--space-1); }
+.body-meta h3 { font-size: var(--fs-h3); font-weight: 600; line-height: 1.2; }
+.body-meta h3 button { padding: 0; border: 0; background: transparent; color: var(--text-1); font: inherit; text-align: left; cursor: pointer; }
+.chip-type {
+  align-self: flex-start; padding: 1px var(--space-2); border-radius: var(--r-full);
+  border: 1px solid var(--border); background: var(--bg-3); color: var(--text-soft); font-size: var(--fs-small);
+}
+.coords { font-size: var(--fs-small); line-height: 1.4; color: var(--text-2); white-space: pre-line; }
+
+.civ-body__deposits { display: flex; flex-direction: column; gap: var(--space-1); }
+.deposits { display: flex; flex-wrap: wrap; gap: var(--space-1); list-style: none; margin: 0; padding: 0; }
+.deposits__item {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  padding: 1px var(--space-2); border-radius: var(--r-full);
+  border: 1px solid var(--border); background: var(--bg-2); font-size: var(--fs-small);
+}
+.game-icon { flex: 0 0 auto; }
+
+/* ---------- the bars of the facts ---------- */
+.civ-bars { display: flex; flex-direction: column; gap: var(--space-2); }
+.bar-row { display: flex; flex-direction: column; gap: var(--space-1); }
+.bar-row__head { display: flex; justify-content: space-between; gap: var(--space-2); font-size: var(--fs-small); }
+.bar-row__head span { color: var(--text-soft); }
+.bar-row__head b { font-weight: 600; white-space: nowrap; }
+.bar-row__head b.warn { color: var(--warning); }
+.track { height: 5px; border-radius: var(--r-full); background: rgba(160, 190, 255, 0.12); overflow: hidden; }
+.track i { display: block; height: 100%; border-radius: var(--r-full); }
+.track .f-accent { background: var(--accent); }
+.track .f-energy { background: var(--warning); }
+.track .f-store { background: var(--text-2); }
+
+/* ---------- the queues and the yields ---------- */
+.civ-queue { display: flex; flex-direction: column; gap: var(--space-2); list-style: none; margin: 0; padding: 0; }
+.civ-queue__item {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
+  padding: var(--space-2) var(--space-3); border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--bg-1);
+}
+.civ-queue__name { font-weight: 600; font-size: var(--fs-small); }
+.civ-yields { display: flex; flex-direction: column; gap: var(--space-1); list-style: none; margin: 0; padding: 0; }
+.civ-yield { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); font-size: var(--fs-small); }
+.civ-yield span:first-child { color: var(--text-soft); }
+
+/* ---------- the bottom bar ---------- */
+.civ-bottombar {
+  position: sticky; bottom: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+  min-height: var(--header-h); padding: var(--space-2) var(--gutter);
+  border-top: 1px solid var(--border); background: rgba(7, 11, 22, 0.94);
+}
+.civ-bottombar__switch { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.civ-thumb {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--bg-2);
+}
+.civ-thumb__letter { font-weight: 700; color: var(--text-soft); }
+.civ-current { display: flex; flex-direction: column; line-height: 1.25; white-space: nowrap; }
+.civ-current small { font-size: var(--fs-small); color: var(--text-2); }
+.civ-current strong { font-weight: 600; }
+
+/* ---------- the tabs of the phone ---------- */
+.civ-tabbar { display: none; }
+
+/* ---------- the phone ---------- */
+@media (max-width: 767px) {
+  .civ-side { display: none; }
+  .civ-topbar { flex-wrap: wrap; gap: var(--space-2); padding: var(--space-2) var(--gutter); }
+  .civ-res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-1) var(--space-2); justify-content: stretch; }
+  .civ__main { padding: var(--space-4) var(--gutter); }
+  .civ-body { grid-template-columns: minmax(0, 1fr); }
+  .civ-body__id { border-right: 0; border-bottom: 1px solid var(--border); }
+  .civ-body__col + .civ-body__col, .civ-body__id + .civ-body__col { border-left: 0; border-top: 1px solid var(--border); }
+  .civ-bottombar { display: none; }
+  .civ-tabbar {
+    position: sticky; bottom: 0; z-index: 10; display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    border-top: 1px solid var(--border); background: rgba(7, 11, 22, 0.96);
+  }
+  .civ-tabbar a, .civ-tabbar span {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    min-height: 58px; text-decoration: none; font-size: var(--fs-small); font-weight: 600; color: var(--text-2);
+  }
+  .civ-tabbar a[aria-current="page"] { color: var(--accent-hover); box-shadow: inset 0 2px 0 var(--accent); }
+  .civ-tabbar span.is-off { color: var(--text-2); }
+}

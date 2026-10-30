@@ -8,6 +8,7 @@ import type { ProcessesApi } from './processesApi';
 import type { ProductionApi } from './productionApi';
 import type { ResearchApi } from './researchApi';
 import type { TextsApi } from './textsApi';
+import type { WorldApi } from './worldApi';
 
 /**
  * The server interfaces the pages use. Tests pass their own implementations.
@@ -22,6 +23,7 @@ export interface Api {
   production: ProductionApi;
   research: ResearchApi;
   texts: TextsApi;
+  world: WorldApi;
 }
 
 export const ApiContext = createContext<Api | null>(null);

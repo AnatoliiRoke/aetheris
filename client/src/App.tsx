@@ -11,6 +11,7 @@ import { createProcessesApi } from './api/processesApi';
 import { createProductionApi } from './api/productionApi';
 import { createResearchApi } from './api/researchApi';
 import { createTextsApi } from './api/textsApi';
+import { createWorldApi } from './api/worldApi';
 import { I18nProvider } from './i18n/I18nProvider';
 import { useI18n } from './i18n/useI18n';
 import { CheckEmailPage } from './pages/auth/CheckEmailPage';
@@ -180,6 +181,7 @@ export default function App() {
       production: createProductionApi(http),
       research: createResearchApi(http),
       texts: createTextsApi(http),
+      world: createWorldApi(http),
     };
   }, []);
 
