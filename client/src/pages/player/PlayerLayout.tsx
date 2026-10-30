@@ -14,8 +14,18 @@ import { EmailBanner } from './EmailBanner';
  *
  * @param showNavigation Whether the start screen and the account page are offered; the first
  *   step of the game offers only the sign-out (task 00006, decision 9).
+ * @param headerExtra What the header shows beside the logo, for example the balances of the
+ *   credits of the civilization (task 00015).
  */
-export function PlayerLayout({ children, showNavigation = true }: { children: ReactNode; showNavigation?: boolean }) {
+export function PlayerLayout({
+  children,
+  showNavigation = true,
+  headerExtra = null,
+}: {
+  children: ReactNode;
+  showNavigation?: boolean;
+  headerExtra?: ReactNode;
+}) {
   const { t } = useI18n();
   const { signOut } = useSession();
   const { navigate } = useRouter();
@@ -31,6 +41,7 @@ export function PlayerLayout({ children, showNavigation = true }: { children: Re
         <Link className="logo" to={showNavigation ? routes.game : routes.civilization} aria-label={t('common.logoHome')}>
           <LogoContent />
         </Link>
+        {headerExtra}
         <nav className="player__nav" aria-label={t('player.nav')}>
           {showNavigation ? (
             <>
