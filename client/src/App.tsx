@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, type ReactNode } from 'react';
 import { isAdminPath } from './admin/adminRoutes';
 import { createAuthApi } from './api/authApi';
 import { ApiContext, type Api } from './api/context';
+import { createEconomyApi } from './api/economyApi';
 import { createGameApi } from './api/gameApi';
 import { HttpClient } from './api/http';
 import { mockContentApi } from './api/mockContentApi';
@@ -172,6 +173,7 @@ export default function App() {
     return {
       auth: createAuthApi(http),
       content: mockContentApi,
+      economy: createEconomyApi(http),
       game: createGameApi(http),
       planets: createPlanetApi(http),
       processes: createProcessesApi(http),
