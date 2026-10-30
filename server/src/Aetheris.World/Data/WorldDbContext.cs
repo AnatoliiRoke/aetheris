@@ -154,6 +154,7 @@ public sealed class WorldDbContext : DbContext
             entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
             entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
+            entity.Property(e => e.Scope).HasMaxLength(CodeLength);
             entity.HasOne<ResourceGroupEntity>().WithMany().HasForeignKey(e => e.ResourceGroupId).OnDelete(DeleteBehavior.Restrict);
         });
 

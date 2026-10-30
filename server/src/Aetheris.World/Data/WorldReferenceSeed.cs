@@ -91,7 +91,8 @@ public static class WorldReferenceSeed
                 NameKey = WorldTextKeys.Name(WorldTextKeys.Resource, resource.Code),
                 DescriptionKey = WorldTextKeys.Description(WorldTextKeys.Resource, resource.Code),
                 ImageKey = resource.ImageKey,
-                ResourceGroupId = groups[resource.Group].Id,
+                ResourceGroupId = resource.Group is null ? null : groups[resource.Group].Id,
+                Scope = resource.Scope,
             },
             StringComparer.Ordinal);
 
@@ -368,16 +369,18 @@ public sealed record SeedResourceGroup(
 
 /// <summary>A resource type of the starting data.</summary>
 /// <param name="Code">The neutral code.</param>
-/// <param name="Group">The code of the group.</param>
+/// <param name="Group">The code of the group, if the resource has one.</param>
 /// <param name="Name">The name by language.</param>
 /// <param name="Description">The description by language, if any.</param>
 /// <param name="ImageKey">The key of the picture, if any.</param>
+/// <param name="Scope">Where the resource lies: on a body or in the whole civilization (task 00015).</param>
 public sealed record SeedResource(
     string Code,
-    string Group,
+    string? Group,
     IReadOnlyDictionary<string, string> Name,
     IReadOnlyDictionary<string, string>? Description = null,
-    string? ImageKey = null);
+    string? ImageKey = null,
+    string Scope = ResourceScopes.Planet);
 
 /// <summary>An object type of the starting data.</summary>
 /// <param name="Code">The neutral code.</param>

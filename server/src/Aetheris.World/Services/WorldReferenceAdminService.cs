@@ -38,6 +38,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
     private const string AllowedOnPlanetField = "allowed_on_planet";
 
+    private const string ScopeField = "scope";
+
     private const string LabelPrefix = "admin.reference.";
 
     /// <summary>The place of the resources in the menu of the reference kinds.</summary>
@@ -105,7 +107,14 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             new(AdminReferenceRules.ImageField, AdminReferenceFieldTypes.Image, LabelPrefix + "field.image"),
             new(AdminReferenceRules.NameField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.name", IsRequired: true, HasLanguages: true, InList: true),
             new(AdminReferenceRules.DescriptionField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.description", IsRequired: true, HasLanguages: true),
-            new(GroupField, AdminReferenceFieldTypes.Reference, LabelPrefix + "field.resource_group", IsRequired: true, InList: true, ReferenceKind: ResourceGroupKind),
+            new(GroupField, AdminReferenceFieldTypes.Reference, LabelPrefix + "field.resource_group", InList: true, ReferenceKind: ResourceGroupKind),
+            new(
+                ScopeField,
+                AdminReferenceFieldTypes.Select,
+                LabelPrefix + "field.scope",
+                IsRequired: true,
+                InList: true,
+                Options: [.. ResourceScopes.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "scope." + value))]),
         ]);
 
     /// <summary>
@@ -153,7 +162,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     resource.ImageKey,
                     resource.IsArchived,
                     resource.Version,
-                    new Dictionary<string, object?> { [GroupField] = resource.ResourceGroupId }))],
+                    new Dictionary<string, object?> { [GroupField] = resource.ResourceGroupId, [ScopeField] = resource.Scope }))],
             ResourceGroupKind => [.. (await _dbContext.ResourceGroups.AsNoTracking().OrderBy(group => group.Id).ToListAsync(cancellationToken).ConfigureAwait(false))
                 .Select(group => new AdminReferenceRow(
                     group.Id,
@@ -319,10 +328,11 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 ResourceTypeEntity resource = new()
                 {
                     Code = code,
-                    ResourceGroupId = values.ResourceGroupId!.Value,
+                    ResourceGroupId = values.ResourceGroupId,
                     NameKey = WorldTextKeys.Name(WorldTextKeys.Resource, code),
                     DescriptionKey = WorldTextKeys.Description(WorldTextKeys.Resource, code),
                     ImageKey = AdminReferenceRules.ImageKey(values.ImageKey),
+                    Scope = values.Scope,
                 };
 
                 _dbContext.ResourceTypes.Add(resource);
@@ -353,7 +363,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 IReadOnlyList<LocalizationPack> packs = await AdminReferenceRules.PacksAsync(_texts, cancellationToken).ConfigureAwait(false);
                 ResourceValues before = ResourceValues.Of(resource, packs);
 
-                resource.ResourceGroupId = values.ResourceGroupId!.Value;
+                resource.ResourceGroupId = values.ResourceGroupId;
+                resource.Scope = values.Scope;
                 resource.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
                 resource.Version++;
 
@@ -445,17 +456,27 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         Dictionary<string, List<string>> failures = [];
         AdminReferenceRules.CheckTexts(failures, _texts, values.Name, values.Description);
 
+        if (!ResourceScopes.IsKnown(values.Scope))
+        {
+            AdminReferenceRules.Fail(failures, ScopeField, AdminReferenceErrors.Unknown);
+        }
+
         ResourceGroupEntity? group = values.ResourceGroupId is { } groupId
             ? await _dbContext.ResourceGroups.AsNoTracking().SingleOrDefaultAsync(entry => entry.Id == groupId, cancellationToken).ConfigureAwait(false)
             : null;
 
-        if (values.ResourceGroupId is null)
+        if (group is null)
         {
-            AdminReferenceRules.Fail(failures, GroupField, AdminReferenceErrors.Required);
-        }
-        else if (group is null)
-        {
-            AdminReferenceRules.Fail(failures, GroupField, AdminReferenceErrors.Unknown);
+            if (values.ResourceGroupId is not null)
+            {
+                AdminReferenceRules.Fail(failures, GroupField, AdminReferenceErrors.Unknown);
+            }
+            else if (string.Equals(values.Scope, ResourceScopes.Planet, StringComparison.Ordinal))
+            {
+                // A resource that lies on a body belongs to a group; a currency of a
+                // civilization has no group, because it does not lie on a body (task 00015).
+                AdminReferenceRules.Fail(failures, GroupField, AdminReferenceErrors.Required);
+            }
         }
         else if (group.IsArchived && group.Id != stored?.ResourceGroupId)
         {
@@ -491,13 +512,14 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         Dictionary<string, string>? Name,
         Dictionary<string, string>? Description,
         int? ResourceGroupId,
-        string? ImageKey)
+        string? ImageKey,
+        string Scope)
     {
         public static ResourceValues Of(ResourceTypeEntity resource, IReadOnlyList<LocalizationPack> packs) =>
-            new(AdminReferenceRules.TextsOf(packs, resource.NameKey), AdminReferenceRules.TextsOf(packs, resource.DescriptionKey), resource.ResourceGroupId, resource.ImageKey);
+            new(AdminReferenceRules.TextsOf(packs, resource.NameKey), AdminReferenceRules.TextsOf(packs, resource.DescriptionKey), resource.ResourceGroupId, resource.ImageKey, resource.Scope);
 
         public static ResourceValues Of(ResourceTypeEntity resource, (Dictionary<string, string> Name, Dictionary<string, string> Description) texts) =>
-            new(texts.Name, texts.Description, resource.ResourceGroupId, resource.ImageKey);
+            new(texts.Name, texts.Description, resource.ResourceGroupId, resource.ImageKey, resource.Scope);
 
         public (Dictionary<string, string> Name, Dictionary<string, string> Description) Trimmed(ILocalizationTexts texts) =>
             (Trim(texts, Name), Trim(texts, Description));
@@ -508,6 +530,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             [AdminReferenceRules.NameField] = Name,
             [AdminReferenceRules.DescriptionField] = Description,
             [GroupField] = ResourceGroupId,
+            [ScopeField] = Scope,
         };
     }
 

@@ -42,8 +42,17 @@ public sealed class ResourceTypeEntity
     /// <summary>Gets or sets the neutral code of the resource, given by the server (task 00022).</summary>
     public string Code { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the group of the resource.</summary>
-    public int ResourceGroupId { get; set; }
+    /// <summary>
+    /// Gets or sets the group of the resource. A currency of a civilization has no group: it
+    /// does not lie on a body and has no share of a body (task 00015).
+    /// </summary>
+    public int? ResourceGroupId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the scope of the resource: where it lies. A resource of a planet is stored
+    /// on the body, a resource of a civilization belongs to the whole civilization (task 00015).
+    /// </summary>
+    public string Scope { get; set; } = ResourceScopes.Planet;
 
     /// <summary>Gets or sets the localisation key of the name.</summary>
     public string NameKey { get; set; } = string.Empty;

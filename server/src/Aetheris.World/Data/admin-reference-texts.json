@@ -6,5 +6,8 @@
   "admin.reference.field.description": { "uk": "Опис", "en": "Description" },
   "admin.reference.field.sort_order": { "uk": "Порядок у списках", "en": "Order in the lists" },
   "admin.reference.field.resource_group": { "uk": "Група ресурсів", "en": "Resource group" },
-  "admin.reference.field.allowed_on_planet": { "uk": "Може лежати на планеті", "en": "May lie on a planet" }
+  "admin.reference.field.allowed_on_planet": { "uk": "Може лежати на планеті", "en": "May lie on a planet" },
+  "admin.reference.field.scope": { "uk": "Область дії", "en": "Scope" },
+  "admin.reference.scope.planet": { "uk": "Планета", "en": "Planet" },
+  "admin.reference.scope.civilization": { "uk": "Цивілізація", "en": "Civilization" }
 }

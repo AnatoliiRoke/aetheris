@@ -46,8 +46,11 @@ public sealed class WorldReferenceRepository
             .Select(group => new ReferenceResourceGroup(group.Id, group.Code, group.AllowedOnPlanet))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
+        // The generation puts resources on the bodies, so the currencies of a civilization are
+        // not a part of its input (task 00015).
         List<ReferenceResource> resources = await _dbContext.ResourceTypes.AsNoTracking()
-            .Select(resource => new ReferenceResource(resource.Id, resource.Code, resource.ResourceGroupId))
+            .Where(resource => resource.ResourceGroupId != null)
+            .Select(resource => new ReferenceResource(resource.Id, resource.Code, resource.ResourceGroupId!.Value))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         List<ReferenceObjectType> types = await _dbContext.ObjectTypes.AsNoTracking()
