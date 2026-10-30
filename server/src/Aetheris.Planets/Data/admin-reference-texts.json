@@ -30,6 +30,7 @@
   "admin.reference.building_effect.energy_output": { "uk": "Виробляє енергію", "en": "Produces energy" },
   "admin.reference.building_effect.energy_consumption": { "uk": "Споживає енергію", "en": "Consumes energy" },
   "admin.reference.building_effect.population_max": { "uk": "Максимум населення", "en": "Population limit" },
+  "admin.reference.building_effect.population_growth_bonus": { "uk": "Швидкість приросту населення", "en": "Speed of the population growth" },
   "admin.reference.building_effect.level_cap": { "uk": "Межа рівня інших будівель", "en": "Level limit of the other buildings" },
   "admin.reference.building_effect.part_storage_capacity": { "uk": "Місткість складу деталей", "en": "Storage of the parts" },
   "admin.reference.requirement.building_level": { "uk": "Будівля рівня", "en": "Building of a level" },

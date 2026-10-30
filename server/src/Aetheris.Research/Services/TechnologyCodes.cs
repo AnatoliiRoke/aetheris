@@ -41,6 +41,16 @@ public static class TechnologyEffectTypes
     public const string PopulationMax = "population_max";
 
     /// <summary>
+    /// The technology raises the speed the population of the body grows with (task 00015).
+    /// </summary>
+    public const string PopulationGrowthBonus = "population_growth_bonus";
+
+    /// <summary>
+    /// The technology raises the income of the credits of the civilization (task 00015).
+    /// </summary>
+    public const string CreditIncomeBonus = "credit_income_bonus";
+
+    /// <summary>
     /// Gets every effect kind, in the order of the form of the admin panel (task 00023).
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -53,6 +63,8 @@ public static class TechnologyEffectTypes
         StorageCapacity,
         EnergyOutput,
         PopulationMax,
+        PopulationGrowthBonus,
+        CreditIncomeBonus,
     ];
 }
 

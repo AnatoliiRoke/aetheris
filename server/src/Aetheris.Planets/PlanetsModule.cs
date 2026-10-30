@@ -3,6 +3,7 @@ using Aetheris.Core.Commands;
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Data;
 using Aetheris.Core.Scheduling;
+using Aetheris.Economy.Services;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Data;
@@ -72,6 +73,10 @@ public sealed class PlanetsModule : IPlanetsModule
         services.AddScoped<PlanetStartPackage>();
         services.TryAddScoped<ITechnologyLevels, NoTechnologyLevels>();
         services.AddScoped<IPlanetsModule, PlanetsModule>();
+
+        // The economy module asks for the effects of the buildings of a body; the contract is
+        // declared by the economy module and implemented here (task 00015).
+        services.AddScoped<IEconomyBuildingEffects, EconomyBuildingEffects>();
         services.AddScoped<IScheduledEventHandler, ConstructionCompleteHandler>();
         services.AddScoped<PlanetsReferenceAdminService>();
         services.AddScoped<IAdminReferenceService>(serviceProvider => serviceProvider.GetRequiredService<PlanetsReferenceAdminService>());

@@ -7,6 +7,7 @@ using Aetheris.Core.Scheduling;
 using Aetheris.Core.Text;
 using Aetheris.Core.Time;
 using Aetheris.Economy;
+using Aetheris.Economy.Data;
 using Aetheris.Fleet;
 using Aetheris.Host.Admin;
 using Aetheris.Host.Auth;
@@ -182,7 +183,6 @@ builder.Services.AddHealthChecks()
 // ---------------------------------------------------------------------------------------------
 // Modules
 // ---------------------------------------------------------------------------------------------
-builder.Services.AddSingleton<IEconomyModule, EconomyModule>();
 builder.Services.AddSingleton<IFleetModule, FleetModule>();
 builder.Services.AddSingleton<IMarketModule, MarketModule>();
 builder.Services.AddSingleton<IRatingModule, RatingModule>();
@@ -203,6 +203,10 @@ builder.Services.AddResearchModule();
 // The Production module reads the bodies and the research modules, so it comes after them.
 builder.Services.AddProductionModule();
 builder.Services.AddProcessesModule();
+
+// The Economy module reads the world, and the bodies and the research modules give it their
+// effects through the contracts it declares (task 00015).
+builder.Services.AddEconomyModule();
 
 WebApplication app = builder.Build();
 
@@ -244,6 +248,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     await ResearchDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await ProductionDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await ProcessesDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
+    await EconomyDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
 
@@ -288,6 +293,10 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     // modules have their own reference data, because a process runs on a body and works with
     // the parts (task 00014).
     await scope.ServiceProvider.GetRequiredService<IProcessesModule>().EnsureAsync().ConfigureAwait(false);
+
+    // The Economy module fills its tables once the bodies, the research and the world modules
+    // have their own reference data, because the numbers of the game live in them (task 00015).
+    await scope.ServiceProvider.GetRequiredService<IEconomyModule>().EnsureAsync().ConfigureAwait(false);
 }
 
 if (AdminCommandLine.IsCommand(args))
@@ -321,6 +330,7 @@ PlanetsModule.MapEndpoints(app);
 ResearchServiceCollectionExtensions.MapEndpoints(app);
 ProductionServiceCollectionExtensions.MapEndpoints(app);
 ProcessesServiceCollectionExtensions.MapEndpoints(app);
+EconomyServiceCollectionExtensions.MapEndpoints(app);
 app.MapCommands();
 
 await app.RunAsync().ConfigureAwait(false);

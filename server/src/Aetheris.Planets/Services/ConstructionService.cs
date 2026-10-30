@@ -4,6 +4,8 @@ using Aetheris.Core.Configuration;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Scheduling;
 using Aetheris.Core.Time;
+using Aetheris.Economy;
+using Aetheris.Economy.Services;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Data;
@@ -43,6 +45,8 @@ public sealed class ConstructionService
     private readonly BuildingCatalogCache _catalogCache;
     private readonly IWorldModule _world;
     private readonly ITechnologyLevels _technologies;
+    private readonly IEconomyModule _economy;
+    private readonly CostSplitter _costs;
     private readonly IRequirementsModule _requirements;
     private readonly IEventScheduler _scheduler;
     private readonly IGameConfig _config;
@@ -66,6 +70,8 @@ public sealed class ConstructionService
         BuildingCatalogCache catalogCache,
         IWorldModule world,
         ITechnologyLevels technologies,
+        IEconomyModule economy,
+        CostSplitter costs,
         IRequirementsModule requirements,
         IEventScheduler scheduler,
         IGameConfig config,
@@ -76,6 +82,8 @@ public sealed class ConstructionService
         ArgumentNullException.ThrowIfNull(catalogCache);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(technologies);
+        ArgumentNullException.ThrowIfNull(economy);
+        ArgumentNullException.ThrowIfNull(costs);
         ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(scheduler);
         ArgumentNullException.ThrowIfNull(config);
@@ -86,6 +94,8 @@ public sealed class ConstructionService
         _catalogCache = catalogCache;
         _world = world;
         _technologies = technologies;
+        _economy = economy;
+        _costs = costs;
         _requirements = requirements;
         _scheduler = scheduler;
         _config = config;
@@ -127,10 +137,20 @@ public sealed class ConstructionService
                     });
                 }
 
-                foreach ((int resourceTypeId, long amount) in check.Info!.Costs)
+                // The costs of a civilization are paid from its balance and the rest from the
+                // balance of the body (task 00015).
+                SplitCosts split = await _costs.SplitAsync(check.Info!.Costs, cancellationToken).ConfigureAwait(false);
+
+                foreach ((int resourceTypeId, long amount) in split.PlanetResources)
                 {
                     session.Take(resourceTypeId, amount);
                 }
+
+                // The credits belong to the civilization of the owner of the body.
+                string ownerPlayerId = session.State.OwnerPlayerId
+                    ?? throw new GameException(PlanetsErrorCodes.PlanetUnknown, "The body has no owner.");
+
+                await _economy.TakeAsync(ownerPlayerId, split.Currencies, cancellationToken).ConfigureAwait(false);
 
                 ConstructionQueueItemEntity item = new()
                 {

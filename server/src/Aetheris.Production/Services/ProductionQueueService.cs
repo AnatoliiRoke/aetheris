@@ -4,6 +4,8 @@ using Aetheris.Core.Configuration;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Scheduling;
 using Aetheris.Core.Time;
+using Aetheris.Economy;
+using Aetheris.Economy.Services;
 using Aetheris.Planets;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Services;
@@ -52,6 +54,8 @@ public sealed class ProductionQueueService
     private readonly ProductionCatalogCache _catalogCache;
     private readonly IPlanetsModule _planets;
     private readonly IPlanetResources _resources;
+    private readonly IEconomyModule _economy;
+    private readonly CostSplitter _costs;
     private readonly IRequirementsModule _requirements;
     private readonly ITechnologyLevels _technologies;
     private readonly IProductionMultipliers _multipliers;
@@ -81,6 +85,8 @@ public sealed class ProductionQueueService
         ProductionCatalogCache catalogCache,
         IPlanetsModule planets,
         IPlanetResources resources,
+        IEconomyModule economy,
+        CostSplitter costs,
         IRequirementsModule requirements,
         ITechnologyLevels technologies,
         IProductionMultipliers multipliers,
@@ -94,6 +100,8 @@ public sealed class ProductionQueueService
         ArgumentNullException.ThrowIfNull(catalogCache);
         ArgumentNullException.ThrowIfNull(planets);
         ArgumentNullException.ThrowIfNull(resources);
+        ArgumentNullException.ThrowIfNull(economy);
+        ArgumentNullException.ThrowIfNull(costs);
         ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(technologies);
         ArgumentNullException.ThrowIfNull(multipliers);
@@ -107,6 +115,8 @@ public sealed class ProductionQueueService
         _catalogCache = catalogCache;
         _planets = planets;
         _resources = resources;
+        _economy = economy;
+        _costs = costs;
         _requirements = requirements;
         _technologies = technologies;
         _multipliers = multipliers;
@@ -207,7 +217,12 @@ public sealed class ProductionQueueService
                 DateTimeOffset now = _clock.GameNow;
                 CheckDuration(now, await ScaledSecondsAsync(playerId, recipe, cancellationToken).ConfigureAwait(false), quantity);
 
-                await _resources.TakeAsync(planetId, playerId, resourceCosts, cancellationToken).ConfigureAwait(false);
+                // The costs of a civilization are paid from its balance and the rest from the
+                // balance of the body (task 00015).
+                SplitCosts split = await _costs.SplitAsync(resourceCosts, cancellationToken).ConfigureAwait(false);
+
+                await _resources.TakeAsync(planetId, playerId, split.PlanetResources, cancellationToken).ConfigureAwait(false);
+                await _economy.TakeAsync(playerId, split.Currencies, cancellationToken).ConfigureAwait(false);
                 List<ProductionOrderCostEntity> partCostRows = await TakePartsAsync(planetId, storage, partCosts, cancellationToken).ConfigureAwait(false);
 
                 ProductionOrderEntity item = new()
@@ -857,7 +872,12 @@ public sealed class ProductionQueueService
 
         if (resourceAmounts.Count > 0)
         {
-            await _resources.GiveAsync(planetId, playerId, resourceAmounts, cancellationToken).ConfigureAwait(false);
+            // The input comes back where it was taken from: the credits to the balance of the
+            // civilization and the rest to the balance of the body (task 00015).
+            SplitCosts split = await _costs.SplitAsync(resourceAmounts, cancellationToken).ConfigureAwait(false);
+
+            await _resources.GiveAsync(planetId, playerId, split.PlanetResources, cancellationToken).ConfigureAwait(false);
+            await _economy.GiveAsync(playerId, split.Currencies, cancellationToken).ConfigureAwait(false);
         }
 
         ProductionCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);

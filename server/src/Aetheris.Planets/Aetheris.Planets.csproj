@@ -16,6 +16,7 @@
   -->
   <ItemGroup>
     <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
+    <ProjectReference Include="..\Aetheris.Economy\Aetheris.Economy.csproj" />
     <ProjectReference Include="..\Aetheris.Requirements\Aetheris.Requirements.csproj" />
     <ProjectReference Include="..\Aetheris.World\Aetheris.World.csproj" />
   </ItemGroup>

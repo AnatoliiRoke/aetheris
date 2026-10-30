@@ -27,6 +27,11 @@ public static class BuildingEffectTypes
     /// <summary>Raises the largest population of the body; kept for the population task.</summary>
     public const string PopulationMax = "population_max";
 
+    /// <summary>
+    /// The effect of a building that raises the speed the population grows with (task 00015).
+    /// </summary>
+    public const string PopulationGrowthBonus = "population_growth_bonus";
+
     /// <summary>The level of every other building of the body cannot exceed the value.</summary>
     public const string LevelCap = "level_cap";
 
@@ -44,6 +49,7 @@ public static class BuildingEffectTypes
         EnergyOutput,
         EnergyConsumption,
         PopulationMax,
+        PopulationGrowthBonus,
         LevelCap,
         PartStorageCapacity,
     ];

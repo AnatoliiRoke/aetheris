@@ -2,6 +2,7 @@ using Aetheris.Core.Admin;
 using Aetheris.Core.Commands;
 using Aetheris.Core.Data;
 using Aetheris.Core.Scheduling;
+using Aetheris.Economy.Services;
 using Aetheris.Planets.Services;
 using Aetheris.Research.Api;
 using Aetheris.Research.Data;
@@ -53,6 +54,11 @@ public static class ResearchServiceCollectionExtensions
         // so the research module replaces the empty stand-in of the bodies module.
         services.RemoveAll<ITechnologyLevels>();
         services.AddScoped<ITechnologyLevels, TechnologyLevelsService>();
+
+        // The economy module asks for the bonuses the technologies give the population and the
+        // credits; the contract is declared by the economy module and implemented here
+        // (task 00015).
+        services.AddScoped<IEconomyTechnologyBonuses, EconomyTechnologyBonuses>();
 
         // The multipliers of the production are a rule of the research, so the production
         // module reads them through this contract (task 00013, decision 14).

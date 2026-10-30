@@ -248,12 +248,19 @@ public static class PlanetOverviewBuilder
 
         foreach (var resource in catalog.Resources)
         {
+            // A currency of a civilization does not lie on a body, so it is not a resource of
+            // the body (task 00015).
+            if (resource.ResourceGroupId is not { } resourceGroupId)
+            {
+                continue;
+            }
+
             long amount = figures.Amounts.GetValueOrDefault(resource.Id);
-            decimal rate = fullGroups.Contains(resource.ResourceGroupId) ? 0 : rates.GetValueOrDefault(resource.Id);
+            decimal rate = fullGroups.Contains(resourceGroupId) ? 0 : rates.GetValueOrDefault(resource.Id);
 
             if (amount > 0 || rate > 0 || figures.Deposits.ContainsKey(resource.Id))
             {
-                resources.Add(new PlanetResourceDto(resource.Id, resource.ResourceGroupId, amount, rate));
+                resources.Add(new PlanetResourceDto(resource.Id, resourceGroupId, amount, rate));
             }
         }
 

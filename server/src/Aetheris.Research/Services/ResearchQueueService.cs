@@ -4,6 +4,8 @@ using Aetheris.Core.Configuration;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Scheduling;
 using Aetheris.Core.Time;
+using Aetheris.Economy;
+using Aetheris.Economy.Services;
 using Aetheris.Planets;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Services;
@@ -46,6 +48,8 @@ public sealed class ResearchQueueService
     private readonly TechnologyCatalogCache _catalogCache;
     private readonly IPlanetsModule _planets;
     private readonly IPlanetResources _resources;
+    private readonly IEconomyModule _economy;
+    private readonly CostSplitter _costs;
     private readonly IRequirementsModule _requirements;
     private readonly IWorldModule _world;
     private readonly IEventScheduler _scheduler;
@@ -73,6 +77,8 @@ public sealed class ResearchQueueService
         TechnologyCatalogCache catalogCache,
         IPlanetsModule planets,
         IPlanetResources resources,
+        IEconomyModule economy,
+        CostSplitter costs,
         IRequirementsModule requirements,
         IWorldModule world,
         IEventScheduler scheduler,
@@ -85,6 +91,8 @@ public sealed class ResearchQueueService
         ArgumentNullException.ThrowIfNull(catalogCache);
         ArgumentNullException.ThrowIfNull(planets);
         ArgumentNullException.ThrowIfNull(resources);
+        ArgumentNullException.ThrowIfNull(economy);
+        ArgumentNullException.ThrowIfNull(costs);
         ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(scheduler);
@@ -97,6 +105,8 @@ public sealed class ResearchQueueService
         _catalogCache = catalogCache;
         _planets = planets;
         _resources = resources;
+        _economy = economy;
+        _costs = costs;
         _requirements = requirements;
         _world = world;
         _scheduler = scheduler;
@@ -156,8 +166,12 @@ public sealed class ResearchQueueService
                 await CheckAvailableAsync(playerId, planetId, technology, targetLevel, queue, cancellationToken).ConfigureAwait(false);
 
                 // The resources are paid when the record enters the queue and returned in
-                // full when it leaves it.
-                await _resources.TakeAsync(planetId, playerId, level.Costs, cancellationToken).ConfigureAwait(false);
+                // full when it leaves it. The costs of a civilization are paid from its
+                // balance and the rest from the balance of the body (task 00015).
+                SplitCosts split = await _costs.SplitAsync(level.Costs, cancellationToken).ConfigureAwait(false);
+
+                await _resources.TakeAsync(planetId, playerId, split.PlanetResources, cancellationToken).ConfigureAwait(false);
+                await _economy.TakeAsync(playerId, split.Currencies, cancellationToken).ConfigureAwait(false);
 
                 DateTimeOffset now = _clock.GameNow;
                 ResearchQueueItemEntity item = new()
@@ -239,7 +253,10 @@ public sealed class ResearchQueueService
 
                 foreach ((long refundPlanetId, Dictionary<int, long> amounts) in refunds)
                 {
-                    await _resources.GiveAsync(refundPlanetId, playerId, amounts, cancellationToken).ConfigureAwait(false);
+                    SplitCosts split = await _costs.SplitAsync(amounts, cancellationToken).ConfigureAwait(false);
+
+                    await _resources.GiveAsync(refundPlanetId, playerId, split.PlanetResources, cancellationToken).ConfigureAwait(false);
+                    await _economy.GiveAsync(playerId, split.Currencies, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (headRemoved)
