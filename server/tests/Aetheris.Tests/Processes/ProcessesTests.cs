@@ -17,15 +17,15 @@ using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.Planets;
-using Aetheris.World.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aetheris.Tests.Processes;
 
 /// <summary>
-/// Tests of the processes: the conversion of matter, the recycling, the terraforming, the
-/// repair and the replacement, the queue of a building, its events and its owner (task 00014).
+/// Tests of the processes: the conversion of matter, the recycling, the repair and the
+/// replacement, the queue of a building, its events and its owner (task 00014). The
+/// terraforming is no process of a queue; its tests are in <see cref="TerraformingTests"/>.
 /// </summary>
 [Collection(DatabaseCollection.Name)]
 public sealed partial class ProcessesTests
@@ -49,8 +49,6 @@ public sealed partial class ProcessesTests
     private const string Engine = "part_4";
 
     private const string LifeSupport = "part_10";
-
-    private const string TerraformingDevice = "part_34";
 
     private readonly AetherisTestFactory _factory;
 
@@ -343,98 +341,6 @@ public sealed partial class ProcessesTests
         Assert.True(state.CrewPending > limit);
         Assert.True(state.IsOverLimit);
         Assert.NotNull(state.OverLimitAt);
-    }
-
-    /// <summary>
-    /// The terraforming takes the device of the storage, needs a ship on the orbit and one
-    /// unit, and makes the deposits rich in the range of the data without lowering a richer
-    /// deposit; the body keeps its type, its size and its buildings (task 00014, criterion 1).
-    /// </summary>
-    /// <returns>A task that completes when the assertion has been evaluated.</returns>
-    [Fact]
-    public async Task The_terraforming_spends_the_device_and_makes_the_deposits_rich()
-    {
-        await ProcessesTestData.ResetAsync(_factory);
-        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
-        using IServiceScope scope = _factory.Services.CreateScope();
-        IServiceProvider services = scope.ServiceProvider;
-
-        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Production);
-        await ProcessesTestData.GiveEveryResourceAsync(player, services);
-        int poor = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, "resource_1", 1.0m);
-        int rich = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, "resource_3", 1.85m);
-
-        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Terraforming);
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
-        ShipsOnOrbitStub ships = services.GetRequiredService<ShipsOnOrbitStub>();
-
-        // Without the device in the storage the order is refused.
-        Assert.Equal(ProcessErrorCodes.PartMissing, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(1)));
-
-        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 2);
-
-        // One device makes one body rich once, and a ship turns it on.
-        Assert.Equal(ProcessErrorCodes.QuantityInvalid, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(2)));
-        ships.Place(player.Account.UserId, player.PlanetId, null);
-        Assert.Equal(ProcessErrorCodes.NoShipOnOrbit, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(1)));
-        ships.Place(player.Account.UserId, player.PlanetId, new ShipOnOrbit([]));
-
-        WorldDbContext world = services.GetRequiredService<WorldDbContext>();
-        Aetheris.World.Data.Entities.PlanetEntity body = await world.Planets.AsNoTracking().Include(entry => entry.CelestialObject).SingleAsync(entry => entry.Id == player.PlanetId, Token);
-        List<(int BuildingTypeId, int Level)> buildings = await BuildingsAsync(player, services);
-
-        await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(1), Token);
-        Assert.Equal(1, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
-
-        await ProcessesTestData.CompleteAsync(player, services, buildingId);
-
-        Dictionary<int, decimal> deposits = await world.Deposits.AsNoTracking()
-            .Where(entry => entry.PlanetId == player.PlanetId)
-            .ToDictionaryAsync(entry => entry.ResourceId, entry => entry.Coefficient, Token);
-
-        // The poor deposit becomes rich, the richer one keeps its richness.
-        Assert.True(deposits[poor] > 1.4m && deposits[poor] <= 1.9m);
-        Assert.Equal(1.85m, deposits[rich]);
-        Assert.All(deposits.Values, coefficient => Assert.True(coefficient > 1.4m && coefficient <= 1.9m));
-        Assert.NotEmpty(await world.DepositChanges.AsNoTracking().Where(change => change.PlanetId == player.PlanetId).ToListAsync(Token));
-
-        // The device is spent; the type, the size and the buildings of the body stay.
-        Assert.Equal(1, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
-        Aetheris.World.Data.Entities.PlanetEntity after = await world.Planets.AsNoTracking().Include(entry => entry.CelestialObject).SingleAsync(entry => entry.Id == player.PlanetId, Token);
-        Assert.Equal(body.CelestialObject!.ObjectTypeId, after.CelestialObject!.ObjectTypeId);
-        Assert.Equal(body.SizeClassId, after.SizeClassId);
-        Assert.Equal(body.Size, after.Size);
-        Assert.Equal(buildings, await BuildingsAsync(player, services));
-    }
-
-    /// <summary>
-    /// Cancelling the terraforming loses the device and leaves the deposits as they were (task
-    /// 00014, criterion 2).
-    /// </summary>
-    /// <returns>A task that completes when the assertion has been evaluated.</returns>
-    [Fact]
-    public async Task Cancelling_the_terraforming_loses_the_device()
-    {
-        await ProcessesTestData.ResetAsync(_factory);
-        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
-        using IServiceScope scope = _factory.Services.CreateScope();
-        IServiceProvider services = scope.ServiceProvider;
-
-        long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Production);
-        await ProcessesTestData.GiveEveryResourceAsync(player, services);
-        int poor = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, "resource_1", 1.0m);
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
-        await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 1);
-
-        IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Terraforming);
-
-        ProcessBuildingDto queued = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(1), Token);
-        await processes.CancelAsync(player.Account.UserId, player.PlanetId, buildingId, queued.Queue[0].OrderId, Token);
-
-        Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, device.PartTypeId, PartCondition.Full));
-        Assert.Equal(1.0m, (await services.GetRequiredService<WorldDbContext>().Deposits.AsNoTracking().SingleAsync(entry => entry.PlanetId == player.PlanetId && entry.ResourceId == poor, Token)).Coefficient);
     }
 
     /// <summary>
@@ -994,15 +900,6 @@ public sealed partial class ProcessesTests
 
         return balances;
     }
-
-    private static async Task<List<(int BuildingTypeId, int Level)>> BuildingsAsync(PlanetsTestPlayer player, IServiceProvider services) =>
-        [
-            .. (await services.GetRequiredService<PlanetsDbContext>().PlanetBuildings.AsNoTracking()
-                .Where(entry => entry.PlanetId == player.PlanetId)
-                .OrderBy(entry => entry.BuildingTypeId)
-                .ToListAsync(Token))
-                .Select(entry => (entry.BuildingTypeId, entry.Level)),
-        ];
 
     private static async Task HandleAsync(IServiceProvider services, ScheduledEventEntity scheduled)
     {
