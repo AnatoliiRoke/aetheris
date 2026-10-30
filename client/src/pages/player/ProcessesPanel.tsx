@@ -6,6 +6,7 @@ import type {
   ProcessIngredient,
   ProcessOrder,
   ProcessOrderRequest,
+  ProcessPartSubject,
   ProcessReason,
   ProcessRecipe,
 } from '../../api/processesApi';
@@ -24,7 +25,7 @@ import { useProcesses } from './useProcesses';
 /**
  * The prefixes of the error codes of the server that have their own text for the player.
  */
-const reasonPrefixes = ['processes_'];
+const reasonPrefixes = ['processes_', 'planets_'];
 
 /**
  * The processes of a body (task 00014): the buildings that run them, the queue of the
@@ -47,10 +48,14 @@ export function ProcessesPanel({ planetId }: { planetId: number }) {
   // The recipes name the resources and the groups by their id, so the names come from the
   // body and from the texts of the game data.
   const resources = useMemo(() => planet?.resourceTypes ?? [], [planet]);
+  const balances = useMemo(
+    () => new Map((planet?.resources ?? []).map((resource) => [resource.resourceTypeId, resource.amount])),
+    [planet],
+  );
   const usesParts = useMemo(
     () =>
       building?.recipes.some(
-        (recipe) => recipe.ingredients.some((ingredient) => ingredient.partTypeId !== null) || recipe.shipStub !== null,
+        (recipe) => recipe.partSubject !== 'none' || recipe.ingredients.some((ingredient) => ingredient.partTypeId !== null),
       ) ?? false,
     [building],
   );
@@ -175,7 +180,9 @@ export function ProcessesPanel({ planetId }: { planetId: number }) {
             recipes={building.recipes}
             language={language}
             resources={resources}
+            balances={balances}
             stacks={stacks}
+            fullCondition={building.fullConditionPercent}
             resourceName={resourceName}
             groupName={groupName}
             partName={partName}
@@ -270,26 +277,69 @@ function ProcessQueue({
 
 /**
  * What the player chose for a recipe: the number of units, the resource the process takes
- * and gives and the part it works on.
+ * and gives and the stack of the storage it works on.
  */
 interface RecipeForm {
   quantity: string;
   sourceResourceTypeId: string;
   targetResourceTypeId: string;
-  partTypeId: string;
+  partKey: string;
 }
 
-const emptyForm: RecipeForm = { quantity: '1', sourceResourceTypeId: '', targetResourceTypeId: '', partTypeId: '' };
+const emptyForm: RecipeForm = { quantity: '1', sourceResourceTypeId: '', targetResourceTypeId: '', partKey: '' };
 
 /**
- * The recipes of the building: the open ones can be ordered, the closed ones say why. The
- * form of a recipe shows only what its data asks for.
+ * A choice of the storage for an order: the parts of one kind in one condition.
+ */
+interface PartChoice {
+  key: string;
+  partTypeId: number;
+  conditionPercent: number;
+  quantity: number;
+}
+
+/**
+ * The parts of the storage an order of a recipe may name, by the part subject the server sends.
+ */
+function partChoices(subject: ProcessPartSubject, stacks: ProductionStack[], fullCondition: number): PartChoice[] {
+  if (subject === 'none') {
+    return [];
+  }
+
+  const choices = new Map<string, PartChoice>();
+
+  for (const stack of stacks) {
+    const damaged = stack.conditionPercent < fullCondition;
+
+    if ((subject === 'damaged' && !damaged) || (subject === 'new' && damaged)) {
+      continue;
+    }
+
+    const key = `${stack.partTypeId}:${stack.conditionPercent}`;
+    const choice = choices.get(key);
+    choices.set(key, {
+      key,
+      partTypeId: stack.partTypeId,
+      conditionPercent: stack.conditionPercent,
+      quantity: (choice?.quantity ?? 0) + stack.quantity,
+    });
+  }
+
+  return [...choices.values()];
+}
+
+/**
+ * The recipes of the building: the open ones can be ordered, the closed ones say why and keep
+ * their button inactive. The form of a recipe shows only what its data asks for, and the check
+ * of the balance and of the storage is only a hint: the server decides.
  */
 function ProcessRecipes({
   recipes,
   language,
   resources,
+  balances,
   stacks,
+  fullCondition,
   resourceName,
   groupName,
   partName,
@@ -299,7 +349,9 @@ function ProcessRecipes({
   recipes: ProcessRecipe[];
   language: Language;
   resources: NamedItem[];
+  balances: Map<number, number>;
   stacks: ProductionStack[];
+  fullCondition: number;
   resourceName: (resourceTypeId: number) => string;
   groupName: (resourceGroupId: number) => string;
   partName: (partTypeId: number) => string;
@@ -342,18 +394,63 @@ function ProcessRecipes({
         {recipes.map((recipe) => {
           const form = forms[recipe.recipeId] ?? emptyForm;
           const quantity = Number(form.quantity);
-          const partTypeIds = recipe.ingredients
-            .filter((ingredient) => ingredient.partTypeId !== null)
-            .map((ingredient) => ingredient.partTypeId);
+          const validQuantity = Number.isInteger(quantity) && quantity > 0;
           const sourceOptions = recipe.sourceGroupId === null ? [] : resources.filter((resource) => resource.resourceGroupId === recipe.sourceGroupId);
           const targetOptions = recipe.targetGroupId === null ? [] : resources.filter((resource) => resource.resourceGroupId === recipe.targetGroupId);
-          const partOptions = stacks.filter((stack) => partTypeIds.includes(stack.partTypeId));
+          const choices = partChoices(recipe.partSubject, stacks, fullCondition);
+          const choice = choices.find((entry) => entry.key === form.partKey) ?? null;
           const complete =
-            Number.isInteger(quantity) &&
-            quantity > 0 &&
+            validQuantity &&
             (recipe.sourceGroupId === null || form.sourceResourceTypeId !== '') &&
             (recipe.targetGroupId === null || form.targetResourceTypeId !== '') &&
-            (partTypeIds.length === 0 || form.partTypeId !== '');
+            (recipe.partSubject === 'none' || choice !== null);
+          const reasons = recipe.reasons.map((reason) => reasonText(language, reason, text));
+
+          // The hint of the balance: the ingredients of every unit, and one unit of the source
+          // for every unit of a recipe that names a source group. The server checks it anyway.
+          if (recipe.isAvailable && complete) {
+            const needed = new Map<number, number>();
+
+            for (const ingredient of recipe.ingredients) {
+              if (ingredient.resourceTypeId !== null) {
+                needed.set(ingredient.resourceTypeId, (needed.get(ingredient.resourceTypeId) ?? 0) + ingredient.amount * quantity);
+              }
+            }
+
+            if (recipe.sourceGroupId !== null) {
+              const sourceId = Number(form.sourceResourceTypeId);
+              needed.set(sourceId, (needed.get(sourceId) ?? 0) + quantity);
+            }
+
+            const missing = [...needed.entries()]
+              .filter(([resourceTypeId, amount]) => (balances.get(resourceTypeId) ?? 0) < amount)
+              .map(([resourceTypeId, amount]) => `${resourceName(resourceTypeId)} ${formatNumber(amount - (balances.get(resourceTypeId) ?? 0), language)}`);
+
+            for (const ingredient of recipe.ingredients) {
+              if (ingredient.partTypeId === null) {
+                continue;
+              }
+
+              const stored = stacks
+                .filter((stack) => stack.partTypeId === ingredient.partTypeId && stack.conditionPercent >= fullCondition)
+                .reduce((sum, stack) => sum + stack.quantity, 0);
+
+              if (stored < ingredient.amount * quantity) {
+                missing.push(`${partName(ingredient.partTypeId)} ${formatNumber(ingredient.amount * quantity - stored, language)}`);
+              }
+            }
+
+            if (choice !== null && choice.quantity < quantity) {
+              missing.push(`${partName(choice.partTypeId)} ${formatNumber(quantity - choice.quantity, language)}`);
+            }
+
+            if (missing.length > 0) {
+              reasons.push(t('processes.missing', { list: missing.join(', ') }));
+            }
+          }
+
+          const canStart = recipe.isAvailable && complete && reasons.length === 0;
+          const reasonsId = `process-recipe-${recipe.recipeId}-reasons`;
 
           return (
             <li key={recipe.recipeId} className="building-card">
@@ -370,6 +467,7 @@ function ProcessRecipes({
               </span>
               <span className="building-card__text">{text(recipe.descriptionKey) ?? recipe.descriptionKey}</span>
               <span className="building-card__text num">{t('processes.duration', { time: formatDuration(language, recipe.durationSeconds) })}</span>
+              {recipe.needsShip ? <span className="building-card__text">{t('processes.needsShip')}</span> : null}
               {recipe.sourceGroupId !== null || recipe.targetGroupId !== null ? (
                 <span className="building-card__text">
                   {t('processes.groups', {
@@ -387,69 +485,66 @@ function ProcessRecipes({
                   })}
                 </span>
               ) : null}
-              {!recipe.isAvailable ? (
-                <ul className="reason-list">
-                  {recipe.reasons.map((reason) => (
-                    <li key={`${reason.code}-${reason.targetId}`}>{reasonText(language, reason, text)}</li>
-                  ))}
-                </ul>
-              ) : null}
-              {recipe.isAvailable ? (
-                <div className="building-card__next">
-                  {sourceOptions.length > 0 ? (
-                    <label className="field">
-                      <span className="field__label">{t('processes.source')}</span>
-                      <select
-                        className="input"
-                        value={form.sourceResourceTypeId}
-                        disabled={busy}
-                        onChange={(event) => change(recipe.recipeId, 'sourceResourceTypeId', event.target.value)}
-                      >
-                        <option value="">{t('processes.chooseResource')}</option>
-                        {sourceOptions.map((resource) => (
-                          <option key={resource.id} value={resource.id}>
-                            {resourceName(resource.id)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ) : null}
-                  {targetOptions.length > 0 ? (
-                    <label className="field">
-                      <span className="field__label">{t('processes.target')}</span>
-                      <select
-                        className="input"
-                        value={form.targetResourceTypeId}
-                        disabled={busy}
-                        onChange={(event) => change(recipe.recipeId, 'targetResourceTypeId', event.target.value)}
-                      >
-                        <option value="">{t('processes.chooseResource')}</option>
-                        {targetOptions.map((resource) => (
-                          <option key={resource.id} value={resource.id}>
-                            {resourceName(resource.id)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ) : null}
-                  {partOptions.length > 0 ? (
-                    <label className="field">
-                      <span className="field__label">{t('processes.partLabel')}</span>
-                      <select
-                        className="input"
-                        value={form.partTypeId}
-                        disabled={busy}
-                        onChange={(event) => change(recipe.recipeId, 'partTypeId', event.target.value)}
-                      >
-                        <option value="">{t('processes.choosePart')}</option>
-                        {partOptions.map((stack) => (
-                          <option key={stack.partTypeId} value={stack.partTypeId}>
-                            {partName(stack.partTypeId)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ) : null}
+              <div className="building-card__next">
+                {recipe.isAvailable && sourceOptions.length > 0 ? (
+                  <label className="field">
+                    <span className="field__label">{t('processes.source')}</span>
+                    <select
+                      className="input"
+                      value={form.sourceResourceTypeId}
+                      disabled={busy}
+                      onChange={(event) => change(recipe.recipeId, 'sourceResourceTypeId', event.target.value)}
+                    >
+                      <option value="">{t('processes.chooseResource')}</option>
+                      {sourceOptions.map((resource) => (
+                        <option key={resource.id} value={resource.id}>
+                          {resourceName(resource.id)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+                {recipe.isAvailable && targetOptions.length > 0 ? (
+                  <label className="field">
+                    <span className="field__label">{t('processes.target')}</span>
+                    <select
+                      className="input"
+                      value={form.targetResourceTypeId}
+                      disabled={busy}
+                      onChange={(event) => change(recipe.recipeId, 'targetResourceTypeId', event.target.value)}
+                    >
+                      <option value="">{t('processes.chooseResource')}</option>
+                      {targetOptions.map((resource) => (
+                        <option key={resource.id} value={resource.id}>
+                          {resourceName(resource.id)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+                {recipe.isAvailable && recipe.partSubject !== 'none' ? (
+                  <label className="field">
+                    <span className="field__label">{t('processes.partLabel')}</span>
+                    <select
+                      className="input"
+                      value={form.partKey}
+                      disabled={busy || choices.length === 0}
+                      onChange={(event) => change(recipe.recipeId, 'partKey', event.target.value)}
+                    >
+                      <option value="">{choices.length === 0 ? t('processes.noParts') : t('processes.choosePart')}</option>
+                      {choices.map((entry) => (
+                        <option key={entry.key} value={entry.key}>
+                          {t('processes.partChoice', {
+                            name: partName(entry.partTypeId),
+                            condition: formatNumber(entry.conditionPercent, language),
+                            quantity: formatNumber(entry.quantity, language),
+                          })}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+                {recipe.isAvailable ? (
                   <TextField
                     label={t('processes.quantity')}
                     type="number"
@@ -459,26 +554,35 @@ function ProcessRecipes({
                     disabled={busy}
                     onChange={(event) => change(recipe.recipeId, 'quantity', event.target.value)}
                   />
-                  <button
-                    className="btn btn--secondary"
-                    type="button"
-                    disabled={busy || !complete}
-                    onClick={() =>
-                      onStart(
-                        recipe,
-                        {
-                          sourceResourceTypeId: recipe.sourceGroupId === null ? null : Number(form.sourceResourceTypeId),
-                          targetResourceTypeId: recipe.targetGroupId === null ? null : Number(form.targetResourceTypeId),
-                          partTypeId: partTypeIds.length === 0 ? null : Number(form.partTypeId),
-                          shipStub: recipe.shipStub,
-                        },
-                        quantity,
-                      )
-                    }
-                  >
-                    {t('processes.produce')}
-                  </button>
-                </div>
+                ) : null}
+                <button
+                  className="btn btn--secondary"
+                  type="button"
+                  disabled={busy || !canStart}
+                  title={reasons.length > 0 ? reasons.join('. ') : undefined}
+                  aria-describedby={reasons.length > 0 ? reasonsId : undefined}
+                  onClick={() =>
+                    onStart(
+                      recipe,
+                      {
+                        sourceResourceTypeId: recipe.sourceGroupId === null ? null : Number(form.sourceResourceTypeId),
+                        targetResourceTypeId: recipe.targetGroupId === null ? null : Number(form.targetResourceTypeId),
+                        partTypeId: choice?.partTypeId ?? null,
+                        partConditionPercent: choice === null || recipe.partSubject === 'new' ? null : choice.conditionPercent,
+                      },
+                      quantity,
+                    )
+                  }
+                >
+                  {t('processes.produce')}
+                </button>
+              </div>
+              {reasons.length > 0 ? (
+                <ul className="reason-list" id={reasonsId}>
+                  {reasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
               ) : null}
             </li>
           );

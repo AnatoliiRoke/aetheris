@@ -23,6 +23,7 @@ export interface ProcessBuilding {
   recipes: ProcessRecipe[];
   queue: ProcessOrder[];
   gameNow: string;
+  fullConditionPercent: number;
 }
 
 /**
@@ -38,12 +39,19 @@ export interface ProcessRecipe {
   sourceGroupId: number | null;
   targetGroupId: number | null;
   durationSeconds: number;
-  shipStub: string | null;
+  needsShip: boolean;
+  partSubject: ProcessPartSubject;
   isAvailable: boolean;
   reasons: ProcessReason[];
   imageKey: string | null;
   ingredients: ProcessIngredient[];
 }
+
+/**
+ * The part an order of a process names, as the server says: none, a part of the storage in
+ * any condition, a damaged one or a new one.
+ */
+export type ProcessPartSubject = 'none' | 'any' | 'damaged' | 'new';
 
 /**
  * An ingredient of one unit of a process: a resource or a part with its amount.
@@ -81,13 +89,13 @@ export interface ProcessOrder {
 
 /**
  * What the order needs besides the recipe and the number of units: the resource the process
- * takes and gives, the part it works on and the stub of the ship on the orbit.
+ * takes and gives and the part it works on with its condition.
  */
 export interface ProcessOrderRequest {
   sourceResourceTypeId?: number | null;
   targetResourceTypeId?: number | null;
   partTypeId?: number | null;
-  shipStub?: string | null;
+  partConditionPercent?: number | null;
 }
 
 /**
@@ -130,7 +138,7 @@ export function createProcessesApi(http: HttpClient): ProcessesApi {
           source_resource_type_id: request?.sourceResourceTypeId ?? undefined,
           target_resource_type_id: request?.targetResourceTypeId ?? undefined,
           part_type_id: request?.partTypeId ?? undefined,
-          ship_stub: request?.shipStub ?? undefined,
+          part_condition_percent: request?.partConditionPercent ?? undefined,
         }),
       );
     },

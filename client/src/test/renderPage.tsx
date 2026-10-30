@@ -452,7 +452,8 @@ export function sampleProcessesBuilding(overrides: Partial<ProcessBuilding> = {}
         sourceGroupId: null,
         targetGroupId: null,
         durationSeconds: 3600,
-        shipStub: 'ship_on_orbit',
+        needsShip: true,
+        partSubject: 'none',
         isAvailable: true,
         reasons: [],
         imageKey: null,
@@ -468,7 +469,8 @@ export function sampleProcessesBuilding(overrides: Partial<ProcessBuilding> = {}
         sourceGroupId: null,
         targetGroupId: null,
         durationSeconds: 900,
-        shipStub: null,
+        needsShip: false,
+        partSubject: 'any',
         isAvailable: false,
         reasons: [{ code: 'processes_requirement_building_level', targetId: 1, targetLevel: 2, targetNameKey: 'planets.building.building_1.name' }],
         imageKey: null,
@@ -489,6 +491,7 @@ export function sampleProcessesBuilding(overrides: Partial<ProcessBuilding> = {}
       },
     ],
     gameNow: '2026-10-26T12:00:00Z',
+    fullConditionPercent: 100,
     ...overrides,
   };
 }
