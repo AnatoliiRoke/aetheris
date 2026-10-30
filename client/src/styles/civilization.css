@@ -30,7 +30,6 @@
 }
 .civ-res { flex: 1 1 auto; display: flex; justify-content: center; gap: var(--space-5); min-width: 0; list-style: none; margin: 0; padding: 0; }
 .civ-res li { font-weight: 600; white-space: nowrap; }
-.civ-home { font-weight: 600; color: var(--text-soft); white-space: nowrap; }
 .civ-topbar__tools { display: flex; align-items: center; gap: var(--space-2); flex: 0 0 auto; }
 
 /* ---------- side menu ---------- */

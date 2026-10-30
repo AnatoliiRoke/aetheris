@@ -114,7 +114,6 @@ function CivHeader({ nickname }: { nickname: string }) {
   const { balances } = useEconomy(null);
   const { planet } = usePlanet(session.status === 'signed-in' ? session.me.civilization?.planetId ?? null : null);
   const { text } = useTexts();
-  const home = session.status === 'signed-in' ? session.me.civilization : null;
 
   // The names of the currencies come from the server with the texts of the game data, so the
   // client knows no currency by name.
@@ -139,7 +138,6 @@ function CivHeader({ nickname }: { nickname: string }) {
           <span aria-hidden="true" className="glyph glyph--race-1" />
           {nickname}
         </span>
-        {home?.planetName ? <span className="civ-home">{home.planetName}</span> : null}
       </div>
       <div className="civ-topbar__res">
         <ul aria-label={t('civ.resources')} className="civ-res">
