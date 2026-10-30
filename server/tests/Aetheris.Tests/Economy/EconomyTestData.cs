@@ -3,6 +3,10 @@ using Aetheris.Economy.Data;
 using Aetheris.Economy.Data.Entities;
 using Aetheris.Economy.Services;
 using Aetheris.Planets.Services;
+using Aetheris.Research;
+using Aetheris.Research.Configuration;
+using Aetheris.Research.Data;
+using Aetheris.Research.Data.Entities;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.Planets;
 using Aetheris.World.Api;
@@ -24,6 +28,11 @@ internal static class EconomyTestData
     /// The code of the currency of the civilization in the starting data.
     /// </summary>
     internal const string CreditsCode = "resource_18";
+
+    /// <summary>
+    /// The code of the medical centre in the starting data.
+    /// </summary>
+    internal const string MedicalCentreCode = "building_25";
 
     /// <summary>
     /// Clears the database, creates the world and prepares the modules, as a fresh server does
@@ -193,6 +202,95 @@ internal static class EconomyTestData
         });
 
         await dbContext.SaveChangesAsync(Token).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Gives a body to a player, as a colonization does, so the player has more than one body.
+    /// </summary>
+    /// <param name="services">The scoped services.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="playerId">The new owner.</param>
+    /// <returns>A task that completes when the body belongs to the player.</returns>
+    internal static async Task GiveBodyAsync(IServiceProvider services, long planetId, string playerId)
+    {
+        WorldDbContext world = services.GetRequiredService<WorldDbContext>();
+        Aetheris.World.Data.Entities.PlanetEntity planet = await world.Planets.SingleAsync(entry => entry.Id == planetId, Token).ConfigureAwait(false);
+
+        planet.OwnerPlayerId = playerId;
+        await world.SaveChangesAsync(Token).ConfigureAwait(false);
+
+        Aetheris.Planets.Data.PlanetsDbContext planets = services.GetRequiredService<Aetheris.Planets.Data.PlanetsDbContext>();
+        Aetheris.Planets.Data.Entities.PlanetStateEntity state = await planets.PlanetStates.SingleAsync(entry => entry.PlanetId == planetId, Token).ConfigureAwait(false);
+
+        state.OwnerPlayerId = playerId;
+        await planets.SaveChangesAsync(Token).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Makes a player learn a technology of one level that has one effect, written straight into
+    /// the tables.
+    /// </summary>
+    /// <param name="services">The scoped services.</param>
+    /// <param name="playerId">The player.</param>
+    /// <param name="effectType">The kind of the effect.</param>
+    /// <param name="value">The value of the effect.</param>
+    /// <returns>A task that completes when the player has learned the technology.</returns>
+    internal static async Task GiveTechnologyAsync(IServiceProvider services, string playerId, string effectType, decimal value)
+    {
+        await AetherisTestFactory.SetParameterAsync(services, ResearchConfigKeys.CatalogCacheSeconds, "0").ConfigureAwait(false);
+        await services.GetRequiredService<IResearchModule>().EnsureAsync(Token).ConfigureAwait(false);
+
+        ResearchDbContext research = services.GetRequiredService<ResearchDbContext>();
+        int branchId = await research.TechnologyBranches.AsNoTracking()
+            .OrderBy(branch => branch.Id)
+            .Select(branch => branch.Id)
+            .FirstAsync(Token)
+            .ConfigureAwait(false);
+        int code = 900 + await research.Technologies.CountAsync(Token).ConfigureAwait(false);
+
+        TechnologyEntity technology = new()
+        {
+            Code = "tech_" + code,
+            NameKey = "research.technology.tech_" + code + ".name",
+            DescriptionKey = "research.technology.tech_" + code + ".description",
+            BranchId = branchId,
+            SortOrder = code,
+            MaxLevel = 1,
+            ResearchCenterLevel = 1,
+            LevelIds =
+            [
+                new TechnologyLevelEntity
+                {
+                    Level = 1,
+                    DurationSeconds = 60,
+                    EffectIds = [new TechnologyLevelEffectEntity { EffectType = effectType, Value = value }],
+                },
+            ],
+        };
+
+        research.Technologies.Add(technology);
+        await research.SaveChangesAsync(Token).ConfigureAwait(false);
+
+        research.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = playerId, TechnologyId = technology.Id, Level = 1 });
+        await research.SaveChangesAsync(Token).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Reads the value of the first effect of a kind at a level of a building type of the
+    /// starting data, so a test counts from the data and not from the formula of the code.
+    /// </summary>
+    /// <param name="services">The scoped services.</param>
+    /// <param name="buildingCode">The code of the building type.</param>
+    /// <param name="level">The level.</param>
+    /// <param name="effectType">The kind of the effect.</param>
+    /// <returns>The value of the effect.</returns>
+    internal static async Task<long> EffectValueAsync(IServiceProvider services, string buildingCode, int level, string effectType)
+    {
+        Aetheris.Planets.Data.Entities.BuildingTypeEntity type = await PlanetsTestData.TypeAsync(services, buildingCode).ConfigureAwait(false);
+
+        return type.LevelIds.Single(entry => entry.Level == level)
+            .EffectIds.Single(effect => string.Equals(effect.EffectType, effectType, StringComparison.Ordinal))
+            .Value;
     }
 
     /// <summary>
