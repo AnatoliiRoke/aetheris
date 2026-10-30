@@ -288,9 +288,10 @@ public sealed record ResourceGroupFact(int Id, string Code, string NameKey, bool
 /// <param name="Id">The resource.</param>
 /// <param name="Code">The stable code.</param>
 /// <param name="NameKey">The localisation key of the name.</param>
-/// <param name="ResourceGroupId">The group.</param>
+/// <param name="ResourceGroupId">The group, if the resource has one: a currency of a civilization has none (task 00015).</param>
 /// <param name="IsArchived">Whether the resource is archived: the stocks stay, it is not offered for new rows (task 00023).</param>
-public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int ResourceGroupId, bool IsArchived = false);
+/// <param name="Scope">Where the resource lies: on a body or in the whole civilization (task 00015).</param>
+public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int? ResourceGroupId, bool IsArchived = false, string Scope = Aetheris.World.Data.Entities.ResourceScopes.Planet);
 
 /// <summary>The home body of a civilization with the start building of its race.</summary>
 /// <param name="PlanetId">The home body.</param>

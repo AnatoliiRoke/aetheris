@@ -9,6 +9,7 @@ import { useSession } from '../../session/useSession';
 import { useTexts } from '../../texts/useTexts';
 import { BuildingCard, EnergyPanel, QueuePanel, ResourcesPanel } from './PlanetPanels';
 import { PlayerLayout } from './PlayerLayout';
+import { PopulationPanel } from './PopulationPanel';
 import { ProcessesPanel } from './ProcessesPanel';
 import { ProductionPanel } from './ProductionPanel';
 import { TerraformingPanel } from './TerraformingPanel';
@@ -105,6 +106,7 @@ export function PlanetPage() {
             <EnergyPanel planet={planet} />
           </div>
           <ResourcesPanel planet={planet} names={names} />
+          <PopulationPanel planetId={civilization.planetId} />
           <ProductionPanel planetId={civilization.planetId} />
           <ProcessesPanel planetId={civilization.planetId} />
           <TerraformingPanel planetId={civilization.planetId} />

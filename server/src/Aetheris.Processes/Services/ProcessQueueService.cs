@@ -4,6 +4,8 @@ using Aetheris.Core.Configuration;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Scheduling;
 using Aetheris.Core.Time;
+using Aetheris.Economy;
+using Aetheris.Economy.Services;
 using Aetheris.Planets;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Services;
@@ -51,6 +53,8 @@ public sealed class ProcessQueueService
     private readonly ProcessCatalogCache _catalogCache;
     private readonly IPlanetsModule _planets;
     private readonly IPlanetResources _resources;
+    private readonly IEconomyModule _economy;
+    private readonly CostSplitter _costs;
     private readonly PartStockService _parts;
     private readonly ITechnologyLevels _technologies;
     private readonly IRequirementsModule _requirements;
@@ -82,6 +86,8 @@ public sealed class ProcessQueueService
         ProcessCatalogCache catalogCache,
         IPlanetsModule planets,
         IPlanetResources resources,
+        IEconomyModule economy,
+        CostSplitter costs,
         PartStockService parts,
         ITechnologyLevels technologies,
         IRequirementsModule requirements,
@@ -96,6 +102,8 @@ public sealed class ProcessQueueService
         ArgumentNullException.ThrowIfNull(catalogCache);
         ArgumentNullException.ThrowIfNull(planets);
         ArgumentNullException.ThrowIfNull(resources);
+        ArgumentNullException.ThrowIfNull(economy);
+        ArgumentNullException.ThrowIfNull(costs);
         ArgumentNullException.ThrowIfNull(parts);
         ArgumentNullException.ThrowIfNull(technologies);
         ArgumentNullException.ThrowIfNull(requirements);
@@ -110,6 +118,8 @@ public sealed class ProcessQueueService
         _catalogCache = catalogCache;
         _planets = planets;
         _resources = resources;
+        _economy = economy;
+        _costs = costs;
         _parts = parts;
         _technologies = technologies;
         _requirements = requirements;
@@ -254,7 +264,12 @@ public sealed class ProcessQueueService
                     throw new GameException(ProcessErrorCodes.PartMissing, "The body lacks the parts the order takes.");
                 }
 
-                await _resources.TakeAsync(planetId, playerId, resourceCosts, cancellationToken).ConfigureAwait(false);
+                // The costs of a civilization are paid from its balance and the rest from the
+                // balance of the body (task 00015).
+                SplitCosts split = await _costs.SplitAsync(resourceCosts, cancellationToken).ConfigureAwait(false);
+
+                await _resources.TakeAsync(planetId, playerId, split.PlanetResources, cancellationToken).ConfigureAwait(false);
+                await _economy.TakeAsync(playerId, split.Currencies, cancellationToken).ConfigureAwait(false);
 
                 ProcessOrderEntity item = new()
                 {
@@ -923,7 +938,12 @@ public sealed class ProcessQueueService
 
         if (resources.Count > 0)
         {
-            await _resources.GiveAsync(planetId, playerId, resources, cancellationToken).ConfigureAwait(false);
+            // The input comes back where it was taken from: the credits to the balance of the
+            // civilization and the rest to the balance of the body (task 00015).
+            SplitCosts split = await _costs.SplitAsync(resources, cancellationToken).ConfigureAwait(false);
+
+            await _resources.GiveAsync(planetId, playerId, split.PlanetResources, cancellationToken).ConfigureAwait(false);
+            await _economy.GiveAsync(playerId, split.Currencies, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -1044,10 +1064,12 @@ public sealed class ProcessQueueService
 
         ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
 
-        // An archived resource keeps its balance, but no new conversion names it.
+        // An archived resource keeps its balance, but no new conversion names it. A currency of
+        // a civilization has no group, so it is not a raw material of a body (task 00015).
         return catalog.Resources
             .Where(resource => resourceTypeIds.Contains(resource.Id) && !resource.IsArchived)
-            .ToDictionary(resource => resource.Id, resource => resource.ResourceGroupId);
+            .Where(resource => resource.ResourceGroupId is not null)
+            .ToDictionary(resource => resource.Id, resource => resource.ResourceGroupId!.Value);
     }
 
     /// <summary>

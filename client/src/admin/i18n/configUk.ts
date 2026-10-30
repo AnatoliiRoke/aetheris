@@ -149,6 +149,12 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.processes.queue.base_slots.description': 'Місць у черзі процесу, разом із тим, що виконується.',
   'config.processes.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черги процесу.',
   'config.processes.catalog.cache_seconds.description': 'Скільки секунд таблиці процесів тримаються в пам’яті сервера до повторного читання.',
+  'config.economy.population.growth_percent.description':
+    'Відсоток від найбільшого населення, на який населення зростає за годину.',
+  'config.economy.population.decline_per_hour.description':
+    'Скільки мешканців зменшується за годину, коли населення вище за найбільше.',
+  'config.economy.credits.per_inhabitant.description':
+    'Скільки кредитів приносить один мешканець цивілізації за годину.',
   'config.processes.population.over_limit_decline_per_hour.description':
     'Скільки людей понад ліміт планети вимирає за ігрову годину, коли екіпаж розібраного корабля перевищив ліміт населення.',
   'config.processes.terraforming.multiplier_min.description':

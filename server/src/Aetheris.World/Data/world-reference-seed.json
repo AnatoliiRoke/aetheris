@@ -261,6 +261,19 @@
         "uk": "Джерела енергії для генераторів.",
         "en": "The sources of energy for the generators."
       }
+    },
+    {
+      "code": "resource_18",
+      "group": null,
+      "name": {
+        "uk": "Кредити",
+        "en": "Credits"
+      },
+      "description": {
+        "uk": "Внутрішня валюта цивілізації: населення планет приносить їх, а вони йдуть на будівництво, розвиток і виробництво.",
+        "en": "The inner currency of the civilization: the population of the bodies brings them, and they pay for the construction, the research and the production."
+      },
+      "scope": "civilization"
     }
   ],
   "object_types": [
