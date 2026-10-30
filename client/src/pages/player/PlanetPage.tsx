@@ -11,6 +11,7 @@ import { BuildingCard, EnergyPanel, QueuePanel, ResourcesPanel } from './PlanetP
 import { PlayerLayout } from './PlayerLayout';
 import { ProcessesPanel } from './ProcessesPanel';
 import { ProductionPanel } from './ProductionPanel';
+import { TerraformingPanel } from './TerraformingPanel';
 import { namer, reasonText, secondsLeft } from './planetText';
 import { useNow, usePlanet } from './usePlanet';
 
@@ -106,6 +107,7 @@ export function PlanetPage() {
           <ResourcesPanel planet={planet} names={names} />
           <ProductionPanel planetId={civilization.planetId} />
           <ProcessesPanel planetId={civilization.planetId} />
+          <TerraformingPanel planetId={civilization.planetId} />
           <section className="panel" aria-labelledby="planet-buildings">
             <h2 className="panel__title" id="planet-buildings">
               {t('planet.buildings')}

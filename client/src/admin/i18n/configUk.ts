@@ -151,4 +151,8 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.processes.catalog.cache_seconds.description': 'Скільки секунд таблиці процесів тримаються в пам’яті сервера до повторного читання.',
   'config.processes.population.over_limit_decline_per_hour.description':
     'Скільки людей понад ліміт планети вимирає за ігрову годину, коли екіпаж розібраного корабля перевищив ліміт населення.',
+  'config.processes.terraforming.multiplier_min.description':
+    'Нижня межа множника родовищ після тераформінгу: множник пристрою має бути більшим за неї.',
+  'config.processes.terraforming.multiplier_max.description':
+    'Верхня межа множника родовищ після тераформінгу: множник пристрою може її досягати.',
 };

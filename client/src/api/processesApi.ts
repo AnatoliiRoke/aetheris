@@ -99,8 +99,55 @@ export interface ProcessOrderRequest {
 }
 
 /**
+ * The terraforming a ship may start from a colony (task 00014, section 9): the devices of the
+ * storage of the colony, the free bodies the player sees and the range of the multiplier.
+ */
+export interface TerraformingState {
+  planetId: number;
+  devices: TerraformingDevice[];
+  targets: TerraformingTarget[];
+  multiplierMin: number;
+  multiplierMax: number;
+}
+
+/**
+ * A one-shot device of the terraforming in the storage of the colony.
+ */
+export interface TerraformingDevice {
+  partTypeId: number;
+  nameKey: string;
+  markLevel: number;
+  multiplier: number;
+  quantity: number;
+}
+
+/**
+ * A free body a device may be turned on at.
+ */
+export interface TerraformingTarget {
+  planetId: number;
+  systemId: number;
+  objectTypeId: number;
+  orbit: number | null;
+  name: string;
+  isTerraformed: boolean;
+}
+
+/**
+ * The outcome of a device turned on at a free body, with the terraforming after the change.
+ */
+export interface TerraformingResult {
+  targetPlanetId: number;
+  partTypeId: number;
+  multiplier: number;
+  changedDeposits: number;
+  terraforming: TerraformingState;
+}
+
+/**
  * The endpoints of the processes module: the reads of the buildings and the commands of the
- * queue. The server checks every rule; the client only shows them.
+ * queue, and the terraforming started by a ship. The server checks every rule; the client only
+ * shows them.
  */
 export interface ProcessesApi {
   buildings(planetId: number): Promise<ProcessBuildingSummary[]>;
@@ -113,6 +160,8 @@ export interface ProcessesApi {
     request?: ProcessOrderRequest,
   ): Promise<ProcessBuilding>;
   cancel(planetId: number, planetBuildingId: number, orderId: number): Promise<ProcessBuilding>;
+  terraforming(planetId: number): Promise<TerraformingState>;
+  terraform(planetId: number, targetPlanetId: number, partTypeId: number): Promise<TerraformingResult>;
 }
 
 const prefix = '/api/v1/processes';
@@ -148,6 +197,18 @@ export function createProcessesApi(http: HttpClient): ProcessesApi {
           planet_id: planetId,
           planet_building_id: planetBuildingId,
           order_id: orderId,
+        }),
+      );
+    },
+    async terraforming(planetId) {
+      return camelize<TerraformingState>(await http.get<unknown>(`${prefix}/terraforming?planet_id=${planetId}`));
+    },
+    async terraform(planetId, targetPlanetId, partTypeId) {
+      return camelize<TerraformingResult>(
+        await http.command<unknown>(`${prefix}/terraform`, {
+          planet_id: planetId,
+          target_planet_id: targetPlanetId,
+          part_type_id: partTypeId,
         }),
       );
     },

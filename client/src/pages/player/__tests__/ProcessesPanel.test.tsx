@@ -26,9 +26,9 @@ describe('ProcessesPanel', () => {
     expect(within(queue).getByText('Зроблено 1 з 2')).toBeInTheDocument();
 
     const recipes = within(panel).getByRole('heading', { name: 'Рецепти процесів' }).closest('div')!;
-    expect(within(recipes).getByText('Тераформування планети')).toBeInTheDocument();
+    expect(within(recipes).getByText('Ремонт корабля на орбіті')).toBeInTheDocument();
     expect(within(recipes).getByText('Розбирання деталі')).toBeInTheDocument();
-    expect(within(recipes).getByText('Процес: Тераформінг')).toBeInTheDocument();
+    expect(within(recipes).getByText('Процес: Ремонт корабля')).toBeInTheDocument();
     expect(within(recipes).getByText('На одиницю: Залізо 4')).toBeInTheDocument();
   });
 

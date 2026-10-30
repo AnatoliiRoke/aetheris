@@ -7,7 +7,7 @@ import type { ContentApi } from '../api/contentApi';
 import type { GameApi, Race } from '../api/gameApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
-import type { ProcessBuilding, ProcessBuildingSummary, ProcessesApi } from '../api/processesApi';
+import type { ProcessBuilding, ProcessBuildingSummary, ProcessesApi, TerraformingState } from '../api/processesApi';
 import type { ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionStock } from '../api/productionApi';
 import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
@@ -83,10 +83,11 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'production.recipe.recipe_2.name': 'Корпусний модуль',
     'production.recipe.recipe_2.description': 'Модуль корпусу корабля.',
     'production.part_type.part_3.name': 'Корпус «Оса» Мк. II',
-    'processes.process_type.terraforming.name': 'Тераформінг',
+    'production.part_type.part_34.name': 'Пристрій тераформінгу Mk I',
+    'processes.process_type.ship_repair.name': 'Ремонт корабля',
     'processes.process_type.recycling.name': 'Розбирання',
-    'processes.process_recipe.recipe_1.name': 'Тераформування планети',
-    'processes.process_recipe.recipe_1.description': 'Пристрій на орбіті робить родовища багатими.',
+    'processes.process_recipe.recipe_1.name': 'Ремонт корабля на орбіті',
+    'processes.process_recipe.recipe_1.description': 'Майстерня лагодить корпус і всі модулі корабля.',
     'processes.process_recipe.recipe_2.name': 'Розбирання деталі',
     'processes.process_recipe.recipe_2.description': 'Деталь розбирається на ресурси.',
   },
@@ -103,10 +104,10 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'production.recipe.recipe_2.name': 'Hull module',
     'production.recipe.recipe_2.description': 'A module of the hull of a ship.',
     'planets.building.building_20.name': 'Recycling factory',
-    'processes.process_type.terraforming.name': 'Terraforming',
+    'processes.process_type.ship_repair.name': 'Ship repair',
     'processes.process_type.recycling.name': 'Recycling',
-    'processes.process_recipe.recipe_1.name': 'Terraforming of the planet',
-    'processes.process_recipe.recipe_1.description': 'The device on the orbit makes the deposits rich.',
+    'processes.process_recipe.recipe_1.name': 'Repair of a ship on the orbit',
+    'processes.process_recipe.recipe_1.description': 'The workshop repairs the hull and every module of a ship.',
     'processes.process_recipe.recipe_2.name': 'Recycling of a part',
     'processes.process_recipe.recipe_2.description': 'The part is taken apart into resources.',
   },
@@ -428,6 +429,32 @@ export function fakeProcessesApi(overrides: Partial<ProcessesApi> = {}): Process
     building: vi.fn().mockResolvedValue(sampleProcessesBuilding()),
     enqueue: vi.fn().mockResolvedValue(sampleProcessesBuilding()),
     cancel: vi.fn().mockResolvedValue(sampleProcessesBuilding()),
+    terraforming: vi.fn().mockResolvedValue(sampleTerraforming()),
+    terraform: vi.fn().mockResolvedValue({
+      targetPlanetId: 70,
+      partTypeId: 34,
+      multiplier: 1.6,
+      changedDeposits: 3,
+      terraforming: sampleTerraforming({ devices: [] }),
+    }),
+    ...overrides,
+  };
+}
+
+/**
+ * The terraforming of a colony for the tests (task 00014, section 9): one device in the storage,
+ * a free body and a body that is terraformed already.
+ */
+export function sampleTerraforming(overrides: Partial<TerraformingState> = {}): TerraformingState {
+  return {
+    planetId: 10,
+    devices: [{ partTypeId: 34, nameKey: 'production.part_type.part_34.name', markLevel: 1, multiplier: 1.6, quantity: 1 }],
+    targets: [
+      { planetId: 70, systemId: 3, objectTypeId: 2, orbit: 4, name: 'Kepler-4', isTerraformed: false },
+      { planetId: 71, systemId: 3, objectTypeId: 2, orbit: 5, name: 'Kepler-5', isTerraformed: true },
+    ],
+    multiplierMin: 1.4,
+    multiplierMax: 1.9,
     ...overrides,
   };
 }
@@ -447,7 +474,7 @@ export function sampleProcessesBuilding(overrides: Partial<ProcessBuilding> = {}
         code: 'recipe_1',
         nameKey: 'processes.process_recipe.recipe_1.name',
         descriptionKey: 'processes.process_recipe.recipe_1.description',
-        processTypeNameKey: 'processes.process_type.terraforming.name',
+        processTypeNameKey: 'processes.process_type.ship_repair.name',
         buildingTypeId: 20,
         sourceGroupId: null,
         targetGroupId: null,
