@@ -97,6 +97,7 @@ public static class WorldReferenceSeed
                 Scope = resource.Scope,
                 EarnsPopulationIncome = resource.EarnsPopulationIncome,
                 Weight = resource.Weight ?? 1m,
+                AllowsDebt = resource.AllowsDebt,
             },
             StringComparer.Ordinal);
 
@@ -230,6 +231,7 @@ public static class WorldReferenceSeed
             Scope = resource.Scope,
             EarnsPopulationIncome = resource.EarnsPopulationIncome,
             Weight = resource.Weight ?? 1m,
+            AllowsDebt = resource.AllowsDebt,
         }));
 
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -446,6 +448,7 @@ public sealed record SeedResourceGroup(
 /// <param name="Scope">Where the resource lies: on a body or in the whole civilization (task 00015).</param>
 /// <param name="EarnsPopulationIncome">Whether the population of a civilization brings this currency (task 00015).</param>
 /// <param name="Weight">The weight of one unit of the resource in tonnes (task 00027).</param>
+/// <param name="AllowsDebt">Whether the balance of this currency may go below zero (task 00024).</param>
 public sealed record SeedResource(
     string Code,
     string? Group,
@@ -454,7 +457,8 @@ public sealed record SeedResource(
     string? ImageKey = null,
     string Scope = ResourceScopes.Planet,
     bool EarnsPopulationIncome = false,
-    decimal? Weight = null);
+    decimal? Weight = null,
+    bool AllowsDebt = false);
 
 /// <summary>An object type of the starting data.</summary>
 /// <param name="Code">The neutral code.</param>

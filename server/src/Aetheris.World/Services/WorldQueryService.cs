@@ -540,7 +540,7 @@ public sealed class WorldQueryService
 
         List<ResourceTypeFact> resources = await _dbContext.ResourceTypes.AsNoTracking()
             .OrderBy(resource => resource.Id)
-            .Select(resource => new ResourceTypeFact(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId, resource.IsArchived, resource.Scope, resource.EarnsPopulationIncome, resource.Weight))
+            .Select(resource => new ResourceTypeFact(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId, resource.IsArchived, resource.Scope, resource.EarnsPopulationIncome, resource.Weight, resource.AllowsDebt))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return new ResourceCatalog(groups, resources);

@@ -300,7 +300,8 @@ public sealed record ResourceGroupFact(int Id, string Code, string NameKey, bool
 /// <param name="Scope">Where the resource lies: on a body or in the whole civilization (task 00015).</param>
 /// <param name="EarnsPopulationIncome">Whether the population of a civilization brings this currency (task 00015).</param>
 /// <param name="Weight">The weight of one unit of the resource in tonnes (task 00027).</param>
-public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int? ResourceGroupId, bool IsArchived = false, string Scope = Aetheris.World.Data.Entities.ResourceScopes.Planet, bool EarnsPopulationIncome = false, decimal Weight = 1m)
+/// <param name="AllowsDebt">Whether the balance of this currency may go below zero after an administrative fine (task 00024).</param>
+public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int? ResourceGroupId, bool IsArchived = false, string Scope = Aetheris.World.Data.Entities.ResourceScopes.Planet, bool EarnsPopulationIncome = false, decimal Weight = 1m, bool AllowsDebt = false)
 {
     /// <summary>
     /// Gets whether the resource belongs to the whole civilization (a currency) and does not lie on a

@@ -61,10 +61,7 @@ namespace Aetheris.Economy.Data.Migrations
                     b.HasIndex("PlayerId", "ResourceTypeId")
                         .IsUnique();
 
-                    b.ToTable("civilization_balance", null, t =>
-                        {
-                            t.HasCheckConstraint("ck_civilization_balance_amount", "amount >= 0");
-                        });
+                    b.ToTable("civilization_balance", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Economy.Data.Entities.PlanetPopulationEntity", b =>

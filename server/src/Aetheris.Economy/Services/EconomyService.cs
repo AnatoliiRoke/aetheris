@@ -333,7 +333,10 @@ public sealed class EconomyService
                 long before = row.Amount;
                 long after = before + request.Amount;
 
-                if (after < 0)
+                // An administrative fine may leave a civilization in debt, but only a currency
+                // that carries the flag of the debt in the reference table (task 00024,
+                // decision 8).
+                if (after < 0 && !(await DebtCurrencyIdsAsync(cancellationToken).ConfigureAwait(false)).Contains(request.ResourceTypeId))
                 {
                     throw new EconomyAdminException(EconomyErrorCodes.CurrencyShort, "The civilization lacks the currency.");
                 }
@@ -514,16 +517,32 @@ public sealed class EconomyService
                 // income the player earned since the last change is in the balance.
                 await FixAsync(playerId, locked, _clock.GameNow, cancellationToken).ConfigureAwait(false);
 
+                // A currency whose balance may go below zero carries the flag in the reference
+                // table (task 00024, decision 8); the others never go below zero.
+                HashSet<int> debtCurrencyIds = await DebtCurrencyIdsAsync(cancellationToken).ConfigureAwait(false);
+
                 foreach ((int resourceTypeId, long amount) in changes)
                 {
                     CivilizationBalanceEntity row = locked.Balances.Single(entry => entry.ResourceTypeId == resourceTypeId);
 
                     if (give)
                     {
-                        row.Amount += amount;
+                        // An incoming amount pays the debt first: what is left after the debt is
+                        // gone joins the balance.
+                        if (row.Amount < 0 && debtCurrencyIds.Contains(resourceTypeId))
+                        {
+                            long paid = Math.Min(-row.Amount, amount);
+                            row.Amount += paid;
+                            row.Amount += amount - paid;
+                        }
+                        else
+                        {
+                            row.Amount += amount;
+                        }
                     }
                     else
                     {
+                        // A game operation never deepens a debt: it spends only what is there.
                         if (row.Amount < amount)
                         {
                             throw new GameException(EconomyErrorCodes.CurrencyShort, "The civilization lacks the currency for the cost.");
@@ -722,6 +741,16 @@ public sealed class EconomyService
             .Where(resource => resource.IsCivilizationScope && resource.EarnsPopulationIncome)
             .Select(resource => resource.Id)
             .Order()];
+
+    /// <summary>
+    /// Gets the currencies whose balance may go below zero: the currencies of the scope of the
+    /// civilization that carry the flag of the debt in the reference table (task 00024,
+    /// decision 8).
+    /// </summary>
+    private async Task<HashSet<int>> DebtCurrencyIdsAsync(CancellationToken cancellationToken) =>
+        [.. (await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false)).Resources
+            .Where(resource => resource.IsCivilizationScope && resource.AllowsDebt)
+            .Select(resource => resource.Id)];
 
     /// <summary>
     /// Counts the population of a row to a moment, with the credits it earned meanwhile.

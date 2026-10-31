@@ -45,6 +45,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
     private const string EarnsPopulationIncomeField = "earns_population_income";
 
+    private const string AllowsDebtField = "allows_debt";
+
     private const string WeightField = "weight";
 
     private const string LabelPrefix = "admin.reference.";
@@ -133,6 +135,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 InList: true,
                 Options: [.. ResourceScopes.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "scope." + value))]),
             new(EarnsPopulationIncomeField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.earns_population_income", InList: true),
+            new(AllowsDebtField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.allows_debt", InList: true),
             new(WeightField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.weight", IsRequired: true, InList: true, Minimum: 0, IsDecimal: true),
         ]);
 
@@ -186,6 +189,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                         [GroupField] = resource.ResourceGroupId,
                         [ScopeField] = resource.Scope,
                         [EarnsPopulationIncomeField] = resource.EarnsPopulationIncome,
+                        [AllowsDebtField] = resource.AllowsDebt,
                         [WeightField] = resource.Weight,
                     }))],
             ResourceGroupKind => [.. (await _dbContext.ResourceGroups.AsNoTracking().OrderBy(group => group.Id).ToListAsync(cancellationToken).ConfigureAwait(false))
@@ -359,6 +363,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     ImageKey = AdminReferenceRules.ImageKey(values.ImageKey),
                     Scope = values.Scope,
                     EarnsPopulationIncome = values.EarnsPopulationIncome,
+                    AllowsDebt = values.AllowsDebt,
                     Weight = values.Weight ?? DefaultWeight(),
                 };
 
@@ -393,6 +398,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 resource.ResourceGroupId = values.ResourceGroupId;
                 resource.Scope = values.Scope;
                 resource.EarnsPopulationIncome = values.EarnsPopulationIncome;
+                resource.AllowsDebt = values.AllowsDebt;
                 resource.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
                 resource.Weight = values.Weight ?? DefaultWeight();
                 resource.Version++;
@@ -583,6 +589,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <param name="Scope">Where the resource lies.</param>
     /// <param name="EarnsPopulationIncome">Whether the population of a civilization brings this currency.</param>
     /// <param name="Weight">The weight of one unit of the resource in tonnes (task 00027).</param>
+    /// <param name="AllowsDebt">Whether the balance of this currency may go below zero (task 00024).</param>
     private sealed record ResourceValues(
         Dictionary<string, string>? Name,
         Dictionary<string, string>? Description,
@@ -590,13 +597,14 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         string? ImageKey,
         string Scope,
         bool EarnsPopulationIncome = false,
-        decimal? Weight = null)
+        decimal? Weight = null,
+        bool AllowsDebt = false)
     {
         public static ResourceValues Of(ResourceTypeEntity resource, IReadOnlyList<LocalizationPack> packs) =>
-            new(AdminReferenceRules.TextsOf(packs, resource.NameKey), AdminReferenceRules.TextsOf(packs, resource.DescriptionKey), resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome, resource.Weight);
+            new(AdminReferenceRules.TextsOf(packs, resource.NameKey), AdminReferenceRules.TextsOf(packs, resource.DescriptionKey), resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome, resource.Weight, resource.AllowsDebt);
 
         public static ResourceValues Of(ResourceTypeEntity resource, (Dictionary<string, string> Name, Dictionary<string, string> Description) texts) =>
-            new(texts.Name, texts.Description, resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome, resource.Weight);
+            new(texts.Name, texts.Description, resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome, resource.Weight, resource.AllowsDebt);
 
         public (Dictionary<string, string> Name, Dictionary<string, string> Description) Trimmed(ILocalizationTexts texts) =>
             (Trim(texts, Name), Trim(texts, Description));
@@ -609,6 +617,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             [GroupField] = ResourceGroupId,
             [ScopeField] = Scope,
             [EarnsPopulationIncomeField] = EarnsPopulationIncome,
+            [AllowsDebtField] = AllowsDebt,
             [WeightField] = Weight,
         };
     }

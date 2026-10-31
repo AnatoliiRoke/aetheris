@@ -1038,6 +1038,10 @@ namespace Aetheris.World.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("AllowsDebt")
+                        .HasColumnType("boolean")
+                        .HasColumnName("allows_debt");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(64)

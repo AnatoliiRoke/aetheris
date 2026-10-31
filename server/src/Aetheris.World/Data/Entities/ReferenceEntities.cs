@@ -61,6 +61,13 @@ public sealed class ResourceTypeEntity
     /// </summary>
     public bool EarnsPopulationIncome { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the balance of this currency may go below zero:
+    /// only an administrative fine may leave a civilization in debt, and only a currency with
+    /// the flag accepts it (task 00024, decision 8).
+    /// </summary>
+    public bool AllowsDebt { get; set; }
+
     /// <summary>Gets or sets the localisation key of the name.</summary>
     public string NameKey { get; set; } = string.Empty;
 

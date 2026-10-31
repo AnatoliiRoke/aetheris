@@ -169,7 +169,6 @@ public sealed class WorldDbContext : DbContext
             entity.HasOne<ResourceGroupEntity>().WithMany().HasForeignKey(e => e.ResourceGroupId).OnDelete(DeleteBehavior.Restrict);
             entity.ToTable(table => table.HasCheckConstraint("ck_resource_type_weight", "weight >= 0"));
         });
-
         modelBuilder.Entity<CelestialObjectTypeEntity>(entity =>
         {
             entity.ToTable("celestial_object_type");

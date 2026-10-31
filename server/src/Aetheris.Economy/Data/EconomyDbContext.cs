@@ -63,7 +63,11 @@ public sealed class EconomyDbContext : DbContext
             entity.Property(e => e.AmountFraction).HasColumnName("amount_fraction");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
             entity.Property(e => e.Version).HasColumnName("version");
-            entity.ToTable(table => table.HasCheckConstraint("ck_civilization_balance_amount", "amount >= 0"));
+
+            // The balance of a currency may go below zero only when the currency carries the flag
+            // of the debt in the reference table of the world (task 00024, decision 8). The flag
+            // lives in another table, so the database cannot check it here; the rule lives in the
+            // economy service, which is the only writer of the balance, and a test holds it.
         });
     }
 }
