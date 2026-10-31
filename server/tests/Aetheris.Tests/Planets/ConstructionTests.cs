@@ -221,7 +221,8 @@ public sealed class ConstructionTests
 
     /// <summary>
     /// A mine yields the value of its level times the richness of the deposit per hour, lazily
-    /// and only up to the capacity of its group; the alarm "storage full" is written as data.
+    /// and only up to the capacity of its resource; the alarm "storage full" is written as data
+    /// for the resource, and the other resources of the group are not touched by it.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
@@ -243,7 +244,8 @@ public sealed class ConstructionTests
             .Single(effect => effect.EffectType == BuildingEffectTypes.StorageCapacity && effect.ResourceGroupId != null
                 && services.GetRequiredService<Aetheris.World.Data.WorldDbContext>().ResourceTypes.Any(resource => resource.Id == iron && resource.ResourceGroupId == effect.ResourceGroupId));
 
-        // Copper of the same group pays for a later change and takes part of the capacity.
+        // Copper of the same group pays for a later change; it has the capacity of its own and does
+        // not take any of the capacity of the iron.
         const long copperAmount = 1000;
         int copper = await PlanetsTestData.ResourceIdAsync(services, SeedCodes.Copper);
 
@@ -259,25 +261,29 @@ public sealed class ConstructionTests
         // The read writes nothing; the balance is fixed only by a change.
         Assert.Equal(0, (await PlanetsTestData.StoredBalanceAsync(services, player.PlanetId))[iron]);
 
-        // Far later the group is full and the mine stands still.
-        DateTimeOffset fullAt = start.AddTicks((long)decimal.Ceiling((capacityEffect.Value - copperAmount) * (decimal)TimeSpan.TicksPerHour / rate));
+        // Far later the iron is full and the mine stands still; the copper has not lost any room.
+        DateTimeOffset fullAt = start.AddTicks((long)decimal.Ceiling(capacityEffect.Value * (decimal)TimeSpan.TicksPerHour / rate));
         PlanetOverviewDto later = await PlanetsTestData.ReadAsync(services, player.PlanetId, fullAt.AddDays(3));
-        StorageGroupDto group = later.StorageGroups.Single(entry => entry.ResourceGroupId == capacityEffect.ResourceGroupId);
+        PlanetResourceDto ironLater = later.Resources.Single(resource => resource.ResourceTypeId == iron);
+        PlanetResourceDto copperLater = later.Resources.Single(resource => resource.ResourceTypeId == copper);
 
-        Assert.Equal(capacityEffect.Value - copperAmount, Amount(later, iron));
-        Assert.True(group.IsFull);
-        Assert.Equal(fullAt, group.FullAt);
-        Assert.Equal(0, later.Resources.Single(resource => resource.ResourceTypeId == iron).RatePerHour);
+        Assert.Equal(capacityEffect.Value, Amount(later, iron));
+        Assert.Equal(capacityEffect.Value, ironLater.Capacity);
+        Assert.True(ironLater.IsFull);
+        Assert.Equal(fullAt, ironLater.FullAt);
+        Assert.Equal(0, ironLater.RatePerHour);
+        Assert.Equal(capacityEffect.Value, copperLater.Capacity);
+        Assert.False(copperLater.IsFull);
 
-        // A change fixes the balance and writes the alarm as the state of the group.
+        // A change fixes the balance and writes the alarm as the state of the resource.
         await services.GetRequiredService<ConstructionService>().EnqueueAsync(
             player.PlanetId,
             (await PlanetsTestData.TypeAsync(services, SeedCodes.PowerPlant)).Id,
             fullAt.AddDays(3),
             Token);
 
-        PlanetStorageGroupEntity stored = await services.GetRequiredService<PlanetsDbContext>().StorageGroups.AsNoTracking()
-            .SingleAsync(entry => entry.PlanetId == player.PlanetId && entry.ResourceGroupId == capacityEffect.ResourceGroupId, Token);
+        PlanetResourceEntity stored = await services.GetRequiredService<PlanetsDbContext>().PlanetResources.AsNoTracking()
+            .SingleAsync(entry => entry.PlanetId == player.PlanetId && entry.ResourceTypeId == iron, Token);
         Assert.NotNull(stored.FullAt);
     }
 

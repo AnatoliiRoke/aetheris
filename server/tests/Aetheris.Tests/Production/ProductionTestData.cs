@@ -125,9 +125,10 @@ internal static class ProductionTestData
     /// </summary>
     /// <param name="player">The player and the body.</param>
     /// <param name="services">The services of the request.</param>
-    /// <param name="freeRoom">How many units still fit, or <see langword="null"/> for an empty storage.</param>
-    /// <returns>The room of the storage.</returns>
-    internal static async Task<long> BuildStorageAsync(PlanetsTestPlayer player, IServiceProvider services, long? freeRoom = null)
+    /// <param name="freeRoom">How many units of the kind still fit, or <see langword="null"/> for an empty storage.</param>
+    /// <param name="filledPartTypeId">The kind of the part that is filled until only <paramref name="freeRoom"/> is free; the room is the room of one kind.</param>
+    /// <returns>The room of the storage for every kind.</returns>
+    internal static async Task<long> BuildStorageAsync(PlanetsTestPlayer player, IServiceProvider services, long? freeRoom = null, int? filledPartTypeId = null)
     {
         PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
         Aetheris.Planets.IPlanetsModule planetsModule = services.GetRequiredService<Aetheris.Planets.IPlanetsModule>();
@@ -161,7 +162,19 @@ internal static class ProductionTestData
         }
 
         storage.Capacity = capacity;
-        storage.Quantity = freeRoom is null ? 0 : Math.Max(0, capacity - freeRoom.Value);
+
+        // The room is the room of one kind, so the storage is filled with the parts of one kind.
+        if (freeRoom is not null)
+        {
+            dbContext.PartStocks.Add(new PartStockEntity
+            {
+                PlanetId = player.PlanetId,
+                SectorId = 0,
+                PartTypeId = filledPartTypeId ?? throw new ArgumentException("The kind to fill is needed.", nameof(filledPartTypeId)),
+                Quantity = Math.Max(0, capacity - freeRoom.Value),
+            });
+        }
+
         await dbContext.SaveChangesAsync(Token);
 
         return capacity;

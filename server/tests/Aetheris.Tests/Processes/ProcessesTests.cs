@@ -827,9 +827,11 @@ public sealed partial class ProcessesTests
         Assert.Equal(2, (await ProcessesTestData.OrdersAsync(player, check.ServiceProvider, recyclingId)).Count);
         Assert.Equal(2, (await ProcessesTestData.OrdersAsync(player, check.ServiceProvider, shopId)).Count);
 
-        PartStorageEntity storage = await check.ServiceProvider.GetRequiredService<Aetheris.Production.Data.ProductionDbContext>().PartStorages.AsNoTracking()
-            .SingleAsync(entry => entry.PlanetId == player.PlanetId, Token);
-        Assert.Equal(1, storage.Quantity);
+        // The stacks of the body hold the one part left, so no part was lost or counted twice.
+        long held = await check.ServiceProvider.GetRequiredService<Aetheris.Production.Data.ProductionDbContext>().PartStocks.AsNoTracking()
+            .Where(stack => stack.PlanetId == player.PlanetId)
+            .SumAsync(stack => stack.Quantity, Token);
+        Assert.Equal(1, held);
         Assert.All(
             await check.ServiceProvider.GetRequiredService<PlanetsDbContext>().PlanetResources.AsNoTracking().Where(row => row.PlanetId == player.PlanetId).ToListAsync(Token),
             row => Assert.True(row.Amount >= 0));

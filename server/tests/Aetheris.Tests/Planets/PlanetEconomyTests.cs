@@ -101,15 +101,15 @@ public sealed class PlanetEconomyTests
             Start.AddMinutes(150));
 
         Assert.Equal(100 + 225, result.Amounts[Iron]);
-        Assert.Equal(Start.AddHours((1_000_000 - 100) / 90d).Ticks, result.FullAt[Metals]!.Value.Ticks, TimeSpan.FromSeconds(1).Ticks);
+        Assert.Equal(Start.AddHours((1_000_000 - 100) / 90d).Ticks, result.FullAt[Iron]!.Value.Ticks, TimeSpan.FromSeconds(1).Ticks);
     }
 
     /// <summary>
-    /// When a group fills, every producer of the group stops and the group holds exactly its
-    /// capacity; another group goes on.
+    /// A resource that fills holds exactly its own capacity and stops alone: the other resources
+    /// of its group keep growing up to the same capacity, and another group goes on.
     /// </summary>
     [Fact]
-    public void A_full_group_stops_its_producers_and_holds_its_capacity()
+    public void A_full_resource_stops_only_itself_and_holds_its_capacity()
     {
         BuildingCatalog catalog = Catalog();
         Dictionary<int, decimal> rates = new() { [Iron] = 70m, [Copper] = 30m, [Quartzite] = 10m };
@@ -123,22 +123,69 @@ public sealed class PlanetEconomyTests
             Start,
             Start.AddHours(24));
 
-        Assert.Equal(1000, result.Amounts[Iron] + result.Amounts[Copper]);
-        Assert.Equal(400 + 350, result.Amounts[Iron]);
-        Assert.Equal(100 + 150, result.Amounts[Copper]);
-        Assert.Equal(Start.AddHours(5), result.FullAt[Metals]);
+        // The iron fills after 600 / 70 hours; the copper of the same group has not filled yet.
+        Assert.Equal(1000, result.Amounts[Iron]);
+        Assert.Equal(100 + 720, result.Amounts[Copper]);
+        Assert.Equal(Start.AddHours(600 / 70d).Ticks, result.FullAt[Iron]!.Value.Ticks, TimeSpan.FromSeconds(1).Ticks);
+        Assert.Equal(Start.AddHours(30), result.FullAt[Copper]);
         Assert.Equal(240, result.Amounts[Quartzite]);
 
-        // Later nothing changes for the full group.
+        // Later the iron stays and the copper goes on to its own capacity.
         AccumulationResult later = PlanetEconomy.Accumulate(catalog, result.Amounts, rates, capacities, Start.AddHours(24), Start.AddHours(48));
 
-        Assert.Equal(result.Amounts[Iron], later.Amounts[Iron]);
-        Assert.Equal(Start.AddHours(24), later.FullAt[Metals]);
+        Assert.Equal(1000, later.Amounts[Iron]);
+        Assert.Equal(Start.AddHours(24), later.FullAt[Iron]);
+        Assert.Equal(1000, later.Amounts[Copper]);
+        Assert.Equal(Start.AddHours(30), later.FullAt[Copper]);
     }
 
     /// <summary>
-    /// The fill moment is exact at the edge: a moment before it the group is not full yet, at
-    /// it the group holds its capacity.
+    /// The capacity a storage gives is the capacity of every resource of its group: a storage of
+    /// five thousand lets five thousand of each resource lie, and the capacities do not add up
+    /// over the resources.
+    /// </summary>
+    [Fact]
+    public void Every_resource_of_a_group_has_the_capacity_of_the_storage()
+    {
+        const long capacity = 5000;
+        BuildingCatalog catalog = Catalog(new BuildingEffectInfo(BuildingEffectTypes.StorageCapacity, null, Metals, capacity));
+        Dictionary<int, long> capacities = PlanetEconomy.Capacities(catalog, new Dictionary<int, int> { [1] = 1 }, PlanetBonuses.None);
+
+        AccumulationResult result = PlanetEconomy.Accumulate(
+            catalog,
+            new Dictionary<int, long>(),
+            new Dictionary<int, decimal> { [Iron] = 100_000m, [Copper] = 100_000m },
+            capacities,
+            Start,
+            Start.AddHours(24));
+
+        Assert.Equal(capacity, capacities[Metals]);
+        Assert.Equal(capacity, result.Amounts[Iron]);
+        Assert.Equal(capacity, result.Amounts[Copper]);
+    }
+
+    /// <summary>
+    /// The moment a resource is full is counted for the resource from its own rate and room, so
+    /// two resources of one group have two moments.
+    /// </summary>
+    [Fact]
+    public void The_full_moment_is_counted_for_every_resource()
+    {
+        AccumulationResult result = PlanetEconomy.Accumulate(
+            Catalog(),
+            new Dictionary<int, long> { [Iron] = 200, [Copper] = 0 },
+            new Dictionary<int, decimal> { [Iron] = 100m, [Copper] = 50m },
+            new Dictionary<int, long> { [Metals] = 1000 },
+            Start,
+            Start);
+
+        Assert.Equal(Start.AddHours(8), result.FullAt[Iron]);
+        Assert.Equal(Start.AddHours(20), result.FullAt[Copper]);
+    }
+
+    /// <summary>
+    /// The fill moment is exact at the edge: a moment before it the resource is not full yet, at
+    /// it the resource holds its capacity.
     /// </summary>
     [Fact]
     public void The_edge_of_the_storage_is_exact()
@@ -155,7 +202,7 @@ public sealed class PlanetEconomyTests
         Assert.Equal(999, before.Amounts[Iron]);
         Assert.Equal(1000, edge.Amounts[Iron]);
         Assert.Equal(1000, after.Amounts[Iron]);
-        Assert.Equal(Start.AddSeconds(1000), before.FullAt[Metals]);
+        Assert.Equal(Start.AddSeconds(1000), before.FullAt[Iron]);
     }
 
     /// <summary>
@@ -173,7 +220,7 @@ public sealed class PlanetEconomyTests
             Start.AddHours(10));
 
         Assert.Equal(5000, result.Amounts[Iron]);
-        Assert.Equal(Start, result.FullAt[Metals]);
+        Assert.Equal(Start, result.FullAt[Iron]);
     }
 
     /// <summary>

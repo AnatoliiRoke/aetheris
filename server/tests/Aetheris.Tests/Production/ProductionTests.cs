@@ -216,7 +216,7 @@ public sealed class ProductionTests
 
         ProductionStockDto stock = await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token);
 
-        Assert.Equal(2, stock.Storage.Stored);
+        Assert.Equal(2, Assert.Single(stock.Storage.Kinds).Quantity);
         Assert.NotEmpty(stock.Stacks);
     }
 
@@ -257,17 +257,17 @@ public sealed class ProductionTests
 
         ProductionStockDto stock = await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token);
 
-        Assert.Equal(2, stock.Storage.Stored);
+        Assert.Equal(2, Assert.Single(stock.Storage.Kinds).Quantity);
         Assert.Equal(2, stock.Stacks.Sum(stack => stack.Quantity));
     }
 
     /// <summary>
-    /// The storage of the parts holds the units, and the production stops when it is full
-    /// (task 00013, criterion 3).
+    /// The storage of the parts holds the units, and the production of a kind stops when the room
+    /// of the kind is full (task 00013, criterion 3).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_production_stops_when_the_storage_is_full()
+    public async Task The_production_stops_when_the_room_of_the_kind_is_full()
     {
         await ResetAsync();
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -275,19 +275,96 @@ public sealed class ProductionTests
 
         long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
         await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
-        long capacity = await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider, 1);
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
+        long capacity = await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider, 1, recipe.PartTypeId);
 
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
-        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
 
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 5, Token);
 
         await ProductionTestData.CompleteAsync(player, scope.ServiceProvider, buildingId);
 
         ProductionStockDto stock = await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token);
+        ProductionPartKindDto kind = Assert.Single(stock.Storage.Kinds);
 
-        Assert.Equal(capacity, stock.Storage.Stored);
-        Assert.NotNull(stock.Storage.FullAt);
+        Assert.Equal(capacity, kind.Quantity);
+        Assert.Equal(capacity, kind.Capacity);
+        Assert.True(kind.IsFull);
+    }
+
+    /// <summary>
+    /// Every kind of part has the room of its own: a kind that is full does not take any room
+    /// from another kind, and the other kind is made up to the same room (decision of the
+    /// author, 31.10.2026).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task Every_kind_of_part_has_the_room_of_its_own()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
+        long capacity = await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider);
+
+        // Another kind of part fills its whole room; the kind of the recipe has none of it.
+        ProductionDbContext dbContext = scope.ServiceProvider.GetRequiredService<ProductionDbContext>();
+        int otherPartTypeId = await dbContext.PartTypes.AsNoTracking()
+            .Where(part => part.Id != recipe.PartTypeId)
+            .Select(part => part.Id)
+            .FirstAsync(Token);
+        dbContext.PartStocks.Add(new PartStockEntity { PlanetId = player.PlanetId, SectorId = 0, PartTypeId = otherPartTypeId, Quantity = capacity });
+        await dbContext.SaveChangesAsync(Token);
+
+        IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
+
+        await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 2, Token);
+        await ProductionTestData.CompleteAsync(player, scope.ServiceProvider, buildingId);
+
+        ProductionStockDto stock = await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token);
+        ProductionPartKindDto other = stock.Storage.Kinds.Single(kind => kind.PartTypeId == otherPartTypeId);
+        ProductionPartKindDto made = stock.Storage.Kinds.Single(kind => kind.PartTypeId == recipe.PartTypeId);
+
+        Assert.Equal(capacity, other.Quantity);
+        Assert.True(other.IsFull);
+        Assert.Equal(2, made.Quantity);
+        Assert.False(made.IsFull);
+        Assert.Equal(capacity, made.Capacity);
+        Assert.Equal(capacity, other.Capacity);
+    }
+
+    /// <summary>
+    /// A return of parts over the room of the kind is not cut: the parts stay in the storage and
+    /// the kind simply counts as full, as a refund of resources does (task 00011, task 00014).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_return_over_the_room_of_the_kind_is_kept_and_the_kind_counts_as_full()
+    {
+        const long overflow = 5;
+
+        await ResetAsync();
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        long capacity = await ProductionTestData.BuildStorageAsync(player, services);
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(services);
+
+        await services.GetRequiredService<PartStockService>().AddAsync(
+            player.PlanetId,
+            [new PartStackAdded(recipe.PartTypeId!.Value, 1, false, PartCondition.Full, capacity + overflow)],
+            Token);
+
+        ProductionStockDto stock = await services.GetRequiredService<IProductionModule>().GetStockAsync(player.Account.UserId, player.PlanetId, Token);
+        ProductionPartKindDto kind = Assert.Single(stock.Storage.Kinds);
+
+        Assert.Equal(capacity + overflow, kind.Quantity);
+        Assert.Equal(capacity, kind.Capacity);
+        Assert.True(kind.IsFull);
     }
 
     /// <summary>
@@ -608,7 +685,7 @@ public sealed class ProductionTests
         }
         catch (GameException exception) when (exception.Code == ProductionErrorCodes.QueueFull)
         {
-            return new ProductionFactoryDto(planetId, buildingId, 0, [], [], new ProductionStorageDto(0, 0, null), default);
+            return new ProductionFactoryDto(planetId, buildingId, 0, [], [], new ProductionStorageDto(0, []), default);
         }
     }
 

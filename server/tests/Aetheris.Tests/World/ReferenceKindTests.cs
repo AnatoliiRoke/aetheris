@@ -283,7 +283,7 @@ public sealed class ReferenceKindTests
         Dictionary<string, int> permissionIds = await main.AdminPermissions.AsNoTracking().ToDictionaryAsync(permission => permission.Code, permission => permission.Id, Token);
 
         Assert.Equal(
-            ["resource", "resource_group", "building", "technology", "technology_branch", "part_group", "part", "recipe",
+            ["resource", "resource_group", "building", "building_category", "technology", "technology_branch", "part_group", "part", "recipe",
              "process_type", "process_recipe", "process_param"],
             descriptors.OrderBy(descriptor => descriptor.SortOrder).Select(descriptor => descriptor.Kind));
         foreach (AdminReferenceDescriptor descriptor in descriptors)

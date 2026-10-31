@@ -464,9 +464,9 @@ public sealed class ProductionReferenceTests
         IProductionModule production = services.GetRequiredService<IProductionModule>();
         long factoryId = await ProductionTestData.BuildFactoryAsync(player, services);
         await ProductionTestData.GiveEveryResourceAsync(player, services);
-        long capacity = await ProductionTestData.BuildStorageAsync(player, services, 1);
+        long capacity = await ProductionTestData.BuildStorageAsync(player, services, 1, partId);
 
-        // The storage has room for one bolt, so the second one waits. A bolt takes the shortest
+        // The room of the bolt kind has room for one bolt, so the second one waits. A bolt takes the shortest
         // time, a second, so the batch stops a few seconds from now.
         DateTimeOffset startedAt = PlanetsTestData.GameNow(services);
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, factoryId, boltRecipeId, 2, Token);
@@ -476,12 +476,12 @@ public sealed class ProductionReferenceTests
         ProductionFactoryDto blocked = await production.GetFactoryAsync(player.Account.UserId, player.PlanetId, factoryId, Token);
         Assert.True(Assert.Single(blocked.Queue).IsBlocked);
         Assert.Equal(1, blocked.Queue[0].ProducedQuantity);
-        Assert.Equal(capacity, blocked.Storage.Stored);
+        Assert.Equal(capacity, Held(blocked.Storage, partId));
 
         // The scrap takes a bolt out of the storage, so the blocked batch goes on.
         long producedBefore = await ProductionTestData.BalanceAsync(player, services, ids.Produced);
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, factoryId, scrapRecipeId, 1, Token);
-        Assert.Equal(capacity - 1, (await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage.Stored);
+        Assert.Equal(capacity - 1, Held((await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage, partId));
 
         // The woken event runs at the moment the room freed up: the waiting unit is made then,
         // and the scrap starts from that moment and not from the old end of the bolt.
@@ -493,13 +493,13 @@ public sealed class ProductionReferenceTests
         ProductionOrderDto scrap = Assert.Single(woken.Queue);
         Assert.Equal(scrapRecipeId, scrap.RecipeId);
         Assert.Equal(freedAt, scrap.StartsAt);
-        Assert.Equal(capacity, woken.Storage.Stored);
+        Assert.Equal(capacity, Held(woken.Storage, partId));
 
         await ProductionTestData.CompleteAsync(player, services, factoryId);
 
         ProductionFactoryDto done = await production.GetFactoryAsync(player.Account.UserId, player.PlanetId, factoryId, Token);
         Assert.Empty(done.Queue);
-        Assert.Equal(capacity, done.Storage.Stored);
+        Assert.Equal(capacity, Held(done.Storage, partId));
         Assert.Equal(producedBefore + 3, await ProductionTestData.BalanceAsync(player, services, ids.Produced));
     }
 
@@ -531,14 +531,12 @@ public sealed class ProductionReferenceTests
 
         ProductionDbContext dbContext = services.GetRequiredService<ProductionDbContext>();
         dbContext.PartStocks.Add(new PartStockEntity { PlanetId = player.PlanetId, SectorId = 0, PartTypeId = partId, Quantity = 6 });
-        PartStorageEntity storage = await dbContext.PartStorages.SingleAsync(entry => entry.PlanetId == player.PlanetId, Token);
-        storage.Quantity = 6;
         await dbContext.SaveChangesAsync(Token);
 
         long ironBefore = await ProductionTestData.BalanceAsync(player, services, ids.Iron);
         long producedBefore = await ProductionTestData.BalanceAsync(player, services, ids.Produced);
         ProductionOrderDto order = (await production.EnqueueAsync(player.Account.UserId, player.PlanetId, factoryId, recipeId, 3, Token)).Queue[0];
-        Assert.Equal(0, (await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage.Stored);
+        Assert.Equal(0, Held((await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage, partId));
 
         // One unit of three is made, so two thirds of the cost come back.
         await services.GetRequiredService<ProductionQueueService>()
@@ -547,7 +545,7 @@ public sealed class ProductionReferenceTests
 
         ProductionStockDto stock = await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token);
         Assert.Equal(4, stock.Stacks.Where(stack => stack.PartTypeId == partId).Sum(stack => stack.Quantity));
-        Assert.Equal(4, stock.Storage.Stored);
+        Assert.Equal(4, Held(stock.Storage, partId));
 
         // The unit made cost ten iron and gave its product; the two units not made cost nothing.
         Assert.Equal(ironBefore - 10, await ProductionTestData.BalanceAsync(player, services, ids.Iron));
@@ -622,6 +620,9 @@ public sealed class ProductionReferenceTests
         description = ReferenceAdmin.Texts(ukrainian + " опис", english + " description"),
         sort_order = sortOrder,
     };
+
+    private static long Held(ProductionStorageDto storage, int partTypeId) =>
+        storage.Kinds.Where(kind => kind.PartTypeId == partTypeId).Sum(kind => kind.Quantity);
 
     private static object Part(int groupId, string ukrainian, string english, object[]? attributes = null, string? imageKey = null) => new
     {

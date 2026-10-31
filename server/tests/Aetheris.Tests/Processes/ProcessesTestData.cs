@@ -182,11 +182,10 @@ internal static class ProcessesTestData
 
         if (storage is null)
         {
-            storage = new PartStorageEntity { PlanetId = player.PlanetId, SectorId = 0, Capacity = 0, Quantity = 0 };
+            storage = new PartStorageEntity { PlanetId = player.PlanetId, SectorId = 0, Capacity = 0 };
             dbContext.PartStorages.Add(storage);
         }
 
-        storage.Quantity += quantity;
         dbContext.PartStocks.Add(new PartStockEntity
         {
             PlanetId = player.PlanetId,
@@ -267,14 +266,32 @@ internal static class ProcessesTestData
     /// <param name="services">The services of the request.</param>
     /// <param name="handlerCode">The logical code of the handler.</param>
     /// <returns>The first recipe of the kind.</returns>
+    /// <remarks>
+    /// The kinds of the repair and the replacement are stubs the seed archives (author decision
+    /// 31.10.2026). Their logic is still tested, so a stub kind that is archived is offered again
+    /// here, as the administrator does in the admin panel.
+    /// </remarks>
     internal static async Task<ProcessRecipeInfo> RecipeOfAsync(IServiceProvider services, string handlerCode)
     {
         ProcessCatalog catalog = await CatalogAsync(services);
 
         ProcessTypeInfo processType = catalog.Types.FirstOrDefault(type => string.Equals(type.HandlerCode, handlerCode, StringComparison.Ordinal))
             ?? throw new InvalidOperationException($"The kind of the process '{handlerCode}' does not exist.");
+        ProcessRecipeInfo recipe = catalog.Recipes.First(entry => entry.ProcessTypeId == processType.Id);
 
-        return catalog.Recipes.First(recipe => recipe.ProcessTypeId == processType.Id);
+        if (!processType.IsArchived && !recipe.IsArchived)
+        {
+            return recipe;
+        }
+
+        ProcessesDbContext dbContext = services.GetRequiredService<ProcessesDbContext>();
+        await dbContext.ProcessTypes.Where(entry => entry.Id == processType.Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(entry => entry.IsArchived, false), Token);
+        await dbContext.ProcessRecipes.Where(entry => entry.Id == recipe.Id)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(entry => entry.IsArchived, false), Token);
+        services.GetRequiredService<ProcessCatalogCache>().Invalidate();
+
+        return (await CatalogAsync(services)).Recipes.First(entry => entry.Id == recipe.Id);
     }
 
     /// <summary>

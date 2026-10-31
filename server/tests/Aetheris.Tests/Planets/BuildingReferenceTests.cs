@@ -339,6 +339,7 @@ public sealed class BuildingReferenceTests
             name = ReferenceAdmin.Texts(ukrainian, english),
             description = ReferenceAdmin.Texts(ukrainian + " опис", english + " description"),
             building_class = buildingClass,
+            category_id = ids.Category,
             sort_order = 50,
             is_start_building = start,
             levels = Enumerable.Range(firstLevel, levels).Select(level => new
@@ -363,7 +364,11 @@ public sealed class BuildingReferenceTests
 
         return new Ids(
             await PlanetsTestData.ResourceIdAsync(services, SeedCodes.Iron),
-            (await PlanetsTestData.TypeAsync(services, SeedCodes.AdminCenter)).Id);
+            (await PlanetsTestData.TypeAsync(services, SeedCodes.AdminCenter)).Id,
+            await services.GetRequiredService<PlanetsDbContext>().BuildingCategories.AsNoTracking()
+                .OrderBy(category => category.SortOrder).ThenBy(category => category.Id)
+                .Select(category => category.Id)
+                .FirstAsync(Token));
     }
 
     private async Task<HttpClient> OwnerAsync() =>
@@ -372,5 +377,6 @@ public sealed class BuildingReferenceTests
     /// <summary>The rows the building values of the tests name.</summary>
     /// <param name="Iron">The first metal.</param>
     /// <param name="AdminCenter">The main building.</param>
-    internal sealed record Ids(int Iron, int AdminCenter);
+    /// <param name="Category">The first category of the buildings.</param>
+    internal sealed record Ids(int Iron, int AdminCenter, int Category);
 }

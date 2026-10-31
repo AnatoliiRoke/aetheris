@@ -324,6 +324,7 @@ public sealed class CreditCostTests
             NameKey = "planets.building.building_900.name",
             DescriptionKey = "planets.building.building_900.description",
             SortOrder = 900,
+            CategoryId = await planets.BuildingCategories.AsNoTracking().OrderBy(category => category.Id).Select(category => category.Id).FirstAsync(Token),
             LevelIds =
             [
                 new BuildingLevelEntity
