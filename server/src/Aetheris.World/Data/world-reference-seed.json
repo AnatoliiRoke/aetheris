@@ -667,6 +667,7 @@
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
+      "picks_all": true,
       "rules": [
         {
           "resource": "resource_1",
@@ -773,6 +774,7 @@
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
+      "picks_all": true,
       "rules": [
         {
           "resource": "resource_1",
@@ -879,6 +881,7 @@
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
+      "picks_all": true,
       "rules": [
         {
           "resource": "resource_1",
@@ -985,6 +988,7 @@
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
+      "picks_all": true,
       "rules": [
         {
           "resource": "resource_1",
@@ -1091,6 +1095,7 @@
       "min_picks": 2,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
+      "picks_all": true,
       "rules": [
         {
           "resource": "resource_1",

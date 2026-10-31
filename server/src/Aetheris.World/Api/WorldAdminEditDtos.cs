@@ -97,12 +97,14 @@ public sealed record AdminObjectTypeUpdate(
 /// <param name="MinPicks">The picks that always happen.</param>
 /// <param name="MaxPicks">The largest number of picks.</param>
 /// <param name="ExtraPickProbability">The probability of every further pick.</param>
+/// <param name="PicksAll">Whether every rule of the group is taken, whatever the picks are.</param>
 public sealed record AdminRuleGroupUpdate(
     [property: JsonPropertyName("version")] int Version,
     [property: JsonPropertyName("reason")] string? Reason,
     [property: JsonPropertyName("min_picks")] int MinPicks,
     [property: JsonPropertyName("max_picks")] int MaxPicks,
-    [property: JsonPropertyName("extra_pick_probability")] double ExtraPickProbability);
+    [property: JsonPropertyName("extra_pick_probability")] double ExtraPickProbability,
+    [property: JsonPropertyName("picks_all")] bool PicksAll = false);
 
 /// <summary>The values of a generation rule, new or changed.</summary>
 /// <param name="Version">The version the administrator saw; ignored when a rule is added.</param>
@@ -323,6 +325,7 @@ public sealed record AdminObjectTypeRow(
 /// <param name="MinPicks">The picks of the group that always happen.</param>
 /// <param name="MaxPicks">The largest number of picks of the group.</param>
 /// <param name="ExtraPickProbability">The probability of every further pick of the group.</param>
+/// <param name="PicksAll">Whether the group takes every rule, whatever the picks are.</param>
 /// <param name="ResourceId">The resource.</param>
 /// <param name="ResourceCode">The code of the resource.</param>
 /// <param name="ResourceNameKey">The localisation key of the resource.</param>
@@ -345,6 +348,7 @@ public sealed record AdminRuleRow(
     int MinPicks,
     int MaxPicks,
     double ExtraPickProbability,
+    bool PicksAll,
     int ResourceId,
     string ResourceCode,
     string ResourceNameKey,

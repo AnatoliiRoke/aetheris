@@ -64,6 +64,7 @@ public sealed record ReferenceRule(
 /// <param name="MaxPicks">The largest number of picks.</param>
 /// <param name="ExtraPickProbability">The probability of every further pick.</param>
 /// <param name="RuleIds">The rules, ordered by identifier.</param>
+/// <param name="PicksAll">Whether every rule is taken, whatever the picks are.</param>
 public sealed record ReferenceRuleGroup(
     int Id,
     int ObjectTypeId,
@@ -71,7 +72,8 @@ public sealed record ReferenceRuleGroup(
     int MinPicks,
     int MaxPicks,
     double ExtraPickProbability,
-    IReadOnlyList<ReferenceRule> RuleIds);
+    IReadOnlyList<ReferenceRule> RuleIds,
+    bool PicksAll = false);
 
 /// <summary>
 /// An immutable snapshot of the reference tables, the data half of the generator input.

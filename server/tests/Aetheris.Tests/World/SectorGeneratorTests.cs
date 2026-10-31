@@ -59,6 +59,7 @@ public sealed class SectorGeneratorTests
         WorldSettings settings = config.Settings;
         WorldReferenceData reference = config.Reference;
         HashSet<int> crystals = WorldTestData.ResourcesOfGroup(reference, SeedCodes.MineralGroup);
+        HashSet<int> ores = WorldTestData.ResourcesOfGroup(reference, SeedCodes.MetalGroup);
         int etherId = reference.Resources.Single(resource => resource.Code == SeedCodes.Ether).Id;
         int darkMatterId = reference.Resources.Single(resource => resource.Code == SeedCodes.DarkMatter).Id;
         int heliumId = reference.Resources.Single(resource => resource.Code == SeedCodes.Helium).Id;
@@ -97,11 +98,13 @@ public sealed class SectorGeneratorTests
                         {
                             Check(problems, crystalKinds is 1 or 2, "one kind of crystals");
                             Check(problems, !body.DepositIds.Any(share => share.ResourceId == heliumId), "no helium-3 on a planet");
+                            Check(problems, ores.IsSubsetOf(body.DepositIds.Select(share => share.ResourceId)), "every ore on a planet");
                         }
                         else
                         {
                             gasGiants++;
                             Check(problems, !type.IsColonizable, "gas giant not colonizable");
+                            Check(problems, !body.DepositIds.Any(share => ores.Contains(share.ResourceId)), "no ore on a gas giant");
                         }
                     }
 
@@ -317,6 +320,70 @@ public sealed class SectorGeneratorTests
         Assert.Contains(deposits, share => share.ResourceId == newCrystal);
         Assert.Contains(fields, share => share.ResourceId == newMetal);
         Assert.Contains(fields, share => share.ResourceId == newCrystal);
+    }
+
+    /// <summary>
+    /// A resource added to a group that takes all its rules lies on every planet of the type at
+    /// once, while the fields keep their random picks (author's decision of 31.10.2026).
+    /// </summary>
+    [Fact]
+    public void A_resource_added_to_a_group_that_takes_all_reaches_every_planet()
+    {
+        WorldReferenceData seed = WorldTestData.ReferenceFromSeed();
+        int ores = seed.Groups.Single(group => group.Code == SeedCodes.MetalGroup).Id;
+        int newOre = seed.Resources.Max(resource => resource.Id) + 1;
+        int ruleId = seed.RuleGroups.SelectMany(group => group.RuleIds).Max(rule => rule.Id);
+
+        List<ReferenceRuleGroup> groups =
+        [
+            .. seed.RuleGroups.Select(group => group.PicksAll && WorldTestData.GroupOfRules(seed, group) == ores
+                ? group with { RuleIds = [.. group.RuleIds, new ReferenceRule(++ruleId, newOre, 1, 0.1m, 0.2m)] }
+                : group),
+        ];
+
+        WorldReferenceData extended = new(
+            seed.Groups,
+            [.. seed.Resources, new ReferenceResource(newOre, "test_ore", ores)],
+            seed.ObjectTypes,
+            seed.SizeClasses,
+            groups);
+
+        SectorPlan plan = SectorGenerator.Generate(3, "S1", new WorldGenerationConfig(WorldTestData.Settings(), extended));
+        List<BodyPlan> planets = [.. plan.SystemIds.SelectMany(system => system.BodyIds)
+            .Where(body => extended.FindType(body.ObjectTypeId)!.ObjectClass == WorldObjectClasses.Planet)];
+        HashSet<int> allOres = WorldTestData.ResourcesOfGroup(extended, SeedCodes.MetalGroup);
+
+        Assert.NotEmpty(planets);
+        Assert.All(planets, planet => Assert.Superset(allOres, planet.DepositIds.Select(share => share.ResourceId).ToHashSet()));
+    }
+
+    /// <summary>
+    /// A group that takes all its rules ignores the picks, and only an empty one is refused.
+    /// </summary>
+    [Fact]
+    public void A_group_that_takes_all_ignores_the_picks_and_needs_a_rule()
+    {
+        WorldReferenceData seed = WorldTestData.ReferenceFromSeed();
+        int terrestrialId = seed.ObjectTypes.Single(type => type.Code == SeedCodes.Terrestrial).Id;
+        int resourceId = seed.Resources.First(resource => seed.Groups.Single(group => group.Id == resource.ResourceGroupId).AllowedOnPlanet).Id;
+
+        WorldReferenceData overPicked = new(
+            seed.Groups,
+            seed.Resources,
+            seed.ObjectTypes,
+            seed.SizeClasses,
+            [.. seed.RuleGroups, new ReferenceRuleGroup(1000, terrestrialId, "rule_group_1000", 5, 5, 0d, [new ReferenceRule(1000, resourceId, 1, 0.1m, 0.2m)], PicksAll: true)]);
+        WorldReferenceData empty = new(
+            seed.Groups,
+            seed.Resources,
+            seed.ObjectTypes,
+            seed.SizeClasses,
+            [.. seed.RuleGroups, new ReferenceRuleGroup(1000, terrestrialId, "rule_group_1000", 0, 0, 0d, [new ReferenceRule(1000, resourceId, 0, 0.1m, 0.2m)], PicksAll: true)]);
+
+        Assert.Empty(WorldConfigValidator.Validate(new WorldGenerationConfig(WorldTestData.Settings(), overPicked)));
+        Assert.Contains(
+            WorldConfigValidator.Validate(new WorldGenerationConfig(WorldTestData.Settings(), empty)),
+            error => error.Contains("takes all its rules", StringComparison.Ordinal));
     }
 
     private static void Check(List<string> problems, bool condition, string name)

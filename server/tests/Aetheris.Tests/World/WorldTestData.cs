@@ -75,7 +75,8 @@ public static class WorldTestData
                         rule.CoefficientMax,
                         rule.RichCoefficientMin,
                         rule.RichCoefficientMax)),
-                ])));
+                ],
+                group.PicksAll)));
     }
 
     /// <summary>

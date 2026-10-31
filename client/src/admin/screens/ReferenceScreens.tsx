@@ -213,11 +213,13 @@ export function RulesScreen() {
       key: 'picks',
       label: 'admin.col.picks',
       render: (row) =>
-        t('admin.rules.picks', {
-          min: Number(row['min_picks']),
-          max: Number(row['max_picks']),
-          probability: formatNumber(Number(row['extra_pick_probability']), language, 2),
-        }),
+        row['picks_all']
+          ? t('admin.rules.picksAll')
+          : t('admin.rules.picks', {
+              min: Number(row['min_picks']),
+              max: Number(row['max_picks']),
+              probability: formatNumber(Number(row['extra_pick_probability']), language, 2),
+            }),
     },
     { key: 'resource_code', label: 'admin.card.resource', render: (row) => <WorldName nameKey={row['resource_name_key'] as string} code={row['resource_code'] as string} /> },
     { key: 'weight', label: 'admin.col.weight', sort: 'weight' },
@@ -419,7 +421,12 @@ function RuleGroupForm({ row, onCancel, onSaved }: { row: RuleRow; onCancel: () 
   const { t } = useAdminText();
   const { api, can } = useAdmin();
   const { reason, setReason, busy, failure, run } = useChange(onSaved);
-  const [form, setForm] = useState({ minPicks: String(row.min_picks), maxPicks: String(row.max_picks), probability: String(row.extra_pick_probability) });
+  const [form, setForm] = useState({
+    minPicks: String(row.min_picks),
+    maxPicks: String(row.max_picks),
+    probability: String(row.extra_pick_probability),
+    picksAll: row.picks_all,
+  });
   const errors = failure?.fields ?? {};
 
   const onSubmit = (event: FormEvent) => {
@@ -442,6 +449,7 @@ function RuleGroupForm({ row, onCancel, onSaved }: { row: RuleRow; onCancel: () 
           min_picks: numbers.min_picks!,
           max_picks: numbers.max_picks!,
           extra_pick_probability: numbers.extra_pick_probability!,
+          picks_all: form.picksAll,
         }),
       invalid,
     );
@@ -461,6 +469,11 @@ function RuleGroupForm({ row, onCancel, onSaved }: { row: RuleRow; onCancel: () 
           <input className="input" inputMode="decimal" value={form.probability} onChange={(event) => setForm({ ...form, probability: event.target.value })} />
         </CardField>
       </div>
+      <label className="admin-check">
+        <input type="checkbox" checked={form.picksAll} onChange={(event) => setForm({ ...form, picksAll: event.target.checked })} />
+        <span>{t('admin.col.picksAll')}</span>
+      </label>
+      <p className="hint">{t('admin.rules.picksAllHint')}</p>
       <FailureBanner failure={failure} onReload={onSaved} />
       <ReasonAndActions
         reason={reason}

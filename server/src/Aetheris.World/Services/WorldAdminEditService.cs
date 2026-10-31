@@ -753,10 +753,12 @@ public sealed class WorldAdminEditService
                 changes.Set("min_picks", group.MinPicks, request.MinPicks);
                 changes.Set("max_picks", group.MaxPicks, request.MaxPicks);
                 changes.Set("extra_pick_probability", group.ExtraPickProbability, request.ExtraPickProbability);
+                changes.Set("picks_all", group.PicksAll, request.PicksAll);
 
                 group.MinPicks = request.MinPicks;
                 group.MaxPicks = request.MaxPicks;
                 group.ExtraPickProbability = request.ExtraPickProbability;
+                group.PicksAll = request.PicksAll;
                 group.Version++;
 
                 await CheckGeneratorAsync(problemsBefore, cancellationToken).ConfigureAwait(false);

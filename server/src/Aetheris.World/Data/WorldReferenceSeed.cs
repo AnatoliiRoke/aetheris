@@ -143,6 +143,7 @@ public static class WorldReferenceSeed
             MinPicks = group.MinPicks,
             MaxPicks = group.MaxPicks,
             ExtraPickProbability = group.ExtraPickProbability,
+            PicksAll = group.PicksAll,
             RuleIds =
             [
                 .. group.Rules.Select(rule => new GenerationRuleEntity
@@ -506,13 +507,15 @@ public sealed record SeedSizeClass(
 /// <param name="MaxPicks">The largest number of picks.</param>
 /// <param name="ExtraPickProbability">The probability of every further pick.</param>
 /// <param name="Rules">The rules.</param>
+/// <param name="PicksAll">Whether every rule is taken, whatever the picks are.</param>
 public sealed record SeedRuleGroup(
     string ObjectType,
     string Code,
     int MinPicks,
     int MaxPicks,
     double ExtraPickProbability,
-    IReadOnlyList<SeedRule> Rules);
+    IReadOnlyList<SeedRule> Rules,
+    bool PicksAll = false);
 
 /// <summary>A generation rule of the starting data.</summary>
 /// <param name="Resource">The code of the resource.</param>

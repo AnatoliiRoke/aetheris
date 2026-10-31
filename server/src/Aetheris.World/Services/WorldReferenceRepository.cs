@@ -93,7 +93,8 @@ public sealed class WorldReferenceRepository
                         rule.CoefficientMax,
                         rule.RichCoefficientMin,
                         rule.RichCoefficientMax)),
-                ])));
+                ],
+                group.PicksAll)));
 
         return new WorldGenerationConfig(Settings, reference);
     }

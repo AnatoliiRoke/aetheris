@@ -263,18 +263,22 @@ public static class SectorGenerator
 
         foreach (ReferenceRuleGroup group in reference.GroupsOf(objectTypeId))
         {
-            int picks = group.MinPicks;
+            List<ReferenceRule> available = [.. group.RuleIds.Where(rule => rule.Weight > 0)];
 
-            while (picks < group.MaxPicks && random.Chance(group.ExtraPickProbability))
+            // A group that takes all its rules puts every resource of the group on the object;
+            // the picks and their probability do not apply to it.
+            int picks = group.PicksAll ? available.Count : group.MinPicks;
+
+            while (!group.PicksAll && picks < group.MaxPicks && random.Chance(group.ExtraPickProbability))
             {
                 picks++;
             }
 
-            List<ReferenceRule> available = [.. group.RuleIds.Where(rule => rule.Weight > 0)];
-
             for (int pick = 0; pick < picks && available.Count > 0; pick++)
             {
-                ReferenceRule rule = PickWeighted(random, available, candidate => candidate.Weight);
+                ReferenceRule rule = group.PicksAll
+                    ? available[0]
+                    : PickWeighted(random, available, candidate => candidate.Weight);
                 available.Remove(rule);
 
                 bool useRich = rich && rule.RichCoefficientMin is not null && rule.RichCoefficientMax is not null;

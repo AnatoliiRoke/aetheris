@@ -353,6 +353,7 @@ export interface RuleRow {
   min_picks: number;
   max_picks: number;
   extra_pick_probability: number;
+  picks_all: boolean;
   resource_id: number;
   resource_code: string;
   resource_name_key: string;
@@ -385,6 +386,7 @@ export interface RuleGroupUpdate {
   min_picks: number;
   max_picks: number;
   extra_pick_probability: number;
+  picks_all: boolean;
 }
 
 /** The tables of the admin panel and their routes. */

@@ -492,6 +492,10 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("object_type_id");
 
+                    b.Property<bool>("PicksAll")
+                        .HasColumnType("boolean")
+                        .HasColumnName("picks_all");
+
                     b.Property<int>("Version")
                         .HasColumnType("integer")
                         .HasColumnName("version");

@@ -185,6 +185,8 @@ public sealed class PlanetSizeClassEntity
 /// <see cref="MinPicks"/> resources are always picked; every further one up to
 /// <see cref="MaxPicks"/> is picked with <see cref="ExtraPickProbability"/>. A planet type
 /// with a crystal group of one pick, rarely two, gives one kind of crystals, rarely two.
+/// A group with <see cref="PicksAll"/> takes every active rule and ignores the picks, so every
+/// resource of the group lies on every object of the type.
 /// </remarks>
 public sealed class GenerationRuleGroupEntity
 {
@@ -205,6 +207,9 @@ public sealed class GenerationRuleGroupEntity
 
     /// <summary>Gets or sets the probability of every further pick.</summary>
     public double ExtraPickProbability { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether every active rule of the group is taken, whatever the picks are.</summary>
+    public bool PicksAll { get; set; }
 
     /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
     public int Version { get; set; } = 1;

@@ -669,6 +669,10 @@ def build_world(world: dict, codes: dict[str, str], cost_base: Decimal, race_bon
         if current == old_ores:
             ore_template = group["rules"][0]
             group["rules"] = [{**ore_template, "resource": code} for code in new_ores]
+            # Every ore lies on every ordinary planet (author's decision 31.10.2026); the
+            # fields keep their random picks.
+            if classes[group["object_type"]] == "planet":
+                group["picks_all"] = True
         elif current == old_minerals:
             template = group["rules"][0]
             group["rules"] = [{**template, "resource": code} for code in new_minerals]

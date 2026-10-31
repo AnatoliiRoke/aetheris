@@ -102,7 +102,12 @@ public static class WorldConfigValidator
             errors.Add($"{name} min_picks must not be negative.");
         }
 
-        if (group.MinPicks > usableRules)
+        // A group that takes all its rules ignores the picks, so only an empty group is wrong.
+        if (group.PicksAll && usableRules == 0)
+        {
+            errors.Add($"{name} takes all its rules but has no rule with a positive weight.");
+        }
+        else if (!group.PicksAll && group.MinPicks > usableRules)
         {
             errors.Add($"{name} picks more resources than it has rules with a positive weight.");
         }
