@@ -61,6 +61,20 @@ public static class ProductionEndpoints
             return Results.Json(factory, ProductionJson.Options);
         });
 
+        // Every batch of every factory of a body, so one screen shows the whole production.
+        production.MapGet("/orders", async (
+            [FromQuery(Name = "planet_id")] long planetId,
+            ClaimsPrincipal user,
+            ProductionQueueService queue,
+            CancellationToken cancellationToken) =>
+        {
+            ProductionActiveOrdersDto orders = await queue
+                .ReadActiveOrdersAsync(PlayerId(user), planetId, cancellationToken)
+                .ConfigureAwait(false);
+
+            return Results.Json(orders, ProductionJson.Options);
+        });
+
         // The storage of the parts of a body.
         production.MapGet("/stock", async (
             [FromQuery(Name = "planet_id")] long planetId,

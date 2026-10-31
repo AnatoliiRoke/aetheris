@@ -54,6 +54,19 @@ public interface IProductionModule
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets every batch that is in the queues of the factories of a body, with the places of
+    /// those queues.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The batches of all the factories of the body.</returns>
+    Task<ProductionActiveOrdersDto> GetActiveOrdersAsync(
+        string playerId,
+        long planetId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the storage of the parts of a body.
     /// </summary>
     /// <param name="playerId">The player.</param>

@@ -31,6 +31,8 @@
     {
       "key": "ship_repair",
       "handler": "ship_repair",
+      "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
+      "is_archived": true,
       "refunds_input": true,
       "sort_order": 40,
       "name": {
@@ -45,6 +47,8 @@
     {
       "key": "module_replacement",
       "handler": "module_replacement",
+      "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
+      "is_archived": true,
       "refunds_input": true,
       "sort_order": 50,
       "name": {
@@ -59,6 +63,8 @@
     {
       "key": "module_repair",
       "handler": "module_repair",
+      "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
+      "is_archived": true,
       "refunds_input": true,
       "sort_order": 60,
       "name": {
@@ -155,6 +161,8 @@
     {
       "key": "repair_ship",
       "type": "ship_repair",
+      "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
+      "is_archived": true,
       "building_class": "orbital_workshop",
       "source_group": null,
       "target_group": null,
@@ -175,6 +183,8 @@
     {
       "key": "replace_module",
       "type": "module_replacement",
+      "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
+      "is_archived": true,
       "building_class": "orbital_workshop",
       "source_group": null,
       "target_group": null,
@@ -195,6 +205,8 @@
     {
       "key": "repair_module",
       "type": "module_repair",
+      "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
+      "is_archived": true,
       "building_class": "module_repair",
       "source_group": null,
       "target_group": null,

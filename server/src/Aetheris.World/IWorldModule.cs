@@ -136,6 +136,15 @@ public interface IWorldModule
     Task<PlanetFacts?> GetPlanetFactsAsync(long planetId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the neutral code of a type of an object, so another module can name a body by its
+    /// type (task 00020).
+    /// </summary>
+    /// <param name="objectTypeId">The type.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The code of the type, or <see langword="null"/> when the type is unknown.</returns>
+    Task<string?> GetObjectTypeCodeAsync(int objectTypeId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the bodies a player owns: the home body and the colonies.
     /// </summary>
     /// <param name="playerId">The player.</param>

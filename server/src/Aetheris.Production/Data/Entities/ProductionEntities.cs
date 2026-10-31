@@ -139,8 +139,10 @@ public sealed class PartStockEntity
 /// The state of the storage of the parts of a body (task 00013, decision 2.9).
 /// </summary>
 /// <remarks>
-/// The parts are not a group of resources of the world, so their storage has its own row
-/// and its own capacity, which the levels of the storage building raise.
+/// The parts are not a group of resources of the world, so their storage has its own row,
+/// which also locks the storage of the body. Every kind of part has the same room of its own
+/// (decision of the author, 31.10.2026): how many parts of a kind lie there is the sum of the
+/// stacks of the kind, so the row keeps no total and no moment of its own.
 /// </remarks>
 public sealed class PartStorageEntity
 {
@@ -153,17 +155,8 @@ public sealed class PartStorageEntity
     /// <summary>Gets or sets the sector of the body.</summary>
     public int SectorId { get; set; }
 
-    /// <summary>Gets or sets the capacity of the storage, in parts.</summary>
+    /// <summary>Gets or sets the capacity of the storage for every kind of part, in parts of the kind.</summary>
     public long Capacity { get; set; }
-
-    /// <summary>Gets or sets how many parts the storage holds.</summary>
-    public long Quantity { get; set; }
-
-    /// <summary>
-    /// Gets or sets the moment the storage is full, or <see langword="null"/> when it does
-    /// not fill.
-    /// </summary>
-    public DateTimeOffset? FullAt { get; set; }
 }
 
 /// <summary>

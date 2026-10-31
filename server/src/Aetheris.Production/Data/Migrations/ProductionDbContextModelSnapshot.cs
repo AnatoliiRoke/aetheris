@@ -186,17 +186,9 @@ namespace Aetheris.Production.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("capacity");
 
-                    b.Property<DateTimeOffset?>("FullAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("full_at");
-
                     b.Property<long>("PlanetId")
                         .HasColumnType("bigint")
                         .HasColumnName("planet_id");
-
-                    b.Property<long>("Quantity")
-                        .HasColumnType("bigint")
-                        .HasColumnName("quantity");
 
                     b.Property<int>("SectorId")
                         .HasColumnType("integer")
@@ -215,8 +207,6 @@ namespace Aetheris.Production.Data.Migrations
                     b.ToTable("part_storage", null, t =>
                         {
                             t.HasCheckConstraint("ck_part_storage_capacity", "capacity >= 0");
-
-                            t.HasCheckConstraint("ck_part_storage_quantity", "quantity >= 0");
                         });
                 });
 

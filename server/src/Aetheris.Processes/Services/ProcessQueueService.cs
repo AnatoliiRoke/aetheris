@@ -544,6 +544,81 @@ public sealed class ProcessQueueService
     }
 
     /// <summary>
+    /// Reads every order that is in the queues of the buildings of a body that run a process,
+    /// with the places of those queues (task 00020, section 7.5). It only reads: no order is
+    /// changed, the units that are due are made first, as a read of one building does.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The orders of all the buildings, in the order of the queues, and the places.</returns>
+    /// <exception cref="GameException">The body is not a colony of the player.</exception>
+    public async Task<ProcessActiveOrdersDto> ReadActiveOrdersAsync(
+        string playerId,
+        long planetId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+
+        DateTimeOffset now = _clock.GameNow;
+        List<ProcessOrderEntity> orders = await LoadPlanetOrdersAsync(planetId, cancellationToken).ConfigureAwait(false);
+        long[] dueBuildingIds = [.. orders
+            .Where(order => order.NextUnitAt is not null && order.NextUnitAt <= now)
+            .Select(order => order.PlanetBuildingId)
+            .Distinct()];
+
+        foreach (long planetBuildingId in dueBuildingIds)
+        {
+            await CompleteDueAsync(playerId, planetId, planetBuildingId, now, cancellationToken).ConfigureAwait(false);
+        }
+
+        if (dueBuildingIds.Length > 0)
+        {
+            orders = await LoadPlanetOrdersAsync(planetId, cancellationToken).ConfigureAwait(false);
+        }
+
+        IReadOnlyList<ProcessBuildingSummaryDto> buildings = await ReadBuildingsAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        Dictionary<long, string> buildingNameKeys = buildings.ToDictionary(building => building.PlanetBuildingId, building => building.NameKey);
+        ProcessesSettings settings = ProcessesSettings.From(_config);
+        int slots = 0;
+
+        // The places of the queues add up: every building of the body has its own queue.
+        foreach (long planetBuildingId in buildingNameKeys.Keys.Union(orders.Select(order => order.PlanetBuildingId)))
+        {
+            slots += await SlotsAsync(settings, planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
+        }
+
+        ProcessCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
+        List<ProcessActiveOrderDto> items = [];
+
+        foreach (ProcessOrderEntity order in orders)
+        {
+            ProcessRecipeInfo? recipe = catalog.FindRecipe(order.ProcessRecipeId);
+            ProcessTypeInfo? processType = recipe is null ? null : catalog.FindType(recipe.ProcessTypeId);
+
+            items.Add(new ProcessActiveOrderDto(
+                order.Id,
+                order.PlanetBuildingId,
+                buildingNameKeys.GetValueOrDefault(order.PlanetBuildingId, string.Empty),
+                order.ProcessRecipeId,
+                recipe?.NameKey ?? string.Empty,
+                processType?.NameKey ?? string.Empty,
+                order.Quantity,
+                order.ProducedQuantity,
+                order.Position,
+                recipe is null ? Math.Max(order.UnitSeconds, 0) : UnitSecondsOf(order, recipe),
+                order.StartsAt,
+                order.NextUnitAt,
+                order.FinishesAt,
+                order.IsBlocked));
+        }
+
+        return new ProcessActiveOrdersDto(planetId, slots, items.Count, items, _clock.GameNow);
+    }
+
+    /// <summary>
     /// Finds the handler of a kind of a process by its logical code.
     /// </summary>
     /// <param name="processType">The kind of the process.</param>
@@ -1261,6 +1336,22 @@ public sealed class ProcessQueueService
                     ingredient.Amount))
             ]);
     }
+
+    /// <summary>
+    /// Reads the orders of every building of a body for a read, in the order of the queues: the
+    /// order under way of every building first, then the ones that wait.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The orders of all the buildings of the body.</returns>
+    private async Task<List<ProcessOrderEntity>> LoadPlanetOrdersAsync(long planetId, CancellationToken cancellationToken) =>
+        await _dbContext.ProcessOrders.AsNoTracking()
+            .Where(order => order.PlanetId == planetId)
+            .OrderBy(order => order.Position)
+            .ThenBy(order => order.PlanetBuildingId)
+            .ThenBy(order => order.Id)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
     /// <summary>
     /// Reads the queue of a building in the order of its places.

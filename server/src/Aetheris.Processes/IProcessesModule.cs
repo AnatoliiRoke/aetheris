@@ -54,6 +54,19 @@ public interface IProcessesModule
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets every order that is in the queues of the buildings of a body that run a process,
+    /// with the places of those queues.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The orders of all the buildings of the body.</returns>
+    Task<ProcessActiveOrdersDto> GetActiveOrdersAsync(
+        string playerId,
+        long planetId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Puts an order of a recipe in the queue of a building. The whole cost of the order is
     /// paid at once, and cancelling it returns the cost in full unless the kind of the
     /// process does not refund it.

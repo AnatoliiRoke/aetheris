@@ -15,7 +15,7 @@ public static class BuildingEffectTypes
     /// <summary>Yields a crystal per hour; the value is multiplied by the richness of the deposit and the crystal bonus.</summary>
     public const string CrystalProduction = "crystal_production";
 
-    /// <summary>Adds capacity to the storage of a resource group.</summary>
+    /// <summary>Adds capacity to the storage of a resource group: every resource of the group holds this much of its own.</summary>
     public const string StorageCapacity = "storage_capacity";
 
     /// <summary>Produces energy.</summary>
@@ -35,7 +35,7 @@ public static class BuildingEffectTypes
     /// <summary>The level of every other building of the body cannot exceed the value.</summary>
     public const string LevelCap = "level_cap";
 
-    /// <summary>Adds room for the parts in the storage of the parts of the body (task 00013, decision 9).</summary>
+    /// <summary>Adds room for the parts in the storage of the parts of the body: every kind of part holds this many of its own (task 00013, decision 9; per kind from 31.10.2026).</summary>
     public const string PartStorageCapacity = "part_storage_capacity";
 
     /// <summary>

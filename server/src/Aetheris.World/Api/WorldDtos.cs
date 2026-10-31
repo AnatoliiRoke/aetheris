@@ -267,7 +267,10 @@ public sealed record PlanetFacts(
     string? Name,
     IReadOnlyList<PlanetDepositFact> Deposits,
     bool IsTerraformed = false,
-    bool IsColonizable = true);
+    bool IsColonizable = true,
+    int ObjectTypeId = 0,
+    long SystemId = 0,
+    int? Orbit = null);
 
 /// <summary>A deposit of a body: the resource and the richness coefficient.</summary>
 /// <param name="ResourceTypeId">The resource.</param>

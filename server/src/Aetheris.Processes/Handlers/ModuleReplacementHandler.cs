@@ -9,10 +9,17 @@ namespace Aetheris.Processes.Handlers;
 /// orbit and a new one from the storage of the body takes its place (task 00014, decision 8).
 /// </summary>
 /// <remarks>
+/// <para>
 /// The order takes the new modules from the storage when it enters the queue. A unit takes
 /// the worst damaged module of the kind off the ship, puts it to the storage as a damaged
 /// part and puts a new one in its place. The replacement is quicker than the repair of the
 /// whole ship by the time of its recipe, which is data.
+/// </para>
+/// <para>
+/// Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived
+/// in the seed. The logic below stays for the future: restoring the kind and its recipe in the
+/// admin panel offers the process again.
+/// </para>
 /// </remarks>
 public sealed class ModuleReplacementHandler : IProcessHandler
 {

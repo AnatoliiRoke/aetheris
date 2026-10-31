@@ -421,6 +421,80 @@ public sealed class ProductionQueueService
     }
 
     /// <summary>
+    /// Reads every batch that is in the queues of the factories of a body, with the places of
+    /// those queues (task 00020, section 7.5). It only reads: the batch is not changed, the
+    /// units that are due are made first, as a read of one factory does.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The batches of all the factories, in the order of the queues, and the places.</returns>
+    /// <exception cref="GameException">The body is not a colony of the player.</exception>
+    public async Task<ProductionActiveOrdersDto> ReadActiveOrdersAsync(
+        string playerId,
+        long planetId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+
+        DateTimeOffset now = _clock.GameNow;
+        List<ProductionOrderEntity> orders = await LoadPlanetOrdersAsync(planetId, cancellationToken).ConfigureAwait(false);
+        long[] dueFactoryIds = [.. orders
+            .Where(order => order.NextUnitAt is not null && order.NextUnitAt <= now)
+            .Select(order => order.PlanetBuildingId)
+            .Distinct()];
+
+        foreach (long planetBuildingId in dueFactoryIds)
+        {
+            await CompleteDueAsync(playerId, planetId, planetBuildingId, now, cancellationToken).ConfigureAwait(false);
+        }
+
+        if (dueFactoryIds.Length > 0)
+        {
+            orders = await LoadPlanetOrdersAsync(planetId, cancellationToken).ConfigureAwait(false);
+        }
+
+        IReadOnlyList<ProductionFactorySummaryDto> factories = await ReadFactoriesAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        Dictionary<long, string> factoryNameKeys = factories.ToDictionary(factory => factory.PlanetBuildingId, factory => factory.NameKey);
+        ProductionSettings settings = ProductionSettings.From(_config);
+        int slots = 0;
+
+        // The places of the queues add up: every factory of the body has its own queue.
+        foreach (long planetBuildingId in factoryNameKeys.Keys.Union(orders.Select(order => order.PlanetBuildingId)))
+        {
+            slots += await SlotsAsync(settings, planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
+        }
+
+        ProductionCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
+        ProductionMultipliers multipliers = await _multipliers.GetMultipliersAsync(playerId, cancellationToken).ConfigureAwait(false);
+        List<ProductionActiveOrderDto> items = [];
+
+        foreach (ProductionOrderEntity order in orders)
+        {
+            RecipeInfo? recipe = catalog.FindRecipe(order.RecipeId);
+
+            items.Add(new ProductionActiveOrderDto(
+                order.Id,
+                order.PlanetBuildingId,
+                factoryNameKeys.GetValueOrDefault(order.PlanetBuildingId, string.Empty),
+                order.RecipeId,
+                recipe?.NameKey ?? string.Empty,
+                order.Quantity,
+                order.ProducedQuantity,
+                order.Position,
+                recipe is null ? 0 : ScaledSeconds(recipe, multipliers),
+                order.StartsAt,
+                order.NextUnitAt,
+                order.FinishesAt,
+                order.IsBlocked));
+        }
+
+        return new ProductionActiveOrdersDto(planetId, slots, items.Count, items, _clock.GameNow);
+    }
+
+    /// <summary>
     /// Reads the storage of the parts of a body.
     /// </summary>
     /// <param name="playerId">The player.</param>
@@ -465,14 +539,22 @@ public sealed class ProductionQueueService
 
         List<ProductionStackDto> rows =
         [
-            .. stacks.Select(stack => new ProductionStackDto(
-                stack.PartTypeId,
-                stack.MarkLevel,
-                stack.HasRaceBonus,
-                stack.ConditionPercent,
-                stack.Quantity,
-                catalog.FindPart(stack.PartTypeId)?.NameKey ?? string.Empty,
-                catalog.FindPart(stack.PartTypeId)?.ImageKey)),
+            .. stacks.Select(stack =>
+            {
+                PartTypeInfo? part = catalog.FindPart(stack.PartTypeId);
+                PartGroupInfo? group = part is null ? null : catalog.FindGroup(part.PartGroupId);
+
+                return new ProductionStackDto(
+                    stack.PartTypeId,
+                    stack.MarkLevel,
+                    stack.HasRaceBonus,
+                    stack.ConditionPercent,
+                    stack.Quantity,
+                    part?.NameKey ?? string.Empty,
+                    part?.ImageKey,
+                    part?.PartGroupId ?? 0,
+                    group?.NameKey);
+            }),
         ];
 
         return new ProductionStockDto(
@@ -709,21 +791,27 @@ public sealed class ProductionQueueService
 
     /// <summary>
     /// The storage of the parts as the player sees it: the room comes from the buildings of the
-    /// body as they are now, so a new level of the storage shows at once.
+    /// body as they are now, so a new level of the storage shows at once. Every kind of part has
+    /// the same room of its own, so the answer names how many parts every kind holds against it.
     /// </summary>
     private async Task<ProductionStorageDto> StorageDtoAsync(long planetId, CancellationToken cancellationToken)
     {
-        PartStorageEntity? storage = await _dbContext.PartStorages.AsNoTracking()
-            .SingleOrDefaultAsync(entry => entry.PlanetId == planetId, cancellationToken)
+        long capacity = await _planets.GetBuildingEffectTotalAsync(planetId, BuildingEffectTypes.PartStorageCapacity, cancellationToken).ConfigureAwait(false);
+
+        var quantities = await _dbContext.PartStocks.AsNoTracking()
+            .Where(stack => stack.PlanetId == planetId)
+            .GroupBy(stack => stack.PartTypeId)
+            .Select(group => new { PartTypeId = group.Key, Quantity = group.Sum(stack => stack.Quantity) })
+            .OrderBy(kind => kind.PartTypeId)
+            .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        long capacity = await _planets.GetBuildingEffectTotalAsync(planetId, BuildingEffectTypes.PartStorageCapacity, cancellationToken).ConfigureAwait(false);
-        long stored = storage?.Quantity ?? 0;
+        List<ProductionPartKindDto> kinds =
+        [
+            .. quantities.Select(kind => new ProductionPartKindDto(kind.PartTypeId, kind.Quantity, capacity, kind.Quantity > 0 && kind.Quantity >= capacity)),
+        ];
 
-        return new ProductionStorageDto(
-            capacity,
-            stored,
-            IsFull(capacity, stored) ? storage?.FullAt ?? _clock.GameNow : null);
+        return new ProductionStorageDto(capacity, kinds);
     }
 
     /// <summary>
@@ -821,8 +909,6 @@ public sealed class ProductionQueueService
             _dbContext.PartStocks.Remove(stack);
         }
 
-        storage.Quantity -= taken.Values.Sum();
-        RefreshFull(storage);
         await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         // The parts left the storage, so the factories of the body that wait for room may go on.
@@ -951,8 +1037,6 @@ public sealed class ProductionQueueService
         }
 
         stack.Quantity += amount;
-        storage.Quantity += amount;
-        RefreshFull(storage);
 
         await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -981,7 +1065,7 @@ public sealed class ProductionQueueService
         int sectorId = await SectorOfAsync(planetId, cancellationToken).ConfigureAwait(false);
 
         await _dbContext.Database
-            .ExecuteSqlAsync($"INSERT INTO part_storage (planet_id, sector_id, capacity, quantity) VALUES ({planetId}, {sectorId}, 0, 0) ON CONFLICT (planet_id) DO NOTHING", cancellationToken)
+            .ExecuteSqlAsync($"INSERT INTO part_storage (planet_id, sector_id, capacity) VALUES ({planetId}, {sectorId}, 0) ON CONFLICT (planet_id) DO NOTHING", cancellationToken)
             .ConfigureAwait(false);
 
         PartStorageEntity storage = (await _dbContext.PartStorages
@@ -990,11 +1074,23 @@ public sealed class ProductionQueueService
             .ConfigureAwait(false)).Single();
 
         storage.Capacity = await _planets.GetBuildingEffectTotalAsync(planetId, BuildingEffectTypes.PartStorageCapacity, cancellationToken).ConfigureAwait(false);
-        RefreshFull(storage);
         await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return storage;
     }
+
+    /// <summary>
+    /// Reads the batches of every factory of a body for a read, in the order of the queues:
+    /// the batch under way of every factory first, then the ones that wait.
+    /// </summary>
+    private async Task<List<ProductionOrderEntity>> LoadPlanetOrdersAsync(long planetId, CancellationToken cancellationToken) =>
+        await _dbContext.ProductionOrders.AsNoTracking()
+            .Where(item => item.PlanetId == planetId)
+            .OrderBy(item => item.Position)
+            .ThenBy(item => item.PlanetBuildingId)
+            .ThenBy(item => item.Id)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
     private async Task<List<ProductionOrderEntity>> LoadQueueAsync(long planetId, long planetBuildingId, CancellationToken cancellationToken)
     {
@@ -1104,9 +1200,10 @@ public sealed class ProductionQueueService
     }
 
     /// <summary>
-    /// Whether the storage the product goes to has room for one unit of the recipe: the storage
-    /// of the parts for a part, the storage of the group of the resource for a produced
-    /// resource (task 00013, decisions 2.4 and 2.9).
+    /// Whether the storage the product goes to has room for one unit of the recipe: the room of
+    /// the kind of the part for a part, the room of the resource itself for a produced resource.
+    /// Every kind of part and every resource has its own room (task 00013, decisions 2.4 and 2.9;
+    /// per kind and per resource from 31.10.2026).
     /// </summary>
     private async Task<bool> HasRoomAsync(
         string playerId,
@@ -1115,9 +1212,14 @@ public sealed class ProductionQueueService
         RecipeInfo recipe,
         CancellationToken cancellationToken)
     {
-        if (recipe.PartTypeId is not null)
+        if (recipe.PartTypeId is { } partTypeId)
         {
-            return storage.Quantity + recipe.OutputQuantity <= storage.Capacity;
+            long kindQuantity = await _dbContext.PartStocks.AsNoTracking()
+                .Where(stack => stack.PlanetId == planetId && stack.PartTypeId == partTypeId)
+                .SumAsync(stack => stack.Quantity, cancellationToken)
+                .ConfigureAwait(false);
+
+            return kindQuantity + recipe.OutputQuantity <= storage.Capacity;
         }
 
         if (recipe.ResourceTypeId is not { } resourceTypeId)
@@ -1125,14 +1227,12 @@ public sealed class ProductionQueueService
             return true;
         }
 
-        ResourceCatalog resources = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
-        int? groupId = resources.Resources.FirstOrDefault(resource => resource.Id == resourceTypeId)?.ResourceGroupId;
         PlanetOverviewDto? planet = await _planets.GetPlanetAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
-        StorageGroupDto? group = planet?.StorageGroups.FirstOrDefault(entry => entry.ResourceGroupId == groupId);
+        PlanetResourceDto? resource = planet?.Resources.FirstOrDefault(entry => entry.ResourceTypeId == resourceTypeId);
 
-        // A group without a storage building has no limit yet; a group with one stops the
+        // A resource without a storage building has no limit yet; a resource with one stops the
         // production when the next unit does not fit.
-        return group is null || group.Capacity <= 0 || group.Stored + recipe.OutputQuantity <= group.Capacity;
+        return resource is null || resource.Capacity <= 0 || resource.Amount + recipe.OutputQuantity <= resource.Capacity;
     }
 
     /// <summary>
@@ -1286,13 +1386,6 @@ public sealed class ProductionQueueService
             await ScheduleUnitAsync(order, _clock.GameNow, cancellationToken).ConfigureAwait(false);
         }
     }
-
-    private void RefreshFull(PartStorageEntity storage)
-    {
-        storage.FullAt = IsFull(storage.Capacity, storage.Quantity) ? storage.FullAt ?? _clock.GameNow : null;
-    }
-
-    private static bool IsFull(long capacity, long stored) => stored > 0 && stored >= capacity;
 
     private static void Renumber(List<ProductionOrderEntity> queue)
     {

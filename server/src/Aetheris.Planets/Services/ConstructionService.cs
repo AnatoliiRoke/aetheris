@@ -436,14 +436,12 @@ public sealed class ConstructionService
         IQueryable<PlanetBuildingEntity> buildings = _dbContext.PlanetBuildings.Where(entry => entry.PlanetId == planetId);
         IQueryable<ConstructionQueueItemEntity> queue = _dbContext.QueueItems.Include(entry => entry.CostIds).Where(entry => entry.PlanetId == planetId);
         IQueryable<PlanetResourceEntity> resources = _dbContext.PlanetResources.Where(entry => entry.PlanetId == planetId);
-        IQueryable<PlanetStorageGroupEntity> groups = _dbContext.StorageGroups.Where(entry => entry.PlanetId == planetId);
 
         if (!forUpdate)
         {
             buildings = buildings.AsNoTracking();
             queue = queue.AsNoTracking();
             resources = resources.AsNoTracking();
-            groups = groups.AsNoTracking();
         }
 
         PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
@@ -456,7 +454,6 @@ public sealed class ConstructionService
             await buildings.ToListAsync(cancellationToken).ConfigureAwait(false),
             [.. (await queue.ToListAsync(cancellationToken).ConfigureAwait(false)).OrderBy(entry => entry.Position).ThenBy(entry => entry.Id)],
             await resources.ToListAsync(cancellationToken).ConfigureAwait(false),
-            await groups.ToListAsync(cancellationToken).ConfigureAwait(false),
             (facts?.Deposits ?? []).ToDictionary(deposit => deposit.ResourceTypeId, deposit => deposit.Coefficient),
             await _technologies.GetLevelsAsync(state.OwnerPlayerId, cancellationToken).ConfigureAwait(false),
             await _technologies.GetBonusesAsync(state.OwnerPlayerId, cancellationToken).ConfigureAwait(false));

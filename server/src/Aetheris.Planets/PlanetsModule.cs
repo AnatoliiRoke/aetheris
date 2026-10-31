@@ -84,6 +84,8 @@ public sealed class PlanetsModule : IPlanetsModule
         services.AddScoped<IScheduledEventHandler, ConstructionCompleteHandler>();
         services.AddScoped<PlanetsReferenceAdminService>();
         services.AddScoped<IAdminReferenceService>(serviceProvider => serviceProvider.GetRequiredService<PlanetsReferenceAdminService>());
+        services.AddScoped<BuildingCategoryAdminService>();
+        services.AddScoped<IAdminReferenceService>(serviceProvider => serviceProvider.GetRequiredService<BuildingCategoryAdminService>());
 
         // The start package of a new civilization lands in this module instead of the old
         // storage of the world.
@@ -112,7 +114,8 @@ public sealed class PlanetsModule : IPlanetsModule
     /// <param name="secured">The secured admin group.</param>
     /// <returns>The same group.</returns>
     public static RouteGroupBuilder MapAdminEndpoints(RouteGroupBuilder secured) =>
-        secured.MapAdminReference<PlanetsReferenceAdminService>(PlanetsReferenceAdminService.BuildingDescriptor);
+        secured.MapAdminReference<PlanetsReferenceAdminService>(PlanetsReferenceAdminService.BuildingDescriptor)
+            .MapAdminReference<BuildingCategoryAdminService>(BuildingCategoryAdminService.CategoryDescriptor);
 
     /// <summary>
     /// Applies the migrations of the module.

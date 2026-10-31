@@ -93,6 +93,55 @@ public sealed record ProcessReasonDto(
     string? TargetNameKey);
 
 /// <summary>
+/// Every order that is in the queues of the buildings of a body that run a process, with the
+/// places of those queues, so one screen shows them all together (task 00020, section 7.5).
+/// </summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="QueueSlots">How many places the queues of all its buildings hold together.</param>
+/// <param name="QueueUsedSlots">How many of those places are taken.</param>
+/// <param name="Orders">The orders of all the buildings, in the order of the queues.</param>
+/// <param name="GameNow">The moment of game time.</param>
+public sealed record ProcessActiveOrdersDto(
+    long PlanetId,
+    int QueueSlots,
+    int QueueUsedSlots,
+    IReadOnlyList<ProcessActiveOrderDto> Orders,
+    DateTimeOffset GameNow);
+
+/// <summary>
+/// An order of the queue of one building of a body, with the names the screen needs.
+/// </summary>
+/// <param name="OrderId">The order.</param>
+/// <param name="PlanetBuildingId">The building the order runs in.</param>
+/// <param name="BuildingNameKey">The localisation key of the name of the building.</param>
+/// <param name="RecipeId">The recipe of the order.</param>
+/// <param name="NameKey">The localisation key of the name of the recipe.</param>
+/// <param name="ProcessTypeNameKey">The localisation key of the name of the kind of the process.</param>
+/// <param name="Quantity">How many units the order holds.</param>
+/// <param name="ProducedQuantity">How many units are already made.</param>
+/// <param name="Position">The place of the order in the queue of its building.</param>
+/// <param name="UnitSeconds">The time of one unit, in game seconds, as it was fixed when the order entered the queue.</param>
+/// <param name="StartsAt">The moment the order started, or <see langword="null"/>.</param>
+/// <param name="NextUnitAt">The moment the next unit is ready, or <see langword="null"/>.</param>
+/// <param name="FinishesAt">The moment the whole order is ready, or <see langword="null"/>.</param>
+/// <param name="IsBlocked">Whether the order waits.</param>
+public sealed record ProcessActiveOrderDto(
+    long OrderId,
+    long PlanetBuildingId,
+    string BuildingNameKey,
+    int RecipeId,
+    string NameKey,
+    string ProcessTypeNameKey,
+    long Quantity,
+    long ProducedQuantity,
+    int Position,
+    long UnitSeconds,
+    DateTimeOffset? StartsAt,
+    DateTimeOffset? NextUnitAt,
+    DateTimeOffset? FinishesAt,
+    bool IsBlocked);
+
+/// <summary>
 /// An order of a process in the queue of a building.
 /// </summary>
 /// <param name="OrderId">The order.</param>

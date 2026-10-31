@@ -20,8 +20,10 @@ namespace Aetheris.Planets.Data;
 /// building type with the start value and the growth of its time, costs and effects. The seed
 /// turns them into one row per level, <c>round(base × growth^(level − 1) + step × (level − 1))</c>,
 /// so the database holds a plain table that a designer or the simulator changes later. Every type
-/// has a neutral code and its texts in every language (task 00022). The seed runs only while the
-/// building table is empty, so it never overwrites a change.
+/// has a neutral code and its texts in every language (task 00022). The seed writes only the
+/// rows whose codes are missing, so it never overwrites a change. The categories of the buildings
+/// (task 00020, section 3.1) come from the same file, and every building names its category by
+/// the code.
 /// </remarks>
 public static class PlanetsReferenceSeed
 {
@@ -132,6 +134,31 @@ public static class PlanetsReferenceSeed
 
         List<SeedBuildingType> missingTypes = [.. seed.BuildingTypes.Where(type => !existingCodes.Contains(type.Code))];
 
+        // The categories are written first: a building needs the identifier of its category.
+        HashSet<string> categoryCodes = [.. seed.Categories.Select(category => category.Code)];
+
+        List<string> existingCategoryCodes = await dbContext.BuildingCategories
+            .Where(category => categoryCodes.Contains(category.Code))
+            .Select(category => category.Code)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        List<SeedBuildingCategory> missingCategories = [.. seed.Categories.Where(category => !existingCategoryCodes.Contains(category.Code))];
+
+        dbContext.BuildingCategories.AddRange(missingCategories.Select(category => new BuildingCategoryEntity
+        {
+            Code = category.Code,
+            NameKey = PlanetsTextKeys.CategoryName(category.Code),
+            DescriptionKey = PlanetsTextKeys.CategoryDescription(category.Code),
+            SortOrder = category.SortOrder,
+        }));
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        Dictionary<string, int> categoryIds = await dbContext.BuildingCategories
+            .Where(category => categoryCodes.Contains(category.Code))
+            .ToDictionaryAsync(category => category.Code, category => category.Id, StringComparer.Ordinal, cancellationToken)
+            .ConfigureAwait(false);
+
         Dictionary<string, int> resourceIds = resources.Resources.ToDictionary(resource => resource.Code, resource => resource.Id, StringComparer.Ordinal);
         Dictionary<string, int> groupIds = resources.Groups.ToDictionary(group => group.Code, group => group.Id, StringComparer.Ordinal);
 
@@ -145,6 +172,9 @@ public static class PlanetsReferenceSeed
                 SortOrder = type.SortOrder,
                 IsStartBuilding = type.IsStartBuilding,
                 BuildingClass = type.BuildingClass,
+                CategoryId = categoryIds.TryGetValue(type.Category, out int categoryId)
+                    ? categoryId
+                    : throw new InvalidOperationException($"The starting data gives the building '{type.Code}' the unknown category '{type.Category}'."),
                 LevelIds =
                 [
                     .. Enumerable.Range(1, seed.LevelCount).Select(level => new BuildingLevelEntity
@@ -211,13 +241,16 @@ public static class PlanetsReferenceSeed
             [
                 .. seed.BuildingTypes.SelectMany(type => SeedTexts.Entries(PlanetsTextKeys.Name(type.Code), type.Name)),
                 .. seed.BuildingTypes.SelectMany(type => SeedTexts.Entries(PlanetsTextKeys.Description(type.Code), type.Description)),
+                .. seed.Categories.SelectMany(category => SeedTexts.Entries(PlanetsTextKeys.CategoryName(category.Code), category.Name)),
+                .. seed.Categories.SelectMany(category => SeedTexts.Entries(PlanetsTextKeys.CategoryDescription(category.Code), category.Description)),
             ],
             SeedTexts.Author,
             cancellationToken).ConfigureAwait(false);
 
         await WorldReferenceSeed.RaiseAsync(codes, PlanetsTextKeys.CodeGroup, seed.BuildingTypes.Select(type => type.Code), cancellationToken).ConfigureAwait(false);
+        await WorldReferenceSeed.RaiseAsync(codes, PlanetsTextKeys.CategoryCodeGroup, seed.Categories.Select(category => category.Code), cancellationToken).ConfigureAwait(false);
 
-        return missingTypes.Count > 0;
+        return missingTypes.Count > 0 || missingCategories.Count > 0;
     }
 }
 
@@ -246,12 +279,44 @@ public static class PlanetsTextKeys
     /// <param name="code">The neutral code.</param>
     /// <returns>The key.</returns>
     public static string Description(string code) => WorldTextKeys.Description(Building, code);
+
+    /// <summary>The group of the neutral codes of the building categories: <c>group_1</c>.</summary>
+    public const string CategoryCodeGroup = "group";
+
+    /// <summary>The prefix of the keys of the building categories.</summary>
+    public const string Category = "planets.building_category";
+
+    /// <summary>
+    /// Builds the key of the name of a building category.
+    /// </summary>
+    /// <param name="code">The neutral code.</param>
+    /// <returns>The key.</returns>
+    public static string CategoryName(string code) => WorldTextKeys.Name(Category, code);
+
+    /// <summary>
+    /// Builds the key of the description of a building category.
+    /// </summary>
+    /// <param name="code">The neutral code.</param>
+    /// <returns>The key.</returns>
+    public static string CategoryDescription(string code) => WorldTextKeys.Description(Category, code);
 }
 
 /// <summary>The starting data of the building tables.</summary>
 /// <param name="LevelCount">The number of levels written for every type.</param>
+/// <param name="Categories">The categories of the building types.</param>
 /// <param name="BuildingTypes">The building types.</param>
-public sealed record PlanetsSeedData(int LevelCount, IReadOnlyList<SeedBuildingType> BuildingTypes);
+public sealed record PlanetsSeedData(int LevelCount, IReadOnlyList<SeedBuildingCategory> Categories, IReadOnlyList<SeedBuildingType> BuildingTypes);
+
+/// <summary>A building category of the starting data.</summary>
+/// <param name="Code">The neutral code.</param>
+/// <param name="SortOrder">The order of the groups on the building page.</param>
+/// <param name="Name">The name by language.</param>
+/// <param name="Description">The description by language.</param>
+public sealed record SeedBuildingCategory(
+    string Code,
+    int SortOrder,
+    IReadOnlyDictionary<string, string> Name,
+    IReadOnlyDictionary<string, string>? Description);
 
 /// <summary>A building type of the starting data.</summary>
 /// <param name="Code">The neutral code.</param>
@@ -264,6 +329,7 @@ public sealed record PlanetsSeedData(int LevelCount, IReadOnlyList<SeedBuildingT
 /// <param name="Requirements">The requirements.</param>
 /// <param name="IsStartBuilding">Whether a race without a start building gets this type.</param>
 /// <param name="BuildingClass">The class of the type: what the building is for (task 00012).</param>
+/// <param name="Category">The code of the category of the type (task 00020).</param>
 public sealed record SeedBuildingType(
     string Code,
     int SortOrder,
@@ -274,7 +340,8 @@ public sealed record SeedBuildingType(
     IReadOnlyList<SeedEffect> Effects,
     IReadOnlyList<SeedRequirement> Requirements,
     bool IsStartBuilding = false,
-    string BuildingClass = Services.BuildingClasses.None);
+    string BuildingClass = Services.BuildingClasses.None,
+    string Category = "");
 
 /// <summary>The growth of a value with the level.</summary>
 /// <remarks>The value at a level is <c>base × growth^(level − 1) + step × (level − 1)</c>.</remarks>

@@ -264,6 +264,22 @@ public sealed class WorldQueryService
     }
 
     /// <summary>
+    /// Gets the neutral code of a type of an object, for the modules that name a body by its
+    /// type (task 00020).
+    /// </summary>
+    /// <param name="objectTypeId">The type.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The code of the type, or <see langword="null"/> when the type is unknown.</returns>
+    public async Task<string?> GetObjectTypeCodeAsync(int objectTypeId, CancellationToken cancellationToken)
+    {
+        return await _dbContext.ObjectTypes.AsNoTracking()
+            .Where(type => type.Id == objectTypeId)
+            .Select(type => type.Code)
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Gets the reference tables, so the client can name the identifiers.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -359,12 +375,22 @@ public sealed class WorldQueryService
             return null;
         }
 
+        // The type of the body and its place in the galaxy are facts of the object it is, so
+        // they come from the objects of the world and never from the code of the type
+        // (task 00020).
+        CelestialObjectEntity? celestial = await _dbContext.Objects.AsNoTracking()
+            .SingleOrDefaultAsync(entry => entry.Id == planet.CelestialObjectId, cancellationToken)
+            .ConfigureAwait(false);
+
         // Whether the body may be settled is a fact of the type of the body, a column of the
         // table of the types, so a gas giant is told by its data and never by its code.
-        bool isColonizable = await _dbContext.Objects.AsNoTracking()
-            .Where(entry => entry.Id == planet.CelestialObjectId)
-            .Join(_dbContext.ObjectTypes, entry => entry.ObjectTypeId, type => type.Id, (entry, type) => type.IsColonizable)
-            .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        bool isColonizable = celestial is null
+            ? false
+            : await _dbContext.ObjectTypes.AsNoTracking()
+                .Where(type => type.Id == celestial.ObjectTypeId)
+                .Select(type => type.IsColonizable)
+                .SingleOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
 
         return new PlanetFacts(
             planet.Id,
@@ -373,7 +399,10 @@ public sealed class WorldQueryService
             planet.Name,
             [.. planet.DepositIds.Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))],
             planet.IsTerraformed,
-            isColonizable);
+            isColonizable,
+            celestial?.ObjectTypeId ?? 0,
+            planet.SystemId,
+            celestial?.Orbit);
     }
 
     /// <summary>

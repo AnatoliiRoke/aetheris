@@ -126,6 +126,7 @@ public static class ProcessReferenceSeed
                 DescriptionKey = ProcessTextKeys.TypeDescription(code),
                 HandlerCode = type.Handler,
                 RefundsInput = type.RefundsInput,
+                IsArchived = type.IsArchived,
                 SortOrder = type.SortOrder,
             };
 
@@ -168,6 +169,7 @@ public static class ProcessReferenceSeed
                 TargetGroupId = recipe.TargetGroup is null ? null : groupIds[recipe.TargetGroup],
                 DurationSeconds = recipe.DurationSeconds,
                 ShipStub = recipe.ShipStub,
+                IsArchived = recipe.IsArchived,
                 SortOrder = recipe.SortOrder,
             };
 
@@ -310,13 +312,15 @@ public sealed record ProcessSeedData(
 /// <param name="SortOrder">The place of the kind in the lists.</param>
 /// <param name="Name">The name of the kind by language.</param>
 /// <param name="Description">The description of the kind by language.</param>
+/// <param name="IsArchived">Whether the seed writes the kind archived: a stub that is not offered (the note of the stub is the field <c>stub_note</c> of the file).</param>
 public sealed record SeedProcessType(
     string Key,
     string Handler,
     bool RefundsInput,
     int SortOrder,
     IReadOnlyDictionary<string, string> Name,
-    IReadOnlyDictionary<string, string> Description);
+    IReadOnlyDictionary<string, string> Description,
+    bool IsArchived = false);
 
 /// <summary>
 /// A recipe of a process in the starting data.
@@ -333,6 +337,7 @@ public sealed record SeedProcessType(
 /// <param name="Description">The description of the recipe by language.</param>
 /// <param name="Ingredients">The ingredients of the recipe.</param>
 /// <param name="Requirements">The requirements of the recipe.</param>
+/// <param name="IsArchived">Whether the seed writes the recipe archived: a stub that is not offered.</param>
 public sealed record SeedProcessRecipe(
     string Key,
     string Type,
@@ -345,7 +350,8 @@ public sealed record SeedProcessRecipe(
     IReadOnlyDictionary<string, string> Name,
     IReadOnlyDictionary<string, string> Description,
     IReadOnlyList<SeedIngredient> Ingredients,
-    IReadOnlyList<SeedRequirement> Requirements);
+    IReadOnlyList<SeedRequirement> Requirements,
+    bool IsArchived = false);
 
 /// <summary>
 /// An ingredient of a recipe in the starting data.

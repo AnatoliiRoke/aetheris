@@ -80,7 +80,8 @@ public static class PlanetEconomy
     }
 
     /// <summary>
-    /// Gets the storage capacity of every resource group, with the bonus of the technologies.
+    /// Gets the storage capacity of every resource group, with the bonus of the technologies. The
+    /// capacity of a group is the limit of every resource of the group, not a sum over them.
     /// </summary>
     /// <param name="catalog">The building catalog.</param>
     /// <param name="levels">The levels by building type.</param>
@@ -190,14 +191,16 @@ public static class PlanetEconomy
     /// <param name="catalog">The building catalog, for the groups of the resources.</param>
     /// <param name="amounts">The amounts at <paramref name="from"/>.</param>
     /// <param name="rates">The production per hour by resource.</param>
-    /// <param name="capacities">The capacities by resource group.</param>
+    /// <param name="capacities">The capacities by resource group; every resource of the group has this capacity of its own.</param>
     /// <param name="from">The moment of the amounts.</param>
     /// <param name="to">The moment to bring them to.</param>
-    /// <returns>The amounts at <paramref name="to"/> and the moment every group is full.</returns>
+    /// <returns>The amounts at <paramref name="to"/> and the moment every resource is full.</returns>
     /// <remarks>
-    /// A group fills at the sum of the rates of its resources; when the sum of its amounts
-    /// reaches the capacity, every producer of the group stops. The amounts are whole numbers:
-    /// the fraction of a unit is left out, and the group that fills gets exactly its capacity.
+    /// Every resource has its own limit, the capacity its group gets from the storage (decision of
+    /// the author, 31.10.2026): a resource fills at its own rate and stops alone, the other
+    /// resources of the group go on. The amounts are whole numbers: the fraction of a unit is
+    /// left out, and the resource that fills gets exactly its capacity. An amount over the
+    /// capacity (a refund) stays and counts as full.
     /// </remarks>
     public static AccumulationResult Accumulate(
         BuildingCatalog catalog,
@@ -216,49 +219,39 @@ public static class PlanetEconomy
         Dictionary<int, DateTimeOffset?> fullAt = [];
         decimal elapsedTicks = to > from ? (to - from).Ticks : 0;
 
-        HashSet<int> groupIds = [.. capacities.Keys];
-        groupIds.UnionWith(amounts.Keys.Concat(rates.Keys).Select(catalog.GroupOf).OfType<int>());
-
-        foreach (int groupId in groupIds)
+        foreach (int resourceTypeId in amounts.Keys.Union(rates.Keys).Order())
         {
-            List<int> members = [.. amounts.Keys.Union(rates.Keys).Where(resourceTypeId => catalog.GroupOf(resourceTypeId) == groupId).Order()];
-            List<int> producers = [.. members.Where(resourceTypeId => rates.GetValueOrDefault(resourceTypeId) > 0)];
-            long stored = members.Sum(resourceTypeId => amounts.GetValueOrDefault(resourceTypeId));
+            if (catalog.GroupOf(resourceTypeId) is not { } groupId)
+            {
+                continue;
+            }
+
+            long stored = amounts.GetValueOrDefault(resourceTypeId);
             long capacity = capacities.GetValueOrDefault(groupId);
-            decimal totalRate = producers.Sum(resourceTypeId => rates[resourceTypeId]);
+            decimal rate = rates.GetValueOrDefault(resourceTypeId);
 
             if (stored >= capacity)
             {
-                fullAt[groupId] = stored > 0 || totalRate > 0 ? from : null;
+                fullAt[resourceTypeId] = stored > 0 || rate > 0 ? from : null;
 
                 continue;
             }
 
-            if (totalRate <= 0)
+            if (rate <= 0)
             {
-                fullAt[groupId] = null;
+                fullAt[resourceTypeId] = null;
 
                 continue;
             }
 
-            decimal ticksToFull = (capacity - stored) * (decimal)TimeSpan.TicksPerHour / totalRate;
-            fullAt[groupId] = AddTicks(from, ticksToFull);
-            decimal producingHours = Math.Min(elapsedTicks, ticksToFull) / TimeSpan.TicksPerHour;
-            long added = 0;
+            decimal ticksToFull = (capacity - stored) * (decimal)TimeSpan.TicksPerHour / rate;
+            fullAt[resourceTypeId] = AddTicks(from, ticksToFull);
 
-            foreach (int resourceTypeId in producers)
-            {
-                long produced = (long)decimal.Floor(rates[resourceTypeId] * producingHours);
-                result[resourceTypeId] = result.GetValueOrDefault(resourceTypeId) + produced;
-                added += produced;
-            }
-
-            if (elapsedTicks >= ticksToFull)
-            {
-                // The group is full: the fractions left out go to the fastest producer.
-                int fastest = producers.OrderByDescending(resourceTypeId => rates[resourceTypeId]).ThenBy(resourceTypeId => resourceTypeId).First();
-                result[fastest] += capacity - stored - added;
-            }
+            // The resource that fills gets exactly its capacity, so the fraction left out never
+            // leaves it short of the limit.
+            result[resourceTypeId] = elapsedTicks >= ticksToFull
+                ? capacity
+                : stored + (long)decimal.Floor(rate * elapsedTicks / TimeSpan.TicksPerHour);
         }
 
         return new AccumulationResult(result, fullAt);
@@ -283,5 +276,5 @@ public sealed record EnergyBalance(long Output, long Consumption)
 
 /// <summary>The amounts of a body brought to a moment.</summary>
 /// <param name="Amounts">The amounts by resource.</param>
-/// <param name="FullAt">The moment every resource group is or will be full, or <see langword="null"/> when it does not fill.</param>
+/// <param name="FullAt">The moment every resource is or will be full by resource, or <see langword="null"/> when it does not fill.</param>
 public sealed record AccumulationResult(IReadOnlyDictionary<int, long> Amounts, IReadOnlyDictionary<int, DateTimeOffset?> FullAt);

@@ -51,6 +51,13 @@ public sealed class ProductionModule : IProductionModule
         _queue.ReadFactoryAsync(playerId, planetId, planetBuildingId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<ProductionActiveOrdersDto> GetActiveOrdersAsync(
+        string playerId,
+        long planetId,
+        CancellationToken cancellationToken = default) =>
+        _queue.ReadActiveOrdersAsync(playerId, planetId, cancellationToken);
+
+    /// <inheritdoc />
     public Task<ProductionStockDto> GetStockAsync(
         string playerId,
         long planetId,

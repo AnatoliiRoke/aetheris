@@ -101,6 +101,9 @@ public static class AdminReferenceErrors
     /// <summary>A module holds data of the row, so its scope cannot change.</summary>
     public const string ScopeInUse = "scope_in_use";
 
+    /// <summary>Rows of the module refer to the row, so it cannot be archived.</summary>
+    public const string InUse = "in_use";
+
     /// <summary>A currency of a civilization does not lie on a body, so it has no group.</summary>
     public const string CurrencyHasNoGroup = "currency_has_no_group";
 
@@ -119,6 +122,7 @@ public static class AdminReferenceErrors
         StateUnchanged,
         LevelsInUse,
         ScopeInUse,
+        InUse,
     };
 }
 

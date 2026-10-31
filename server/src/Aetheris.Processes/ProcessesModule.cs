@@ -46,6 +46,13 @@ public sealed class ProcessesModule : IProcessesModule
         _queue.ReadBuildingsAsync(playerId, planetId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<ProcessActiveOrdersDto> GetActiveOrdersAsync(
+        string playerId,
+        long planetId,
+        CancellationToken cancellationToken = default) =>
+        _queue.ReadActiveOrdersAsync(playerId, planetId, cancellationToken);
+
+    /// <inheritdoc />
     public Task<ProcessBuildingDto> GetBuildingAsync(
         string playerId,
         long planetId,

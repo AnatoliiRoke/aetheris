@@ -1,4 +1,6 @@
 using Aetheris.Core.Time;
+using Aetheris.Economy;
+using Aetheris.Economy.Api;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
@@ -24,6 +26,7 @@ public sealed class PlanetQueryService
     private readonly ConstructionService _construction;
     private readonly BuildingCatalogCache _catalogCache;
     private readonly IWorldModule _world;
+    private readonly IEconomyModule _economy;
     private readonly ITechnologyLevels _technologies;
     private readonly IRequirementsModule _requirements;
     private readonly IGameClock _clock;
@@ -43,6 +46,7 @@ public sealed class PlanetQueryService
         ConstructionService construction,
         BuildingCatalogCache catalogCache,
         IWorldModule world,
+        IEconomyModule economy,
         ITechnologyLevels technologies,
         IRequirementsModule requirements,
         IGameClock clock)
@@ -51,6 +55,7 @@ public sealed class PlanetQueryService
         ArgumentNullException.ThrowIfNull(construction);
         ArgumentNullException.ThrowIfNull(catalogCache);
         ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(economy);
         ArgumentNullException.ThrowIfNull(technologies);
         ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(clock);
@@ -59,6 +64,7 @@ public sealed class PlanetQueryService
         _construction = construction;
         _catalogCache = catalogCache;
         _world = world;
+        _economy = economy;
         _technologies = technologies;
         _requirements = requirements;
         _clock = clock;
@@ -93,7 +99,96 @@ public sealed class PlanetQueryService
             await _construction.CompleteDueAsync(planetId, now, cancellationToken).ConfigureAwait(false);
         }
 
-        return await _construction.ReadAsync(planetId, now, cancellationToken).ConfigureAwait(false);
+        PlanetOverviewDto? overview = await _construction.ReadAsync(planetId, now, cancellationToken).ConfigureAwait(false);
+
+        if (overview is null)
+        {
+            return null;
+        }
+
+        return await EnrichAsync(playerId, planetId, facts, overview, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Adds the facts of the other modules to the answer of a command on a body, so the answer
+    /// the client takes in place of the body is as full as a read (task 00020). The command
+    /// has checked the owner already.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="overview">The answer of the command.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The answer with the facts of the other modules.</returns>
+    public async Task<PlanetOverviewDto> EnrichOwnedAsync(long planetId, PlanetOverviewDto overview, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(overview);
+
+        PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
+
+        if (facts?.OwnerPlayerId is not { } ownerPlayerId)
+        {
+            return overview;
+        }
+
+        return await EnrichAsync(ownerPlayerId, planetId, facts, overview, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Adds to the answer of a body the facts that the other modules own: the name and the
+    /// place of the body from the world, the population from the economy (task 00020).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="facts">The facts of the body from the world.</param>
+    /// <param name="overview">The answer of the bodies module.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The answer with the facts of the other modules.</returns>
+    private async Task<PlanetOverviewDto> EnrichAsync(
+        string playerId,
+        long planetId,
+        PlanetFacts facts,
+        PlanetOverviewDto overview,
+        CancellationToken cancellationToken)
+    {
+        // The type of the body is named by its code, so the client reads the name and the
+        // picture of the type from the reference table of the world.
+        string? typeCode = await _world.GetObjectTypeCodeAsync(facts.ObjectTypeId, cancellationToken).ConfigureAwait(false);
+
+        // The population belongs to the economy module; a body without a population yet has
+        // none, and the client shows a placeholder instead of a made-up number.
+        PopulationFacts? population = await _economy.GetPopulationAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+
+        return overview with
+        {
+            Name = facts.Name,
+            TypeCode = typeCode,
+            Coordinates = new PlanetCoordinatesDto(facts.SectorId, facts.SystemId, facts.Orbit),
+            Population = population?.Amount ?? 0,
+            PopulationGrowthPerHour = population?.GrowthPerHour ?? 0,
+            TimeToMaximum = FormatTimeToMaximum(population?.TimeToMaximum),
+            DepositRichness = [.. facts.Deposits.Select(deposit => new DepositRichnessDto(deposit.ResourceTypeId, deposit.Coefficient))],
+        };
+    }
+
+    /// <summary>
+    /// The time to the largest population as the server sends it: `[-][d.]hh:mm:ss`.
+    /// </summary>
+    /// <param name="time">The time span.</param>
+    /// <returns>The text of the time, or <see langword="null"/> when there is no span.</returns>
+    private static string? FormatTimeToMaximum(TimeSpan? time)
+    {
+        if (time is not { } span)
+        {
+            return null;
+        }
+
+        bool negative = span < TimeSpan.Zero;
+        TimeSpan absolute = negative ? span.Negate() : span;
+
+        string text = absolute.Days > 0
+            ? $"{absolute.Days}.{absolute.Hours:00}:{absolute.Minutes:00}:{absolute.Seconds:00}"
+            : $"{absolute.Hours:00}:{absolute.Minutes:00}:{absolute.Seconds:00}";
+
+        return negative ? $"-{text}" : text;
     }
 
     /// <summary>

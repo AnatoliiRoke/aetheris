@@ -18,12 +18,19 @@ namespace Aetheris.Planets.Services;
 /// <param name="Requirements">The requirements of every subject.</param>
 /// <param name="Resources">The resource types.</param>
 /// <param name="Groups">The resource groups.</param>
+/// <param name="CategoryList">The building categories in the order of the groups; <see langword="null"/> for a catalog that has none.</param>
 public sealed record BuildingCatalog(
     IReadOnlyList<BuildingTypeInfo> Types,
     IReadOnlyList<RequirementInfo> Requirements,
     IReadOnlyList<ResourceTypeFact> Resources,
-    IReadOnlyList<ResourceGroupFact> Groups)
+    IReadOnlyList<ResourceGroupFact> Groups,
+    IReadOnlyList<BuildingCategoryInfo>? CategoryList = null)
 {
+    /// <summary>
+    /// Gets the building categories in the order of the groups.
+    /// </summary>
+    public IReadOnlyList<BuildingCategoryInfo> Categories { get; } = CategoryList ?? [];
+
     private readonly Dictionary<int, BuildingTypeInfo> _typesById = Types.ToDictionary(type => type.Id);
     private readonly Dictionary<int, ResourceTypeFact> _resourcesById = Resources.ToDictionary(resource => resource.Id);
 
@@ -66,6 +73,14 @@ public sealed record BuildingCatalog(
             && string.Equals(requirement.SubjectType, subjectType, StringComparison.Ordinal));
 }
 
+/// <summary>A category of the building types.</summary>
+/// <param name="Id">The category.</param>
+/// <param name="Code">The neutral code.</param>
+/// <param name="NameKey">The localisation key of the name.</param>
+/// <param name="SortOrder">The order of the groups.</param>
+/// <param name="ImageKey">The key of the picture, or <see langword="null"/>.</param>
+public sealed record BuildingCategoryInfo(int Id, string Code, string NameKey, int SortOrder, string? ImageKey);
+
 /// <summary>A building type with its levels.</summary>
 /// <param name="Id">The type.</param>
 /// <param name="Code">The stable code.</param>
@@ -75,6 +90,7 @@ public sealed record BuildingCatalog(
 /// <param name="BuildingClass">The class of the type: what the building is for.</param>
 /// <param name="Levels">The levels by number.</param>
 /// <param name="IsArchived">Whether the type is archived: its buildings work, no new building or level of it is offered.</param>
+/// <param name="CategoryId">The category of the type: the group of its tile on the building page.</param>
 public sealed record BuildingTypeInfo(
     int Id,
     string Code,
@@ -83,7 +99,8 @@ public sealed record BuildingTypeInfo(
     int SortOrder,
     string BuildingClass,
     IReadOnlyDictionary<int, BuildingLevelInfo> Levels,
-    bool IsArchived = false)
+    bool IsArchived = false,
+    int CategoryId = 0)
 {
     /// <summary>
     /// Gets a value indicating whether a building of this type limits the levels of the others;
@@ -252,6 +269,13 @@ public sealed class BuildingCatalogCache
 
         ResourceCatalog resources = await world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
 
+        // An archived category is listed only while a building type still has it.
+        List<BuildingCategoryEntity> categories = await dbContext.BuildingCategories.AsNoTracking()
+            .OrderBy(category => category.SortOrder)
+            .ThenBy(category => category.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        HashSet<int> usedCategoryIds = [.. types.Select(type => type.CategoryId)];
+
         return new BuildingCatalog(
             [
                 .. types.Select(type => new BuildingTypeInfo(
@@ -268,11 +292,17 @@ public sealed class BuildingCatalogCache
                             level.DurationSeconds,
                             level.CostIds.ToDictionary(cost => cost.ResourceTypeId, cost => cost.Amount),
                             [.. level.EffectIds.Select(effect => new BuildingEffectInfo(effect.EffectType, effect.ResourceTypeId, effect.ResourceGroupId, effect.Value))])),
-                    type.IsArchived)),
+                    type.IsArchived,
+                    type.CategoryId)),
             ],
             requirementInfos,
             resources.Resources,
-            resources.Groups);
+            resources.Groups,
+            [
+                .. categories
+                    .Where(category => !category.IsArchived || usedCategoryIds.Contains(category.Id))
+                    .Select(category => new BuildingCategoryInfo(category.Id, category.Code, category.NameKey, category.SortOrder, category.ImageKey)),
+            ]);
     }
 
     /// <summary>

@@ -118,6 +118,10 @@ public sealed class WorldModule : IWorldModule
         _queries.GetPlanetFactsAsync(planetId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<string?> GetObjectTypeCodeAsync(int objectTypeId, CancellationToken cancellationToken = default) =>
+        _queries.GetObjectTypeCodeAsync(objectTypeId, cancellationToken);
+
+    /// <inheritdoc />
     public Task<IReadOnlyList<OwnedPlanet>> GetOwnedPlanetsAsync(string playerId, CancellationToken cancellationToken = default) =>
         _queries.GetOwnedPlanetsAsync(playerId, cancellationToken);
 

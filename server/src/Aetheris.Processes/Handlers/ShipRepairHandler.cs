@@ -9,11 +9,18 @@ namespace Aetheris.Processes.Handlers;
 /// module of the ship with one order (task 00014, decision 8).
 /// </summary>
 /// <remarks>
+/// <para>
 /// The cost and the time of the repair are the sum over the parts of the ship, each in
 /// proportion to the condition it lost: the cost is the share of the cost of a new part the
 /// parameters of the kind give at the level of the workshop. The ship does not fly while the
 /// repair runs; the ships arrive with the task of the flights, until then the ship is the
 /// stub of <see cref="IShipsOnOrbit"/>.
+/// </para>
+/// <para>
+/// Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived
+/// in the seed. The logic below stays for the future: restoring the kind and its recipe in the
+/// admin panel offers the process again.
+/// </para>
 /// </remarks>
 public sealed class ShipRepairHandler : IProcessHandler
 {

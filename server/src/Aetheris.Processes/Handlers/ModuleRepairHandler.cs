@@ -10,10 +10,17 @@ namespace Aetheris.Processes.Handlers;
 /// decision 8).
 /// </summary>
 /// <remarks>
+/// <para>
 /// The order takes the damaged parts from the storage when it enters the queue, with the cost
 /// of the repair: the share of the cost of a new part the parameters of the kind give at the
 /// level of the shop, in proportion to the condition the part lost. The time of a unit is in
 /// the same proportion. A unit puts the part back with its full condition.
+/// </para>
+/// <para>
+/// Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived
+/// in the seed. The logic below stays for the future: restoring the kind and its recipe in the
+/// admin panel offers the process again.
+/// </para>
 /// </remarks>
 public sealed class ModuleRepairHandler : IProcessHandler
 {

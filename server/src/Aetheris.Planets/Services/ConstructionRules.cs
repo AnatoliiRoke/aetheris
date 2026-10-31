@@ -12,7 +12,7 @@ namespace Aetheris.Planets.Services;
 /// <param name="Levels">The levels of the buildings by type.</param>
 /// <param name="Queue">The construction queue in its order.</param>
 /// <param name="Amounts">The amounts at <paramref name="Now"/>.</param>
-/// <param name="FullAt">The moment every resource group is or will be full.</param>
+/// <param name="FullAt">The moment every resource is or will be full, by resource.</param>
 /// <param name="Deposits">The richness coefficients of the deposits by resource.</param>
 /// <param name="TechnologyLevels">The technologies of the owner.</param>
 /// <param name="Bonuses">The bonuses of the technologies.</param>
@@ -233,24 +233,6 @@ public static class PlanetOverviewBuilder
         Dictionary<int, int> queuedLevels = figures.QueuedLevels();
         EnergyBalance energy = PlanetEconomy.Energy(catalog, figures.Levels, figures.Bonuses);
 
-        List<StorageGroupDto> groups = [];
-
-        foreach (var group in catalog.Groups)
-        {
-            long stored = figures.Amounts.Where(entry => catalog.GroupOf(entry.Key) == group.Id).Sum(entry => entry.Value);
-            long capacity = capacities.GetValueOrDefault(group.Id);
-            DateTimeOffset? fullAt = figures.FullAt.GetValueOrDefault(group.Id);
-
-            if (capacity == 0 && stored == 0)
-            {
-                continue;
-            }
-
-            groups.Add(new StorageGroupDto(group.Id, capacity, stored, fullAt is { } moment && moment <= figures.Now, fullAt));
-        }
-
-        HashSet<int> fullGroups = [.. groups.Where(group => group.IsFull).Select(group => group.ResourceGroupId)];
-
         List<PlanetResourceDto> resources = [];
 
         foreach (var resource in catalog.Resources)
@@ -262,12 +244,17 @@ public static class PlanetOverviewBuilder
                 continue;
             }
 
+            // Every resource has the capacity its group gets from the storage and is full on its
+            // own: a full resource stops its own production, the others of the group go on.
             long amount = figures.Amounts.GetValueOrDefault(resource.Id);
-            decimal rate = fullGroups.Contains(resourceGroupId) ? 0 : rates.GetValueOrDefault(resource.Id);
+            long capacity = capacities.GetValueOrDefault(resourceGroupId);
+            DateTimeOffset? fullAt = figures.FullAt.GetValueOrDefault(resource.Id);
+            bool isFull = fullAt is { } moment && moment <= figures.Now;
+            decimal rate = isFull ? 0 : rates.GetValueOrDefault(resource.Id);
 
-            if (amount > 0 || rate > 0 || figures.Deposits.ContainsKey(resource.Id))
+            if (amount > 0 || rate > 0 || capacity > 0 || figures.Deposits.ContainsKey(resource.Id))
             {
-                resources.Add(new PlanetResourceDto(resource.Id, resourceGroupId, amount, rate));
+                resources.Add(new PlanetResourceDto(resource.Id, resourceGroupId, amount, rate, capacity, isFull, fullAt));
             }
         }
 
@@ -302,7 +289,8 @@ public static class PlanetOverviewBuilder
                     next.ReasonCodes.Count == 0,
                     next.ReasonCodes,
                     Requirements(catalog, next.Unmet),
-                    Amounts(next.Missing))));
+                    Amounts(next.Missing)),
+                type.CategoryId));
         }
 
         return new PlanetOverviewDto(
@@ -310,7 +298,6 @@ public static class PlanetOverviewBuilder
             figures.Now,
             timeMultiplier,
             resources,
-            groups,
             new EnergyDto(energy.Output, energy.Consumption, energy.Balance, PlanetEconomy.Energy(catalog, queuedLevels, figures.Bonuses).Balance),
             new ConstructionQueueDto(
                 ConstructionRules.SlotCount(settings, figures.ExtraQueueSlots),
@@ -328,7 +315,8 @@ public static class PlanetOverviewBuilder
             buildings,
             PlanetEconomy.PopulationMax(catalog, figures.Levels, figures.Bonuses),
             [.. catalog.Resources.Select(resource => new NamedItemDto(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId))],
-            [.. catalog.Groups.Select(group => new NamedItemDto(group.Id, group.Code, group.NameKey, null))]);
+            [.. catalog.Groups.Select(group => new NamedItemDto(group.Id, group.Code, group.NameKey, null))],
+            BuildingCategories: [.. catalog.Categories.Select(category => new BuildingCategoryDto(category.Id, category.Code, category.NameKey, category.SortOrder, category.ImageKey))]);
     }
 
     /// <summary>

@@ -22,40 +22,75 @@ public static class PlanetsJson
 /// <param name="GameNow">The game time of the answer; the timers of the queue count from it.</param>
 /// <param name="TimeMultiplier">The game seconds per real second.</param>
 /// <param name="Resources">The balance of the body.</param>
-/// <param name="StorageGroups">The storage by resource group.</param>
 /// <param name="Energy">The energy of the body.</param>
 /// <param name="Queue">The construction queue.</param>
 /// <param name="Buildings">Every building type with its level and the next level.</param>
 /// <param name="PopulationMax">The largest population the buildings allow.</param>
 /// <param name="ResourceTypes">The names of the resources.</param>
 /// <param name="ResourceGroups">The names of the resource groups.</param>
+/// <param name="Name">The name the owner gave the body.</param>
+/// <param name="TypeCode">The code of the type of the body; the client reads its name and its picture from the reference table.</param>
+/// <param name="Coordinates">The place of the body in the galaxy.</param>
+/// <param name="Population">The population of the body now.</param>
+/// <param name="PopulationGrowthPerHour">How much the population grows with in an hour; it is negative when it dies down.</param>
+/// <param name="TimeToMaximum">The time to the largest population, as the server sends it: `[-][d.]hh:mm:ss`.</param>
+/// <param name="DepositRichness">The richness coefficients of the deposits by resource.</param>
+/// <param name="BuildingCategories">The categories of the buildings with their order: the client groups the tiles by them (task 00020).</param>
 public sealed record PlanetOverviewDto(
     long PlanetId,
     DateTimeOffset GameNow,
     double TimeMultiplier,
     IReadOnlyList<PlanetResourceDto> Resources,
-    IReadOnlyList<StorageGroupDto> StorageGroups,
     EnergyDto Energy,
     ConstructionQueueDto Queue,
     IReadOnlyList<BuildingDto> Buildings,
     long PopulationMax,
     IReadOnlyList<NamedItemDto> ResourceTypes,
-    IReadOnlyList<NamedItemDto> ResourceGroups);
+    IReadOnlyList<NamedItemDto> ResourceGroups,
+    string? Name = null,
+    string? TypeCode = null,
+    PlanetCoordinatesDto? Coordinates = null,
+    long Population = 0,
+    decimal PopulationGrowthPerHour = 0,
+    string? TimeToMaximum = null,
+    IReadOnlyList<DepositRichnessDto>? DepositRichness = null,
+    IReadOnlyList<BuildingCategoryDto>? BuildingCategories = null);
 
-/// <summary>The amount of a resource on a body now.</summary>
+/// <summary>A category of the buildings: the group of the tiles on the building page.</summary>
+/// <param name="Id">The category.</param>
+/// <param name="Code">The neutral code.</param>
+/// <param name="NameKey">The localisation key of the name.</param>
+/// <param name="SortOrder">The order of the groups.</param>
+/// <param name="ImageKey">The key of the picture, or <see langword="null"/>.</param>
+public sealed record BuildingCategoryDto(int Id, string Code, string NameKey, int SortOrder, string? ImageKey);
+
+/// <summary>The place of a body in the galaxy (task 00020).</summary>
+/// <param name="SectorId">The sector.</param>
+/// <param name="SystemId">The system.</param>
+/// <param name="Orbit">The orbit in the system, if the body has one.</param>
+public sealed record PlanetCoordinatesDto(int SectorId, long SystemId, int? Orbit);
+
+/// <summary>The richness of a deposit of a body: the resource and the coefficient of it.</summary>
+/// <param name="ResourceTypeId">The resource.</param>
+/// <param name="Coefficient">The coefficient of the richness.</param>
+public sealed record DepositRichnessDto(int ResourceTypeId, decimal Coefficient);
+
+/// <summary>The amount of a resource on a body now, with the limit of the resource.</summary>
 /// <param name="ResourceTypeId">The resource.</param>
 /// <param name="ResourceGroupId">The group of the resource.</param>
 /// <param name="Amount">The amount now.</param>
-/// <param name="RatePerHour">The production per game hour, zero while the group is full.</param>
-public sealed record PlanetResourceDto(int ResourceTypeId, int ResourceGroupId, long Amount, decimal RatePerHour);
-
-/// <summary>The storage of a resource group.</summary>
-/// <param name="ResourceGroupId">The group.</param>
-/// <param name="Capacity">The capacity.</param>
-/// <param name="Stored">The sum of the amounts of the group.</param>
-/// <param name="IsFull">Whether the group is full and its producers stand still.</param>
-/// <param name="FullAt">The moment of game time the group is or will be full.</param>
-public sealed record StorageGroupDto(int ResourceGroupId, long Capacity, long Stored, bool IsFull, DateTimeOffset? FullAt);
+/// <param name="RatePerHour">The production per game hour, zero while the resource is full.</param>
+/// <param name="Capacity">How much of this resource the storage of the body holds; every resource of a group has the same capacity.</param>
+/// <param name="IsFull">Whether the resource is full and its production stands still.</param>
+/// <param name="FullAt">The moment of game time the resource is or will be full, or <see langword="null"/> when it does not fill.</param>
+public sealed record PlanetResourceDto(
+    int ResourceTypeId,
+    int ResourceGroupId,
+    long Amount,
+    decimal RatePerHour,
+    long Capacity = 0,
+    bool IsFull = false,
+    DateTimeOffset? FullAt = null);
 
 /// <summary>The energy of a body.</summary>
 /// <param name="Output">The energy produced.</param>
@@ -98,6 +133,7 @@ public sealed record QueueItemDto(
 /// <param name="MaxLevel">The largest level.</param>
 /// <param name="Effects">The effects of the level built.</param>
 /// <param name="Next">The next level that can be queued, with the reasons it cannot.</param>
+/// <param name="CategoryId">The category of the building: the group of its tile on the building page.</param>
 public sealed record BuildingDto(
     int BuildingTypeId,
     string Code,
@@ -107,7 +143,8 @@ public sealed record BuildingDto(
     int QueuedLevel,
     int MaxLevel,
     IReadOnlyList<EffectDto> Effects,
-    NextLevelDto Next);
+    NextLevelDto Next,
+    int CategoryId = 0);
 
 /// <summary>The next level of a building and whether it can be queued now.</summary>
 /// <param name="Level">The level.</param>

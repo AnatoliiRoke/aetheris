@@ -31,19 +31,23 @@ public sealed class EnqueueConstructionCommand : Command<EnqueueConstructionComm
     public const string Code = "planets.construction_enqueue";
 
     private readonly ConstructionService _construction;
+    private readonly PlanetQueryService _queries;
     private readonly IGameClock _clock;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EnqueueConstructionCommand"/> class.
     /// </summary>
     /// <param name="construction">The changes of a body.</param>
+    /// <param name="queries">The reads of a body, which add the facts of the other modules to the answer.</param>
     /// <param name="clock">The game clock.</param>
-    public EnqueueConstructionCommand(ConstructionService construction, IGameClock clock)
+    public EnqueueConstructionCommand(ConstructionService construction, PlanetQueryService queries, IGameClock clock)
     {
         ArgumentNullException.ThrowIfNull(construction);
+        ArgumentNullException.ThrowIfNull(queries);
         ArgumentNullException.ThrowIfNull(clock);
 
         _construction = construction;
+        _queries = queries;
         _clock = clock;
     }
 
@@ -79,7 +83,10 @@ public sealed class EnqueueConstructionCommand : Command<EnqueueConstructionComm
             .EnqueueAsync(request.PlanetId!.Value, request.BuildingTypeId!.Value, _clock.GameNow, cancellationToken)
             .ConfigureAwait(false);
 
-        return JsonSerializer.SerializeToElement(overview, PlanetsJson.Options);
+        // The answer replaces the body on the screen, so it carries the same facts as a read.
+        PlanetOverviewDto full = await _queries.EnrichOwnedAsync(request.PlanetId!.Value, overview, cancellationToken).ConfigureAwait(false);
+
+        return JsonSerializer.SerializeToElement(full, PlanetsJson.Options);
     }
 
     /// <summary>
@@ -109,19 +116,23 @@ public sealed class CancelConstructionCommand : Command<CancelConstructionComman
     public const string Code = "planets.construction_cancel";
 
     private readonly ConstructionService _construction;
+    private readonly PlanetQueryService _queries;
     private readonly IGameClock _clock;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CancelConstructionCommand"/> class.
     /// </summary>
     /// <param name="construction">The changes of a body.</param>
+    /// <param name="queries">The reads of a body, which add the facts of the other modules to the answer.</param>
     /// <param name="clock">The game clock.</param>
-    public CancelConstructionCommand(ConstructionService construction, IGameClock clock)
+    public CancelConstructionCommand(ConstructionService construction, PlanetQueryService queries, IGameClock clock)
     {
         ArgumentNullException.ThrowIfNull(construction);
+        ArgumentNullException.ThrowIfNull(queries);
         ArgumentNullException.ThrowIfNull(clock);
 
         _construction = construction;
+        _queries = queries;
         _clock = clock;
     }
 
@@ -157,7 +168,10 @@ public sealed class CancelConstructionCommand : Command<CancelConstructionComman
             .CancelAsync(request.PlanetId!.Value, request.QueueItemId!.Value, _clock.GameNow, cancellationToken)
             .ConfigureAwait(false);
 
-        return JsonSerializer.SerializeToElement(overview, PlanetsJson.Options);
+        // The answer replaces the body on the screen, so it carries the same facts as a read.
+        PlanetOverviewDto full = await _queries.EnrichOwnedAsync(request.PlanetId!.Value, overview, cancellationToken).ConfigureAwait(false);
+
+        return JsonSerializer.SerializeToElement(full, PlanetsJson.Options);
     }
 
     /// <summary>

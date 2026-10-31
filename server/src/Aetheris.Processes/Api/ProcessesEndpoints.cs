@@ -62,6 +62,21 @@ public static class ProcessesEndpoints
             return Results.Json(building, ProcessesJson.Options);
         });
 
+        // Every order of every building of a body that runs a process, so one screen shows
+        // all the processes of the body.
+        processes.MapGet("/orders", async (
+            [FromQuery(Name = "planet_id")] long planetId,
+            ClaimsPrincipal user,
+            ProcessQueueService queue,
+            CancellationToken cancellationToken) =>
+        {
+            ProcessActiveOrdersDto orders = await queue
+                .ReadActiveOrdersAsync(PlayerId(user), planetId, cancellationToken)
+                .ConfigureAwait(false);
+
+            return Results.Json(orders, ProcessesJson.Options);
+        });
+
         // The terraforming a ship may start: the free bodies with the ships by them and the
         // devices in their holds. No colony is named: it comes only from a ship.
         processes.MapGet("/terraforming", async (

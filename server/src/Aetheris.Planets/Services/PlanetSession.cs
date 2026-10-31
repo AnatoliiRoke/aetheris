@@ -19,7 +19,6 @@ public sealed class PlanetSession
     private readonly PlanetsDbContext _dbContext;
     private readonly List<PlanetBuildingEntity> _buildings;
     private readonly List<PlanetResourceEntity> _resources;
-    private readonly List<PlanetStorageGroupEntity> _groups;
     private readonly IReadOnlyDictionary<int, decimal> _deposits;
     private readonly IReadOnlyDictionary<int, int> _technologyLevels;
     private readonly PlanetBonuses _bonuses;
@@ -34,7 +33,6 @@ public sealed class PlanetSession
     /// <param name="buildings">The buildings.</param>
     /// <param name="queue">The queue in its order.</param>
     /// <param name="resources">The balance rows.</param>
-    /// <param name="groups">The storage states.</param>
     /// <param name="deposits">The richness coefficients by resource.</param>
     /// <param name="technologyLevels">The technologies of the owner.</param>
     /// <param name="bonuses">The bonuses of the technologies.</param>
@@ -46,7 +44,6 @@ public sealed class PlanetSession
         List<PlanetBuildingEntity> buildings,
         List<ConstructionQueueItemEntity> queue,
         List<PlanetResourceEntity> resources,
-        List<PlanetStorageGroupEntity> groups,
         IReadOnlyDictionary<int, decimal> deposits,
         IReadOnlyDictionary<int, int> technologyLevels,
         PlanetBonuses bonuses)
@@ -58,7 +55,6 @@ public sealed class PlanetSession
         _buildings = buildings;
         Queue = queue;
         _resources = resources;
-        _groups = groups;
         _deposits = deposits;
         _technologyLevels = technologyLevels;
         _bonuses = bonuses;
@@ -109,27 +105,26 @@ public sealed class PlanetSession
     }
 
     /// <summary>
-    /// Writes the moment every resource group is full, from the amounts and the rates as they
+    /// Writes the moment every resource is full, from the amounts and the rates as they
     /// are now. It is called after every change of the amounts or of the buildings.
     /// </summary>
     /// <param name="moment">The moment of the amounts.</param>
     public void RefreshStorage(DateTimeOffset moment) =>
         WriteFullAt(FullSince(Accumulate(moment, moment).FullAt, moment));
 
-    private void WriteFullAt(IReadOnlyDictionary<int, DateTimeOffset?> fullAtByGroup)
+    private void WriteFullAt(IReadOnlyDictionary<int, DateTimeOffset?> fullAtByResource)
     {
-        foreach ((int groupId, DateTimeOffset? fullAt) in fullAtByGroup)
+        foreach ((int resourceTypeId, DateTimeOffset? fullAt) in fullAtByResource)
         {
-            PlanetStorageGroupEntity? group = _groups.FirstOrDefault(entry => entry.ResourceGroupId == groupId);
+            PlanetResourceEntity? row = _resources.FirstOrDefault(entry => entry.ResourceTypeId == resourceTypeId);
 
-            if (group is null)
+            // A resource without a row is empty, so it has no moment to keep until it is produced.
+            if (row is null && fullAt is null)
             {
-                group = new PlanetStorageGroupEntity { PlanetId = State.PlanetId, ResourceGroupId = groupId, SectorId = State.SectorId };
-                _groups.Add(group);
-                _dbContext.StorageGroups.Add(group);
+                continue;
             }
 
-            group.FullAt = fullAt;
+            (row ?? Row(resourceTypeId)).FullAt = fullAt;
         }
     }
 
@@ -231,21 +226,21 @@ public sealed class PlanetSession
         PlanetOverviewBuilder.Build(Catalog, Settings, Figures(now), timeMultiplier);
 
     /// <summary>
-    /// Keeps the earlier moment of a group that was already full at the start of a computation,
-    /// so the alarm says since when the group is full, not when it was last computed.
+    /// Keeps the earlier moment of a resource that was already full at the start of a computation,
+    /// so the alarm says since when the resource is full, not when it was last computed.
     /// </summary>
     /// <param name="computed">The moments computed from <paramref name="from"/>.</param>
     /// <param name="from">The start of the computation.</param>
-    /// <returns>The moments by group.</returns>
+    /// <returns>The moments by resource.</returns>
     private Dictionary<int, DateTimeOffset?> FullSince(IReadOnlyDictionary<int, DateTimeOffset?> computed, DateTimeOffset from)
     {
         Dictionary<int, DateTimeOffset?> result = new(computed);
 
-        foreach (PlanetStorageGroupEntity group in _groups)
+        foreach (PlanetResourceEntity row in _resources)
         {
-            if (result.GetValueOrDefault(group.ResourceGroupId) is { } fullAt && fullAt <= from && group.FullAt is { } since && since < fullAt)
+            if (result.GetValueOrDefault(row.ResourceTypeId) is { } fullAt && fullAt <= from && row.FullAt is { } since && since < fullAt)
             {
-                result[group.ResourceGroupId] = since;
+                result[row.ResourceTypeId] = since;
             }
         }
 

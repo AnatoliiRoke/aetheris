@@ -44,6 +44,9 @@ public sealed class PlanetsDbContext : DbContext
     /// <summary>Gets the building types.</summary>
     public DbSet<BuildingTypeEntity> BuildingTypes => Set<BuildingTypeEntity>();
 
+    /// <summary>Gets the categories of the building types.</summary>
+    public DbSet<BuildingCategoryEntity> BuildingCategories => Set<BuildingCategoryEntity>();
+
     /// <summary>Gets the levels of the building types.</summary>
     public DbSet<BuildingLevelEntity> BuildingLevels => Set<BuildingLevelEntity>();
 
@@ -68,8 +71,6 @@ public sealed class PlanetsDbContext : DbContext
     /// <summary>Gets the balance of the bodies.</summary>
     public DbSet<PlanetResourceEntity> PlanetResources => Set<PlanetResourceEntity>();
 
-    /// <summary>Gets the storage states of the resource groups of the bodies.</summary>
-    public DbSet<PlanetStorageGroupEntity> StorageGroups => Set<PlanetStorageGroupEntity>();
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -93,7 +94,19 @@ public sealed class PlanetsDbContext : DbContext
             entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasIndex(e => e.BuildingClass);
+            entity.HasIndex(e => e.CategoryId);
+            entity.HasOne<BuildingCategoryEntity>().WithMany().HasForeignKey(e => e.CategoryId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(e => e.LevelIds).WithOne().HasForeignKey(level => level.BuildingTypeId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<BuildingCategoryEntity>(entity =>
+        {
+            entity.ToTable("building_category");
+            entity.Property(e => e.Code).HasMaxLength(CodeLength);
+            entity.Property(e => e.NameKey).HasMaxLength(NameLength);
+            entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
+            entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
+            entity.HasIndex(e => e.Code).IsUnique();
         });
 
         modelBuilder.Entity<BuildingLevelEntity>(entity =>
@@ -169,14 +182,6 @@ public sealed class PlanetsDbContext : DbContext
             entity.HasIndex(e => e.SectorId);
             entity.HasOne<PlanetStateEntity>().WithMany().HasForeignKey(e => e.PlanetId).OnDelete(DeleteBehavior.Cascade);
             entity.ToTable(table => table.HasCheckConstraint("ck_planet_resource_amount", "amount >= 0"));
-        });
-
-        modelBuilder.Entity<PlanetStorageGroupEntity>(entity =>
-        {
-            entity.ToTable("planet_storage_group");
-            entity.HasKey(e => new { e.PlanetId, e.ResourceGroupId });
-            entity.HasIndex(e => e.SectorId);
-            entity.HasOne<PlanetStateEntity>().WithMany().HasForeignKey(e => e.PlanetId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 

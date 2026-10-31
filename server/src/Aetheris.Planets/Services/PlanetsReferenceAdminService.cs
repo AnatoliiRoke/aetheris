@@ -16,7 +16,7 @@ namespace Aetheris.Planets.Services;
 
 /// <summary>
 /// The building types in the admin panel: the list, the form, the creation, the change and the
-/// archive (task 00023, section 4.4).
+/// archive (task 00023, section 4.4). A building has a mandatory category (task 00020).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -42,6 +42,8 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
     private const string LabelPrefix = "admin.reference.";
 
     private const string ClassField = "building_class";
+
+    private const string CategoryField = "category_id";
 
     private const string SortOrderField = "sort_order";
 
@@ -148,6 +150,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
                 LabelPrefix + "field.building_class",
                 InList: true,
                 Options: [.. BuildingClassValues.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "building_class." + (value.Length == 0 ? "none" : value)))]),
+            new(CategoryField, AdminReferenceFieldTypes.Reference, LabelPrefix + "field.category", IsRequired: true, InList: true, ReferenceKind: BuildingCategoryAdminService.CategoryKind),
             new(SortOrderField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.sort_order", IsRequired: true, InList: true, Minimum: 0),
             new(StartField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.is_start_building", InList: true),
             new(
@@ -218,6 +221,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
                 new Dictionary<string, object?>
                 {
                     [ClassField] = type.BuildingClass,
+                    [CategoryField] = type.CategoryId,
                     [SortOrderField] = type.SortOrder,
                     [StartField] = type.IsStartBuilding,
                 })),
@@ -379,12 +383,13 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
     }
 
     /// <summary>
-    /// Writes the sent values into the row: the class, the order, the flag, the picture and the
+    /// Writes the sent values into the row: the class, the category, the order, the flag, the picture and the
     /// levels. A kept level keeps its row; its costs and effects are written again.
     /// </summary>
     private static void Apply(BuildingTypeEntity type, BuildingValues values)
     {
         type.BuildingClass = values.BuildingClass ?? BuildingClasses.None;
+        type.CategoryId = values.CategoryId!.Value;
         type.SortOrder = values.SortOrder ?? 0;
         type.IsStartBuilding = values.IsStartBuilding;
         type.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
@@ -452,6 +457,8 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
             AdminReferenceRules.Fail(failures, SortOrderField, values.SortOrder is null ? AdminReferenceErrors.Required : AdminReferenceErrors.OutOfBounds);
         }
 
+        await CheckCategoryAsync(failures, values, stored, cancellationToken).ConfigureAwait(false);
+
         // One type is the start building of a race without one: a second flag would make the
         // choice ambiguous.
         if (values.IsStartBuilding && await _dbContext.BuildingTypes.AnyAsync(
@@ -480,6 +487,36 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
         AdminReferenceRules.ThrowIfInvalid(failures);
 
         return requirements;
+    }
+
+    /// <summary>
+    /// Checks the category of a building: it is mandatory, it exists, and an archived one is not
+    /// offered to a new building or to a building that changes its category.
+    /// </summary>
+    private async Task CheckCategoryAsync(Dictionary<string, List<string>> failures, BuildingValues values, BuildingTypeEntity? stored, CancellationToken cancellationToken)
+    {
+        if (values.CategoryId is not { } categoryId)
+        {
+            AdminReferenceRules.Fail(failures, CategoryField, AdminReferenceErrors.Required);
+
+            return;
+        }
+
+        // The row of the category is locked (shared) until the commit, so the category cannot be
+        // archived between this check and the write of the building.
+        BuildingCategoryEntity? category = (await _dbContext.BuildingCategories
+            .FromSql($"SELECT * FROM building_category WHERE id = {categoryId} FOR SHARE")
+            .AsNoTracking()
+            .ToListAsync(cancellationToken).ConfigureAwait(false)).FirstOrDefault();
+
+        if (category is null)
+        {
+            AdminReferenceRules.Fail(failures, CategoryField, AdminReferenceErrors.Unknown);
+        }
+        else if (category.IsArchived && category.Id != stored?.CategoryId)
+        {
+            AdminReferenceRules.Fail(failures, CategoryField, AdminReferenceErrors.Archived);
+        }
     }
 
     /// <summary>
@@ -699,6 +736,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
             AdminReferenceRules.TextsOf(packs, type.NameKey),
             AdminReferenceRules.TextsOf(packs, type.DescriptionKey),
             type.BuildingClass,
+            type.CategoryId,
             type.SortOrder,
             type.IsStartBuilding,
             type.ImageKey,
@@ -721,6 +759,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
     /// <param name="Name">The name by language.</param>
     /// <param name="Description">The description by language.</param>
     /// <param name="BuildingClass">The class, one of <see cref="BuildingClasses"/>.</param>
+    /// <param name="CategoryId">The category of the building: the group of its tile on the building page.</param>
     /// <param name="SortOrder">The order in the lists.</param>
     /// <param name="IsStartBuilding">Whether a race without a start building gets this type.</param>
     /// <param name="ImageKey">The key of the picture.</param>
@@ -729,6 +768,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
         Dictionary<string, string>? Name,
         Dictionary<string, string>? Description,
         string? BuildingClass,
+        int? CategoryId,
         int? SortOrder,
         bool IsStartBuilding,
         string? ImageKey,
@@ -746,6 +786,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
             [AdminReferenceRules.NameField] = Name,
             [AdminReferenceRules.DescriptionField] = Description,
             [ClassField] = BuildingClass,
+            [CategoryField] = CategoryId,
             [SortOrderField] = SortOrder,
             [StartField] = IsStartBuilding,
             [LevelsField] = Levels,

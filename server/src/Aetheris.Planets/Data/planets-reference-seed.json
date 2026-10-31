@@ -1,10 +1,121 @@
 {
   "level_count": 20,
+  "categories": [
+    {
+      "code": "group_1",
+      "sort_order": 1,
+      "name": {
+        "uk": "Видобуток",
+        "en": "Extraction"
+      },
+      "description": {
+        "uk": "Шахти й видобуток ресурсів із родовищ планети.",
+        "en": "The mines and the extraction of the resources from the deposits of the planet."
+      }
+    },
+    {
+      "code": "group_2",
+      "sort_order": 2,
+      "name": {
+        "uk": "Енергія",
+        "en": "Energy"
+      },
+      "description": {
+        "uk": "Будівлі, що виробляють енергію для планети.",
+        "en": "The buildings that produce the energy of the planet."
+      }
+    },
+    {
+      "code": "group_3",
+      "sort_order": 3,
+      "name": {
+        "uk": "Виробництво",
+        "en": "Production"
+      },
+      "description": {
+        "uk": "Заводи й переробка: з сировини в продукцію.",
+        "en": "The factories and the processing: from raw materials to goods."
+      }
+    },
+    {
+      "code": "group_4",
+      "sort_order": 4,
+      "name": {
+        "uk": "Склад",
+        "en": "Storage"
+      },
+      "description": {
+        "uk": "Склади й резервуари, що збільшують місткість планети.",
+        "en": "The storages and the tanks that raise the capacity of the planet."
+      }
+    },
+    {
+      "code": "group_5",
+      "sort_order": 5,
+      "name": {
+        "uk": "Населення",
+        "en": "Population"
+      },
+      "description": {
+        "uk": "Будівлі, що впливають на населення й керування колонією.",
+        "en": "The buildings that affect the population and the government of the colony."
+      }
+    },
+    {
+      "code": "group_6",
+      "sort_order": 6,
+      "name": {
+        "uk": "Флот",
+        "en": "Fleet"
+      },
+      "description": {
+        "uk": "Будівлі для будівництва й ремонту кораблів.",
+        "en": "The buildings for the construction and the repair of the ships."
+      }
+    },
+    {
+      "code": "group_7",
+      "sort_order": 7,
+      "name": {
+        "uk": "Оборона",
+        "en": "Defence"
+      },
+      "description": {
+        "uk": "Захист планети й спостереження за небом.",
+        "en": "The defence of the planet and the watch of the sky."
+      }
+    },
+    {
+      "code": "group_8",
+      "sort_order": 8,
+      "name": {
+        "uk": "Дослідження",
+        "en": "Research"
+      },
+      "description": {
+        "uk": "Будівлі, у яких вивчають технології.",
+        "en": "The buildings where the technologies are researched."
+      }
+    },
+    {
+      "code": "group_9",
+      "sort_order": 9,
+      "name": {
+        "uk": "Торгівля",
+        "en": "Trade"
+      },
+      "description": {
+        "uk": "Торгівля, ринок і зв'язок із далекими системами.",
+        "en": "The trade, the market and the link with the distant systems."
+      }
+    }
+  ],
   "building_types": [
     {
       "code": "building_1",
       "sort_order": 1,
       "building_class": "",
+      "category": "group_5",
       "is_start_building": true,
       "name": {
         "uk": "Адміністративний центр",
@@ -72,6 +183,7 @@
       "code": "building_2",
       "sort_order": 2,
       "building_class": "research_center",
+      "category": "group_8",
       "name": {
         "uk": "Науковий центр",
         "en": "Science center"
@@ -115,6 +227,7 @@
       "code": "building_3",
       "sort_order": 3,
       "building_class": "",
+      "category": "group_5",
       "name": {
         "uk": "Житловий комплекс",
         "en": "Residential complex"
@@ -157,6 +270,7 @@
       "code": "building_4",
       "sort_order": 4,
       "building_class": "",
+      "category": "group_2",
       "name": {
         "uk": "Електростанція",
         "en": "Power plant"
@@ -194,6 +308,7 @@
       "code": "building_5",
       "sort_order": 5,
       "building_class": "",
+      "category": "group_1",
       "name": {
         "uk": "Шахта заліза",
         "en": "Iron mine"
@@ -242,6 +357,7 @@
       "code": "building_6",
       "sort_order": 6,
       "building_class": "",
+      "category": "group_1",
       "name": {
         "uk": "Шахта міді",
         "en": "Copper mine"
@@ -290,6 +406,7 @@
       "code": "building_7",
       "sort_order": 7,
       "building_class": "",
+      "category": "group_4",
       "name": {
         "uk": "Склад металів",
         "en": "Metal storage"
@@ -333,6 +450,7 @@
       "code": "building_8",
       "sort_order": 8,
       "building_class": "",
+      "category": "group_4",
       "name": {
         "uk": "Склад мінералів",
         "en": "Mineral storage"
@@ -376,6 +494,7 @@
       "code": "building_9",
       "sort_order": 9,
       "building_class": "",
+      "category": "group_4",
       "name": {
         "uk": "Паливний резервуар",
         "en": "Fuel tank"
@@ -419,6 +538,7 @@
       "code": "building_10",
       "sort_order": 10,
       "building_class": "mine",
+      "category": "group_1",
       "is_start_building": false,
       "name": {
         "uk": "Шахта титану",
@@ -463,6 +583,7 @@
       "code": "building_11",
       "sort_order": 11,
       "building_class": "mine",
+      "category": "group_1",
       "is_start_building": false,
       "name": {
         "uk": "Шахта іридію",
@@ -507,6 +628,7 @@
       "code": "building_12",
       "sort_order": 12,
       "building_class": "mine",
+      "category": "group_1",
       "is_start_building": false,
       "name": {
         "uk": "Шахта кристалів",
@@ -551,6 +673,7 @@
       "code": "building_13",
       "sort_order": 13,
       "building_class": "production",
+      "category": "group_3",
       "is_start_building": false,
       "name": {
         "uk": "Завод",
@@ -589,6 +712,7 @@
       "code": "building_14",
       "sort_order": 14,
       "building_class": "shipyard",
+      "category": "group_6",
       "is_start_building": false,
       "name": {
         "uk": "Верф",
@@ -627,6 +751,7 @@
       "code": "building_15",
       "sort_order": 15,
       "building_class": "sensor",
+      "category": "group_7",
       "is_start_building": false,
       "name": {
         "uk": "Радар",
@@ -665,6 +790,7 @@
       "code": "building_16",
       "sort_order": 16,
       "building_class": "defence",
+      "category": "group_7",
       "is_start_building": false,
       "name": {
         "uk": "Оборонна споруда",
@@ -703,6 +829,7 @@
       "code": "building_17",
       "sort_order": 17,
       "building_class": "portal",
+      "category": "group_9",
       "is_start_building": false,
       "name": {
         "uk": "Портал",
@@ -741,6 +868,7 @@
       "code": "building_18",
       "sort_order": 18,
       "building_class": "trade_center",
+      "category": "group_9",
       "is_start_building": false,
       "name": {
         "uk": "Торговий центр",
@@ -779,6 +907,7 @@
       "code": "building_19",
       "sort_order": 19,
       "building_class": "defence",
+      "category": "group_7",
       "is_start_building": false,
       "name": {
         "uk": "Бункер",
@@ -817,6 +946,7 @@
       "code": "building_20",
       "sort_order": 20,
       "building_class": "recycling",
+      "category": "group_3",
       "is_start_building": false,
       "name": {
         "uk": "Фабрика утилізації",
@@ -855,6 +985,7 @@
       "code": "building_21",
       "sort_order": 21,
       "building_class": "",
+      "category": "group_4",
       "is_start_building": false,
       "name": {
         "uk": "Склад деталей",
@@ -898,6 +1029,7 @@
       "code": "building_22",
       "sort_order": 22,
       "building_class": "converter",
+      "category": "group_3",
       "is_start_building": false,
       "name": {
         "uk": "Перетворювач матерії",
@@ -936,6 +1068,7 @@
       "code": "building_23",
       "sort_order": 23,
       "building_class": "module_repair",
+      "category": "group_6",
       "is_start_building": false,
       "name": {
         "uk": "Ремонтний цех модулів",
@@ -974,6 +1107,7 @@
       "code": "building_24",
       "sort_order": 24,
       "building_class": "orbital_workshop",
+      "category": "group_6",
       "is_start_building": false,
       "name": {
         "uk": "Майстерня на орбіті",
@@ -1012,6 +1146,7 @@
       "code": "building_25",
       "sort_order": 25,
       "building_class": "",
+      "category": "group_5",
       "is_start_building": false,
       "name": {
         "uk": "Медичний центр",

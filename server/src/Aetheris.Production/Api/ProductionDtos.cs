@@ -118,15 +118,73 @@ public sealed record ProductionOrderDto(
     bool IsBlocked);
 
 /// <summary>
-/// The storage of the parts of a body.
+/// Every batch that is in the queues of the factories of a body, with the places of those
+/// queues, so one screen shows them all together (task 00020, section 7.5).
 /// </summary>
-/// <param name="Capacity">How many parts the storage holds.</param>
-/// <param name="Stored">How many parts it holds now.</param>
-/// <param name="FullAt">The moment the storage is or will be full.</param>
+/// <param name="PlanetId">The body.</param>
+/// <param name="QueueSlots">How many places the queues of all its factories hold together.</param>
+/// <param name="QueueUsedSlots">How many of those places are taken.</param>
+/// <param name="Orders">The batches of all the factories, in the order of the queues.</param>
+/// <param name="GameNow">The moment of game time.</param>
+public sealed record ProductionActiveOrdersDto(
+    long PlanetId,
+    int QueueSlots,
+    int QueueUsedSlots,
+    IReadOnlyList<ProductionActiveOrderDto> Orders,
+    DateTimeOffset GameNow);
+
+/// <summary>
+/// A batch of the queue of one factory of a body, with the names the screen needs.
+/// </summary>
+/// <param name="OrderId">The batch.</param>
+/// <param name="PlanetBuildingId">The factory the batch runs in.</param>
+/// <param name="BuildingNameKey">The localisation key of the name of the factory.</param>
+/// <param name="RecipeId">The recipe of the batch.</param>
+/// <param name="NameKey">The localisation key of the name of what the batch makes.</param>
+/// <param name="Quantity">How many units the batch holds.</param>
+/// <param name="ProducedQuantity">How many units are already made.</param>
+/// <param name="Position">The place of the batch in the queue of its factory.</param>
+/// <param name="UnitSeconds">The time of one unit for the player, in game seconds.</param>
+/// <param name="StartsAt">The moment the batch started, or <see langword="null"/>.</param>
+/// <param name="NextUnitAt">The moment the next unit is ready, or <see langword="null"/>.</param>
+/// <param name="FinishesAt">The moment the whole batch is ready, or <see langword="null"/>.</param>
+/// <param name="IsBlocked">Whether the batch waits for a free place in the storage.</param>
+public sealed record ProductionActiveOrderDto(
+    long OrderId,
+    long PlanetBuildingId,
+    string BuildingNameKey,
+    int RecipeId,
+    string NameKey,
+    long Quantity,
+    long ProducedQuantity,
+    int Position,
+    long UnitSeconds,
+    DateTimeOffset? StartsAt,
+    DateTimeOffset? NextUnitAt,
+    DateTimeOffset? FinishesAt,
+    bool IsBlocked);
+
+/// <summary>
+/// The storage of the parts of a body: every kind of part has the same room of its own.
+/// </summary>
+/// <param name="Capacity">How many parts of every kind the storage holds.</param>
+/// <param name="Kinds">How many parts every kind on the body holds against that room.</param>
 public sealed record ProductionStorageDto(
     long Capacity,
-    long Stored,
-    DateTimeOffset? FullAt);
+    IReadOnlyList<ProductionPartKindDto> Kinds);
+
+/// <summary>
+/// The parts of one kind on a body against the room of the kind.
+/// </summary>
+/// <param name="PartTypeId">The kind of the part.</param>
+/// <param name="Quantity">How many parts of the kind lie on the body, in every stack of the kind.</param>
+/// <param name="Capacity">How many parts of the kind the storage holds.</param>
+/// <param name="IsFull">Whether the kind has no room left, so the production of it waits.</param>
+public sealed record ProductionPartKindDto(
+    int PartTypeId,
+    long Quantity,
+    long Capacity,
+    bool IsFull);
 
 /// <summary>
 /// The storage of the parts of a body with the stacks it holds.
@@ -151,6 +209,8 @@ public sealed record ProductionStockDto(
 /// <param name="Quantity">How many parts the stack holds.</param>
 /// <param name="NameKey">The localisation key of the name of the part.</param>
 /// <param name="ImageKey">The key of the picture of the part, or <see langword="null"/>.</param>
+/// <param name="PartGroupId">The group of the part, so the client groups the parts by it (task 00020).</param>
+/// <param name="PartGroupNameKey">The localisation key of the name of the group.</param>
 public sealed record ProductionStackDto(
     int PartTypeId,
     int MarkLevel,
@@ -158,4 +218,6 @@ public sealed record ProductionStackDto(
     int ConditionPercent,
     long Quantity,
     string NameKey,
-    string? ImageKey);
+    string? ImageKey,
+    int PartGroupId = 0,
+    string? PartGroupNameKey = null);

@@ -1,5 +1,7 @@
 {
   "admin.reference.building.title": { "uk": "Будівлі", "en": "Buildings" },
+  "admin.reference.building_category.title": { "uk": "Категорії будівель", "en": "Building categories" },
+  "admin.reference.field.category": { "uk": "Категорія", "en": "Category" },
   "admin.reference.field.building_class": { "uk": "Клас будівлі", "en": "Building class" },
   "admin.reference.field.is_start_building": { "uk": "Стартова будівля", "en": "Start building" },
   "admin.reference.field.levels": { "uk": "Рівні", "en": "Levels" },

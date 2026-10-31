@@ -54,8 +54,51 @@ public sealed class BuildingTypeEntity
     /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
     public int Version { get; set; } = 1;
 
+    /// <summary>
+    /// Gets or sets the category of the type: the group of the tiles on the building page of the
+    /// client (a row of <c>building_category</c>); the client never guesses the group from the
+    /// class or from the effects.
+    /// </summary>
+    public int CategoryId { get; set; }
+
     /// <summary>Gets or sets the levels of the type.</summary>
     public List<BuildingLevelEntity> LevelIds { get; set; } = [];
+}
+
+/// <summary>
+/// A category of the building types: a row of the reference table <c>building_category</c>
+/// (task 00020, section 3.1). The tiles of the building page are grouped by it.
+/// </summary>
+/// <remarks>
+/// A category is data: its name and description live in the table of texts, its order is a
+/// column, and a new category is a new row. The category a building has may be archived, but an
+/// archived category is not offered to a new or a changed building.
+/// </remarks>
+public sealed class BuildingCategoryEntity
+{
+    /// <summary>Gets or sets the primary key.</summary>
+    public int Id { get; set; }
+
+    /// <summary>Gets or sets the neutral code, given by the server.</summary>
+    public string Code { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localisation key of the name.</summary>
+    public string NameKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the localisation key of the description.</summary>
+    public string DescriptionKey { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the key of the picture, or <see langword="null"/> for the neutral placeholder.</summary>
+    public string? ImageKey { get; set; }
+
+    /// <summary>Gets or sets the order of the groups on the building page.</summary>
+    public int SortOrder { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the category is archived: it is not offered to a new or a changed building.</summary>
+    public bool IsArchived { get; set; }
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
 }
 
 /// <summary>
@@ -256,28 +299,12 @@ public sealed class PlanetResourceEntity
 
     /// <summary>Gets or sets the amount.</summary>
     public long Amount { get; set; }
-}
 
-/// <summary>
-/// The state of the storage of one resource group of a body: the moment the group is full
-/// (decision 8).
-/// </summary>
-/// <remarks>
-/// It is written at every fix of the balance from the rates of that moment, so the alarm
-/// "storage full" is data: the group is full while the current game time is not before
-/// <see cref="FullAt"/>.
-/// </remarks>
-public sealed class PlanetStorageGroupEntity
-{
-    /// <summary>Gets or sets the body.</summary>
-    public long PlanetId { get; set; }
-
-    /// <summary>Gets or sets the resource group.</summary>
-    public int ResourceGroupId { get; set; }
-
-    /// <summary>Gets or sets the sector.</summary>
-    public int SectorId { get; set; }
-
-    /// <summary>Gets or sets the moment of game time the group is or will be full, or <see langword="null"/> when it does not fill.</summary>
+    /// <summary>
+    /// Gets or sets the moment of game time the resource is or will be full (the amount reaches the
+    /// capacity its group gets from the storage), or <see langword="null"/> when it does not fill.
+    /// It is written at every fix of the balance from the rates of that moment, so the alarm
+    /// "storage full" is data: the resource is full while the current game time is not before it.
+    /// </summary>
     public DateTimeOffset? FullAt { get; set; }
 }

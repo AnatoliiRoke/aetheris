@@ -1,5 +1,4 @@
 using Aetheris.Core.Errors;
-using Aetheris.Core.Time;
 using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Requirements;
@@ -30,7 +29,6 @@ public sealed class PartStockService
     private readonly ProductionUnitOfWork _unitOfWork;
     private readonly ProductionCatalogCache _catalogCache;
     private readonly IRequirementsModule _requirements;
-    private readonly IGameClock _clock;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PartStockService"/> class.
@@ -39,25 +37,21 @@ public sealed class PartStockService
     /// <param name="unitOfWork">The transaction of the module.</param>
     /// <param name="catalogCache">The catalog of the production.</param>
     /// <param name="requirements">The common requirements module, for the catalog.</param>
-    /// <param name="clock">The clock of the game.</param>
     public PartStockService(
         ProductionDbContext dbContext,
         ProductionUnitOfWork unitOfWork,
         ProductionCatalogCache catalogCache,
-        IRequirementsModule requirements,
-        IGameClock clock)
+        IRequirementsModule requirements)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(catalogCache);
         ArgumentNullException.ThrowIfNull(requirements);
-        ArgumentNullException.ThrowIfNull(clock);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
         _catalogCache = catalogCache;
         _requirements = requirements;
-        _clock = clock;
     }
 
     /// <summary>
@@ -188,15 +182,11 @@ public sealed class PartStockService
                     }
 
                     stack.Quantity += part.Quantity;
-                    storage.Quantity += part.Quantity;
 
                     // Every stack is saved before the next one is looked up, so two parts of one
                     // stack in the same call add to one row.
                     await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-
-                RefreshFull(storage, _clock.GameNow);
-                await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 return true;
             },
@@ -329,7 +319,7 @@ public sealed class PartStockService
             return [];
         }
 
-        PartStorageEntity storage = await LockedStorageAsync(planetId, cancellationToken).ConfigureAwait(false);
+        await LockedStorageAsync(planetId, cancellationToken).ConfigureAwait(false);
 
         // The plain parts go first and the parts with the bonus of the race last, like the
         // factory takes them.
@@ -371,8 +361,6 @@ public sealed class PartStockService
             _dbContext.PartStocks.Remove(stack);
         }
 
-        storage.Quantity -= quantity;
-        RefreshFull(storage, _clock.GameNow);
         await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return taken;
@@ -390,7 +378,7 @@ public sealed class PartStockService
         // The row is created without a conflict first, so the first parallel commands of a body
         // wait for one row instead of failing on a duplicate key.
         await _dbContext.Database
-            .ExecuteSqlAsync($"INSERT INTO part_storage (planet_id, sector_id, capacity, quantity) VALUES ({planetId}, {sectorId}, 0, 0) ON CONFLICT (planet_id) DO NOTHING", cancellationToken)
+            .ExecuteSqlAsync($"INSERT INTO part_storage (planet_id, sector_id, capacity) VALUES ({planetId}, {sectorId}, 0) ON CONFLICT (planet_id) DO NOTHING", cancellationToken)
             .ConfigureAwait(false);
 
         return await LockedStorageAsync(planetId, cancellationToken).ConfigureAwait(false);
@@ -411,18 +399,6 @@ public sealed class PartStockService
             .ConfigureAwait(false)).SingleOrDefault();
 
         return storage ?? throw new GameException(ProductionErrorCodes.PartMissing, "The body has no storage of the parts.");
-    }
-
-    /// <summary>
-    /// Refreshes the moment the storage of the parts is full, so the client knows when the
-    /// production stops.
-    /// </summary>
-    /// <param name="storage">The storage of the parts.</param>
-    /// <param name="now">The moment of game time.</param>
-    private static void RefreshFull(PartStorageEntity storage, DateTimeOffset now)
-    {
-        bool full = storage.Quantity > 0 && storage.Quantity >= storage.Capacity;
-        storage.FullAt = full ? storage.FullAt ?? now : null;
     }
 }
 

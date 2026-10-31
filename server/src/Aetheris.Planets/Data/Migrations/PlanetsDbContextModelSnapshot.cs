@@ -22,6 +22,60 @@ namespace Aetheris.Planets.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Aetheris.Planets.Data.Entities.BuildingCategoryEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("DescriptionKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description_key");
+
+                    b.Property<string>("ImageKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("image_key");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
+                    b.Property<string>("NameKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name_key");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_building_category");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_building_category_code");
+
+                    b.ToTable("building_category", (string)null);
+                });
+
             modelBuilder.Entity("Aetheris.Planets.Data.Entities.BuildingLevelCostEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -145,6 +199,10 @@ namespace Aetheris.Planets.Data.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("building_class");
 
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer")
+                        .HasColumnName("category_id");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -189,6 +247,9 @@ namespace Aetheris.Planets.Data.Migrations
 
                     b.HasIndex("BuildingClass")
                         .HasDatabaseName("ix_building_type_building_class");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_building_type_category_id");
 
                     b.HasIndex("Code")
                         .IsUnique()
@@ -348,6 +409,10 @@ namespace Aetheris.Planets.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("amount");
 
+                    b.Property<DateTimeOffset?>("FullAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("full_at");
+
                     b.Property<long>("PlanetId")
                         .HasColumnType("bigint")
                         .HasColumnName("planet_id");
@@ -414,33 +479,6 @@ namespace Aetheris.Planets.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Aetheris.Planets.Data.Entities.PlanetStorageGroupEntity", b =>
-                {
-                    b.Property<long>("PlanetId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("planet_id");
-
-                    b.Property<int>("ResourceGroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("resource_group_id");
-
-                    b.Property<DateTimeOffset?>("FullAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("full_at");
-
-                    b.Property<int>("SectorId")
-                        .HasColumnType("integer")
-                        .HasColumnName("sector_id");
-
-                    b.HasKey("PlanetId", "ResourceGroupId")
-                        .HasName("pk_planet_storage_group");
-
-                    b.HasIndex("SectorId")
-                        .HasDatabaseName("ix_planet_storage_group_sector_id");
-
-                    b.ToTable("planet_storage_group", (string)null);
-                });
-
             modelBuilder.Entity("Aetheris.Planets.Data.Entities.BuildingLevelCostEntity", b =>
                 {
                     b.HasOne("Aetheris.Planets.Data.Entities.BuildingLevelEntity", null)
@@ -469,6 +507,16 @@ namespace Aetheris.Planets.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_building_level_building_type_building_type_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Planets.Data.Entities.BuildingTypeEntity", b =>
+                {
+                    b.HasOne("Aetheris.Planets.Data.Entities.BuildingCategoryEntity", null)
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_building_type_building_category_category_id");
                 });
 
             modelBuilder.Entity("Aetheris.Planets.Data.Entities.ConstructionQueueCostEntity", b =>
@@ -523,16 +571,6 @@ namespace Aetheris.Planets.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_planet_resource_planet_state_planet_id");
-                });
-
-            modelBuilder.Entity("Aetheris.Planets.Data.Entities.PlanetStorageGroupEntity", b =>
-                {
-                    b.HasOne("Aetheris.Planets.Data.Entities.PlanetStateEntity", null)
-                        .WithMany()
-                        .HasForeignKey("PlanetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_planet_storage_group_planet_state_planet_id");
                 });
 
             modelBuilder.Entity("Aetheris.Planets.Data.Entities.BuildingLevelEntity", b =>

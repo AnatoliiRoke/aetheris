@@ -175,7 +175,6 @@ public sealed class ProductionDbContext : DbContext
             entity.HasIndex(e => e.PlanetId).IsUnique();
             entity.HasIndex(e => e.SectorId);
             entity.ToTable(table => table.HasCheckConstraint("ck_part_storage_capacity", "capacity >= 0"));
-            entity.ToTable(table => table.HasCheckConstraint("ck_part_storage_quantity", "quantity >= 0"));
         });
 
         modelBuilder.Entity<ProductionQueueStateEntity>(entity =>
