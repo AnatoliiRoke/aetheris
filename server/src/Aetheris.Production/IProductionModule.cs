@@ -28,6 +28,17 @@ public interface IProductionModule
     Task<ProductionBootstrapResult> EnsureAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the parts of the catalog, with their groups.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The parts in the order of the lists.</returns>
+    /// <remarks>
+    /// The parts live in the tables of the module, so another module reads them through this
+    /// contract and never through the tables (documentation/tech/01, section 8).
+    /// </remarks>
+    Task<IReadOnlyList<ProductionPartSummaryDto>> GetPartsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the factories of a body.
     /// </summary>
     /// <param name="playerId">The player.</param>

@@ -52,6 +52,7 @@ public sealed class ModuleIsolationTests
         ["Aetheris.Research"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Economy"],
         ["Aetheris.Production"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research", "Aetheris.Economy"],
         ["Aetheris.Processes"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research", "Aetheris.Production", "Aetheris.Economy"],
+        ["Aetheris.Market"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Production", "Aetheris.Requirements", "Aetheris.Economy"],
     };
 
     private readonly AetherisTestFactory _factory;

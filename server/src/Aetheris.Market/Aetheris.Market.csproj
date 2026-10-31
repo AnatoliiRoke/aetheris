@@ -5,7 +5,32 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!--
+    The module of the market reads the world for the distances and the reference tables, the
+    bodies module for the stock of the resources and the levels of the buildings, the production
+    module for the stock of the parts, the economy module for the balances of the currencies and
+    the common requirements module for the checks of the requirements. The dependencies go one way
+    only.
+  -->
+  <ItemGroup>
     <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
+    <ProjectReference Include="..\Aetheris.Economy\Aetheris.Economy.csproj" />
+    <ProjectReference Include="..\Aetheris.Planets\Aetheris.Planets.csproj" />
+    <ProjectReference Include="..\Aetheris.Production\Aetheris.Production.csproj" />
+    <ProjectReference Include="..\Aetheris.Requirements\Aetheris.Requirements.csproj" />
+    <ProjectReference Include="..\Aetheris.World\Aetheris.World.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\market-reference-seed.json" LogicalName="Aetheris.Market.reference-seed.json" />
+    <EmbeddedResource Include="Data\admin-reference-texts.json" LogicalName="Aetheris.Market.admin-reference-texts.json" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,7 @@
 using Aetheris.Production.Api;
+using Aetheris.Production.Data;
 using Aetheris.Production.Services;
+using Aetheris.Requirements;
 
 namespace Aetheris.Production;
 
@@ -11,21 +13,36 @@ public sealed class ProductionModule : IProductionModule
 {
     private readonly ProductionBootstrapService _bootstrap;
     private readonly ProductionQueueService _queue;
+    private readonly ProductionCatalogCache _catalog;
+    private readonly ProductionDbContext _dbContext;
+    private readonly IRequirementsModule _requirements;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProductionModule"/> class.
     /// </summary>
     /// <param name="bootstrap">The preparation of the module.</param>
     /// <param name="queue">The queue of the factories.</param>
+    /// <param name="catalog">The catalog of the production.</param>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="requirements">The common requirements module.</param>
     public ProductionModule(
         ProductionBootstrapService bootstrap,
-        ProductionQueueService queue)
+        ProductionQueueService queue,
+        ProductionCatalogCache catalog,
+        ProductionDbContext dbContext,
+        IRequirementsModule requirements)
     {
         ArgumentNullException.ThrowIfNull(bootstrap);
         ArgumentNullException.ThrowIfNull(queue);
+        ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(requirements);
 
         _bootstrap = bootstrap;
         _queue = queue;
+        _catalog = catalog;
+        _dbContext = dbContext;
+        _requirements = requirements;
     }
 
     /// <inheritdoc />
@@ -34,6 +51,24 @@ public sealed class ProductionModule : IProductionModule
     /// <inheritdoc />
     public Task<ProductionBootstrapResult> EnsureAsync(CancellationToken cancellationToken = default) =>
         _bootstrap.EnsureAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductionPartSummaryDto>> GetPartsAsync(CancellationToken cancellationToken = default)
+    {
+        ProductionCatalog catalog = await _catalog.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
+
+        return
+        [
+            .. catalog.Parts.Select(part => new ProductionPartSummaryDto(
+                part.Id,
+                part.Code,
+                part.NameKey,
+                part.DescriptionKey,
+                part.PartGroupId,
+                catalog.FindGroup(part.PartGroupId)?.Code ?? string.Empty,
+                part.IsArchived)),
+        ];
+    }
 
     /// <inheritdoc />
     public Task<IReadOnlyList<ProductionFactorySummaryDto>> GetFactoriesAsync(

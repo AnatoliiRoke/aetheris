@@ -59,6 +59,8 @@ public sealed partial class NoGameTermsTests
         Path.Combine("tests", "Aetheris.Tests", "Processes") + Path.DirectorySeparatorChar,
         Path.Combine("src", "Aetheris.Economy") + Path.DirectorySeparatorChar,
         Path.Combine("tests", "Aetheris.Tests", "Economy") + Path.DirectorySeparatorChar,
+        Path.Combine("src", "Aetheris.Market") + Path.DirectorySeparatorChar,
+        Path.Combine("tests", "Aetheris.Tests", "Market") + Path.DirectorySeparatorChar,
     ];
 
     /// <summary>

@@ -18379,7 +18379,14 @@
           "from_level": 5
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "market_lot_limit",
+          "base": 2,
+          "growth": 1,
+          "step": 1
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -18697,7 +18704,14 @@
           "from_level": 7
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "portal_delivery_factor",
+          "base": 1,
+          "growth": 1,
+          "step": 0.5
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",

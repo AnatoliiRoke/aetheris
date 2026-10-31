@@ -132,6 +132,14 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.world.seed.level_cap.base.description': 'База формули межі рівнів стартової будівлі.',
   'config.world.seed.level_cap.growth.description': 'Множник формули межі рівнів стартової будівлі.',
   'config.world.seed.level_cap.step.description': 'Крок формули межі рівнів стартової будівлі.',
+  'config.world.seed.market.lot_limit.base.description':
+    'Кількість лотів ринку цивілізації на першому рівні торгового центру.',
+  'config.world.seed.market.lot_limit.step.description':
+    'Кількість лотів ринку, яку додає кожен наступний рівень торгового центру.',
+  'config.world.seed.market.delivery_factor.base.description':
+    'Швидкість доставлення через портал на першому рівні порталу.',
+  'config.world.seed.market.delivery_factor.step.description':
+    'Швидкість доставлення через портал, яку додає кожен наступний рівень порталу.',
   'config.world.naming.sector_template.description': 'Шаблон назви сектора: {index}.',
   'config.world.naming.system_template.description': 'Шаблон назви зоряної системи: {sector}, {number}.',
   'config.world.naming.body_template.description': 'Шаблон назви тіла: {system}, {orbit}.',

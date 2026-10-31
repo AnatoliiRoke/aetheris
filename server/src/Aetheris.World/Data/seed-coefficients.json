@@ -55,6 +55,34 @@
       "minimum": "0",
       "maximum": "1000000000",
       "description": "Step of the level-cap formula on the start building."
+    },
+    {
+      "key": "world.seed.market.lot_limit.base",
+      "value": "2",
+      "minimum": "0",
+      "maximum": "1000000000",
+      "description": "Number of the market lots of a civilization at the first level of the trade centre."
+    },
+    {
+      "key": "world.seed.market.lot_limit.step",
+      "value": "1",
+      "minimum": "0",
+      "maximum": "1000000000",
+      "description": "Number of the market lots every later level of the trade centre adds."
+    },
+    {
+      "key": "world.seed.market.delivery_factor.base",
+      "value": "1",
+      "minimum": "0",
+      "maximum": "1000000000",
+      "description": "Speed of the delivery through the portal at the first level of the portal."
+    },
+    {
+      "key": "world.seed.market.delivery_factor.step",
+      "value": "0.5",
+      "minimum": "0",
+      "maximum": "1000000000",
+      "description": "Speed of the delivery through the portal every later level of the portal adds."
     }
   ]
 }

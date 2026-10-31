@@ -1,13 +1,30 @@
+using Aetheris.Market.Services;
+
 namespace Aetheris.Market;
 
 /// <summary>
-/// Stub implementation of the Market module.
+/// The implementation of <see cref="IMarketModule"/>: a thin front of the services of the
+/// module.
 /// </summary>
-/// <remarks>
-/// Task 00001 creates the module skeleton only; the game logic arrives with later tasks.
-/// </remarks>
 public sealed class MarketModule : IMarketModule
 {
+    private readonly MarketBootstrapService _bootstrap;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MarketModule"/> class.
+    /// </summary>
+    /// <param name="bootstrap">The preparation of the module.</param>
+    public MarketModule(MarketBootstrapService bootstrap)
+    {
+        ArgumentNullException.ThrowIfNull(bootstrap);
+
+        _bootstrap = bootstrap;
+    }
+
     /// <inheritdoc />
     public string ModuleName => "Market";
+
+    /// <inheritdoc />
+    public Task EnsureAsync(CancellationToken cancellationToken = default) =>
+        _bootstrap.EnsureAsync(cancellationToken);
 }

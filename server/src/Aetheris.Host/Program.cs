@@ -21,6 +21,7 @@ using Aetheris.Host.Realtime;
 using Aetheris.Host.Scheduling;
 using Aetheris.Host.Security;
 using Aetheris.Market;
+using Aetheris.Market.Data;
 using Aetheris.Planets;
 using Aetheris.Processes;
 using Aetheris.Processes.Data;
@@ -184,7 +185,6 @@ builder.Services.AddHealthChecks()
 // Modules
 // ---------------------------------------------------------------------------------------------
 builder.Services.AddSingleton<IFleetModule, FleetModule>();
-builder.Services.AddSingleton<IMarketModule, MarketModule>();
 builder.Services.AddSingleton<IRatingModule, RatingModule>();
 builder.Services.AddSingleton<IChatModule, ChatModule>();
 builder.Services.AddSingleton<IAdminModule, AdminModule>();
@@ -207,6 +207,9 @@ builder.Services.AddProcessesModule();
 // The Economy module reads the world, and the bodies and the research modules give it their
 // effects through the contracts it declares (task 00015).
 builder.Services.AddEconomyModule();
+
+// The Market module reads the world, the production and the economy, so it comes after them.
+builder.Services.AddMarketModule();
 
 WebApplication app = builder.Build();
 
@@ -249,6 +252,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     await ProductionDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await ProcessesDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
     await EconomyDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
+    await MarketDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
 
@@ -331,6 +335,7 @@ ResearchServiceCollectionExtensions.MapEndpoints(app);
 ProductionServiceCollectionExtensions.MapEndpoints(app);
 ProcessesServiceCollectionExtensions.MapEndpoints(app);
 EconomyServiceCollectionExtensions.MapEndpoints(app);
+MarketServiceCollectionExtensions.MapEndpoints(app);
 app.MapCommands();
 
 await app.RunAsync().ConfigureAwait(false);

@@ -424,7 +424,8 @@
         "en": "Resource of its group."
       },
       "scope": "civilization",
-      "earns_population_income": true
+      "earns_population_income": true,
+      "allows_debt": false
     },
     {
       "code": "resource_28",
@@ -437,7 +438,8 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
-      "scope": "civilization"
+      "scope": "civilization",
+      "allows_debt": true
     },
     {
       "code": "resource_29",

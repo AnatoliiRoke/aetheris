@@ -1,0 +1,17 @@
+{
+  "admin.reference.market_level.title": { "uk": "Рівні ринку", "en": "Market levels" },
+  "admin.reference.market_reference_price.title": { "uk": "Еталонні ціни", "en": "Reference prices" },
+  "admin.reference.field.image": { "uk": "Зображення", "en": "Picture" },
+  "admin.reference.field.name": { "uk": "Назва", "en": "Name" },
+  "admin.reference.field.description": { "uk": "Опис", "en": "Description" },
+  "admin.reference.field.visibility": { "uk": "Область видимості", "en": "Visibility" },
+  "admin.reference.field.commission_percent": { "uk": "Комісія, %", "en": "Commission, %" },
+  "admin.reference.field.is_active": { "uk": "Активний", "en": "Active" },
+  "admin.reference.field.sort_order": { "uk": "Порядок у списках", "en": "Order in the lists" },
+  "admin.reference.field.resource": { "uk": "Ресурс", "en": "Resource" },
+  "admin.reference.field.part": { "uk": "Деталь", "en": "Part" },
+  "admin.reference.field.price": { "uk": "Ціна за одиницю", "en": "Price per unit" },
+  "admin.reference.visibility.clan": { "uk": "Клановий", "en": "Clan" },
+  "admin.reference.visibility.sector": { "uk": "Секторний", "en": "Sector" },
+  "admin.reference.visibility.galactic": { "uk": "Всегалактичний", "en": "Galactic" }
+}

@@ -13,6 +13,7 @@ using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Localization;
 using Aetheris.Host.Security;
+using Aetheris.Market;
 using Aetheris.Planets;
 using Aetheris.Processes;
 using Aetheris.Production;
@@ -240,6 +241,7 @@ public static class AdminEndpoints
         ProductionServiceCollectionExtensions.MapAdminEndpoints(secured);
         ProcessesServiceCollectionExtensions.MapAdminEndpoints(secured);
         EconomyServiceCollectionExtensions.MapAdminEndpoints(secured);
+        MarketServiceCollectionExtensions.MapAdminEndpoints(secured);
     }
 
     private static async Task<IResult> SignInAsync(

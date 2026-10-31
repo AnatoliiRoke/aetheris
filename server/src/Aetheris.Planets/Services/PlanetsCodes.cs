@@ -39,6 +39,18 @@ public static class BuildingEffectTypes
     public const string PartStorageCapacity = "part_storage_capacity";
 
     /// <summary>
+    /// Raises the number of the lots of the market a civilization may have at the same time; the
+    /// level of the trade centre of the body gives the number (task 00024, section 3, point 5).
+    /// </summary>
+    public const string MarketLotLimit = "market_lot_limit";
+
+    /// <summary>
+    /// Raises the speed the goods travel through the portal of the body; the level of the portal
+    /// gives the speed (task 00024, section 3, point 8).
+    /// </summary>
+    public const string PortalDeliveryFactor = "portal_delivery_factor";
+
+    /// <summary>
     /// Gets every effect type, in the order of the form of the admin panel (task 00023).
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -52,6 +64,8 @@ public static class BuildingEffectTypes
         PopulationGrowthBonus,
         LevelCap,
         PartStorageCapacity,
+        MarketLotLimit,
+        PortalDeliveryFactor,
     ];
 
     /// <summary>

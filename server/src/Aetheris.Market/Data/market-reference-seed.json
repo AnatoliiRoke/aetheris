@@ -1,0 +1,32 @@
+{
+  "market_levels": [
+    {
+      "code": "market_level_1",
+      "visibility": "clan",
+      "commission_percent": 1.0,
+      "is_active": false,
+      "sort_order": 1,
+      "name": { "uk": "Клановий ринок", "en": "Clan market" },
+      "description": { "uk": "Лоти бачать лише члени клану продавця. Ринок неактивний, поки немає кланів.", "en": "Only the members of the clan of the seller see the lots. The market is inactive while there are no clans." }
+    },
+    {
+      "code": "market_level_2",
+      "visibility": "sector",
+      "commission_percent": 5.0,
+      "is_active": true,
+      "sort_order": 2,
+      "name": { "uk": "Секторний ринок", "en": "Sector market" },
+      "description": { "uk": "Лоти бачать гравці сектору продавця.", "en": "The players of the sector of the seller see the lots." }
+    },
+    {
+      "code": "market_level_3",
+      "visibility": "galactic",
+      "commission_percent": 10.0,
+      "is_active": true,
+      "sort_order": 3,
+      "name": { "uk": "Всегалактичний ринок", "en": "Galactic market" },
+      "description": { "uk": "Лоти бачать усі гравці.", "en": "Every player sees the lots." }
+    }
+  ],
+  "reference_prices": []
+}

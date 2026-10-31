@@ -263,6 +263,25 @@ public sealed record CharacteristicGroupDto(
     bool IsRequired);
 
 /// <summary>
+/// A part of the catalog of the production with its group (task 00024).
+/// </summary>
+/// <param name="Id">The part.</param>
+/// <param name="Code">The neutral code of the part.</param>
+/// <param name="NameKey">The localisation key of the name of the part.</param>
+/// <param name="DescriptionKey">The localisation key of the description of the part.</param>
+/// <param name="PartGroupId">The group of the part.</param>
+/// <param name="PartGroupCode">The neutral code of the group of the part.</param>
+/// <param name="IsArchived">Whether the part is archived: it is not offered for new rows (task 00023).</param>
+public sealed record ProductionPartSummaryDto(
+    int Id,
+    string Code,
+    string NameKey,
+    string DescriptionKey,
+    int PartGroupId,
+    string PartGroupCode,
+    bool IsArchived);
+
+/// <summary>
 /// The weight and the characteristics of a part (task 00027, section 3.2).
 /// </summary>
 /// <param name="PartTypeId">The part.</param>
