@@ -74,4 +74,36 @@ public sealed class ProductionStockGroupTests
         Assert.Equal(part.PartGroupId, stack.PartGroupId);
         Assert.Equal(catalog.FindGroup(part.PartGroupId)!.NameKey, stack.PartGroupNameKey);
     }
+
+    /// <summary>
+    /// The stock names the resources some recipe makes, so the storage screen shows the produced
+    /// resources apart from the raw ones; the list comes from the recipes and never from a code.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_stock_names_the_produced_resources_from_the_recipes()
+    {
+        await PlanetsTestData.ResetAsync(_factory);
+
+        using (IServiceScope reset = _factory.Services.CreateScope())
+        {
+            await AetherisTestFactory.SetParameterAsync(reset.ServiceProvider, ProductionConfigKeys.CatalogCacheSeconds, "0");
+            await reset.ServiceProvider.GetRequiredService<IProductionModule>().EnsureAsync(Token);
+        }
+
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        ProductionStockDto stock = await services.GetRequiredService<IProductionModule>().GetStockAsync(player.Account.UserId, player.PlanetId, Token);
+        ProductionCatalog catalog = await services.GetRequiredService<ProductionCatalogCache>()
+            .GetAsync(
+                services.GetRequiredService<ProductionDbContext>(),
+                services.GetRequiredService<Aetheris.Requirements.IRequirementsModule>(),
+                Token);
+        int[] fromRecipes = [.. catalog.Recipes.Where(recipe => recipe.ResourceTypeId is not null).Select(recipe => recipe.ResourceTypeId!.Value).Distinct().Order()];
+
+        Assert.NotEmpty(fromRecipes);
+        Assert.Equal(fromRecipes, stock.ProducedResourceTypeIds);
+    }
 }

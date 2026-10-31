@@ -55,16 +55,11 @@ public sealed class PlanetOverviewTests
         int resourceId = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, SeedCodes.Iron, changedCoefficient);
 
         PlanetFacts facts = (await services.GetRequiredService<IWorldModule>().GetPlanetFactsAsync(player.PlanetId, Token))!;
-        string typeCode = await services.GetRequiredService<WorldDbContext>().ObjectTypes.AsNoTracking()
-            .Where(type => type.Id == facts.ObjectTypeId)
-            .Select(type => type.Code)
-            .SingleAsync(Token);
-
         PlanetOverviewDto overview = (await services.GetRequiredService<IPlanetsModule>()
             .GetPlanetAsync(player.Account.UserId, player.PlanetId, Token))!;
 
         Assert.Equal(facts.Name, overview.Name);
-        Assert.Equal(typeCode, overview.TypeCode);
+        Assert.Equal(facts.ObjectTypeId, overview.TypeId);
         Assert.NotNull(overview.Coordinates);
         Assert.Equal((facts.SectorId, facts.SystemId, facts.Orbit), (overview.Coordinates.SectorId, overview.Coordinates.SystemId, overview.Coordinates.Orbit));
 
@@ -102,8 +97,9 @@ public sealed class PlanetOverviewTests
         JsonElement root = body.RootElement;
 
         Assert.True(root.TryGetProperty("name", out _));
-        Assert.True(root.TryGetProperty("type_code", out JsonElement typeCode));
-        Assert.False(string.IsNullOrEmpty(typeCode.GetString()));
+        Assert.True(root.TryGetProperty("type_id", out JsonElement typeId));
+        Assert.True(typeId.GetInt32() > 0);
+        Assert.False(root.TryGetProperty("type_code", out _));
         Assert.True(root.GetProperty("coordinates").TryGetProperty("system_id", out _));
         Assert.True(root.TryGetProperty("population", out _));
         Assert.True(root.TryGetProperty("population_growth_per_hour", out _));
@@ -164,8 +160,28 @@ public sealed class PlanetOverviewTests
         PlanetOverviewDto read = (await services.GetRequiredService<IPlanetsModule>().GetPlanetAsync(player.Account.UserId, player.PlanetId, Token))!;
 
         Assert.Equal(read.Name, answer.RootElement.GetProperty("name").GetString());
-        Assert.Equal(read.TypeCode, answer.RootElement.GetProperty("type_code").GetString());
+        Assert.Equal(read.TypeId, answer.RootElement.GetProperty("type_id").GetInt32());
         Assert.Equal(read.Coordinates!.SystemId, answer.RootElement.GetProperty("coordinates").GetProperty("system_id").GetInt64());
         Assert.Equal(read.DepositRichness!.Count, answer.RootElement.GetProperty("deposit_richness").GetArrayLength());
+    }
+
+    /// <summary>
+    /// The next level of every building names the energy of the body once it is done as the
+    /// output and the consumption, and the two make the balance the answer already carries.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_next_level_names_the_output_and_the_consumption_of_the_energy_after_it()
+    {
+        await PlanetsTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+
+        PlanetOverviewDto overview = (await scope.ServiceProvider.GetRequiredService<IPlanetsModule>()
+            .GetPlanetAsync(player.Account.UserId, player.PlanetId, Token))!;
+
+        Assert.NotEmpty(overview.Buildings);
+        Assert.All(overview.Buildings, building => Assert.Equal(building.Next.EnergyBalanceAfter, building.Next.EnergyOutputAfter - building.Next.EnergyConsumptionAfter));
+        Assert.Contains(overview.Buildings, building => building.Next.EnergyOutputAfter > 0);
     }
 }

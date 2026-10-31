@@ -10,9 +10,11 @@ public sealed class PlanetEconomyTests
 {
     private const int Metals = 1;
     private const int Crystals = 2;
+    private const int Produced = 3;
     private const int Iron = 10;
     private const int Copper = 11;
     private const int Quartzite = 20;
+    private const int Beams = 30;
 
     private static readonly DateTimeOffset Start = new(2026, 10, 26, 12, 0, 0, TimeSpan.Zero);
 
@@ -206,6 +208,55 @@ public sealed class PlanetEconomyTests
     }
 
     /// <summary>
+    /// The one rule of a zero capacity (task 00020, section 7.9): a produced resource whose group
+    /// has no storage is not full and does not stop; it grows by its rate without a limit.
+    /// </summary>
+    [Fact]
+    public void A_produced_resource_without_a_capacity_is_not_full_and_does_not_stop()
+    {
+        AccumulationResult result = PlanetEconomy.Accumulate(
+            Catalog(),
+            new Dictionary<int, long> { [Beams] = 40 },
+            new Dictionary<int, decimal> { [Beams] = 10m },
+            new Dictionary<int, long> { [Metals] = 1000 },
+            Start,
+            Start.AddHours(5));
+
+        Assert.Equal(90, result.Amounts[Beams]);
+        Assert.Null(result.FullAt[Beams]);
+
+        // Nothing stored and nothing made: not full either.
+        AccumulationResult idle = PlanetEconomy.Accumulate(
+            Catalog(),
+            new Dictionary<int, long>(),
+            new Dictionary<int, decimal> { [Beams] = 0m },
+            new Dictionary<int, long>(),
+            Start,
+            Start.AddHours(5));
+
+        Assert.Null(idle.FullAt[Beams]);
+    }
+
+    /// <summary>
+    /// Once the group of the produced resource has a capacity, the resource fills up to it and
+    /// is full from that moment.
+    /// </summary>
+    [Fact]
+    public void A_produced_resource_with_a_capacity_fills_up_to_it()
+    {
+        AccumulationResult result = PlanetEconomy.Accumulate(
+            Catalog(),
+            new Dictionary<int, long> { [Beams] = 40 },
+            new Dictionary<int, decimal> { [Beams] = 10m },
+            new Dictionary<int, long> { [Produced] = 100 },
+            Start,
+            Start.AddHours(24));
+
+        Assert.Equal(100, result.Amounts[Beams]);
+        Assert.Equal(Start.AddHours(6), result.FullAt[Beams]);
+    }
+
+    /// <summary>
     /// A start balance above the capacity is kept and nothing is added.
     /// </summary>
     [Fact]
@@ -266,11 +317,13 @@ public sealed class PlanetEconomyTests
         new(Iron, "resource_1", "world.resource.resource_1.name", Metals),
         new(Copper, "resource_3", "world.resource.resource_3.name", Metals),
         new(Quartzite, "resource_5", "world.resource.resource_5.name", Crystals),
+        new(Beams, "resource_13", "world.resource.resource_13.name", Produced),
     ];
 
     private static List<ResourceGroupFact> Groups() =>
     [
         new(Metals, "resource_group_1", "world.resource_group.resource_group_1.name"),
         new(Crystals, "resource_group_2", "world.resource_group.resource_group_2.name"),
+        new(Produced, "resource_group_6", "world.resource_group.resource_group_6.name"),
     ];
 }

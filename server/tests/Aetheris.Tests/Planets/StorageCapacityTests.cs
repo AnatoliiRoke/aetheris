@@ -31,6 +31,9 @@ public sealed class StorageCapacityTests
         _factory = factory;
     }
 
+    private const string ProducedResourceCode = "resource_13";
+    private const string ProducedWarehouseCode = "building_26";
+
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
     /// <summary>
@@ -114,6 +117,72 @@ public sealed class StorageCapacityTests
 
         Assert.Equal(before, mineAfter);
         Assert.True(otherAfter > before);
+    }
+
+    /// <summary>
+    /// The produced resources have a storage from the starting data (the warehouse of produced
+    /// goods gives the group a capacity), so a produced resource that is stored shows its
+    /// capacity and fills up to it; the next level of the warehouse raises it.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_produced_resource_has_a_capacity_from_the_warehouse_and_fills_up_to_it()
+    {
+        await PlanetsTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        int beams = await PlanetsTestData.ResourceIdAsync(services, ProducedResourceCode);
+        DateTimeOffset start = PlanetsTestData.GameNow(services);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, ProducedWarehouseCode, 1);
+        await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, new Dictionary<int, long> { [beams] = 5 }, start);
+
+        PlanetOverviewDto overview = await PlanetsTestData.ReadAsync(services, player.PlanetId, start);
+        PlanetResourceDto row = overview.Resources.Single(resource => resource.ResourceTypeId == beams);
+
+        Assert.True(row.Capacity > 5);
+        Assert.False(row.IsFull);
+
+        BuildingDto warehouse = PlanetsTestData.Building(overview, ProducedWarehouseCode);
+        Assert.Contains(warehouse.Next.Effects, effect => effect.EffectType == BuildingEffectTypes.StorageCapacity && effect.ResourceGroupId == row.ResourceGroupId);
+
+        // A balance at the capacity is full, and the warehouse raises the capacity of the body.
+        await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, new Dictionary<int, long> { [beams] = row.Capacity }, start);
+        Assert.True((await PlanetsTestData.ReadAsync(services, player.PlanetId, start)).Resources.Single(resource => resource.ResourceTypeId == beams).IsFull);
+
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, ProducedWarehouseCode, 2);
+        PlanetResourceDto raised = (await PlanetsTestData.ReadAsync(services, player.PlanetId, start)).Resources.Single(resource => resource.ResourceTypeId == beams);
+
+        Assert.True(raised.Capacity > row.Capacity);
+        Assert.False(raised.IsFull);
+    }
+
+    /// <summary>
+    /// The one rule of a zero capacity: a produced resource whose group has no storage at all is
+    /// never full, shows the capacity zero and keeps the amount stored.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_produced_resource_without_a_capacity_is_not_full()
+    {
+        await PlanetsTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        int beams = await PlanetsTestData.ResourceIdAsync(services, ProducedResourceCode);
+        DateTimeOffset start = PlanetsTestData.GameNow(services);
+
+        // Without the warehouse the group has no storage.
+        await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, new Dictionary<int, long> { [beams] = 50 }, start);
+
+        PlanetResourceDto row = (await PlanetsTestData.ReadAsync(services, player.PlanetId, start.AddHours(1))).Resources.Single(resource => resource.ResourceTypeId == beams);
+
+        Assert.Equal(0, row.Capacity);
+        Assert.Equal(50, row.Amount);
+        Assert.False(row.IsFull);
+        Assert.Null(row.FullAt);
     }
 
     /// <summary>
