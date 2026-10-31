@@ -585,6 +585,15 @@ public sealed class ResearchQueueService
             unlockNameKeys[targets.UnlockKind] = await targets.GetNameKeysAsync(cancellationToken).ConfigureAwait(false);
         }
 
+        // The balance of the selected body is the accumulated one of this moment (one read of
+        // the body), so the tree can say what a level is short of without a request per level.
+        PlanetOverviewDto? selectedPlanet = selected is null
+            ? null
+            : await _planets.GetPlanetAsync(playerId, selected.PlanetId, cancellationToken).ConfigureAwait(false);
+        // Without a selected body of the player there is no balance, and the tree says nothing
+        // about a shortage.
+        Dictionary<int, long>? balance = selectedPlanet?.Resources.ToDictionary(resource => resource.ResourceTypeId, resource => resource.Amount);
+
         return new ResearchTreeSnapshot(
             catalog,
             queue,
@@ -597,6 +606,7 @@ public sealed class ResearchQueueService
             await _planets.GetBuildingNameKeysAsync(cancellationToken).ConfigureAwait(false),
             _clock.GameNow,
             _clock.Multiplier,
-            unlockNameKeys);
+            unlockNameKeys,
+            balance);
     }
 }

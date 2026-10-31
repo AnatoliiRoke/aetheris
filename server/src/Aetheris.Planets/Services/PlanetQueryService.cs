@@ -149,10 +149,6 @@ public sealed class PlanetQueryService
         PlanetOverviewDto overview,
         CancellationToken cancellationToken)
     {
-        // The type of the body is named by its code, so the client reads the name and the
-        // picture of the type from the reference table of the world.
-        string? typeCode = await _world.GetObjectTypeCodeAsync(facts.ObjectTypeId, cancellationToken).ConfigureAwait(false);
-
         // The population belongs to the economy module; a body without a population yet has
         // none, and the client shows a placeholder instead of a made-up number.
         PopulationFacts? population = await _economy.GetPopulationAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
@@ -160,7 +156,9 @@ public sealed class PlanetQueryService
         return overview with
         {
             Name = facts.Name,
-            TypeCode = typeCode,
+            // The type is linked by its identifier, so the client reads the name and the picture
+            // of the type from the reference table of the world (documentation/tech/09, 3.3).
+            TypeId = facts.ObjectTypeId,
             Coordinates = new PlanetCoordinatesDto(facts.SectorId, facts.SystemId, facts.Orbit),
             Population = population?.Amount ?? 0,
             PopulationGrowthPerHour = population?.GrowthPerHour ?? 0,

@@ -29,7 +29,7 @@ public static class PlanetsJson
 /// <param name="ResourceTypes">The names of the resources.</param>
 /// <param name="ResourceGroups">The names of the resource groups.</param>
 /// <param name="Name">The name the owner gave the body.</param>
-/// <param name="TypeCode">The code of the type of the body; the client reads its name and its picture from the reference table.</param>
+/// <param name="TypeId">The type of the body; the client reads its name and its picture from the reference table.</param>
 /// <param name="Coordinates">The place of the body in the galaxy.</param>
 /// <param name="Population">The population of the body now.</param>
 /// <param name="PopulationGrowthPerHour">How much the population grows with in an hour; it is negative when it dies down.</param>
@@ -48,7 +48,7 @@ public sealed record PlanetOverviewDto(
     IReadOnlyList<NamedItemDto> ResourceTypes,
     IReadOnlyList<NamedItemDto> ResourceGroups,
     string? Name = null,
-    string? TypeCode = null,
+    int? TypeId = null,
     PlanetCoordinatesDto? Coordinates = null,
     long Population = 0,
     decimal PopulationGrowthPerHour = 0,
@@ -156,6 +156,8 @@ public sealed record BuildingDto(
 /// <param name="ReasonCodes">The reasons it cannot, as localisation keys.</param>
 /// <param name="UnmetRequirements">The requirements that are not met.</param>
 /// <param name="MissingResources">The resources that are short, by how much.</param>
+/// <param name="EnergyOutputAfter">The energy the body produces once the queue and this level are done.</param>
+/// <param name="EnergyConsumptionAfter">The energy the body consumes once the queue and this level are done.</param>
 public sealed record NextLevelDto(
     int Level,
     long? DurationSeconds,
@@ -165,7 +167,9 @@ public sealed record NextLevelDto(
     bool CanEnqueue,
     IReadOnlyList<string> ReasonCodes,
     IReadOnlyList<RequirementDto> UnmetRequirements,
-    IReadOnlyList<ResourceAmountDto> MissingResources);
+    IReadOnlyList<ResourceAmountDto> MissingResources,
+    long EnergyOutputAfter = 0,
+    long EnergyConsumptionAfter = 0);
 
 /// <summary>An amount of a resource.</summary>
 /// <param name="ResourceTypeId">The resource.</param>
@@ -186,7 +190,8 @@ public sealed record EffectDto(string EffectType, int? ResourceTypeId, int? Reso
 /// <param name="TargetLevel">The required level.</param>
 /// <param name="ReasonCode">The localisation key of the reason.</param>
 /// <param name="TargetNameKey">The localisation key of the name of the target, when the server knows it.</param>
-public sealed record RequirementDto(int RequirementId, string RequirementType, int TargetId, int TargetLevel, string ReasonCode, string? TargetNameKey);
+/// <param name="IsClosed">Whether the requirement is out of reach of the next step, so the screen shows the subject as closed (task 00020, section 7.10).</param>
+public sealed record RequirementDto(int RequirementId, string RequirementType, int TargetId, int TargetLevel, string ReasonCode, string? TargetNameKey, bool IsClosed = false);
 
 /// <summary>A row of a reference table with its localisation key.</summary>
 /// <param name="Id">The row.</param>

@@ -17,6 +17,7 @@ namespace Aetheris.Research.Api;
 /// <param name="AvailableCenterLevel">The level of the science centre of the chosen body.</param>
 /// <param name="ReasonCode">The localisation key of the reason the technology is not available, or <see langword="null"/>.</param>
 /// <param name="Levels">The levels of the technology.</param>
+/// <param name="CurrentEffects">What the technology gives at the level the player has learned, as the server counts it; empty when nothing is learned yet.</param>
 public sealed record TechnologyDto(
     int Id,
     string Code,
@@ -31,7 +32,8 @@ public sealed record TechnologyDto(
     int ResearchCenterLevel,
     int AvailableCenterLevel,
     string? ReasonCode,
-    IReadOnlyList<TechnologyLevelDto> Levels);
+    IReadOnlyList<TechnologyLevelDto> Levels,
+    IReadOnlyList<TechnologyEffectDto>? CurrentEffects = null);
 
 /// <summary>
 /// A level of a technology with its time, its costs and its effects (task 00012, section 3.2).
@@ -41,12 +43,14 @@ public sealed record TechnologyDto(
 /// <param name="Costs">The costs by resource.</param>
 /// <param name="Effects">The effects of the level.</param>
 /// <param name="UnmetRequirementIds">The identifiers of the requirements that are not met.</param>
+/// <param name="MissingResources">For the next level of a technology the player can still research: the resources the selected body is short of, by how much; empty for every other level.</param>
 public sealed record TechnologyLevelDto(
     int Level,
     long DurationSeconds,
     IReadOnlyList<ResourceAmountDto> Costs,
     IReadOnlyList<TechnologyEffectDto> Effects,
-    IReadOnlyList<int> UnmetRequirementIds);
+    IReadOnlyList<int> UnmetRequirementIds,
+    IReadOnlyList<ResourceAmountDto>? MissingResources = null);
 
 /// <summary>
 /// An effect of a level of a technology (task 00012, section 3.2).
@@ -142,7 +146,7 @@ public sealed record ResearchBranchDto(int Id, string Branch, string NameKey);
 /// </summary>
 public static class ResearchTechnologyStatuses
 {
-    /// <summary>The player does not know the technology yet.</summary>
+    /// <summary>The technology lies beyond what the player can reach: a technology it needs is itself out of reach, so the tree shows the card dimmed and without details.</summary>
     public const string Unknown = "unknown";
 
     /// <summary>The player knows the technology and may research its next level.</summary>

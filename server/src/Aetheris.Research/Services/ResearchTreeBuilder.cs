@@ -115,8 +115,14 @@ public sealed class ResearchTreeBuilder
         }
         else if (unmet.Count > 0)
         {
-            status = ResearchTechnologyStatuses.Unavailable;
-            reason = ResearchErrorCodes.RequirementUnmet;
+            // A technology whose missing technology is itself out of reach is beyond the edge
+            // of what the player can see: the tree keeps it as unknown, a dimmed card without
+            // details. One whose missing technology is open is the next step, so it is closed
+            // with its reason.
+            status = IsBeyondReach(snapshot, technology, unmet)
+                ? ResearchTechnologyStatuses.Unknown
+                : ResearchTechnologyStatuses.Unavailable;
+            reason = status == ResearchTechnologyStatuses.Unknown ? null : ResearchErrorCodes.RequirementUnmet;
         }
         else
         {
@@ -137,24 +143,60 @@ public sealed class ResearchTreeBuilder
             technology.ResearchCenterLevel,
             snapshot.AvailableCenterLevel,
             reason,
-            [.. technology.Levels.Keys.Order().Select(level => BuildLevel(snapshot, technology, level, level == nextLevel ? unmet : []))]);
+            [.. technology.Levels.Keys.Order().Select(level => BuildLevel(snapshot, technology, level, level == nextLevel ? unmet : [], level == nextLevel && learned < technology.MaxLevel))],
+            Effects(snapshot, technology.Levels.GetValueOrDefault(learned)));
     }
 
-    private static TechnologyLevelDto BuildLevel(ResearchTreeSnapshot snapshot, TechnologyInfo technology, int level, IReadOnlySet<int> unmet)
+    /// <summary>
+    /// Whether a technology that waits for other technologies lies beyond the player's reach: a
+    /// technology it needs is not learned, not in the queue and itself waits for a technology
+    /// the player has not learned.
+    /// </summary>
+    private static bool IsBeyondReach(ResearchTreeSnapshot snapshot, TechnologyInfo technology, IReadOnlySet<int> unmetRequirementIds)
+    {
+        IEnumerable<int> neededTechnologyIds = snapshot.Requirements
+            .Where(requirement => requirement.SubjectId == technology.Id && unmetRequirementIds.Contains(requirement.Requirement.Id))
+            .Select(requirement => requirement.Requirement.TargetId);
+
+        return neededTechnologyIds.Any(neededId =>
+            snapshot.LearnedLevels.GetValueOrDefault(neededId) == 0
+            && snapshot.Queue.All(item => item.TechnologyId != neededId)
+            && snapshot.Requirements.Any(requirement => requirement.SubjectId == neededId
+                && requirement.Requirement.RequirementType == RequirementTypes.TechnologyLevel
+                && snapshot.LearnedLevels.GetValueOrDefault(requirement.Requirement.TargetId) < requirement.Requirement.TargetLevel));
+    }
+
+    private static List<TechnologyEffectDto> Effects(ResearchTreeSnapshot snapshot, TechnologyLevelInfo? info) =>
+        [.. (info?.Effects ?? []).Select(effect => new TechnologyEffectDto(
+            effect.EffectType,
+            effect.UnlockKind,
+            effect.UnlockTargetId,
+            UnlockNameKey(snapshot, effect),
+            effect.Value))];
+
+    private static TechnologyLevelDto BuildLevel(ResearchTreeSnapshot snapshot, TechnologyInfo technology, int level, IReadOnlySet<int> unmet, bool isNext)
     {
         TechnologyLevelInfo? info = technology.Levels.GetValueOrDefault(level);
+
+        // What the selected body is short of for the level that would be researched next.
+        IReadOnlyDictionary<int, long> balance = snapshot.SelectedBalance ?? new Dictionary<int, long>();
+        List<ResourceAmountDto> missing =
+        [
+            .. isNext && snapshot.SelectedBalance is not null
+                ? (info?.Costs ?? new Dictionary<int, long>())
+                    .Where(cost => balance.GetValueOrDefault(cost.Key) < cost.Value)
+                    .OrderBy(cost => cost.Key)
+                    .Select(cost => new ResourceAmountDto(cost.Key, cost.Value - balance.GetValueOrDefault(cost.Key)))
+                : [],
+        ];
 
         return new TechnologyLevelDto(
             level,
             info?.DurationSeconds ?? 0,
             [.. (info?.Costs ?? new Dictionary<int, long>()).OrderBy(cost => cost.Key).Select(cost => new ResourceAmountDto(cost.Key, cost.Value))],
-            [.. (info?.Effects ?? []).Select(effect => new TechnologyEffectDto(
-                effect.EffectType,
-                effect.UnlockKind,
-                effect.UnlockTargetId,
-                UnlockNameKey(snapshot, effect),
-                effect.Value))],
-            [.. unmet.Order()]);
+            Effects(snapshot, info),
+            [.. unmet.Order()],
+            missing);
     }
 
     private static string? UnlockNameKey(ResearchTreeSnapshot snapshot, TechnologyEffectInfo effect) =>

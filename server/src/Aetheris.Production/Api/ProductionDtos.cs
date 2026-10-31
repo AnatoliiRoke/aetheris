@@ -193,11 +193,13 @@ public sealed record ProductionPartKindDto(
 /// <param name="Stacks">The stacks of the parts.</param>
 /// <param name="Storage">The storage of the parts.</param>
 /// <param name="GameNow">The moment of game time.</param>
+/// <param name="ProducedResourceTypeIds">The resources some recipe makes: the produced resources, which the storage screen shows apart from the raw ones.</param>
 public sealed record ProductionStockDto(
     long PlanetId,
     IReadOnlyList<ProductionStackDto> Stacks,
     ProductionStorageDto Storage,
-    DateTimeOffset GameNow);
+    DateTimeOffset GameNow,
+    IReadOnlyList<int>? ProducedResourceTypeIds = null);
 
 /// <summary>
 /// A stack of the parts on a body.

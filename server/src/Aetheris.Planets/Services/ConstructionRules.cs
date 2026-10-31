@@ -245,7 +245,9 @@ public static class PlanetOverviewBuilder
             }
 
             // Every resource has the capacity its group gets from the storage and is full on its
-            // own: a full resource stops its own production, the others of the group go on.
+            // own: a full resource stops its own production, the others of the group go on. A
+            // group without a storage (capacity zero) has no limit: its resources are never full
+            // (the one rule of a zero capacity, task 00020, section 7.9).
             long amount = figures.Amounts.GetValueOrDefault(resource.Id);
             long capacity = capacities.GetValueOrDefault(resourceGroupId);
             DateTimeOffset? fullAt = figures.FullAt.GetValueOrDefault(resource.Id);
@@ -288,8 +290,10 @@ public static class PlanetOverviewBuilder
                     next.EnergyAfter.Balance,
                     next.ReasonCodes.Count == 0,
                     next.ReasonCodes,
-                    Requirements(catalog, next.Unmet),
-                    Amounts(next.Missing)),
+                    Requirements(catalog, next.Unmet, figures.Levels),
+                    Amounts(next.Missing),
+                    next.EnergyAfter.Output,
+                    next.EnergyAfter.Consumption),
                 type.CategoryId));
         }
 
@@ -324,8 +328,12 @@ public static class PlanetOverviewBuilder
     /// </summary>
     /// <param name="catalog">The building catalog.</param>
     /// <param name="unmet">The unmet requirements.</param>
+    /// <param name="levels">
+    /// The levels of the buildings of the body by type, to tell which requirement is out of reach of
+    /// the next step; without them no requirement is closed.
+    /// </param>
     /// <returns>The requirements with the names of their targets.</returns>
-    public static IReadOnlyList<RequirementDto> Requirements(BuildingCatalog catalog, IReadOnlyList<UnmetRequirement> unmet)
+    public static IReadOnlyList<RequirementDto> Requirements(BuildingCatalog catalog, IReadOnlyList<UnmetRequirement> unmet, IReadOnlyDictionary<int, int>? levels = null)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(unmet);
@@ -343,8 +351,30 @@ public static class PlanetOverviewBuilder
                     RequirementTypes.BuildingLevel => catalog.FindType(requirement.TargetId)?.NameKey,
                     RequirementTypes.Deposit => catalog.Resources.FirstOrDefault(resource => resource.Id == requirement.TargetId)?.NameKey,
                     _ => null,
-                })),
+                },
+                IsOutOfReach(requirement, levels))),
         ];
+    }
+
+    /// <summary>
+    /// Whether a requirement is out of reach of the next step: a technology that is not learned is
+    /// out of reach of construction, and a building level is out of reach when it is more than one
+    /// level above the level of the required building on the body. A building one level short is
+    /// only a thing to prepare for.
+    /// </summary>
+    private static bool IsOutOfReach(UnmetRequirement requirement, IReadOnlyDictionary<int, int>? levels)
+    {
+        if (levels is null)
+        {
+            return false;
+        }
+
+        return requirement.RequirementType switch
+        {
+            RequirementTypes.TechnologyLevel => true,
+            RequirementTypes.BuildingLevel => requirement.TargetLevel - levels.GetValueOrDefault(requirement.TargetId) > 1,
+            _ => false,
+        };
     }
 
     private static List<ResourceAmountDto> Amounts(IReadOnlyDictionary<int, long>? amounts) =>

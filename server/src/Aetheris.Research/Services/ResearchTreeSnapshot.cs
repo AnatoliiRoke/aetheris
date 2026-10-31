@@ -20,6 +20,7 @@ namespace Aetheris.Research.Services;
 /// <param name="GameNow">The moment of game time of the answer.</param>
 /// <param name="TimeMultiplier">The game seconds per real second.</param>
 /// <param name="UnlockNameKeys">The localisation keys of the names of the subjects of the other modules a technology opens, by kind.</param>
+/// <param name="SelectedBalance">The balance of the selected body by resource, as of the moment of the answer; the tree shows what a level is short of.</param>
 public sealed record ResearchTreeSnapshot(
     TechnologyCatalog Catalog,
     IReadOnlyList<ResearchQueueItemEntity> Queue,
@@ -32,4 +33,5 @@ public sealed record ResearchTreeSnapshot(
     IReadOnlyDictionary<int, string> BuildingNameKeys,
     DateTimeOffset GameNow,
     double TimeMultiplier,
-    IReadOnlyDictionary<string, IReadOnlyDictionary<int, string>>? UnlockNameKeys = null);
+    IReadOnlyDictionary<string, IReadOnlyDictionary<int, string>>? UnlockNameKeys = null,
+    IReadOnlyDictionary<int, long>? SelectedBalance = null);

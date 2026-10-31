@@ -200,7 +200,8 @@ public static class PlanetEconomy
     /// the author, 31.10.2026): a resource fills at its own rate and stops alone, the other
     /// resources of the group go on. The amounts are whole numbers: the fraction of a unit is
     /// left out, and the resource that fills gets exactly its capacity. An amount over the
-    /// capacity (a refund) stays and counts as full.
+    /// capacity (a refund) stays and counts as full. A group with no capacity at all has no
+    /// limit: its resources never fill (decision 7.9 of task 00020).
     /// </remarks>
     public static AccumulationResult Accumulate(
         BuildingCatalog catalog,
@@ -229,6 +230,21 @@ public static class PlanetEconomy
             long stored = amounts.GetValueOrDefault(resourceTypeId);
             long capacity = capacities.GetValueOrDefault(groupId);
             decimal rate = rates.GetValueOrDefault(resourceTypeId);
+
+            // The one rule of a zero capacity (task 00020, section 7.9): a group without a storage
+            // has no limit. Its resources are never full and never stop the production; the
+            // limit begins with the first storage that gives the group a capacity.
+            if (capacity <= 0)
+            {
+                fullAt[resourceTypeId] = null;
+
+                if (rate > 0)
+                {
+                    result[resourceTypeId] = stored + (long)decimal.Floor(rate * elapsedTicks / TimeSpan.TicksPerHour);
+                }
+
+                continue;
+            }
 
             if (stored >= capacity)
             {

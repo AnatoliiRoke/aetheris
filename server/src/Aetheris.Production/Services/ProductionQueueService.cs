@@ -561,7 +561,8 @@ public sealed class ProductionQueueService
             planetId,
             rows,
             await StorageDtoAsync(planetId, cancellationToken).ConfigureAwait(false),
-            _clock.GameNow);
+            _clock.GameNow,
+            [.. catalog.Recipes.Where(recipe => recipe.ResourceTypeId is not null).Select(recipe => recipe.ResourceTypeId!.Value).Distinct().Order()]);
     }
 
     /// <summary>
@@ -1230,7 +1231,8 @@ public sealed class ProductionQueueService
         PlanetOverviewDto? planet = await _planets.GetPlanetAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
         PlanetResourceDto? resource = planet?.Resources.FirstOrDefault(entry => entry.ResourceTypeId == resourceTypeId);
 
-        // A resource without a storage building has no limit yet; a resource with one stops the
+        // The one rule of a zero capacity (task 00020, section 7.9), the same as in the economy
+        // of the body: a group without a storage has no limit, a group with one stops the
         // production when the next unit does not fit.
         return resource is null || resource.Capacity <= 0 || resource.Amount + recipe.OutputQuantity <= resource.Capacity;
     }
