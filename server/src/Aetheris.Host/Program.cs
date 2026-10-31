@@ -209,6 +209,7 @@ builder.Services.AddProcessesModule();
 builder.Services.AddEconomyModule();
 
 // The Market module reads the world, the production and the economy, so it comes after them.
+builder.Services.AddScoped<Aetheris.Core.Players.IPlayerDirectory, Aetheris.Host.Data.IdentityPlayerDirectory>();
 builder.Services.AddMarketModule();
 
 WebApplication app = builder.Build();

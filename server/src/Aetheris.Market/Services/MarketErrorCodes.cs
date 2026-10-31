@@ -54,6 +54,12 @@ public static class MarketErrorCodes
     /// <summary>The currency is not one the exchange swaps.</summary>
     public const string CurrencyUnknown = "market_currency_unknown";
 
+    /// <summary>The player has less trade currency than the lot costs.</summary>
+    public const string TradeCurrencyShort = "market_trade_currency_short";
+
+    /// <summary>The chosen body has fewer energy rods than the delivery costs.</summary>
+    public const string EnergyShort = "market_energy_short";
+
     /// <summary>The delivery fee has no resource in the data.</summary>
     public const string EnergyResourceMissing = "market_energy_resource_missing";
 }

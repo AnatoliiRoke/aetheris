@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
  * The source files of the screens of the player: the components and the hooks, without the
  * tests, which live one folder deeper.
  */
-const sourceFiles = Object.entries(import.meta.glob<string>('../*.{ts,tsx}', { query: '?raw', import: 'default', eager: true })).map(([path, text]) => ({
+const sourceFiles = Object.entries(import.meta.glob<string>(['../*.{ts,tsx}', '../market/*.{ts,tsx}'], { query: '?raw', import: 'default', eager: true })).map(([path, text]) => ({
   name: path.replace('../', ''),
   text,
 }));

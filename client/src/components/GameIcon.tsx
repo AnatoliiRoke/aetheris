@@ -68,6 +68,18 @@ const paths = {
   warn: 'M12 3l10 18H2z M12 10v4 M12 17.5v.01',
   danger: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v3M12 14v3M7 12h3M14 12h3',
   storage: 'M3 7l9-4 9 4v10l-9 4-9-4z M3 7l9 4 9-4 M12 11v10',
+
+  // The marks of the screen of the market (task 00026).
+  lock: 'M6 11h12v9H6z M8 11V8a4 4 0 0 1 8 0v3',
+  info: 'M12 21a9 9 0 1 0 0-18a9 9 0 1 0 0 18z M12 11v6 M12 7.5v.01',
+  close: 'M6 6l12 12 M18 6L6 18',
+  check: 'M5 12l5 5L20 7',
+  chevronDown: 'M6 9l6 6 6-6',
+  sortBoth: 'M7 9l5-5 5 5 M7 15l5 5 5-5',
+  arrowUp: 'M12 19V5 M6 11l6-6 6 6',
+  arrowDown: 'M12 5v14 M6 13l6 6 6-6',
+  clock: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2',
+  history: 'M12 8v4l3 2 M3 12a9 9 0 1 0 3-6.7 M3 4v5h5',
 } as const;
 
 /**

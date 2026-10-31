@@ -194,4 +194,7 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.market.exchange.sensitivity_percent.description': 'На скільки відсотків від базового курс зсувається, коли весь потік іде в один бік.',
   'config.market.exchange.window_hours.description': 'За скільки годин рахується потік обмінів, що рухає курс.',
   'config.market.exchange.commission_percent.description': 'Комісія обміну у відсотках; вона зникає й нікому не йде.',
+  'config.market.delivery.recent_hours.description':
+    'Скільки годин доставка, що вже прибула, лишається в списку доставок.',
+  'config.market.exchange.history_days.description': 'Скільки днів історії курсу показує графік обміну.',
 };

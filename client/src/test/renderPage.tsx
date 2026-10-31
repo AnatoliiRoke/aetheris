@@ -7,6 +7,7 @@ import type { Api } from '../api/context';
 import type { ContentApi } from '../api/contentApi';
 import type { CurrencyBalanceFacts, EconomyApi, EconomyOverview, PopulationFacts } from '../api/economyApi';
 import type { GameApi, Race } from '../api/gameApi';
+import type { MarketApi, MarketLot, MarketOverview, MyLot } from '../api/marketApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
 import type { ActiveOrders } from '../api/activeOrders';
@@ -430,6 +431,93 @@ export function fakeEconomyApi(overrides: Partial<EconomyApi> = {}): EconomyApi 
   return {
     overview: vi.fn().mockResolvedValue(sampleEconomyOverview()),
     population: vi.fn().mockResolvedValue(samplePopulation()),
+    ...overrides,
+  };
+}
+
+/**
+ * The overview of the market for the tests (task 00026): the clan level closed, the sector and the
+ * galaxy levels open, and one body with a trade centre and a portal.
+ */
+export function sampleMarketOverview(overrides: Partial<MarketOverview> = {}): MarketOverview {
+  return {
+    levels: [
+      { id: 1, visibility: 'clan', commissionPercent: 1, isActive: false, sortOrder: 1 },
+      { id: 2, visibility: 'sector', commissionPercent: 5, isActive: true, sortOrder: 2 },
+      { id: 3, visibility: 'galactic', commissionPercent: 10, isActive: true, sortOrder: 3 },
+    ],
+    creditsResourceTypeId: 18,
+    tradeResourceTypeId: 19,
+    energyResourceTypeId: 3,
+    lotLimit: { used: 1, limit: 3 },
+    planets: [{ planetId: 10, hasTradeCentre: true, hasPortal: true }],
+    gameNow: '2026-10-26T12:00:00Z',
+    timeMultiplier: 1,
+    ...overrides,
+  };
+}
+
+/**
+ * A lot of another player for the tests (task 00026).
+ */
+export function sampleMarketLot(overrides: Partial<MarketLot> = {}): MarketLot {
+  return {
+    id: 101,
+    seller: { playerId: 'user-2', nickname: 'Vektor_Prime', raceNameKey: 'world.race.race_1.name', raceColorKey: 'race-1' },
+    sellerPlanetId: 20,
+    marketLevelId: 2,
+    resourceTypeId: 1,
+    partTypeId: null,
+    quantity: 1200,
+    pricePerUnit: 4,
+    totalPrice: 4800,
+    createdAt: '2026-10-26T10:00:00Z',
+    partConditionPercent: null,
+    deliverySeconds: 720,
+    energyRodAmount: 6,
+    unavailableReason: null,
+    ...overrides,
+  };
+}
+
+/**
+ * A lot of the player for the tests (task 00026).
+ */
+export function sampleMyLot(overrides: Partial<MyLot> = {}): MyLot {
+  return {
+    id: 201,
+    sellerPlanetId: 10,
+    marketLevelId: 2,
+    resourceTypeId: 1,
+    partTypeId: null,
+    quantity: 600,
+    pricePerUnit: 5,
+    totalPrice: 3000,
+    state: 'open',
+    createdAt: '2026-10-26T10:00:00Z',
+    partConditionPercent: null,
+    ...overrides,
+  };
+}
+
+/**
+ * A market API whose every method is a spy; a test overrides what it needs.
+ */
+export function fakeMarketApi(overrides: Partial<MarketApi> = {}): MarketApi {
+  return {
+    overview: vi.fn().mockResolvedValue(sampleMarketOverview()),
+    lots: vi.fn().mockResolvedValue({ items: [sampleMarketLot()], energyRodBalance: 8, destinationHasPortal: true }),
+    myLots: vi.fn().mockResolvedValue([sampleMyLot()]),
+    deliveries: vi.fn().mockResolvedValue({ incoming: [], outgoing: [] }),
+    deals: vi.fn().mockResolvedValue([]),
+    rate: vi.fn().mockResolvedValue({ rate: 100, commissionPercent: 5, creditsResourceTypeId: 18, tradeResourceTypeId: 19 }),
+    rateHistory: vi.fn().mockResolvedValue({ points: [], dayChangePercent: null }),
+    quote: vi.fn().mockResolvedValue({ sum: 4800, commission: 240, energyResourceTypeId: 3, energyRodAmount: 6, deliverySeconds: 720 }),
+    priceLimit: vi.fn().mockResolvedValue({ min: 80, max: 120 }),
+    listLot: vi.fn().mockResolvedValue([sampleMyLot()]),
+    cancelLot: vi.fn().mockResolvedValue(sampleMyLot({ state: 'cancelled' })),
+    buy: vi.fn().mockResolvedValue({ id: 1, lotId: 101, direction: 'bought' }),
+    exchange: vi.fn().mockResolvedValue({ id: 1, fromResourceTypeId: 18, toResourceTypeId: 19, fromAmount: 1000, toAmount: 9, rate: 100, commissionPercent: 5, createdAt: '2026-10-26T12:00:00Z' }),
     ...overrides,
   };
 }
@@ -876,7 +964,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
 /**
  * The fake server interfaces of the tests that a test may override.
  */
-type FakeApis = { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; game?: GameApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi };
+type FakeApis = { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; game?: GameApi; market?: MarketApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi };
 
 /**
  * The server interfaces of a test: every one is a fake unless the test gives its own.
@@ -887,6 +975,7 @@ function buildApi(options: FakeApis): Api {
     content: options.content ?? mockContentApi,
     economy: options.economy ?? fakeEconomyApi(),
     game: options.game ?? fakeGameApi(),
+    market: options.market ?? fakeMarketApi(),
     planets: options.planets ?? fakePlanetApi(),
     processes: options.processes ?? fakeProcessesApi(),
     production: options.production ?? fakeProductionApi(),

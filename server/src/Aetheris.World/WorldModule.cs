@@ -98,6 +98,14 @@ public sealed class WorldModule : IWorldModule
         _civilizations.GetAsync(playerId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<IReadOnlyDictionary<string, PlayerRaceBrief>> GetRaceBriefsAsync(IReadOnlyCollection<string> playerIds, CancellationToken cancellationToken = default) =>
+        _civilizations.GetRaceBriefsAsync(playerIds, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<long, double>> GetPlanetDistancesAsync(long fromPlanetId, IReadOnlyCollection<long> planetIds, CancellationToken cancellationToken = default) =>
+        _queries.GetPlanetDistancesAsync(fromPlanetId, planetIds, cancellationToken);
+
+    /// <inheritdoc />
     public Task ReleasePlayerAsync(string playerId, CancellationToken cancellationToken = default) =>
         _civilizations.ReleaseAsync(playerId, cancellationToken);
 

@@ -61,6 +61,10 @@ function mainClass(path: string): string {
     return 'civ__main civ__main--storage';
   }
 
+  if (path === routes.market) {
+    return 'civ__main civ__main--market';
+  }
+
   return 'civ__main';
 }
 

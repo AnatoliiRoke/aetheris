@@ -77,7 +77,7 @@ describe('GamePage', () => {
     expect(await screen.findByText('Підтверди пошту')).toBeInTheDocument();
     // The screen is loaded on demand, so its button comes a moment after the frame.
     expect(await screen.findByRole('button', { name: 'Будівництво' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Ринок' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Рейтинг' })).toBeDisabled();
 
     await user.click(screen.getByRole('button', { name: 'Надіслати лист ще раз' }));
 

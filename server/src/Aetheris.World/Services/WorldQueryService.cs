@@ -325,6 +325,52 @@ public sealed class WorldQueryService
     }
 
     /// <summary>
+    /// Gets the distances from one body to other bodies in one read: the three-dimensional distance
+    /// between their star systems, zero inside one system (task 00024: the delivery of the market).
+    /// </summary>
+    /// <param name="fromPlanetId">The body the distances are counted from.</param>
+    /// <param name="planetIds">The other bodies.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The distance by body; a body that is unknown is not in the answer.</returns>
+    public async Task<IReadOnlyDictionary<long, double>> GetPlanetDistancesAsync(long fromPlanetId, IReadOnlyCollection<long> planetIds, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(planetIds);
+
+        List<long> ids = [.. planetIds.Append(fromPlanetId).Distinct()];
+        var rows = await (
+                from planet in _dbContext.Planets.AsNoTracking()
+                join system in _dbContext.Systems on planet.SystemId equals system.Id
+                join sector in _dbContext.Sectors on system.SectorId equals sector.Id
+                where ids.Contains(planet.Id)
+                select new
+                {
+                    planet.Id,
+                    planet.SystemId,
+                    Local = new { system.X, system.Y, system.Z },
+                    Origin = new { sector.X, sector.Y, sector.Z },
+                })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var source = rows.FirstOrDefault(row => row.Id == fromPlanetId);
+
+        if (source is null)
+        {
+            return new Dictionary<long, double>();
+        }
+
+        Point3 sourcePoint = new Point3(source.Origin.X, source.Origin.Y, source.Origin.Z).Plus(new Point3(source.Local.X, source.Local.Y, source.Local.Z));
+
+        return rows
+            .Where(row => row.Id != fromPlanetId)
+            .ToDictionary(
+                row => row.Id,
+                row => row.SystemId == source.SystemId
+                    ? 0d
+                    : WorldGeometry.Distance(sourcePoint, new Point3(row.Origin.X, row.Origin.Y, row.Origin.Z).Plus(new Point3(row.Local.X, row.Local.Y, row.Local.Z))));
+    }
+
+    /// <summary>
     /// Gets the position of a star system in the coordinates of the galaxy.
     /// </summary>
     /// <param name="systemId">The system.</param>

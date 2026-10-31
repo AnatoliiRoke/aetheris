@@ -252,6 +252,12 @@ public sealed record CivilizationSummary(
     [property: System.Text.Json.Serialization.JsonPropertyName("sector_id")] int SectorId,
     [property: System.Text.Json.Serialization.JsonPropertyName("founded_at")] DateTimeOffset FoundedAt);
 
+/// <summary>The race of a player as another player sees it (task 00024: the seller of a lot).</summary>
+/// <param name="Code">The neutral code of the race.</param>
+/// <param name="NameKey">The localisation key of the name of the race.</param>
+/// <param name="ColorKey">The colour key of the race, or <see langword="null"/>.</param>
+public sealed record PlayerRaceBrief(string Code, string NameKey, string? ColorKey);
+
 /// <summary>What another module needs to know about a body (task 00011).</summary>
 /// <param name="PlanetId">The body.</param>
 /// <param name="SectorId">The sector.</param>

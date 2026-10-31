@@ -101,6 +101,24 @@ public interface IWorldModule
     Task ReleasePlayerAsync(string playerId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the races of several players in one read, for the modules that show a player to other
+    /// players (task 00024: the seller of a lot).
+    /// </summary>
+    /// <param name="playerIds">The players.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The race by player; a player without a civilization is not in the answer.</returns>
+    Task<IReadOnlyDictionary<string, PlayerRaceBrief>> GetRaceBriefsAsync(IReadOnlyCollection<string> playerIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the distances from one body to other bodies in one read, zero inside one system.
+    /// </summary>
+    /// <param name="fromPlanetId">The body the distances are counted from.</param>
+    /// <param name="planetIds">The other bodies.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The distance by body; a body that is unknown is not in the answer.</returns>
+    Task<IReadOnlyDictionary<long, double>> GetPlanetDistancesAsync(long fromPlanetId, IReadOnlyCollection<long> planetIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Processes one cycle on an asteroid field.
     /// </summary>
     /// <param name="fieldId">The field.</param>

@@ -101,11 +101,11 @@ describe('the screen of the civilization (task 00010)', () => {
   it('keeps the sections that no task has made yet inactive with the reason', async () => {
     renderPage('/game', { auth: signedIn() });
 
-    const market = await screen.findByRole('button', { name: 'Ринок' });
+    const ranking = await screen.findByRole('button', { name: 'Рейтинг' });
 
-    expect(market).toBeDisabled();
+    expect(ranking).toBeDisabled();
     // The hint tells the reason, and the reason begins with the word of the placeholder.
-    expect(market.getAttribute('title')).toMatch(/^Скоро: /);
+    expect(ranking.getAttribute('title')).toMatch(/^Скоро: /);
   });
 
   it('keeps the actions closed until the address is confirmed', async () => {

@@ -569,18 +569,39 @@ public sealed class MarketTradeService
             return;
         }
 
-        long reference = await _catalog.ReferencePriceAsync(resourceTypeId, partTypeId, cancellationToken).ConfigureAwait(false)
+        PriceLimitDto limit = await PriceLimitAsync(resourceTypeId, partTypeId, cancellationToken).ConfigureAwait(false)
             ?? throw new GameException(MarketErrorCodes.NoReferencePrice, "The item has no reference price.");
-        (long deals, decimal? average) = await _catalog.DealStatisticsAsync(resourceTypeId, partTypeId, _clock.GameNow.AddDays(-settings.AverageWindowDays), cancellationToken).ConfigureAwait(false);
-        (long min, long max) = MarketRules.PriceLimit(reference, deals, average, settings);
 
-        if (price < min || price > max)
+        if (price < limit.Min || price > limit.Max)
         {
             throw new GameException(
                 MarketErrorCodes.PriceOutOfRange,
                 "The price is outside the limit of the item.",
-                new Dictionary<string, object?> { ["min"] = min, ["max"] = max });
+                new Dictionary<string, object?> { ["min"] = limit.Min, ["max"] = limit.Max });
         }
+    }
+
+    /// <summary>
+    /// Gets the lowest and the highest price of one unit of an item.
+    /// </summary>
+    /// <param name="resourceTypeId">The resource, or <see langword="null"/>.</param>
+    /// <param name="partTypeId">The part, or <see langword="null"/>.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The limit, or <see langword="null"/> when the item has no reference price.</returns>
+    public async Task<PriceLimitDto?> PriceLimitAsync(int? resourceTypeId, int? partTypeId, CancellationToken cancellationToken)
+    {
+        MarketSettings settings = MarketSettings.From(_config);
+        long? reference = await _catalog.ReferencePriceAsync(resourceTypeId, partTypeId, cancellationToken).ConfigureAwait(false);
+
+        if (reference is not { } referencePrice)
+        {
+            return null;
+        }
+
+        (long deals, decimal? average) = await _catalog.DealStatisticsAsync(resourceTypeId, partTypeId, _clock.GameNow.AddDays(-settings.AverageWindowDays), cancellationToken).ConfigureAwait(false);
+        (long min, long max) = MarketRules.PriceLimit(referencePrice, deals, average, settings);
+
+        return new PriceLimitDto(min, max);
     }
 
     private async Task<(int ResourceTypeId, long Amount)> DeliveryFeeAsync(MarketLotEntity lot, double distance, MarketSettings settings, CancellationToken cancellationToken)

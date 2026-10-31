@@ -120,6 +120,25 @@ public sealed class CivilizationService
         .SingleOrDefaultAsync(cancellationToken);
 
     /// <summary>
+    /// Gets the races of several players in one read.
+    /// </summary>
+    /// <param name="playerIds">The players.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The race by player; a player without a civilization is not in the answer.</returns>
+    public async Task<IReadOnlyDictionary<string, PlayerRaceBrief>> GetRaceBriefsAsync(IReadOnlyCollection<string> playerIds, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(playerIds);
+
+        return await (
+                from civilization in _dbContext.Civilizations.AsNoTracking()
+                join race in _dbContext.Races on civilization.RaceId equals race.Id
+                where playerIds.Contains(civilization.PlayerId)
+                select new { civilization.PlayerId, race.Code, race.NameKey, race.ColorKey })
+            .ToDictionaryAsync(row => row.PlayerId, row => new PlayerRaceBrief(row.Code, row.NameKey, row.ColorKey), cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Gets the home bodies of every civilization with the start building of the race.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>

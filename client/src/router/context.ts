@@ -16,6 +16,7 @@ export const routes = {
   planetBuild: '/planet/build',
   planetResearch: '/planet/research',
   planetStorage: '/planet/storage',
+  market: '/market',
   civilization: '/civilization',
   account: '/account',
 } as const;

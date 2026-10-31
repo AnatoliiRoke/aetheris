@@ -40,6 +40,9 @@ public static class MarketConfigKeys
     /// <summary>The energy rods a delivery costs for one tonne of the goods carried over one unit of the distance.</summary>
     public const string EnergyPerTonneDistance = "market.delivery.energy_per_tonne_distance";
 
+    /// <summary>How long a delivery that has arrived stays in the list of the deliveries, in hours.</summary>
+    public const string DeliveryRecentHours = "market.delivery.recent_hours";
+
     /// <summary>The largest number of rows one read of the market returns.</summary>
     public const string PageSize = "market.list.page_size";
 
@@ -58,6 +61,9 @@ public static class MarketConfigKeys
     /// <summary>The window of the flow that moves the rate, in hours.</summary>
     public const string ExchangeWindowHours = "market.exchange.window_hours";
 
+    /// <summary>How many days of the history of the rate the chart of the exchange shows.</summary>
+    public const string RateHistoryDays = "market.exchange.history_days";
+
     /// <summary>The commission of the exchange in per cent; it is taken away and reaches nobody.</summary>
     public const string ExchangeCommissionPercent = "market.exchange.commission_percent";
 
@@ -75,12 +81,14 @@ public static class MarketConfigKeys
         new(DeliverySecondsPerDistance, "5", "0", "86400", "The seconds a delivery adds for every unit of the distance between the bodies."),
         new(EnergyResourceCode, "resource_17", null, null, "The code of the resource the buyer pays the delivery with."),
         new(EnergyPerTonneDistance, "0.01", "0", "1000000", "The energy rods a delivery costs for one tonne of the goods carried over one unit of the distance."),
+        new(DeliveryRecentHours, "24", "0", "720", "How long a delivery that has arrived stays in the list of the deliveries, in hours."),
         new(PageSize, "100", "1", "1000", "The largest number of rows one read of the market returns."),
         new(ExchangeBaseRate, "100", "1", "1000000", "The rate of the exchange when the flow of the market is even: credits for one unit of the trade currency."),
         new(ExchangeMinRate, "50", "1", "1000000", "The lowest rate of the exchange."),
         new(ExchangeMaxRate, "200", "1", "1000000", "The highest rate of the exchange."),
         new(ExchangeSensitivityPercent, "50", "0", "100", "How far the rate moves from the base rate when all the flow goes one way, in per cent."),
         new(ExchangeWindowHours, "24", "1", "720", "The window of the flow that moves the rate, in hours."),
+        new(RateHistoryDays, "7", "1", "90", "How many days of the history of the rate the chart of the exchange shows."),
         new(ExchangeCommissionPercent, "5", "0", "100", "The commission of the exchange in per cent; it is taken away and reaches nobody."),
     ];
 }

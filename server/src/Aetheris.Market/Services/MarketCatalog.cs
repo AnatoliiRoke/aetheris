@@ -1,6 +1,7 @@
 using Aetheris.Market.Configuration;
 using Aetheris.Market.Data;
 using Aetheris.Market.Data.Entities;
+using Aetheris.Production.Services;
 using Aetheris.World;
 using Aetheris.World.Api;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,25 @@ namespace Aetheris.Market.Services;
 public sealed record MarketCurrencies(int CreditsResourceTypeId, int TradeResourceTypeId);
 
 /// <summary>
+/// The weight of one unit of the resources and of the parts, in tonnes.
+/// </summary>
+/// <param name="Resources">The weight by resource.</param>
+/// <param name="Parts">The weight by part.</param>
+public sealed record MarketWeights(IReadOnlyDictionary<int, decimal> Resources, IReadOnlyDictionary<int, decimal> Parts)
+{
+    /// <summary>
+    /// Gets the weight of one unit of an item.
+    /// </summary>
+    /// <param name="resourceTypeId">The resource, or <see langword="null"/>.</param>
+    /// <param name="partTypeId">The part, or <see langword="null"/>.</param>
+    /// <returns>The weight in tonnes; zero for an unknown item.</returns>
+    public decimal UnitWeight(int? resourceTypeId, int? partTypeId) =>
+        resourceTypeId is { } resourceId
+            ? Resources.GetValueOrDefault(resourceId)
+            : partTypeId is { } partId ? Parts.GetValueOrDefault(partId) : 0m;
+}
+
+/// <summary>
 /// The reads of the reference data of the market: the levels, the reference prices, the average
 /// price of the deals, the currencies and the rate of the exchange (task 00024).
 /// </summary>
@@ -22,19 +42,51 @@ public sealed class MarketCatalog
 {
     private readonly MarketDbContext _db;
     private readonly IWorldModule _world;
+    private readonly PartStockService _parts;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MarketCatalog"/> class.
     /// </summary>
     /// <param name="db">The context of the module.</param>
     /// <param name="world">The world module, for the currencies.</param>
-    public MarketCatalog(MarketDbContext db, IWorldModule world)
+    /// <param name="parts">The storage of the parts, for the weight of a part.</param>
+    public MarketCatalog(MarketDbContext db, IWorldModule world, PartStockService parts)
     {
         ArgumentNullException.ThrowIfNull(db);
         ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(parts);
 
         _db = db;
         _world = world;
+        _parts = parts;
+    }
+
+    /// <summary>
+    /// Gets the weight of one unit of every resource and of every part, in tonnes.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The weights.</returns>
+    public async Task<MarketWeights> WeightsAsync(CancellationToken cancellationToken)
+    {
+        ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
+        IReadOnlyDictionary<int, PartFacts> parts = await _parts.GetPartFactsAsync(cancellationToken).ConfigureAwait(false);
+
+        return new MarketWeights(
+            catalog.Resources.ToDictionary(resource => resource.Id, resource => resource.Weight),
+            parts.ToDictionary(part => part.Key, part => part.Value.Weight));
+    }
+
+    /// <summary>
+    /// Finds the resource of the delivery fee by its code in the configuration.
+    /// </summary>
+    /// <param name="code">The code of the resource.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The resource, or <see langword="null"/> when the data has none with the code.</returns>
+    public async Task<int?> EnergyResourceAsync(string code, CancellationToken cancellationToken)
+    {
+        ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
+
+        return catalog.Resources.FirstOrDefault(resource => string.Equals(resource.Code, code, StringComparison.Ordinal))?.Id;
     }
 
     /// <summary>

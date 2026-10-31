@@ -39,12 +39,26 @@ public static class MarketEndpoints
             [FromQuery(Name = "seller_player_id")] string? sellerPlayerId,
             [FromQuery(Name = "max_sum")] long? maxSum,
             [FromQuery(Name = "offset")] int? offset,
+            [FromQuery(Name = "planet_id")] long? planetId,
             ClaimsPrincipal user,
             MarketReadService reads,
             CancellationToken cancellationToken) =>
             Results.Json(
-                await reads.LotsAsync(PlayerId(user), new LotFilter(levelId, resourceTypeId, partTypeId, sellerPlayerId, maxSum, offset ?? 0), cancellationToken).ConfigureAwait(false),
+                await reads.LotsAsync(PlayerId(user), new LotFilter(levelId, resourceTypeId, partTypeId, sellerPlayerId, maxSum, offset ?? 0, planetId), cancellationToken).ConfigureAwait(false),
                 MarketJson.Options));
+
+        market.MapGet("/overview", async (ClaimsPrincipal user, MarketReadService reads, CancellationToken cancellationToken) =>
+            Results.Json(await reads.OverviewAsync(PlayerId(user), cancellationToken).ConfigureAwait(false), MarketJson.Options));
+
+        market.MapGet("/rate-history", async (MarketReadService reads, CancellationToken cancellationToken) =>
+            Results.Json(await reads.RateHistoryAsync(cancellationToken).ConfigureAwait(false), MarketJson.Options));
+
+        market.MapGet("/price-limit", async (
+            [FromQuery(Name = "resource_type_id")] int? resourceTypeId,
+            [FromQuery(Name = "part_type_id")] int? partTypeId,
+            MarketReadService reads,
+            CancellationToken cancellationToken) =>
+            Results.Json(await reads.PriceLimitAsync(resourceTypeId, partTypeId, cancellationToken).ConfigureAwait(false), MarketJson.Options));
 
         market.MapGet("/my-lots", async (ClaimsPrincipal user, MarketReadService reads, CancellationToken cancellationToken) =>
             Results.Json(await reads.MyLotsAsync(PlayerId(user), cancellationToken).ConfigureAwait(false), MarketJson.Options));

@@ -90,6 +90,14 @@ public static class MarketRules
     }
 
     /// <summary>
+    /// Gets how much a value changed from a value before, in per cent.
+    /// </summary>
+    /// <param name="before">The value before; it must be above zero.</param>
+    /// <param name="now">The value now.</param>
+    /// <returns>The change in per cent.</returns>
+    public static decimal ChangePercent(decimal before, decimal now) => (now - before) / before * Hundred;
+
+    /// <summary>
     /// Gets the rate of the exchange: it climbs when more trade currency is bought than sold
     /// in the window and falls in the other case, within the lowest and the highest rate.
     /// </summary>

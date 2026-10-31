@@ -40,7 +40,10 @@
 | POST | `/api/v1/market/orders/cancel` | Скасувати власний лот (`lot_id`; товар повертається на склад) |
 | POST | `/api/v1/market/orders/buy` | Купити лот цілим (`lot_id`, `destination_planet_id`; доставка порталом) |
 | POST | `/api/v1/exchange` | Обмін кредитів і торгової валюти за поточним курсом (`give_resource_type_id`, `amount`) |
-| GET | `/api/v1/market/lots` | Лоти, які бачить гравець (фільтри `market_level_id`, `resource_type_id`, `part_type_id`, `seller_player_id`, `max_sum`, `offset`) |
+| GET | `/api/v1/market/overview` | Рівні ринку, ідентифікатори валют і ресурсу плати за доставку, ліміт лотів, планети гравця з Торговим центром і порталом, ігровий час і його швидкість |
+| GET | `/api/v1/market/lots` | Лоти, які бачить гравець (фільтри `market_level_id`, `resource_type_id`, `part_type_id`, `seller_player_id`, `max_sum`, `offset`; з `planet_id` кожен лот несе час і плату за доставку на цю планету та причину, чому його не можна купити) |
+| GET | `/api/v1/market/rate-history` | Курс обміну наприкінці кожного дня вікна й зміна за добу |
+| GET | `/api/v1/market/price-limit` | Найнижча й найвища ціна одиниці предмета (`resource_type_id` або `part_type_id`) |
 | GET | `/api/v1/market/my-lots` | Мої відкриті лоти |
 | GET | `/api/v1/market/deliveries` | Мої вхідні й вихідні доставки, що ще в дорозі |
 | GET | `/api/v1/market/deals` | Журнал моїх угод (купівля й продаж) |

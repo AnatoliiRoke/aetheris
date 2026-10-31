@@ -15,12 +15,14 @@ namespace Aetheris.Market.Configuration;
 /// <param name="DeliverySecondsPerDistance">The seconds a unit of the distance adds.</param>
 /// <param name="EnergyResourceCode">The code of the resource of the delivery fee.</param>
 /// <param name="EnergyPerTonneDistance">The fee of a tonne carried over a unit of the distance.</param>
+/// <param name="DeliveryRecentHours">How long an arrived delivery stays in the list, in hours.</param>
 /// <param name="PageSize">The largest number of rows of a read.</param>
 /// <param name="ExchangeBaseRate">The rate with an even flow.</param>
 /// <param name="ExchangeMinRate">The lowest rate.</param>
 /// <param name="ExchangeMaxRate">The highest rate.</param>
 /// <param name="ExchangeSensitivityPercent">How far the flow moves the rate, in per cent.</param>
 /// <param name="ExchangeWindowHours">The window of the flow, in hours.</param>
+/// <param name="RateHistoryDays">The days of the chart of the rate.</param>
 /// <param name="ExchangeCommissionPercent">The commission of the exchange, in per cent.</param>
 public sealed record MarketSettings(
     decimal ReferenceBandPercent,
@@ -32,12 +34,14 @@ public sealed record MarketSettings(
     decimal DeliverySecondsPerDistance,
     string EnergyResourceCode,
     decimal EnergyPerTonneDistance,
+    int DeliveryRecentHours,
     int PageSize,
     decimal ExchangeBaseRate,
     decimal ExchangeMinRate,
     decimal ExchangeMaxRate,
     decimal ExchangeSensitivityPercent,
     int ExchangeWindowHours,
+    int RateHistoryDays,
     decimal ExchangeCommissionPercent)
 {
     /// <summary>
@@ -59,12 +63,14 @@ public sealed record MarketSettings(
             Number(config, MarketConfigKeys.DeliverySecondsPerDistance),
             config.GetRaw(MarketConfigKeys.EnergyResourceCode) ?? Default(MarketConfigKeys.EnergyResourceCode),
             Number(config, MarketConfigKeys.EnergyPerTonneDistance),
+            (int)Number(config, MarketConfigKeys.DeliveryRecentHours),
             (int)Number(config, MarketConfigKeys.PageSize),
             Number(config, MarketConfigKeys.ExchangeBaseRate),
             Number(config, MarketConfigKeys.ExchangeMinRate),
             Number(config, MarketConfigKeys.ExchangeMaxRate),
             Number(config, MarketConfigKeys.ExchangeSensitivityPercent),
             (int)Number(config, MarketConfigKeys.ExchangeWindowHours),
+            (int)Number(config, MarketConfigKeys.RateHistoryDays),
             Number(config, MarketConfigKeys.ExchangeCommissionPercent));
     }
 
