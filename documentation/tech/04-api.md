@@ -36,9 +36,17 @@
 | POST | `/api/v1/fleets/{id}/orders` | Наказ флоту: переліт, атака, видобуток, ескорт, повернення |
 | POST | `/api/v1/battles/{id}/orders` | Накази на наступний цикл бою |
 | POST | `/api/v1/research` | Почати дослідження |
-| POST | `/api/v1/market/orders` | Виставити лот |
-| POST | `/api/v1/market/orders/{id}/buy` | Купити лот (доставка конвоєм чи порталом) |
-| POST | `/api/v1/exchange` | Обмін кредитів і торгової валюти |
+| POST | `/api/v1/market/orders` | Виставити лот (товар списується зі складу планети) |
+| POST | `/api/v1/market/orders/cancel` | Скасувати власний лот (`lot_id`; товар повертається на склад) |
+| POST | `/api/v1/market/orders/buy` | Купити лот цілим (`lot_id`, `destination_planet_id`; доставка порталом) |
+| POST | `/api/v1/exchange` | Обмін кредитів і торгової валюти за поточним курсом (`give_resource_type_id`, `amount`) |
+| GET | `/api/v1/market/lots` | Лоти, які бачить гравець (фільтри `market_level_id`, `resource_type_id`, `part_type_id`, `seller_player_id`, `max_sum`, `offset`) |
+| GET | `/api/v1/market/my-lots` | Мої відкриті лоти |
+| GET | `/api/v1/market/deliveries` | Мої вхідні й вихідні доставки, що ще в дорозі |
+| GET | `/api/v1/market/deals` | Журнал моїх угод (купівля й продаж) |
+| GET | `/api/v1/market/rate` | Поточний курс обміну й комісія |
+| GET | `/api/v1/market/quote` | Прогноз купівлі (`lot_id`, `planet_id`): ціна, комісія, енергострижні, час |
+| GET | `/api/v1/market/limits` | Лотів зайнято / дозволено |
 | POST | `/api/v1/clans/{id}/diplomacy` | Запропонувати стосунки |
 
 Кожна команда має **ідентифікатор запиту** (idempotency key): повторне надсилання (наприклад, через збій мережі) не виконає дію двічі.

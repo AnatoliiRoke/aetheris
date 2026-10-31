@@ -1,6 +1,10 @@
 using Aetheris.Core.Admin;
+using Aetheris.Core.Commands;
 using Aetheris.Core.Data;
+using Aetheris.Core.Scheduling;
+using Aetheris.Market.Api;
 using Aetheris.Market.Data;
+using Aetheris.Market.Events;
 using Aetheris.Market.Services;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +35,15 @@ public static class MarketServiceCollectionExtensions
 
         services.AddScoped<MarketUnitOfWork>();
         services.AddScoped<MarketBootstrapService>();
+        services.AddScoped<MarketCatalog>();
+        services.AddScoped<MarketTradeService>();
+        services.AddScoped<MarketReadService>();
+        services.AddScoped<IScheduledEventHandler, MarketDeliveryHandler>();
+
+        services.AddCommand<ListLotCommand>();
+        services.AddCommand<CancelLotCommand>();
+        services.AddCommand<BuyLotCommand>();
+        services.AddCommand<ExchangeCommand>();
 
         // The module keeps tables of its own, so it works on the context of the request, which
         // lives in the scope.
