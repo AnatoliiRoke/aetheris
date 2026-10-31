@@ -9,6 +9,7 @@
   "admin.reference.field.allowed_on_planet": { "uk": "Може лежати на планеті", "en": "May lie on a planet" },
   "admin.reference.field.scope": { "uk": "Область дії", "en": "Scope" },
   "admin.reference.field.earns_population_income": { "uk": "Дохід від населення", "en": "Income from the population" },
+  "admin.reference.field.weight": { "uk": "Вага однієї одиниці (тонн)", "en": "Weight of one unit (tonnes)" },
   "admin.reference.scope.planet": { "uk": "Планета", "en": "Planet" },
   "admin.reference.scope.civilization": { "uk": "Цивілізація", "en": "Civilization" }
 }

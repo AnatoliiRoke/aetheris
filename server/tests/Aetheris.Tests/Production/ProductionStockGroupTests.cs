@@ -51,11 +51,10 @@ public sealed class ProductionStockGroupTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        long buildingId = await ProductionTestData.BuildFactoryAsync(player, services);
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(services);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, services, recipe);
         await ProductionTestData.GiveEveryResourceAsync(player, services);
         await ProductionTestData.BuildStorageAsync(player, services);
-
-        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(services);
         IProductionModule production = services.GetRequiredService<IProductionModule>();
 
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 1, Token);

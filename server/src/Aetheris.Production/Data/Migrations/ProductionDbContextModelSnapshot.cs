@@ -22,6 +22,65 @@ namespace Aetheris.Production.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.CharacteristicEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("DescriptionKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description_key");
+
+                    b.Property<string>("ImageKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("image_key");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
+                    b.Property<string>("NameKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name_key");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("UnitKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("unit_key");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_characteristic");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_characteristic_code");
+
+                    b.ToTable("characteristic", (string)null);
+                });
+
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartAttributeEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -61,6 +120,135 @@ namespace Aetheris.Production.Data.Migrations
                         .HasDatabaseName("ix_part_attribute_part_type_id_attribute_key");
 
                     b.ToTable("part_attribute", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartCharacteristicLevelValueEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
+
+                    b.Property<decimal>("NumberValue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("number_value");
+
+                    b.Property<int>("PartCharacteristicValueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_characteristic_value_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_part_characteristic_level_value");
+
+                    b.HasIndex("PartCharacteristicValueId", "Level")
+                        .IsUnique()
+                        .HasDatabaseName("ix_part_characteristic_level_value_part_characteristic_value_i~");
+
+                    b.ToTable("part_characteristic_level_value", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_part_characteristic_level_value_level", "level >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartCharacteristicValueEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CharacteristicId")
+                        .HasColumnType("integer")
+                        .HasColumnName("characteristic_id");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
+                    b.Property<decimal>("NumberValue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("number_value");
+
+                    b.Property<int>("PartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_type_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_part_characteristic_value");
+
+                    b.HasIndex("CharacteristicId")
+                        .HasDatabaseName("ix_part_characteristic_value_characteristic_id");
+
+                    b.HasIndex("PartTypeId", "CharacteristicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_part_characteristic_value_part_type_id_characteristic_id");
+
+                    b.ToTable("part_characteristic_value", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartGroupCharacteristicEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CharacteristicId")
+                        .HasColumnType("integer")
+                        .HasColumnName("characteristic_id");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_required");
+
+                    b.Property<int>("PartGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_group_id");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_part_group_characteristic");
+
+                    b.HasIndex("CharacteristicId")
+                        .HasDatabaseName("ix_part_group_characteristic_characteristic_id");
+
+                    b.HasIndex("PartGroupId", "CharacteristicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_part_group_characteristic_part_group_id_characteristic_id");
+
+                    b.HasIndex("PartGroupId", "SortOrder")
+                        .HasDatabaseName("ix_part_group_characteristic_part_group_id_sort_order");
+
+                    b.ToTable("part_group_characteristic", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartGroupEntity", b =>
@@ -262,6 +450,11 @@ namespace Aetheris.Production.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("version");
 
+                    b.Property<decimal>("Weight")
+                        .HasPrecision(12, 3)
+                        .HasColumnType("numeric(12,3)")
+                        .HasColumnName("weight");
+
                     b.HasKey("Id")
                         .HasName("pk_part_type");
 
@@ -275,6 +468,8 @@ namespace Aetheris.Production.Data.Migrations
                     b.ToTable("part_type", null, t =>
                         {
                             t.HasCheckConstraint("ck_part_type_mark_level", "mark_level >= 1 AND mark_level <= 3");
+
+                            t.HasCheckConstraint("ck_part_type_weight", "weight >= 0");
                         });
                 });
 
@@ -612,6 +807,50 @@ namespace Aetheris.Production.Data.Migrations
                         .HasConstraintName("fk_part_attribute_part_type_part_type_id");
                 });
 
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartCharacteristicLevelValueEntity", b =>
+                {
+                    b.HasOne("Aetheris.Production.Data.Entities.PartCharacteristicValueEntity", null)
+                        .WithMany("Levels")
+                        .HasForeignKey("PartCharacteristicValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_characteristic_level_value_part_characteristic_value_p~");
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartCharacteristicValueEntity", b =>
+                {
+                    b.HasOne("Aetheris.Production.Data.Entities.CharacteristicEntity", null)
+                        .WithMany()
+                        .HasForeignKey("CharacteristicId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_characteristic_value_characteristic_characteristic_id");
+
+                    b.HasOne("Aetheris.Production.Data.Entities.PartTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("PartTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_characteristic_value_part_type_part_type_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartGroupCharacteristicEntity", b =>
+                {
+                    b.HasOne("Aetheris.Production.Data.Entities.CharacteristicEntity", null)
+                        .WithMany()
+                        .HasForeignKey("CharacteristicId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_group_characteristic_characteristic_characteristic_id");
+
+                    b.HasOne("Aetheris.Production.Data.Entities.PartGroupEntity", null)
+                        .WithMany()
+                        .HasForeignKey("PartGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_group_characteristic_part_group_part_group_id");
+                });
+
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartTypeEntity", b =>
                 {
                     b.HasOne("Aetheris.Production.Data.Entities.PartGroupEntity", null)
@@ -650,6 +889,11 @@ namespace Aetheris.Production.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_recipe_ingredient_recipe_recipe_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartCharacteristicValueEntity", b =>
+                {
+                    b.Navigation("Levels");
                 });
 
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartTypeEntity", b =>

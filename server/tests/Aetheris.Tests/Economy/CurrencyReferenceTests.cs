@@ -160,7 +160,6 @@ public sealed class CurrencyReferenceTests
     {
         await WorldTestData.ResetWorldAsync(_factory);
         using HttpClient admin = await OwnerAsync();
-        int metals = await GroupIdAsync(SeedCodes.MetalGroup);
 
         using IServiceScope scope = _factory.Services.CreateScope();
         ResourceTypeEntity credits = await scope.ServiceProvider.GetRequiredService<WorldDbContext>().ResourceTypes.AsNoTracking()
@@ -168,7 +167,8 @@ public sealed class CurrencyReferenceTests
 
         Assert.Equal(ResourceScopes.Civilization, credits.Scope);
 
-        await ReferenceAdmin.ChangedAsync(await ReferenceAdmin.UpdateAsync(admin, Resources, credits.Id, credits.Version, Resource("Золоті монети", "Gold coins", ResourceScopes.Planet, metals)));
+        // The admin panel refuses a group on a currency. The scope stays and the group is cleared.
+        await ReferenceAdmin.ChangedAsync(await ReferenceAdmin.UpdateAsync(admin, Resources, credits.Id, credits.Version, Resource("Золоті монети", "Gold coins", ResourceScopes.Civilization, null)));
 
         // The world starts again, as the server does at every start.
         await scope.ServiceProvider.GetRequiredService<IWorldModule>().EnsureWorldAsync(Token);
@@ -177,15 +177,15 @@ public sealed class CurrencyReferenceTests
         JsonElement values = record.GetProperty("values");
 
         Assert.Equal(EconomyTestData.CreditsCode, record.GetProperty("code").GetString());
-        Assert.Equal(ResourceScopes.Planet, values.GetProperty("scope").GetString());
-        Assert.Equal(metals, values.GetProperty("resource_group_id").GetInt32());
+        Assert.Equal(ResourceScopes.Civilization, values.GetProperty("scope").GetString());
+        Assert.Equal(JsonValueKind.Null, values.GetProperty("resource_group_id").ValueKind);
         Assert.Equal("Gold coins", values.GetProperty("name").GetProperty("en").GetString());
         Assert.Equal("Золоті монети", values.GetProperty("name").GetProperty("uk").GetString());
 
         using IServiceScope check = _factory.Services.CreateScope();
         ResourceCatalog catalog = await check.ServiceProvider.GetRequiredService<IWorldModule>().GetResourceCatalogAsync(Token);
 
-        Assert.Equal(ResourceScopes.Planet, catalog.Resources.Single(resource => resource.Id == credits.Id).Scope);
+        Assert.Equal(ResourceScopes.Civilization, catalog.Resources.Single(resource => resource.Id == credits.Id).Scope);
     }
 
     private static object Resource(string ukrainian, string english, string scope, int? groupId) => new

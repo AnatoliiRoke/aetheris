@@ -6,49 +6,49 @@ namespace Aetheris.Tests.World;
 
 /// <summary>
 /// Tests of the richness multipliers of the deposits of planets (task 00009, decision 12): an
-/// ordinary planet keeps every multiplier in the ordinary range of its rule, a rich planet has
-/// every multiplier in the rich range, and the probability and the ranges are data.
+/// ordinary planet keeps every multiplier in the ordinary range of its own rule, a rich planet
+/// uses the rich range of a rule that has one, and the probability and the ranges are data.
 /// </summary>
 public sealed class RichPlanetTests
 {
     private const int Seeds = 40;
 
     /// <summary>
-    /// Without rich planets every deposit of a planet lies in 0.8–1.4; with every planet rich,
-    /// in 1.4–1.9 (acceptance criterion 9b).
+    /// Without rich planets every deposit lies in the ordinary range of its rule; with every
+    /// planet rich, a rule that has a rich range uses it and a rule without one keeps the
+    /// ordinary range (acceptance criterion 9b).
     /// </summary>
     /// <param name="probability">The probability of a rich planet.</param>
-    /// <param name="minimum">The smallest expected multiplier.</param>
-    /// <param name="maximum">The largest expected multiplier.</param>
     [Theory]
-    [InlineData("0", 0.8, 1.4)]
-    [InlineData("1", 1.4, 1.9)]
-    public void The_multipliers_follow_the_range_of_the_planet(string probability, double minimum, double maximum)
+    [InlineData("0")]
+    [InlineData("1")]
+    public void The_multipliers_follow_the_range_of_the_planet(string probability)
     {
         WorldGenerationConfig config = WorldTestData.Config(Overrides(probability));
+        List<CheckedDeposit> deposits = [.. PlanetBodies(config).SelectMany(body => body)];
 
-        List<decimal> multipliers = [.. PlanetDeposits(config).SelectMany(deposits => deposits)];
-
-        Assert.NotEmpty(multipliers);
-        Assert.All(multipliers, multiplier => Assert.InRange(multiplier, (decimal)minimum, (decimal)maximum));
+        Assert.NotEmpty(deposits);
+        Assert.All(deposits, deposit => AssertInOwnRange(RuleOf(config.Reference, deposit), deposit.Coefficient, probability == "1"));
     }
 
     /// <summary>
-    /// A multiplier above the ordinary range appears only on a rich planet, where every deposit
-    /// has one; gas giants keep the ranges of their own rules.
+    /// A multiplier above the ordinary range of its rule appears only on a rich planet. On that
+    /// planet a rule with a rich range lies in it, and a rule without one stays ordinary. Gas
+    /// giants keep the ranges of their own rules because they are not planets.
     /// </summary>
     [Fact]
     public void A_multiplier_above_the_ordinary_range_belongs_to_a_rich_planet()
     {
         WorldGenerationConfig config = WorldTestData.Config(Overrides("0.5"));
-        decimal ordinaryMaximum = OrdinaryMaximum(config.Reference);
-
-        List<IReadOnlyList<decimal>> planets = [.. PlanetDeposits(config).Where(deposits => deposits.Count > 0)];
-        List<IReadOnlyList<decimal>> rich = [.. planets.Where(deposits => deposits.Any(multiplier => multiplier > ordinaryMaximum))];
+        List<IReadOnlyList<CheckedDeposit>> planets = [.. PlanetBodies(config).Where(body => body.Count > 0)];
+        List<IReadOnlyList<CheckedDeposit>> rich =
+        [
+            .. planets.Where(body => body.Any(deposit => deposit.Coefficient > RuleOf(config.Reference, deposit).CoefficientMax)),
+        ];
 
         Assert.NotEmpty(rich);
         Assert.True(rich.Count < planets.Count);
-        Assert.All(rich, deposits => Assert.All(deposits, multiplier => Assert.True(multiplier >= ordinaryMaximum)));
+        Assert.All(rich, body => Assert.All(body, deposit => AssertInOwnRange(RuleOf(config.Reference, deposit), deposit.Coefficient, preferRich: true)));
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ public sealed class RichPlanetTests
                 ? group with { RuleIds = [.. group.RuleIds.Select(rule => rule with { RichCoefficientMin = 1.5m, RichCoefficientMax = 1.6m })] }
                 : group));
 
-        List<decimal> multipliers = [.. PlanetDeposits(seed with { Reference = changed }).SelectMany(deposits => deposits)];
+        List<decimal> multipliers = [.. PlanetBodies(seed with { Reference = changed }).SelectMany(body => body).Select(deposit => deposit.Coefficient)];
 
         Assert.NotEmpty(multipliers);
         Assert.All(multipliers, multiplier => Assert.InRange(multiplier, 1.5m, 1.6m));
@@ -79,17 +79,24 @@ public sealed class RichPlanetTests
     private static Dictionary<string, string> Overrides(string probability) =>
         new(WorldTestData.SmallSectors, StringComparer.Ordinal) { [WorldConfigKeys.RichPlanetProbability] = probability };
 
-    private static decimal OrdinaryMaximum(WorldReferenceData reference)
+    private static void AssertInOwnRange(ReferenceRule rule, decimal coefficient, bool preferRich)
     {
-        HashSet<int> planetTypes = [.. reference.TypesOf(WorldObjectClasses.Planet).Select(type => type.Id)];
+        if (preferRich && rule.RichCoefficientMin is decimal richMinimum && rule.RichCoefficientMax is decimal richMaximum)
+        {
+            Assert.InRange(coefficient, richMinimum, richMaximum);
+            return;
+        }
 
-        return reference.RuleGroups
-            .Where(group => planetTypes.Contains(group.ObjectTypeId))
-            .SelectMany(group => group.RuleIds)
-            .Max(rule => rule.CoefficientMax);
+        Assert.InRange(coefficient, rule.CoefficientMin, rule.CoefficientMax);
     }
 
-    private static IEnumerable<IReadOnlyList<decimal>> PlanetDeposits(WorldGenerationConfig config)
+    private static ReferenceRule RuleOf(WorldReferenceData reference, CheckedDeposit deposit) =>
+        reference.RuleGroups
+            .Where(group => group.ObjectTypeId == deposit.ObjectTypeId)
+            .SelectMany(group => group.RuleIds)
+            .Single(rule => rule.ResourceId == deposit.ResourceId);
+
+    private static IEnumerable<IReadOnlyList<CheckedDeposit>> PlanetBodies(WorldGenerationConfig config)
     {
         HashSet<int> planetTypes = [.. config.Reference.TypesOf(WorldObjectClasses.Planet).Select(type => type.Id)];
 
@@ -99,8 +106,10 @@ public sealed class RichPlanetTests
 
             foreach (BodyPlan body in plan.SystemIds.SelectMany(system => system.BodyIds).Where(body => planetTypes.Contains(body.ObjectTypeId)))
             {
-                yield return [.. body.DepositIds.Select(deposit => deposit.Coefficient)];
+                yield return [.. body.DepositIds.Select(deposit => new CheckedDeposit(body.ObjectTypeId, deposit.ResourceId, deposit.Coefficient))];
             }
         }
     }
+
+    private sealed record CheckedDeposit(int ObjectTypeId, int ResourceId, decimal Coefficient);
 }

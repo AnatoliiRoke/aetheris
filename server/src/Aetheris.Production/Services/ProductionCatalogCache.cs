@@ -108,10 +108,29 @@ public sealed class ProductionCatalogCache
             .ThenBy(group => group.Id)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
+        List<CharacteristicEntity> characteristics = await dbContext.Characteristics.AsNoTracking()
+            .OrderBy(characteristic => characteristic.SortOrder)
+            .ThenBy(characteristic => characteristic.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        List<PartGroupCharacteristicEntity> groupCharacteristics = await dbContext.PartGroupCharacteristics.AsNoTracking()
+            .Where(link => !link.IsArchived)
+            .OrderBy(link => link.PartGroupId)
+            .ThenBy(link => link.SortOrder)
+            .ThenBy(link => link.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
         List<PartTypeEntity> parts = await dbContext.PartTypes.AsNoTracking()
             .Include(part => part.AttributeIds)
             .OrderBy(part => part.SortOrder)
             .ThenBy(part => part.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        List<PartCharacteristicValueEntity> characteristicValues = await dbContext.PartCharacteristicValues.AsNoTracking()
+            .Where(value => !value.IsArchived)
+            .Include(value => value.Levels)
+            .OrderBy(value => value.PartTypeId)
+            .ThenBy(value => value.CharacteristicId)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         List<RecipeEntity> recipes = await dbContext.Recipes.AsNoTracking()
@@ -138,6 +157,41 @@ public sealed class ProductionCatalogCache
                 subjectRequirement.Requirement.TargetLevel)),
         ];
 
+        Dictionary<int, CharacteristicEntity> characteristicsById = characteristics.ToDictionary(characteristic => characteristic.Id);
+
+        Dictionary<int, IReadOnlyList<PartGroupCharacteristicInfo>> groupCharacteristicInfos =
+            groupCharacteristics
+                .Where(link => characteristicsById.ContainsKey(link.CharacteristicId))
+                .GroupBy(link => link.PartGroupId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => (IReadOnlyList<PartGroupCharacteristicInfo>)[
+                        .. group.Select(link =>
+                        {
+                            CharacteristicEntity characteristic = characteristicsById[link.CharacteristicId];
+
+                            return new PartGroupCharacteristicInfo(
+                                characteristic.Id,
+                                characteristic.Code,
+                                characteristic.NameKey,
+                                characteristic.UnitKey,
+                                link.SortOrder,
+                                link.IsRequired);
+                        })
+                    ]);
+
+        Dictionary<int, IReadOnlyDictionary<int, PartCharacteristicInfo>> partCharacteristicInfos =
+            characteristicValues
+                .GroupBy(value => value.PartTypeId)
+                .ToDictionary(
+                    part => part.Key,
+                    part => (IReadOnlyDictionary<int, PartCharacteristicInfo>)part.ToDictionary(
+                        value => value.CharacteristicId,
+                        value => new PartCharacteristicInfo(
+                            value.CharacteristicId,
+                            value.NumberValue,
+                            value.Levels.ToDictionary(level => level.Level, level => level.NumberValue))));
+
         return new ProductionCatalog(
             [
                 .. groups.Select(group => new PartGroupInfo(
@@ -147,7 +201,8 @@ public sealed class ProductionCatalogCache
                     group.DescriptionKey,
                     group.ImageKey,
                     group.SortOrder,
-                    group.IsArchived)),
+                    group.IsArchived,
+                    groupCharacteristicInfos.GetValueOrDefault(group.Id, []))),
             ],
             [
                 .. parts.Select(part => new PartTypeInfo(
@@ -166,7 +221,9 @@ public sealed class ProductionCatalogCache
                             attribute.AttributeKey,
                             attribute.NumberValue,
                             attribute.CodeValue,
-                            attribute.TextValue)))),
+                            attribute.TextValue)),
+                    part.Weight,
+                    partCharacteristicInfos.GetValueOrDefault(part.Id, new Dictionary<int, PartCharacteristicInfo>()))),
             ],
             [
                 .. recipes.Select(recipe => new RecipeInfo(
@@ -189,7 +246,18 @@ public sealed class ProductionCatalogCache
                             ingredient.Amount)),
                     ])),
             ],
-            requirementInfos);
+            requirementInfos,
+            [
+                .. characteristics.Select(characteristic => new CharacteristicInfo(
+                    characteristic.Id,
+                    characteristic.Code,
+                    characteristic.NameKey,
+                    characteristic.DescriptionKey,
+                    characteristic.UnitKey,
+                    characteristic.ImageKey,
+                    characteristic.SortOrder,
+                    characteristic.IsArchived)),
+            ]);
     }
 
     private sealed record CachedCatalog(ProductionCatalog Catalog, DateTimeOffset LoadedAt);

@@ -32,7 +32,7 @@ public sealed class StorageCapacityTests
     }
 
     private const string ProducedResourceCode = "resource_13";
-    private const string ProducedWarehouseCode = "building_26";
+    private const string ProducedWarehouseCode = "building_7";
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
@@ -56,6 +56,7 @@ public sealed class StorageCapacityTests
         int copper = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, SeedCodes.Copper, 1m);
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.IronMine, 1);
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.CopperMine, 1);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.MetalStorage, 10);
         DateTimeOffset start = PlanetsTestData.GameNow(services);
 
         PlanetOverviewDto first = await PlanetsTestData.ReadAsync(services, player.PlanetId, start);
@@ -202,6 +203,7 @@ public sealed class StorageCapacityTests
         BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, SeedCodes.PowerPlant);
         Dictionary<int, long> costs = plant.LevelIds.Single(level => level.Level == 1).CostIds.ToDictionary(cost => cost.ResourceTypeId, cost => cost.Amount);
         DateTimeOffset start = PlanetsTestData.GameNow(services);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.MetalStorage, 1);
 
         PlanetOverviewDto overview = await PlanetsTestData.ReadAsync(services, player.PlanetId, start);
         Dictionary<int, long> capacities = costs.Keys.ToDictionary(
@@ -254,6 +256,7 @@ public sealed class StorageCapacityTests
         int copper = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, SeedCodes.Copper, 1m);
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.IronMine, 1);
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.CopperMine, 1);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.MetalStorage, 1);
         DateTimeOffset start = PlanetsTestData.GameNow(services);
 
         long capacity = (await PlanetsTestData.ReadAsync(services, player.PlanetId, start)).Resources.Single(resource => resource.ResourceTypeId == iron).Capacity;
@@ -293,6 +296,11 @@ public sealed class StorageCapacityTests
     {
         await PlanetsTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            await PlanetsTestData.SetLevelAsync(scope.ServiceProvider, player.PlanetId, SeedCodes.MetalStorage, 1);
+        }
 
         using HttpResponseMessage response = await player.Client.GetAsync($"/api/v1/planets/{player.PlanetId}", Token);
         using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync(Token));

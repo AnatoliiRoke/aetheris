@@ -31,8 +31,8 @@ describe('StoragePage: the screen of the storage (task 00020)', () => {
     const iron = within(block).getByText('Залізо').closest('tr')!;
     const copper = within(block).getByText('Мідь').closest('tr')!;
 
-    // The columns of the design: the name, the amount, the rate per hour and the fill.
-    expect(within(block).getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['Назва', 'Кількість', 'За годину', 'Заповнення', 'Видобувні']);
+    // The columns of the design plus the weight and the stored tonnes (task 00027).
+    expect(within(block).getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['Назва', 'Кількість', 'За годину', 'Заповнення', 'Вага', 'Обсяг', 'Видобувні']);
     // Every resource has the capacity of its own, so 900 of 10 000 is 9 percent of the iron and
     // 500 of 10 000 is 5 percent of the copper.
     expect(within(iron).getByText('900 / 10 000')).toBeInTheDocument();

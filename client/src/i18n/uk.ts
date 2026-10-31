@@ -768,6 +768,11 @@ export const uk = {
   'storage.modulesHeading': 'Модулі кораблів',
   'storage.hullsHeading': 'Корпуси кораблів',
   'storage.unit': 'шт.',
+  'storage.weight': 'Вага',
+  'storage.weightUnit': 'т',
+  'storage.volume': 'Обсяг',
+  'storage.levelValue': 'рівень {level}',
+  'storage.characteristics': 'Характеристики',
   'civ.addBuilding': 'Додати будівництво',
   'civ.race': 'Раса: {race}',
 } as const;

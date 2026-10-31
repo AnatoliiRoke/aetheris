@@ -27,12 +27,12 @@ internal static class EconomyTestData
     /// <summary>
     /// The code of the currency of the civilization in the starting data.
     /// </summary>
-    internal const string CreditsCode = "resource_18";
+    internal const string CreditsCode = "resource_27";
 
     /// <summary>
     /// The code of the medical centre in the starting data.
     /// </summary>
-    internal const string MedicalCentreCode = "building_25";
+    internal const string MedicalCentreCode = "building_3";
 
     /// <summary>
     /// Clears the database, creates the world and prepares the modules, as a fresh server does
@@ -100,6 +100,7 @@ internal static class EconomyTestData
         row.OwnerPlayerId = ownerPlayerId;
         row.SectorId = 0;
         row.Amount = amount;
+        row.AmountFraction = 0m;
         row.UpdatedAt = at;
 
         await dbContext.SaveChangesAsync(Token).ConfigureAwait(false);
@@ -135,6 +136,7 @@ internal static class EconomyTestData
         }
 
         row.Amount = amount;
+        row.AmountFraction = 0m;
         row.UpdatedAt = at;
 
         await dbContext.SaveChangesAsync(Token).ConfigureAwait(false);

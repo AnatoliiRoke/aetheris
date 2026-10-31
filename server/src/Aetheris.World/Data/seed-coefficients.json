@@ -1,0 +1,60 @@
+{
+  "parameters": [
+    {
+      "key": "world.seed.cost.base",
+      "value": "100",
+      "minimum": "0",
+      "maximum": "1000000000",
+      "description": "Amount of each listed resource at the first level of a seeded cost."
+    },
+    {
+      "key": "world.seed.cost.growth",
+      "value": "0.1",
+      "minimum": "0",
+      "maximum": "10",
+      "description": "Fraction added to a seeded cost on every later level."
+    },
+    {
+      "key": "world.seed.duration.base_seconds",
+      "value": "20",
+      "minimum": "0",
+      "maximum": "1000000000",
+      "description": "Duration of the first level of a seeded action, in seconds."
+    },
+    {
+      "key": "world.seed.duration.growth",
+      "value": "0.2",
+      "minimum": "0",
+      "maximum": "10",
+      "description": "Fraction added to a seeded duration on every later level."
+    },
+    {
+      "key": "world.seed.race.bonus",
+      "value": "0.1",
+      "minimum": "0",
+      "maximum": "10",
+      "description": "Fraction a race adds to the modules of its combat group."
+    },
+    {
+      "key": "world.seed.level_cap.base",
+      "value": "1",
+      "minimum": "0",
+      "maximum": "1000000000",
+      "description": "Base of the level-cap formula on the start building."
+    },
+    {
+      "key": "world.seed.level_cap.growth",
+      "value": "1",
+      "minimum": "0",
+      "maximum": "1000000000",
+      "description": "Growth of the level-cap formula on the start building."
+    },
+    {
+      "key": "world.seed.level_cap.step",
+      "value": "1",
+      "minimum": "0",
+      "maximum": "1000000000",
+      "description": "Step of the level-cap formula on the start building."
+    }
+  ]
+}

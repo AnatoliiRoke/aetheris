@@ -136,6 +136,12 @@ public static class WorldConfigKeys
     /// <summary>The capacity of the storage of a new home body, per resource.</summary>
     public const string StartStorageCapacity = "world.civilization.start_storage_capacity";
 
+    /// <summary>
+    /// The weight of one unit of a resource in tonnes, for the resources that have no weight of
+    /// their own yet (task 00027).
+    /// </summary>
+    public const string DefaultResourceWeight = "world.resource.default_weight";
+
     /// <summary>The name template of a body on an orbit.</summary>
     public const string BodyNameTemplate = "world.naming.body_template";
 
@@ -198,6 +204,7 @@ public static class WorldConfigKeys
         new(HomeNameMaxLength, "20", "1", "64", "Largest length of the name a player gives the home body."),
         new(HomeNameCharacters, "A-Za-zЀ-ӿ0-9 _'’-", null, null, "Characters the name of the home body may contain: listed as they are, a-z is a range, a dash at the end is the dash itself."),
         new(StartStorageCapacity, "10000", "0", "1000000000", "Capacity of the storage of a new home body, per resource; the start resources never exceed it."),
+        new(DefaultResourceWeight, "1", "0", "1000000000", "Вага однієї одиниці ресурсу в тоннах, для ресурсів, у яких ще немає власної ваги."),
         new(SectorNameTemplate, "S{index}", null, null, "Name template of a sector: {index}."),
         new(SystemNameTemplate, "{sector}-{number}", null, null, "Name template of a star system: {sector}, {number}."),
         new(BodyNameTemplate, "{system}-{orbit}", null, null, "Name template of a body: {system}, {orbit}."),
@@ -206,5 +213,6 @@ public static class WorldConfigKeys
         new(MaxSectorsPerRun, "10", "1", "1000", "Largest number of sectors an administrator adds in one generation run."),
         new(MaxSystemsPerRun, "100", "1", "1000000", "Largest expected number of star systems of one generation run: sectors times the average of systems_min and systems_max."),
         new(StatusPollSeconds, "2", "1", "60", "How often the admin panel asks for the status of a running generation, in seconds."),
+        ..SeedCoefficientKeys.Definitions,
     ];
 }

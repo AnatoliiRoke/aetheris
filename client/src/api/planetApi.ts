@@ -109,6 +109,10 @@ export interface PlanetResource {
   isFull: boolean;
   /** The moment of game time the resource is or will be full, or `null` when it does not fill. */
   fullAt: string | null;
+  /** The weight of one unit in tonnes (task 00027). Absent answers count as one tonne. */
+  weight?: number;
+  /** How much of the resource lies on the body, in tonnes (task 00027). */
+  storedTonnes?: number;
 }
 
 /**

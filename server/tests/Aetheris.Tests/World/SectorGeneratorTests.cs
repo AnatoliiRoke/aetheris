@@ -59,7 +59,9 @@ public sealed class SectorGeneratorTests
         WorldSettings settings = config.Settings;
         WorldReferenceData reference = config.Reference;
         HashSet<int> crystals = WorldTestData.ResourcesOfGroup(reference, SeedCodes.MineralGroup);
-        HashSet<int> ether = WorldTestData.ResourcesOfGroup(reference, SeedCodes.EtherGroup);
+        int etherId = reference.Resources.Single(resource => resource.Code == SeedCodes.Ether).Id;
+        int darkMatterId = reference.Resources.Single(resource => resource.Code == SeedCodes.DarkMatter).Id;
+        int heliumId = reference.Resources.Single(resource => resource.Code == SeedCodes.Helium).Id;
 
         Property property = Prop.ForAll(
             Arb.From(Gen.Choose(0, int.MaxValue)),
@@ -89,11 +91,12 @@ public sealed class SectorGeneratorTests
                         int crystalKinds = body.DepositIds.Count(share => crystals.Contains(share.ResourceId));
 
                         Check(problems, WorldTestData.BodyClasses.Contains(type.ObjectClass), "body class");
-                        Check(problems, !body.DepositIds.Any(share => ether.Contains(share.ResourceId)), "no ether on a body");
+                        Check(problems, !body.DepositIds.Any(share => share.ResourceId == etherId || share.ResourceId == darkMatterId), "no ether or dark matter on a body");
 
                         if (type.ObjectClass == WorldObjectClasses.Planet)
                         {
                             Check(problems, crystalKinds is 1 or 2, "one kind of crystals");
+                            Check(problems, !body.DepositIds.Any(share => share.ResourceId == heliumId), "no helium-3 on a planet");
                         }
                         else
                         {
@@ -260,7 +263,7 @@ public sealed class SectorGeneratorTests
     public void Ether_on_a_body_is_refused_by_the_validation()
     {
         WorldReferenceData seed = WorldTestData.ReferenceFromSeed();
-        int etherId = WorldTestData.ResourcesOfGroup(seed, SeedCodes.EtherGroup).Single();
+        int forbiddenId = seed.Resources.First(resource => !seed.Groups.Single(group => group.Id == resource.ResourceGroupId).AllowedOnPlanet).Id;
         int terrestrialId = seed.ObjectTypes.Single(type => type.Code == SeedCodes.Terrestrial).Id;
 
         WorldReferenceData broken = new(
@@ -268,7 +271,7 @@ public sealed class SectorGeneratorTests
             seed.Resources,
             seed.ObjectTypes,
             seed.SizeClasses,
-            [.. seed.RuleGroups, new ReferenceRuleGroup(1000, terrestrialId, "rule_group_1000", 1, 1, 0d, [new ReferenceRule(1000, etherId, 1, 0.1m, 0.2m)])]);
+            [.. seed.RuleGroups, new ReferenceRuleGroup(1000, terrestrialId, "rule_group_1000", 1, 1, 0d, [new ReferenceRule(1000, forbiddenId, 1, 0.1m, 0.2m)])]);
 
         IReadOnlyList<string> errors = WorldConfigValidator.Validate(new WorldGenerationConfig(WorldTestData.Settings(), broken));
 

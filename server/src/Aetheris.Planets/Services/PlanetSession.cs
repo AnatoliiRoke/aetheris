@@ -256,6 +256,7 @@ public sealed class PlanetSession
             _resources.ToDictionary(row => row.ResourceTypeId, row => row.Amount),
             PlanetEconomy.ProductionRates(Catalog, levels, _deposits, _bonuses),
             PlanetEconomy.Capacities(Catalog, levels, _bonuses),
+            PlanetEconomy.Weights(Catalog),
             from,
             to);
     }

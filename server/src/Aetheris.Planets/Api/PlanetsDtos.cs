@@ -79,10 +79,12 @@ public sealed record DepositRichnessDto(int ResourceTypeId, decimal Coefficient)
 /// <param name="ResourceTypeId">The resource.</param>
 /// <param name="ResourceGroupId">The group of the resource.</param>
 /// <param name="Amount">The amount now.</param>
-/// <param name="RatePerHour">The production per game hour, zero while the resource is full.</param>
-/// <param name="Capacity">How much of this resource the storage of the body holds; every resource of a group has the same capacity.</param>
+/// <param name="RatePerHour">The production per game hour, zero while the group is full.</param>
+/// <param name="Capacity">How much of the resource the storage of the body holds, in tonnes.</param>
 /// <param name="IsFull">Whether the resource is full and its production stands still.</param>
-/// <param name="FullAt">The moment of game time the resource is or will be full, or <see langword="null"/> when it does not fill.</param>
+/// <param name="FullAt">The moment of game time the resource is or will be full.</param>
+/// <param name="Weight">The weight of one unit of the resource in tonnes (task 00027).</param>
+/// <param name="StoredTonnes">How much the resource weighs on the body now, in tonnes.</param>
 public sealed record PlanetResourceDto(
     int ResourceTypeId,
     int ResourceGroupId,
@@ -90,7 +92,9 @@ public sealed record PlanetResourceDto(
     decimal RatePerHour,
     long Capacity = 0,
     bool IsFull = false,
-    DateTimeOffset? FullAt = null);
+    DateTimeOffset? FullAt = null,
+    decimal Weight = 1m,
+    decimal StoredTonnes = 0);
 
 /// <summary>The energy of a body.</summary>
 /// <param name="Output">The energy produced.</param>

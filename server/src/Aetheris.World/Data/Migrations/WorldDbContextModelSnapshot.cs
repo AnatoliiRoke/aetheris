@@ -1079,6 +1079,11 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("version");
 
+                    b.Property<decimal>("Weight")
+                        .HasPrecision(12, 3)
+                        .HasColumnType("numeric(12,3)")
+                        .HasColumnName("weight");
+
                     b.HasKey("Id")
                         .HasName("pk_resource_type");
 
@@ -1089,7 +1094,10 @@ namespace Aetheris.World.Data.Migrations
                     b.HasIndex("ResourceGroupId")
                         .HasDatabaseName("ix_resource_type_resource_group_id");
 
-                    b.ToTable("resource_type", (string)null);
+                    b.ToTable("resource_type", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_resource_type_weight", "weight >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Aetheris.World.Data.Entities.SectorEntity", b =>

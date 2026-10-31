@@ -11,6 +11,11 @@ Run from the folder of the module:
 
 import json
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from characteristics import CHARACTERISTICS, GROUP_CHARACTERISTICS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TARGET = os.path.join(HERE, os.pardir, "Data", "production-reference-seed.json")
@@ -174,6 +179,49 @@ PART_GROUPS = [
     },
 ]
 
+# The one-shot device of the terraforming (task 00014): it has no mark levels, because a ship
+# turns it on once and it is spent. It comes after the parts of the groups, so its number is
+# the last one.
+TERRAFORMING_DEVICE = {
+    "part": {
+        "code": "part_34",
+        "group": "part_group_10",
+        "mark_level": 1,
+        "sort_order": 34,
+        "name": {"uk": "Пристрій тераформінгу Mk I", "en": "Terraforming device Mk I"},
+        "description": {
+            "uk": "Одноразовий пристрій: корабель на орбіті вмикає його, і родовища планети стають багатими.",
+            "en": "A one-shot device: a ship on the orbit turns it on and the deposits of the body become rich.",
+        },
+        "attributes": {
+            "mass": {"number": 30.0},
+            "slot_size": {"code": "standard"},
+            "terraforming_device": {},
+        },
+        "weight": 30.0,
+    },
+    "recipe": {
+        "code": "recipe_39",
+        "part": "part_34",
+        "factory": "building_13",
+        "output_quantity": 1,
+        "duration_seconds": 1800,
+        "sort_order": 39,
+        "name": {"uk": "Пристрій тераформінгу Mk I", "en": "Terraforming device Mk I"},
+        "description": {
+            "uk": "Дорогий одноразовий пристрій для тераформінгу планети.",
+            "en": "An expensive one-shot device for the terraforming of a body.",
+        },
+        "ingredients": [
+            {"resource": "resource_1", "amount": 200},
+            {"resource": "resource_13", "amount": 60},
+            {"resource": "resource_15", "amount": 40},
+        ],
+        "requirements": [],
+        "race": None,
+    },
+}
+
 # The three mark levels: the second and the third cost more and take longer.
 MARK_LEVELS = [
     {"level": 1, "cost_factor": 1.0, "duration_factor": 1.0, "attribute_factor": 1.0},
@@ -193,6 +241,17 @@ def scale_attributes(attributes, factor):
             grown[key] = value
 
     return grown
+
+
+def weight_of(attributes, factor):
+    """The weight of one part in tonnes (task 00027).
+
+    The weight of a part is its own number, and the starting value is the mass the group
+    already declares; a part without a mass weighs the default of the seed.
+    """
+    mass = attributes.get("mass", {}).get("number")
+
+    return round(mass * factor, 2) if mass is not None else 1
 
 
 def build_parts(first_recipe_number):
@@ -225,6 +284,7 @@ def build_parts(first_recipe_number):
                 },
                 "description": group["description"],
                 "attributes": scale_attributes(group["attributes"], mark["attribute_factor"]),
+                "weight": weight_of(group["attributes"], mark["attribute_factor"]),
             })
 
             ingredients = [
@@ -253,6 +313,9 @@ def build_parts(first_recipe_number):
                 # group are made by every race, and only the ones of that race carry its mark.
                 "race": group["race"] if mark["level"] == 1 else None,
             })
+
+    parts.append(TERRAFORMING_DEVICE["part"])
+    recipes.append(TERRAFORMING_DEVICE["recipe"])
 
     return parts, recipes
 
@@ -321,12 +384,17 @@ def main():
     catalog["parts"] = parts
     catalog["recipes"] = recipes
     catalog["race_bonuses"] = build_race_bonuses()
+    catalog["characteristics"] = CHARACTERISTICS
+    catalog["group_characteristics"] = GROUP_CHARACTERISTICS
 
     with open(TARGET, "w", encoding="utf-8") as target:
         json.dump(catalog, target, ensure_ascii=False, indent=2)
         target.write("\n")
 
-    print(f"parts: {len(parts)}, recipes: {len(recipes)}, bonuses: {len(catalog['race_bonuses'])}")
+    print(
+        f"parts: {len(parts)}, recipes: {len(recipes)}, bonuses: {len(catalog['race_bonuses'])}, "
+        f"characteristics: {len(catalog['characteristics'])}, group links: {len(catalog['group_characteristics'])}"
+    )
 
 
 if __name__ == "__main__":

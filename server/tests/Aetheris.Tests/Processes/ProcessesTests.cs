@@ -17,6 +17,7 @@ using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
 using Aetheris.Research.Data;
+using Aetheris.Tests.Economy;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.Planets;
 using Microsoft.EntityFrameworkCore;
@@ -34,15 +35,13 @@ public sealed partial class ProcessesTests
 {
     private const string Fuel = "resource_group_3";
 
-    private const string Deuterium = "resource_9";
+    private const string Deuterium = "resource_12";
 
-    private const string Plasma = "resource_10";
+    private const string Helium = "resource_13";
 
-    private const string Ether = "resource_11";
+    private const string Quartzite = "resource_8";
 
-    private const string Quartzite = "resource_5";
-
-    private const string BuildingMaterials = "resource_13";
+    private const string BuildingMaterials = "resource_20";
 
     private const string ConversionTechnology = "tech_18";
 
@@ -128,7 +127,7 @@ public sealed partial class ProcessesTests
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
         int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int targetId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        int targetId = await ProcessesTestData.ResourceIdAsync(services, Helium);
 
         long sourceBefore = await ProcessesTestData.BalanceAsync(player, services, sourceId);
         long targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
@@ -165,7 +164,7 @@ public sealed partial class ProcessesTests
     }
 
     /// <summary>
-    /// The conversion refuses a source of another group, the ether, a produced good, a target
+    /// The conversion refuses a source of another group, a produced good, a target
     /// of another group, the same resource and a player without the technology, and nothing is
     /// spent (task 00014, criterion 4).
     /// </summary>
@@ -184,8 +183,7 @@ public sealed partial class ProcessesTests
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
         int deuterium = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int plasma = await ProcessesTestData.ResourceIdAsync(services, Plasma);
-        int ether = await ProcessesTestData.ResourceIdAsync(services, Ether);
+        int plasma = await ProcessesTestData.ResourceIdAsync(services, Helium);
         int quartzite = await ProcessesTestData.ResourceIdAsync(services, Quartzite);
         int produced = await ProcessesTestData.ResourceIdAsync(services, BuildingMaterials);
 
@@ -195,10 +193,10 @@ public sealed partial class ProcessesTests
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
         long before = await ProcessesTestData.BalanceAsync(player, services, deuterium);
 
-        Assert.Equal(ProcessErrorCodes.SourceGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, ether, plasma)));
+        Assert.Equal(ProcessErrorCodes.SourceGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, quartzite, plasma)));
         Assert.Equal(ProcessErrorCodes.SourceGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, produced, plasma)));
-        Assert.Equal(ProcessErrorCodes.TargetGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, ether)));
         Assert.Equal(ProcessErrorCodes.TargetGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, quartzite)));
+        Assert.Equal(ProcessErrorCodes.TargetGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, produced)));
         Assert.Equal(ProcessErrorCodes.SameSourceAndTarget, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, deuterium)));
         Assert.Equal(ProcessErrorCodes.QuantityInvalid, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(0, deuterium, plasma)));
         Assert.Equal(ProcessErrorCodes.QuantityInvalid, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(long.MaxValue, deuterium, plasma)));
@@ -227,7 +225,7 @@ public sealed partial class ProcessesTests
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
         int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int targetId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        int targetId = await ProcessesTestData.ResourceIdAsync(services, Helium);
         long before = await ProcessesTestData.BalanceAsync(player, services, sourceId);
 
         // A whole order that is cancelled at once returns everything.
@@ -326,7 +324,7 @@ public sealed partial class ProcessesTests
         await ProcessesTestData.GiveEveryResourceAsync(player, services);
 
         // The life support is the part that carries the attribute of the crew.
-        PartFacts lifeSupport = await ProcessesTestData.PartAsync(services, LifeSupport);
+        PartFacts lifeSupport = await ProcessesTestData.WithAttributeAsync(services, LifeSupport, PartAttributeKeys.Crew, 1m);
         ProductionDbContext production = services.GetRequiredService<ProductionDbContext>();
         Assert.True(await production.PartAttributes.AsNoTracking().AnyAsync(
             attribute => attribute.PartTypeId == lifeSupport.PartTypeId && attribute.AttributeKey == PartAttributeKeys.Crew && attribute.NumberValue > 0,
@@ -424,7 +422,7 @@ public sealed partial class ProcessesTests
             IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
             ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
             int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-            int targetId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+            int targetId = await ProcessesTestData.ResourceIdAsync(services, Helium);
             ProcessOrderRequest request = new(10, sourceId, targetId);
             long targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
 
@@ -475,7 +473,7 @@ public sealed partial class ProcessesTests
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
         int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int targetId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        int targetId = await ProcessesTestData.ResourceIdAsync(services, Helium);
         long targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
 
         PartFacts hull = await ProcessesTestData.PartAsync(services, Hull);
@@ -496,7 +494,15 @@ public sealed partial class ProcessesTests
 
         Assert.Equal(targetBefore + 3, await ProcessesTestData.BalanceAsync(player, services, targetId));
         Dictionary<int, long> hullAfter = await BalancesAsync(player, services, hull.ResourceCost.Keys);
-        Assert.All(hull.ResourceCost, cost => Assert.Equal(hullBefore[cost.Key] + (long)decimal.Floor(2 * cost.Value * 0.40m), hullAfter[cost.Key]));
+
+        // The conversion spends ten of the source and gives three of the target. A resource of
+        // the hull that is one of those two carries both changes.
+        Assert.All(hull.ResourceCost, cost =>
+        {
+            long returned = (long)decimal.Floor(2 * cost.Value * 0.40m);
+            long conversion = cost.Key == sourceId ? 10 : cost.Key == targetId ? -3 : 0;
+            Assert.Equal(hullBefore[cost.Key] + returned - conversion, hullAfter[cost.Key]);
+        });
     }
 
     /// <summary>
@@ -586,12 +592,12 @@ public sealed partial class ProcessesTests
         ]));
 
         HashSet<int> resourceIds = [.. hull.ResourceCost.Keys, .. engine.ResourceCost.Keys];
-        Dictionary<int, long> before = await BalancesAsync(player, services, resourceIds);
+        Dictionary<int, long> before = await PaidBalancesAsync(player, services, resourceIds);
 
         ProcessBuildingDto queued = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(1), Token);
 
         // The cost is the share of the cost of a new part times the lost condition, summed.
-        Dictionary<int, long> paid = await BalancesAsync(player, services, resourceIds);
+        Dictionary<int, long> paid = await PaidBalancesAsync(player, services, resourceIds);
         foreach (int resourceId in resourceIds)
         {
             decimal expected = (hull.ResourceCost.GetValueOrDefault(resourceId) * 0.3m * 0.5m) + (engine.ResourceCost.GetValueOrDefault(resourceId) * 0.3m * 0.2m);
@@ -658,7 +664,7 @@ public sealed partial class ProcessesTests
         // The repair shop repairs the module that came off: the cost and the time follow the
         // lost condition, and the part comes back with its full condition.
         await ProcessesTestData.PutPartsAsync(player, services, engine.PartTypeId, 40, 1);
-        Dictionary<int, long> before = await BalancesAsync(player, services, engine.ResourceCost.Keys);
+        Dictionary<int, long> before = await PaidBalancesAsync(player, services, engine.ResourceCost.Keys);
 
         Assert.Equal(ProcessErrorCodes.PartNotDamaged, await RefusedAsync(processes, player, shopId, moduleRepair.Id, new ProcessOrderRequest(2, PartTypeId: engine.PartTypeId)));
 
@@ -666,7 +672,7 @@ public sealed partial class ProcessesTests
         ProcessOrderDto repairOrder = repairing.Queue[0];
         Assert.Equal((long)decimal.Ceiling(moduleRepair.DurationSeconds * 0.6m), (long)(repairOrder.NextUnitAt!.Value - repairOrder.StartsAt!.Value).TotalSeconds);
 
-        Dictionary<int, long> paid = await BalancesAsync(player, services, engine.ResourceCost.Keys);
+        Dictionary<int, long> paid = await PaidBalancesAsync(player, services, engine.ResourceCost.Keys);
         Assert.All(engine.ResourceCost, cost => Assert.Equal(before[cost.Key] - (long)decimal.Ceiling(cost.Value * 0.3m * 0.6m * 2), paid[cost.Key]));
 
         await ProcessesTestData.CompleteAsync(player, services, shopId);
@@ -694,7 +700,7 @@ public sealed partial class ProcessesTests
 
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-        ProcessOrderRequest request = new(3, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Plasma));
+        ProcessOrderRequest request = new(3, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Helium));
 
         await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
         ProcessBuildingDto two = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
@@ -739,7 +745,7 @@ public sealed partial class ProcessesTests
             await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 10);
 
             ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-            targetId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+            targetId = await ProcessesTestData.ResourceIdAsync(services, Helium);
             targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
 
             ProcessBuildingDto queued = await services.GetRequiredService<IProcessesModule>().EnqueueAsync(
@@ -860,7 +866,7 @@ public sealed partial class ProcessesTests
 
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-        ProcessOrderRequest request = new(2, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Plasma));
+        ProcessOrderRequest request = new(2, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Helium));
         ProcessBuildingDto queued = await processes.EnqueueAsync(owner.Account.UserId, owner.PlanetId, buildingId, recipe.Id, request, Token);
         long orderId = queued.Queue[0].OrderId;
 
@@ -945,7 +951,7 @@ public sealed partial class ProcessesTests
 
             IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
             ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-            ProcessOrderRequest request = new(1, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Plasma));
+            ProcessOrderRequest request = new(1, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Helium));
             await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
 
             ProcessReferenceAdminService admin = services.GetRequiredService<ProcessReferenceAdminService>();
@@ -988,7 +994,7 @@ public sealed partial class ProcessesTests
 
         long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
         await ProcessesTestData.GiveEveryResourceAsync(player, services);
-        int gift = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        int gift = await ProcessesTestData.ResourceIdAsync(services, Helium);
         int buildingTypeId = (await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>().FindBuildingTypeIdByClassAsync(BuildingClasses.Converter, Token))!.Value;
 
         ProcessesDbContext dbContext = services.GetRequiredService<ProcessesDbContext>();
@@ -1110,6 +1116,25 @@ public sealed partial class ProcessesTests
         foreach (int resourceId in resourceIds)
         {
             balances[resourceId] = await ProcessesTestData.BalanceAsync(player, services, resourceId);
+        }
+
+        return balances;
+    }
+
+    /// <summary>
+    /// The balances the repair pays: a currency from the civilization, the other resources from
+    /// the body.
+    /// </summary>
+    private static async Task<Dictionary<int, long>> PaidBalancesAsync(PlanetsTestPlayer player, IServiceProvider services, IEnumerable<int> resourceIds)
+    {
+        HashSet<int> currencyIds = await PlanetsTestData.CurrencyIdsAsync(services);
+        Dictionary<int, long> balances = [];
+
+        foreach (int resourceId in resourceIds)
+        {
+            balances[resourceId] = currencyIds.Contains(resourceId)
+                ? await EconomyTestData.BalanceAsync(services, player.Account.UserId, resourceId)
+                : await ProcessesTestData.BalanceAsync(player, services, resourceId);
         }
 
         return balances;

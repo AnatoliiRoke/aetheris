@@ -52,7 +52,7 @@ public sealed class ProductionTests
         using IServiceScope scope = _factory.Services.CreateScope();
         ProductionDbContext dbContext = scope.ServiceProvider.GetRequiredService<ProductionDbContext>();
 
-        Assert.Equal(12, await dbContext.PartGroups.CountAsync(Token));
+        Assert.Equal(18, await dbContext.PartGroups.CountAsync(Token));
         Assert.True(await dbContext.PartTypes.CountAsync(Token) >= 33);
         Assert.True(await dbContext.Recipes.CountAsync(Token) >= 38);
 
@@ -194,12 +194,12 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider, recipe);
         await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
         await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider);
 
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
-        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
 
         ProductionFactoryDto queued = await production.EnqueueAsync(
             player.Account.UserId,
@@ -233,12 +233,12 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider, recipe);
         await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
         await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider);
 
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
-        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
 
         ProductionFactoryDto queued = await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 2, Token);
         ProductionOrderDto order = queued.Queue[0];
@@ -273,9 +273,9 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
-        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
         RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider, recipe);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
         long capacity = await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider, 1, recipe.PartTypeId);
 
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
@@ -305,9 +305,9 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
-        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
         RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(scope.ServiceProvider);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider, recipe);
+        await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
         long capacity = await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider);
 
         // Another kind of part fills its whole room; the kind of the recipe has none of it.
@@ -415,15 +415,14 @@ public sealed class ProductionTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
-        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider);
+        // The recipe of a part of a group the race of the player has a bonus in, so the part
+        // carries the mark of the race.
+        RecipeInfo recipe = await FirstPartRecipeOfTheRaceAsync(scope.ServiceProvider, player);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, scope.ServiceProvider, recipe);
         await ProductionTestData.GiveEveryResourceAsync(player, scope.ServiceProvider);
         await ProductionTestData.BuildStorageAsync(player, scope.ServiceProvider);
 
         IProductionModule production = scope.ServiceProvider.GetRequiredService<IProductionModule>();
-
-        // The recipe of a part of a group the race of the player has a bonus in, so the part
-        // carries the mark of the race.
-        RecipeInfo recipe = await FirstPartRecipeOfTheRaceAsync(scope.ServiceProvider, player);
 
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 1, Token);
 
@@ -490,12 +489,12 @@ public sealed class ProductionTests
         IServiceProvider services = scope.ServiceProvider;
         IProductionModule production = services.GetRequiredService<IProductionModule>();
 
-        long buildingId = await ProductionTestData.BuildFactoryAsync(player, services);
+        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(services);
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, services, recipe);
         await ProductionTestData.GiveEveryResourceAsync(player, services);
         Assert.Equal(0, (await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage.Capacity);
 
         // Without the building a part has nowhere to go, so the batch waits.
-        RecipeInfo recipe = await ProductionTestData.FirstPartRecipeAsync(services);
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, 1, Token);
         await ProductionTestData.CompleteAsync(player, services, buildingId);
         Assert.True(Assert.Single((await production.GetFactoryAsync(player.Account.UserId, player.PlanetId, buildingId, Token)).Queue).IsBlocked);
@@ -503,7 +502,7 @@ public sealed class ProductionTests
         long first = await ProductionTestData.BuildStorageAsync(player, services);
         Assert.Equal(first, (await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage.Capacity);
 
-        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, "building_21", 2);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.MetalStorage, 2);
         long second = (await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage.Capacity;
         Assert.True(second > first);
         Assert.Equal(
@@ -717,12 +716,10 @@ public sealed class ProductionTests
             .Select(bonus => bonus.PartGroupId)
             .ToListAsync(Token)];
 
-        // The top module of a group is made by its race alone, so the recipe of the group of the
-        // race of the player is one of the parts of the second mark level.
+        // The race bonus covers a whole group. The starting parts of that group share one mark.
         return catalog.Recipes.First(recipe =>
             recipe.PartTypeId is not null
             && catalog.FindPart(recipe.PartTypeId.Value) is { } part
-            && part.MarkLevel > 1
             && bonusGroups.Contains(part.PartGroupId));
     }
 

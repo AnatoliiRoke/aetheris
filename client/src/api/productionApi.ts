@@ -134,6 +134,76 @@ export interface ProductionStack {
 }
 
 /**
+ * A group of the parts with one of its characteristics (task 00027, section 3.2).
+ */
+export interface CharacteristicGroup {
+  /** The group of the parts. */
+  partGroupId: number;
+  /** The neutral code of the group. */
+  code: string;
+  /** The localisation key of the name of the group. */
+  nameKey: string;
+  /** The order of the characteristic in the list of the group. */
+  sortOrder: number;
+  /** Whether a part of the group must have the value of the characteristic. */
+  isRequired: boolean;
+}
+
+/**
+ * A characteristic of the parts with the groups that have it (task 00027, section 3.2).
+ */
+export interface Characteristic {
+  /** The characteristic. */
+  characteristicId: number;
+  /** The neutral code of the characteristic. */
+  code: string;
+  /** The localisation key of the name of the characteristic. */
+  nameKey: string;
+  /** The localisation key of the description of the characteristic. */
+  descriptionKey: string;
+  /** The localisation key of the unit of measure, or `null` when it has none. */
+  unitKey: string | null;
+  /** The key of the picture of the characteristic, or `null`. */
+  imageKey: string | null;
+  /** The order in the lists. */
+  sortOrder: number;
+  /** Whether the characteristic is archived. */
+  isArchived: boolean;
+  /** The groups of the parts that have the characteristic. */
+  groups: CharacteristicGroup[];
+}
+
+/**
+ * The value of a characteristic of a part (task 00027, section 3.2).
+ */
+export interface PartCharacteristicValue {
+  /** The characteristic. */
+  characteristicId: number;
+  /** The value of the characteristic. */
+  numberValue: number;
+  /** The values of the characteristic by the level of the part, when it has them. */
+  levels: Record<string, number>;
+}
+
+/**
+ * The weight and the characteristics of a part (task 00027, section 3.2).
+ */
+export interface PartCharacteristics {
+  /** The part. */
+  partTypeId: number;
+  /** The neutral code of the part. */
+  code: string;
+  /** The localisation key of the name of the part. */
+  nameKey: string;
+  /** The group of the part. */
+  partGroupId: number;
+  /** The weight of one part in tonnes. */
+  weight: number;
+  /** The values of the characteristics of the part. */
+  characteristics: PartCharacteristicValue[];
+}
+
+/**
  * The endpoints of the production module: the reads of the factories and the stock, and the
  * commands of the queue. The server checks every rule; the client only shows them.
  */
@@ -143,6 +213,10 @@ export interface ProductionApi {
   stock(planetId: number): Promise<ProductionStock>;
   /** Every batch of every factory of the body in one list (task 00020, section 7.5). */
   orders(planetId: number): Promise<ActiveOrders>;
+  /** The characteristics of the parts with the groups that have them (task 00027). */
+  characteristics(): Promise<Characteristic[]>;
+  /** The weight and the characteristics of every part (task 00027). */
+  characteristicParts(): Promise<PartCharacteristics[]>;
   enqueue(planetId: number, planetBuildingId: number, recipeId: number, quantity: number): Promise<ProductionFactory>;
   cancel(planetId: number, planetBuildingId: number, orderId: number): Promise<ProductionFactory>;
 }
@@ -165,6 +239,12 @@ export function createProductionApi(http: HttpClient): ProductionApi {
     },
     async orders(planetId) {
       return camelize<ActiveOrders>(await http.get<unknown>(`${prefix}/orders?planet_id=${planetId}`));
+    },
+    async characteristics() {
+      return camelize<Characteristic[]>(await http.get<unknown>(`${prefix}/characteristics`));
+    },
+    async characteristicParts() {
+      return camelize<PartCharacteristics[]>(await http.get<unknown>(`${prefix}/characteristics/parts`));
     },
     async enqueue(planetId, planetBuildingId, recipeId, quantity) {
       return camelize<ProductionFactory>(

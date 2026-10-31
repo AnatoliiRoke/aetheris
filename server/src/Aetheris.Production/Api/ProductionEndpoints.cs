@@ -89,6 +89,31 @@ public static class ProductionEndpoints
             return Results.Json(stock, ProductionJson.Options);
         });
 
+        // The characteristics of the parts and the values of every part (task 00027): the
+        // client and the simulator read them from here, never from the tables.
+        production.MapGet("/characteristics", async (
+            CharacteristicQueryService characteristics,
+            CancellationToken cancellationToken) =>
+        {
+            IReadOnlyList<CharacteristicDto> rows = await characteristics
+                .ReadAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return Results.Json(rows, ProductionJson.Options);
+        });
+
+        // The weight and the characteristics of every part.
+        production.MapGet("/characteristics/parts", async (
+            CharacteristicQueryService characteristics,
+            CancellationToken cancellationToken) =>
+        {
+            IReadOnlyList<PartCharacteristicsDto> rows = await characteristics
+                .ReadPartsAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return Results.Json(rows, ProductionJson.Options);
+        });
+
         return endpoints;
     }
 

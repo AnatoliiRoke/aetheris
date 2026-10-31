@@ -5,6 +5,7 @@ using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
+using Aetheris.Tests.Economy;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.World;
 using Microsoft.EntityFrameworkCore;
@@ -69,7 +70,21 @@ public sealed class ConstructionTests
         Assert.Equal(start, underWay.StartedAt);
         Assert.Equal(start.AddSeconds(plantLevel.DurationSeconds), underWay.FinishesAt);
         Assert.Null(waiting.StartedAt);
-        Assert.All(plantLevel.CostIds, cost => Assert.Equal(balance[cost.ResourceTypeId] - cost.Amount, Amount(first, cost.ResourceTypeId)));
+        HashSet<int> currencyIds = await PlanetsTestData.CurrencyIdsAsync(services);
+        Assert.All(
+            plantLevel.CostIds.Where(cost => !currencyIds.Contains(cost.ResourceTypeId)),
+            cost => Assert.Equal(balance[cost.ResourceTypeId] - cost.Amount, Amount(first, cost.ResourceTypeId)));
+
+        foreach (BuildingLevelCostEntity currencyCost in plantLevel.CostIds.Where(cost => currencyIds.Contains(cost.ResourceTypeId)))
+        {
+            long housingCost = housingLevel.CostIds
+                .Where(cost => cost.ResourceTypeId == currencyCost.ResourceTypeId)
+                .Sum(cost => cost.Amount);
+
+            Assert.Equal(
+                balance[currencyCost.ResourceTypeId] - currencyCost.Amount - housingCost,
+                await EconomyTestData.BalanceAsync(services, player.Account.UserId, currencyCost.ResourceTypeId));
+        }
 
         // A third record finds no place.
         GameException full = await Assert.ThrowsAsync<GameException>(() => construction.EnqueueAsync(player.PlanetId, storage.Id, start.AddSeconds(6), Token));
@@ -165,19 +180,36 @@ public sealed class ConstructionTests
         await AetherisTestFactory.SetParameterAsync(services, PlanetsConfigKeys.QueueBaseSlots, "100");
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, await BuildingsTests.RichBalanceAsync(services), now);
 
-        // The main building of level 2 opens the science centre and gives some energy.
+        // The main building of level 2 lets the next level of the housing through the level cap.
+        // The housing is the consumer: the seed spends energy as a resource, so the test adds
+        // the consumption effect the rule checks.
         const int mainLevel = 2;
+        const decimal housingConsumption = 50m;
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.AdminCenter, mainLevel);
+
+        PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
+        BuildingTypeEntity housingRow = await planets.BuildingTypes
+            .Include(type => type.LevelIds)
+            .ThenInclude(level => level.EffectIds)
+            .SingleAsync(type => type.Code == SeedCodes.ResidentialComplex, Token);
+
+        foreach (BuildingLevelEntity level in housingRow.LevelIds.Where(level => level.Level <= mainLevel))
+        {
+            level.EffectIds.Add(new BuildingLevelEffectEntity
+            {
+                EffectType = BuildingEffectTypes.EnergyConsumption,
+                Value = housingConsumption,
+            });
+        }
+
+        await planets.SaveChangesAsync(Token);
+        services.GetRequiredService<BuildingCatalogCache>().Invalidate();
 
         BuildingTypeEntity main = await PlanetsTestData.TypeAsync(services, SeedCodes.AdminCenter);
         BuildingTypeEntity plant = await PlanetsTestData.TypeAsync(services, SeedCodes.PowerPlant);
         List<BuildingTypeEntity> consumers =
         [
             await PlanetsTestData.TypeAsync(services, SeedCodes.ResidentialComplex),
-            await PlanetsTestData.TypeAsync(services, SeedCodes.MetalStorage),
-            await PlanetsTestData.TypeAsync(services, SeedCodes.MineralStorage),
-            await PlanetsTestData.TypeAsync(services, SeedCodes.FuelStorage),
-            await PlanetsTestData.TypeAsync(services, SeedCodes.ScienceCenter),
         ];
 
         long output = Effect(main, mainLevel, BuildingEffectTypes.EnergyOutput);
@@ -238,25 +270,26 @@ public sealed class ConstructionTests
         DateTimeOffset start = PlanetsTestData.GameNow(services);
 
         BuildingTypeEntity mine = await PlanetsTestData.TypeAsync(services, SeedCodes.IronMine);
-        BuildingTypeEntity main = await PlanetsTestData.TypeAsync(services, SeedCodes.AdminCenter);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.MetalStorage, 1);
+        BuildingTypeEntity warehouse = await PlanetsTestData.TypeAsync(services, SeedCodes.MetalStorage);
         long value = Effect(mine, 1, BuildingEffectTypes.MetalProduction);
-        BuildingLevelEffectEntity capacityEffect = main.LevelIds.Single(level => level.Level == 1).EffectIds
+        BuildingLevelEffectEntity capacityEffect = warehouse.LevelIds.Single(level => level.Level == 1).EffectIds
             .Single(effect => effect.EffectType == BuildingEffectTypes.StorageCapacity && effect.ResourceGroupId != null
                 && services.GetRequiredService<Aetheris.World.Data.WorldDbContext>().ResourceTypes.Any(resource => resource.Id == iron && resource.ResourceGroupId == effect.ResourceGroupId));
 
         // Copper of the same group pays for a later change; it has the capacity of its own and does
         // not take any of the capacity of the iron.
-        const long copperAmount = 1000;
+        const long copperAmount = 10;
         int copper = await PlanetsTestData.ResourceIdAsync(services, SeedCodes.Copper);
 
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.IronMine, 1);
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, new Dictionary<int, long> { [iron] = 0, [copper] = copperAmount }, start);
 
         decimal rate = value * richness;
-        PlanetOverviewDto twoHours = await PlanetsTestData.ReadAsync(services, player.PlanetId, start.AddHours(2));
+        PlanetOverviewDto early = await PlanetsTestData.ReadAsync(services, player.PlanetId, start.AddMinutes(20));
 
-        Assert.Equal(rate, twoHours.Resources.Single(resource => resource.ResourceTypeId == iron).RatePerHour);
-        Assert.Equal((long)decimal.Floor(rate * 2), Amount(twoHours, iron));
+        Assert.Equal(rate, early.Resources.Single(resource => resource.ResourceTypeId == iron).RatePerHour);
+        Assert.Equal((long)decimal.Floor(rate * 20 / 60), Amount(early, iron));
 
         // The read writes nothing; the balance is fixed only by a change.
         Assert.Equal(0, (await PlanetsTestData.StoredBalanceAsync(services, player.PlanetId))[iron]);
@@ -276,6 +309,7 @@ public sealed class ConstructionTests
         Assert.False(copperLater.IsFull);
 
         // A change fixes the balance and writes the alarm as the state of the resource.
+        await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, await BuildingsTests.RichBalanceAsync(services), fullAt.AddDays(3));
         await services.GetRequiredService<ConstructionService>().EnqueueAsync(
             player.PlanetId,
             (await PlanetsTestData.TypeAsync(services, SeedCodes.PowerPlant)).Id,
@@ -331,8 +365,16 @@ public sealed class ConstructionTests
             response => Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode));
 
         Dictionary<int, long> left = await PlanetsTestData.StoredBalanceAsync(services, player.PlanetId);
+        HashSet<int> spentCurrencyIds = await PlanetsTestData.CurrencyIdsAsync(services);
         Assert.All(left.Values, amount => Assert.True(amount >= 0));
-        Assert.All(balance.Keys, resourceTypeId => Assert.Equal(0, left[resourceTypeId]));
+        Assert.All(
+            balance.Keys.Where(resourceTypeId => !spentCurrencyIds.Contains(resourceTypeId)),
+            resourceTypeId => Assert.Equal(0, left[resourceTypeId]));
+
+        foreach (int resourceTypeId in balance.Keys.Where(spentCurrencyIds.Contains))
+        {
+            Assert.Equal(0, await EconomyTestData.BalanceAsync(services, player.Account.UserId, resourceTypeId));
+        }
 
         List<int> levels = await services.GetRequiredService<PlanetsDbContext>().QueueItems.AsNoTracking()
             .Where(item => item.PlanetId == player.PlanetId)

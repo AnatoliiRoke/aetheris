@@ -8,6 +8,7 @@ using Aetheris.Requirements;
 using Aetheris.Requirements.Data;
 using Aetheris.Requirements.Data.Entities;
 using Aetheris.Requirements.Services;
+using Aetheris.Tests.Economy;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.World;
 using Aetheris.World;
@@ -65,9 +66,16 @@ public sealed class BuildingsTests
             .ToListAsync(Token));
         Assert.Equal((main.Id, 1), (building.BuildingTypeId, building.Level));
 
+        HashSet<int> currencyIds = await PlanetsTestData.CurrencyIdsAsync(scope.ServiceProvider);
+
         Assert.Equal(
-            race.StartResourceIds.ToDictionary(entry => entry.ResourceTypeId, entry => entry.Amount),
+            race.StartResourceIds.Where(entry => !currencyIds.Contains(entry.ResourceTypeId)).ToDictionary(entry => entry.ResourceTypeId, entry => entry.Amount),
             await PlanetsTestData.StoredBalanceAsync(scope.ServiceProvider, player.PlanetId));
+
+        foreach (RaceStartResourceEntity currency in race.StartResourceIds.Where(entry => currencyIds.Contains(entry.ResourceTypeId)))
+        {
+            Assert.Equal(currency.Amount, await EconomyTestData.BalanceAsync(scope.ServiceProvider, player.Account.UserId, currency.ResourceTypeId));
+        }
 
         // The client reads the same through the API.
         PlanetOverviewDto? overview = await scope.ServiceProvider.GetRequiredService<IPlanetsModule>()
@@ -100,20 +108,17 @@ public sealed class BuildingsTests
         DateTimeOffset now = PlanetsTestData.GameNow(services);
         PlanetOverviewDto overview = await PlanetsTestData.ReadAsync(services, player.PlanetId, now);
 
-        string[] open = [SeedCodes.AdminCenter, SeedCodes.ResidentialComplex, SeedCodes.PowerPlant, SeedCodes.IronMine, SeedCodes.MetalStorage, SeedCodes.MineralStorage, SeedCodes.FuelStorage];
+        string[] open = [SeedCodes.AdminCenter, SeedCodes.ResidentialComplex, SeedCodes.PowerPlant, SeedCodes.IronMine, SeedCodes.MetalStorage, SeedCodes.ScienceCenter];
 
         Assert.All(open, code => Assert.DoesNotContain(PlanetsErrorCodes.RequirementUnmet, PlanetsTestData.Building(overview, code).Next.ReasonCodes));
 
-        RequirementDto science = Assert.Single(PlanetsTestData.Building(overview, SeedCodes.ScienceCenter).Next.UnmetRequirements);
-        Assert.Equal(PlanetsErrorCodes.RequirementBuildingLevel, science.ReasonCode);
-        Assert.Equal(2, science.TargetLevel);
-        Assert.Equal(PlanetsErrorCodes.RequirementDeposit, Assert.Single(PlanetsTestData.Building(overview, SeedCodes.CopperMine).Next.UnmetRequirements).ReasonCode);
+        RequirementDto deposit = Assert.Single(PlanetsTestData.Building(overview, SeedCodes.CopperMine).Next.UnmetRequirements);
+        Assert.Equal(PlanetsErrorCodes.RequirementDeposit, deposit.ReasonCode);
 
-        // A designer lowers the requirement of the science centre in the database. The
-        // requirements live in the common requirements module (task 00012, decision 3).
+        // A designer removes the deposit requirement. The requirements live in the common
+        // requirements module (task 00012, decision 3).
         RequirementsDbContext requirements = services.GetRequiredService<RequirementsDbContext>();
-        await requirements.Requirements.Where(entry => entry.Id == science.RequirementId)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(entry => entry.TargetLevel, 1), Token);
+        await requirements.Requirements.Where(entry => entry.Id == deposit.RequirementId).ExecuteDeleteAsync(Token);
 
         // A technology that does not exist yet closes the housing.
         BuildingTypeEntity housing = await PlanetsTestData.TypeAsync(services, SeedCodes.ResidentialComplex);
@@ -130,7 +135,7 @@ public sealed class BuildingsTests
 
         PlanetOverviewDto changed = await PlanetsTestData.ReadAsync(services, player.PlanetId, now);
 
-        Assert.Empty(PlanetsTestData.Building(changed, SeedCodes.ScienceCenter).Next.UnmetRequirements);
+        Assert.Empty(PlanetsTestData.Building(changed, SeedCodes.CopperMine).Next.UnmetRequirements);
         Assert.Equal(PlanetsErrorCodes.RequirementTechnology, Assert.Single(PlanetsTestData.Building(changed, SeedCodes.ResidentialComplex).Next.UnmetRequirements).ReasonCode);
 
         // The common check answers the same for any subject.
@@ -172,22 +177,19 @@ public sealed class BuildingsTests
 
         PlanetOverviewDto overview = await PlanetsTestData.ReadAsync(services, player.PlanetId, now);
         Assert.Contains(PlanetsErrorCodes.LevelCapped, PlanetsTestData.Building(overview, SeedCodes.PowerPlant).Next.ReasonCodes);
-        Assert.Contains(PlanetsErrorCodes.RequirementUnmet, PlanetsTestData.Building(overview, SeedCodes.ScienceCenter).Next.ReasonCodes);
+        Assert.DoesNotContain(PlanetsErrorCodes.RequirementUnmet, PlanetsTestData.Building(overview, SeedCodes.ScienceCenter).Next.ReasonCodes);
 
         GameException capped = await Assert.ThrowsAsync<GameException>(() => construction.EnqueueAsync(player.PlanetId, plant.Id, now, Token));
         Assert.Equal(PlanetsErrorCodes.LevelCapped, capped.Code);
 
-        GameException closed = await Assert.ThrowsAsync<GameException>(() => construction.EnqueueAsync(player.PlanetId, science.Id, now, Token));
-        Assert.Equal(PlanetsErrorCodes.RequirementUnmet, closed.Code);
+        PlanetOverviewDto opened = await construction.EnqueueAsync(player.PlanetId, science.Id, now, Token);
+        Assert.Equal(1, PlanetsTestData.Building(opened, SeedCodes.ScienceCenter).QueuedLevel);
 
         // The main building grows by the ordinary rules, and the others follow it.
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.AdminCenter, 2);
 
         PlanetOverviewDto grown = await construction.EnqueueAsync(player.PlanetId, plant.Id, now, Token);
         Assert.Equal(2, PlanetsTestData.Building(grown, SeedCodes.PowerPlant).QueuedLevel);
-
-        PlanetOverviewDto opened = await construction.EnqueueAsync(player.PlanetId, science.Id, now, Token);
-        Assert.Equal(1, PlanetsTestData.Building(opened, SeedCodes.ScienceCenter).QueuedLevel);
     }
 
     /// <summary>

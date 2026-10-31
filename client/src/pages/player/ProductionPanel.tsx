@@ -8,7 +8,9 @@ import type { Language } from '../../i18n/context';
 import { useI18n } from '../../i18n/useI18n';
 import type { EntityText } from '../../texts/context';
 import { useTexts } from '../../texts/useTexts';
-import { formatDuration, formatNumber, lookup } from './planetText';
+import { formatCoefficient, formatDuration, formatNumber, lookup } from './planetText';
+import { CharacteristicList } from './StorageBlocks';
+import { useCharacteristics } from './useCharacteristics';
 import { useProduction } from './useProduction';
 import { useShellActions } from './useShell';
 
@@ -243,11 +245,12 @@ function RecipeList({
 }
 
 /**
- * The stock of the parts of the body with the mark of the race.
+ * The stock of the parts of the body with the mark of the race and the weight of every part.
  */
 function StockPanel({ stacks, storage }: { stacks: ProductionStack[]; storage: ProductionStorage | null }) {
   const { t, language } = useI18n();
   const { text } = useTexts();
+  const characteristics = useCharacteristics();
   const partName = (partTypeId: number) => {
     const stack = stacks.find((entry) => entry.partTypeId === partTypeId);
 
@@ -268,16 +271,31 @@ function StockPanel({ stacks, storage }: { stacks: ProductionStack[]; storage: P
         <p className="lead">{t('production.stockEmpty')}</p>
       ) : (
         <ul className="storage-list">
-          {stacks.map((stack) => (
-            <li key={`${stack.partTypeId}-${stack.markLevel}-${stack.hasRaceBonus}-${stack.conditionPercent}`} className="storage-row">
-              <span>{text(stack.nameKey) ?? t('production.part', { id: stack.partTypeId })}</span>
-              <span className="num">
-                {t('production.mark', { level: markName(stack.markLevel) })}
-              </span>
-              {stack.hasRaceBonus ? <span className="badge">{t('production.raceBonus')}</span> : null}
-              <span className="num">{formatNumber(stack.quantity, language)}</span>
-            </li>
-          ))}
+          {stacks.map((stack) => {
+            const weight = characteristics.weight(stack.partTypeId);
+            const rows = characteristics.rows(stack.partTypeId);
+
+            return (
+              <li key={`${stack.partTypeId}-${stack.markLevel}-${stack.hasRaceBonus}-${stack.conditionPercent}`} className="storage-stock">
+                <div className="storage-row">
+                  <span>{text(stack.nameKey) ?? t('production.part', { id: stack.partTypeId })}</span>
+                  <span className="num">
+                    {t('production.mark', { level: markName(stack.markLevel) })}
+                  </span>
+                  {stack.hasRaceBonus ? <span className="badge">{t('production.raceBonus')}</span> : null}
+                  <span className="num storage-stock__weight">
+                    {formatNumber(stack.quantity, language)}
+                    {weight === null ? null : (
+                      <span className="meta">
+                        {formatCoefficient(weight, language)} {t('storage.weightUnit')}
+                      </span>
+                    )}
+                  </span>
+                </div>
+                {rows.length > 0 ? <CharacteristicList language={language} rows={rows} /> : null}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

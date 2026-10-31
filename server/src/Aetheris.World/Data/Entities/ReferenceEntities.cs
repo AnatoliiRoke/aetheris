@@ -71,6 +71,13 @@ public sealed class ResourceTypeEntity
     public string? ImageKey { get; set; }
 
     /// <summary>
+    /// Gets or sets the weight of one unit of the resource in tonnes. The room of a storage and
+    /// of a hold is counted by it, so the weight is data and not a number of the code
+    /// (task 00027, section 3.1).
+    /// </summary>
+    public decimal Weight { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether the resource is archived: the stocks of the players and
     /// the costs already written stay, but no new level, recipe or generation rule gets it
     /// (task 00023, decision 5).

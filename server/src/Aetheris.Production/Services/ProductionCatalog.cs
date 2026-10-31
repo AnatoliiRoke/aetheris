@@ -10,15 +10,18 @@ namespace Aetheris.Production.Services;
 /// <param name="Parts">The parts in the order of the lists.</param>
 /// <param name="Recipes">The recipes in the order of the lists.</param>
 /// <param name="Requirements">The requirements of every recipe.</param>
+/// <param name="Characteristics">The characteristics of the parts, in the order of the lists.</param>
 public sealed record ProductionCatalog(
     IReadOnlyList<PartGroupInfo> Groups,
     IReadOnlyList<PartTypeInfo> Parts,
     IReadOnlyList<RecipeInfo> Recipes,
-    IReadOnlyList<ProductionRequirementInfo> Requirements)
+    IReadOnlyList<ProductionRequirementInfo> Requirements,
+    IReadOnlyList<CharacteristicInfo> Characteristics)
 {
     private readonly Dictionary<int, PartGroupInfo> _groupsById = Groups.ToDictionary(group => group.Id);
     private readonly Dictionary<int, PartTypeInfo> _partsById = Parts.ToDictionary(part => part.Id);
     private readonly Dictionary<int, RecipeInfo> _recipesById = Recipes.ToDictionary(recipe => recipe.Id);
+    private readonly Dictionary<int, CharacteristicInfo> _characteristicsById = Characteristics.ToDictionary(characteristic => characteristic.Id);
 
     /// <summary>
     /// Finds a group of the parts.
@@ -33,6 +36,13 @@ public sealed record ProductionCatalog(
     /// <param name="partId">The part.</param>
     /// <returns>The part, or <see langword="null"/>.</returns>
     public PartTypeInfo? FindPart(int partId) => _partsById.GetValueOrDefault(partId);
+
+    /// <summary>
+    /// Finds a characteristic.
+    /// </summary>
+    /// <param name="characteristicId">The characteristic.</param>
+    /// <returns>The characteristic, or <see langword="null"/>.</returns>
+    public CharacteristicInfo? FindCharacteristic(int characteristicId) => _characteristicsById.GetValueOrDefault(characteristicId);
 
     /// <summary>
     /// Finds a recipe.
@@ -67,11 +77,47 @@ public sealed record ProductionCatalog(
 /// <param name="ImageKey">The key of the picture, or <see langword="null"/>.</param>
 /// <param name="SortOrder">The order in the lists.</param>
 /// <param name="IsArchived">Whether the group is archived.</param>
+/// <param name="Characteristics">The characteristics the parts of the group have, in the order of the form.</param>
 public sealed record PartGroupInfo(
     int Id,
     string Code,
     string NameKey,
     string DescriptionKey,
+    string? ImageKey,
+    int SortOrder,
+    bool IsArchived,
+    IReadOnlyList<PartGroupCharacteristicInfo> Characteristics);
+
+/// <summary>A characteristic of a group of the parts.</summary>
+/// <param name="CharacteristicId">The characteristic.</param>
+/// <param name="Code">The stable code of the characteristic.</param>
+/// <param name="NameKey">The localisation key of the name of the characteristic.</param>
+/// <param name="UnitKey">The localisation key of the unit of measure, or <see langword="null"/>.</param>
+/// <param name="SortOrder">The order in the list of the group.</param>
+/// <param name="IsRequired">Whether a part of the group must have the value of the characteristic.</param>
+public sealed record PartGroupCharacteristicInfo(
+    int CharacteristicId,
+    string Code,
+    string NameKey,
+    string? UnitKey,
+    int SortOrder,
+    bool IsRequired);
+
+/// <summary>A characteristic of the parts.</summary>
+/// <param name="Id">The characteristic.</param>
+/// <param name="Code">The stable code.</param>
+/// <param name="NameKey">The localisation key of the name.</param>
+/// <param name="DescriptionKey">The localisation key of the description.</param>
+/// <param name="UnitKey">The localisation key of the unit of measure, or <see langword="null"/>.</param>
+/// <param name="ImageKey">The key of the picture, or <see langword="null"/>.</param>
+/// <param name="SortOrder">The order in the lists.</param>
+/// <param name="IsArchived">Whether the characteristic is archived.</param>
+public sealed record CharacteristicInfo(
+    int Id,
+    string Code,
+    string NameKey,
+    string DescriptionKey,
+    string? UnitKey,
     string? ImageKey,
     int SortOrder,
     bool IsArchived);
@@ -87,6 +133,8 @@ public sealed record PartGroupInfo(
 /// <param name="SortOrder">The order in the lists.</param>
 /// <param name="IsArchived">Whether the part is archived.</param>
 /// <param name="Attributes">The attributes of the part by their key.</param>
+/// <param name="Weight">The weight of one part in tonnes (task 00027).</param>
+/// <param name="Characteristics">The values of the characteristics of the part by the characteristic.</param>
 public sealed record PartTypeInfo(
     int Id,
     string Code,
@@ -97,7 +145,18 @@ public sealed record PartTypeInfo(
     int MarkLevel,
     int SortOrder,
     bool IsArchived,
-    IReadOnlyDictionary<string, PartAttributeInfo> Attributes);
+    IReadOnlyDictionary<string, PartAttributeInfo> Attributes,
+    decimal Weight,
+    IReadOnlyDictionary<int, PartCharacteristicInfo> Characteristics);
+
+/// <summary>The value of a characteristic of a part.</summary>
+/// <param name="CharacteristicId">The characteristic.</param>
+/// <param name="NumberValue">The value of the characteristic.</param>
+/// <param name="Levels">The values of the characteristic by the level of the part, when it has them.</param>
+public sealed record PartCharacteristicInfo(
+    int CharacteristicId,
+    decimal NumberValue,
+    IReadOnlyDictionary<int, decimal> Levels);
 
 /// <summary>An attribute of a part.</summary>
 /// <param name="AttributeKey">The key of the parameter.</param>

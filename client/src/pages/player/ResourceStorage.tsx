@@ -2,7 +2,7 @@ import type { Planet, PlanetResource } from '../../api/planetApi';
 import { Alert } from '../../components/Alert';
 import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
-import { formatAmount, type namer } from './planetText';
+import { fillPercent, formatAmount, formatCoefficient, storedTonnes, unitWeight, type namer } from './planetText';
 
 type Names = ReturnType<typeof namer>;
 
@@ -58,14 +58,16 @@ export function ResourceStorage({ planet, names }: { planet: Planet; names: Name
 
 /**
  * A row of the storage: the icon and the name, the bar, and the amount against the capacity of
- * the resource with the badge of a full resource. A resource whose group has no storage has no
- * capacity: the row shows the amount alone and says there is no storage, never a full bar.
+ * the resource with the badge of a full resource. The bar is the stored tonnes against the
+ * capacity in tonnes. The row also shows the weight of one unit and the stored tonnes. A
+ * resource whose group has no storage has no capacity: the row shows the amount alone and says
+ * there is no storage, never a full bar.
  */
 function ResourceStorageRow({ resource, names }: { resource: PlanetResource; names: Names }) {
   const { t, language } = useI18n();
   const name = names.resource(resource.resourceTypeId);
   const hasCapacity = resource.capacity > 0;
-  const percent = hasCapacity ? Math.min(fullPercent, Math.round((resource.amount / resource.capacity) * fullPercent)) : 0;
+  const percent = fillPercent(resource);
 
   return (
     <li className="storage-resource">
@@ -83,6 +85,11 @@ function ResourceStorageRow({ resource, names }: { resource: PlanetResource; nam
         ) : (
           <span title={t('planet.storageNoCapacityHint')}>{t('planet.storageNoCapacity', { amount: formatAmount(resource.amount, language) })}</span>
         )}
+        <span className="meta">
+          {t('storage.weight')} {formatCoefficient(unitWeight(resource), language)} {t('storage.weightUnit')}
+          {' · '}
+          {t('storage.volume')} {formatCoefficient(storedTonnes(resource), language)} {t('storage.weightUnit')}
+        </span>
       </span>
     </li>
   );

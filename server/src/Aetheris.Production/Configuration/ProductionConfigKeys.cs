@@ -22,6 +22,12 @@ public static class ProductionConfigKeys
     public const string CatalogCacheSeconds = "production.catalog.cache_seconds";
 
     /// <summary>
+    /// The weight of one part in tonnes, for the parts that have no weight of their own yet
+    /// (task 00027).
+    /// </summary>
+    public const string DefaultPartWeight = "production.part.default_weight";
+
+    /// <summary>
     /// Gets the definitions of the parameters with their starting values and bounds.
     /// </summary>
     public static IReadOnlyList<ConfigParameterDefinition> Definitions { get; } =
@@ -29,5 +35,6 @@ public static class ProductionConfigKeys
         new(QueueBaseSlots, "2", "1", "100", "Місць у черзі заводу, разом із тим, що виробляється."),
         new(QueueMaxExtraSlots, "2", "0", "100", "Найбільша кількість платних місць, доданих до черги заводу."),
         new(CatalogCacheSeconds, "30", "0", "86400", "Скільки секунд таблиці виробництва залишаються в пам'яті сервера перед повторним читанням."),
+        new(DefaultPartWeight, "1", "0", "1000000000", "Вага однієї деталі в тоннах, для деталей, у яких ще немає власної ваги."),
     ];
 }

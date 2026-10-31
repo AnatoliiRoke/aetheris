@@ -96,8 +96,8 @@ public sealed class StartCapitalTests
             .OrderBy(level => level.Level)
             .Select(level => level.EffectIds.Single(effect => effect.EffectType == EconomyCodes.PopulationGrowthBonusEffect).Value)];
 
-        // The values of the author for the first six levels, kept without a rounding.
-        Assert.Equal([1.2m, 1.4m, 1.6m, 1.8m, 2.0m, 2.3m], multipliers[..6]);
+        // The values of the author for the first six levels.
+        Assert.Equal([100m, 110m, 121m, 133m, 146m, 161m], multipliers[..6]);
         Assert.Equal(multipliers.OrderBy(value => value), multipliers);
 
         IEconomyModule economy = services.GetRequiredService<IEconomyModule>();

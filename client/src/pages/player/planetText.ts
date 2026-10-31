@@ -92,15 +92,56 @@ export function formatNumber(value: number, language: Language): string {
 }
 
 /**
+ * The weight of one unit of a resource, in tonnes (task 00027). A resource the server did not
+ * weigh counts as one tonne, which is the default of the data.
+ *
+ * @param resource The resource of a body.
+ * @returns The weight of one unit.
+ */
+export function unitWeight(resource: PlanetResource): number {
+  const weight = resource.weight;
+
+  return weight === undefined || !Number.isFinite(weight) ? 1 : weight;
+}
+
+/**
+ * How much a resource weighs on the body, in tonnes (task 00027). The server sends the tonnes;
+ * an older answer is the amount times the weight of one unit.
+ *
+ * @param resource The resource of a body.
+ * @returns The stored weight in tonnes.
+ */
+export function storedTonnes(resource: PlanetResource): number {
+  const tonnes = resource.storedTonnes;
+
+  return tonnes !== undefined && Number.isFinite(tonnes) ? tonnes : resource.amount * unitWeight(resource);
+}
+
+/**
+ * How full the storage of a resource is, from the tonnes it holds against the tonnes the storage
+ * allows (task 00027). A resource without a capacity has nothing to fill.
+ *
+ * @param resource The resource of a body.
+ * @returns The percent, from 0 to 100.
+ */
+export function fillPercent(resource: PlanetResource): number {
+  if (resource.capacity <= 0) {
+    return 0;
+  }
+
+  return Math.min(100, Math.round((storedTonnes(resource) / resource.capacity) * 100));
+}
+
+/**
  * Finds the resource of a body that is the nearest to its limit: a full resource first, then the
- * one with the largest share of its capacity. The summary of a body uses it, because every
- * resource has the capacity of its own and there is no total of the storage.
+ * one with the largest share of its capacity in tonnes. The summary of a body uses it, because
+ * every resource has the capacity of its own and there is no total of the storage.
  *
  * @param resources The resources of the body.
  * @returns The resource, or `null` when no resource has a capacity.
  */
 export function fullestResource(resources: PlanetResource[]): PlanetResource | null {
-  const share = (resource: PlanetResource) => (resource.isFull ? Number.POSITIVE_INFINITY : resource.amount / resource.capacity);
+  const share = (resource: PlanetResource) => (resource.isFull ? Number.POSITIVE_INFINITY : storedTonnes(resource) / resource.capacity);
 
   return resources
     .filter((resource) => resource.capacity > 0)

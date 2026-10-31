@@ -368,7 +368,7 @@ describe('/planet/storage: the elements of the design', () => {
     const production = await screen.findByRole('table', { name: 'Продукція' });
     const row = within(production).getByText('Будматеріали').closest('tr')!;
 
-    expect(within(production).getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['Назва', 'Кількість', 'Заповнення']);
+    expect(within(production).getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['Назва', 'Кількість', 'Заповнення', 'Вага', 'Обсяг']);
     expect(within(row).getByText('630 / 2 500')).toBeInTheDocument();
     expect(within(row).getByText('25%')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Недоступно' })).not.toBeInTheDocument();

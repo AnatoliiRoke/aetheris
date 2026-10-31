@@ -177,11 +177,11 @@ public static class PlanetsReferenceSeed
                     : throw new InvalidOperationException($"The starting data gives the building '{type.Code}' the unknown category '{type.Category}'."),
                 LevelIds =
                 [
-                    .. Enumerable.Range(1, seed.LevelCount).Select(level => new BuildingLevelEntity
+                    .. Enumerable.Range(1, type.MaxLevel is > 0 ? type.MaxLevel.Value : seed.LevelCount).Select(level => new BuildingLevelEntity
                     {
                         Level = level,
                         DurationSeconds = ValueAt(type.DurationSeconds, level),
-                        CostIds = [.. type.Costs.Select(cost => new BuildingLevelCostEntity { ResourceTypeId = resourceIds[cost.Resource], Amount = ValueAt(cost, level) })],
+                        CostIds = [.. type.Costs.Where(cost => level >= cost.FromLevel).Select(cost => new BuildingLevelCostEntity { ResourceTypeId = resourceIds[cost.Resource], Amount = ValueAt(cost, level) })],
                         EffectIds =
                         [
                             .. type.Effects.Select(effect => new BuildingLevelEffectEntity
@@ -218,7 +218,11 @@ public static class PlanetsReferenceSeed
                 continue;
             }
 
-            foreach (IGrouping<int, SeedRequirement> group in type.Requirements.GroupBy(requirement => requirement.SubjectLevel ?? 1))
+            // A technology requirement is resolved after the technologies exist. The research
+            // seed writes it, and only for a technology inserted on that run (task 00028).
+            foreach (IGrouping<int, SeedRequirement> group in type.Requirements
+                .Where(requirement => requirement.Type != RequirementTypes.TechnologyLevel)
+                .GroupBy(requirement => requirement.SubjectLevel ?? 1))
             {
                 await requirements.AddAsync(
                     RequirementSubjectTypes.BuildingType,
@@ -341,7 +345,8 @@ public sealed record SeedBuildingType(
     IReadOnlyList<SeedRequirement> Requirements,
     bool IsStartBuilding = false,
     string BuildingClass = Services.BuildingClasses.None,
-    string Category = "");
+    string Category = "",
+    int? MaxLevel = null);
 
 /// <summary>The growth of a value with the level.</summary>
 /// <remarks>The value at a level is <c>base × growth^(level − 1) + step × (level − 1)</c>.</remarks>
@@ -362,6 +367,9 @@ public sealed record SeedCost : SeedGrowth
 {
     /// <summary>Gets the code of the resource.</summary>
     public string Resource { get; init; } = string.Empty;
+
+    /// <summary>Gets the first level that pays this resource. Earlier levels omit the row.</summary>
+    public int FromLevel { get; init; } = 1;
 }
 
 /// <summary>An effect of the starting data.</summary>

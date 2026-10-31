@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Text;
+using Aetheris.Economy.Data;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Data;
 using Aetheris.Planets.Data;
@@ -109,11 +110,17 @@ public sealed class CivilizationTests
         WorldDbContext world = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
         RaceEntity race = await world.Races.AsNoTracking().Include(entry => entry.StartResourceIds).OrderBy(entry => entry.SortOrder).FirstAsync(Token);
         RaceStartResourceEntity changed = race.StartResourceIds[0];
+        HashSet<int> currencyIds = [.. await world.ResourceTypes.AsNoTracking()
+            .Where(resource => resource.Scope == ResourceScopes.Civilization)
+            .Select(resource => resource.Id)
+            .ToListAsync(Token)];
 
         (HttpClient first, long firstPlanet) = await FoundForNewPlayerAsync(race.Id, "Перша");
+        string firstOwner = await OwnerAsync(world, firstPlanet);
 
         Dictionary<int, long> firstStorage = await StorageAsync(scope, firstPlanet);
-        Assert.Equal(race.StartResourceIds.ToDictionary(entry => entry.ResourceTypeId, entry => entry.Amount), firstStorage);
+        Assert.Equal(Package(race.StartResourceIds, currencyIds, true, changed, null, null), firstStorage);
+        AssertPackage(Package(race.StartResourceIds, currencyIds, false, changed, null, null), await WalletAsync(scope, firstOwner));
 
         // A designer changes one row and lowers the storage limit.
         await world.RaceStartResources.Where(entry => entry.Id == changed.Id)
@@ -122,10 +129,11 @@ public sealed class CivilizationTests
         await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, WorldConfigKeys.StartStorageCapacity, capacity.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
         (HttpClient second, long secondPlanet) = await FoundForNewPlayerAsync(race.Id, "Друга");
+        string secondOwner = await OwnerAsync(world, secondPlanet);
         Dictionary<int, long> secondStorage = await StorageAsync(scope, secondPlanet);
 
-        Assert.Equal(77, secondStorage[changed.ResourceTypeId]);
-        Assert.All(secondStorage.Where(entry => entry.Key != changed.ResourceTypeId), entry => Assert.Equal(capacity, entry.Value));
+        Assert.Equal(Package(race.StartResourceIds, currencyIds, true, changed, 77, capacity), secondStorage);
+        AssertPackage(Package(race.StartResourceIds, currencyIds, false, changed, 77, capacity), await WalletAsync(scope, secondOwner));
 
         // A second step is refused and gives nothing.
         HttpResponseMessage again = await CivilizationTestData.FoundAsync(first, race.Id, "Знову", "again-1");
@@ -390,6 +398,46 @@ public sealed class CivilizationTests
         await scope.ServiceProvider.GetRequiredService<PlanetsDbContext>().PlanetResources.AsNoTracking()
             .Where(entry => entry.PlanetId == planetId)
             .ToDictionaryAsync(entry => entry.ResourceTypeId, entry => entry.Amount, Token);
+
+    private static async Task<Dictionary<int, long>> WalletAsync(IServiceScope scope, string playerId) =>
+        await scope.ServiceProvider.GetRequiredService<EconomyDbContext>().CivilizationBalances.AsNoTracking()
+            .Where(entry => entry.PlayerId == playerId)
+            .ToDictionaryAsync(entry => entry.ResourceTypeId, entry => entry.Amount, Token);
+
+    private static async Task<string> OwnerAsync(WorldDbContext world, long planetId) =>
+        await world.Planets.AsNoTracking()
+            .Where(planet => planet.Id == planetId)
+            .Select(planet => planet.OwnerPlayerId)
+            .SingleAsync(Token)
+        ?? throw new InvalidOperationException("The body has no owner.");
+
+    private static void AssertPackage(Dictionary<int, long> expected, Dictionary<int, long> actual)
+    {
+        foreach ((int resourceTypeId, long amount) in expected)
+        {
+            Assert.Equal(amount, actual[resourceTypeId]);
+        }
+
+        // Founding also writes an empty row for every other currency of a civilization.
+        Assert.All(actual.Where(entry => !expected.ContainsKey(entry.Key)), entry => Assert.Equal(0L, entry.Value));
+    }
+
+    private static Dictionary<int, long> Package(
+        IEnumerable<RaceStartResourceEntity> rows,
+        HashSet<int> currencyIds,
+        bool onPlanet,
+        RaceStartResourceEntity changed,
+        long? changedAmount,
+        long? capacity) =>
+        rows.Where(entry => currencyIds.Contains(entry.ResourceTypeId) != onPlanet)
+            .ToDictionary(
+                entry => entry.ResourceTypeId,
+                entry =>
+                {
+                    long amount = entry.Id == changed.Id && changedAmount is long replacement ? replacement : entry.Amount;
+
+                    return capacity is long limit ? Math.Min(amount, limit) : amount;
+                });
 
     private async Task<(HttpClient Client, long PlanetId)> FoundForNewPlayerAsync(int raceId, string name)
     {

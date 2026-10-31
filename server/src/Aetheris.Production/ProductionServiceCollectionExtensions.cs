@@ -39,12 +39,15 @@ public static class ProductionServiceCollectionExtensions
         services.AddScoped<ProductionUnitOfWork>();
         services.AddScoped<ProductionBootstrapService>();
         services.AddScoped<ProductionQueueService>();
+        services.AddScoped<CharacteristicQueryService>();
         services.AddScoped<PartStockService>();
         services.AddScoped<IResourceUsage, ProductionResourceUsage>();
         services.AddScoped<IProductionModule, ProductionModule>();
         services.AddScoped<IScheduledEventHandler, ProductionUnitReadyHandler>();
         services.AddScoped<ProductionReferenceAdminService>();
         services.AddScoped<IAdminReferenceService>(serviceProvider => serviceProvider.GetRequiredService<ProductionReferenceAdminService>());
+        services.AddScoped<CharacteristicReferenceAdminService>();
+        services.AddScoped<IAdminReferenceService>(serviceProvider => serviceProvider.GetRequiredService<CharacteristicReferenceAdminService>());
 
         // A technology may open a recipe with its effect «opens» (task 00023, decision 7).
         services.AddScoped<ITechnologyUnlockTargets, ProductionUnlockTargets>();
@@ -65,7 +68,9 @@ public static class ProductionServiceCollectionExtensions
 
     /// <summary>
     /// Maps the reference kinds of the module on the secured admin group of the host
-    /// (task 00023): the groups of the parts, the parts and the recipes.
+    /// (task 00023): the groups of the parts, the parts, the recipes, the characteristics of the
+    /// parts, the characteristics of the groups of the parts and the values of the
+    /// characteristics of the parts.
     /// </summary>
     /// <param name="secured">The secured admin group.</param>
     /// <returns>The same group.</returns>
@@ -73,5 +78,8 @@ public static class ProductionServiceCollectionExtensions
         secured
             .MapAdminReference<ProductionReferenceAdminService>(ProductionReferenceAdminService.PartGroupDescriptor)
             .MapAdminReference<ProductionReferenceAdminService>(ProductionReferenceAdminService.PartDescriptor)
-            .MapAdminReference<ProductionReferenceAdminService>(ProductionReferenceAdminService.RecipeDescriptor);
+            .MapAdminReference<ProductionReferenceAdminService>(ProductionReferenceAdminService.RecipeDescriptor)
+            .MapAdminReference<CharacteristicReferenceAdminService>(CharacteristicReferenceAdminService.CharacteristicDescriptor)
+            .MapAdminReference<CharacteristicReferenceAdminService>(CharacteristicReferenceAdminService.PartGroupCharacteristicDescriptor)
+            .MapAdminReference<CharacteristicReferenceAdminService>(CharacteristicReferenceAdminService.PartCharacteristicDescriptor);
 }

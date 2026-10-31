@@ -42,6 +42,16 @@ public sealed class WorldDbContext : DbContext
     private const int CoefficientScale = 6;
 
     /// <summary>
+    /// The precision of a weight column, in tonnes (task 00027).
+    /// </summary>
+    private const int WeightPrecision = 12;
+
+    /// <summary>
+    /// The scale of a weight column, in tonnes (task 00027).
+    /// </summary>
+    private const int WeightScale = 3;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="WorldDbContext"/> class.
     /// </summary>
     /// <param name="options">The database options.</param>
@@ -155,7 +165,9 @@ public sealed class WorldDbContext : DbContext
             entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
             entity.Property(e => e.Scope).HasMaxLength(CodeLength);
+            entity.Property(e => e.Weight).HasPrecision(WeightPrecision, WeightScale);
             entity.HasOne<ResourceGroupEntity>().WithMany().HasForeignKey(e => e.ResourceGroupId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(table => table.HasCheckConstraint("ck_resource_type_weight", "weight >= 0"));
         });
 
         modelBuilder.Entity<CelestialObjectTypeEntity>(entity =>

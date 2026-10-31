@@ -26,6 +26,16 @@ public sealed class ProductionDbContext : DbContext
     private const int NameLength = 128;
 
     /// <summary>
+    /// The precision of a weight column, in tonnes (task 00027).
+    /// </summary>
+    private const int WeightPrecision = 12;
+
+    /// <summary>
+    /// The scale of a weight column, in tonnes (task 00027).
+    /// </summary>
+    private const int WeightScale = 3;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ProductionDbContext"/> class.
     /// </summary>
     /// <param name="options">The database options.</param>
@@ -42,6 +52,18 @@ public sealed class ProductionDbContext : DbContext
 
     /// <summary>Gets the attributes of the parts.</summary>
     public DbSet<PartAttributeEntity> PartAttributes => Set<PartAttributeEntity>();
+
+    /// <summary>Gets the characteristics of the parts.</summary>
+    public DbSet<CharacteristicEntity> Characteristics => Set<CharacteristicEntity>();
+
+    /// <summary>Gets the characteristics of the groups of the parts.</summary>
+    public DbSet<PartGroupCharacteristicEntity> PartGroupCharacteristics => Set<PartGroupCharacteristicEntity>();
+
+    /// <summary>Gets the values of the characteristics of the parts.</summary>
+    public DbSet<PartCharacteristicValueEntity> PartCharacteristicValues => Set<PartCharacteristicValueEntity>();
+
+    /// <summary>Gets the values of the characteristics of the parts by their level.</summary>
+    public DbSet<PartCharacteristicLevelValueEntity> PartCharacteristicLevelValues => Set<PartCharacteristicLevelValueEntity>();
 
     /// <summary>Gets the recipes.</summary>
     public DbSet<RecipeEntity> Recipes => Set<RecipeEntity>();
@@ -98,8 +120,10 @@ public sealed class ProductionDbContext : DbContext
             entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasIndex(e => new { e.PartGroupId, e.SortOrder });
+            entity.Property(e => e.Weight).HasPrecision(WeightPrecision, WeightScale);
             entity.HasOne<PartGroupEntity>().WithMany().HasForeignKey(e => e.PartGroupId).OnDelete(DeleteBehavior.Restrict);
             entity.ToTable(table => table.HasCheckConstraint("ck_part_type_mark_level", "mark_level >= 1 AND mark_level <= 3"));
+            entity.ToTable(table => table.HasCheckConstraint("ck_part_type_weight", "weight >= 0"));
         });
 
         modelBuilder.Entity<PartAttributeEntity>(entity =>
@@ -108,6 +132,42 @@ public sealed class ProductionDbContext : DbContext
             entity.HasIndex(e => new { e.PartTypeId, e.AttributeKey }).IsUnique();
             entity.HasOne<PartTypeEntity>().WithMany(e => e.AttributeIds).HasForeignKey(e => e.PartTypeId).OnDelete(DeleteBehavior.Cascade);
             entity.Property(e => e.AttributeKey).HasMaxLength(CodeLength);
+        });
+
+        modelBuilder.Entity<CharacteristicEntity>(entity =>
+        {
+            entity.ToTable("characteristic");
+            entity.Property(e => e.Code).HasMaxLength(CodeLength);
+            entity.Property(e => e.NameKey).HasMaxLength(NameLength);
+            entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
+            entity.Property(e => e.UnitKey).HasMaxLength(NameLength);
+            entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
+            entity.HasIndex(e => e.Code).IsUnique();
+        });
+
+        modelBuilder.Entity<PartGroupCharacteristicEntity>(entity =>
+        {
+            entity.ToTable("part_group_characteristic");
+            entity.HasIndex(e => new { e.PartGroupId, e.CharacteristicId }).IsUnique();
+            entity.HasIndex(e => new { e.PartGroupId, e.SortOrder });
+            entity.HasOne<PartGroupEntity>().WithMany().HasForeignKey(e => e.PartGroupId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<CharacteristicEntity>().WithMany().HasForeignKey(e => e.CharacteristicId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PartCharacteristicValueEntity>(entity =>
+        {
+            entity.ToTable("part_characteristic_value");
+            entity.HasIndex(e => new { e.PartTypeId, e.CharacteristicId }).IsUnique();
+            entity.HasOne<PartTypeEntity>().WithMany().HasForeignKey(e => e.PartTypeId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<CharacteristicEntity>().WithMany().HasForeignKey(e => e.CharacteristicId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PartCharacteristicLevelValueEntity>(entity =>
+        {
+            entity.ToTable("part_characteristic_level_value");
+            entity.HasIndex(e => new { e.PartCharacteristicValueId, e.Level }).IsUnique();
+            entity.HasOne<PartCharacteristicValueEntity>().WithMany(e => e.Levels).HasForeignKey(e => e.PartCharacteristicValueId).OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint("ck_part_characteristic_level_value_level", "level >= 1"));
         });
 
         modelBuilder.Entity<RecipeEntity>(entity =>

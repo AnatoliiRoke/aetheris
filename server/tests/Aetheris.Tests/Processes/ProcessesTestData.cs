@@ -49,6 +49,8 @@ internal static class ProcessesTestData
         await AetherisTestFactory.SetParameterAsync(services, ProcessesConfigKeys.CatalogCacheSeconds, "0");
         await services.GetRequiredService<IResearchModule>().EnsureAsync(Token);
         await services.GetRequiredService<IProductionModule>().EnsureAsync(Token);
+        await EnsureProcessBuildingAsync(services, "building_9001", BuildingClasses.OrbitalWorkshop);
+        await EnsureProcessBuildingAsync(services, "building_9002", BuildingClasses.ModuleRepair);
         await services.GetRequiredService<IProcessesModule>().EnsureAsync(Token);
         services.GetRequiredService<ProcessCatalogCache>().Invalidate();
     }
@@ -226,6 +228,85 @@ internal static class ProcessesTestData
     internal static async Task<PartFacts> PartAsync(IServiceProvider services, string code) =>
         (await services.GetRequiredService<PartStockService>().GetPartFactsAsync(Token)).Values
             .Single(part => string.Equals(part.Code, code, StringComparison.Ordinal));
+
+    /// <summary>
+    /// Stamps an attribute on a part of the catalog when the starting data has none, and returns
+    /// the facts of the part. The repair and the terraforming tests need marks the seed does not
+    /// carry (task 00028).
+    /// </summary>
+    /// <param name="services">The services of the request.</param>
+    /// <param name="code">The neutral code of the part.</param>
+    /// <param name="attributeKey">The key of the attribute.</param>
+    /// <param name="numberValue">The number of the attribute, or <see langword="null"/>.</param>
+    /// <returns>The facts of the part.</returns>
+    internal static async Task<PartFacts> WithAttributeAsync(IServiceProvider services, string code, string attributeKey, decimal? numberValue = null)
+    {
+        ProductionDbContext production = services.GetRequiredService<ProductionDbContext>();
+        int partTypeId = await production.PartTypes.AsNoTracking()
+            .Where(part => part.Code == code)
+            .Select(part => part.Id)
+            .SingleAsync(Token);
+
+        if (!await production.PartAttributes.AnyAsync(attribute => attribute.PartTypeId == partTypeId && attribute.AttributeKey == attributeKey, Token))
+        {
+            production.PartAttributes.Add(new PartAttributeEntity
+            {
+                PartTypeId = partTypeId,
+                AttributeKey = attributeKey,
+                NumberValue = numberValue,
+            });
+            await production.SaveChangesAsync(Token);
+        }
+
+        services.GetRequiredService<ProductionCatalogCache>().Invalidate();
+
+        return await PartAsync(services, code);
+    }
+
+    /// <summary>
+    /// Adds a building of a class the process seed names and the planets seed does not, so a
+    /// recipe of that class can be bound. The row exists only in these tests.
+    /// </summary>
+    /// <param name="services">The services of the request.</param>
+    /// <param name="code">The neutral code of the building.</param>
+    /// <param name="buildingClass">The class of the building.</param>
+    /// <returns>A task that completes when the building exists.</returns>
+    private static async Task EnsureProcessBuildingAsync(IServiceProvider services, string code, string buildingClass)
+    {
+        PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
+
+        if (await planets.BuildingTypes.AnyAsync(entry => entry.BuildingClass == buildingClass, Token))
+        {
+            return;
+        }
+
+        int categoryId = await planets.BuildingTypes.AsNoTracking()
+            .OrderBy(entry => entry.Id)
+            .Select(entry => entry.CategoryId)
+            .FirstAsync(Token);
+
+        BuildingTypeEntity processBuilding = new()
+        {
+            Code = code,
+            NameKey = "planets.building." + code + ".name",
+            DescriptionKey = "planets.building." + code + ".description",
+            SortOrder = 9000,
+            BuildingClass = buildingClass,
+            CategoryId = categoryId,
+        };
+
+        for (int level = 1; level <= 20; level++)
+        {
+            processBuilding.LevelIds.Add(new BuildingLevelEntity
+            {
+                Level = level,
+                DurationSeconds = 60,
+            });
+        }
+
+        planets.BuildingTypes.Add(processBuilding);
+        await planets.SaveChangesAsync(Token);
+    }
 
     /// <summary>
     /// Gives the player a level of a technology.

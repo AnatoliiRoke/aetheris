@@ -213,8 +213,12 @@ public sealed class EconomyIntegrityTests
         using (IServiceScope scope = _factory.Services.CreateScope())
         {
             creditsId = await EconomyTestData.CreditsIdAsync(scope.ServiceProvider);
+            EconomyDbContext balances = scope.ServiceProvider.GetRequiredService<EconomyDbContext>();
 
-            Assert.False(await scope.ServiceProvider.GetRequiredService<EconomyDbContext>().CivilizationBalances.AsNoTracking().AnyAsync(Token));
+            // Founding already wrote the start credits. The first change of this test starts from no row.
+            await balances.CivilizationBalances.ExecuteDeleteAsync(Token);
+
+            Assert.False(await balances.CivilizationBalances.AsNoTracking().AnyAsync(Token));
         }
 
         await Task.WhenAll(Enumerable.Range(0, parallelCount).Select(async _ =>
@@ -451,17 +455,33 @@ public sealed class EconomyIntegrityTests
         using IServiceScope scope = _factory.Services.CreateScope();
         WorldDbContext world = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
         int resourcesBefore = await world.ResourceTypes.AsNoTracking().CountAsync(Token);
+        int creditsId = await world.ResourceTypes.AsNoTracking()
+            .Where(resource => resource.Code == EconomyTestData.CreditsCode)
+            .Select(resource => resource.Id)
+            .SingleAsync(Token);
 
-        await world.ResourceTypes.Where(resource => resource.Code == EconomyTestData.CreditsCode).ExecuteDeleteAsync(Token);
+        await world.RaceStartResources.Where(entry => entry.ResourceTypeId == creditsId).ExecuteDeleteAsync(Token);
+        await world.Storage.Where(entry => entry.ResourceTypeId == creditsId).ExecuteDeleteAsync(Token);
+        await world.Deposits.Where(entry => entry.ResourceId == creditsId).ExecuteDeleteAsync(Token);
+        await world.FieldCompositions.Where(entry => entry.ResourceId == creditsId).ExecuteDeleteAsync(Token);
+        await world.NebulaCompositions.Where(entry => entry.ResourceId == creditsId).ExecuteDeleteAsync(Token);
+        await world.Rules.Where(entry => entry.ResourceId == creditsId).ExecuteDeleteAsync(Token);
+        await world.ObjectTypes.Where(entry => entry.HiddenResourceTypeId == creditsId).ExecuteDeleteAsync(Token);
+        await world.ResourceTypes.Where(resource => resource.Id == creditsId).ExecuteDeleteAsync(Token);
 
         Assert.Equal(resourcesBefore - 1, await world.ResourceTypes.AsNoTracking().CountAsync(Token));
 
         await scope.ServiceProvider.GetRequiredService<IWorldModule>().EnsureWorldAsync(Token);
 
         ResourceTypeEntity credits = await world.ResourceTypes.AsNoTracking().SingleAsync(resource => resource.Code == EconomyTestData.CreditsCode, Token);
+        int balancesGroupId = await world.ResourceGroups.AsNoTracking()
+            .Where(group => group.Code == "resource_group_6")
+            .Select(group => group.Id)
+            .SingleAsync(Token);
 
         Assert.Equal(ResourceScopes.Civilization, credits.Scope);
-        Assert.Null(credits.ResourceGroupId);
+        Assert.Equal(balancesGroupId, credits.ResourceGroupId);
+        Assert.True(credits.EarnsPopulationIncome);
         Assert.Equal(resourcesBefore, await world.ResourceTypes.AsNoTracking().CountAsync(Token));
     }
 

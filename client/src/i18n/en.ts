@@ -770,6 +770,11 @@ export const en: Messages = {
   'storage.modulesHeading': 'Ship modules',
   'storage.hullsHeading': 'Ship hulls',
   'storage.unit': 'pcs',
+  'storage.weight': 'Weight',
+  'storage.weightUnit': 't',
+  'storage.volume': 'Volume',
+  'storage.levelValue': 'level {level}',
+  'storage.characteristics': 'Characteristics',
   'civ.addBuilding': 'Add construction',
   'civ.race': 'Race: {race}',
 };

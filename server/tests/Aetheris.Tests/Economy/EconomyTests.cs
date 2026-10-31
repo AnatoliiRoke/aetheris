@@ -326,7 +326,7 @@ public sealed class EconomyTests
         Aetheris.Planets.Data.PlanetsDbContext dbContext = services.GetRequiredService<Aetheris.Planets.Data.PlanetsDbContext>();
 
         int housingTypeId = await dbContext.BuildingTypes.AsNoTracking()
-            .Where(type => type.Code == "building_3")
+            .Where(type => type.Code == "building_2")
             .Select(type => type.Id)
             .SingleAsync(Token);
 

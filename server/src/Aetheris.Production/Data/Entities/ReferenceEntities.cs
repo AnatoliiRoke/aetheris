@@ -68,6 +68,12 @@ public sealed class PartTypeEntity
     /// </summary>
     public int MarkLevel { get; set; } = 1;
 
+    /// <summary>
+    /// Gets or sets the weight of one part in tonnes. The room of a storage and of a hold is
+    /// counted by it, so the weight is data and not a number of the code (task 00027, section 3.1).
+    /// </summary>
+    public decimal Weight { get; set; }
+
     /// <summary>Gets or sets the order of the part in the lists.</summary>
     public int SortOrder { get; set; }
 

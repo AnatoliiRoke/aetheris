@@ -1,0 +1,183 @@
+.DS_Store	14340
+00-plan-dokumentatsii.md	9690
+analysis/ANALYSIS.md	29989
+analysis/DEEP_ANALYSIS.md	17971
+analysis/README.md	842
+art-local/.DS_Store	6148
+art-local/README.txt	190
+art-local/icons/.gitkeep	0
+art-local/images/.DS_Store	6148
+art-local/images/.gitkeep	0
+art-local/images/arts/.DS_Store	6148
+art-local/images/arts/Cargo_ships_docking_space_station_20261025165028.jpg	892106
+art-local/images/arts/Comet_passing_a_planet_20261025165028.jpg	610095
+art-local/images/arts/Desert_planet_with_sand_dunes_20261025165028_2.jpg	485741
+art-local/images/arts/Earth-like_planet_in_space_20261025165028.jpg	505030
+art-local/images/arts/Fleets_exchanging_laser_fire_space_20261025165028_2.jpg	731711
+art-local/images/arts/Gas_giant_with_storm_bands_20261025165028.jpg	561146
+art-local/images/arts/Icy_planet_with_frozen_cracks_20261025165028.jpg	601687
+art-local/images/arts/Kvarr_warship_side_view_20261025165028.jpg	644910
+art-local/images/arts/Nexar_warship_in_dark_space_20261025165028.jpg	517031
+art-local/images/arts/Ocean_planet_covered_in_water_20261025165028.jpg	540183
+art-local/images/arts/Oct 25 - 16_38/Cargo_ships_docking_at_station_20261025165028.jpg	836222
+art-local/images/arts/Oct 25 - 16_38/Cargo_ships_docking_space_station_20261025165028.jpg	892106
+art-local/images/arts/Oct 25 - 16_38/Colony_on_rocky_planet_20261025165028.jpg	711252
+art-local/images/arts/Oct 25 - 16_38/Colony_on_rocky_planet_20261025165028_2.jpg	743362
+art-local/images/arts/Oct 25 - 16_38/Comet_passing_a_planet_20261025165028.jpg	610095
+art-local/images/arts/Oct 25 - 16_38/Comet_passing_planet_space_scene_20261025165028.jpg	488810
+art-local/images/arts/Oct 25 - 16_38/Desert_planet_with_sand_dunes_20261025165028.jpg	506906
+art-local/images/arts/Oct 25 - 16_38/Desert_planet_with_sand_dunes_20261025165028_2.jpg	485741
+art-local/images/arts/Oct 25 - 16_38/Earth-like_planet_in_space_20261025165028.jpg	505030
+art-local/images/arts/Oct 25 - 16_38/Fleets_exchanging_laser_fire_space_20261025165028.jpg	714350
+art-local/images/arts/Oct 25 - 16_38/Fleets_exchanging_laser_fire_space_20261025165028_2.jpg	731711
+art-local/images/arts/Oct 25 - 16_38/Gas_giant_planet_with_storm_20261025165028.jpg	547046
+art-local/images/arts/Oct 25 - 16_38/Gas_giant_with_storm_bands_20261025165028.jpg	561146
+art-local/images/arts/Oct 25 - 16_38/Icy_planet_with_frozen_cracks_20261025165028.jpg	601687
+art-local/images/arts/Oct 25 - 16_38/Kvarr_warship_side_view_20261025165028.jpg	644910
+art-local/images/arts/Oct 25 - 16_38/Kvarr_warship_side_view_20261025165028_2.jpg	709667
+art-local/images/arts/Oct 25 - 16_38/Nexar_warship_in_dark_space_20261025165028.jpg	517031
+art-local/images/arts/Oct 25 - 16_38/Nexar_warship_in_space_20261025165028.jpg	596943
+art-local/images/arts/Oct 25 - 16_38/Ocean_planet_covered_by_clouds_20261025165028.jpg	518308
+art-local/images/arts/Oct 25 - 16_38/Ocean_planet_covered_in_water_20261025165028.jpg	540183
+art-local/images/arts/Oct 25 - 16_38/Planet_floating_in_dark_space_20261025165028.jpg	507921
+art-local/images/arts/Oct 25 - 16_38/Round_icy_planet_floating_20261025165028.jpg	601059
+art-local/images/arts/Oct 25 - 16_38/Ships_flying_toward_bright_star_20261025165028.jpg	504407
+art-local/images/arts/Oct 25 - 16_38/Ships_flying_toward_bright_star_20261025165028_2.jpg	660922
+art-local/images/arts/Oct 25 - 16_38/Skolar_warship_side_view_20261025165028.jpg	645981
+art-local/images/arts/Oct 25 - 16_38/Skolar_warship_side_view_20261025165028_2.jpg	591282
+art-local/images/arts/Oct 25 - 16_38/Small_ships_flying_toward_star_20261025165028.jpg	601562
+art-local/images/arts/Oct 25 - 16_38/Small_ships_flying_toward_star_20261025165028_2.jpg	531688
+art-local/images/arts/Oct 25 - 16_38/Spaceships_flying_toward_ocean_p…_20261025165028.jpg	621387
+art-local/images/arts/Oct 25 - 16_38/Spaceships_flying_toward_ocean_p…_20261025165028_2.jpg	573837
+art-local/images/arts/Oct 25 - 16_38/Spaceships_flying_toward_ocean_p…_20261025165028_3.jpg	588833
+art-local/images/arts/Oct 25 - 16_38/Spaceships_flying_toward_ocean_p…_20261025165028_4.jpg	608625
+art-local/images/arts/Oct 25 - 16_38/Starfield_layer_in_deep_space_20261025165028.jpg	710363
+art-local/images/arts/Oct 25 - 16_38/Starship_and_glowing_gear_in_20261025165028.jpg	654136
+art-local/images/arts/Oct 25 - 16_38/Starship_and_glowing_gear_in_20261025165028_2.jpg	583825
+art-local/images/arts/Oct 25 - 16_38/Starship_blueprint_on_holographi…_20261025165028.jpg	595776
+art-local/images/arts/Oct 25 - 16_38/Starship_blueprint_on_holographi…_20261025165028_2.jpg	690658
+art-local/images/arts/Oct 25 - 16_38/Starship_leaving_orbital_station_20261025165028.jpg	560291
+art-local/images/arts/Oct 25 - 16_38/Starship_leaving_orbital_station_20261025165028_2.jpg	688899
+art-local/images/arts/Oct 25 - 16_38/Terran_warship_side_view_20261025165028.jpg	559413
+art-local/images/arts/Oct 25 - 16_38/Terran_warship_side_view_20261025165028_2.jpg	568159
+art-local/images/arts/Oct 25 - 16_38/Transparent_starfield_digital_il…_20261025165028.jpg	707583
+art-local/images/arts/Oct 25 - 16_38/Volcanic_planet_with_glowing_lava_20261025165028.jpg	623978
+art-local/images/arts/Oct 25 - 16_38/Volcanic_planet_with_glowing_lava_20261025165028_2.jpg	589108
+art-local/images/arts/Ships_flying_toward_bright_star_20261025165028.jpg	504407
+art-local/images/arts/Ships_flying_toward_bright_star_20261025165028_2.jpg	660922
+art-local/images/arts/Skolar_warship_side_view_20261025165028_2.jpg	591282
+art-local/images/arts/Small_ships_flying_toward_star_20261025165028_2.jpg	531688
+art-local/images/arts/Starship_and_glowing_gear_in_20261025165028_2.jpg	583825
+art-local/images/arts/Starship_blueprint_on_holographi…_20261025165028.jpg	595776
+art-local/images/arts/Starship_leaving_orbital_station_20261025165028.jpg	560291
+art-local/images/arts/Terran_warship_side_view_20261025165028.jpg	559413
+art-local/images/arts/Volcanic_planet_with_glowing_lava_20261025165028.jpg	623978
+art-local/images/arts/art-1.jpg	608625
+art-local/images/arts/art-10.jpg	596943
+art-local/images/arts/art-11a.jpg	696603
+art-local/images/arts/art-11b.jpg	676663
+art-local/images/arts/art-11c.jpg	712276
+art-local/images/arts/art-11d.jpg	689668
+art-local/images/arts/art-12a.jpg	507921
+art-local/images/arts/art-12b.jpg	589108
+art-local/images/arts/art-12c.jpg	601059
+art-local/images/arts/art-12d.jpg	506906
+art-local/images/arts/art-12e.jpg	518308
+art-local/images/arts/art-12f.jpg	547046
+art-local/images/arts/art-13a.jpg	654136
+art-local/images/arts/art-13b.jpg	488810
+art-local/images/arts/art-13c.jpg	601562
+art-local/images/arts/art-14.jpg	474150
+art-local/images/arts/art-15.jpg	688899
+art-local/images/arts/art-2.jpg	707583
+art-local/images/arts/art-3.jpg	711252
+art-local/images/arts/art-4.jpg	690658
+art-local/images/arts/art-5.jpg	836222
+art-local/images/arts/art-6.jpg	714350
+art-local/images/arts/art-7.jpg	568159
+art-local/images/arts/art-8.jpg	709667
+art-local/images/arts/art-9.jpg	645981
+backlog/ekonomichni-prohalyny.md	9554
+backlog/nevykonani-kroky.md	7428
+backlog/status-zadach.md	9158
+game-design/01-zahalnyi-opys-hry.md	11134
+game-design/02-ekonomika-ta-resursy.md	23737
+game-design/03-rozvytok-planet.md	14946
+game-design/04-tekhnolohii.md	11724
+game-design/05-flot-ta-korabli.md	15792
+game-design/05a-moduli-ta-komponenty.md	28342
+game-design/06-kosmichni-boi.md	10217
+game-design/07-pve-piraty-ta-zahrozy.md	5692
+game-design/08-rasy.md	7830
+game-design/09-svit-ta-karta.md	12488
+game-design/10-klany-ta-dyplomatiia.md	6088
+game-design/11-reitynh.md	7239
+game-design/12-monetyzatsiia.md	11789
+game-design/13-onbordynh-novachka.md	10372
+game-design/14-balans-i-formuly.md	15497
+game-design/15-artefakty.md	8643
+game-design/16-kosmichni-sporudy.md	10388
+production/01-etapy-ta-mvp.md	4354
+production/02-dorozhnia-karta.md	7416
+production/03-ryzyky.md	7583
+references/analiz-zalezhnostei.md	18168
+references/konfigurator-zalezhnostei.html	363766
+references/perelik-1-resursy.md	6142
+references/perelik-2-tekhnolohii.md	4394
+references/perelik-3-moduli.md	11475
+references/perelik-4-korpusy.md	4748
+references/perelik-5-rasy.md	2770
+references/perelik-6-budivli.md	8282
+references/starfederation-ohliad.md	9513
+references/starfederation_handbook.md	2009252
+references/vybir-obrane.md	28319
+references/vybir-zi-zorianoi-federatsii.html	281883
+references/vybir-zi-zorianoi-federatsii.md	135318
+references/zalezhnosti-rozklad.json	498123
+tasks/.DS_Store	6148
+tasks/00001-zibraty-stek-i-zapustyty-server.md	11862
+tasks/00002-bazova-bezpeka-servera.md	18894
+tasks/00002-plan-implementation.md	22737
+tasks/00003-dyzain-pershoi-storinky-proektu.md	29777
+tasks/00004-heneratsiia-vsesvitu.md	39314
+tasks/00005-skript-lokalnoho-zapusku.md	5288
+tasks/00006-reiestratsiia-ta-avtoryzatsiia-hravtsia.md	29265
+tasks/00007-admin-panel.md	22408
+tasks/00008-dyzain-ekrana-keruvannya-tsyvilizatsiieiu.md	17754
+tasks/00009-doopratsiuvannia-adminky-redahuvannia-obiektiv.md	27769
+tasks/00010-ekran-keruvannia-tsyvilizatsiieiu.md	29523
+tasks/00011-vymohy-budivli-ta-cherha-budivnytstva.md	28342
+tasks/00012-analiz-pislia-00011.md	49864
+tasks/00012-naukovyi-tsentr-ta-cherha-doslidzhen.md	33238
+tasks/00013-analiz-pislia-00012.md	48918
+tasks/00013-vyrobnytstvo-retsepty-zavody-sklad-detalei.md	47620
+tasks/00014-planetarni-protsesy-teraformuvannia-rozbyrannia-peretvoriuvach.md	106259
+tasks/00015-naselennia-kredyty-ta-torhova-valiuta.md	95568
+tasks/00016-dyzain-storinky-planety.md	16700
+tasks/00017-dyzain-storinky-budivnytstva.md	16789
+tasks/00018-dyzain-storinky-doslidzhen.md	18161
+tasks/00019-dyzain-ekrana-skladu.md	14752
+tasks/00020-perenesty-chotyry-novi-storinky-hry.md	123310
+tasks/00020-pytannia.md	12828
+tasks/00021-ci-vynyatky-gitleaks-stabilizatsiia-testiv-zalezhnosti.md	12571
+tasks/00022-neitralni-kody-dovidnykiv-ta-tablytsia-tekstiv.md	28998
+tasks/00023-dovidnyky-v-adminky-resursy-budivli-tekhnolohii.md	83690
+tasks/00024-torhivlia-rynok-lot-portal-obmin-valiut.md	24012
+tasks/00025-dyzain-storinky-torhivli.md	16154
+tasks/00026-perenesty-storinku-torhivli-v-kliyent.md	11040
+tasks/00027-kharakterystyky-ta-vaha-modulei-i-resursiv.md	12641
+tasks/00028-pershyi-sid-z-obranykh-elementiv.md	13528
+tech/01-arkhitektura.md	16687
+tech/02-tekhnolohichnyi-stek.md	11639
+tech/03-model-danykh.md	12629
+tech/04-api.md	8215
+tech/05-bezpeka-ta-antychit.md	13715
+tech/06-testuvannia-ta-symuliatory.md	10438
+tech/07-planuvalnyk-podii.md	15056
+tech/08-pravyla-kodu-dlia-ahentiv.md	6562
+tech/09-zvedeni-pravyla-kodu-lohiky-ta-kodiv.md	18618
+ui-art/01-vizualnyi-styl.md	11577
+ui-art/02-ekrany-ta-navihatsiia.md	10249
+ui-art/03-interfeis-boiu.md	7818
+ui-art/04-lokalizatsiia.md	5144
+ui-art/05-yedynyi-styl-interfeisu.md	16686

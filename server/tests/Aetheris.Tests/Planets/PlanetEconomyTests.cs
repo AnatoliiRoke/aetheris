@@ -99,6 +99,7 @@ public sealed class PlanetEconomyTests
             new Dictionary<int, long> { [Iron] = 100 },
             rates,
             new Dictionary<int, long> { [Metals] = 1_000_000 },
+            Weights(),
             Start,
             Start.AddMinutes(150));
 
@@ -122,6 +123,7 @@ public sealed class PlanetEconomyTests
             new Dictionary<int, long> { [Iron] = 400, [Copper] = 100 },
             rates,
             capacities,
+            Weights(),
             Start,
             Start.AddHours(24));
 
@@ -133,7 +135,7 @@ public sealed class PlanetEconomyTests
         Assert.Equal(240, result.Amounts[Quartzite]);
 
         // Later the iron stays and the copper goes on to its own capacity.
-        AccumulationResult later = PlanetEconomy.Accumulate(catalog, result.Amounts, rates, capacities, Start.AddHours(24), Start.AddHours(48));
+        AccumulationResult later = PlanetEconomy.Accumulate(catalog, result.Amounts, rates, capacities, Weights(), Start.AddHours(24), Start.AddHours(48));
 
         Assert.Equal(1000, later.Amounts[Iron]);
         Assert.Equal(Start.AddHours(24), later.FullAt[Iron]);
@@ -158,6 +160,7 @@ public sealed class PlanetEconomyTests
             new Dictionary<int, long>(),
             new Dictionary<int, decimal> { [Iron] = 100_000m, [Copper] = 100_000m },
             capacities,
+            Weights(),
             Start,
             Start.AddHours(24));
 
@@ -178,6 +181,7 @@ public sealed class PlanetEconomyTests
             new Dictionary<int, long> { [Iron] = 200, [Copper] = 0 },
             new Dictionary<int, decimal> { [Iron] = 100m, [Copper] = 50m },
             new Dictionary<int, long> { [Metals] = 1000 },
+            Weights(),
             Start,
             Start);
 
@@ -197,9 +201,9 @@ public sealed class PlanetEconomyTests
         Dictionary<int, long> capacities = new() { [Metals] = 1000 };
         Dictionary<int, long> amounts = new() { [Iron] = 0 };
 
-        AccumulationResult before = PlanetEconomy.Accumulate(catalog, amounts, rates, capacities, Start, Start.AddSeconds(999));
-        AccumulationResult edge = PlanetEconomy.Accumulate(catalog, amounts, rates, capacities, Start, Start.AddSeconds(1000));
-        AccumulationResult after = PlanetEconomy.Accumulate(catalog, amounts, rates, capacities, Start, Start.AddSeconds(5000));
+        AccumulationResult before = PlanetEconomy.Accumulate(catalog, amounts, rates, capacities, Weights(), Start, Start.AddSeconds(999));
+        AccumulationResult edge = PlanetEconomy.Accumulate(catalog, amounts, rates, capacities, Weights(), Start, Start.AddSeconds(1000));
+        AccumulationResult after = PlanetEconomy.Accumulate(catalog, amounts, rates, capacities, Weights(), Start, Start.AddSeconds(5000));
 
         Assert.Equal(999, before.Amounts[Iron]);
         Assert.Equal(1000, edge.Amounts[Iron]);
@@ -219,6 +223,7 @@ public sealed class PlanetEconomyTests
             new Dictionary<int, long> { [Beams] = 40 },
             new Dictionary<int, decimal> { [Beams] = 10m },
             new Dictionary<int, long> { [Metals] = 1000 },
+            Weights(),
             Start,
             Start.AddHours(5));
 
@@ -231,6 +236,7 @@ public sealed class PlanetEconomyTests
             new Dictionary<int, long>(),
             new Dictionary<int, decimal> { [Beams] = 0m },
             new Dictionary<int, long>(),
+            Weights(),
             Start,
             Start.AddHours(5));
 
@@ -249,6 +255,7 @@ public sealed class PlanetEconomyTests
             new Dictionary<int, long> { [Beams] = 40 },
             new Dictionary<int, decimal> { [Beams] = 10m },
             new Dictionary<int, long> { [Produced] = 100 },
+            Weights(),
             Start,
             Start.AddHours(24));
 
@@ -267,11 +274,49 @@ public sealed class PlanetEconomyTests
             new Dictionary<int, long> { [Iron] = 5000 },
             new Dictionary<int, decimal> { [Iron] = 100m },
             new Dictionary<int, long> { [Metals] = 1000 },
+            Weights(),
             Start,
             Start.AddHours(10));
 
         Assert.Equal(5000, result.Amounts[Iron]);
         Assert.Equal(Start, result.FullAt[Iron]);
+    }
+
+    /// <summary>
+    /// The room of a storage is counted in tonnes (task 00027, decision 1): a resource that
+    /// weighs more fills earlier and holds fewer units under the same capacity.
+    /// </summary>
+    [Fact]
+    public void The_room_of_a_storage_is_counted_in_tonnes()
+    {
+        BuildingCatalog catalog = Catalog();
+        Dictionary<int, long> capacities = new() { [Metals] = 1000 };
+
+        // The iron weighs five tonnes, so a thousand tonnes hold two hundred units of it.
+        AccumulationResult heavy = PlanetEconomy.Accumulate(
+            catalog,
+            new Dictionary<int, long> { [Iron] = 100 },
+            new Dictionary<int, decimal> { [Iron] = 100m },
+            capacities,
+            new Dictionary<int, decimal> { [Iron] = 5m },
+            Start,
+            Start.AddHours(10));
+
+        Assert.Equal(200, heavy.Amounts[Iron]);
+        Assert.Equal(Start.AddHours(1), heavy.FullAt[Iron]);
+
+        // The same capacity holds a thousand units of a resource that weighs one tonne.
+        AccumulationResult light = PlanetEconomy.Accumulate(
+            catalog,
+            new Dictionary<int, long> { [Iron] = 100 },
+            new Dictionary<int, decimal> { [Iron] = 100m },
+            capacities,
+            new Dictionary<int, decimal> { [Iron] = 1m },
+            Start,
+            Start.AddHours(10));
+
+        Assert.Equal(1000, light.Amounts[Iron]);
+        Assert.Equal(Start.AddHours(9), light.FullAt[Iron]);
     }
 
     /// <summary>
@@ -326,4 +371,17 @@ public sealed class PlanetEconomyTests
         new(Crystals, "resource_group_2", "world.resource_group.resource_group_2.name"),
         new(Produced, "resource_group_6", "world.resource_group.resource_group_6.name"),
     ];
+
+    /// <summary>
+    /// The weight of one unit of every resource, in tonnes (task 00027). Every resource weighs
+    /// one tonne in these tests, so the room of a storage is the same as it was before.
+    /// </summary>
+    private static Dictionary<int, decimal> Weights() =>
+        new()
+        {
+            [Iron] = 1m,
+            [Copper] = 1m,
+            [Quartzite] = 1m,
+            [Beams] = 1m,
+        };
 }

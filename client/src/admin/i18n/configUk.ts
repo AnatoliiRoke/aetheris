@@ -122,6 +122,16 @@ export const configDescriptionsUk: Record<string, string> = {
     'Символи, дозволені в назві рідної планети: перелічені як є, a-z означає діапазон, дефіс у кінці означає сам дефіс.',
   'config.world.civilization.start_storage_capacity.description':
     'Місткість складу нової рідної планети на кожен ресурс; стартові ресурси ніколи її не перевищують.',
+  'config.world.resource.default_weight.description':
+    'Вага однієї одиниці ресурсу в тоннах, для ресурсів, у яких ще немає власної ваги.',
+  'config.world.seed.cost.base.description': 'Базова витрата кожного ресурсу на першому рівні сиду.',
+  'config.world.seed.cost.growth.description': 'Частка, на яку витрата ресурсу зростає з кожним наступним рівнем.',
+  'config.world.seed.duration.base_seconds.description': 'Базовий час першого рівня сиду, у секундах.',
+  'config.world.seed.duration.growth.description': 'Частка, на яку час зростає з кожним наступним рівнем.',
+  'config.world.seed.race.bonus.description': 'Частка бойового бонусу раси до модулів своєї групи.',
+  'config.world.seed.level_cap.base.description': 'База формули межі рівнів стартової будівлі.',
+  'config.world.seed.level_cap.growth.description': 'Множник формули межі рівнів стартової будівлі.',
+  'config.world.seed.level_cap.step.description': 'Крок формули межі рівнів стартової будівлі.',
   'config.world.naming.sector_template.description': 'Шаблон назви сектора: {index}.',
   'config.world.naming.system_template.description': 'Шаблон назви зоряної системи: {sector}, {number}.',
   'config.world.naming.body_template.description': 'Шаблон назви тіла: {system}, {orbit}.',
@@ -145,6 +155,8 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.production.queue.base_slots.description': 'Місць у черзі заводу, разом із тим, що виробляється.',
   'config.production.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черги заводу.',
   'config.production.catalog.cache_seconds.description': 'Скільки секунд таблиці виробництва тримаються в пам’яті сервера до повторного читання.',
+  'config.production.part.default_weight.description':
+    'Вага однієї деталі в тоннах, для деталей, у яких ще немає власної ваги.',
 
   'config.processes.queue.base_slots.description': 'Місць у черзі процесу, разом із тим, що виконується.',
   'config.processes.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черги процесу.',

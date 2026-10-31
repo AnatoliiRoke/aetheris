@@ -7,6 +7,8 @@ using Aetheris.Core.Security;
 using Aetheris.Host.Admin;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
+using Aetheris.Planets.Data;
+using Aetheris.Planets.Data.Entities;
 using Aetheris.Production;
 using Aetheris.Production.Api;
 using Aetheris.Production.Configuration;
@@ -478,6 +480,10 @@ public sealed class ProductionReferenceTests
         Assert.Equal(1, blocked.Queue[0].ProducedQuantity);
         Assert.Equal(capacity, Held(blocked.Storage, partId));
 
+        // The body already holds more of the product than its storage can take, so the pile is
+        // emptied and the scrap has room for its output.
+        await ClearResourceAsync(services, player.PlanetId, ids.Produced);
+
         // The scrap takes a bolt out of the storage, so the blocked batch goes on.
         long producedBefore = await ProductionTestData.BalanceAsync(player, services, ids.Produced);
         await production.EnqueueAsync(player.Account.UserId, player.PlanetId, factoryId, scrapRecipeId, 1, Token);
@@ -534,6 +540,10 @@ public sealed class ProductionReferenceTests
         await dbContext.SaveChangesAsync(Token);
 
         long ironBefore = await ProductionTestData.BalanceAsync(player, services, ids.Iron);
+
+        // The body already holds more of the product than its storage can take, so one made unit
+        // would stay blocked and the cancel would return the whole cost.
+        await ClearResourceAsync(services, player.PlanetId, ids.Produced);
         long producedBefore = await ProductionTestData.BalanceAsync(player, services, ids.Produced);
         ProductionOrderDto order = (await production.EnqueueAsync(player.Account.UserId, player.PlanetId, factoryId, recipeId, 3, Token)).Queue[0];
         Assert.Equal(0, Held((await production.GetStockAsync(player.Account.UserId, player.PlanetId, Token)).Storage, partId));
@@ -624,6 +634,16 @@ public sealed class ProductionReferenceTests
     private static long Held(ProductionStorageDto storage, int partTypeId) =>
         storage.Kinds.Where(kind => kind.PartTypeId == partTypeId).Sum(kind => kind.Quantity);
 
+    private static async Task ClearResourceAsync(IServiceProvider services, long planetId, int resourceTypeId)
+    {
+        PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
+        PlanetResourceEntity row = await planets.PlanetResources
+            .SingleAsync(entry => entry.PlanetId == planetId && entry.ResourceTypeId == resourceTypeId, Token);
+
+        row.Amount = 0;
+        await planets.SaveChangesAsync(Token);
+    }
+
     private static object Part(int groupId, string ukrainian, string english, object[]? attributes = null, string? imageKey = null) => new
     {
         image_key = imageKey,
@@ -708,7 +728,7 @@ public sealed class ProductionReferenceTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        int factoryTypeId = await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>().FindBuildingTypeIdAsync("building_13", Token)
+        int factoryTypeId = (await ProductionTestData.FirstRecipeAsync(services)).BuildingTypeId
             ?? throw new InvalidOperationException("The factory type does not exist.");
         int groupId = await services.GetRequiredService<ProductionDbContext>().PartGroups.AsNoTracking()
             .OrderBy(group => group.SortOrder).Select(group => group.Id).FirstAsync(Token);

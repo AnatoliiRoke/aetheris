@@ -34,6 +34,13 @@ public static class ProductionReferenceSeed
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
     };
 
+    /// <summary>The empty set of the values of the characteristics of a part (task 00027).</summary>
+    private static readonly IReadOnlyDictionary<string, SeedCharacteristicValue> EmptyCharacteristics =
+        new Dictionary<string, SeedCharacteristicValue>();
+
+    /// <summary>The empty set of the values of a characteristic by the level of a part (task 00027).</summary>
+    private static readonly IReadOnlyDictionary<int, decimal> EmptyLevels = new Dictionary<int, decimal>();
+
     /// <summary>
     /// Reads the starting data.
     /// </summary>
@@ -65,6 +72,7 @@ public static class ProductionReferenceSeed
         ILocalizationTexts texts,
         ICodeSequence codes,
         IRequirementsModule requirements,
+        IReadOnlyDictionary<string, int>? technologyIds = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
@@ -112,9 +120,39 @@ public static class ProductionReferenceSeed
 
         Dictionary<string, int> partGroupIds = [];
         Dictionary<string, int> partTypeIds = [];
+        Dictionary<string, int> characteristicIds = [];
 
         // Every row takes the next code of the counter of the server, and the keys of its texts
         // are built from that code (documentation/tech/09, sections 3.2 and 4.1).
+
+        // The characteristics come first: the groups of the parts point at them, and the parts
+        // keep their values (task 00027).
+        foreach (SeedCharacteristic characteristic in data.Characteristics ?? [])
+        {
+            string code = await codes.NextAsync(ProductionTextKeys.CharacteristicCodeGroup, cancellationToken).ConfigureAwait(false);
+
+            CharacteristicEntity entity = new()
+            {
+                Code = code,
+                NameKey = ProductionTextKeys.CharacteristicName(code),
+                DescriptionKey = ProductionTextKeys.CharacteristicDescription(code),
+                UnitKey = characteristic.Unit is null ? null : ProductionTextKeys.CharacteristicUnit(code),
+                SortOrder = characteristic.SortOrder,
+            };
+
+            dbContext.Characteristics.Add(entity);
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            characteristicIds[characteristic.Code] = entity.Id;
+
+            await texts.AddMissingAsync(
+                [
+                    .. ProductionSeedTexts.Entries(entity.NameKey, characteristic.Name),
+                    .. ProductionSeedTexts.Entries(entity.DescriptionKey, characteristic.Description),
+                    .. ProductionSeedTexts.Entries(entity.UnitKey, characteristic.Unit),
+                ],
+                ProductionSeedActor,
+                cancellationToken).ConfigureAwait(false);
+        }
 
         foreach (SeedPartGroup group in data.PartGroups)
         {
@@ -141,6 +179,26 @@ public static class ProductionReferenceSeed
                 cancellationToken).ConfigureAwait(false);
         }
 
+        // The characteristics of every group are bound after the groups exist, so the link
+        // points at real rows of both sides (task 00027).
+        foreach (SeedGroupCharacteristic link in data.GroupCharacteristics ?? [])
+        {
+            PartGroupCharacteristicEntity entity = new()
+            {
+                PartGroupId = partGroupIds[link.Group],
+                CharacteristicId = characteristicIds[link.Characteristic],
+                SortOrder = link.SortOrder,
+                IsRequired = link.IsRequired,
+            };
+
+            dbContext.PartGroupCharacteristics.Add(entity);
+        }
+
+        if (data.GroupCharacteristics is { Count: > 0 })
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         foreach (SeedPart part in data.Parts)
         {
             string code = await codes.NextAsync(ProductionTextKeys.PartTypeCodeGroup, cancellationToken).ConfigureAwait(false);
@@ -153,6 +211,7 @@ public static class ProductionReferenceSeed
                 PartGroupId = partGroupIds[part.Group],
                 MarkLevel = part.MarkLevel,
                 SortOrder = part.SortOrder,
+                Weight = part.Weight ?? 1m,
             };
 
             foreach (KeyValuePair<string, SeedAttributeValue> attribute in part.Attributes)
@@ -169,6 +228,34 @@ public static class ProductionReferenceSeed
             dbContext.PartTypes.Add(entity);
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             partTypeIds[part.Code] = entity.Id;
+
+            // The values of the characteristics of the part come after the part itself, so
+            // they point at a real row of it (task 00027).
+            foreach (KeyValuePair<string, SeedCharacteristicValue> value in part.Characteristics ?? EmptyCharacteristics)
+            {
+                PartCharacteristicValueEntity characteristicValue = new()
+                {
+                    PartTypeId = entity.Id,
+                    CharacteristicId = characteristicIds[value.Key],
+                    NumberValue = value.Value.Number,
+                };
+
+                foreach (KeyValuePair<int, decimal> level in value.Value.Levels ?? EmptyLevels)
+                {
+                    characteristicValue.Levels.Add(new PartCharacteristicLevelValueEntity
+                    {
+                        Level = level.Key,
+                        NumberValue = level.Value,
+                    });
+                }
+
+                dbContext.PartCharacteristicValues.Add(characteristicValue);
+            }
+
+            if (part.Characteristics is { Count: > 0 })
+            {
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
 
             await texts.AddMissingAsync(
                 [
@@ -246,11 +333,22 @@ public static class ProductionReferenceSeed
 
             foreach (SeedRequirement requirement in recipe.Requirements)
             {
+                // A technology gate is written when the technologies are already in the database.
+                // A run that fills the production before the research leaves the gate out; the
+                // full start of the server writes it (task 00028).
+                if (requirement.Type == RequirementTypes.TechnologyLevel && technologyIds is not { Count: > 0 })
+                {
+                    continue;
+                }
+
                 // The target is named by its neutral code and becomes the identifier of the row.
                 int targetId = requirement.Type switch
                 {
                     RequirementTypes.BuildingLevel => await planets.FindBuildingTypeIdAsync(requirement.Target, cancellationToken).ConfigureAwait(false)
                         ?? throw new InvalidOperationException($"The building '{requirement.Target}' of the starting data does not exist."),
+                    RequirementTypes.TechnologyLevel => technologyIds!.TryGetValue(requirement.Target, out int technologyId)
+                        ? technologyId
+                        : throw new InvalidOperationException($"The technology '{requirement.Target}' of the starting data does not exist."),
                     ProductionRequirementTypes.Race => raceIds[requirement.Target],
                     _ => throw new InvalidOperationException($"The starting data names the requirement type '{requirement.Type}', which it cannot resolve."),
                 };
@@ -298,11 +396,39 @@ public static class ProductionReferenceSeed
 /// <param name="Parts">The parts.</param>
 /// <param name="Recipes">The recipes.</param>
 /// <param name="RaceBonuses">The bonuses of the races in the groups of the parts.</param>
+/// <param name="Characteristics">The characteristics of the parts (task 00027).</param>
+/// <param name="GroupCharacteristics">The characteristics of the groups of the parts (task 00027).</param>
 public sealed record ProductionSeedData(
     IReadOnlyList<SeedPartGroup> PartGroups,
     IReadOnlyList<SeedPart> Parts,
     IReadOnlyList<SeedRecipe> Recipes,
-    IReadOnlyList<SeedRaceBonus> RaceBonuses);
+    IReadOnlyList<SeedRaceBonus> RaceBonuses,
+    IReadOnlyList<SeedCharacteristic>? Characteristics = null,
+    IReadOnlyList<SeedGroupCharacteristic>? GroupCharacteristics = null);
+
+/// <summary>A characteristic of the starting data.</summary>
+/// <param name="Code">The neutral code of the characteristic.</param>
+/// <param name="SortOrder">The order in the lists.</param>
+/// <param name="Name">The name of the characteristic.</param>
+/// <param name="Description">The description of the characteristic.</param>
+/// <param name="Unit">The unit of measure, if any.</param>
+public sealed record SeedCharacteristic(
+    string Code,
+    int SortOrder,
+    IReadOnlyDictionary<string, string> Name,
+    IReadOnlyDictionary<string, string> Description,
+    IReadOnlyDictionary<string, string>? Unit = null);
+
+/// <summary>A characteristic of a group of the parts of the starting data.</summary>
+/// <param name="Group">The neutral code of the group of the parts.</param>
+/// <param name="Characteristic">The neutral code of the characteristic.</param>
+/// <param name="SortOrder">The order in the list of the group.</param>
+/// <param name="IsRequired">Whether a part of the group must have the value of the characteristic.</param>
+public sealed record SeedGroupCharacteristic(
+    string Group,
+    string Characteristic,
+    int SortOrder,
+    bool IsRequired = false);
 
 /// <summary>A group of the parts of the starting data.</summary>
 /// <param name="Code">The neutral code of the group.</param>
@@ -323,6 +449,8 @@ public sealed record SeedPartGroup(
 /// <param name="Name">The name of the part.</param>
 /// <param name="Description">The description of the part.</param>
 /// <param name="Attributes">The attributes of the part.</param>
+/// <param name="Weight">The weight of one part in tonnes (task 00027).</param>
+/// <param name="Characteristics">The values of the characteristics of the part (task 00027).</param>
 public sealed record SeedPart(
     string Code,
     string Group,
@@ -330,7 +458,14 @@ public sealed record SeedPart(
     int SortOrder,
     IReadOnlyDictionary<string, string> Name,
     IReadOnlyDictionary<string, string> Description,
-    IReadOnlyDictionary<string, SeedAttributeValue> Attributes);
+    IReadOnlyDictionary<string, SeedAttributeValue> Attributes,
+    decimal? Weight = null,
+    IReadOnlyDictionary<string, SeedCharacteristicValue>? Characteristics = null);
+
+/// <summary>The value of a characteristic of a part of the starting data.</summary>
+/// <param name="Number">The value of the characteristic.</param>
+/// <param name="Levels">The values of the characteristic by the level of the part, when it has them.</param>
+public sealed record SeedCharacteristicValue(decimal Number, IReadOnlyDictionary<int, decimal>? Levels = null);
 
 /// <summary>An attribute of a part of the starting data.</summary>
 /// <param name="Number">The value as a number, or <see langword="null"/>.</param>
@@ -401,9 +536,11 @@ public static class ProductionSeedTexts
     /// <summary>
     /// Builds the texts of one key.
     /// </summary>
-    /// <param name="key">The key.</param>
+    /// <param name="key">The key, or <see langword="null"/> when the row has no such text.</param>
     /// <param name="texts">The text by language, or <see langword="null"/>.</param>
     /// <returns>The texts.</returns>
-    public static IEnumerable<LocalizationTextEntry> Entries(string key, IReadOnlyDictionary<string, string>? texts) =>
-        texts is null ? [] : texts.Select(text => new LocalizationTextEntry(key, text.Key, text.Value));
+    public static IEnumerable<LocalizationTextEntry> Entries(string? key, IReadOnlyDictionary<string, string>? texts) =>
+        key is null || texts is null
+            ? []
+            : texts.Select(text => new LocalizationTextEntry(key, text.Key, text.Value));
 }

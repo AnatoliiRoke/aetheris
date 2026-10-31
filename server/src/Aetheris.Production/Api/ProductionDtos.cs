@@ -223,3 +223,69 @@ public sealed record ProductionStackDto(
     string? ImageKey,
     int PartGroupId = 0,
     string? PartGroupNameKey = null);
+
+/// <summary>
+/// A characteristic of the parts with the groups that have it (task 00027, section 3.2).
+/// </summary>
+/// <param name="CharacteristicId">The characteristic.</param>
+/// <param name="Code">The neutral code of the characteristic.</param>
+/// <param name="NameKey">The localisation key of the name of the characteristic.</param>
+/// <param name="DescriptionKey">The localisation key of the description of the characteristic.</param>
+/// <param name="UnitKey">The localisation key of the unit of measure, or <see langword="null"/>.</param>
+/// <param name="ImageKey">The key of the picture of the characteristic, or <see langword="null"/>.</param>
+/// <param name="SortOrder">The order in the lists.</param>
+/// <param name="IsArchived">Whether the characteristic is archived.</param>
+/// <param name="Groups">The groups of the parts that have the characteristic.</param>
+public sealed record CharacteristicDto(
+    int CharacteristicId,
+    string Code,
+    string NameKey,
+    string DescriptionKey,
+    string? UnitKey,
+    string? ImageKey,
+    int SortOrder,
+    bool IsArchived,
+    IReadOnlyList<CharacteristicGroupDto> Groups);
+
+/// <summary>
+/// A group of the parts with one of its characteristics.
+/// </summary>
+/// <param name="PartGroupId">The group of the parts.</param>
+/// <param name="Code">The neutral code of the group.</param>
+/// <param name="NameKey">The localisation key of the name of the group.</param>
+/// <param name="SortOrder">The order of the characteristic in the list of the group.</param>
+/// <param name="IsRequired">Whether a part of the group must have the value of the characteristic.</param>
+public sealed record CharacteristicGroupDto(
+    int PartGroupId,
+    string Code,
+    string NameKey,
+    int SortOrder,
+    bool IsRequired);
+
+/// <summary>
+/// The weight and the characteristics of a part (task 00027, section 3.2).
+/// </summary>
+/// <param name="PartTypeId">The part.</param>
+/// <param name="Code">The neutral code of the part.</param>
+/// <param name="NameKey">The localisation key of the name of the part.</param>
+/// <param name="PartGroupId">The group of the part.</param>
+/// <param name="Weight">The weight of one part in tonnes.</param>
+/// <param name="Characteristics">The values of the characteristics of the part.</param>
+public sealed record PartCharacteristicsDto(
+    int PartTypeId,
+    string Code,
+    string NameKey,
+    int PartGroupId,
+    decimal Weight,
+    IReadOnlyList<PartCharacteristicValueDto> Characteristics);
+
+/// <summary>
+/// The value of a characteristic of a part.
+/// </summary>
+/// <param name="CharacteristicId">The characteristic.</param>
+/// <param name="NumberValue">The value of the characteristic.</param>
+/// <param name="Levels">The values of the characteristic by the level of the part.</param>
+public sealed record PartCharacteristicValueDto(
+    int CharacteristicId,
+    decimal NumberValue,
+    IReadOnlyDictionary<int, decimal> Levels);

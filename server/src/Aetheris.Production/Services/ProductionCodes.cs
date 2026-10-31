@@ -19,6 +19,9 @@ public static class ProductionTextKeys
     /// <summary>The group of the neutral codes of the recipes.</summary>
     public const string RecipeCodeGroup = "recipe";
 
+    /// <summary>The group of the neutral codes of the characteristics of the parts (task 00027).</summary>
+    public const string CharacteristicCodeGroup = "characteristic";
+
     /// <summary>The prefix of the keys of the groups of the parts.</summary>
     public const string PartGroup = "production.part_group";
 
@@ -27,6 +30,9 @@ public static class ProductionTextKeys
 
     /// <summary>The prefix of the keys of the recipes.</summary>
     public const string Recipe = "production.recipe";
+
+    /// <summary>The prefix of the keys of the characteristics of the parts (task 00027).</summary>
+    public const string Characteristic = "production.characteristic";
 
     /// <summary>
     /// Builds the key of the name of a group of the parts.
@@ -69,6 +75,27 @@ public static class ProductionTextKeys
     /// <param name="code">The neutral code of the recipe.</param>
     /// <returns>The key.</returns>
     public static string RecipeDescription(string code) => $"{Recipe}.{code}.description";
+
+    /// <summary>
+    /// Builds the key of the name of a characteristic of the parts (task 00027).
+    /// </summary>
+    /// <param name="code">The neutral code of the characteristic.</param>
+    /// <returns>The key.</returns>
+    public static string CharacteristicName(string code) => $"{Characteristic}.{code}.name";
+
+    /// <summary>
+    /// Builds the key of the description of a characteristic of the parts (task 00027).
+    /// </summary>
+    /// <param name="code">The neutral code of the characteristic.</param>
+    /// <returns>The key.</returns>
+    public static string CharacteristicDescription(string code) => $"{Characteristic}.{code}.description";
+
+    /// <summary>
+    /// Builds the key of the unit of measure of a characteristic of the parts (task 00027).
+    /// </summary>
+    /// <param name="code">The neutral code of the characteristic.</param>
+    /// <returns>The key.</returns>
+    public static string CharacteristicUnit(string code) => $"{Characteristic}.{code}.unit";
 }
 
 /// <summary>

@@ -322,7 +322,7 @@ public sealed class AdminObjectEditingTests
         };
 
         await AssertBodyRefusedAsync(client, planetId, Body(neighbourOrbit, resources[SeedCodes.Iron], 1m), "orbit", AdminEditErrors.OrbitTaken);
-        await AssertBodyRefusedAsync(client, planetId, Body(freeOrbit, resources[SeedCodes.Ether], 1m), "deposit_ids", AdminEditErrors.NotAllowedOnBody);
+        await AssertBodyRefusedAsync(client, planetId, Body(freeOrbit, resources[SeedCodes.Manufactured], 1m), "deposit_ids", AdminEditErrors.NotAllowedOnBody);
         await AssertBodyRefusedAsync(client, planetId, Body(freeOrbit, resources[SeedCodes.Iron], 2.5m), "deposit_ids", AdminEditErrors.OutOfBounds);
 
         HttpResponseMessage saved = await client.PutAsJsonAsync(AdminEndpoints.Prefix + $"/world/objects/{planetId}", Body(freeOrbit, resources[SeedCodes.Iron], 1.25m), Token);

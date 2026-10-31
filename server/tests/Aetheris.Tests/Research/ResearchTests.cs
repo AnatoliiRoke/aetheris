@@ -10,6 +10,7 @@ using Aetheris.Research.Api;
 using Aetheris.Research.Configuration;
 using Aetheris.Research.Data;
 using Aetheris.Research.Services;
+using Aetheris.Tests.Economy;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.Planets;
 using Aetheris.Tests.World;
@@ -86,21 +87,18 @@ public sealed class ResearchTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        // The science centre is built on the body, so the technology of the first level opens.
+        // The science centre is built on the body, so the first level of a technology opens.
+        // Every technology names the centre level 1; a later level names the centre in its requirements.
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ScienceCenter, 1);
 
         ResearchTreeDto tree = await services.GetRequiredService<IResearchModule>()
             .GetTreeAsync(player.Account.UserId, player.PlanetId, Token);
 
-        TechnologyDto first = tree.Technologies.OrderBy(technology => technology.ResearchCenterLevel).First();
+        TechnologyDto first = tree.Technologies.Single(technology => technology.NameKey == "research.technology.tech_1.name");
         Assert.Equal(1, first.ResearchCenterLevel);
         Assert.Equal(ResearchTechnologyStatuses.Available, first.Status);
         Assert.Null(first.ReasonCode);
-
-        // A technology that needs a higher centre stays unavailable with its reason.
-        TechnologyDto higher = tree.Technologies.First(technology => technology.ResearchCenterLevel > 1);
-        Assert.Equal(ResearchTechnologyStatuses.Unavailable, higher.Status);
-        Assert.Equal(ResearchErrorCodes.ResearchCenterLevel, higher.ReasonCode);
+        Assert.DoesNotContain(tree.Technologies, technology => technology.ResearchCenterLevel > 1);
     }
 
     /// <summary>
@@ -122,8 +120,11 @@ public sealed class ResearchTests
         IResearchModule research = services.GetRequiredService<IResearchModule>();
         ResearchTreeDto tree = await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token);
 
-        TechnologyDto first = tree.Technologies.OrderBy(technology => technology.ResearchCenterLevel).First();
-        long cost = first.Levels.First(level => level.Level == 1).Costs.Sum(cost => cost.Amount);
+        TechnologyDto first = tree.Technologies.Single(technology => technology.NameKey == "research.technology.tech_1.name");
+        HashSet<int> currencyIds = await PlanetsTestData.CurrencyIdsAsync(services);
+        long planetCost = first.Levels.First(level => level.Level == 1).Costs
+            .Where(cost => !currencyIds.Contains(cost.ResourceTypeId))
+            .Sum(cost => cost.Amount);
 
         Dictionary<int, long> before = await PlanetsTestData.StoredBalanceAsync(services, player.PlanetId);
 
@@ -138,7 +139,7 @@ public sealed class ResearchTests
         Assert.Equal(ResearchTechnologyStatuses.Researching, queued.Technologies.Single(technology => technology.Id == first.Id).Status);
 
         Dictionary<int, long> afterQueue = await PlanetsTestData.StoredBalanceAsync(services, player.PlanetId);
-        Assert.Equal(before.Values.Sum() - cost, afterQueue.Values.Sum());
+        Assert.Equal(before.Values.Sum() - planetCost, afterQueue.Values.Sum());
 
         // The cancellation returns the whole cost.
         ResearchTreeDto cancelled = await research.CancelAsync(player.Account.UserId, queued.Queue[0].Id, Token);
@@ -194,7 +195,7 @@ public sealed class ResearchTests
 
         IResearchModule research = services.GetRequiredService<IResearchModule>();
         ResearchTreeDto tree = await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token);
-        TechnologyDto first = tree.Technologies.OrderBy(technology => technology.ResearchCenterLevel).First();
+        TechnologyDto first = tree.Technologies.Single(technology => technology.NameKey == "research.technology.tech_5.name");
 
         await research.EnqueueAsync(player.Account.UserId, player.PlanetId, first.Id, 1, Token);
 
@@ -232,23 +233,22 @@ public sealed class ResearchTests
         IResearchModule research = services.GetRequiredService<IResearchModule>();
         ResearchTreeDto tree = await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token);
 
-        TechnologyDto opener = tree.Technologies.Single(technology => technology.NameKey == "research.technology.tech_7.name");
-
-        // The mine is closed while the technology is unknown.
+        // The first level of the mine needs only its deposit. The second level needs a technology.
         AvailabilityDto before = await services.GetRequiredService<IPlanetsModule>()
             .CheckRequirementsAsync(
                 RequirementSubjectTypes.BuildingType,
                 await BuildingTypeIdAsync(services, SeedCodes.TitaniumMine),
-                1,
+                2,
                 player.PlanetId,
                 player.Account.UserId,
                 Token);
 
         Assert.False(before.IsAvailable);
-        Assert.Equal(PlanetsErrorCodes.RequirementTechnology, before.UnmetRequirements.Single().ReasonCode);
+        RequirementDto gate = Assert.Single(before.UnmetRequirements);
+        Assert.Equal(PlanetsErrorCodes.RequirementTechnology, gate.ReasonCode);
 
         // The technology is learned, so the mine opens.
-        await research.EnqueueAsync(player.Account.UserId, player.PlanetId, opener.Id, 1, Token);
+        await research.EnqueueAsync(player.Account.UserId, player.PlanetId, gate.TargetId, gate.TargetLevel, Token);
         await services.GetRequiredService<ResearchQueueService>()
             .CompleteDueAsync(player.Account.UserId, DateTimeOffset.MaxValue, Token);
 
@@ -256,7 +256,7 @@ public sealed class ResearchTests
             .CheckRequirementsAsync(
                 RequirementSubjectTypes.BuildingType,
                 await BuildingTypeIdAsync(services, SeedCodes.TitaniumMine),
-                1,
+                2,
                 player.PlanetId,
                 player.Account.UserId,
                 Token);
@@ -282,13 +282,14 @@ public sealed class ResearchTests
 
         IResearchModule research = services.GetRequiredService<IResearchModule>();
         ResearchTreeDto tree = await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token);
-        TechnologyDto higher = tree.Technologies.First(technology => technology.ResearchCenterLevel > 1);
+        TechnologyDto mathematics = tree.Technologies.Single(technology => technology.NameKey == "research.technology.tech_1.name");
 
+        await research.EnqueueAsync(player.Account.UserId, player.PlanetId, mathematics.Id, 1, Token);
         GameException refused = await Assert.ThrowsAsync<GameException>(() =>
-            research.EnqueueAsync(player.Account.UserId, player.PlanetId, higher.Id, 1, Token));
+            research.EnqueueAsync(player.Account.UserId, player.PlanetId, mathematics.Id, 2, Token));
 
-        Assert.Equal(ResearchErrorCodes.ResearchCenterLevel, refused.Code);
-        Assert.Empty((await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token)).Queue);
+        Assert.Equal(ResearchErrorCodes.RequirementUnmet, refused.Code);
+        Assert.Equal([1], (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token)).Queue.Select(item => item.TargetLevel));
     }
 
     /// <summary>
@@ -304,12 +305,12 @@ public sealed class ResearchTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ScienceCenter, 1);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ScienceCenter, 2);
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, await RichBalanceAsync(services), FutureMoment(services));
 
         IResearchModule research = services.GetRequiredService<IResearchModule>();
         ResearchTreeDto tree = await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token);
-        TechnologyDto technology = tree.Technologies.First(entry => entry.ResearchCenterLevel == 1 && entry.MaxLevel > 2);
+        TechnologyDto technology = tree.Technologies.Single(entry => entry.NameKey == "research.technology.tech_1.name");
         Dictionary<int, long> before = await PlanetsTestData.StoredBalanceAsync(services, player.PlanetId);
 
         // The second level is refused before the first one is learned or queued.
@@ -392,13 +393,18 @@ public sealed class ResearchTests
         Dictionary<int, long> left = await PlanetsTestData.StoredBalanceAsync(services, player.PlanetId);
         Assert.All(left.Values, amount => Assert.True(amount >= 0));
 
+        HashSet<int> currencyIds = await PlanetsTestData.CurrencyIdsAsync(services);
+
         foreach (int resourceTypeId in balance.Keys)
         {
             long spent = chosen
                 .Where(technology => queued.Contains(technology.TechnologyId))
                 .Sum(technology => technology.Costs.GetValueOrDefault(resourceTypeId));
+            long actual = currencyIds.Contains(resourceTypeId)
+                ? await EconomyTestData.BalanceAsync(services, player.Account.UserId, resourceTypeId)
+                : left.GetValueOrDefault(resourceTypeId);
 
-            Assert.Equal(balance[resourceTypeId] - spent, left.GetValueOrDefault(resourceTypeId));
+            Assert.Equal(balance[resourceTypeId] - spent, actual);
         }
 
         foreach (HttpResponseMessage response in responses)
@@ -619,13 +625,13 @@ public sealed class ResearchTests
             using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
 
             int mineId = await BuildingTypeIdAsync(services, SeedCodes.TitaniumMine);
-            AvailabilityDto before = await planets.CheckRequirementsAsync(RequirementSubjectTypes.BuildingType, mineId, 1, player.PlanetId, player.Account.UserId, Token);
+            AvailabilityDto before = await planets.CheckRequirementsAsync(RequirementSubjectTypes.BuildingType, mineId, 2, player.PlanetId, player.Account.UserId, Token);
             Assert.DoesNotContain(before.UnmetRequirements, requirement => requirement.ReasonCode == PlanetsErrorCodes.RequirementTechnology);
 
             await AetherisTestFactory.SetParameterAsync(services, ResearchConfigKeys.CatalogCacheSeconds, "0");
             await services.GetRequiredService<IResearchModule>().EnsureAsync(Token);
 
-            AvailabilityDto after = await planets.CheckRequirementsAsync(RequirementSubjectTypes.BuildingType, mineId, 1, player.PlanetId, player.Account.UserId, Token);
+            AvailabilityDto after = await planets.CheckRequirementsAsync(RequirementSubjectTypes.BuildingType, mineId, 2, player.PlanetId, player.Account.UserId, Token);
             Assert.Contains(after.UnmetRequirements, requirement => requirement.ReasonCode == PlanetsErrorCodes.RequirementTechnology);
         }
         finally

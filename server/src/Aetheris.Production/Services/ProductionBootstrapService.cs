@@ -1,6 +1,7 @@
 using Aetheris.Core.Data;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
+using Aetheris.Planets.Services;
 using Aetheris.Production.Data;
 using Aetheris.Requirements;
 using Aetheris.World;
@@ -27,6 +28,7 @@ public sealed class ProductionBootstrapService
     private readonly ILocalizationTexts _texts;
     private readonly ICodeSequence _codes;
     private readonly IRequirementsModule _requirements;
+    private readonly ITechnologyLevels _technologies;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProductionBootstrapService"/> class.
@@ -47,7 +49,8 @@ public sealed class ProductionBootstrapService
         IPlanetsModule planets,
         ILocalizationTexts texts,
         ICodeSequence codes,
-        IRequirementsModule requirements)
+        IRequirementsModule requirements,
+        ITechnologyLevels technologies)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -56,6 +59,7 @@ public sealed class ProductionBootstrapService
         ArgumentNullException.ThrowIfNull(texts);
         ArgumentNullException.ThrowIfNull(codes);
         ArgumentNullException.ThrowIfNull(requirements);
+        ArgumentNullException.ThrowIfNull(technologies);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -65,6 +69,7 @@ public sealed class ProductionBootstrapService
         _texts = texts;
         _codes = codes;
         _requirements = requirements;
+        _technologies = technologies;
     }
 
     /// <summary>
@@ -77,8 +82,10 @@ public sealed class ProductionBootstrapService
         ResourceCatalog resources = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
         IReadOnlyList<RaceDto> races = await _world.GetRacesAsync(cancellationToken).ConfigureAwait(false);
 
+        IReadOnlyDictionary<string, int> technologyIds = await _technologies.GetTechnologyIdsByCodeAsync(cancellationToken).ConfigureAwait(false);
+
         bool seeded = await _unitOfWork.RunAsync(
-            () => ProductionReferenceSeed.SeedAsync(_dbContext, resources, races, _planets, _texts, _codes, _requirements, cancellationToken),
+            () => ProductionReferenceSeed.SeedAsync(_dbContext, resources, races, _planets, _texts, _codes, _requirements, technologyIds, cancellationToken),
             cancellationToken).ConfigureAwait(false);
 
         _catalogCache.Invalidate();

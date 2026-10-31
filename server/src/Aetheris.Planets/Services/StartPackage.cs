@@ -1,9 +1,11 @@
 using Aetheris.Core.Time;
+using Aetheris.Economy;
 using Aetheris.Economy.Services;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.World.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Aetheris.Planets.Services;
@@ -25,6 +27,7 @@ public sealed class PlanetStartPackage : IHomePlanetStore, IStartBuildingPlacer
     private readonly PlanetsUnitOfWork _unitOfWork;
     private readonly IGameClock _clock;
     private readonly IColonyRegistry _colonies;
+    private readonly IServiceProvider _services;
     private readonly ILogger<PlanetStartPackage> _logger;
 
     /// <summary>
@@ -34,24 +37,31 @@ public sealed class PlanetStartPackage : IHomePlanetStore, IStartBuildingPlacer
     /// <param name="unitOfWork">The transaction of the request.</param>
     /// <param name="clock">The game clock.</param>
     /// <param name="colonies">The rows of the population of the colonies.</param>
+    /// <param name="services">The request services. The cost split and the economy module are
+    /// resolved from here when a civilization is founded, not in this constructor: both reach
+    /// <c>IWorldModule</c>, and the world reaches this class through <c>IStartBuildingPlacer</c>
+    /// (task 00028).</param>
     /// <param name="logger">The logger.</param>
     public PlanetStartPackage(
         PlanetsDbContext dbContext,
         PlanetsUnitOfWork unitOfWork,
         IGameClock clock,
         IColonyRegistry colonies,
+        IServiceProvider services,
         ILogger<PlanetStartPackage> logger)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(colonies);
+        ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(logger);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
         _clock = clock;
         _colonies = colonies;
+        _services = services;
         _logger = logger;
     }
 
@@ -69,10 +79,20 @@ public sealed class PlanetStartPackage : IHomePlanetStore, IStartBuildingPlacer
             async () =>
             {
                 await EnsureStateAsync(planetId, sectorId, playerId, cancellationToken).ConfigureAwait(false);
-                await AddResourcesAsync(planetId, sectorId, amounts, cancellationToken).ConfigureAwait(false);
+
+                // A currency belongs to the civilization. The rest of the start package lies on the body.
+                CostSplitter costs = _services.GetRequiredService<CostSplitter>();
+                SplitCosts split = await costs.SplitAsync(amounts, cancellationToken).ConfigureAwait(false);
+                await AddResourcesAsync(planetId, sectorId, split.PlanetResources, cancellationToken).ConfigureAwait(false);
 
                 // The body is a colony of the player from now on: its population is counted from here.
                 await _colonies.FoundAsync(playerId, planetId, sectorId, cancellationToken).ConfigureAwait(false);
+
+                if (split.Currencies.Count > 0)
+                {
+                    IEconomyModule economy = _services.GetRequiredService<IEconomyModule>();
+                    await economy.GiveAsync(playerId, split.Currencies, cancellationToken).ConfigureAwait(false);
+                }
 
                 return true;
             },

@@ -1,7 +1,10 @@
+using System.Globalization;
 using Aetheris.Core.Admin;
+using Aetheris.Core.Configuration;
 using Aetheris.Core.Data;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Text;
+using Aetheris.World.Configuration;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +45,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
     private const string EarnsPopulationIncomeField = "earns_population_income";
 
+    private const string WeightField = "weight";
+
     private const string LabelPrefix = "admin.reference.";
 
     /// <summary>The place of the resources in the menu of the reference kinds.</summary>
@@ -60,6 +65,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     private readonly ILocalizationTexts _texts;
     private readonly IAdminReferenceImages _images;
     private readonly IReadOnlyList<IResourceUsage> _usages;
+    private readonly IGameConfig _config;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WorldReferenceAdminService"/> class.
@@ -70,13 +76,15 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <param name="texts">The texts of the game data.</param>
     /// <param name="images">The pictures of the server.</param>
     /// <param name="usages">The modules that hold data of a resource, asked before its scope changes.</param>
+    /// <param name="config">The game configuration, for the default weight of a resource.</param>
     public WorldReferenceAdminService(
         WorldDbContext dbContext,
         WorldUnitOfWork unitOfWork,
         ICodeSequence codes,
         ILocalizationTexts texts,
         IAdminReferenceImages images,
-        IEnumerable<IResourceUsage> usages)
+        IEnumerable<IResourceUsage> usages,
+        IGameConfig config)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -84,6 +92,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         ArgumentNullException.ThrowIfNull(texts);
         ArgumentNullException.ThrowIfNull(images);
         ArgumentNullException.ThrowIfNull(usages);
+        ArgumentNullException.ThrowIfNull(config);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -91,6 +100,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         _texts = texts;
         _images = images;
         _usages = [.. usages];
+        _config = config;
     }
 
     /// <summary>
@@ -123,6 +133,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 InList: true,
                 Options: [.. ResourceScopes.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "scope." + value))]),
             new(EarnsPopulationIncomeField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.earns_population_income", InList: true),
+            new(WeightField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.weight", IsRequired: true, InList: true, Minimum: 0, IsDecimal: true),
         ]);
 
     /// <summary>
@@ -170,7 +181,13 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     resource.ImageKey,
                     resource.IsArchived,
                     resource.Version,
-                    new Dictionary<string, object?> { [GroupField] = resource.ResourceGroupId, [ScopeField] = resource.Scope, [EarnsPopulationIncomeField] = resource.EarnsPopulationIncome }))],
+                    new Dictionary<string, object?>
+                    {
+                        [GroupField] = resource.ResourceGroupId,
+                        [ScopeField] = resource.Scope,
+                        [EarnsPopulationIncomeField] = resource.EarnsPopulationIncome,
+                        [WeightField] = resource.Weight,
+                    }))],
             ResourceGroupKind => [.. (await _dbContext.ResourceGroups.AsNoTracking().OrderBy(group => group.Id).ToListAsync(cancellationToken).ConfigureAwait(false))
                 .Select(group => new AdminReferenceRow(
                     group.Id,
@@ -342,6 +359,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     ImageKey = AdminReferenceRules.ImageKey(values.ImageKey),
                     Scope = values.Scope,
                     EarnsPopulationIncome = values.EarnsPopulationIncome,
+                    Weight = values.Weight ?? DefaultWeight(),
                 };
 
                 _dbContext.ResourceTypes.Add(resource);
@@ -376,6 +394,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 resource.Scope = values.Scope;
                 resource.EarnsPopulationIncome = values.EarnsPopulationIncome;
                 resource.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
+                resource.Weight = values.Weight ?? DefaultWeight();
                 resource.Version++;
 
                 await _texts.SetAsync(
@@ -471,6 +490,11 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             AdminReferenceRules.Fail(failures, ScopeField, AdminReferenceErrors.Unknown);
         }
 
+        if (values.Weight is < 0)
+        {
+            AdminReferenceRules.Fail(failures, WeightField, AdminReferenceErrors.OutOfBounds);
+        }
+
         ResourceGroupEntity? group = values.ResourceGroupId is { } groupId
             ? await _dbContext.ResourceGroups.AsNoTracking().SingleOrDefaultAsync(entry => entry.Id == groupId, cancellationToken).ConfigureAwait(false)
             : null;
@@ -558,19 +582,21 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <param name="ImageKey">The key of the picture.</param>
     /// <param name="Scope">Where the resource lies.</param>
     /// <param name="EarnsPopulationIncome">Whether the population of a civilization brings this currency.</param>
+    /// <param name="Weight">The weight of one unit of the resource in tonnes (task 00027).</param>
     private sealed record ResourceValues(
         Dictionary<string, string>? Name,
         Dictionary<string, string>? Description,
         int? ResourceGroupId,
         string? ImageKey,
         string Scope,
-        bool EarnsPopulationIncome = false)
+        bool EarnsPopulationIncome = false,
+        decimal? Weight = null)
     {
         public static ResourceValues Of(ResourceTypeEntity resource, IReadOnlyList<LocalizationPack> packs) =>
-            new(AdminReferenceRules.TextsOf(packs, resource.NameKey), AdminReferenceRules.TextsOf(packs, resource.DescriptionKey), resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome);
+            new(AdminReferenceRules.TextsOf(packs, resource.NameKey), AdminReferenceRules.TextsOf(packs, resource.DescriptionKey), resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome, resource.Weight);
 
         public static ResourceValues Of(ResourceTypeEntity resource, (Dictionary<string, string> Name, Dictionary<string, string> Description) texts) =>
-            new(texts.Name, texts.Description, resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome);
+            new(texts.Name, texts.Description, resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome, resource.Weight);
 
         public (Dictionary<string, string> Name, Dictionary<string, string> Description) Trimmed(ILocalizationTexts texts) =>
             (Trim(texts, Name), Trim(texts, Description));
@@ -583,6 +609,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             [GroupField] = ResourceGroupId,
             [ScopeField] = Scope,
             [EarnsPopulationIncomeField] = EarnsPopulationIncome,
+            [WeightField] = Weight,
         };
     }
 
@@ -616,4 +643,18 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
     private static Dictionary<string, string> Trim(ILocalizationTexts texts, Dictionary<string, string>? values) =>
         texts.Languages.ToDictionary(language => language, language => values?.GetValueOrDefault(language)?.Trim() ?? string.Empty, StringComparer.Ordinal);
+
+    /// <summary>
+    /// Gets the weight of one unit of a resource for the resources that have no weight of their
+    /// own yet. The value comes from the configuration, so the code carries no number of the
+    /// game (task 00027, section 3.1).
+    /// </summary>
+    /// <returns>The default weight in tonnes.</returns>
+    private decimal DefaultWeight() =>
+        decimal.TryParse(_config.GetRaw(WorldConfigKeys.DefaultResourceWeight), NumberStyles.Number, CultureInfo.InvariantCulture, out decimal value)
+            ? value
+            : decimal.Parse(Default(WorldConfigKeys.DefaultResourceWeight), NumberStyles.Number, CultureInfo.InvariantCulture);
+
+    private static string Default(string key) =>
+        WorldConfigKeys.Definitions.First(definition => string.Equals(definition.Key, key, StringComparison.Ordinal)).DefaultValue;
 }

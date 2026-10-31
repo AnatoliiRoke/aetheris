@@ -106,10 +106,20 @@ public static class ProcessReferenceSeed
             .Select(value => value!)
             .OrderBy(value => value, StringComparer.Ordinal))
         {
-            int buildingTypeId = await planets.FindBuildingTypeIdByClassAsync(buildingClass, cancellationToken).ConfigureAwait(false)
-                ?? throw new InvalidOperationException($"The building of the class '{buildingClass}' of the starting data does not exist.");
+            int? buildingTypeId = await planets.FindBuildingTypeIdByClassAsync(buildingClass, cancellationToken).ConfigureAwait(false);
 
-            buildingIds[buildingClass] = buildingTypeId;
+            if (buildingTypeId is int resolvedBuildingTypeId)
+            {
+                buildingIds[buildingClass] = resolvedBuildingTypeId;
+                continue;
+            }
+
+            // An archived stub may name a class the chosen catalog does not have yet
+            // (task 00028). A live recipe still needs its building, so that gap stops the seed.
+            if (data.Recipes.Any(recipe => recipe.BuildingClass == buildingClass && !recipe.IsArchived))
+            {
+                throw new InvalidOperationException($"The building of the class '{buildingClass}' of the starting data does not exist.");
+            }
         }
 
         Dictionary<string, int> typeIds = [];
@@ -164,7 +174,9 @@ public static class ProcessReferenceSeed
                 NameKey = ProcessTextKeys.RecipeName(code),
                 DescriptionKey = ProcessTextKeys.RecipeDescription(code),
                 ProcessTypeId = typeIds[recipe.Type],
-                BuildingTypeId = recipe.BuildingClass is null ? null : buildingIds[recipe.BuildingClass],
+                BuildingTypeId = recipe.BuildingClass is not null && buildingIds.TryGetValue(recipe.BuildingClass, out int processBuildingTypeId)
+                    ? processBuildingTypeId
+                    : null,
                 SourceGroupId = recipe.SourceGroup is null ? null : groupIds[recipe.SourceGroup],
                 TargetGroupId = recipe.TargetGroup is null ? null : groupIds[recipe.TargetGroup],
                 DurationSeconds = recipe.DurationSeconds,

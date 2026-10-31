@@ -60,6 +60,7 @@ public sealed class ResearchTreeDetailsTests
         IReadOnlyList<ResearchAmount> costs = technology.Levels.Single(level => level.Level == 1).Costs;
         ResearchAmount first = costs[0];
         ResearchAmount second = costs[1];
+        HashSet<int> currencyIds = await PlanetsTestData.CurrencyIdsAsync(services);
         DateTimeOffset moment = PlanetsTestData.GameNow(services);
 
         // The first resource is half there, the second is missing, the rest is enough.
@@ -74,15 +75,22 @@ public sealed class ResearchTreeDetailsTests
         Assert.Equal(
             costs.Where(cost => cost.ResourceTypeId == first.ResourceTypeId || cost.ResourceTypeId == second.ResourceTypeId).Select(cost => cost.ResourceTypeId).Order(),
             missing.Select(entry => entry.ResourceTypeId).Order());
-        Assert.Equal(first.Amount - (first.Amount / 2), missing.Single(entry => entry.ResourceTypeId == first.ResourceTypeId).Amount);
+        // A currency is not on the body, so the tree reports its whole cost as missing.
+        long firstMissing = currencyIds.Contains(first.ResourceTypeId) ? first.Amount : first.Amount - (first.Amount / 2);
+
+        Assert.Equal(firstMissing, missing.Single(entry => entry.ResourceTypeId == first.ResourceTypeId).Amount);
         Assert.Equal(second.Amount, missing.Single(entry => entry.ResourceTypeId == second.ResourceTypeId).Amount);
         Assert.All(shortOf.Levels.Where(level => level.Level != 1), level => Assert.Empty(level.MissingResources!));
 
-        // A rich body is short of nothing.
+        // A rich body is short only of the currencies, which it does not hold.
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, await RichBalanceAsync(services), moment);
         TechnologyDto enough = (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token)).Technologies.Single(entry => entry.Id == technology.Id);
+        IReadOnlyList<ResearchAmount> richMissing = enough.Levels.Single(level => level.Level == 1).MissingResources!;
 
-        Assert.Empty(enough.Levels.Single(level => level.Level == 1).MissingResources!);
+        Assert.Equal(
+            costs.Where(cost => currencyIds.Contains(cost.ResourceTypeId)).Select(cost => cost.ResourceTypeId).Order(),
+            richMissing.Select(entry => entry.ResourceTypeId).Order());
+        Assert.All(richMissing, entry => Assert.Equal(costs.Single(cost => cost.ResourceTypeId == entry.ResourceTypeId).Amount, entry.Amount));
     }
 
     /// <summary>
@@ -123,7 +131,7 @@ public sealed class ResearchTreeDetailsTests
         IResearchModule research = services.GetRequiredService<IResearchModule>();
 
         TechnologyDto before = (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token))
-            .Technologies.First(entry => entry.Status == ResearchTechnologyStatuses.Available && entry.MaxLevel > 2 && entry.Levels.First().Effects.Count > 0);
+            .Technologies.First(entry => entry.MaxLevel > 2 && entry.Levels.Any(level => level.Level == 2 && level.Effects.Count > 0));
 
         Assert.Empty(before.CurrentEffects!);
 

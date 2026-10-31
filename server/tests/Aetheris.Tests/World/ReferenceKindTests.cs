@@ -284,6 +284,7 @@ public sealed class ReferenceKindTests
 
         Assert.Equal(
             ["resource", "resource_group", "building", "building_category", "technology", "technology_branch", "part_group", "part", "recipe",
+             "characteristic", "part_group_characteristic", "part_characteristic",
              "process_type", "process_recipe", "process_param"],
             descriptors.OrderBy(descriptor => descriptor.SortOrder).Select(descriptor => descriptor.Kind));
         foreach (AdminReferenceDescriptor descriptor in descriptors)

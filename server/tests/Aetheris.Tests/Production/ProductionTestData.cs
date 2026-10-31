@@ -5,6 +5,7 @@ using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
 using Aetheris.Tests.Planets;
+using Aetheris.Tests.World;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,14 +24,18 @@ internal static class ProductionTestData
     /// </summary>
     /// <param name="player">The player and the body.</param>
     /// <param name="services">The services of the request.</param>
+    /// <param name="recipe">The recipe the factory must be able to run, or <see langword="null"/> for the first recipe of a resource.</param>
     /// <returns>The building of the factory.</returns>
-    internal static async Task<long> BuildFactoryAsync(PlanetsTestPlayer player, IServiceProvider services)
+    internal static async Task<long> BuildFactoryAsync(PlanetsTestPlayer player, IServiceProvider services, RecipeInfo? recipe = null)
     {
         PlanetsDbContext dbContext = services.GetRequiredService<PlanetsDbContext>();
 
-        int factoryTypeId = await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>()
-            .FindBuildingTypeIdAsync("building_13", Token)
-            ?? throw new InvalidOperationException("The factory type does not exist.");
+        int? requestedTypeId = recipe?.BuildingTypeId ?? (await FirstRecipeAsync(services)).BuildingTypeId;
+
+        if (requestedTypeId is not int factoryTypeId)
+        {
+            throw new InvalidOperationException("The factory type does not exist.");
+        }
 
         PlanetBuildingEntity? building = await dbContext.PlanetBuildings
             .Where(entry => entry.PlanetId == player.PlanetId && entry.BuildingTypeId == factoryTypeId)
@@ -84,39 +89,13 @@ internal static class ProductionTestData
     /// <returns>A task that completes when the balance is filled.</returns>
     internal static async Task GiveEveryResourceAsync(PlanetsTestPlayer player, IServiceProvider services)
     {
-        PlanetsDbContext dbContext = services.GetRequiredService<PlanetsDbContext>();
         Aetheris.World.Data.WorldDbContext world = services.GetRequiredService<Aetheris.World.Data.WorldDbContext>();
 
-        List<int> resourceTypeIds = await world.ResourceTypes.AsNoTracking()
-            .Select(resource => resource.Id)
-            .ToListAsync(Token);
+        Dictionary<int, long> amounts = await world.ResourceTypes.AsNoTracking()
+            .ToDictionaryAsync(resource => resource.Id, _ => 1_000_000L, Token);
 
-        List<PlanetResourceEntity> rows = await dbContext.PlanetResources
-            .Where(entry => entry.PlanetId == player.PlanetId)
-            .ToListAsync(Token);
-
-        foreach (PlanetResourceEntity row in rows)
-        {
-            row.Amount = 1_000_000L;
-        }
-
-        foreach (int resourceTypeId in resourceTypeIds)
-        {
-            if (rows.Any(row => row.ResourceTypeId == resourceTypeId))
-            {
-                continue;
-            }
-
-            dbContext.PlanetResources.Add(new PlanetResourceEntity
-            {
-                PlanetId = player.PlanetId,
-                SectorId = 0,
-                ResourceTypeId = resourceTypeId,
-                Amount = 1_000_000L,
-            });
-        }
-
-        await dbContext.SaveChangesAsync(Token);
+        // A currency belongs to the civilization. The moment is ahead of the clock, so a mine adds nothing while the test runs.
+        await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, amounts, PlanetsTestData.GameNow(services).AddDays(1));
     }
 
     /// <summary>
@@ -133,7 +112,7 @@ internal static class ProductionTestData
         PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
         Aetheris.Planets.IPlanetsModule planetsModule = services.GetRequiredService<Aetheris.Planets.IPlanetsModule>();
 
-        int storageTypeId = await planetsModule.FindBuildingTypeIdAsync("building_21", Token)
+        int storageTypeId = await planetsModule.FindBuildingTypeIdAsync(SeedCodes.MetalStorage, Token)
             ?? throw new InvalidOperationException("The storage type does not exist.");
 
         if (!await planets.PlanetBuildings.AnyAsync(entry => entry.PlanetId == player.PlanetId && entry.BuildingTypeId == storageTypeId, Token))

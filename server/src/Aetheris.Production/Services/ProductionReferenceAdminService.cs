@@ -1,9 +1,12 @@
+using System.Globalization;
 using Aetheris.Core.Admin;
+using Aetheris.Core.Configuration;
 using Aetheris.Core.Data;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
 using Aetheris.Planets.Services;
+using Aetheris.Production.Configuration;
 using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
@@ -50,6 +53,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     private const string GroupField = "part_group_id";
 
     private const string MarkLevelField = "mark_level";
+
+    private const string WeightField = "weight";
 
     private const string SortOrderField = "sort_order";
 
@@ -118,6 +123,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     private readonly IPlanetsModule _planets;
     private readonly IRequirementsModule _requirements;
     private readonly ITechnologyLevels _technologies;
+    private readonly IGameConfig _config;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProductionReferenceAdminService"/> class.
@@ -132,6 +138,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     /// <param name="planets">The bodies module, for the factories.</param>
     /// <param name="requirements">The common requirements module.</param>
     /// <param name="technologies">The technologies, for the requirement of a recipe on a technology.</param>
+    /// <param name="config">The game configuration, for the default weight of a part.</param>
     public ProductionReferenceAdminService(
         ProductionDbContext dbContext,
         ProductionUnitOfWork unitOfWork,
@@ -142,7 +149,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         IWorldModule world,
         IPlanetsModule planets,
         IRequirementsModule requirements,
-        ITechnologyLevels technologies)
+        ITechnologyLevels technologies,
+        IGameConfig config)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -154,6 +162,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         ArgumentNullException.ThrowIfNull(planets);
         ArgumentNullException.ThrowIfNull(requirements);
         ArgumentNullException.ThrowIfNull(technologies);
+        ArgumentNullException.ThrowIfNull(config);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -165,6 +174,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         _planets = planets;
         _requirements = requirements;
         _technologies = technologies;
+        _config = config;
     }
 
     /// <summary>
@@ -228,6 +238,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                 Minimum: PartMarkLevels.First,
                 Maximum: PartMarkLevels.Max),
             new(SortOrderField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.sort_order", IsRequired: true, InList: true, Minimum: 0),
+            new(WeightField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.weight", IsRequired: true, InList: true, Minimum: 0, IsDecimal: true),
             new(
                 AttributesField,
                 AdminReferenceFieldTypes.Effects,
@@ -359,6 +370,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                                 [GroupField] = part.PartGroupId,
                                 [MarkLevelField] = part.MarkLevel,
                                 [SortOrderField] = part.SortOrder,
+                                [WeightField] = part.Weight,
                             })),
                 ],
                 query,
@@ -453,6 +465,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             [GroupField] = part.PartGroupId,
                             [MarkLevelField] = part.MarkLevel,
                             [SortOrderField] = part.SortOrder,
+                            [WeightField] = part.Weight,
                             [AttributesField] = AttributesOf(part),
                         });
                 }
@@ -559,6 +572,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             };
 
                             Apply(part, values);
+                            part.Weight = values.Weight ?? DefaultWeight();
                             _dbContext.PartTypes.Add(part);
                             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -678,10 +692,12 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                                 [GroupField] = part.PartGroupId,
                                 [MarkLevelField] = part.MarkLevel,
                                 [SortOrderField] = part.SortOrder,
+                                [WeightField] = part.Weight,
                                 [AttributesField] = AttributesOf(part),
                             };
 
                             Apply(part, values);
+                            part.Weight = values.Weight ?? DefaultWeight();
                             part.Version++;
                             await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -890,6 +906,11 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         if (values.SortOrder is null or < 0)
         {
             AdminReferenceRules.Fail(failures, SortOrderField, values.SortOrder is null ? AdminReferenceErrors.Required : AdminReferenceErrors.OutOfBounds);
+        }
+
+        if (values.Weight is < 0)
+        {
+            AdminReferenceRules.Fail(failures, WeightField, AdminReferenceErrors.OutOfBounds);
         }
 
         await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), stored?.ImageKey, cancellationToken)
@@ -1257,6 +1278,20 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         _texts.Invalidate();
     }
 
+    /// <summary>
+    /// Gets the weight of one part for the parts that have no weight of their own yet. The
+    /// value comes from the configuration, so the code carries no number of the game
+    /// (task 00027, section 3.1).
+    /// </summary>
+    /// <returns>The default weight in tonnes.</returns>
+    private decimal DefaultWeight() =>
+        decimal.TryParse(_config.GetRaw(ProductionConfigKeys.DefaultPartWeight), NumberStyles.Number, CultureInfo.InvariantCulture, out decimal value)
+            ? value
+            : decimal.Parse(Default(ProductionConfigKeys.DefaultPartWeight), NumberStyles.Number, CultureInfo.InvariantCulture);
+
+    private static string Default(string key) =>
+        ProductionConfigKeys.Definitions.First(definition => string.Equals(definition.Key, key, StringComparison.Ordinal)).DefaultValue;
+
     private sealed record GroupValues(
         Dictionary<string, string>? Name,
         Dictionary<string, string>? Description,
@@ -1285,7 +1320,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         int? MarkLevel,
         int? SortOrder,
         string? ImageKey,
-        List<AttributeValues>? Attributes)
+        List<AttributeValues>? Attributes,
+        decimal? Weight = null)
     {
         public PartValues Trimmed(ILocalizationTexts texts) => this with
         {
@@ -1301,6 +1337,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             [GroupField] = PartGroupId,
             [MarkLevelField] = MarkLevel,
             [SortOrderField] = SortOrder,
+            [WeightField] = Weight,
             [AttributesField] = Attributes,
         };
     }

@@ -78,7 +78,7 @@ public sealed class TerraformingTests
         int firstPoor = await PlanetsTestData.SetDepositAsync(services, targetId, Iron, 1.0m);
         int secondPoor = await PlanetsTestData.SetDepositAsync(services, targetId, Copper, 1.0m);
         int rich = await PlanetsTestData.SetDepositAsync(services, targetId, Deuterium, 1.85m);
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PartFacts device = await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
 
         // The storage of the colony holds devices too, and none of them may be taken.
         await ProcessesTestData.PutPartsAsync(player, services, device.PartTypeId, PartCondition.Full, 2);
@@ -162,7 +162,7 @@ public sealed class TerraformingTests
         await world.Deposits.Where(entry => entry.PlanetId == targetId).ExecuteDeleteAsync(Token);
         int first = await PlanetsTestData.SetDepositAsync(services, targetId, Iron, 1.0m);
         int second = await PlanetsTestData.SetDepositAsync(services, targetId, Copper, 1.0m);
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PartFacts device = await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
         PlaceShip(services, player, targetId, ShipId, device.PartTypeId, 1);
         string lowest = ProcessesConfigKeys.Definitions.Single(definition => definition.Key == ProcessesConfigKeys.TerraformingMultiplierMin).DefaultValue;
         string highest = ProcessesConfigKeys.Definitions.Single(definition => definition.Key == ProcessesConfigKeys.TerraformingMultiplierMax).DefaultValue;
@@ -207,7 +207,7 @@ public sealed class TerraformingTests
         IServiceProvider services = scope.ServiceProvider;
 
         long targetId = await FreeBodyAsync(services, player);
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PartFacts device = await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
 
         // The storage of the colony holds devices, and the only ship by the target has an empty hold.
@@ -246,7 +246,7 @@ public sealed class TerraformingTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PartFacts device = await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
         PlaceShip(services, player, neighbour.PlanetId, ShipId, device.PartTypeId, 1);
         PlaceShip(services, player, player.PlanetId, ShipId, device.PartTypeId, 1);
         int poor = await PlanetsTestData.SetDepositAsync(services, neighbour.PlanetId, Iron, 1.0m);
@@ -286,7 +286,7 @@ public sealed class TerraformingTests
             .Select(row => row.planet.Id)
             .FirstAsync(Token);
 
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PartFacts device = await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
         PlaceShip(services, player, giantId, ShipId, device.PartTypeId, 1);
         List<decimal> deposits = await world.Deposits.AsNoTracking().Where(entry => entry.PlanetId == giantId).Select(entry => entry.Coefficient).ToListAsync(Token);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
@@ -314,7 +314,7 @@ public sealed class TerraformingTests
         IServiceProvider services = scope.ServiceProvider;
 
         long targetId = await FreeBodyAsync(services, player);
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PartFacts device = await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
         PlaceShip(services, player, targetId, ShipId, device.PartTypeId, 2);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
 
@@ -347,7 +347,7 @@ public sealed class TerraformingTests
 
         long targetId = await FreeBodyAsync(services, player);
         int sectorId = (await services.GetRequiredService<IWorldModule>().GetPlanetFactsAsync(targetId, Token))!.SectorId;
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PartFacts device = await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
         PlaceShip(services, player, targetId, ShipId, device.PartTypeId, 1);
         PlaceShip(services, other, targetId, ShipId, device.PartTypeId, 1);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
@@ -389,7 +389,7 @@ public sealed class TerraformingTests
         IServiceProvider services = scope.ServiceProvider;
 
         long targetId = await FreeBodyAsync(services, owner);
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PartFacts device = await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
         PartFacts hull = await ProcessesTestData.PartAsync(services, "part_1");
         PlaceShip(services, owner, targetId, ShipId, device.PartTypeId, 1);
         Ships.Place(stranger.Account.UserId, targetId, new ShipOnOrbit([]) { ShipId = ShipId + 1, Cargo = [new ShipCargoPart(device.PartTypeId, 1), new ShipCargoPart(hull.PartTypeId, 1)] });
@@ -446,7 +446,7 @@ public sealed class TerraformingTests
         IServiceProvider services = scope.ServiceProvider;
 
         long targetId = await FreeBodyAsync(services, player);
-        PartFacts device = await ProcessesTestData.PartAsync(services, TerraformingDevice);
+        PartFacts device = await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
         PlaceShip(services, player, targetId, ShipId, device.PartTypeId, 1);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         string highest = ProcessesConfigKeys.Definitions.Single(definition => definition.Key == ProcessesConfigKeys.TerraformingMultiplierMax).DefaultValue;
@@ -485,7 +485,7 @@ public sealed class TerraformingTests
         {
             IServiceProvider services = scope.ServiceProvider;
             targetId = await FreeBodyAsync(services, first);
-            deviceId = (await ProcessesTestData.PartAsync(services, TerraformingDevice)).PartTypeId;
+            deviceId = (await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice)).PartTypeId;
 
             foreach (PlanetsTestPlayer player in players)
             {
@@ -518,6 +518,8 @@ public sealed class TerraformingTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
+
+        await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
 
         Dictionary<int, PartFacts> devices = (await services.GetRequiredService<PartStockService>().GetPartFactsAsync(Token)).Values
             .Where(part => part.IsTerraformingDevice)

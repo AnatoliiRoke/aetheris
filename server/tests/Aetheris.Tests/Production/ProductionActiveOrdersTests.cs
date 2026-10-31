@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Aetheris.Core.Configuration;
 using Aetheris.Planets.Data;
+using Aetheris.Planets.Data.Entities;
 using Aetheris.Production;
 using Aetheris.Production.Api;
 using Aetheris.Production.Configuration;
@@ -230,7 +231,17 @@ public sealed class ProductionActiveOrdersTests
         await dbContext.SaveChangesAsync(Token);
         services.GetRequiredService<ProductionCatalogCache>().Invalidate();
 
+        // The seed does not open this building on a new body, so the test places it.
         PlanetsDbContext planetsContext = services.GetRequiredService<PlanetsDbContext>();
+        planetsContext.PlanetBuildings.Add(new PlanetBuildingEntity
+        {
+            PlanetId = player.PlanetId,
+            SectorId = 0,
+            BuildingTypeId = secondTypeId,
+            Level = 1,
+        });
+        await planetsContext.SaveChangesAsync(Token);
+
         long secondFactoryId = await planetsContext.PlanetBuildings.AsNoTracking()
             .Where(building => building.PlanetId == player.PlanetId && building.BuildingTypeId == secondTypeId)
             .Select(building => building.Id)

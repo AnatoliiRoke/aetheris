@@ -11,7 +11,7 @@ import { useTexts } from '../../texts/useTexts';
 import { BodyIdentity, Deposits, FactBar } from './CivilizationParts';
 import { BuildingQueue } from './BuildingQueue';
 import { EnergyPanel } from './PlanetPanels';
-import { formatNumber, fullestResource, namer } from './planetText';
+import { formatNumber, fullestResource, namer, storedTonnes } from './planetText';
 import { PlaceholderBlock } from './PlaceholderBlock';
 import { ProcessesPanel } from './ProcessesPanel';
 import { ProductionPanel } from './ProductionPanel';
@@ -147,9 +147,9 @@ const BodyCard = memo(function BodyCard({
 
   const typeName = type ? text(type.nameKey) ?? type.nameKey : t('civ.unknownType');
   // Every resource has the capacity of its own, so the bar of the storage shows the resource that
-  // is the nearest to its limit: a full resource first, then the one with the most of its capacity.
+  // is the nearest to its limit. The number is the stored tonnes against that capacity.
   const storage = fullestResource(data?.resources ?? []);
-  const stored = storage?.amount ?? 0;
+  const stored = storage ? storedTonnes(storage) : 0;
   const capacity = storage?.capacity ?? 0;
   const energy = data?.energy ?? null;
   const output = energy?.output ?? 0;

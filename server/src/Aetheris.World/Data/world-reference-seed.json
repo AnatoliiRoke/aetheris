@@ -4,8 +4,12 @@
       "code": "resource_group_1",
       "allowed_on_planet": true,
       "name": {
-        "uk": "Видобувні",
-        "en": "Extractable"
+        "uk": "Руди",
+        "en": "Ores"
+      },
+      "description": {
+        "uk": "Група ресурсів «Руди».",
+        "en": "Resource group Ores."
       }
     },
     {
@@ -14,6 +18,10 @@
       "name": {
         "uk": "Мінерали",
         "en": "Minerals"
+      },
+      "description": {
+        "uk": "Група ресурсів «Мінерали».",
+        "en": "Resource group Minerals."
       }
     },
     {
@@ -22,38 +30,46 @@
       "name": {
         "uk": "Пальне",
         "en": "Fuel"
+      },
+      "description": {
+        "uk": "Група ресурсів «Пальне».",
+        "en": "Resource group Fuel."
       }
     },
     {
       "code": "resource_group_4",
-      "allowed_on_planet": false,
+      "allowed_on_planet": true,
       "name": {
-        "uk": "Ефір",
-        "en": "Ether"
+        "uk": "Кристали",
+        "en": "Crystals"
+      },
+      "description": {
+        "uk": "Група ресурсів «Кристали».",
+        "en": "Resource group Crystals."
       }
     },
     {
       "code": "resource_group_5",
       "allowed_on_planet": false,
       "name": {
-        "uk": "Кристали",
-        "en": "Crystals"
+        "uk": "Вироблені ресурси",
+        "en": "Manufactured"
       },
       "description": {
-        "uk": "Унікальні кристали, які трапляються лише в астероїдних полях.",
-        "en": "Unique crystals found only in asteroid fields."
+        "uk": "Група ресурсів «Вироблені ресурси».",
+        "en": "Resource group Manufactured."
       }
     },
     {
       "code": "resource_group_6",
-      "allowed_on_planet": true,
+      "allowed_on_planet": false,
       "name": {
-        "uk": "Вироблена продукція",
-        "en": "Produced goods"
+        "uk": "Баланси цивілізації",
+        "en": "Balances"
       },
       "description": {
-        "uk": "Матеріали, зроблені з сировини на заводах.",
-        "en": "The materials made from raw materials in the factories."
+        "uk": "Група ресурсів «Баланси цивілізації».",
+        "en": "Resource group Balances."
       }
     }
   ],
@@ -62,219 +78,405 @@
       "code": "resource_1",
       "group": "resource_group_1",
       "name": {
-        "uk": "Залізо",
-        "en": "Iron"
+        "uk": "Залізна руда",
+        "en": "Iron ore"
       },
       "description": {
-        "uk": "Базові корпуси й будівлі.",
-        "en": "Basic hulls and buildings."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
       "code": "resource_2",
       "group": "resource_group_1",
       "name": {
-        "uk": "Титан",
-        "en": "Titanium"
+        "uk": "Титанова руда",
+        "en": "Titanium ore"
       },
       "description": {
-        "uk": "Броня й важкі кораблі.",
-        "en": "Armour and heavy ships."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
       "code": "resource_3",
       "group": "resource_group_1",
       "name": {
-        "uk": "Мідь",
-        "en": "Copper"
+        "uk": "Іридієва руда",
+        "en": "Iridium ore"
       },
       "description": {
-        "uk": "Енергосистеми й електроніка.",
-        "en": "Power systems and electronics."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
       "code": "resource_4",
       "group": "resource_group_1",
       "name": {
-        "uk": "Іридій",
-        "en": "Iridium"
+        "uk": "Кобальтова руда",
+        "en": "Cobalt ore"
       },
       "description": {
-        "uk": "Елітні корпуси й оборонні споруди.",
-        "en": "Elite hulls and defence structures."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
       "code": "resource_5",
+      "group": "resource_group_1",
+      "name": {
+        "uk": "Уранова руда",
+        "en": "Uranium ore"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_6",
+      "group": "resource_group_1",
+      "name": {
+        "uk": "Силікорова руда",
+        "en": "Silicore ore"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_7",
+      "group": "resource_group_1",
+      "name": {
+        "uk": "Тектонітова руда",
+        "en": "Tectonite ore"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_8",
       "group": "resource_group_2",
       "name": {
         "uk": "Кварцит",
         "en": "Quartzite"
       },
       "description": {
-        "uk": "Базові технології й сенсори.",
-        "en": "Basic technologies and sensors."
-      }
-    },
-    {
-      "code": "resource_6",
-      "group": "resource_group_2",
-      "name": {
-        "uk": "Рубій",
-        "en": "Rubium"
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
       },
-      "description": {
-        "uk": "Лазерна й енергетична зброя.",
-        "en": "Laser and energy weapons."
-      }
+      "scope": "planet"
     },
     {
-      "code": "resource_7",
-      "group": "resource_group_2",
-      "name": {
-        "uk": "Сапфірит",
-        "en": "Sapphirite"
-      },
-      "description": {
-        "uk": "Щити.",
-        "en": "Shields."
-      }
-    },
-    {
-      "code": "resource_8",
+      "code": "resource_9",
       "group": "resource_group_2",
       "name": {
         "uk": "Обсидіан",
         "en": "Obsidian"
       },
       "description": {
-        "uk": "Двигуни й гіперстрибки.",
-        "en": "Engines and hyperjumps."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
-      "code": "resource_9",
+      "code": "resource_10",
+      "group": "resource_group_2",
+      "name": {
+        "uk": "Лінтрій",
+        "en": "Lintrium"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_11",
+      "group": "resource_group_2",
+      "name": {
+        "uk": "Орекс",
+        "en": "Orex"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_12",
       "group": "resource_group_3",
       "name": {
         "uk": "Дейтерій",
         "en": "Deuterium"
       },
       "description": {
-        "uk": "Пальне для звичайних досвітлових двигунів.",
-        "en": "Fuel for ordinary sublight engines."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
-      "code": "resource_10",
+      "code": "resource_13",
       "group": "resource_group_3",
       "name": {
-        "uk": "Плазма",
-        "en": "Plasma"
+        "uk": "Гелій-3",
+        "en": "Helium-3"
       },
       "description": {
-        "uk": "Пальне для швидкісних двигунів.",
-        "en": "Fuel for fast engines."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
-      "code": "resource_11",
-      "group": "resource_group_4",
+      "code": "resource_14",
+      "group": "resource_group_3",
+      "name": {
+        "uk": "Темна матерія",
+        "en": "Dark matter"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_15",
+      "group": "resource_group_3",
       "name": {
         "uk": "Ефір",
         "en": "Ether"
       },
       "description": {
-        "uk": "Дуже рідкісний ресурс космосу для найкращих кораблів і технологій.",
-        "en": "A very rare resource of space for the best ships and technologies."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
-      "code": "resource_12",
-      "group": "resource_group_5",
+      "code": "resource_16",
+      "group": "resource_group_3",
       "name": {
-        "uk": "Кристал",
-        "en": "Crystal"
+        "uk": "Збагачений Уран",
+        "en": "Enriched uranium"
       },
       "description": {
-        "uk": "Унікальний ресурс астероїдних полів.",
-        "en": "A unique resource of asteroid fields."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
-      "code": "resource_13",
-      "group": "resource_group_6",
+      "code": "resource_17",
+      "group": "resource_group_4",
+      "name": {
+        "uk": "Квартан",
+        "en": "Quartan"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_18",
+      "group": "resource_group_4",
+      "name": {
+        "uk": "Стобій",
+        "en": "Stobium"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_19",
+      "group": "resource_group_4",
+      "name": {
+        "uk": "Туманій",
+        "en": "Tumanium"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_20",
+      "group": "resource_group_5",
       "name": {
         "uk": "Будматеріали",
         "en": "Building materials"
       },
       "description": {
-        "uk": "Плити й балки для будівель і корпусів.",
-        "en": "The plates and the beams for the buildings and the hulls."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
-      "code": "resource_14",
-      "group": "resource_group_6",
+      "code": "resource_21",
+      "group": "resource_group_5",
       "name": {
         "uk": "Оптоволокно",
-        "en": "Optical fibre"
+        "en": "Optical fiber"
       },
       "description": {
-        "uk": "Нитки світла для сенсорів і зв'язку.",
-        "en": "The threads of light for the sensors and the communication."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
-      "code": "resource_15",
-      "group": "resource_group_6",
+      "code": "resource_22",
+      "group": "resource_group_5",
       "name": {
         "uk": "Мікропроцесори",
         "en": "Microprocessors"
       },
       "description": {
-        "uk": "Серце будь-якої електроніки.",
-        "en": "The heart of any electronics."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
-      "code": "resource_16",
-      "group": "resource_group_6",
+      "code": "resource_23",
+      "group": "resource_group_5",
       "name": {
         "uk": "Композити",
         "en": "Composites"
       },
       "description": {
-        "uk": "Міцні матеріали для важких корпусів і броні.",
-        "en": "The strong materials for the heavy hulls and the armour."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
-      "code": "resource_17",
-      "group": "resource_group_6",
+      "code": "resource_24",
+      "group": "resource_group_5",
       "name": {
         "uk": "Енергострижні",
-        "en": "Power strips"
+        "en": "Energy rods"
       },
       "description": {
-        "uk": "Джерела енергії для генераторів.",
-        "en": "The sources of energy for the generators."
-      }
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
     },
     {
-      "code": "resource_18",
-      "group": null,
+      "code": "resource_25",
+      "group": "resource_group_5",
+      "name": {
+        "uk": "Нановолокно",
+        "en": "Nanofiber"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_26",
+      "group": "resource_group_5",
+      "name": {
+        "uk": "Титановий сплав",
+        "en": "Titanium alloy"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_27",
+      "group": "resource_group_6",
       "name": {
         "uk": "Кредити",
         "en": "Credits"
       },
       "description": {
-        "uk": "Внутрішня валюта цивілізації: населення планет приносить їх, а вони йдуть на будівництво, розвиток і виробництво.",
-        "en": "The inner currency of the civilization: the population of the bodies brings them, and they pay for the construction, the research and the production."
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
       },
       "scope": "civilization",
       "earns_population_income": true
+    },
+    {
+      "code": "resource_28",
+      "group": "resource_group_6",
+      "name": {
+        "uk": "Торгова валюта",
+        "en": "Trade currency"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "civilization"
+    },
+    {
+      "code": "resource_29",
+      "group": "resource_group_6",
+      "name": {
+        "uk": "Енергія",
+        "en": "Energy"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_30",
+      "group": "resource_group_6",
+      "name": {
+        "uk": "Населення",
+        "en": "Population"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "planet"
+    },
+    {
+      "code": "resource_31",
+      "group": "resource_group_6",
+      "name": {
+        "uk": "Реальна валюта",
+        "en": "Premium currency"
+      },
+      "description": {
+        "uk": "Ресурс групи.",
+        "en": "Resource of its group."
+      },
+      "scope": "civilization"
     }
   ],
   "object_types": [
@@ -396,7 +598,7 @@
         "uk": "Звичайне поле",
         "en": "Ordinary field"
       },
-      "hidden_resource": "resource_12",
+      "hidden_resource": "resource_15",
       "hidden_share_min": 0.04,
       "hidden_share_max": 0.1
     },
@@ -411,7 +613,7 @@
         "uk": "Багате поле",
         "en": "Rich field"
       },
-      "hidden_resource": "resource_12",
+      "hidden_resource": "resource_15",
       "hidden_share_min": 0.04,
       "hidden_share_max": 0.1
     },
@@ -476,7 +678,7 @@
         },
         {
           "resource": "resource_2",
-          "weight": 25,
+          "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -484,7 +686,7 @@
         },
         {
           "resource": "resource_3",
-          "weight": 25,
+          "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -492,7 +694,31 @@
         },
         {
           "resource": "resource_4",
-          "weight": 10,
+          "weight": 40,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_5",
+          "weight": 40,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_6",
+          "weight": 40,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_7",
+          "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -508,7 +734,7 @@
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "resource_5",
+          "resource": "resource_8",
           "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -516,24 +742,24 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_6",
-          "weight": 25,
+          "resource": "resource_9",
+          "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_7",
-          "weight": 25,
+          "resource": "resource_10",
+          "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_8",
-          "weight": 10,
+          "resource": "resource_11",
+          "weight": 40,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -566,7 +792,7 @@
         },
         {
           "resource": "resource_3",
-          "weight": 15,
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -574,7 +800,31 @@
         },
         {
           "resource": "resource_4",
-          "weight": 25,
+          "weight": 30,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_5",
+          "weight": 30,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_6",
+          "weight": 30,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_7",
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -590,7 +840,7 @@
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "resource_5",
+          "resource": "resource_8",
           "weight": 15,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -598,24 +848,24 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_6",
-          "weight": 40,
+          "resource": "resource_9",
+          "weight": 15,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_7",
-          "weight": 10,
+          "resource": "resource_10",
+          "weight": 15,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_8",
-          "weight": 35,
+          "resource": "resource_11",
+          "weight": 15,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -640,7 +890,7 @@
         },
         {
           "resource": "resource_2",
-          "weight": 20,
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -648,7 +898,7 @@
         },
         {
           "resource": "resource_3",
-          "weight": 35,
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -656,7 +906,31 @@
         },
         {
           "resource": "resource_4",
-          "weight": 15,
+          "weight": 30,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_5",
+          "weight": 30,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_6",
+          "weight": 30,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_7",
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -672,7 +946,7 @@
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "resource_5",
+          "resource": "resource_8",
           "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -680,24 +954,24 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_6",
-          "weight": 10,
+          "resource": "resource_9",
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_7",
-          "weight": 50,
+          "resource": "resource_10",
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_8",
-          "weight": 10,
+          "resource": "resource_11",
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -722,7 +996,7 @@
         },
         {
           "resource": "resource_2",
-          "weight": 30,
+          "weight": 35,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -730,7 +1004,7 @@
         },
         {
           "resource": "resource_3",
-          "weight": 25,
+          "weight": 35,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -738,7 +1012,31 @@
         },
         {
           "resource": "resource_4",
-          "weight": 10,
+          "weight": 35,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_5",
+          "weight": 35,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_6",
+          "weight": 35,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_7",
+          "weight": 35,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -754,7 +1052,7 @@
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "resource_5",
+          "resource": "resource_8",
           "weight": 45,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -762,24 +1060,24 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_6",
-          "weight": 25,
+          "resource": "resource_9",
+          "weight": 45,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_7",
-          "weight": 10,
+          "resource": "resource_10",
+          "weight": 45,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_8",
-          "weight": 20,
+          "resource": "resource_11",
+          "weight": 45,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -804,7 +1102,7 @@
         },
         {
           "resource": "resource_2",
-          "weight": 25,
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -812,7 +1110,7 @@
         },
         {
           "resource": "resource_3",
-          "weight": 35,
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -820,7 +1118,31 @@
         },
         {
           "resource": "resource_4",
-          "weight": 10,
+          "weight": 30,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_5",
+          "weight": 30,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_6",
+          "weight": 30,
+          "coefficient_min": 0.8,
+          "coefficient_max": 1.4,
+          "rich_coefficient_min": 1.4,
+          "rich_coefficient_max": 1.9
+        },
+        {
+          "resource": "resource_7",
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -836,7 +1158,7 @@
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "resource_5",
+          "resource": "resource_8",
           "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -844,24 +1166,24 @@
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_6",
-          "weight": 20,
+          "resource": "resource_9",
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_7",
-          "weight": 40,
+          "resource": "resource_10",
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         },
         {
-          "resource": "resource_8",
-          "weight": 10,
+          "resource": "resource_11",
+          "weight": 30,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
           "rich_coefficient_min": 1.4,
@@ -877,7 +1199,7 @@
       "extra_pick_probability": 0.5,
       "rules": [
         {
-          "resource": "resource_9",
+          "resource": "resource_12",
           "weight": 1,
           "coefficient_min": 0.8,
           "coefficient_max": 1.4,
@@ -894,13 +1216,13 @@
       "extra_pick_probability": 0,
       "rules": [
         {
-          "resource": "resource_9",
+          "resource": "resource_12",
           "weight": 80,
           "coefficient_min": 0.8,
           "coefficient_max": 1.6
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_13",
           "weight": 20,
           "coefficient_min": 0.8,
           "coefficient_max": 1.6
@@ -922,19 +1244,37 @@
         },
         {
           "resource": "resource_2",
-          "weight": 25,
+          "weight": 40,
           "coefficient_min": 0.1,
           "coefficient_max": 0.3
         },
         {
           "resource": "resource_3",
-          "weight": 25,
+          "weight": 40,
           "coefficient_min": 0.1,
           "coefficient_max": 0.3
         },
         {
           "resource": "resource_4",
-          "weight": 10,
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.3
+        },
+        {
+          "resource": "resource_5",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.3
+        },
+        {
+          "resource": "resource_6",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.3
+        },
+        {
+          "resource": "resource_7",
+          "weight": 40,
           "coefficient_min": 0.1,
           "coefficient_max": 0.3
         }
@@ -948,26 +1288,26 @@
       "extra_pick_probability": 0.3,
       "rules": [
         {
-          "resource": "resource_5",
+          "resource": "resource_8",
           "weight": 30,
           "coefficient_min": 0.02,
           "coefficient_max": 0.06
         },
         {
-          "resource": "resource_6",
-          "weight": 25,
+          "resource": "resource_9",
+          "weight": 30,
           "coefficient_min": 0.02,
           "coefficient_max": 0.06
         },
         {
-          "resource": "resource_7",
-          "weight": 25,
+          "resource": "resource_10",
+          "weight": 30,
           "coefficient_min": 0.02,
           "coefficient_max": 0.06
         },
         {
-          "resource": "resource_8",
-          "weight": 20,
+          "resource": "resource_11",
+          "weight": 30,
           "coefficient_min": 0.02,
           "coefficient_max": 0.06
         }
@@ -988,19 +1328,37 @@
         },
         {
           "resource": "resource_2",
-          "weight": 25,
+          "weight": 40,
           "coefficient_min": 0.1,
           "coefficient_max": 0.25
         },
         {
           "resource": "resource_3",
-          "weight": 25,
+          "weight": 40,
           "coefficient_min": 0.1,
           "coefficient_max": 0.25
         },
         {
           "resource": "resource_4",
-          "weight": 10,
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_5",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_6",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_7",
+          "weight": 40,
           "coefficient_min": 0.1,
           "coefficient_max": 0.25
         }
@@ -1014,26 +1372,26 @@
       "extra_pick_probability": 0.4,
       "rules": [
         {
-          "resource": "resource_5",
+          "resource": "resource_8",
           "weight": 30,
           "coefficient_min": 0.04,
           "coefficient_max": 0.1
         },
         {
-          "resource": "resource_6",
-          "weight": 25,
+          "resource": "resource_9",
+          "weight": 30,
           "coefficient_min": 0.04,
           "coefficient_max": 0.1
         },
         {
-          "resource": "resource_7",
-          "weight": 25,
+          "resource": "resource_10",
+          "weight": 30,
           "coefficient_min": 0.04,
           "coefficient_max": 0.1
         },
         {
-          "resource": "resource_8",
-          "weight": 20,
+          "resource": "resource_11",
+          "weight": 30,
           "coefficient_min": 0.04,
           "coefficient_max": 0.1
         }
@@ -1047,7 +1405,7 @@
       "extra_pick_probability": 0.05,
       "rules": [
         {
-          "resource": "resource_11",
+          "resource": "resource_15",
           "weight": 1,
           "coefficient_min": 0.01,
           "coefficient_max": 0.03
@@ -1062,13 +1420,13 @@
       "extra_pick_probability": 0.3,
       "rules": [
         {
-          "resource": "resource_9",
+          "resource": "resource_12",
           "weight": 70,
           "coefficient_min": 0.2,
           "coefficient_max": 0.5
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_14",
           "weight": 30,
           "coefficient_min": 0.2,
           "coefficient_max": 0.5
@@ -1083,10 +1441,145 @@
       "extra_pick_probability": 0.1,
       "rules": [
         {
-          "resource": "resource_11",
+          "resource": "resource_15",
           "weight": 1,
           "coefficient_min": 0.01,
           "coefficient_max": 0.05
+        }
+      ]
+    },
+    {
+      "object_type": "object_type_5",
+      "code": "rule_group_20",
+      "min_picks": 1,
+      "max_picks": 1,
+      "extra_pick_probability": 0,
+      "rules": [
+        {
+          "resource": "resource_17",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_18",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_19",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        }
+      ]
+    },
+    {
+      "object_type": "object_type_6",
+      "code": "rule_group_21",
+      "min_picks": 1,
+      "max_picks": 1,
+      "extra_pick_probability": 0,
+      "rules": [
+        {
+          "resource": "resource_17",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_18",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_19",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        }
+      ]
+    },
+    {
+      "object_type": "object_type_7",
+      "code": "rule_group_22",
+      "min_picks": 1,
+      "max_picks": 1,
+      "extra_pick_probability": 0,
+      "rules": [
+        {
+          "resource": "resource_17",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_18",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_19",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        }
+      ]
+    },
+    {
+      "object_type": "object_type_8",
+      "code": "rule_group_23",
+      "min_picks": 1,
+      "max_picks": 1,
+      "extra_pick_probability": 0,
+      "rules": [
+        {
+          "resource": "resource_17",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_18",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_19",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        }
+      ]
+    },
+    {
+      "object_type": "object_type_9",
+      "code": "rule_group_24",
+      "min_picks": 1,
+      "max_picks": 1,
+      "extra_pick_probability": 0,
+      "rules": [
+        {
+          "resource": "resource_17",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_18",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
+        },
+        {
+          "resource": "resource_19",
+          "weight": 40,
+          "coefficient_min": 0.1,
+          "coefficient_max": 0.25
         }
       ]
     }
@@ -1100,45 +1593,53 @@
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 1000
+          "amount": 100
         },
         {
-          "resource": "resource_2",
-          "amount": 600
+          "resource": "resource_20",
+          "amount": 100
         },
         {
-          "resource": "resource_3",
-          "amount": 600
+          "resource": "resource_27",
+          "amount": 100
         },
         {
-          "resource": "resource_5",
-          "amount": 200
+          "resource": "resource_29",
+          "amount": 100
         },
         {
-          "resource": "resource_9",
-          "amount": 300
+          "resource": "resource_6",
+          "amount": 100
+        },
+        {
+          "resource": "resource_30",
+          "amount": 100
         }
       ],
       "name": {
-        "uk": "Терани",
+        "uk": "Террани",
         "en": "Terrans"
       },
       "description": {
-        "uk": "Надійні й дисципліновані. Сірий метал, синій стяг і флот, що тримає стрій.",
-        "en": "Reliable and disciplined. Grey metal, a blue banner and a fleet that holds formation."
+        "uk": "Ігрова раса. Бойовий бонус 10% до групи «Двигуни».",
+        "en": "A playable race. Combat bonus of 10% to the Engines group."
       },
       "mood": {
-        "uk": "військовий порядок",
-        "en": "military order"
+        "uk": "Рівні",
+        "en": "Steady"
       },
       "traits": [
         {
-          "uk": "Оборона",
-          "en": "Defence"
+          "uk": "Двигуни",
+          "en": "Engines"
         },
         {
-          "uk": "Логістика",
-          "en": "Logistics"
+          "uk": "Колоніальний модуль",
+          "en": "Colony module"
+        },
+        {
+          "uk": "Вантажний відсік",
+          "en": "Cargo hold"
         }
       ],
       "image_key": "art-07",
@@ -1147,50 +1648,58 @@
     {
       "code": "race_2",
       "sort_order": 2,
-      "preferred_object_type": "object_type_6",
+      "preferred_object_type": "object_type_7",
       "start_building_level": 1,
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 1000
+          "amount": 100
         },
         {
-          "resource": "resource_2",
-          "amount": 600
+          "resource": "resource_20",
+          "amount": 100
         },
         {
-          "resource": "resource_3",
-          "amount": 600
+          "resource": "resource_27",
+          "amount": 100
         },
         {
-          "resource": "resource_5",
-          "amount": 200
+          "resource": "resource_29",
+          "amount": 100
         },
         {
-          "resource": "resource_9",
-          "amount": 300
+          "resource": "resource_6",
+          "amount": 100
+        },
+        {
+          "resource": "resource_30",
+          "amount": 100
         }
       ],
       "name": {
-        "uk": "Кварри",
-        "en": "Kvarr"
+        "uk": "Літаріони",
+        "en": "Litari"
       },
       "description": {
-        "uk": "Кристалічні корпуси й товста броня. Повільні, але їх майже не пробити.",
-        "en": "Crystalline hulls and thick armour. Slow, but almost impossible to break through."
+        "uk": "Ігрова раса. Бойовий бонус 10% до групи «Броня».",
+        "en": "A playable race. Combat bonus of 10% to the Armor group."
       },
       "mood": {
-        "uk": "камінь і терпіння",
-        "en": "stone and patience"
+        "uk": "Холодні",
+        "en": "Cold"
       },
       "traits": [
         {
           "uk": "Броня",
-          "en": "Armour"
+          "en": "Armor"
         },
         {
-          "uk": "Видобуток",
-          "en": "Mining"
+          "uk": "Бурова установка",
+          "en": "Drill rig"
+        },
+        {
+          "uk": "Астросканер",
+          "en": "Astroscanner"
         }
       ],
       "image_key": "art-08",
@@ -1199,50 +1708,58 @@
     {
       "code": "race_3",
       "sort_order": 3,
-      "preferred_object_type": "object_type_8",
+      "preferred_object_type": "object_type_6",
       "start_building_level": 1,
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 1000
+          "amount": 100
         },
         {
-          "resource": "resource_2",
-          "amount": 600
+          "resource": "resource_20",
+          "amount": 100
         },
         {
-          "resource": "resource_3",
-          "amount": 600
+          "resource": "resource_27",
+          "amount": 100
         },
         {
-          "resource": "resource_5",
-          "amount": 200
+          "resource": "resource_29",
+          "amount": 100
         },
         {
-          "resource": "resource_9",
-          "amount": 300
+          "resource": "resource_6",
+          "amount": 100
+        },
+        {
+          "resource": "resource_30",
+          "amount": 100
         }
       ],
       "name": {
-        "uk": "Сколари",
-        "en": "Skolar"
+        "uk": "Драккури",
+        "en": "Drakkuri"
       },
       "description": {
-        "uk": "Гострі силуети й червоні вогні. Рейдери, що б’ють першими й зникають.",
-        "en": "Sharp silhouettes and red lights. Raiders who strike first and vanish."
+        "uk": "Ігрова раса. Бойовий бонус 10% до групи «Зброя».",
+        "en": "A playable race. Combat bonus of 10% to the Weapons group."
       },
       "mood": {
-        "uk": "швидкий удар",
-        "en": "swift strike"
+        "uk": "Гарячі",
+        "en": "Hot"
       },
       "traits": [
         {
-          "uk": "Атака",
-          "en": "Attack"
+          "uk": "Зброя",
+          "en": "Weapons"
         },
         {
-          "uk": "Швидкість",
-          "en": "Speed"
+          "uk": "Вантажний відсік",
+          "en": "Cargo hold"
+        },
+        {
+          "uk": "Туманнісний збирач",
+          "en": "Nebula collector"
         }
       ],
       "image_key": "art-09",
@@ -1251,50 +1768,58 @@
     {
       "code": "race_4",
       "sort_order": 4,
-      "preferred_object_type": "object_type_7",
+      "preferred_object_type": "object_type_8",
       "start_building_level": 1,
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 1000
+          "amount": 100
         },
         {
-          "resource": "resource_2",
-          "amount": 600
+          "resource": "resource_20",
+          "amount": 100
         },
         {
-          "resource": "resource_3",
-          "amount": 600
+          "resource": "resource_27",
+          "amount": 100
         },
         {
-          "resource": "resource_5",
-          "amount": 200
+          "resource": "resource_29",
+          "amount": 100
         },
         {
-          "resource": "resource_9",
-          "amount": 300
+          "resource": "resource_6",
+          "amount": 100
+        },
+        {
+          "resource": "resource_30",
+          "amount": 100
         }
       ],
       "name": {
-        "uk": "Нексари",
-        "en": "Nexar"
+        "uk": "Вейрани",
+        "en": "Veirani"
       },
       "description": {
-        "uk": "Плавні форми й світні лінії. Ставка на сенсори, щити й точний розрахунок.",
-        "en": "Smooth shapes and glowing lines. They rely on sensors, shields and precise calculation."
+        "uk": "Ігрова раса. Бойовий бонус 10% до групи «Щити».",
+        "en": "A playable race. Combat bonus of 10% to the Shields group."
       },
       "mood": {
-        "uk": "тиша технологій",
-        "en": "silence of technology"
+        "uk": "Сухі",
+        "en": "Dry"
       },
       "traits": [
         {
-          "uk": "Технології",
-          "en": "Technology"
+          "uk": "Щити",
+          "en": "Shields"
         },
         {
-          "uk": "Сенсори",
-          "en": "Sensors"
+          "uk": "Корабельний радар",
+          "en": "Ship radar"
+        },
+        {
+          "uk": "Бортовий комп'ютер",
+          "en": "Onboard computer"
         }
       ],
       "image_key": "art-10",

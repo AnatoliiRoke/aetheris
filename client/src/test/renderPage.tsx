@@ -11,7 +11,7 @@ import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
 import type { ActiveOrders } from '../api/activeOrders';
 import type { ProcessActiveOrder, ProcessBuilding, ProcessBuildingSummary, ProcessesApi, TerraformingState, TerraformingTarget } from '../api/processesApi';
-import type { ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionStock } from '../api/productionApi';
+import type { Characteristic, PartCharacteristics, ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionStock } from '../api/productionApi';
 import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
 import type { OwnedPlanet, Reference, WorldApi, WorldReference } from '../api/worldApi';
@@ -96,6 +96,12 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'production.recipe.recipe_2.description': 'Модуль корпусу корабля.',
     'production.part_type.part_3.name': 'Корпус «Оса» Мк. II',
     'production.part_type.part_34.name': 'Пристрій тераформінгу Mk I',
+    'production.characteristic.characteristic_1.name': 'Тяга',
+    'production.characteristic.characteristic_1.description': 'Сила тяги рушія.',
+    'production.characteristic.characteristic_1.unit': 'кН',
+    'production.characteristic.characteristic_2.name': 'Витрата палива',
+    'production.characteristic.characteristic_2.description': 'Скільки палива рушій витрачає за одиницю часу.',
+    'production.characteristic.characteristic_2.unit': 'т/год',
     'processes.process_type.ship_repair.name': 'Ремонт корабля',
     'processes.process_type.recycling.name': 'Розбирання',
     'processes.process_recipe.recipe_1.name': 'Ремонт корабля на орбіті',
@@ -110,6 +116,10 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'world.resource.resource_18.name': 'Credits',
     'world.object_type.object_type_5.name': 'Volcanic',
     'production.part_group.part_group_2.name': 'Hull modules',
+    'production.characteristic.characteristic_1.name': 'Thrust',
+    'production.characteristic.characteristic_1.unit': 'kN',
+    'production.characteristic.characteristic_2.name': 'Fuel use',
+    'production.characteristic.characteristic_2.unit': 't/h',
     'planets.building.building_1.name': 'Administrative center',
     'research.branch.economy.name': 'Economy',
     'research.technology.tech_1.name': 'Deep extraction',
@@ -433,6 +443,8 @@ export function fakeProductionApi(overrides: Partial<ProductionApi> = {}): Produ
     factory: vi.fn().mockResolvedValue(sampleProductionFactory()),
     stock: vi.fn().mockResolvedValue(sampleProductionStock()),
     orders: vi.fn().mockResolvedValue(sampleProductionOrders()),
+    characteristics: vi.fn().mockResolvedValue(sampleCharacteristics()),
+    characteristicParts: vi.fn().mockResolvedValue(samplePartCharacteristics()),
     enqueue: vi.fn().mockResolvedValue(sampleProductionFactory()),
     cancel: vi.fn().mockResolvedValue(sampleProductionFactory()),
     ...overrides,
@@ -550,6 +562,61 @@ export function sampleProductionStock(overrides: Partial<ProductionStock> = {}):
     producedResourceTypeIds: [],
     ...overrides,
   };
+}
+
+/**
+ * The characteristics of the parts for the tests (task 00027): two of them, both of the group of
+ * the hull modules, the second one not required.
+ */
+export function sampleCharacteristics(overrides: Partial<Characteristic>[] = []): Characteristic[] {
+  const rows: Characteristic[] = [
+    {
+      characteristicId: 1,
+      code: 'characteristic_1',
+      nameKey: 'production.characteristic.characteristic_1.name',
+      descriptionKey: 'production.characteristic.characteristic_1.description',
+      unitKey: 'production.characteristic.characteristic_1.unit',
+      imageKey: null,
+      sortOrder: 1,
+      isArchived: false,
+      groups: [{ partGroupId: 2, code: 'part_group_2', nameKey: 'production.part_group.part_group_2.name', sortOrder: 1, isRequired: true }],
+    },
+    {
+      characteristicId: 2,
+      code: 'characteristic_2',
+      nameKey: 'production.characteristic.characteristic_2.name',
+      descriptionKey: 'production.characteristic.characteristic_2.description',
+      unitKey: 'production.characteristic.characteristic_2.unit',
+      imageKey: null,
+      sortOrder: 2,
+      isArchived: false,
+      groups: [{ partGroupId: 2, code: 'part_group_2', nameKey: 'production.part_group.part_group_2.name', sortOrder: 2, isRequired: false }],
+    },
+  ];
+
+  return rows.map((row, index) => ({ ...row, ...overrides[index] }));
+}
+
+/**
+ * The weight and the characteristics of every part for the tests (task 00027): the hull module
+ * weighs 12.5 tonnes and has the thrust and the fuel use.
+ */
+export function samplePartCharacteristics(overrides: Partial<PartCharacteristics>[] = []): PartCharacteristics[] {
+  const rows: PartCharacteristics[] = [
+    {
+      partTypeId: 3,
+      code: 'part_3',
+      nameKey: 'production.part_type.part_3.name',
+      partGroupId: 2,
+      weight: 12.5,
+      characteristics: [
+        { characteristicId: 1, numberValue: 120, levels: {} },
+        { characteristicId: 2, numberValue: 3.5, levels: {} },
+      ],
+    },
+  ];
+
+  return rows.map((row, index) => ({ ...row, ...overrides[index] }));
 }
 
 /**

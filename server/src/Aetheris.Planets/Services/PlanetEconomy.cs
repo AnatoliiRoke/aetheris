@@ -1,3 +1,5 @@
+using Aetheris.World.Api;
+
 namespace Aetheris.Planets.Services;
 
 /// <summary>
@@ -87,6 +89,11 @@ public static class PlanetEconomy
     /// <param name="levels">The levels by building type.</param>
     /// <param name="bonuses">The bonuses of the technologies.</param>
     /// <returns>The capacities by group.</returns>
+    /// <remarks>
+    /// The capacity of a group is in tonnes (task 00027, decision 1): the resources of the body
+    /// are counted by their weight, and every resource of the group has the capacity of the group
+    /// as its own limit.
+    /// </remarks>
     public static Dictionary<int, long> Capacities(
         BuildingCatalog catalog,
         IReadOnlyDictionary<int, int> levels,
@@ -105,6 +112,25 @@ public static class PlanetEconomy
         }
 
         return capacities;
+    }
+
+    /// <summary>
+    /// Gets the weight of one unit of every resource, in tonnes (task 00027).
+    /// </summary>
+    /// <param name="catalog">The building catalog, for the resources.</param>
+    /// <returns>The weights by resource.</returns>
+    public static Dictionary<int, decimal> Weights(BuildingCatalog catalog)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+
+        Dictionary<int, decimal> weights = [];
+
+        foreach (ResourceTypeFact resource in catalog.Resources)
+        {
+            weights[resource.Id] = resource.Weight;
+        }
+
+        return weights;
     }
 
     /// <summary>
@@ -191,23 +217,31 @@ public static class PlanetEconomy
     /// <param name="catalog">The building catalog, for the groups of the resources.</param>
     /// <param name="amounts">The amounts at <paramref name="from"/>.</param>
     /// <param name="rates">The production per hour by resource.</param>
-    /// <param name="capacities">The capacities by resource group; every resource of the group has this capacity of its own.</param>
+    /// <param name="capacities">The capacities by resource group, in tonnes; every resource of the group has this capacity of its own.</param>
+    /// <param name="weights">The weight of one unit of every resource, in tonnes (task 00027).</param>
     /// <param name="from">The moment of the amounts.</param>
     /// <param name="to">The moment to bring them to.</param>
     /// <returns>The amounts at <paramref name="to"/> and the moment every resource is full.</returns>
     /// <remarks>
+    /// <para>
     /// Every resource has its own limit, the capacity its group gets from the storage (decision of
     /// the author, 31.10.2026): a resource fills at its own rate and stops alone, the other
     /// resources of the group go on. The amounts are whole numbers: the fraction of a unit is
     /// left out, and the resource that fills gets exactly its capacity. An amount over the
     /// capacity (a refund) stays and counts as full. A group with no capacity at all has no
     /// limit: its resources never fill (decision 7.9 of task 00020).
+    /// </para>
+    /// <para>
+    /// The room of a resource is counted in tonnes (task 00027, decision 1): the amount of the
+    /// resource times its weight never goes over the capacity of the group.
+    /// </para>
     /// </remarks>
     public static AccumulationResult Accumulate(
         BuildingCatalog catalog,
         IReadOnlyDictionary<int, long> amounts,
         IReadOnlyDictionary<int, decimal> rates,
         IReadOnlyDictionary<int, long> capacities,
+        IReadOnlyDictionary<int, decimal> weights,
         DateTimeOffset from,
         DateTimeOffset to)
     {
@@ -215,6 +249,7 @@ public static class PlanetEconomy
         ArgumentNullException.ThrowIfNull(amounts);
         ArgumentNullException.ThrowIfNull(rates);
         ArgumentNullException.ThrowIfNull(capacities);
+        ArgumentNullException.ThrowIfNull(weights);
 
         Dictionary<int, long> result = new(amounts);
         Dictionary<int, DateTimeOffset?> fullAt = [];
@@ -230,6 +265,7 @@ public static class PlanetEconomy
             long stored = amounts.GetValueOrDefault(resourceTypeId);
             long capacity = capacities.GetValueOrDefault(groupId);
             decimal rate = rates.GetValueOrDefault(resourceTypeId);
+            decimal weight = weights.GetValueOrDefault(resourceTypeId);
 
             // The one rule of a zero capacity (task 00020, section 7.9): a group without a storage
             // has no limit. Its resources are never full and never stop the production; the
@@ -246,7 +282,12 @@ public static class PlanetEconomy
                 continue;
             }
 
-            if (stored >= capacity)
+            // The room of the resource is counted in tonnes (task 00027): the weight of the
+            // stored amount against the capacity of the group.
+            decimal weightStored = stored * weight;
+            decimal weightCapacity = capacity;
+
+            if (weightStored >= weightCapacity)
             {
                 fullAt[resourceTypeId] = stored > 0 || rate > 0 ? from : null;
 
@@ -260,13 +301,18 @@ public static class PlanetEconomy
                 continue;
             }
 
-            decimal ticksToFull = (capacity - stored) * (decimal)TimeSpan.TicksPerHour / rate;
+            // The rate is in units per hour, so the room that is left is counted in units too:
+            // the tonnes that are left divided by the weight of one unit.
+            decimal unitsLeft = weightCapacity > weightStored
+                ? (weightCapacity - weightStored) / (weight > 0 ? weight : 1m)
+                : 0;
+            decimal ticksToFull = unitsLeft * (decimal)TimeSpan.TicksPerHour / rate;
             fullAt[resourceTypeId] = AddTicks(from, ticksToFull);
 
             // The resource that fills gets exactly its capacity, so the fraction left out never
             // leaves it short of the limit.
             result[resourceTypeId] = elapsedTicks >= ticksToFull
-                ? capacity
+                ? (long)decimal.Floor(weightCapacity / (weight > 0 ? weight : 1m))
                 : stored + (long)decimal.Floor(rate * elapsedTicks / TimeSpan.TicksPerHour);
         }
 

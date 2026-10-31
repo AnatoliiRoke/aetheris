@@ -107,15 +107,19 @@ public sealed class NeutralCodeTests
         ResourceGroupEntity crystals = groups.Single(group => group.Code == SeedCodes.CrystalGroup);
         ResourceTypeEntity crystal = resources.Single(resource => resource.Code == SeedCodes.Crystal);
 
+        ResourceTypeEntity ether = resources.Single(resource => resource.Code == SeedCodes.Ether);
+        ResourceGroupEntity manufactured = groups.Single(group => group.Code == SeedCodes.ManufacturedGroup);
+
         Assert.Equal("Мінерали", ukrainian.Texts[minerals.NameKey]);
         Assert.Equal("Кристали", ukrainian.Texts[crystals.NameKey]);
-        Assert.False(crystals.AllowedOnPlanet);
+        Assert.True(crystals.AllowedOnPlanet);
         Assert.Equal(crystals.Id, crystal.ResourceGroupId);
+        Assert.False(manufactured.AllowedOnPlanet);
         Assert.All(
             types.Where(type => type.ObjectClass == WorldObjectClasses.AsteroidField),
             field =>
             {
-                Assert.Equal(crystal.Id, field.HiddenResourceTypeId);
+                Assert.Equal(ether.Id, field.HiddenResourceTypeId);
                 Assert.Equal(0.04m, field.HiddenShareMin);
                 Assert.Equal(0.1m, field.HiddenShareMax);
             });
@@ -142,7 +146,7 @@ public sealed class NeutralCodeTests
         Assert.NotNull(first.Headers.ETag);
 
         using JsonDocument pack = JsonDocument.Parse(await first.Content.ReadAsStringAsync(Token));
-        Assert.Equal("Iron", pack.RootElement.GetProperty("texts").GetProperty(ResourceNameKey(SeedCodes.Iron)).GetString());
+        Assert.Equal("Iron ore", pack.RootElement.GetProperty("texts").GetProperty(ResourceNameKey(SeedCodes.Iron)).GetString());
 
         using HttpRequestMessage again = new(HttpMethod.Get, "/api/v1/texts/en");
         again.Headers.IfNoneMatch.Add(first.Headers.ETag);
@@ -172,7 +176,7 @@ public sealed class NeutralCodeTests
         JsonElement row = Assert.Single(rows.RootElement.GetProperty("items").EnumerateArray());
         int version = row.GetProperty("version").GetInt32();
 
-        Assert.Equal("Залізо", row.GetProperty("text").GetString());
+        Assert.Equal("Залізна руда", row.GetProperty("text").GetString());
         Assert.Equal(Languages, rows.RootElement.GetProperty("languages").EnumerateArray().Select(language => language.GetString()));
 
         HttpResponseMessage withoutReason = await admin.PutAsJsonAsync(
@@ -197,7 +201,7 @@ public sealed class NeutralCodeTests
         Assert.Equal(HttpStatusCode.Conflict, stale.StatusCode);
 
         AdminAuditLogEntity audit = await LastAuditAsync(owner, "admin.text_updated");
-        Assert.Equal("Залізо", audit.OldValue);
+        Assert.Equal("Залізна руда", audit.OldValue);
         Assert.Equal("Ферум", audit.NewValue);
         Assert.Equal(Reason, audit.Reason);
 
@@ -355,7 +359,7 @@ public sealed class NeutralCodeTests
 
         Assert.Equal("world.race.race_1.name", first.GetProperty("name_key").GetString());
         Assert.Equal("world.race.race_1.description", first.GetProperty("description_key").GetString());
-        Assert.Equal(2, first.GetProperty("trait_keys").GetArrayLength());
+        Assert.Equal(3, first.GetProperty("trait_keys").GetArrayLength());
         Assert.Equal("art-07", first.GetProperty("image_key").GetString());
         Assert.Equal("race-1", first.GetProperty("color_key").GetString());
     }

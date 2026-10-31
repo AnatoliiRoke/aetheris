@@ -211,7 +211,7 @@ public static class ResearchReferenceSeed
                     {
                         Level = level,
                         DurationSeconds = ValueAt(technology.DurationSeconds, level),
-                        CostIds = [.. technology.Costs.Select(cost => new TechnologyLevelCostEntity { ResourceTypeId = resourceIds[cost.Resource], Amount = ValueAt(cost.Growth, level) })],
+                        CostIds = [.. technology.Costs.Where(cost => level >= cost.FromLevel).Select(cost => new TechnologyLevelCostEntity { ResourceTypeId = resourceIds[cost.Resource], Amount = ValueAt(cost.Growth, level) })],
                         EffectIds =
                         [
                             .. technology.Effects.Where(effect => effect.Level is null || effect.Level == level).Select(effect => new TechnologyLevelEffectEntity
@@ -230,27 +230,12 @@ public static class ResearchReferenceSeed
         dbContext.Technologies.AddRange(technologies.Values);
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        // A technology that opens a building closes it until the technology is learned, so the
-        // requirement of the building lives in the common requirements module.
-        foreach ((SeedTechnology seedTechnology, TechnologyEntity technology) in missingTechnologies
-            .Select(seedTechnology => (seedTechnology, technologies[seedTechnology.Code])))
+        // An unlock effect names what the technology opens. It does not close the building at
+        // level 1: the chosen file leaves level 1 open, and the requirement rows below say the
+        // level that actually waits for the technology (task 00028).
+        if (missingTechnologies.Count > 0)
         {
-            foreach (SeedTechnologyEffect effect in seedTechnology.Effects.Where(effect => effect.Type == TechnologyEffectTypes.Unlocks))
-            {
-                if (effect.UnlockKind != TechnologyUnlockKinds.BuildingType
-                    || effect.UnlockTarget is null
-                    || !unlockIds.TryGetValue(effect.UnlockTarget, out int buildingTypeId))
-                {
-                    continue;
-                }
-
-                await requirements.AddAsync(
-                    RequirementSubjectTypes.BuildingType,
-                    buildingTypeId,
-                    1,
-                    [new RequirementDefinition(RequirementTypes.TechnologyLevel, technology.Id, effect.Level ?? 1)],
-                    cancellationToken).ConfigureAwait(false);
-            }
+            await WriteInsertedRequirementsAsync(missingTechnologies, planets, requirements, dbContext, cancellationToken).ConfigureAwait(false);
         }
 
         await texts.AddMissingAsync(
@@ -264,6 +249,92 @@ public static class ResearchReferenceSeed
         await WorldReferenceSeed.RaiseAsync(codes, ResearchTextKeys.CodeGroup, seed.Technologies.Select(technology => technology.Code), cancellationToken).ConfigureAwait(false);
 
         return missingTechnologies.Count > 0;
+    }
+
+    /// <summary>
+    /// Writes the requirements of the technologies inserted on this run, and the technology
+    /// requirements of buildings whose target was inserted on this run.
+    /// </summary>
+    private static async Task WriteInsertedRequirementsAsync(
+        List<SeedTechnology> missingTechnologies,
+        IPlanetsModule planets,
+        IRequirementsModule requirements,
+        ResearchDbContext dbContext,
+        CancellationToken cancellationToken)
+    {
+        Dictionary<string, int> technologyIds = await dbContext.Technologies.AsNoTracking()
+            .ToDictionaryAsync(technology => technology.Code, technology => technology.Id, StringComparer.Ordinal, cancellationToken)
+            .ConfigureAwait(false);
+
+        HashSet<string> insertedCodes = missingTechnologies.Select(technology => technology.Code).ToHashSet(StringComparer.Ordinal);
+
+        foreach (SeedTechnology seedTechnology in missingTechnologies)
+        {
+            if (seedTechnology.Requirements is not { Count: > 0 })
+            {
+                continue;
+            }
+
+            foreach (IGrouping<int, Aetheris.Planets.Data.SeedRequirement> group in seedTechnology.Requirements.GroupBy(requirement => requirement.SubjectLevel ?? 1))
+            {
+                List<RequirementDefinition> definitions = [];
+
+                foreach (Aetheris.Planets.Data.SeedRequirement requirement in group)
+                {
+                    int targetId = requirement.Type switch
+                    {
+                        RequirementTypes.BuildingLevel => await planets.FindBuildingTypeIdAsync(requirement.Target, cancellationToken).ConfigureAwait(false)
+                            ?? throw new InvalidOperationException($"The starting data requires the building '{requirement.Target}', which the bodies module does not have."),
+                        RequirementTypes.TechnologyLevel => technologyIds.TryGetValue(requirement.Target, out int technologyId)
+                            ? technologyId
+                            : throw new InvalidOperationException($"The starting data requires the technology '{requirement.Target}', which does not exist."),
+                        _ => throw new InvalidOperationException($"The starting data names the requirement type '{requirement.Type}', which it cannot resolve."),
+                    };
+
+                    definitions.Add(new RequirementDefinition(requirement.Type, targetId, requirement.TargetLevel ?? 0));
+                }
+
+                await requirements.AddAsync(
+                    RequirementSubjectTypes.Technology,
+                    technologyIds[seedTechnology.Code],
+                    group.Key,
+                    definitions,
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        Aetheris.Planets.Data.PlanetsSeedData planetsSeed = Aetheris.Planets.Data.PlanetsReferenceSeed.Load();
+
+        foreach (Aetheris.Planets.Data.SeedBuildingType building in planetsSeed.BuildingTypes)
+        {
+            List<Aetheris.Planets.Data.SeedRequirement> technologyRequirements =
+            [
+                .. building.Requirements.Where(requirement => requirement.Type == RequirementTypes.TechnologyLevel && insertedCodes.Contains(requirement.Target)),
+            ];
+
+            if (technologyRequirements.Count == 0)
+            {
+                continue;
+            }
+
+            int buildingTypeId = await planets.FindBuildingTypeIdAsync(building.Code, cancellationToken).ConfigureAwait(false)
+                ?? throw new InvalidOperationException($"The starting data requires a technology for the building '{building.Code}', which the bodies module does not have.");
+
+            foreach (IGrouping<int, Aetheris.Planets.Data.SeedRequirement> group in technologyRequirements.GroupBy(requirement => requirement.SubjectLevel ?? 1))
+            {
+                await requirements.AddAsync(
+                    RequirementSubjectTypes.BuildingType,
+                    buildingTypeId,
+                    group.Key,
+                    [
+                        .. group.Select(requirement => new RequirementDefinition(
+                            RequirementTypes.TechnologyLevel,
+                            technologyIds[requirement.Target],
+                            requirement.TargetLevel ?? 1)),
+                    ],
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
     }
 }
 
@@ -335,13 +406,14 @@ public sealed record SeedTechnology(
     IReadOnlyDictionary<string, string> Description,
     SeedGrowth DurationSeconds,
     IReadOnlyList<SeedTechnologyCost> Costs,
-    IReadOnlyList<SeedTechnologyEffect> Effects);
+    IReadOnlyList<SeedTechnologyEffect> Effects,
+    IReadOnlyList<Aetheris.Planets.Data.SeedRequirement>? Requirements = null);
 
 /// <summary>The cost of a level of a technology of the starting data.</summary>
 /// <param name="Resource">The neutral code of the resource.</param>
 /// <param name="Base">The amount at the first level.</param>
 /// <param name="Growth">The multiplier per level.</param>
-public sealed record SeedTechnologyCost(string Resource, SeedGrowth Growth);
+public sealed record SeedTechnologyCost(string Resource, SeedGrowth Growth, int FromLevel = 1);
 
 /// <summary>An effect of a level of a technology of the starting data.</summary>
 /// <param name="Type">The kind of the effect.</param>

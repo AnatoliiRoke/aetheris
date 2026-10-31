@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 
 /**
  * A column of a table of the storage: the heading and whether the numbers are on the right.
@@ -11,9 +11,12 @@ export interface StorageColumn {
 
 /**
  * A row of a table of the storage: the key and the cells in the order of the columns, or, for a
- * heading of a group, the text that spans the whole row.
+ * heading of a group, the text that spans the whole row. A row may carry a detail that shows
+ * under it and spans the whole table.
  */
-export type StorageRow = { key: string | number; cells: ReactNode[] } | { key: string | number; heading: string };
+export type StorageRow =
+  | { key: string | number; cells: ReactNode[]; details?: ReactNode }
+  | { key: string | number; heading: string };
 
 /**
  * A table of the storage screen. On a phone the table scrolls inside its own container, so the
@@ -45,13 +48,20 @@ export function StorageTable({ label, columns, rows }: { label: string; columns:
                 </th>
               </tr>
             ) : (
-              <tr key={row.key}>
-                {row.cells.map((cell, index) => (
-                  <td className={columns[index]?.numeric ? 'num' : undefined} key={columns[index]?.id ?? index}>
-                    {cell}
-                  </td>
-                ))}
-              </tr>
+              <Fragment key={row.key}>
+                <tr>
+                  {row.cells.map((cell, index) => (
+                    <td className={columns[index]?.numeric ? 'num' : undefined} key={columns[index]?.id ?? index}>
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+                {row.details ? (
+                  <tr className="planet-table__details">
+                    <td colSpan={columns.length}>{row.details}</td>
+                  </tr>
+                ) : null}
+              </Fragment>
             ),
           )}
         </tbody>

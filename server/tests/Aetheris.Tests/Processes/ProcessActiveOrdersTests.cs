@@ -26,9 +26,9 @@ public sealed class ProcessActiveOrdersTests
 {
     private const string Fuel = "resource_group_3";
 
-    private const string Deuterium = "resource_9";
+    private const string Deuterium = "resource_12";
 
-    private const string Plasma = "resource_10";
+    private const string Helium = "resource_13";
 
     private const string ConversionTechnology = "tech_18";
 
@@ -67,7 +67,7 @@ public sealed class ProcessActiveOrdersTests
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         string playerId = player.Account.UserId;
         int deuteriumId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int plasmaId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        int plasmaId = await ProcessesTestData.ResourceIdAsync(services, Helium);
         PartFacts hull = await ProcessesTestData.PartAsync(services, Hull);
 
         await processes.EnqueueAsync(playerId, player.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(10, deuteriumId, plasmaId), Token);
@@ -144,7 +144,7 @@ public sealed class ProcessActiveOrdersTests
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
         ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
         int deuteriumId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int plasmaId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        int plasmaId = await ProcessesTestData.ResourceIdAsync(services, Helium);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         string playerId = player.Account.UserId;
 
@@ -186,7 +186,7 @@ public sealed class ProcessActiveOrdersTests
         await ProcessesTestData.LearnAsync(owner, services, ConversionTechnology, 1);
         ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
         int deuteriumId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int plasmaId = await ProcessesTestData.ResourceIdAsync(services, Plasma);
+        int plasmaId = await ProcessesTestData.ResourceIdAsync(services, Helium);
 
         await services.GetRequiredService<IProcessesModule>()
             .EnqueueAsync(owner.Account.UserId, owner.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(10, deuteriumId, plasmaId), Token);

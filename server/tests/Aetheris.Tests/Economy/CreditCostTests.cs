@@ -392,8 +392,13 @@ public sealed class CreditCostTests
     {
         ProductionDbContext production = services.GetRequiredService<ProductionDbContext>();
 
+        // The seed recipe already spends credits. The test names the amount itself.
+        await production.Set<RecipeIngredientEntity>()
+            .Where(ingredient => ingredient.RecipeId == recipeId && ingredient.ResourceTypeId == creditsId)
+            .ExecuteDeleteAsync(Token);
         production.Set<RecipeIngredientEntity>().Add(new RecipeIngredientEntity { RecipeId = recipeId, ResourceTypeId = creditsId, Amount = amount });
         await production.SaveChangesAsync(Token);
+        services.GetRequiredService<ProductionCatalogCache>().Invalidate();
     }
 
     /// <summary>

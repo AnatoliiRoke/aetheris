@@ -7,8 +7,11 @@ using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
+using Aetheris.Tests.Economy;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.World;
+using Aetheris.World;
+using Aetheris.World.Api;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -155,18 +158,41 @@ public static class PlanetsTestData
     {
         PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
         PlanetStateEntity state = await planets.PlanetStates.SingleAsync(entry => entry.PlanetId == planetId, Token);
+        HashSet<int> currencyIds = await CurrencyIdsAsync(services);
 
         await planets.PlanetResources.Where(entry => entry.PlanetId == planetId).ExecuteDeleteAsync(Token);
-        planets.PlanetResources.AddRange(amounts.Select(entry => new PlanetResourceEntity
-        {
-            PlanetId = planetId,
-            SectorId = state.SectorId,
-            ResourceTypeId = entry.Key,
-            Amount = entry.Value,
-        }));
+        planets.PlanetResources.AddRange(amounts
+            .Where(entry => !currencyIds.Contains(entry.Key))
+            .Select(entry => new PlanetResourceEntity
+            {
+                PlanetId = planetId,
+                SectorId = state.SectorId,
+                ResourceTypeId = entry.Key,
+                Amount = entry.Value,
+            }));
         state.ResourcesUpdatedAt = at;
 
         await planets.SaveChangesAsync(Token);
+
+        if (state.OwnerPlayerId is { } ownerPlayerId)
+        {
+            foreach ((int resourceTypeId, long amount) in amounts.Where(entry => currencyIds.Contains(entry.Key)))
+            {
+                await EconomyTestData.SetBalanceAsync(services, ownerPlayerId, resourceTypeId, amount, at);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the resources that belong to a civilization.
+    /// </summary>
+    /// <param name="services">The scoped services.</param>
+    /// <returns>The identifiers of the currencies.</returns>
+    public static async Task<HashSet<int>> CurrencyIdsAsync(IServiceProvider services)
+    {
+        ResourceCatalog catalog = await services.GetRequiredService<IWorldModule>().GetResourceCatalogAsync(Token);
+
+        return [.. catalog.Resources.Where(resource => resource.IsCivilizationScope).Select(resource => resource.Id)];
     }
 
     /// <summary>

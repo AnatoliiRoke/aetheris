@@ -238,8 +238,8 @@ public static class PlanetOverviewBuilder
         foreach (var resource in catalog.Resources)
         {
             // A currency of a civilization does not lie on a body, so it is not a resource of
-            // the body (task 00015).
-            if (resource.ResourceGroupId is not { } resourceGroupId)
+            // the body (task 00015). A currency may still belong to a resource group.
+            if (resource.IsCivilizationScope || resource.ResourceGroupId is not { } resourceGroupId)
             {
                 continue;
             }
@@ -253,10 +253,22 @@ public static class PlanetOverviewBuilder
             DateTimeOffset? fullAt = figures.FullAt.GetValueOrDefault(resource.Id);
             bool isFull = fullAt is { } moment && moment <= figures.Now;
             decimal rate = isFull ? 0 : rates.GetValueOrDefault(resource.Id);
+            decimal weight = resource.Weight;
 
             if (amount > 0 || rate > 0 || capacity > 0 || figures.Deposits.ContainsKey(resource.Id))
             {
-                resources.Add(new PlanetResourceDto(resource.Id, resourceGroupId, amount, rate, capacity, isFull, fullAt));
+                // The room of the storage is counted in tonnes (task 00027, decision 1), so the
+                // client sees how much the resource weighs and not only how many units of it there are.
+                resources.Add(new PlanetResourceDto(
+                    resource.Id,
+                    resourceGroupId,
+                    amount,
+                    rate,
+                    capacity,
+                    isFull,
+                    fullAt,
+                    weight,
+                    amount * weight));
             }
         }
 
