@@ -29,7 +29,13 @@ export function TextsProvider({ children }: { children: ReactNode }) {
     Promise.all(languages.map((wanted) => texts.pack(wanted).then((pack) => [wanted, pack.texts] as const))).then(
       (loaded) => {
         if (current) {
-          setPacks((previous) => ({ ...previous, ...Object.fromEntries(loaded) }));
+          // A pack that says the same keeps its old object, so a read on the return to the tab wakes
+          // no reader of the texts when nothing was renamed.
+          setPacks((previous) => {
+            const changed = loaded.filter(([wanted, pack]) => JSON.stringify(previous[wanted]) !== JSON.stringify(pack));
+
+            return changed.length === 0 ? previous : { ...previous, ...Object.fromEntries(changed) };
+          });
         }
       },
       () => {

@@ -10,6 +10,7 @@ import type { EntityText } from '../../texts/context';
 import { useTexts } from '../../texts/useTexts';
 import { formatDuration, formatNumber, lookup } from './planetText';
 import { useProduction } from './useProduction';
+import { useShellActions } from './useShell';
 
 /**
  * The prefixes of the error codes of the server that have their own text for the player.
@@ -37,6 +38,7 @@ export function ProductionPanel({
 }) {
   const { t, language } = useI18n();
   const { production } = useApi();
+  const { refreshAfterCommand } = useShellActions();
   const { text } = useTexts();
   const { factories, factory, stock, loaded, failed, reload, applyFactory, selectFactory } = useProduction(planetId);
   const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
@@ -65,6 +67,7 @@ export function ProductionPanel({
     } finally {
       setBusy(false);
       onChanged?.();
+      refreshAfterCommand(planetId);
     }
   };
 

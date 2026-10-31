@@ -19,6 +19,7 @@ import { deadlineFor, type namer } from './planetText';
  * @param action A link beside the heading.
  * @param emptyText What to say when the queue is empty.
  * @param footnote A short note under the queue.
+ * @param collect The inactive "collect" button of the design, shown where the server has no such action yet.
  */
 export function BuildingQueue({
   planet,
@@ -30,6 +31,7 @@ export function BuildingQueue({
   action,
   emptyText,
   footnote,
+  collect,
 }: {
   planet: Planet;
   names: ReturnType<typeof namer>;
@@ -40,6 +42,7 @@ export function BuildingQueue({
   action?: ReactNode;
   emptyText?: string;
   footnote?: string;
+  collect?: { label: string; reason: string };
 }) {
   const { t } = useI18n();
   const { items, slotCount } = planet.queue;
@@ -56,6 +59,7 @@ export function BuildingQueue({
       durationSeconds: item.durationSeconds / multiplier,
       details: names.amounts(item.costs),
       cancelLabel: t('planet.queueCancelLabel', { name, level: item.targetLevel }),
+      locksCancelWhenDue: true,
     };
   });
 
@@ -63,6 +67,7 @@ export function BuildingQueue({
     <QueuePanel
       action={action}
       busy={busy}
+      collect={collect}
       emptyText={emptyText ?? t('queue.emptyShort')}
       entries={entries}
       footnote={footnote}

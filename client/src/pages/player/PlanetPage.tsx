@@ -6,7 +6,6 @@ import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
 import { useTexts } from '../../texts/useTexts';
 import { BuildingQueue } from './BuildingQueue';
-import { CivShell } from './CivShell';
 import { EnergyPanel, ResourcesPanel, StoragePanel } from './PlanetPanels';
 import { PlanetCard } from './PlanetCard';
 import { PopulationPanel } from './PopulationPanel';
@@ -39,21 +38,21 @@ export function PlanetPage() {
   const { text } = useTexts();
   useDocumentTitle(t('meta.planet.title'));
 
-  const { civilization, planet, receivedAt, failed, reload, names, busy, notice, onCancel } = usePlanetScreen();
+  const { civilization, planetId, planet, receivedAt, failed, reload, names, busy, notice, onCancel } = usePlanetScreen();
   const reference = useWorldReference();
-  const researchState = useResearch(civilization?.planetId ?? null);
-  const research = useResearchCommands(researchState, civilization?.planetId ?? 0);
+  const researchState = useResearch(planetId);
+  const research = useResearchCommands(researchState, planetId ?? 0);
   // The panels of the factory and of the processes read again after a command of the queues
   // above them, and the queues read again after a command of the panels.
   const [productionRevision, setProductionRevision] = useState(0);
   const [processesRevision, setProcessesRevision] = useState(0);
-  const productionOrders = useProductionOrders(civilization?.planetId ?? null, () => setProductionRevision((revision) => revision + 1));
-  const processOrders = useProcessOrders(civilization?.planetId ?? null, () => setProcessesRevision((revision) => revision + 1));
+  const productionOrders = useProductionOrders(planetId, () => setProductionRevision((revision) => revision + 1));
+  const processOrders = useProcessOrders(planetId, () => setProcessesRevision((revision) => revision + 1));
   const resourceName = useResourceNames(reference, text);
   const resourceGroup = useResourceGroups(reference);
-  const objectType = useMemo(() => reference?.objectTypes.find((type) => type.code === planet?.typeCode) ?? null, [reference, planet?.typeCode]);
+  const objectType = useMemo(() => reference?.objectTypes.find((type) => type.id === planet?.typeId) ?? null, [reference, planet?.typeId]);
 
-  if (!civilization) {
+  if (!civilization || planetId === null) {
     return null;
   }
 
@@ -65,34 +64,52 @@ export function PlanetPage() {
   );
 
   return (
-    <CivShell active="planet">
-      <div className="civ-main__in">
-        <ScreenHead
-          subtitle={planet?.coordinates ? `${typeName} · ${t('civ.sector')} ${planet.coordinates.sectorId} · ${t('civ.system')} ${planet.coordinates.systemId}` : undefined}
-          title={t('planet.title', { name: planet?.name ?? civilization.planetName ?? '' })}
-        />
-        {notice ? <Alert kind={notice.kind}>{notice.text}</Alert> : null}
-        {research.notice ? <Alert kind={research.notice.kind}>{research.notice.text}</Alert> : null}
-        {productionOrders.notice ? <Alert kind={productionOrders.notice.kind}>{productionOrders.notice.text}</Alert> : null}
-        {processOrders.notice ? <Alert kind={processOrders.notice.kind}>{processOrders.notice.text}</Alert> : null}
-        {failed && !planet ? (
-          <div className="panel">
-            <Alert kind="error">{t('planet.loadFailed')}</Alert>
-            <button className="btn btn--secondary" type="button" onClick={() => void reload()}>
-              {t('planet.retry')}
-            </button>
-          </div>
-        ) : null}
-        {!planet || !names ? (
-          failed ? null : (
-            <p className="lead" role="status">
-              {t('common.loading')}
-            </p>
-          )
-        ) : (
-          <>
-            <PlanetCard planet={planet} resourceGroup={resourceGroup} resourceName={resourceName} typeImageKey={objectType?.imageKey ?? null} typeName={typeName} />
-            <div className="planet-grid">
+    <div className="civ-main__in">
+      <ScreenHead
+        subtitle={planet?.coordinates ? `${typeName} · ${t('civ.sector')} ${planet.coordinates.sectorId} · ${t('civ.system')} ${planet.coordinates.systemId}` : undefined}
+        title={t('planet.title', { name: planet?.name ?? civilization.planetName ?? '' })}
+      />
+      {notice ? <Alert kind={notice.kind}>{notice.text}</Alert> : null}
+      {research.notice ? <Alert kind={research.notice.kind}>{research.notice.text}</Alert> : null}
+      {productionOrders.notice ? <Alert kind={productionOrders.notice.kind}>{productionOrders.notice.text}</Alert> : null}
+      {processOrders.notice ? <Alert kind={processOrders.notice.kind}>{processOrders.notice.text}</Alert> : null}
+      {failed && !planet ? (
+        <div className="panel">
+          <Alert kind="error">{t('planet.loadFailed')}</Alert>
+          <button className="btn btn--secondary" type="button" onClick={() => void reload()}>
+            {t('planet.retry')}
+          </button>
+        </div>
+      ) : null}
+      {!planet || !names ? (
+        failed ? null : (
+          <p className="lead" role="status">
+            {t('common.loading')}
+          </p>
+        )
+      ) : (
+        <>
+          <div className="planet-layout">
+            <div className="planet-layout__main">
+              <PlanetCard planet={planet} resourceGroup={resourceGroup} resourceName={resourceName} typeImageKey={objectType?.imageKey ?? null} typeName={typeName} />
+              <ResourcesPanel names={names} planet={planet} />
+              <StoragePanel names={names} planet={planet} />
+              <div className="planet-grid">
+                <EnergyPanel planet={planet} />
+                <PopulationPanel planetId={planetId} />
+              </div>
+              <ProductionPanel
+                onChanged={() => void productionOrders.reload()}
+                planetId={planetId}
+                revision={productionRevision}
+              />
+              <ProcessesPanel
+                onChanged={() => void processOrders.reload()}
+                planetId={planetId}
+                revision={processesRevision}
+              />
+            </div>
+            <aside aria-label={t('planet.queues')} className="planet-layout__aside">
               <BuildingQueue
                 action={chooseLabel(routes.planetBuild, t('planet.chooseBuilding'))}
                 busy={busy}
@@ -102,86 +119,66 @@ export function PlanetPage() {
                 planet={planet}
                 receivedAt={receivedAt}
               />
-              <div className="planet-column">
-                {researchState.tree ? (
-                  <ResearchQueue
-                    action={chooseLabel(routes.planetResearch, t('planet.chooseResearch'))}
-                    busy={research.busy}
-                    onCancel={research.cancel}
-                    onFinished={() => void researchState.reload()}
-                    receivedAt={researchState.receivedAt}
-                    resourceName={resourceName}
-                    technologyName={(key) => text(key) ?? key}
-                    tree={researchState.tree}
-                  />
-                ) : (
-                  <section aria-label={t('research.queueTitle')} className="panel">
-                    <h2 className="panel__title">{t('research.queueTitle')}</h2>
-                    <p className="lead" role="status">
-                      {researchState.failed ? t('research.loadFailed') : t('common.loading')}
-                    </p>
-                  </section>
-                )}
-                {productionOrders.orders ? (
-                  <ProductionQueue
-                    busy={productionOrders.busy}
-                    onCancel={(order) => void productionOrders.cancel(order)}
-                    onFinished={() => void productionOrders.reload()}
-                    orders={productionOrders.orders}
-                    receivedAt={productionOrders.receivedAt}
-                    timeMultiplier={planet.timeMultiplier}
-                  />
-                ) : (
-                  <QueueLoading
-                    failed={productionOrders.failed}
-                    failedText={t('production.loadFailed')}
-                    loadingText={t('production.loading')}
-                    onRetry={() => void productionOrders.reload()}
-                    title={t('production.queue')}
-                  />
-                )}
-                {processOrders.orders ? (
-                  <ProcessQueue
-                    busy={processOrders.busy}
-                    onCancel={(order) => void processOrders.cancel(order)}
-                    onFinished={() => void processOrders.reload()}
-                    orders={processOrders.orders}
-                    receivedAt={processOrders.receivedAt}
-                    timeMultiplier={planet.timeMultiplier}
-                  />
-                ) : (
-                  <QueueLoading
-                    failed={processOrders.failed}
-                    failedText={t('processes.loadFailed')}
-                    loadingText={t('processes.loading')}
-                    onRetry={() => void processOrders.reload()}
-                    title={t('processes.queue')}
-                  />
-                )}
-              </div>
-            </div>
-            <div className="planet-grid">
-              <ResourcesPanel names={names} planet={planet} />
-              <StoragePanel names={names} planet={planet} />
-            </div>
-            <div className="planet-grid">
-              <EnergyPanel planet={planet} />
-              <PopulationPanel planetId={civilization.planetId} />
-            </div>
-            <ProductionPanel
-              onChanged={() => void productionOrders.reload()}
-              planetId={civilization.planetId}
-              revision={productionRevision}
-            />
-            <ProcessesPanel
-              onChanged={() => void processOrders.reload()}
-              planetId={civilization.planetId}
-              revision={processesRevision}
-            />
-          </>
-        )}
-      </div>
-    </CivShell>
+              {researchState.tree ? (
+                <ResearchQueue
+                  action={chooseLabel(routes.planetResearch, t('planet.chooseResearch'))}
+                  busy={research.busy}
+                  onCancel={research.cancel}
+                  onFinished={() => void researchState.reload()}
+                  receivedAt={researchState.receivedAt}
+                  resourceName={resourceName}
+                  technologyName={(key) => text(key) ?? key}
+                  tree={researchState.tree}
+                />
+              ) : (
+                <section aria-label={t('research.queueTitle')} className="panel">
+                  <h2 className="panel__title">{t('research.queueTitle')}</h2>
+                  <p className="lead" role="status">
+                    {researchState.failed ? t('research.loadFailed') : t('common.loading')}
+                  </p>
+                </section>
+              )}
+              {productionOrders.orders ? (
+                <ProductionQueue
+                  busy={productionOrders.busy}
+                  onCancel={(order) => void productionOrders.cancel(order)}
+                  onFinished={() => void productionOrders.reload()}
+                  orders={productionOrders.orders}
+                  receivedAt={productionOrders.receivedAt}
+                  timeMultiplier={planet.timeMultiplier}
+                />
+              ) : (
+                <QueueLoading
+                  failed={productionOrders.failed}
+                  failedText={t('production.loadFailed')}
+                  loadingText={t('production.loading')}
+                  onRetry={() => void productionOrders.reload()}
+                  title={t('production.queue')}
+                />
+              )}
+              {processOrders.orders ? (
+                <ProcessQueue
+                  busy={processOrders.busy}
+                  onCancel={(order) => void processOrders.cancel(order)}
+                  onFinished={() => void processOrders.reload()}
+                  orders={processOrders.orders}
+                  receivedAt={processOrders.receivedAt}
+                  timeMultiplier={planet.timeMultiplier}
+                />
+              ) : (
+                <QueueLoading
+                  failed={processOrders.failed}
+                  failedText={t('processes.loadFailed')}
+                  loadingText={t('processes.loading')}
+                  onRetry={() => void processOrders.reload()}
+                  title={t('processes.queue')}
+                />
+              )}
+            </aside>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 

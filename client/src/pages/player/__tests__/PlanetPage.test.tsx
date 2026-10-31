@@ -28,7 +28,7 @@ describe('PlanetPage', () => {
     expect(within(resources).getByText('+60')).toBeInTheDocument();
 
     const energy = screen.getByRole('region', { name: 'Енергія' });
-    expect(within(energy).getByText('Після черги')).toBeInTheDocument();
+    expect(within(energy).getByText('Баланс після черги')).toBeInTheDocument();
   });
 
   it('warns which resources are full', async () => {
@@ -56,7 +56,10 @@ describe('GamePage queue', () => {
     const queue = await screen.findByRole('region', { name: 'Черга будівництва' });
     expect(await within(queue).findByText('Шахта заліза, рівень 1')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('link', { name: 'Будівництво' }));
+    // The menu has an item of the same name that opens the construction; the card opens the planet.
+    const link = screen.getAllByRole('link', { name: 'Будівництво' }).find((element) => element.closest('nav') === null);
+
+    await user.click(link!);
     await waitFor(() => expect(window.location.pathname).toBe('/planet'));
   });
 

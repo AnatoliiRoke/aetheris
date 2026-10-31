@@ -4,6 +4,15 @@
 .num { font-variant-numeric: tabular-nums; }
 .planet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-5); }
 .planet-column { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+/* The planet screen as the design lays it out: the card, the resources, the storage, the energy
+   and the population in the wide column, the queues in the narrow column beside it; on a narrow
+   screen the narrow column goes below, in the same order. */
+.planet-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 340px); gap: var(--space-5); align-items: start; }
+.planet-layout__main, .planet-layout__aside { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+.storage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: var(--space-5); align-items: start; }
+@media (max-width: 1023px) {
+  .planet-layout { grid-template-columns: minmax(0, 1fr); }
+}
 .planet-subtitle { font-size: var(--fs-body); font-weight: 600; }
 
 .planet-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-lg); }

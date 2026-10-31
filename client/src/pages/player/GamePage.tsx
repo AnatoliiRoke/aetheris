@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo } from 'react';
 import type { QueueItem } from '../../api/planetApi';
 import type { OwnedPlanet } from '../../api/worldApi';
 import { useApi } from '../../api/useApi';
@@ -9,10 +9,10 @@ import { Link } from '../../router/Router';
 import { useSession } from '../../session/useSession';
 import { useTexts } from '../../texts/useTexts';
 import { BodyIdentity, Deposits, FactBar } from './CivilizationParts';
-import { CivShell } from './CivShell';
 import { BuildingQueue } from './BuildingQueue';
 import { EnergyPanel } from './PlanetPanels';
 import { formatNumber, fullestResource, namer } from './planetText';
+import { PlaceholderBlock } from './PlaceholderBlock';
 import { ProcessesPanel } from './ProcessesPanel';
 import { ProductionPanel } from './ProductionPanel';
 import { ResearchPanel } from './ResearchPanel';
@@ -21,6 +21,7 @@ import { useEconomy } from './useEconomy';
 import { usePlanet } from './usePlanet';
 import { useResourceGroups } from './useResourceGroups';
 import { useResourceNames } from './useResourceNames';
+import { useCurrentPlanetId, useShellActions } from './useShell';
 
 /**
  * The screen of the civilization (task 00010): the bodies of the player with their real
@@ -35,6 +36,7 @@ import { useResourceNames } from './useResourceNames';
  */
 export function GamePage() {
   const { t } = useI18n();
+  const { text } = useTexts();
   const { session } = useSession();
 
   if (session.status !== 'signed-in') {
@@ -42,25 +44,30 @@ export function GamePage() {
   }
 
   return (
-    <CivShell active="overview">
-      <div className="civ-main__in">
-        <div className="civ-main__head">
-          <h1>{t('player.game.title', { nickname: session.me.nickname })}</h1>
-          <p className="lead">{t('civ.lead')}</p>
-          <h2 className="civ-main__title">{t('civ.planets')}</h2>
-          {session.me.emailConfirmed ? (
-            <Link className="btn btn--secondary" to={routes.planet}>
-              {t('player.game.build')}
-            </Link>
-          ) : (
-            <button className="btn btn--secondary" disabled title={t('player.game.locked')} type="button">
-              {t('player.game.build')}
-            </button>
-          )}
-        </div>
-        <CivBodies />
+    <div className="civ-main__in">
+      <div className="civ-main__head">
+        <h1>{t('player.game.title', { nickname: session.me.nickname })}</h1>
+        {session.me.civilization ? (
+          <p className="meta">{t('civ.race', { race: text(session.me.civilization.raceNameKey) ?? session.me.civilization.raceNameKey })}</p>
+        ) : null}
+        <p className="lead">{t('civ.lead')}</p>
+        <h2 className="civ-main__title">{t('civ.planets')}</h2>
+        {session.me.emailConfirmed ? (
+          <Link className="btn btn--secondary" to={routes.planet}>
+            {t('player.game.build')}
+          </Link>
+        ) : (
+          <button className="btn btn--secondary" disabled title={t('player.game.locked')} type="button">
+            {t('player.game.build')}
+          </button>
+        )}
       </div>
-    </CivShell>
+      <div className="civ-aside">
+        <PlaceholderBlock reason={t('civ.notificationsSoon')} rows={2} title={t('civ.notifications')} />
+        <PlaceholderBlock reason={t('civ.fleetsSoon')} rows={2} title={t('civ.fleets')} />
+      </div>
+      <CivBodies />
+    </div>
   );
 }
 
@@ -70,12 +77,12 @@ export function GamePage() {
 function CivBodies() {
   const { t } = useI18n();
   const { text } = useTexts();
-  const [selected, setSelected] = useState<number | null>(null);
+  const { selectPlanet } = useShellActions();
   const { bodies, reference, loaded, failed } = useBodies();
   const names = useResourceNames(reference, text);
   const groups = useResourceGroups(reference);
   const types = useMemo(() => new Map((reference?.objectTypes ?? []).map((type) => [type.id, type])), [reference]);
-  const current = selected ?? bodies[0]?.planetId ?? null;
+  const current = useCurrentPlanetId();
 
   return (
     <div className="civ-main__in">
@@ -97,7 +104,7 @@ function CivBodies() {
               groups={groups}
               key={planet.planetId}
               names={names}
-              onSelect={() => setSelected(planet.planetId)}
+              onSelect={selectPlanet}
               planet={planet}
               type={types.get(planet.objectTypeId) ?? null}
             />
@@ -112,7 +119,7 @@ function CivBodies() {
  * A card of a body: the picture with the type and the place, the real data of the body and
  * the queues and the panels that the server has.
  */
-function BodyCard({
+const BodyCard = memo(function BodyCard({
   planet,
   type,
   names,
@@ -125,7 +132,7 @@ function BodyCard({
   names: (id: number) => string;
   groups: (id: number) => string | null;
   current: boolean;
-  onSelect: () => void;
+  onSelect: (planetId: number) => void;
 }) {
   const { t, language } = useI18n();
   const { text } = useTexts();
@@ -145,14 +152,18 @@ function BodyCard({
   const stored = storage?.amount ?? 0;
   const capacity = storage?.capacity ?? 0;
   const energy = data?.energy ?? null;
-  const balance = energy?.balance ?? 0;
+  const output = energy?.output ?? 0;
   const consumption = energy?.consumption ?? 0;
+  const deficit = energy !== null && energy.balance < 0;
+  // The badge on the picture of the body, as in the design: what needs the attention of the player.
+  const badge = storage?.isFull ? { tone: 'warning' as const, text: t('civ.alert.storageFull') } : deficit ? { tone: 'warning' as const, text: t('civ.energyDeficitBadge') } : null;
 
   return (
     <article aria-label={planet.name ?? typeName} className={current ? 'civ-body is-current' : 'civ-body'}>
       <div className="civ-body__id">
         <BodyIdentity
-          onSelect={onSelect}
+          badge={badge}
+          onSelect={() => onSelect(planet.planetId)}
           planet={planet}
           selected={current}
           typeImageKey={type?.imageKey ?? null}
@@ -179,14 +190,14 @@ function BodyCard({
           />
           <FactBar
             label={t('civ.energy')}
-            percent={consumption > 0 ? (balance / consumption) * 100 : balance > 0 ? 100 : 0}
+            percent={output > 0 ? (consumption / output) * 100 : consumption > 0 ? 100 : 0}
             tone="energy"
             value={
               energy
-                ? `${formatNumber(balance, language)} / ${formatNumber(consumption, language)}${balance < consumption ? ` · ${t('civ.deficit')} ${formatNumber(consumption - balance, language)}` : ''}`
+                ? `${formatNumber(consumption, language)} / ${formatNumber(output, language)}${deficit ? ` · ${t('civ.deficit')} ${formatNumber(consumption - output, language)}` : ''}`
                 : t('civ.noData')
             }
-            warning={energy !== null && balance < consumption}
+            warning={deficit}
           />
           <FactBar
             label={storage && data ? `${t('civ.storage')} · ${namer(data, language, text).resource(storage.resourceTypeId)}` : t('civ.storage')}
@@ -207,7 +218,14 @@ function BodyCard({
           <>
             <EnergyPanel planet={data} />
             <BuildingQueue
+              action={
+                <Link className="btn btn--secondary" onClick={() => onSelect(planet.planetId)} to={routes.planetBuild}>
+                  + {t('civ.addBuilding')}
+                </Link>
+              }
               busy={false}
+              collect={{ label: t('civ.collect'), reason: t('civ.collectSoon') }}
+              emptyText={t('civ.queueEmpty')}
               names={namer(data, language, text)}
               onCancel={onCancel}
               onFinished={() => void reload()}
@@ -246,6 +264,7 @@ function BodyCard({
             <ResearchPanel planetId={planet.planetId} />
             <ProductionPanel planetId={planet.planetId} />
             <ProcessesPanel planetId={planet.planetId} />
+            <PlaceholderBlock reason={t('civ.activitySoon')} rows={2} title={t('civ.activity')} />
           </>
         ) : (
           <p className="meta">{t('civ.lockedUntilConfirmed')}</p>
@@ -253,4 +272,4 @@ function BodyCard({
       </div>
     </article>
   );
-}
+});

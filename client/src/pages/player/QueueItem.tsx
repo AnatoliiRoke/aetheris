@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../../i18n/useI18n';
 import { clockTickMs } from './clock';
 import { formatDuration } from './planetText';
+import { reportRender } from './renderProbe';
 
 /**
  * A record of a queue as the standard queue shows it. A queue of the buildings and a queue of
@@ -23,6 +24,11 @@ export interface QueueEntry {
   details: string;
   /** The label of the cancel button for a screen reader. */
   cancelLabel: string;
+  /**
+   * Whether the record cannot be cancelled once its time has run out: a building or a research
+   * is finished by the server then, while a batch of a factory still has units to cancel.
+   */
+  locksCancelWhenDue?: boolean;
 }
 
 const millisecondsPerSecond = 1000;
@@ -92,9 +98,13 @@ export function QueueItem({
   onCancel: (id: number) => void;
   onFinished: () => void;
 }) {
+  reportRender('QueueItem');
+
   const { t, language } = useI18n();
   const secondsLeft = useSecondsLeft(entry.deadline, onFinished);
   const total = Math.max(entry.durationSeconds, 1);
+  // A record whose time has run out is being finished by the server: it cannot be cancelled any more.
+  const isFinishing = entry.locksCancelWhenDue === true && secondsLeft !== null && secondsLeft <= 0;
   const percent = secondsLeft === null ? 0 : Math.max(0, Math.min(fullPercent, (1 - secondsLeft / total) * fullPercent));
 
   return (
@@ -121,9 +131,40 @@ export function QueueItem({
           </div>
         )}
       </div>
-      <button className="btn btn--secondary" disabled={busy} title={entry.cancelLabel} aria-label={entry.cancelLabel} type="button" onClick={() => onCancel(entry.id)}>
+      <button
+        aria-label={entry.cancelLabel}
+        className="btn btn--secondary"
+        disabled={busy || isFinishing}
+        title={isFinishing ? t('queue.finishingNoCancel') : entry.cancelLabel}
+        type="button"
+        onClick={() => onCancel(entry.id)}
+      >
         {t('planet.queueCancel')}
       </button>
     </li>
   );
+}
+
+/**
+ * The time left to a moment, ticking on its own, for the tile of a technology that is under
+ * way. The record of the queue above it asks the server when the time runs out, so this one
+ * only shows the time.
+ *
+ * @param deadline The moment the record ends on the clock of the browser, in milliseconds.
+ */
+export function Countdown({ deadline }: { deadline: number }) {
+  const { t, language } = useI18n();
+  const secondsLeft = useSecondsLeft(deadline, noop);
+
+  return secondsLeft !== null && secondsLeft > 0 ? (
+    <span className="num" role="timer">
+      {formatDuration(language, secondsLeft)}
+    </span>
+  ) : (
+    <span>{t('planet.finishing')}</span>
+  );
+}
+
+function noop() {
+  // The record of the queue reads the server again; the tile only shows the time.
 }

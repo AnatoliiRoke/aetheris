@@ -87,10 +87,18 @@ describe('PopulationPanel', () => {
 
     const header = await screen.findByRole('banner');
 
-    expect(await within(header).findByText('(0/год)')).toBeInTheDocument();
+    // The credits are a counter of the header: the value is zero, not a dash, and the hint carries the income.
+    const counter = await waitFor(() => {
+      const found = header.querySelector<HTMLElement>('.civ-counter--credits');
 
-    const badge = within(header).getByText('Кредити').closest('span.badge');
-    expect(badge?.getAttribute('title')).toContain('Кредити: 0');
+      expect(found).not.toBeNull();
+      expect(found!.getAttribute('title')).toContain('Кредити: 0');
+
+      return found!;
+    });
+
+    expect(counter.getAttribute('title')).toContain('Дохід за годину: 0/год');
+    expect(within(counter).getByText('0')).toBeInTheDocument();
   });
 
   it('shows the balance of the credits with the income per hour in the header of the game', async () => {
@@ -98,13 +106,13 @@ describe('PopulationPanel', () => {
 
     const header = await screen.findByRole('banner');
 
-    expect(await within(header).findByText('Кредити')).toBeInTheDocument();
-    expect(within(header).getByText('234')).toBeInTheDocument();
-    expect(within(header).getByText('(+25/год)')).toBeInTheDocument();
+    expect(await within(header).findByText('234')).toBeInTheDocument();
 
-    // The full values stay in the hint of the badge.
-    const badge = within(header).getByText('Кредити').closest('span.badge');
-    expect(badge?.getAttribute('title')).toContain('Дохід за годину: +25');
+    // The name is for a screen reader and the income per hour stays in the hint of the counter.
+    const counter = header.querySelector<HTMLElement>('.civ-counter--credits')!;
+
+    expect(within(counter).getByText('Кредити:')).toBeInTheDocument();
+    expect(counter.getAttribute('title')).toContain('Дохід за годину: +25');
   });
 
   it('shows a placeholder in the header when there are no balances yet', async () => {
@@ -116,6 +124,7 @@ describe('PopulationPanel', () => {
 
     const header = await screen.findByRole('banner');
 
-    await waitFor(() => expect(within(header).getByText('—')).toBeInTheDocument());
+    // The credits have no balance yet: the counter shows a dash, not a made-up number.
+    await waitFor(() => expect(header.querySelector('.civ-counter--credits')).toHaveTextContent('—'));
   });
 });

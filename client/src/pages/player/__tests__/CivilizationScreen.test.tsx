@@ -104,7 +104,8 @@ describe('the screen of the civilization (task 00010)', () => {
     const market = await screen.findByRole('button', { name: 'Ринок' });
 
     expect(market).toBeDisabled();
-    expect(market).toHaveAttribute('title', 'Скоро');
+    // The hint tells the reason, and the reason begins with the word of the placeholder.
+    expect(market.getAttribute('title')).toMatch(/^Скоро: /);
   });
 
   it('keeps the actions closed until the address is confirmed', async () => {

@@ -28,6 +28,8 @@ export interface UnmetRequirement {
   targetLevel: number;
   reasonCode: string;
   targetNameKey: string | null;
+  /** Whether the requirement is out of reach of the next step, so the building is shown as closed. */
+  isClosed: boolean;
 }
 
 /**
@@ -39,6 +41,10 @@ export interface NextLevel {
   costs: ResourceAmount[];
   effects: BuildingEffect[];
   energyBalanceAfter: number;
+  /** The energy the body produces once the queue and this level are done. */
+  energyOutputAfter: number;
+  /** The energy the body consumes once the queue and this level are done. */
+  energyConsumptionAfter: number;
   canEnqueue: boolean;
   reasonCodes: string[];
   unmetRequirements: UnmetRequirement[];
@@ -150,8 +156,8 @@ export interface Planet {
   resourceGroups: NamedItem[];
   /** The name the owner gave the body (task 00020). */
   name: string | null;
-  /** The code of the type of the body; the client reads the name and the picture from the reference table. */
-  typeCode: string | null;
+  /** The type of the body by identifier; the client reads the name and the picture from the reference table. */
+  typeId: number | null;
   /** The place of the body in the galaxy (task 00020). */
   coordinates: PlanetCoordinates | null;
   /** The population of the body now (task 00020). */

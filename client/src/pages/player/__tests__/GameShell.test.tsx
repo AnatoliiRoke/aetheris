@@ -11,7 +11,7 @@ const signedIn = () => fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe())
 const gameRoutes = [
   { path: '/game', current: 'Огляд' },
   { path: '/planet', current: 'Планета' },
-  { path: '/planet/build', current: 'Планета' },
+  { path: '/planet/build', current: 'Будівництво' },
   { path: '/planet/research', current: 'Дослідження' },
   { path: '/planet/storage', current: 'Склад' },
 ];
@@ -52,8 +52,11 @@ describe('the common frame of the screens of the game (task 00020, section 8.1)'
       const { container, unmount } = renderPage(path, { auth: signedIn() });
 
       await waitFor(() => expect(container.querySelector('.civ-side')).not.toBeNull());
-      await waitFor(() => expect(container.querySelector('.civ-bottombar .civ-current strong')).toHaveTextContent('Планет: 1'));
-      await waitFor(() => expect(container.querySelector('.civ-topbar .civ-balances')).not.toBeNull());
+      await waitFor(() => expect(container.querySelectorAll('.civ-bottombar .civ-thumb')).toHaveLength(1));
+      // The header is complete when the balances, the energy and the sign of the race have arrived.
+      await waitFor(() => expect(container.querySelector('.civ-topbar .civ-counter--credits:not(.is-off)')).not.toBeNull());
+      await waitFor(() => expect(container.querySelector('.civ-topbar .civ-counter--energy:not(.is-off)')).not.toBeNull());
+      await waitFor(() => expect(container.querySelector('.civ-topbar .nick .glyph--race-1')).not.toBeNull());
 
       menus.push(menuWithoutMark(container));
       headers.push(container.querySelector('.civ-topbar')!.outerHTML);

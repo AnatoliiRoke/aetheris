@@ -112,6 +112,8 @@ export interface ProductionStock {
   stacks: ProductionStack[];
   storage: ProductionStorage;
   gameNow: string;
+  /** The resources some recipe makes: the produced resources, shown apart from the raw ones on the storage screen. */
+  producedResourceTypeIds: number[];
 }
 
 /**

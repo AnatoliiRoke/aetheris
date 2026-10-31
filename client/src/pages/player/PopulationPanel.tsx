@@ -7,6 +7,7 @@ import { useEconomy } from './useEconomy';
 const secondsPerMinute = 60;
 const secondsPerHour = 3600;
 const secondsPerDay = 86400;
+const fullPercent = 100;
 
 /**
  * The population of a body (task 00015): how many inhabitants it has now, the largest number
@@ -18,6 +19,11 @@ const secondsPerDay = 86400;
 export function PopulationPanel({ planetId }: { planetId: number }) {
   const { t, language } = useI18n();
   const { population, loaded, failed } = useEconomy(planetId);
+  // How full the largest population is, from the two numbers of the server; none without a maximum.
+  const fillPercent =
+    population && Number.isFinite(population.amount) && Number.isFinite(population.maximum) && population.maximum > 0
+      ? Math.min(fullPercent, Math.round((population.amount / population.maximum) * fullPercent))
+      : null;
 
   return (
     <section className="panel" aria-labelledby="population-title">
@@ -33,16 +39,30 @@ export function PopulationPanel({ planetId }: { planetId: number }) {
           {t('population.loading')}
         </p>
       ) : (
-        <dl className="facts">
-          <dt>{t('population.current')}</dt>
-          <dd className="num">{showValue(population?.amount, language)}</dd>
-          <dt>{t('population.maximum')}</dt>
-          <dd className="num">{showValue(population?.maximum, language)}</dd>
-          <dt>{t('population.growth')}</dt>
-          <dd className="num">{growthText(population?.growthPerHour, language)}</dd>
-          <dt>{t('population.timeToMaximum')}</dt>
-          <dd className="num">{timeText(population?.timeToMaximum, language)}</dd>
-        </dl>
+        <>
+          {fillPercent === null ? null : (
+            <div
+              aria-label={t('population.title')}
+              aria-valuemax={fullPercent}
+              aria-valuemin={0}
+              aria-valuenow={fillPercent}
+              className="track"
+              role="progressbar"
+            >
+              <i className="f-accent" style={{ width: `${fillPercent}%` }} />
+            </div>
+          )}
+          <dl className="facts">
+            <dt>{t('population.current')}</dt>
+            <dd className="num">{showValue(population?.amount, language)}</dd>
+            <dt>{t('population.maximum')}</dt>
+            <dd className="num">{showValue(population?.maximum, language)}</dd>
+            <dt>{t('population.growth')}</dt>
+            <dd className="num">{growthText(population?.growthPerHour, language)}</dd>
+            <dt>{t('population.timeToMaximum')}</dt>
+            <dd className="num">{timeText(population?.timeToMaximum, language)}</dd>
+          </dl>
+        </>
       )}
     </section>
   );

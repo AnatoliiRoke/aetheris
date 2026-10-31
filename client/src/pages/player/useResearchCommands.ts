@@ -4,6 +4,7 @@ import { useApi } from '../../api/useApi';
 import { useI18n } from '../../i18n/useI18n';
 import { noticeFromError, type Notice } from './screenNotice';
 import type { ResearchState } from './useResearch';
+import { useShellActions } from './useShell';
 
 /**
  * The commands of the research queue with the message of their result. Every screen that
@@ -16,6 +17,7 @@ import type { ResearchState } from './useResearch';
 export function useResearchCommands(state: ResearchState, fallbackPlanetId: number) {
   const { t, language } = useI18n();
   const { research } = useApi();
+  const { refreshAfterCommand } = useShellActions();
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
 
@@ -31,6 +33,7 @@ export function useResearchCommands(state: ResearchState, fallbackPlanetId: numb
       await state.reload();
     } finally {
       setBusy(false);
+      refreshAfterCommand(state.tree?.selectedPlanetId ?? fallbackPlanetId);
     }
   };
 

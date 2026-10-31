@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CurrencyBalanceFacts, EconomyOverview, PopulationFacts } from '../../api/economyApi';
-import { ApiError } from '../../api/http';
-import { useApi } from '../../api/useApi';
-import { useReloadOnVisible } from './tabVisibility';
+import { useCallback, useEffect } from 'react';
+import type { CurrencyBalanceFacts, PopulationFacts } from '../../api/economyApi';
+import { useShell, useShellSelector } from './useShell';
 
 /**
  * The state of the economy on a page: the balances of the currencies of the civilization and,
@@ -10,7 +8,7 @@ import { useReloadOnVisible } from './tabVisibility';
  */
 export interface EconomyState {
   /** The balances of the currencies of the civilization. */
-  balances: CurrencyBalanceFacts[];
+  balances: readonly CurrencyBalanceFacts[];
   /** The population of the body, or `null` when it has none yet. */
   population: PopulationFacts | null;
   /** Whether the answers of the server have arrived. */
@@ -22,86 +20,31 @@ export interface EconomyState {
 }
 
 /**
- * Reads the economy of the player: the balances of the currencies and, when a body is named,
- * the population of that body. The values grow on the server, so they are read again and again.
+ * Reads the economy of the player from the state the frame shares: the balances and, when a body
+ * is named, the population of that body. The values grow on the server, so they are read again on
+ * the events of the page (the shared watch of the tab, a command), never on a timer.
  */
 export function useEconomy(planetId: number | null = null): EconomyState {
-  const { economy } = useApi();
-  const [balances, setBalances] = useState<CurrencyBalanceFacts[]>([]);
-  const [population, setPopulation] = useState<PopulationFacts | null>(null);
-  const [overviewLoaded, setOverviewLoaded] = useState(false);
-  const [populationLoaded, setPopulationLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const active = useRef(true);
-
-  const applyOverview = useCallback((answer: EconomyOverview) => {
-    if (active.current) {
-      setBalances(answer.balances);
-      setOverviewLoaded(true);
-      setFailed(false);
-    }
-  }, []);
-
-  const applyPopulation = useCallback((facts: PopulationFacts | null) => {
-    if (active.current) {
-      setPopulation(facts);
-      setPopulationLoaded(true);
-    }
-  }, []);
-
-  const applyFailure = useCallback(() => {
-    if (active.current) {
-      setFailed(true);
-    }
-  }, []);
-
-  const reload = useCallback(async () => {
-    const overviewRequest = economy.overview();
-    const populationRequest = planetId === null ? null : economy.population(planetId);
-    const [overviewAnswer, populationAnswer] = await Promise.allSettled([overviewRequest, populationRequest]);
-
-    if (!active.current) {
-      return;
-    }
-
-    if (overviewAnswer.status === 'fulfilled') {
-      applyOverview(overviewAnswer.value);
-    } else {
-      applyFailure();
-    }
-
-    if (planetId === null) {
-      return;
-    }
-
-    if (populationAnswer.status === 'fulfilled' && populationAnswer.value !== null) {
-      applyPopulation(populationAnswer.value);
-      return;
-    }
-
-    applyPopulation(null);
-
-    // The body has no population yet: the server answers 404 and the panel shows a
-    // placeholder, not a made-up number (task 00010).
-    const error = populationAnswer.status === 'rejected' ? populationAnswer.reason : null;
-
-    if (!(error instanceof ApiError && error.status === 404)) {
-      applyFailure();
-    }
-  }, [economy, planetId, applyOverview, applyPopulation, applyFailure]);
+  const { actions } = useShell();
+  const balances = useShellSelector((state) => state.balances);
+  const population = useShellSelector((state) => (planetId === null ? null : state.populations.get(planetId) ?? null));
+  const economyLoaded = useShellSelector((state) => state.economyLoaded);
+  const populationLoaded = useShellSelector((state) => planetId === null || state.populations.has(planetId));
+  const failed = useShellSelector((state) => state.economyFailed);
 
   useEffect(() => {
-    active.current = true;
-    void reload();
+    void actions.loadEconomy();
+  }, [actions]);
 
-    return () => {
-      active.current = false;
-    };
-  }, [reload]);
+  useEffect(() => {
+    if (planetId !== null) {
+      void actions.loadPopulation(planetId);
+    }
+  }, [actions, planetId]);
 
-  useReloadOnVisible(reload);
+  const reload = useCallback(async () => {
+    await Promise.all([actions.loadEconomy(true), planetId === null ? undefined : actions.loadPopulation(planetId, true)]);
+  }, [actions, planetId]);
 
-  const loaded = overviewLoaded && (planetId === null || populationLoaded);
-
-  return { balances, population, loaded, failed, reload };
+  return { balances, population, loaded: economyLoaded && populationLoaded, failed, reload };
 }

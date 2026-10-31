@@ -10,12 +10,10 @@ export interface StorageColumn {
 }
 
 /**
- * A row of a table of the storage: the key and the cells in the order of the columns.
+ * A row of a table of the storage: the key and the cells in the order of the columns, or, for a
+ * heading of a group, the text that spans the whole row.
  */
-export interface StorageRow {
-  key: string | number;
-  cells: ReactNode[];
-}
+export type StorageRow = { key: string | number; cells: ReactNode[] } | { key: string | number; heading: string };
 
 /**
  * A table of the storage screen. On a phone the table scrolls inside its own container, so the
@@ -39,15 +37,23 @@ export function StorageTable({ label, columns, rows }: { label: string; columns:
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.key}>
-              {row.cells.map((cell, index) => (
-                <td className={columns[index]?.numeric ? 'num' : undefined} key={columns[index]?.id ?? index}>
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {rows.map((row) =>
+            'heading' in row ? (
+              <tr className="planet-table__section" key={row.key}>
+                <th colSpan={columns.length} scope="colgroup">
+                  {row.heading}
+                </th>
+              </tr>
+            ) : (
+              <tr key={row.key}>
+                {row.cells.map((cell, index) => (
+                  <td className={columns[index]?.numeric ? 'num' : undefined} key={columns[index]?.id ?? index}>
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ),
+          )}
         </tbody>
       </table>
     </div>

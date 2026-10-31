@@ -38,6 +38,9 @@ describe('the queues of the production and of the processes on /planet', () => {
   it('stands under the research queue, in one column with it, in the standard queue panel', async () => {
     renderPage('/planet', { auth: signedIn() });
 
+    // The queue of the research shows a placeholder panel until its tree arrives: wait for the real one.
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Черга досліджень' })).toHaveClass('queue-panel'));
+
     const research = await screen.findByRole('region', { name: 'Черга досліджень' });
     const production = await screen.findByRole('region', { name: 'Черга виробництва' });
     const processes = await screen.findByRole('region', { name: 'Черга процесів' });

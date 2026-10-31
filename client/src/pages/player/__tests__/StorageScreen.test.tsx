@@ -19,8 +19,8 @@ describe('StoragePage: the screen of the storage (task 00020)', () => {
 
     expect(await screen.findByRole('region', { name: 'Ресурси' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Продукція' })).toBeInTheDocument();
-    expect(await screen.findByRole('region', { name: 'Модулі' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Корпуси' })).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: 'Модулі кораблів' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Корпуси кораблів' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Артефакти' })).toBeInTheDocument();
   });
 
@@ -28,16 +28,19 @@ describe('StoragePage: the screen of the storage (task 00020)', () => {
     renderPage('/planet/storage', { auth: signedIn() });
 
     const block = await screen.findByRole('region', { name: 'Ресурси' });
-    const iron = within(block).getByText('Залізо').closest('li')!;
-    const copper = within(block).getByText('Мідь').closest('li')!;
+    const iron = within(block).getByText('Залізо').closest('tr')!;
+    const copper = within(block).getByText('Мідь').closest('tr')!;
 
-    expect(within(block).getByRole('heading', { name: 'Видобувні' })).toBeInTheDocument();
+    // The columns of the design: the name, the amount, the rate per hour and the fill.
+    expect(within(block).getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['Назва', 'Кількість', 'За годину', 'Заповнення', 'Видобувні']);
     // Every resource has the capacity of its own, so 900 of 10 000 is 9 percent of the iron and
     // 500 of 10 000 is 5 percent of the copper.
     expect(within(iron).getByText('900 / 10 000')).toBeInTheDocument();
     expect(within(iron).getByRole('progressbar', { name: 'Залізо' })).toHaveAttribute('aria-valuenow', '9');
+    expect(within(iron).getByText('9%')).toBeInTheDocument();
     expect(within(copper).getByText('500 / 10 000')).toBeInTheDocument();
     expect(within(copper).getByRole('progressbar', { name: 'Мідь' })).toHaveAttribute('aria-valuenow', '5');
+    expect(within(copper).getByText('5%')).toBeInTheDocument();
   });
 
   it('marks only the full resource with the badge and names it in the alarm', async () => {
@@ -54,14 +57,16 @@ describe('StoragePage: the screen of the storage (task 00020)', () => {
     renderPage('/planet/storage', { auth: signedIn(), planets });
 
     const block = await screen.findByRole('region', { name: 'Ресурси' });
-    const iron = within(block).getByText('Залізо').closest('li')!;
-    const copper = within(block).getByText('Мідь').closest('li')!;
+    const iron = within(block).getByText('Залізо').closest('tr')!;
+    const copper = within(block).getByText('Мідь').closest('tr')!;
 
     expect(within(iron).getByText('Повний')).toBeInTheDocument();
     expect(within(iron).getByText('4 200 / 4 200')).toBeInTheDocument();
     expect(within(copper).queryByText('Повний')).not.toBeInTheDocument();
     expect(within(copper).getByText('0 / 4 200')).toBeInTheDocument();
-    expect(within(block).getByText('Склад заповнений, видобуток зупинено: Залізо')).toBeInTheDocument();
+    // The alarm stands above the tabs with the advice and the way to the construction.
+    const alarm = screen.getByText(/^Склад заповнений, видобуток зупинено: Залізо\. Збудуйте більше місткості\./);
+    expect(within(alarm).getByRole('link', { name: 'До будівництва' })).toHaveAttribute('href', '/planet/build');
   });
 
   it('switches the tabs and shows only the block of the chosen one', async () => {
@@ -73,8 +78,8 @@ describe('StoragePage: the screen of the storage (task 00020)', () => {
     await user.click(screen.getByRole('tab', { name: 'Ресурси' }));
     expect(screen.getByRole('tab', { name: 'Ресурси', selected: true })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Ресурси' })).toBeInTheDocument();
-    expect(screen.queryByRole('region', { name: 'Корпуси' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('region', { name: 'Модулі' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Корпуси кораблів' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Модулі кораблів' })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('tab', { name: 'Модулі' }));
     expect(await screen.findByRole('table', { name: 'Модулі' })).toBeInTheDocument();
@@ -154,8 +159,11 @@ describe('StoragePage: the screen of the storage (task 00020)', () => {
     const user = userEvent.setup();
     renderPage('/planet/storage', { auth: signedIn() });
 
-    for (const name of ['Корпуси', 'Артефакти', 'Продукція']) {
-      await user.click(await screen.findByRole('tab', { name: name }));
+    for (const [tab, name] of [
+      ['Корпуси', 'Корпуси кораблів'],
+      ['Артефакти', 'Артефакти'],
+    ]) {
+      await user.click(await screen.findByRole('tab', { name: tab }));
 
       const block = screen.getByRole('region', { name });
 

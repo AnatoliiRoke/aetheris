@@ -20,6 +20,7 @@ import { useTexts } from '../../texts/useTexts';
 import { formatDuration, formatNumber, lookup } from './planetText';
 import { usePlanet } from './usePlanet';
 import { useProcesses } from './useProcesses';
+import { useShellActions } from './useShell';
 
 /**
  * The prefixes of the error codes of the server that have their own text for the player.
@@ -49,6 +50,7 @@ export function ProcessesPanel({
 }) {
   const { t, language } = useI18n();
   const { processes } = useApi();
+  const { refreshAfterCommand } = useShellActions();
   const { text } = useTexts();
   const { buildings, building, loaded, failed, reload, applyBuilding, selectBuilding } = useProcesses(planetId);
   const { planet } = usePlanet(planetId);
@@ -122,6 +124,7 @@ export function ProcessesPanel({
     } finally {
       setBusy(false);
       onChanged?.();
+      refreshAfterCommand(planetId);
     }
   };
 

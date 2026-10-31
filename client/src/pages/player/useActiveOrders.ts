@@ -5,6 +5,7 @@ import { useApi } from '../../api/useApi';
 import { useI18n } from '../../i18n/useI18n';
 import { noticeFromError, type Notice } from './screenNotice';
 import { useReloadOnVisible } from './tabVisibility';
+import { useShellActions } from './useShell';
 
 /**
  * The prefixes of the error codes of the production that have their own text for the player.
@@ -88,6 +89,7 @@ export function useProductionOrders(planetId: number | null, onChanged: () => vo
   const { production } = useApi();
   const read = useCallback((id: number) => production.orders(id), [production]);
   const state = useOrdersState(planetId, read);
+  const { refreshAfterCommand } = useShellActions();
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
 
@@ -107,6 +109,7 @@ export function useProductionOrders(planetId: number | null, onChanged: () => vo
     } finally {
       await state.reload();
       onChanged();
+      refreshAfterCommand(planetId);
       setBusy(false);
     }
   };
@@ -125,6 +128,7 @@ export function useProcessOrders(planetId: number | null, onChanged: () => void)
   const { processes } = useApi();
   const read = useCallback((id: number) => processes.orders(id), [processes]);
   const state = useOrdersState<ProcessActiveOrder>(planetId, read);
+  const { refreshAfterCommand } = useShellActions();
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
 
@@ -144,6 +148,7 @@ export function useProcessOrders(planetId: number | null, onChanged: () => void)
     } finally {
       await state.reload();
       onChanged();
+      refreshAfterCommand(planetId);
       setBusy(false);
     }
   };

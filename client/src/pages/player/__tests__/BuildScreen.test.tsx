@@ -131,14 +131,14 @@ describe('BuildPage: the screen of the construction (task 00020)', () => {
     expect(screen.queryByRole('region', { name: 'Черга будівництва' })).not.toBeInTheDocument();
   });
 
-  it('draws only the common frame and marks the planet as the current section', async () => {
+  it('draws only the common frame and marks the construction as the current section', async () => {
     const { container } = renderPage('/planet/build', { auth: signedIn() });
 
     await screen.findByRole('region', { name: 'Черга будівництва' });
     await waitFor(() => expect(container.querySelectorAll('header')).toHaveLength(1));
 
     expect(container.querySelectorAll('.civ-side')).toHaveLength(1);
-    expect(within(container.querySelector<HTMLElement>('.civ-side')!).getByRole('link', { current: 'page' })).toHaveTextContent('Планета');
+    expect(within(container.querySelector<HTMLElement>('.civ-side')!).getByRole('link', { current: 'page' })).toHaveTextContent('Будівництво');
   });
 
   it('speaks English with the English names of the categories', async () => {

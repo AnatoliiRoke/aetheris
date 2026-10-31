@@ -1,5 +1,6 @@
 import type { Planet, PlanetResource } from '../../api/planetApi';
 import { Alert } from '../../components/Alert';
+import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 import { formatAmount, type namer } from './planetText';
 
@@ -56,23 +57,32 @@ export function ResourceStorage({ planet, names }: { planet: Planet; names: Name
 }
 
 /**
- * A row of the storage: the name, the bar, and the amount against the capacity of the resource
- * with the badge of a full resource.
+ * A row of the storage: the icon and the name, the bar, and the amount against the capacity of
+ * the resource with the badge of a full resource. A resource whose group has no storage has no
+ * capacity: the row shows the amount alone and says there is no storage, never a full bar.
  */
 function ResourceStorageRow({ resource, names }: { resource: PlanetResource; names: Names }) {
   const { t, language } = useI18n();
   const name = names.resource(resource.resourceTypeId);
-  const percent = resource.capacity > 0 ? Math.min(fullPercent, Math.round((resource.amount / resource.capacity) * fullPercent)) : 0;
+  const hasCapacity = resource.capacity > 0;
+  const percent = hasCapacity ? Math.min(fullPercent, Math.round((resource.amount / resource.capacity) * fullPercent)) : 0;
 
   return (
     <li className="storage-resource">
-      <span className="storage-resource__name">{name}</span>
+      <span className="storage-resource__name">
+        <ResourceIcon groupCode={names.resourceGroupCode(resource.resourceTypeId)} />
+        <span>{name}</span>
+      </span>
       <div aria-label={name} aria-valuemax={fullPercent} aria-valuemin={0} aria-valuenow={percent} className="track" role="progressbar">
         <i className={resource.isFull ? 'f-energy' : 'f-store'} style={{ width: `${percent}%` }} />
       </div>
       <span className="storage-resource__value num">
         {resource.isFull ? <span className="badge badge--warning">{t('planet.storageFullBadge')}</span> : null}
-        <span>{t('planet.storageAmount', { amount: formatAmount(resource.amount, language), capacity: formatAmount(resource.capacity, language) })}</span>
+        {hasCapacity ? (
+          <span>{t('planet.storageAmount', { amount: formatAmount(resource.amount, language), capacity: formatAmount(resource.capacity, language) })}</span>
+        ) : (
+          <span title={t('planet.storageNoCapacityHint')}>{t('planet.storageNoCapacity', { amount: formatAmount(resource.amount, language) })}</span>
+        )}
       </span>
     </li>
   );

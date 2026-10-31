@@ -8,6 +8,7 @@ import { groupByBranch } from './researchTree';
 import { TechnologyCard } from './TechnologyCard';
 import { useResearch } from './useResearch';
 import { useResearchCommands } from './useResearchCommands';
+import { useResourceGroups } from './useResourceGroups';
 import { useResourceNames } from './useResourceNames';
 import { useWorldReference } from './useWorldReference';
 
@@ -25,7 +26,9 @@ export function ResearchPanel({ planetId }: { planetId: number }) {
   const state = useResearch(selectedPlanetId);
   const { tree, receivedAt, failed, reload } = state;
   const { busy, notice, enqueue, cancel } = useResearchCommands(state, planetId);
-  const resourceName = useResourceNames(useWorldReference(), text);
+  const reference = useWorldReference();
+  const resourceName = useResourceNames(reference, text);
+  const resourceGroup = useResourceGroups(reference);
 
   const branches = useMemo(() => groupByBranch(tree), [tree]);
 
@@ -64,6 +67,9 @@ export function ResearchPanel({ planetId }: { planetId: number }) {
                   {technologies.map((technology) => (
                     <TechnologyCard
                       key={technology.id}
+                      branchName={text(nameKey) ?? nameKey}
+                      deadline={null}
+                      resourceGroupCode={resourceGroup}
                       technology={technology}
                       name={text(technology.nameKey) ?? technology.nameKey}
                       description={text(technology.descriptionKey) ?? technology.descriptionKey}

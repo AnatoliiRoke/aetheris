@@ -1,33 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import type { WorldReference } from '../../api/worldApi';
-import { useApi } from '../../api/useApi';
+import { useShell, useShellSelector } from './useShell';
 
 /**
- * Reads the reference tables of the world once: the names and the pictures of the resources and
- * the types of the bodies. The tables do not change while a screen is open.
+ * Reads the reference tables of the world from the state the frame shares: the names and the
+ * pictures of the resources and the types of the bodies. The tables do not change while a screen
+ * is open, so the server is asked once for all the screens.
  *
  * @returns The tables, or `null` while they have not arrived or when the read failed.
  */
 export function useWorldReference(): WorldReference | null {
-  const { world } = useApi();
-  const [reference, setReference] = useState<WorldReference | null>(null);
+  const { actions } = useShell();
+  const reference = useShellSelector((state) => state.reference);
 
   useEffect(() => {
-    let cancelled = false;
-
-    world
-      .reference()
-      .then((tables) => {
-        if (!cancelled) {
-          setReference(tables);
-        }
-      })
-      .catch(() => undefined);
-
-    return () => {
-      cancelled = true;
-    };
-  }, [world]);
+    void actions.loadBodies();
+  }, [actions]);
 
   return reference;
 }

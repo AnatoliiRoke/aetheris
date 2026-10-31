@@ -7,6 +7,7 @@ import { useTexts } from '../../texts/useTexts';
 import { namer } from './planetText';
 import { noticeFromError, type Notice } from './screenNotice';
 import { usePlanet } from './usePlanet';
+import { useCurrentPlanetId } from './useShell';
 
 /**
  * What a screen of a body needs: the body, its names, and the commands of the construction queue
@@ -20,7 +21,8 @@ export function usePlanetScreen() {
   const { planets } = useApi();
   const { text } = useTexts();
   const civilization = session.status === 'signed-in' ? session.me.civilization : null;
-  const { planet, receivedAt, failed, reload, apply } = usePlanet(civilization?.planetId ?? null);
+  const planetId = useCurrentPlanetId();
+  const { planet, receivedAt, failed, reload, apply } = usePlanet(planetId);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const names = useMemo(() => (planet ? namer(planet, language, text) : null), [planet, language, text]);
@@ -41,23 +43,23 @@ export function usePlanetScreen() {
 
   const onEnqueue = (building: Building) =>
     void run(async () => {
-      if (!civilization) {
+      if (planetId === null) {
         return;
       }
 
-      apply(await planets.enqueue(civilization.planetId, building.buildingTypeId));
+      apply(await planets.enqueue(planetId, building.buildingTypeId));
       setNotice({ kind: 'success', text: t('planet.queued', { name: names?.building(building.buildingTypeId) ?? building.nameKey, level: building.next.level }) });
     });
 
   const onCancel = (item: QueueItem) =>
     void run(async () => {
-      if (!civilization) {
+      if (planetId === null) {
         return;
       }
 
-      apply(await planets.cancel(civilization.planetId, item.id));
+      apply(await planets.cancel(planetId, item.id));
       setNotice({ kind: 'success', text: t('planet.cancelled') });
     });
 
-  return { civilization, planet, receivedAt, failed, reload, names, busy, notice, onEnqueue, onCancel };
+  return { civilization, planetId, planet, receivedAt, failed, reload, names, busy, notice, onEnqueue, onCancel };
 }

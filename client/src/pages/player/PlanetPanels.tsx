@@ -1,6 +1,7 @@
 import type { Planet } from '../../api/planetApi';
+import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
-import { formatNumber, namer } from './planetText';
+import { formatNumber, formatSigned, namer } from './planetText';
 import { FullResourcesAlert, ResourceStorage } from './ResourceStorage';
 
 type Names = ReturnType<typeof namer>;
@@ -14,9 +15,12 @@ export function ResourcesPanel({ planet, names }: { planet: Planet; names: Names
 
   return (
     <section className="panel" aria-labelledby="planet-resources">
-      <h2 className="panel__title" id="planet-resources">
-        {t('planet.resources')}
-      </h2>
+      <div className="panel__head">
+        <h2 className="panel__title" id="planet-resources">
+          {t('planet.resources')}
+        </h2>
+        <span className="meta">{t('planet.resourcesSubtitle')}</span>
+      </div>
       <FullResourcesAlert names={names} planet={planet} />
       <div className="planet-table-wrap">
         <table className="planet-table">
@@ -29,7 +33,12 @@ export function ResourcesPanel({ planet, names }: { planet: Planet; names: Names
           <tbody>
             {planet.resources.map((resource) => (
               <tr key={resource.resourceTypeId}>
-                <td>{names.resource(resource.resourceTypeId)}</td>
+                <td>
+                  <span className="resource-name">
+                    <ResourceIcon groupCode={names.resourceGroupCode(resource.resourceTypeId)} />
+                    <span>{names.resource(resource.resourceTypeId)}</span>
+                  </span>
+                </td>
                 <td className="num">{resource.ratePerHour > 0 ? `+${formatNumber(resource.ratePerHour, language)}` : t('planet.notMined')}</td>
               </tr>
             ))}
@@ -75,10 +84,11 @@ export function EnergyPanel({ planet }: { planet: Planet }) {
         <dt>{t('planet.energyConsumption')}</dt>
         <dd className="num">{formatNumber(energy.consumption, language)}</dd>
         <dt>{t('planet.energyBalance')}</dt>
-        <dd className="num">{formatNumber(energy.balance, language)}</dd>
+        <dd className="num">{formatSigned(energy.balance, language)}</dd>
         <dt>{t('planet.energyQueued')}</dt>
-        <dd className="num">{formatNumber(energy.queuedBalance, language)}</dd>
+        <dd className="num">{formatSigned(energy.queuedBalance, language)}</dd>
       </dl>
+      <p className="meta">{t('planet.energyNote')}</p>
     </section>
   );
 }

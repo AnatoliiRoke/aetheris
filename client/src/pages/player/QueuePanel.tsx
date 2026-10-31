@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useI18n } from '../../i18n/useI18n';
 import { QueueItem, type QueueEntry } from './QueueItem';
+import { freeSlotsText } from './planetText';
 
 /**
  * The standard queue of the game (task 00020, section 8.1): the same panel on every screen and
@@ -21,6 +22,7 @@ import { QueueItem, type QueueEntry } from './QueueItem';
  * @param onFinished What to do when the timer of a record runs out.
  * @param action A link or a button beside the heading, for example the way to choose a record.
  * @param footnote A short note under the queue.
+ * @param collect The inactive "collect" button of the design with the reason it is not available yet.
  */
 export function QueuePanel({
   id,
@@ -36,6 +38,7 @@ export function QueuePanel({
   onFinished,
   action,
   footnote,
+  collect,
 }: {
   id: string;
   title: string;
@@ -50,8 +53,9 @@ export function QueuePanel({
   onFinished: () => void;
   action?: ReactNode;
   footnote?: string;
+  collect?: { label: string; reason: string };
 }) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const freeSlots = Math.max(0, total - entries.length);
 
   return (
@@ -60,7 +64,10 @@ export function QueuePanel({
         <h2 className="panel__title" id={id}>
           {title}
         </h2>
-        <span className="meta">{t('planet.queueSlots', { used, total })}</span>
+        <span className="meta">
+          {t('planet.queueSlots', { used, total })}
+          {freeSlots > 0 ? <span className="queue-panel__free">{freeSlotsText(language, t, freeSlots)}</span> : null}
+        </span>
       </div>
       {entries.length === 0 ? <p className="lead">{emptyText}</p> : null}
       <ol className="queue-list">
@@ -82,6 +89,11 @@ export function QueuePanel({
         ))}
       </ol>
       {action}
+      {collect ? (
+        <button className="btn btn--secondary queue-panel__collect" disabled title={collect.reason} type="button">
+          {collect.label}
+        </button>
+      ) : null}
       {footnote ? <p className="meta">{footnote}</p> : null}
     </section>
   );

@@ -1,63 +1,76 @@
-import type { ReactNode } from 'react';
-import { GameIcon, type GameIconName } from '../../components/GameIcon';
+import { memo, Suspense, useEffect, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/useI18n';
-import type { MessageKey } from '../../i18n/uk';
-import { routes } from '../../router/context';
-import { Link } from '../../router/Router';
 import { CivFooter } from './CivFooter';
 import { CivHeader } from './CivHeader';
 import { CivMenu } from './CivMenu';
+import { CivTabbar } from './CivTabbar';
 import { EmailBanner } from './EmailBanner';
+import { reportRender } from './renderProbe';
+import { useCurrentPlanetId, useShellActions } from './useShell';
+
+const Banner = memo(EmailBanner);
 
 /**
- * The tabs of the phone: the sections of the menu that the player reaches most.
+ * Reads what the frame shows once: the economy, the bodies with the reference tables, the races
+ * and the current body. The same reads that a page asks for are one request, because the shared
+ * state does not send a read that is under way again.
  */
-const tabItems: { id: string; icon: GameIconName; label: MessageKey; route?: string }[] = [
-  { id: 'overview', icon: 'overview', label: 'civ.nav.overview', route: routes.game },
-  { id: 'planet', icon: 'planet', label: 'civ.nav.planet', route: routes.planet },
-  { id: 'storage', icon: 'box', label: 'civ.nav.storage', route: routes.planetStorage },
-  { id: 'production', icon: 'production', label: 'civ.nav.production', route: routes.planetBuild },
-];
+const ShellLoader = memo(function ShellLoader() {
+  const actions = useShellActions();
+  const planetId = useCurrentPlanetId();
+
+  useEffect(() => {
+    void actions.loadEconomy();
+    void actions.loadBodies();
+    void actions.loadRaces();
+  }, [actions]);
+
+  useEffect(() => {
+    if (planetId !== null) {
+      void actions.loadPlanet(planetId);
+    }
+  }, [actions, planetId]);
+
+  return null;
+});
 
 /**
- * The frame of the screens of the game (task 00020, section 8.1): the header with the
- * resources and the balances, the menu on the left, the bottom bar and the tabs of the
- * phone.
+ * The frame of the screens of the game (task 00020, section 8.1): the header, the menu on the left,
+ * the bottom bar and the tabs of the phone around the content of a page.
  *
- * The frame is the same on every screen of the game: a screen gives it its own content and
- * says which section of the menu is the current one, тож the player always finds the
- * resources, the money and the menu in the same place.
+ * The frame is the same on every screen and stands above the pages in the route, so it stays
+ * mounted when the player goes from one screen to another: its data is not read again and its
+ * blocks are not drawn again. A page gives it only its own content; the current section of the menu
+ * comes from the address.
  *
- * @param active The section of the menu the screen belongs to.
  * @param children The content of the screen.
  */
-export function CivShell({ active, children }: { active: string; children: ReactNode }) {
+export function CivShell({ children }: { children: ReactNode }) {
+  reportRender('CivShell');
+
   const { t } = useI18n();
 
   return (
     <div className="civ">
+      <ShellLoader />
       <CivHeader />
-      <EmailBanner />
+      <Banner />
       <div className="civ__body">
-        <CivMenu active={active} />
-        <main className="civ__main">{children}</main>
+        <CivMenu />
+        <main className="civ__main">
+          <Suspense
+            fallback={
+              <p className="lead" role="status">
+                {t('common.loading')}
+              </p>
+            }
+          >
+            {children}
+          </Suspense>
+        </main>
       </div>
       <CivFooter />
-      <nav aria-label={t('civ.gameMenu')} className="civ-tabbar">
-        {tabItems.map((item) =>
-          item.route ? (
-            <Link aria-current={item.id === active ? 'page' : undefined} key={item.id} to={item.route}>
-              <GameIcon name={item.icon} size={22} />
-              <span>{t(item.label)}</span>
-            </Link>
-          ) : (
-            <span aria-disabled="true" className="is-off" key={item.id}>
-              <GameIcon name={item.icon} size={22} />
-              <span>{t(item.label)}</span>
-            </span>
-          ),
-        )}
-      </nav>
+      <CivTabbar />
     </div>
   );
 }

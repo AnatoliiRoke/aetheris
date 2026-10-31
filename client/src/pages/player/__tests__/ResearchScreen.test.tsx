@@ -69,8 +69,11 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
 
     const tile = (await screen.findByRole('heading', { name: 'Глибинний видобуток' })).closest('li')!;
     expect(within(tile).getByText('Шахти видобувають більше металів.')).toBeInTheDocument();
-    expect(within(tile).getByText('Видобуток металів ×1,05')).toBeInTheDocument();
-    expect(within(tile).getByText('Залізо 200')).toBeInTheDocument();
+    // The effect now (nothing learned yet) and what the next level adds, from the server's numbers.
+    expect(within(tile).getByText('Видобуток металів')).toBeInTheDocument();
+    expect(within(tile).getByText('+5% / рівень')).toBeInTheDocument();
+    expect(within(tile).getByText('Залізо')).toBeInTheDocument();
+    expect(within(tile).getByText('200')).toBeInTheDocument();
     expect(within(tile).getByText('0:05:00')).toBeInTheDocument();
     expect(within(tile).getByRole('button', { name: 'Дослідити' })).toBeEnabled();
   });
@@ -133,14 +136,15 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     renderPage('/planet/research', { auth: signedIn(), research: fakeResearchApi({ tree: vi.fn().mockResolvedValue(tree()) }), ...texts });
 
     await screen.findByRole('heading', { name: 'Глибинний видобуток' });
-    const filter = screen.getByRole('combobox', { name: 'Стан' });
+    const filter = screen.getByRole('group', { name: 'Стан' });
 
-    await user.selectOptions(filter, 'learned');
+    await user.click(within(filter).getByRole('button', { name: 'Вивчені' }));
+    expect(within(filter).getByRole('button', { name: 'Вивчені' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('heading', { name: 'Логістика складів' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Глибинний видобуток' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Плазмова енергетика' })).not.toBeInTheDocument();
 
-    await user.selectOptions(filter, 'all');
+    await user.click(within(filter).getByRole('button', { name: 'Усі' }));
     expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(3);
   });
 
@@ -201,6 +205,6 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Research' })).toBeInTheDocument();
     expect(await screen.findByRole('region', { name: 'Research queue' })).toBeInTheDocument();
     expect(await screen.findByRole('searchbox', { name: 'Search for a technology' })).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'State' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'State' })).toBeInTheDocument();
   });
 });

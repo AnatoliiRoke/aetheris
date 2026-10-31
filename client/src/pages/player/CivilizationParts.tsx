@@ -1,6 +1,6 @@
 import { artImage } from '../../assets/images';
 import type { OwnedPlanet } from '../../api/worldApi';
-import { ResourceIcon } from '../../components/GameIcon';
+import { GameIcon, ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 
 /**
@@ -13,7 +13,7 @@ export function BodyArt({ imageKey, name }: { imageKey: string | null | undefine
   const source = artImage(imageKey);
 
   return source ? (
-    <img alt="" className="body-art__image" height={116} src={source} width={116} />
+    <img alt="" className="body-art__image" height={116} loading="lazy" src={source} width={116} />
   ) : (
     <span aria-hidden="true" className="body-art__placeholder">
       {name.slice(0, 1)}
@@ -103,6 +103,7 @@ export function FactBar({
  * @param typeName The name of the type of the body.
  * @param typeImageKey The key of the picture of the type.
  * @param selected Whether the body is the chosen one.
+ * @param badge What needs the attention of the player, shown on the picture, or `null`.
  * @param onSelect What to do when the body is chosen.
  */
 export function BodyIdentity({
@@ -110,12 +111,14 @@ export function BodyIdentity({
   typeName,
   typeImageKey,
   selected,
+  badge = null,
   onSelect,
 }: {
   planet: OwnedPlanet;
   typeName: string;
   typeImageKey: string | null;
   selected: boolean;
+  badge?: { tone: 'warning' | 'danger'; text: string } | null;
   onSelect: () => void;
 }) {
   const { t } = useI18n();
@@ -124,6 +127,12 @@ export function BodyIdentity({
     <div className="body-id">
       <div className="body-art">
         <BodyArt imageKey={typeImageKey} name={planet.name ?? typeName} />
+        {badge ? (
+          <span className={`body-badge body-badge--${badge.tone}`} role="status">
+            <GameIcon name="warn" size={13} />
+            {badge.text}
+          </span>
+        ) : null}
         {selected ? <span className="body-sel">{t('civ.selected')}</span> : null}
       </div>
       <div className="body-meta">

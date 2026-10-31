@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Planet } from '../../api/planetApi';
-import { useApi } from '../../api/useApi';
-import { useReloadOnVisible } from './tabVisibility';
+import { useShell, useShellSelector } from './useShell';
 
 /**
  * The state of a body on a page: the last answer of the server and the moment it came.
@@ -15,47 +14,36 @@ export interface PlanetState {
 }
 
 /**
- * Reads a body, reads it again on the events of the page and takes the answers of the commands.
+ * Reads a body from the state the frame shares: the body is asked for once for the header and
+ * for every page, and it is read again only on the events of the page or after a command. The
+ * answers of the commands are taken through `apply`.
  */
 export function usePlanet(planetId: number | null): PlanetState {
-  const { planets } = useApi();
-  const [planet, setPlanet] = useState<Planet | null>(null);
-  const [receivedAt, setReceivedAt] = useState(() => Date.now());
-  const [failed, setFailed] = useState(false);
-  const active = useRef(true);
-
-  const apply = useCallback((next: Planet) => {
-    if (active.current) {
-      setPlanet(next);
-      setReceivedAt(Date.now());
-      setFailed(false);
-    }
-  }, []);
+  const { actions } = useShell();
+  const entry = useShellSelector((state) => (planetId === null ? null : state.planets.get(planetId) ?? null));
+  const failed = useShellSelector((state) => planetId !== null && state.failedPlanetIds.includes(planetId));
+  const [fallbackTime] = useState(() => Date.now());
 
   const reload = useCallback(async () => {
-    if (planetId === null) {
-      return;
+    if (planetId !== null) {
+      await actions.loadPlanet(planetId, true);
     }
+  }, [actions, planetId]);
 
-    try {
-      apply(await planets.planet(planetId));
-    } catch {
-      if (active.current) {
-        setFailed(true);
+  const apply = useCallback(
+    (next: Planet) => {
+      if (planetId !== null) {
+        actions.applyPlanet(planetId, next);
       }
-    }
-  }, [planetId, planets, apply]);
+    },
+    [actions, planetId],
+  );
 
   useEffect(() => {
-    active.current = true;
-    void reload();
+    if (planetId !== null) {
+      void actions.loadPlanet(planetId);
+    }
+  }, [actions, planetId]);
 
-    return () => {
-      active.current = false;
-    };
-  }, [reload]);
-
-  useReloadOnVisible(reload);
-
-  return { planet, receivedAt, failed, reload, apply };
+  return { planet: entry?.planet ?? null, receivedAt: entry?.receivedAt ?? fallbackTime, failed, reload, apply };
 }

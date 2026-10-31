@@ -21,6 +21,8 @@ export interface TechnologyLevel {
   costs: ResourceAmount[];
   effects: TechnologyEffect[];
   unmetRequirementIds: number[];
+  /** For the next level the player can research: what the selected body is short of, by how much; empty for other levels. */
+  missingResources: ResourceAmount[];
 }
 
 /**
@@ -52,6 +54,8 @@ export interface Technology {
   availableCenterLevel: number;
   reasonCode: string | null;
   levels: TechnologyLevel[];
+  /** What the technology gives at the level learned, as the server counts it; empty while nothing is learned. */
+  currentEffects: TechnologyEffect[];
 }
 
 /**

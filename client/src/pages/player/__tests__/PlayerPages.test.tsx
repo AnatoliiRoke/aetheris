@@ -75,7 +75,8 @@ describe('GamePage', () => {
     renderPage('/game', { auth });
 
     expect(await screen.findByText('Підтверди пошту')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Будівництво' })).toBeDisabled();
+    // The screen is loaded on demand, so its button comes a moment after the frame.
+    expect(await screen.findByRole('button', { name: 'Будівництво' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Ринок' })).toBeDisabled();
 
     await user.click(screen.getByRole('button', { name: 'Надіслати лист ще раз' }));
@@ -89,7 +90,7 @@ describe('GamePage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Вітаємо, Pilot' })).toBeInTheDocument();
     // The planets come with a separate request, so wait for them before the check of the banner.
-    expect(await screen.findByText('Nova')).toBeInTheDocument();
+    expect(await screen.findByRole('article', { name: 'Nova' })).toBeInTheDocument();
     expect(screen.queryByText('Підтверди пошту')).not.toBeInTheDocument();
   });
 

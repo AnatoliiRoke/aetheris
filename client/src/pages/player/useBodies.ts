@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import type { OwnedPlanet, WorldReference } from '../../api/worldApi';
-import { useApi } from '../../api/useApi';
-import { useReloadOnVisible } from './tabVisibility';
+import { useShell, useShellSelector } from './useShell';
 
 /**
  * The state of the bodies of the player on a screen: the bodies themselves and the reference
@@ -9,7 +8,7 @@ import { useReloadOnVisible } from './tabVisibility';
  */
 export interface BodiesState {
   /** The bodies of the player. */
-  bodies: OwnedPlanet[];
+  bodies: readonly OwnedPlanet[];
   /** The reference tables of the world, or `null` when they have not arrived. */
   reference: WorldReference | null;
   /** Whether the answers of the server have arrived. */
@@ -21,53 +20,22 @@ export interface BodiesState {
 }
 
 /**
- * Reads the bodies of the player and the reference tables of the world, and reads them again on the events of the page.
- * The tables never change while the screen is open, so they are read once.
+ * Reads the bodies of the player and the reference tables of the world from the state the frame
+ * shares, so the bottom bar and the screens ask the server once. The tables never change while
+ * the screen is open, so they are read once.
  */
 export function useBodies(): BodiesState {
-  const { world } = useApi();
-  const [bodies, setBodies] = useState<OwnedPlanet[]>([]);
-  const [reference, setReference] = useState<WorldReference | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const active = useRef(true);
-
-  const apply = useCallback((answer: OwnedPlanet[], tables: WorldReference) => {
-    if (active.current) {
-      setBodies(answer);
-      setReference(tables);
-      setLoaded(true);
-      setFailed(false);
-    }
-  }, []);
-
-  const applyFailure = useCallback(() => {
-    if (active.current) {
-      setFailed(true);
-      setLoaded(true);
-    }
-  }, []);
-
-  const reload = useCallback(async () => {
-    try {
-      const [answer, tables] = await Promise.all([world.planets(), world.reference()]);
-
-      apply(answer, tables);
-    } catch {
-      applyFailure();
-    }
-  }, [world, apply, applyFailure]);
+  const { actions } = useShell();
+  const bodies = useShellSelector((state) => state.bodies);
+  const reference = useShellSelector((state) => state.reference);
+  const loaded = useShellSelector((state) => state.bodiesLoaded);
+  const failed = useShellSelector((state) => state.bodiesFailed);
 
   useEffect(() => {
-    active.current = true;
-    void reload();
+    void actions.loadBodies();
+  }, [actions]);
 
-    return () => {
-      active.current = false;
-    };
-  }, [reload]);
-
-  useReloadOnVisible(reload);
+  const reload = useCallback(() => actions.loadBodies(true), [actions]);
 
   return { bodies, reference, loaded, failed, reload };
 }

@@ -13,21 +13,46 @@ const styleRoot = join(process.cwd(), 'src', 'styles');
 /**
  * The files that the task 00010 brought or changed.
  */
-const newFiles = ['GamePage.tsx', 'CivilizationParts.tsx', 'useBodies.ts', 'useResourceNames.ts', 'useResourceGroups.ts'];
+const newFiles = [
+  'GamePage.tsx',
+  'CivilizationParts.tsx',
+  'useBodies.ts',
+  'useResourceNames.ts',
+  'useResourceGroups.ts',
+  'CivShell.tsx',
+  'CivHeader.tsx',
+  'CivHeaderParts.tsx',
+  'CivMenu.tsx',
+  'CivTabbar.tsx',
+  'CivFooter.tsx',
+  'civMenuItems.ts',
+  'shellStore.ts',
+  'useShell.ts',
+  'ShellProvider.tsx',
+];
 const newStyles = ['civilization.css'];
 
 /**
- * The words of the colours and the sizes of a line of a style sheet: the custom properties,
- * the class names and the values, the comments aside.
+ * The colour a line of a style sheet writes by itself: a hex value or a function of colour. The
+ * translucent surfaces are written with `color-mix` over the tokens, so a style sheet carries no
+ * colour of its own.
  */
-function styleWords(line: string): string[] {
-  return line
-    .replace(/\/\*.*?\*\//g, '')
-    .split(/[^a-z0-9-]+/)
-    .filter((word) => word.length > 0);
+function colourIn(line: string): string | undefined {
+  const code = line.replace(/\/\*.*?\*\//g, '');
+
+  return (
+    /#(?:[0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3,4})\b/i.exec(code)?.[0] ?? /\b(?:rgb|rgba|hsl|hsla|hwb|lab|lch|oklab|oklch)\(/i.exec(code)?.[0]
+  );
 }
 
 describe('the screen of the civilization uses the tokens only (task 00010, acceptance criterion 3)', () => {
+  it('finds a colour written in a style sheet and lets a mix of the tokens pass', () => {
+    expect(colourIn('.a { background: rgba(7, 11, 22, 0.92); }')).toBe('rgba(');
+    expect(colourIn('.a { color: #2EC4C4; }')).toBe('#2EC4C4');
+    expect(colourIn('.a { background: color-mix(in srgb, var(--bg-0) 92%, transparent); }')).toBeUndefined();
+    expect(colourIn('.a { color: var(--accent); } /* rgba(0, 0, 0, 0.5) in a comment */')).toBeUndefined();
+  });
+
   it('has no hard-wired colour in the new style sheet', () => {
     const findings: string[] = [];
 
@@ -37,12 +62,10 @@ describe('the screen of the civilization uses the tokens only (task 00010, accep
       readFileSync(file, 'utf8')
         .split('\n')
         .forEach((line, index) => {
-          const words = styleWords(line);
-          const hex = words.find((word) => /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(word));
-          const rgb = words.find((word) => /^(?:rgb|rgba|hsl|hsla)\d+$/i.test(word));
+          const found = colourIn(line);
 
-          if (hex || rgb) {
-            findings.push(`${relative(process.cwd(), file)}:${index + 1}: '${hex ?? rgb}'`);
+          if (found) {
+            findings.push(`${relative(process.cwd(), file)}:${index + 1}: '${found}'`);
           }
         });
     }

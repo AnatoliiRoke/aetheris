@@ -1,5 +1,5 @@
 import type { BuildingEffect, Planet, PlanetResource, ResourceAmount, UnmetRequirement } from '../../api/planetApi';
-import { dictionaries, format, type Language, type MessageParams } from '../../i18n/context';
+import { dictionaries, format, type I18nValue, type Language, type MessageParams } from '../../i18n/context';
 import type { MessageKey } from '../../i18n/uk';
 import type { EntityText } from '../../texts/context';
 
@@ -48,6 +48,12 @@ export function namer(planet: Planet, language: Language, entities: EntityText) 
     resource: (id: number | null) => name(id === null ? undefined : resources.get(id)?.nameKey, id),
     group: (id: number | null) => name(id === null ? undefined : groups.get(id)?.nameKey, id),
     building: (id: number) => name(buildings.get(id)?.nameKey, id),
+    /** The code of the group of a resource, for its icon; `null` when the resource has no group. */
+    resourceGroupCode: (id: number): string | null => {
+      const groupId = resources.get(id)?.resourceGroupId;
+
+      return groupId === null || groupId === undefined ? null : (groups.get(groupId)?.code ?? null);
+    },
     amounts: (amounts: ResourceAmount[]) =>
       amounts.map((amount) => `${name(resources.get(amount.resourceTypeId)?.nameKey, amount.resourceTypeId)} ${formatNumber(amount.amount, language)}`).join(', '),
   };
@@ -174,4 +180,27 @@ export function deadlineFor(gameNow: string, timeMultiplier: number, finishesAt:
   const multiplier = timeMultiplier > 0 ? timeMultiplier : 1;
 
   return receivedAt + (Date.parse(finishesAt) - Date.parse(gameNow)) / multiplier;
+}
+
+/**
+ * A number with its sign, a plus for a gain and a minus for a loss, zero without a sign: an
+ * energy balance of "+70" or "-5".
+ */
+export function formatSigned(value: number, language: Language): string {
+  return new Intl.NumberFormat(language === 'uk' ? 'uk-UA' : 'en-GB', { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(value);
+}
+
+/**
+ * The note of the free places of a queue, "+1 slot available", in the plural form of the
+ * language.
+ *
+ * @param language The language.
+ * @param t The translation function.
+ * @param count How many places are free.
+ */
+export function freeSlotsText(language: Language, t: I18nValue['t'], count: number): string {
+  const category = new Intl.PluralRules(language === 'uk' ? 'uk-UA' : 'en-GB').select(count);
+  const key = category === 'one' ? 'queue.slotsFree.one' : category === 'few' ? 'queue.slotsFree.few' : category === 'many' ? 'queue.slotsFree.many' : 'queue.slotsFree.other';
+
+  return t(key, { count });
 }

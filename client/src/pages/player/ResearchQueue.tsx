@@ -56,6 +56,7 @@ export function ResearchQueue({
       durationSeconds: (level?.durationSeconds ?? 0) / multiplier,
       details: item.costs.map((cost) => `${resourceName(cost.resourceTypeId)} ${formatNumber(cost.amount, language)}`).join(', '),
       cancelLabel: t('research.cancelLabel', { name, level: item.targetLevel }),
+      locksCancelWhenDue: true,
     };
   });
 
