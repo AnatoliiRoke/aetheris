@@ -14,6 +14,7 @@ import { ProcessQueue } from './ProcessQueue';
 import { ProductionPanel } from './ProductionPanel';
 import { ProductionQueue } from './ProductionQueue';
 import { ResearchQueue } from './ResearchQueue';
+import { galaxyPlace } from './planetText';
 import { ScreenHead } from './ScreenHead';
 import { useProcessOrders, useProductionOrders } from './useActiveOrders';
 import { useResearch } from './useResearch';
@@ -66,8 +67,10 @@ export function PlanetPage() {
   return (
     <div className="civ-main__in">
       <ScreenHead
-        subtitle={planet?.coordinates ? `${typeName} · ${t('civ.sector')} ${planet.coordinates.sectorId} · ${t('civ.system')} ${planet.coordinates.systemId}` : undefined}
-        title={t('planet.title', { name: planet?.name ?? civilization.planetName ?? '' })}
+        badge={planet ? typeName : undefined}
+        subtitle={planet?.coordinates ? galaxyPlace(t, planet.coordinates) : undefined}
+        title={planet?.name ?? civilization.planetName ?? ''}
+        titlePrefix={t('planet.title', { name: '' }).trim()}
       />
       {notice ? <Alert kind={notice.kind}>{notice.text}</Alert> : null}
       {research.notice ? <Alert kind={research.notice.kind}>{research.notice.text}</Alert> : null}
@@ -123,6 +126,7 @@ export function PlanetPage() {
                 <ResearchQueue
                   action={chooseLabel(routes.planetResearch, t('planet.chooseResearch'))}
                   busy={research.busy}
+                  fillClass="f-research"
                   onCancel={research.cancel}
                   onFinished={() => void researchState.reload()}
                   receivedAt={researchState.receivedAt}

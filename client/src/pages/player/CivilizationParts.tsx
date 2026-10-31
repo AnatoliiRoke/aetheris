@@ -1,4 +1,4 @@
-import { artImage } from '../../assets/images';
+import { artImage, bodyArtClass } from '../../assets/images';
 import type { OwnedPlanet } from '../../api/worldApi';
 import { GameIcon, ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
@@ -90,7 +90,7 @@ export function FactBar({
         <b className={warning ? 'warn' : undefined}>{value}</b>
       </div>
       <div aria-label={label} aria-valuemax={100} aria-valuemin={0} aria-valuenow={Math.round(filled)} className="track" role="progressbar">
-        <i className={`f-${tone}`} style={{ width: `${filled}%` }} />
+        <i className={warning ? 'f-stripe' : `f-${tone}`} style={{ width: `${filled}%` }} />
       </div>
     </div>
   );
@@ -125,7 +125,7 @@ export function BodyIdentity({
 
   return (
     <div className="body-id">
-      <div className="body-art">
+      <div className={bodyArtClass(typeImageKey)}>
         <BodyArt imageKey={typeImageKey} name={planet.name ?? typeName} />
         {badge ? (
           <span className={`body-badge body-badge--${badge.tone}`} role="status">
@@ -143,7 +143,7 @@ export function BodyIdentity({
         </h3>
         <span className="chip-type">{typeName}</span>
         <span className="coords">
-          {t('civ.sector')} {planet.sectorId} · {t('civ.system')} {planet.systemId}
+          {t('civ.sector')} {planet.sectorName?.trim() ? planet.sectorName.trim() : planet.sectorId} · {t('civ.system')} {planet.systemName?.trim() ? planet.systemName.trim() : planet.systemId}
           {planet.orbit === null ? '' : `\n${t('civ.orbit')} ${planet.orbit}`}
         </span>
       </div>

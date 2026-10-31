@@ -76,7 +76,7 @@ function ResourceStorageRow({ resource, names }: { resource: PlanetResource; nam
         <span>{name}</span>
       </span>
       <div aria-label={name} aria-valuemax={fullPercent} aria-valuemin={0} aria-valuenow={percent} className="track" role="progressbar">
-        <i className={resource.isFull ? 'f-energy' : 'f-store'} style={{ width: `${percent}%` }} />
+        <i className={resource.isFull ? 'f-stripe' : 'f-store'} style={{ width: `${percent}%` }} />
       </div>
       <span className="storage-resource__value num">
         {resource.isFull ? <span className="badge badge--warning">{t('planet.storageFullBadge')}</span> : null}

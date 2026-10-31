@@ -132,6 +132,10 @@ export interface PlanetCoordinates {
   sectorId: number;
   systemId: number;
   orbit: number | null;
+  /** The name of the star system. Absent when the world has no name for it. */
+  systemName?: string | null;
+  /** The name of the sector. Absent when the world has no name for it. */
+  sectorName?: string | null;
 }
 
 /**

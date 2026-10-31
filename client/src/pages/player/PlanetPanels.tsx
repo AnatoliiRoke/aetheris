@@ -25,21 +25,33 @@ export function ResourcesPanel({ planet, names }: { planet: Planet; names: Names
       <div className="planet-table-wrap">
         <table className="planet-table">
           <thead>
-            <tr>
+            <tr role="row">
               <th scope="col">{t('planet.resource')}</th>
               <th scope="col">{t('planet.rate')}</th>
             </tr>
           </thead>
           <tbody>
             {planet.resources.map((resource) => (
-              <tr key={resource.resourceTypeId}>
+              <tr key={resource.resourceTypeId} role="row">
                 <td>
                   <span className="resource-name">
                     <ResourceIcon groupCode={names.resourceGroupCode(resource.resourceTypeId)} />
                     <span>{names.resource(resource.resourceTypeId)}</span>
                   </span>
                 </td>
-                <td className="num">{resource.ratePerHour > 0 ? `+${formatNumber(resource.ratePerHour, language)}` : t('planet.notMined')}</td>
+                <td className="num">
+                  {resource.ratePerHour > 0 ? (
+                    <>
+                      <span className="rate-plus">+{formatNumber(resource.ratePerHour, language)}</span>
+                      <span className="rate-unit">{t('planet.rate')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="rate-dash">—</span>
+                      <span>{t('planet.notMined')}</span>
+                    </>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

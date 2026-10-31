@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/useI18n';
 import { clockTickMs } from './clock';
 import { formatDuration } from './planetText';
@@ -90,6 +90,9 @@ export function QueueItem({
   busy,
   onCancel,
   onFinished,
+  fillClass = 'f-accent',
+  mark,
+  clockOnly = false,
 }: {
   entry: QueueEntry;
   underWayLabel: string;
@@ -97,6 +100,12 @@ export function QueueItem({
   busy: boolean;
   onCancel: (id: number) => void;
   onFinished: () => void;
+  /** The fill of the progress. A research uses the research colour of the design. */
+  fillClass?: string;
+  /** The icon in front of the name. The research screen draws one; the other queues do not. */
+  mark?: ReactNode;
+  /** The research screen shows the clock alone. The other queues keep the "time left" sentence. */
+  clockOnly?: boolean;
 }) {
   reportRender('QueueItem');
 
@@ -108,29 +117,34 @@ export function QueueItem({
   const percent = secondsLeft === null ? 0 : Math.max(0, Math.min(fullPercent, (1 - secondsLeft / total) * fullPercent));
 
   return (
-    <li className="queue-item">
-      <div className="queue-item__body">
+    <li className={entry.underWay ? 'queue-item queue-item--active' : 'queue-item'}>
+      <div className="queue-item__identity">
+        {mark ? (
+          <span aria-hidden="true" className="queue-item__mark">
+            {mark}
+          </span>
+        ) : null}
         <strong>{entry.title}</strong>
-        <span className="meta">
+        <span className={entry.underWay ? 'queue-item__status queue-item__status--active' : 'queue-item__status'}>
           {entry.underWay ? underWayLabel : waitingLabel}
-          {' · '}
-          {secondsLeft === null ? (
-            <span className="num">{formatDuration(language, entry.durationSeconds)}</span>
-          ) : secondsLeft > 0 ? (
-            <span className="num" role="timer">
-              {t('planet.timeLeft', { time: formatDuration(language, secondsLeft) })}
-            </span>
-          ) : (
-            <span>{t('planet.finishing')}</span>
-          )}
         </span>
-        {entry.details ? <span className="meta">{entry.details}</span> : null}
-        {secondsLeft === null ? null : (
-          <div aria-label={entry.title} aria-valuemax={fullPercent} aria-valuemin={0} aria-valuenow={Math.round(percent)} className="track" role="progressbar">
-            <i className="f-accent" style={{ width: `${percent}%` }} />
-          </div>
-        )}
       </div>
+      {secondsLeft === null ? (
+        <span className="queue-item__track" />
+      ) : (
+        <div aria-label={entry.title} aria-valuemax={fullPercent} aria-valuemin={0} aria-valuenow={Math.round(percent)} className="track queue-item__track" role="progressbar">
+          <i className={fillClass} style={{ width: `${percent}%` }} />
+        </div>
+      )}
+      <span className="queue-item__time num">
+        {secondsLeft === null ? (
+          formatDuration(language, entry.durationSeconds)
+        ) : secondsLeft > 0 ? (
+          <span role="timer">{clockOnly ? formatDuration(language, secondsLeft) : t('planet.timeLeft', { time: formatDuration(language, secondsLeft) })}</span>
+        ) : (
+          <span>{t('planet.finishing')}</span>
+        )}
+      </span>
       <button
         aria-label={entry.cancelLabel}
         className="btn btn--secondary"
@@ -141,6 +155,7 @@ export function QueueItem({
       >
         {t('planet.queueCancel')}
       </button>
+      {entry.details ? <span className="queue-item__details meta">{entry.details}</span> : null}
     </li>
   );
 }
@@ -167,4 +182,46 @@ export function Countdown({ deadline }: { deadline: number }) {
 
 function noop() {
   // The record of the queue reads the server again; the tile only shows the time.
+}
+
+/**
+ * The progress and the clock of a technology that is being researched, inside its plate.
+ * The queue above asks the server when the time runs out, so this one only shows them.
+ *
+ * @param deadline The moment the research ends on the clock of the browser, in milliseconds.
+ * @param durationSeconds How many real seconds the research takes in all.
+ * @param label The word beside the clock.
+ */
+export function ResearchProgress({
+  deadline,
+  durationSeconds,
+  label,
+}: {
+  deadline: number;
+  durationSeconds: number;
+  label: string;
+}) {
+  const { t, language } = useI18n();
+  const secondsLeft = useSecondsLeft(deadline, noop);
+  const total = Math.max(durationSeconds, 1);
+  const left = secondsLeft === null ? total : Math.max(secondsLeft, 0);
+  const percent = Math.max(0, Math.min(fullPercent, (1 - left / total) * fullPercent));
+
+  return (
+    <>
+      <div aria-valuemax={fullPercent} aria-valuemin={0} aria-valuenow={Math.round(percent)} className="track tech-card__track" role="progressbar">
+        <i className="f-accent" style={{ width: `${percent}%` }} />
+      </div>
+      <div className="tech-card__time">
+        <span>{label}</span>
+        {secondsLeft !== null && secondsLeft > 0 ? (
+          <span className="num" role="timer">
+            {formatDuration(language, secondsLeft)}
+          </span>
+        ) : (
+          <span>{t('planet.finishing')}</span>
+        )}
+      </div>
+    </>
+  );
 }

@@ -20,6 +20,28 @@
   --success: #4CD08A;
   --warning: #F2C14E;
 
+  /* Game screen (documentation/design/aetheris-civ). The public site does not use these. */
+  --bg-card-in: #0F1529;
+  --bg-art: #0A1124;
+  --bg-id: #10172C;
+  --border-soft: rgba(160, 190, 255, 0.10);
+  --track: rgba(160, 190, 255, 0.12);
+  --energy: #FFD84D;
+  --premium: #E9C46A;
+  --research: #7FE0EE;
+  --credits: #3DD6A6;
+  --trade: #B79CFF;
+  --group-metal: #A7B1C2;
+  --group-gem: #6FA8FF;
+  --group-flame: #FF9F43;
+  --stripe: repeating-linear-gradient(135deg, #F2C14E 0 6px, #D9A93A 6px 12px);
+  --glow-earth: #50AAFF;
+  --glow-ember: #FF6B3D;
+  --glow-icy: #BEE6FF;
+  --glow-dune: #E69650;
+  --glow-oceanic: #3C96FF;
+  --glow-gas: #E6AA6E;
+
   /* Races */
   --race-1: #6C8DB8;
   --race-2: #D08A4E;
@@ -57,6 +79,8 @@
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-selected: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent), 0 12px 32px rgba(0, 0, 0, 0.38);
   --shadow-cta: 0 8px 24px rgba(46, 196, 196, 0.25);
   --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.5);
 

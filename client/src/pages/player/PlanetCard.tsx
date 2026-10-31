@@ -1,8 +1,9 @@
 import type { Planet } from '../../api/planetApi';
+import { bodyArtClass } from '../../assets/images';
 import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 import { BodyArt } from './CivilizationParts';
-import { formatCoefficient, formatNumber } from './planetText';
+import { formatCoefficient, formatNumber, galaxyPlace } from './planetText';
 
 /**
  * The card of a body (task 00020): the picture of its type, the type, the place in the galaxy,
@@ -38,7 +39,7 @@ export function PlanetCard({
 
   return (
     <section aria-label={t('planet.card')} className="panel planet-card">
-      <div className="body-art">
+      <div className={bodyArtClass(typeImageKey)}>
         <BodyArt imageKey={typeImageKey} name={planet.name ?? typeName} />
       </div>
       <div className="planet-card__facts">
@@ -46,11 +47,7 @@ export function PlanetCard({
           <dt>{t('planet.type')}</dt>
           <dd>{typeName}</dd>
           <dt>{t('planet.coordinates')}</dt>
-          <dd>
-            {coordinates
-              ? `${t('civ.sector')} ${coordinates.sectorId} · ${t('civ.system')} ${coordinates.systemId}${coordinates.orbit === null ? '' : ` · ${t('civ.orbit')} ${coordinates.orbit}`}`
-              : '—'}
-          </dd>
+          <dd>{coordinates ? galaxyPlace(t, coordinates) : '—'}</dd>
           <dt>{t('planet.population')}</dt>
           <dd className="num">{`${formatNumber(planet.population, language)} / ${formatNumber(planet.populationMax, language)}`}</dd>
           <dt>{t('planet.energy')}</dt>
@@ -66,7 +63,9 @@ export function PlanetCard({
                 <li key={id}>
                   <ResourceIcon groupCode={resourceGroup(id)} />
                   <span>{resourceName(id)}</span>
-                  <span className="num">{coefficient === undefined ? '—' : `${formatCoefficient(coefficient, language)}×`}</span>
+                  <span className={coefficient === undefined ? 'deposit-rows__empty' : 'num'}>
+                    {coefficient === undefined ? '—' : `${formatCoefficient(coefficient, language)}×`}
+                  </span>
                 </li>
               );
             })}

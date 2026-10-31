@@ -270,7 +270,9 @@ public sealed record PlanetFacts(
     bool IsColonizable = true,
     int ObjectTypeId = 0,
     long SystemId = 0,
-    int? Orbit = null);
+    int? Orbit = null,
+    string? SystemName = null,
+    string? SectorName = null);
 
 /// <summary>A deposit of a body: the resource and the richness coefficient.</summary>
 /// <param name="ResourceTypeId">The resource.</param>
@@ -326,6 +328,8 @@ public sealed record OwnedPlanet(long PlanetId, int SectorId);
 /// <param name="Size">The size of the body.</param>
 /// <param name="IsTerraformed">Whether the body is terraformed already (task 00014, section 9).</param>
 /// <param name="Deposits">The deposits of the body with their coefficients.</param>
+/// <param name="SystemName">The name of the star system, when the world has one.</param>
+/// <param name="SectorName">The name of the sector, when the world has one.</param>
 public sealed record OwnedPlanetDto(
     long PlanetId,
     string? Name,
@@ -336,7 +340,9 @@ public sealed record OwnedPlanetDto(
     int SizeClassId,
     int Size,
     bool IsTerraformed,
-    IReadOnlyList<PlanetDepositFact> Deposits);
+    IReadOnlyList<PlanetDepositFact> Deposits,
+    string? SystemName = null,
+    string? SectorName = null);
 
 /// <summary>The home body of a civilization with the start building of its race.</summary>
 /// <param name="PlanetId">The home body.</param>

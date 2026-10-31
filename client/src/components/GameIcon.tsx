@@ -3,11 +3,12 @@
  * events (task 00010). The contours come from the design of the screen of the civilization
  * (`documentation/design/aetheris-civ/src/icons.js`).
  *
- * Every icon inherits the colour of the text and has a label beside it, so the colour is
- * never the only carrier of the meaning (ui-art/05, section 7).
+ * A menu icon inherits the colour of the text. A resource icon takes the colour of its
+ * group from the design and still has a label beside it, so the colour is never the only
+ * carrier of the meaning (ui-art/05, section 7).
  */
 
-import { resourceIconName } from './resourceIcon';
+import { resourceIconClass, resourceIconName } from './resourceIcon';
 
 /**
  * The contours of the icons, by their name. The codes are the keys of the data, not the
@@ -30,6 +31,7 @@ const paths = {
   settings: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8z M12 2v3 M12 19v3 M2 12h3 M19 12h3 M4.9 4.9l2.1 2.1 M17 17l2.1 2.1 M4.9 19.1L7 17 M17 7l2.1-2.1',
   more: 'M5 12h.01 M12 12h.01 M19 12h.01',
   send: 'M3 11l18-8-8 18-2-8z',
+  search: 'M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14z M21 21l-5-5',
   signout: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9',
   star: 'M12 2l2.6 6.9L22 9.3l-5.8 4.6 2 7.1L12 17l-6.2 4 2-7.1L2 9.3l7.4-.4z',
 
@@ -111,5 +113,5 @@ export function GameIcon({ name, size = 20, className }: { name: GameIconName; s
 export function ResourceIcon({ groupCode, size = 14 }: { groupCode: string | null | undefined; size?: number }) {
   const name = resourceIconName(groupCode);
 
-  return <GameIcon name={name} size={size} className="game-icon" />;
+  return <GameIcon name={name} size={size} className={resourceIconClass(groupCode)} />;
 }

@@ -7,7 +7,7 @@ import { BuildingCard } from './BuildingCard';
 import { BuildingQueue } from './BuildingQueue';
 import { ScreenHead } from './ScreenHead';
 import { groupBuildings } from './buildingCategories';
-import { lookup } from './planetText';
+import { galaxyPlace, lookup } from './planetText';
 import { usePlanetScreen } from './usePlanetScreen';
 
 /**
@@ -36,12 +36,9 @@ export function BuildPage() {
           </Link>
         }
         breadcrumbs={[{ label: t('civ.nav.planet'), to: routes.planet }, { label: planet?.name ?? civilization.planetName ?? t('civ.untitled') }]}
-        subtitle={
-          planet?.coordinates
-            ? `${t('civ.sector')} ${planet.coordinates.sectorId} · ${t('civ.system')} ${planet.coordinates.systemId}${planet.coordinates.orbit === null ? '' : ` · ${t('civ.orbit')} ${planet.coordinates.orbit}`}`
-            : undefined
-        }
-        title={t('build.title', { name: planet?.name ?? civilization.planetName ?? '' })}
+        subtitle={planet?.coordinates ? galaxyPlace(t, planet.coordinates) : undefined}
+        title={t('civ.nav.build')}
+        titleNote={planet?.name ?? civilization.planetName ?? ''}
       />
       {notice ? <Alert kind={notice.kind}>{notice.text}</Alert> : null}
       {failed && !planet ? (
@@ -76,8 +73,8 @@ export function BuildPage() {
             </div>
           ) : (
             groupBuildings(planet).map(({ key, category, buildings }) => (
-              <section aria-labelledby={`build-${key}`} className="panel" key={key}>
-                <h2 className="panel__title" id={`build-${key}`}>
+              <section aria-labelledby={`build-${key}`} className="build-category" key={key}>
+                <h2 className="build-category__title" id={`build-${key}`}>
                   {category ? lookup(language, category.nameKey, category.code, undefined, names.entities) : t('planet.category.other')}
                 </h2>
                 <ul className="building-grid">

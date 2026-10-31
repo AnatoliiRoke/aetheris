@@ -34,6 +34,22 @@ export function hasKey(language: Language, key: string): key is MessageKey {
 }
 
 /**
+ * The place of a body as the mock-up writes it: the name of the sector, then the name of the
+ * system, then the orbit. A sector or a system without a name shows its identifier. The name
+ * from a mock-up is never used.
+ */
+export function galaxyPlace(
+  translate: (key: MessageKey, params?: MessageParams) => string,
+  coordinates: { sectorId: number; systemId: number; orbit: number | null; sectorName?: string | null; systemName?: string | null },
+): string {
+  const sectorLabel = coordinates.sectorName?.trim() ? coordinates.sectorName.trim() : String(coordinates.sectorId);
+  const systemLabel = coordinates.systemName?.trim() ? coordinates.systemName.trim() : String(coordinates.systemId);
+  const orbit = coordinates.orbit === null ? '' : ` · ${translate('civ.orbit')} ${coordinates.orbit}`;
+
+  return `${translate('civ.sector')} ${sectorLabel} · ${translate('civ.system')} ${systemLabel}${orbit}`;
+}
+
+/**
  * Names the resources, groups and buildings of a body by their localisation keys and the texts
  * of the game data. A row without a text shows its key, never its code.
  */

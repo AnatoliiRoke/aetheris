@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useI18n } from '../../i18n/useI18n';
 import { QueueItem, type QueueEntry } from './QueueItem';
-import { freeSlotsText } from './planetText';
+// import { freeSlotsText } from './planetText';
 
 /**
  * The standard queue of the game (task 00020, section 8.1): the same panel on every screen and
@@ -39,6 +39,10 @@ export function QueuePanel({
   action,
   footnote,
   collect,
+  fillClass = 'f-accent',
+  mark,
+  clockOnly = false,
+  slotsText,
 }: {
   id: string;
   title: string;
@@ -54,9 +58,18 @@ export function QueuePanel({
   action?: ReactNode;
   footnote?: string;
   collect?: { label: string; reason: string };
+  /** The fill of a record that is under way. */
+  fillClass?: string;
+  /** The icon in front of every record. */
+  mark?: ReactNode;
+  /** Show the clock alone, without the "time left" sentence. */
+  clockOnly?: boolean;
+  /** The slot line. Without it the panel says how many places are used. */
+  slotsText?: string;
 }) {
-  const { t, language } = useI18n();
-  const freeSlots = Math.max(0, total - entries.length);
+  const { t } = useI18n();
+  // const { t, language } = useI18n();
+  // const freeSlots = Math.max(0, total - entries.length);
 
   return (
     <section aria-labelledby={id} className="panel queue-panel">
@@ -64,9 +77,11 @@ export function QueuePanel({
         <h2 className="panel__title" id={id}>
           {title}
         </h2>
-        <span className="meta">
-          {t('planet.queueSlots', { used, total })}
+        <span className="meta queue-panel__slots">
+          {slotsText ?? t('planet.queueSlots', { used, total })}
+          {/*
           {freeSlots > 0 ? <span className="queue-panel__free">{freeSlotsText(language, t, freeSlots)}</span> : null}
+          */}
         </span>
       </div>
       {entries.length === 0 ? <p className="lead">{emptyText}</p> : null}
@@ -76,19 +91,24 @@ export function QueuePanel({
             busy={busy}
             entry={entry}
             key={entry.id}
+            clockOnly={clockOnly}
+            fillClass={fillClass}
+            mark={mark}
             onCancel={onCancel}
             onFinished={onFinished}
             underWayLabel={underWayLabel}
             waitingLabel={waitingLabel}
           />
         ))}
+        {/*
         {Array.from({ length: freeSlots }, (_, index) => (
           <li className="queue-item queue-item--free" key={`free-${index}`}>
             <span className="meta">{t('queue.freeSlot')}</span>
           </li>
         ))}
+        */}
       </ol>
-      {action}
+      {action && used < total ? action : null}
       {collect ? (
         <button className="btn btn--secondary queue-panel__collect" disabled title={collect.reason} type="button">
           {collect.label}

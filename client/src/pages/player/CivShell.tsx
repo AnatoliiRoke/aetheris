@@ -1,5 +1,7 @@
 import { memo, Suspense, useEffect, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/useI18n';
+import { routes } from '../../router/context';
+import { useRouter } from '../../router/useRouter';
 import { CivFooter } from './CivFooter';
 import { CivHeader } from './CivHeader';
 import { CivMenu } from './CivMenu';
@@ -35,6 +37,34 @@ const ShellLoader = memo(function ShellLoader() {
 });
 
 /**
+ * The main column takes its padding from the screen. The mockups do not share one inset:
+ * the civilization screen, the planet and the three screens under it each have their own.
+ */
+function mainClass(path: string): string {
+  if (path === routes.game) {
+    return 'civ__main civ__main--game';
+  }
+
+  if (path === routes.planet) {
+    return 'civ__main civ__main--planet';
+  }
+
+  if (path === routes.planetBuild) {
+    return 'civ__main civ__main--build';
+  }
+
+  if (path === routes.planetResearch) {
+    return 'civ__main civ__main--research';
+  }
+
+  if (path === routes.planetStorage) {
+    return 'civ__main civ__main--storage';
+  }
+
+  return 'civ__main';
+}
+
+/**
  * The frame of the screens of the game (task 00020, section 8.1): the header, the menu on the left,
  * the bottom bar and the tabs of the phone around the content of a page.
  *
@@ -49,6 +79,7 @@ export function CivShell({ children }: { children: ReactNode }) {
   reportRender('CivShell');
 
   const { t } = useI18n();
+  const { path } = useRouter();
 
   return (
     <div className="civ">
@@ -57,7 +88,7 @@ export function CivShell({ children }: { children: ReactNode }) {
       <Banner />
       <div className="civ__body">
         <CivMenu />
-        <main className="civ__main">
+        <main className={mainClass(path)}>
           <Suspense
             fallback={
               <p className="lead" role="status">

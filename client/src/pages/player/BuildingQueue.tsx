@@ -32,6 +32,7 @@ export function BuildingQueue({
   emptyText,
   footnote,
   collect,
+  title,
 }: {
   planet: Planet;
   names: ReturnType<typeof namer>;
@@ -43,6 +44,8 @@ export function BuildingQueue({
   emptyText?: string;
   footnote?: string;
   collect?: { label: string; reason: string };
+  /** The heading. The overview uses the short name; the other screens keep the queue name. */
+  title?: string;
 }) {
   const { t } = useI18n();
   const { items, slotCount } = planet.queue;
@@ -80,7 +83,7 @@ export function BuildingQueue({
         }
       }}
       onFinished={onFinished}
-      title={t('planet.queue')}
+      title={title ?? t('planet.queue')}
       total={slotCount}
       underWayLabel={t('planet.queueUnderWay')}
       used={items.length}

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Technology } from '../../api/researchApi';
 import { Alert } from '../../components/Alert';
+import { GameIcon } from '../../components/GameIcon';
 import { useDocumentTitle } from '../../components/useDocumentTitle';
 import { useI18n } from '../../i18n/useI18n';
-import { routes } from '../../router/context';
-import { Link } from '../../router/Router';
 import { useSession } from '../../session/useSession';
 import { useTexts } from '../../texts/useTexts';
 import { ResearchPlanetSelect } from './ResearchPlanetSelect';
@@ -80,12 +79,26 @@ export function ResearchPage() {
     <div className="civ-main__in">
       <ScreenHead
         actions={
-          <Link className="btn btn--secondary" to={routes.planet}>
-            {t('screen.backToPlanet')}
-          </Link>
+          <>
+            {tree ? (
+              <div className="research-center">
+                <span aria-hidden="true" className="research-center__mark">
+                  <GameIcon name="research" size={22} />
+                </span>
+                <span aria-hidden="true" className="research-center__text">
+                  <span className="research-center__line">{t('research.centerLevelLine', { level: tree.availableCenterLevel })}</span>
+                  <span className="research-center__hint">{t('research.centerHint')}</span>
+                </span>
+                <span className="visually-hidden">
+                  {t('research.centerLevelLine', { level: tree.availableCenterLevel })}
+                  {' · '}
+                  {t('research.centerHint')}
+                </span>
+              </div>
+            ) : null}
+          </>
         }
         breadcrumbs={[{ label: t('civ.nav.research') }]}
-        subtitle={tree ? `${t('research.centerLevelLine', { level: tree.availableCenterLevel })} · ${t('research.centerHint')}` : undefined}
         title={t('research.title')}
       />
       {notice ? <Alert kind={notice.kind}>{notice.text}</Alert> : null}
@@ -108,12 +121,16 @@ export function ResearchPage() {
           <ResearchPlanetSelect disabled={busy} onChange={setSelectedPlanetId} tree={tree} />
           <ResearchQueue
             busy={busy}
+            clockOnly
             footnote={t('research.queueNote')}
+            marked
             onCancel={cancel}
             onFinished={() => void reload()}
             receivedAt={receivedAt}
             resourceName={resourceName}
+            slotsText={t('research.queueSlots', { used: tree.queueUsedSlots, total: tree.queueSlots })}
             technologyName={(key) => text(key) ?? key}
+            title={t('research.title')}
             tree={tree}
           />
           {activeBranch ? (
@@ -125,9 +142,10 @@ export function ResearchPage() {
                 tabs={branches.map((branch) => ({ id: branch.branch, label: text(branch.nameKey) ?? branch.nameKey }))}
               />
               <div className="tech-tools">
-                <label className="field">
-                  <span className="field__label">{t('research.search')}</span>
-                  <input className="input" type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
+                <label className="field tech-search">
+                  <span className="visually-hidden">{t('research.search')}</span>
+                  <GameIcon className="tech-search__icon" name="search" size={20} />
+                  <input className="input" placeholder={t('research.search')} type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
                 </label>
                 <div aria-label={t('research.filter')} className="filter-chips" role="group">
                   {[{ id: allStatuses }, ...statusFilters].map((entry) => (

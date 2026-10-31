@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { ResearchQueueItem, ResearchTree } from '../../api/researchApi';
+import { GameIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 import { QueuePanel } from './QueuePanel';
 import type { QueueEntry } from './QueueItem';
@@ -30,6 +31,11 @@ export function ResearchQueue({
   onFinished,
   action,
   footnote,
+  fillClass = 'f-accent',
+  title,
+  marked = false,
+  clockOnly = false,
+  slotsText,
 }: {
   tree: ResearchTree;
   receivedAt: number;
@@ -40,6 +46,16 @@ export function ResearchQueue({
   onFinished: () => void;
   action?: ReactNode;
   footnote?: string;
+  /** The fill of a record under way. The card of a body uses the research colour. */
+  fillClass?: string;
+  /** The heading. The overview uses the short name; the other screens keep the queue name. */
+  title?: string;
+  /** The research screen draws the icon and joins the name and the level with a dot. */
+  marked?: boolean;
+  /** The research screen shows the clock alone. */
+  clockOnly?: boolean;
+  /** The slot line of the research screen. */
+  slotsText?: string;
 }) {
   const { t, language } = useI18n();
   const multiplier = tree.timeMultiplier > 0 ? tree.timeMultiplier : 1;
@@ -50,7 +66,7 @@ export function ResearchQueue({
 
     return {
       id: item.id,
-      title: t('research.queueItem', { name, level: item.targetLevel }),
+      title: t(marked ? 'research.queueItemDot' : 'research.queueItem', { name, level: item.targetLevel }),
       underWay: item.finishesAt !== null,
       deadline: deadlineFor(tree.gameNow, tree.timeMultiplier, item.finishesAt, receivedAt),
       durationSeconds: (level?.durationSeconds ?? 0) / multiplier,
@@ -66,8 +82,12 @@ export function ResearchQueue({
       busy={busy}
       emptyText={t('research.queueEmpty')}
       entries={entries}
+      clockOnly={clockOnly}
+      fillClass={fillClass}
       footnote={footnote}
       id="research-queue"
+      mark={marked ? <GameIcon name="research" size={20} /> : undefined}
+      slotsText={slotsText}
       onCancel={(id) => {
         const item = tree.queue.find((candidate) => candidate.id === id);
 
@@ -76,7 +96,7 @@ export function ResearchQueue({
         }
       }}
       onFinished={onFinished}
-      title={t('research.queueTitle')}
+      title={title ?? t('research.queueTitle')}
       total={tree.queueSlots}
       underWayLabel={t('research.underWay')}
       used={tree.queueUsedSlots}

@@ -392,6 +392,30 @@ public sealed class WorldQueryService
                 .SingleOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false);
 
+        // The screen writes the names of the sector and the system. Each name is a column of
+        // that row, never a name taken from a mock-up. A row without a name leaves the field
+        // empty and the client shows the identifier.
+        string? systemName = await _dbContext.Systems.AsNoTracking()
+            .Where(system => system.Id == planet.SystemId)
+            .Select(system => system.Name)
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+        string? sectorName = await _dbContext.Sectors.AsNoTracking()
+            .Where(sector => sector.Id == planet.SectorId)
+            .Select(sector => sector.Name)
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (string.IsNullOrWhiteSpace(systemName))
+        {
+            systemName = null;
+        }
+
+        if (string.IsNullOrWhiteSpace(sectorName))
+        {
+            sectorName = null;
+        }
+
         return new PlanetFacts(
             planet.Id,
             planet.SectorId,
@@ -402,7 +426,9 @@ public sealed class WorldQueryService
             isColonizable,
             celestial?.ObjectTypeId ?? 0,
             planet.SystemId,
-            celestial?.Orbit);
+            celestial?.Orbit,
+            systemName,
+            sectorName);
     }
 
     /// <summary>
@@ -454,11 +480,34 @@ public sealed class WorldQueryService
             .ToDictionaryAsync(entry => entry.Id, cancellationToken)
             .ConfigureAwait(false);
 
+        long[] systemIds = [.. bodies.Select(body => body.SystemId).Distinct()];
+        Dictionary<long, string> systemNames = await _dbContext.Systems.AsNoTracking()
+            .Where(system => systemIds.Contains(system.Id))
+            .ToDictionaryAsync(system => system.Id, system => system.Name, cancellationToken)
+            .ConfigureAwait(false);
+        int[] sectorIds = [.. bodies.Select(body => body.SectorId).Distinct()];
+        Dictionary<int, string> sectorNames = await _dbContext.Sectors.AsNoTracking()
+            .Where(sector => sectorIds.Contains(sector.Id))
+            .ToDictionaryAsync(sector => sector.Id, sector => sector.Name, cancellationToken)
+            .ConfigureAwait(false);
+
         return
         [
             .. bodies.Select(body =>
             {
                 CelestialObjectEntity celestial = objects[body.CelestialObjectId];
+                string? systemName = systemNames.GetValueOrDefault(body.SystemId);
+                string? sectorName = sectorNames.GetValueOrDefault(body.SectorId);
+
+                if (string.IsNullOrWhiteSpace(systemName))
+                {
+                    systemName = null;
+                }
+
+                if (string.IsNullOrWhiteSpace(sectorName))
+                {
+                    sectorName = null;
+                }
 
                 return new OwnedPlanetDto(
                     body.Id,
@@ -470,7 +519,9 @@ public sealed class WorldQueryService
                     body.SizeClassId,
                     body.Size,
                     body.IsTerraformed,
-                    [.. body.DepositIds.OrderBy(deposit => deposit.ResourceId).Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))]);
+                    [.. body.DepositIds.OrderBy(deposit => deposit.ResourceId).Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))],
+                    systemName,
+                    sectorName);
             })
         ];
     }

@@ -73,6 +73,12 @@ public sealed class PlanetSession
     public List<ConstructionQueueItemEntity> Queue { get; }
 
     /// <summary>
+    /// Gets or sets the localisation keys of the names of the technologies, by technology.
+    /// A requirement of a technology uses the key so the screen can name it and its level.
+    /// </summary>
+    public IReadOnlyDictionary<int, string> TechnologyNameKeys { get; set; } = new Dictionary<int, string>();
+
+    /// <summary>
     /// Gets or sets the balances of the currencies of the civilization of the owner of the body, by
     /// currency. The costs in a currency are checked against them (task 00015).
     /// </summary>
@@ -223,7 +229,7 @@ public sealed class PlanetSession
     /// <param name="timeMultiplier">The game seconds per real second.</param>
     /// <returns>The answer.</returns>
     public PlanetOverviewDto Overview(DateTimeOffset now, double timeMultiplier) =>
-        PlanetOverviewBuilder.Build(Catalog, Settings, Figures(now), timeMultiplier);
+        PlanetOverviewBuilder.Build(Catalog, Settings, Figures(now), timeMultiplier, TechnologyNameKeys);
 
     /// <summary>
     /// Keeps the earlier moment of a resource that was already full at the start of a computation,

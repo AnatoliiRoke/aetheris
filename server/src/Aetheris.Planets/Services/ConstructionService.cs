@@ -130,7 +130,7 @@ public sealed class ConstructionService
                     throw new GameException(check.ReasonCodes[0], "The building cannot be queued.", new Dictionary<string, object?>
                     {
                         ["reason_codes"] = check.ReasonCodes.ToArray(),
-                        ["unmet_requirements"] = JsonSerializer.SerializeToElement(PlanetOverviewBuilder.Requirements(session.Catalog, check.Unmet), PlanetsJson.Options),
+                        ["unmet_requirements"] = JsonSerializer.SerializeToElement(PlanetOverviewBuilder.Requirements(session.Catalog, check.Unmet, technologyNameKeys: session.TechnologyNameKeys), PlanetsJson.Options),
                         ["missing_resources"] = JsonSerializer.SerializeToElement(
                             check.Missing.Select(entry => new ResourceAmountDto(entry.Key, entry.Value)).ToArray(),
                             PlanetsJson.Options),
@@ -456,7 +456,10 @@ public sealed class ConstructionService
             await resources.ToListAsync(cancellationToken).ConfigureAwait(false),
             (facts?.Deposits ?? []).ToDictionary(deposit => deposit.ResourceTypeId, deposit => deposit.Coefficient),
             await _technologies.GetLevelsAsync(state.OwnerPlayerId, cancellationToken).ConfigureAwait(false),
-            await _technologies.GetBonusesAsync(state.OwnerPlayerId, cancellationToken).ConfigureAwait(false));
+            await _technologies.GetBonusesAsync(state.OwnerPlayerId, cancellationToken).ConfigureAwait(false))
+        {
+            TechnologyNameKeys = await _technologies.GetTechnologyNameKeysAsync(cancellationToken).ConfigureAwait(false),
+        };
 
         // The costs in a currency are checked against the balance of the civilization.
         if (state.OwnerPlayerId is { } ownerPlayerId)

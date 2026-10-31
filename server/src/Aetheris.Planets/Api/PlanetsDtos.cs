@@ -68,7 +68,9 @@ public sealed record BuildingCategoryDto(int Id, string Code, string NameKey, in
 /// <param name="SectorId">The sector.</param>
 /// <param name="SystemId">The system.</param>
 /// <param name="Orbit">The orbit in the system, if the body has one.</param>
-public sealed record PlanetCoordinatesDto(int SectorId, long SystemId, int? Orbit);
+/// <param name="SystemName">The name of the star system, when the world has one. The mock-up name is not used.</param>
+/// <param name="SectorName">The name of the sector, when the world has one. The mock-up name is not used.</param>
+public sealed record PlanetCoordinatesDto(int SectorId, long SystemId, int? Orbit, string? SystemName = null, string? SectorName = null);
 
 /// <summary>The richness of a deposit of a body: the resource and the coefficient of it.</summary>
 /// <param name="ResourceTypeId">The resource.</param>

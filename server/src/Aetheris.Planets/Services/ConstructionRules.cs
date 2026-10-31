@@ -221,8 +221,14 @@ public static class PlanetOverviewBuilder
     /// <param name="settings">The parameters.</param>
     /// <param name="figures">The state of the body.</param>
     /// <param name="timeMultiplier">The game seconds per real second.</param>
+    /// <param name="technologyNameKeys">The localisation keys of the names of the technologies, by technology.</param>
     /// <returns>The answer.</returns>
-    public static PlanetOverviewDto Build(BuildingCatalog catalog, PlanetsSettings settings, PlanetFigures figures, double timeMultiplier)
+    public static PlanetOverviewDto Build(
+        BuildingCatalog catalog,
+        PlanetsSettings settings,
+        PlanetFigures figures,
+        double timeMultiplier,
+        IReadOnlyDictionary<int, string>? technologyNameKeys = null)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(settings);
@@ -302,7 +308,7 @@ public static class PlanetOverviewBuilder
                     next.EnergyAfter.Balance,
                     next.ReasonCodes.Count == 0,
                     next.ReasonCodes,
-                    Requirements(catalog, next.Unmet, figures.Levels),
+                    Requirements(catalog, next.Unmet, figures.Levels, technologyNameKeys),
                     Amounts(next.Missing),
                     next.EnergyAfter.Output,
                     next.EnergyAfter.Consumption),
@@ -344,8 +350,13 @@ public static class PlanetOverviewBuilder
     /// The levels of the buildings of the body by type, to tell which requirement is out of reach of
     /// the next step; without them no requirement is closed.
     /// </param>
+    /// <param name="technologyNameKeys">The localisation keys of the names of the technologies, by technology.</param>
     /// <returns>The requirements with the names of their targets.</returns>
-    public static IReadOnlyList<RequirementDto> Requirements(BuildingCatalog catalog, IReadOnlyList<UnmetRequirement> unmet, IReadOnlyDictionary<int, int>? levels = null)
+    public static IReadOnlyList<RequirementDto> Requirements(
+        BuildingCatalog catalog,
+        IReadOnlyList<UnmetRequirement> unmet,
+        IReadOnlyDictionary<int, int>? levels = null,
+        IReadOnlyDictionary<int, string>? technologyNameKeys = null)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(unmet);
@@ -362,6 +373,7 @@ public static class PlanetOverviewBuilder
                 {
                     RequirementTypes.BuildingLevel => catalog.FindType(requirement.TargetId)?.NameKey,
                     RequirementTypes.Deposit => catalog.Resources.FirstOrDefault(resource => resource.Id == requirement.TargetId)?.NameKey,
+                    RequirementTypes.TechnologyLevel => technologyNameKeys?.GetValueOrDefault(requirement.TargetId),
                     _ => null,
                 },
                 IsOutOfReach(requirement, levels))),

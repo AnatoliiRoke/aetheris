@@ -3,14 +3,14 @@ import type { QueueItem } from '../../api/planetApi';
 import type { OwnedPlanet } from '../../api/worldApi';
 import { useApi } from '../../api/useApi';
 import { Alert } from '../../components/Alert';
+import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
 import { useSession } from '../../session/useSession';
 import { useTexts } from '../../texts/useTexts';
-import { BodyIdentity, Deposits, FactBar } from './CivilizationParts';
+import { BodyIdentity, FactBar } from './CivilizationParts';
 import { BuildingQueue } from './BuildingQueue';
-import { EnergyPanel } from './PlanetPanels';
 import { formatNumber, fullestResource, namer, storedTonnes } from './planetText';
 import { PlaceholderBlock } from './PlaceholderBlock';
 import { ProcessesPanel } from './ProcessesPanel';
@@ -169,13 +169,27 @@ const BodyCard = memo(function BodyCard({
           typeImageKey={type?.imageKey ?? null}
           typeName={typeName}
         />
-        <div className="civ-body__deposits">
-          <span className="civ-label">{t('civ.deposits')}</span>
-          <Deposits groups={groups} names={names} planet={planet} />
-        </div>
       </div>
 
       <div className="civ-body__col">
+        <span className="civ-label">{t('civ.yield')}</span>
+        {data && data.resources.length > 0 ? (
+          <ul className="civ-yields">
+            {data.resources
+              .filter((resource) => resource.ratePerHour > 0)
+              .map((resource) => (
+                <li className="civ-yield" key={resource.resourceTypeId}>
+                  <ResourceIcon groupCode={groups(resource.resourceTypeId)} />
+                  <span>{names(resource.resourceTypeId)}</span>
+                  <span className="num">
+                    +{formatNumber(resource.ratePerHour, language)} {t('civ.perHour')}
+                  </span>
+                </li>
+              ))}
+          </ul>
+        ) : (
+          <p className="meta">{t('civ.noData')}</p>
+        )}
         <span className="civ-label">{t('civ.facts')}</span>
         <div className="civ-bars">
           <FactBar
@@ -215,56 +229,36 @@ const BodyCard = memo(function BodyCard({
 
       <div className="civ-body__col">
         {data && confirmed ? (
-          <>
-            <EnergyPanel planet={data} />
-            <BuildingQueue
-              action={
-                <Link className="btn btn--secondary" onClick={() => onSelect(planet.planetId)} to={routes.planetBuild}>
-                  + {t('civ.addBuilding')}
-                </Link>
-              }
-              busy={false}
-              collect={{ label: t('civ.collect'), reason: t('civ.collectSoon') }}
-              emptyText={t('civ.queueEmpty')}
-              names={namer(data, language, text)}
-              onCancel={onCancel}
-              onFinished={() => void reload()}
-              planet={data}
-              receivedAt={receivedAt}
-            />
-          </>
+          <BuildingQueue
+            action={
+              <Link className="btn btn--secondary" onClick={() => onSelect(planet.planetId)} to={routes.planetBuild}>
+                + {t('civ.addBuilding')}
+              </Link>
+            }
+            busy={false}
+            emptyText={t('civ.queueEmpty')}
+            names={namer(data, language, text)}
+            onCancel={onCancel}
+            onFinished={() => void reload()}
+            planet={data}
+            receivedAt={receivedAt}
+            title={t('civ.construction')}
+          />
         ) : (
           <p className="lead" role="status">
             {t('common.loading')}
           </p>
         )}
-
-        <span className="civ-label">{t('civ.resources')}</span>
-        {data && data.resources.length > 0 ? (
-          <ul className="civ-yields">
-            {data.resources
-              .filter((resource) => resource.ratePerHour > 0)
-              .map((resource) => (
-                <li className="civ-yield" key={resource.resourceTypeId}>
-                  <span>{names(resource.resourceTypeId)}</span>
-                  <span className="num">
-                    +{formatNumber(resource.ratePerHour, language)} {t('civ.perHour')}
-                  </span>
-                </li>
-              ))}
-          </ul>
-        ) : (
-          <p className="meta">{t('civ.noData')}</p>
-        )}
+        {confirmed ? <ProductionPanel planetId={planet.planetId} /> : null}
       </div>
 
       <div className="civ-body__col civ-body__col--wide">
         {confirmed ? (
           <>
             <ResearchPanel planetId={planet.planetId} />
-            <ProductionPanel planetId={planet.planetId} />
             <ProcessesPanel planetId={planet.planetId} />
-            <PlaceholderBlock reason={t('civ.activitySoon')} rows={2} title={t('civ.activity')} />
+            {/* Activity stays out of the overview until the server has something to show. */}
+            {/* <PlaceholderBlock reason={t('civ.activitySoon')} rows={2} title={t('civ.activity')} /> */}
           </>
         ) : (
           <p className="meta">{t('civ.lockedUntilConfirmed')}</p>

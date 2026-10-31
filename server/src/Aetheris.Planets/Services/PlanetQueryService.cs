@@ -159,7 +159,7 @@ public sealed class PlanetQueryService
             // The type is linked by its identifier, so the client reads the name and the picture
             // of the type from the reference table of the world (documentation/tech/09, 3.3).
             TypeId = facts.ObjectTypeId,
-            Coordinates = new PlanetCoordinatesDto(facts.SectorId, facts.SystemId, facts.Orbit),
+            Coordinates = new PlanetCoordinatesDto(facts.SectorId, facts.SystemId, facts.Orbit, facts.SystemName, facts.SectorName),
             Population = population?.Amount ?? 0,
             PopulationGrowthPerHour = population?.GrowthPerHour ?? 0,
             TimeToMaximum = FormatTimeToMaximum(population?.TimeToMaximum),
@@ -237,7 +237,9 @@ public sealed class PlanetQueryService
                         requirement.TargetLevel)),
                 context);
 
-        return new AvailabilityDto(unmet.Count == 0, PlanetOverviewBuilder.Requirements(catalog, unmet));
+        IReadOnlyDictionary<int, string> technologyNameKeys = await _technologies.GetTechnologyNameKeysAsync(cancellationToken).ConfigureAwait(false);
+
+        return new AvailabilityDto(unmet.Count == 0, PlanetOverviewBuilder.Requirements(catalog, unmet, technologyNameKeys: technologyNameKeys));
     }
 
     /// <summary>

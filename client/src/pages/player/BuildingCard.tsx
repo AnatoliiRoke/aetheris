@@ -42,7 +42,7 @@ export function BuildingCard({
         ? t('build.opensWith', { name: lookup(language, requirement.targetNameKey, requirement.targetNameKey ?? String(requirement.targetId), undefined, names.entities), level: requirement.targetLevel })
         : requirementText(language, requirement, names.entities),
     ),
-    ...next.reasonCodes.filter((code) => code !== 'planets_requirement_unmet').map((code) => reasonText(language, code)),
+    ...next.reasonCodes.filter((code) => code !== 'planets_requirement_unmet' && code !== 'planets_resources_short').map((code) => reasonText(language, code)),
   ];
   const hint = [...reasons, ...(next.missingResources.length > 0 && !isClosed ? [t('planet.missing', { list: names.amounts(next.missingResources) })] : [])].join('. ');
   const reasonsId = `building-${building.buildingTypeId}-reasons`;

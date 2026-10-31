@@ -1,13 +1,31 @@
-/* AETHERIS — the screen of the civilization (task 00010). The layout of the design
-   `documentation/design/aetheris-civ`, with the tokens of `tokens.css` and no other values
-   (ui-art/05). */
+/* AETHERIS — the screen of the civilization (task 00010) and the shared frame (task 00020).
+   The public site keeps the scale of tokens.css. The game scale lives on .civ, taken from
+   documentation/design/aetheris-civ and documentation/design/AETHERIS_4_pages. */
 
 .civ {
+  --header-h: 64px;
+  --fs-body: 15px;
+  --fs-h3: 18px;
+  --fs-caption: 11px;
+  --fs-note: 12px;
+  --fs-ui: 14px;
+  --fs-game: 15px;
+  --fs-section: 16px;
+  --fs-card: 17px;
+  --fs-name: 18px;
+  --fs-title: 32px;
+  --fs-title-planet: 34px;
+  --fs-title-screen: 40px;
+  --fs-title-phone: 26px;
+  --fs-title-planet-phone: 28px;
+  --fs-title-screen-phone: 30px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--bg-0);
   color: var(--text-1);
+  font-size: var(--fs-game);
+  line-height: 1.4;
 }
 
 .civ__body { flex: 1 1 auto; display: flex; align-items: stretch; min-width: 0; }
@@ -15,38 +33,41 @@
 /* ---------- top bar ---------- */
 .civ-topbar {
   position: sticky; top: 0; z-index: 10;
-  display: flex; align-items: center; gap: var(--space-4);
-  min-height: var(--header-h); padding-inline: var(--gutter);
+  display: flex; align-items: center; gap: var(--space-5);
+  min-height: var(--header-h); padding: 0 20px;
   border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--bg-0) 92%, transparent);
 }
-.civ-topbar__id { display: flex; align-items: center; gap: var(--space-3); flex: 0 0 auto; }
-.brand { display: flex; align-items: center; gap: var(--space-2); text-decoration: none; color: var(--text-1); }
-.brand img { width: 28px; height: 28px; border-radius: var(--r-sm); object-fit: cover; }
-.brand b { font-weight: 700; letter-spacing: 0.04em; }
+.civ-topbar__id { display: flex; align-items: center; gap: var(--space-4); flex: 0 0 auto; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-1); }
+.brand img { width: 28px; height: 28px; border-radius: 7px; object-fit: cover; }
+.brand b { font-size: var(--fs-name); font-weight: 700; letter-spacing: 0.04em; }
 .nick {
   display: inline-flex; align-items: center; gap: var(--space-2);
-  padding: var(--space-1) var(--space-3); border-radius: var(--r-full);
-  border: 1px solid var(--border); background: var(--bg-2); font-weight: 600;
+  padding: 5px 10px 5px 8px; border-radius: var(--r-full);
+  border: 1px solid var(--border); background: var(--bg-2);
+  font-size: var(--fs-ui); font-weight: 600;
 }
-.civ-res { flex: 1 1 auto; display: flex; justify-content: center; gap: var(--space-5); min-width: 0; list-style: none; margin: 0; padding: 0; }
-.civ-res li { font-weight: 600; white-space: nowrap; }
+.civ-res { flex: 1 1 auto; display: flex; justify-content: center; gap: 22px; min-width: 0; list-style: none; margin: 0; padding: 0; font-size: var(--fs-game); }
+.civ-res li { font-size: var(--fs-game); font-weight: 600; white-space: nowrap; }
 .civ-topbar__tools { display: flex; align-items: center; gap: var(--space-2); flex: 0 0 auto; }
 .nick .glyph { flex: 0 0 auto; }
-.civ-tariff { gap: var(--space-1); font-weight: 700; color: var(--text-2); border-color: var(--border-strong); cursor: help; }
-.civ-counter { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 600; white-space: nowrap; cursor: default; }
-.civ-counter--credits svg { color: var(--success); }
-.civ-counter--trade svg { color: var(--accent); }
-.civ-counter--energy svg { color: var(--warning); }
+.civ-tariff { gap: 5px; padding: 3px 9px; font-size: var(--fs-note); font-weight: 700; color: var(--text-2); border-color: var(--border-strong); cursor: help; }
+.civ-counter { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--fs-game); font-weight: 600; white-space: nowrap; cursor: default; }
+.civ-counter--credits svg { color: var(--credits); }
+.civ-counter--trade svg { color: var(--trade); }
+.civ-counter--energy svg { color: var(--energy); fill: currentColor; stroke: none; }
+.civ-tariff.is-premium { color: var(--premium); border-color: color-mix(in srgb, var(--premium) 55%, transparent); background: color-mix(in srgb, var(--premium) 10%, transparent); }
 .civ-counter.is-off { opacity: 1; color: var(--text-2); }
 .civ-alert {
-  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding-inline: var(--space-3);
+  display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px;
   border-radius: var(--r-full); border: 1px solid var(--border-strong); background: transparent;
   font: inherit; font-size: var(--fs-small); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums;
   color: var(--text-2); text-decoration: none; cursor: pointer;
 }
 .civ-alert--danger { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger-text); }
 .civ-alert--warning { border-color: var(--warning); background: color-mix(in srgb, var(--warning) 10%, transparent); color: var(--warning); }
-.civ-sep { width: 1px; height: var(--space-5); margin-inline: var(--space-1); background: var(--border); }
+.civ-sep { width: 1px; height: 28px; margin-inline: var(--space-1); background: var(--border); }
+.civ .lang-switch button { min-width: 40px; min-height: 34px; padding: 0 8px; font-size: var(--fs-small); }
 .civ-ibtn {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 44px; height: 44px;
   border-radius: var(--r-md); border: 1px solid var(--border); background: transparent; color: var(--text-soft); cursor: pointer;
@@ -56,15 +77,15 @@
 /* ---------- side menu ---------- */
 .civ-side {
   position: sticky; top: var(--header-h); align-self: flex-start;
-  flex: 0 0 220px; width: 220px; min-height: calc(100vh - var(--header-h));
+  flex: 0 0 220px; width: 220px; min-height: calc(100vh - 2 * var(--header-h));
   display: flex; flex-direction: column; gap: 2px;
-  padding: var(--space-4) var(--space-3); border-right: 1px solid var(--border);
+  padding: 16px 12px; border-right: 1px solid var(--border);
   background: color-mix(in srgb, var(--bg-1) 60%, transparent);
 }
 .civ-nav {
   display: flex; align-items: center; gap: var(--space-3);
   min-height: 44px; padding-inline: var(--space-3); border-radius: var(--r-md);
-  text-decoration: none; font-weight: 500; color: var(--text-soft);
+  text-decoration: none; font-size: var(--fs-game); font-weight: 500; color: var(--text-soft);
 }
 .civ-nav:hover { background: color-mix(in srgb, var(--border) 40%, transparent); }
 .civ-nav[aria-current="page"] { color: var(--text-1); font-weight: 600; background: color-mix(in srgb, var(--accent) 12%, transparent); box-shadow: inset 3px 0 0 var(--accent); }
@@ -74,13 +95,21 @@
 .civ-nav-hr { display: block; height: 1px; margin: var(--space-2) var(--space-3); background: var(--border); }
 
 /* ---------- main ---------- */
-.civ__main { position: relative; flex: 1 1 auto; min-width: 0; padding: var(--space-5) var(--gutter); }
+.civ__main { position: relative; flex: 1 1 auto; min-width: 0; padding: 20px 24px; }
+.civ__main--planet { padding: 16px 24px 24px; }
+.civ__main--build { padding: 24px 28px 40px; }
+.civ__main--research, .civ__main--storage { padding: 20px 28px 40px; }
 .civ__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.22; pointer-events: none; z-index: 0; }
-.civ-main__in { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--space-4); }
-.civ-main__head h1 { font-size: var(--fs-h2); line-height: 1.2; }
+.civ-main__in { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 16px; }
+.civ__main--game .civ-main__in { gap: 14px; }
+.civ__main--build .civ-main__in { gap: 20px; }
+.civ-main__head h1 { font-size: var(--fs-title); font-weight: 700; line-height: 1.2; }
+.civ .player__title { font-size: var(--fs-title-screen); font-weight: 700; line-height: 1.15; }
+.civ__main--planet .player__title { font-size: var(--fs-title-planet); }
+.civ .lead { font-size: var(--fs-small); }
 .civ-main__title { font-size: var(--fs-h3); font-weight: 600; color: var(--text-2); }
 .civ-main__title span { color: var(--text-2); font-weight: 600; }
-.civ-bodies { display: flex; flex-direction: column; gap: var(--space-4); }
+.civ-bodies { display: flex; flex-direction: column; gap: 14px; }
 .civ-empty {
   padding: var(--space-5); border: 1px dashed var(--border-strong); border-radius: var(--r-lg);
   background: var(--bg-2); color: var(--text-2);
@@ -89,22 +118,44 @@
 
 /* ---------- the card of a body ---------- */
 .civ-body {
-  display: grid; grid-template-columns: 220px repeat(3, minmax(0, 1fr));
+  display: grid; grid-template-columns: 200px repeat(3, minmax(0, 1fr));
   border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden;
-  background: var(--bg-2); box-shadow: var(--shadow-sm);
+  background: var(--bg-2); box-shadow: var(--shadow-card);
 }
-.civ-body.is-current { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.civ-body__id { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); background: var(--bg-1); border-right: 1px solid var(--border); }
-.civ-body__col { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); min-width: 0; }
-.civ-body__col + .civ-body__col, .civ-body__id + .civ-body__col { border-left: 1px solid var(--border); }
-.civ-label { font-size: var(--fs-small); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); }
+.civ-body.is-current { border: 2px solid var(--accent); box-shadow: var(--shadow-selected); }
+.civ-body__id { display: flex; flex-direction: column; gap: 0; padding: 0; background: var(--bg-id); border-right: 1px solid var(--border-soft); }
+.civ-body__col { display: flex; flex-direction: column; gap: var(--space-2); padding: 14px 16px; min-width: 0; }
+.civ__main--game .civ-body .panel { gap: 6px; padding: 8px 10px; }
+.civ__main--game .civ-body .queue-list { gap: 4px; }
+.civ__main--game .civ-body .queue-item { gap: 4px; padding: 6px 8px; }
+.civ__main--game .civ-body .production-block,
+.civ__main--game .civ-body .processes-block { gap: 6px; margin-top: 0; }
+.civ__main--game .civ-body .building-grid { gap: 8px; }
+.civ__main--game .civ-body .building-card { gap: 6px; padding: 8px 10px; }
+.civ__main--game .civ-body .storage-list { gap: 4px; }
+.civ-body__col + .civ-body__col, .civ-body__id + .civ-body__col { border-left: 1px solid var(--border-soft); }
+.civ-label { font-size: var(--fs-caption); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); }
 
-.body-id { display: flex; flex-direction: column; gap: var(--space-2); }
+.body-id { display: flex; flex-direction: column; gap: 0; }
 .body-art {
+  --body-glow: transparent;
   position: relative; display: flex; align-items: center; justify-content: center;
-  padding: var(--space-3); border-radius: var(--r-lg); background: var(--bg-2);
+  height: 132px; padding: 0; border-radius: 0; border-bottom: 1px solid var(--border-soft); overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--body-glow) 20%, transparent) 0%, transparent 55%),
+    var(--bg-art);
 }
-.body-art__image { width: 116px; height: 116px; object-fit: cover; border-radius: 50%; }
+.body-art--earth { --body-glow: var(--glow-earth); }
+.body-art--ember { --body-glow: var(--glow-ember); }
+.body-art--icy { --body-glow: var(--glow-icy); }
+.body-art--dune { --body-glow: var(--glow-dune); }
+.body-art--oceanic { --body-glow: var(--glow-oceanic); }
+.body-art--gas { --body-glow: var(--glow-gas); }
+.body-art__image {
+  width: 116px; height: 116px; object-fit: cover;
+  -webkit-mask-image: radial-gradient(closest-side, black 82%, transparent 100%);
+  mask-image: radial-gradient(closest-side, black 82%, transparent 100%);
+}
 .body-art__placeholder {
   display: flex; align-items: center; justify-content: center;
   width: 116px; height: 116px; border-radius: 50%; background: var(--bg-3);
@@ -112,85 +163,93 @@
 }
 .body-sel {
   position: absolute; top: var(--space-2); right: var(--space-2);
-  padding: 2px var(--space-2); border-radius: var(--r-full);
-  background: var(--accent); color: var(--on-accent); font-size: var(--fs-small); font-weight: 700;
+  padding: 2px 8px; border-radius: var(--r-full);
+  background: var(--accent); color: var(--on-accent); font-size: var(--fs-caption); font-weight: 700;
 }
 .body-badge {
-  position: absolute; top: var(--space-2); left: var(--space-2); display: inline-flex; align-items: center; gap: var(--space-1);
-  padding: 2px var(--space-2); border-radius: var(--r-full); border: 1px solid var(--warning);
-  background: color-mix(in srgb, var(--bg-0) 80%, transparent); color: var(--warning); font-size: var(--fs-small); font-weight: 700;
+  position: absolute; top: var(--space-2); left: var(--space-2); display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px; border-radius: var(--r-full); border: 1px solid var(--warning);
+  background: color-mix(in srgb, var(--bg-0) 80%, transparent); color: var(--warning); font-size: var(--fs-caption); font-weight: 700;
 }
 .body-badge--danger { border-color: var(--danger); color: var(--danger-text); }
 .civ-aside { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
-.body-meta { display: flex; flex-direction: column; gap: var(--space-1); }
-.body-meta h3 { font-size: var(--fs-h3); font-weight: 600; line-height: 1.2; }
+.body-meta { display: flex; flex-direction: column; gap: var(--space-1); padding: 10px 12px 12px; }
+.body-meta h3 { font-size: var(--fs-name); font-weight: 600; line-height: 1.2; }
 .body-meta h3 button { padding: 0; border: 0; background: transparent; color: var(--text-1); font: inherit; text-align: left; cursor: pointer; }
 .chip-type {
   align-self: flex-start; padding: 1px var(--space-2); border-radius: var(--r-full);
-  border: 1px solid var(--border); background: var(--bg-3); color: var(--text-soft); font-size: var(--fs-small);
+  border: 1px solid var(--border); background: var(--bg-3); color: var(--text-soft); font-size: var(--fs-note); font-weight: 600;
 }
-.coords { font-size: var(--fs-small); line-height: 1.4; color: var(--text-2); white-space: pre-line; }
+.coords { font-size: var(--fs-note); line-height: 1.4; color: var(--text-2); white-space: pre-line; }
 
 .civ-body__deposits { display: flex; flex-direction: column; gap: var(--space-1); }
 .deposits { display: flex; flex-wrap: wrap; gap: var(--space-1); list-style: none; margin: 0; padding: 0; }
 .deposits__item {
   display: inline-flex; align-items: center; gap: var(--space-1);
   padding: 1px var(--space-2); border-radius: var(--r-full);
-  border: 1px solid var(--border); background: var(--bg-2); font-size: var(--fs-small);
+  border: 1px solid var(--border); background: var(--bg-2); font-size: var(--fs-note);
 }
 .game-icon { flex: 0 0 auto; }
+.game-icon--metal { color: var(--group-metal); }
+.game-icon--gem { color: var(--group-gem); }
+.game-icon--flame { color: var(--group-flame); }
+.game-icon--made { color: var(--text-soft); }
+.game-icon--credits { color: var(--credits); }
+.game-icon--fill { fill: currentColor; stroke: none; }
 
 /* ---------- the bars of the facts ---------- */
-.civ-bars { display: flex; flex-direction: column; gap: var(--space-2); }
-.bar-row { display: flex; flex-direction: column; gap: var(--space-1); }
-.bar-row__head { display: flex; justify-content: space-between; gap: var(--space-2); font-size: var(--fs-small); }
+.civ-bars { display: flex; flex-direction: column; gap: 6px; }
+.bar-row { display: flex; flex-direction: column; gap: 3px; }
+.bar-row__head { display: flex; justify-content: space-between; gap: var(--space-2); font-size: var(--fs-note); }
 .bar-row__head span { color: var(--text-soft); }
 .bar-row__head b { font-weight: 600; white-space: nowrap; }
 .bar-row__head b.warn { color: var(--warning); }
-.track { height: 5px; border-radius: var(--r-full); background: color-mix(in srgb, var(--border) 75%, transparent); overflow: hidden; }
+.track { height: 5px; border-radius: var(--r-full); background: var(--track); overflow: hidden; }
 .track i { display: block; height: 100%; border-radius: var(--r-full); }
 .track .f-accent { background: var(--accent); }
-.track .f-energy { background: var(--warning); }
+.track .f-energy { background: var(--energy); }
 .track .f-store { background: var(--text-2); }
+.track .f-research { background: var(--research); }
+.track .f-stripe { background: var(--stripe); }
 
 /* ---------- the queues and the yields ---------- */
-.civ-queue { display: flex; flex-direction: column; gap: var(--space-2); list-style: none; margin: 0; padding: 0; }
+.civ-queue { display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 0; }
 .civ-queue__item {
-  display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
-  padding: var(--space-2) var(--space-3); border-radius: var(--r-md);
-  border: 1px solid var(--border); background: var(--bg-1);
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 8px 10px; border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--bg-card-in);
 }
 .civ-queue__name { font-weight: 600; font-size: var(--fs-small); }
-.civ-yields { display: flex; flex-direction: column; gap: var(--space-1); list-style: none; margin: 0; padding: 0; }
-.civ-yield { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); font-size: var(--fs-small); }
-.civ-yield span:first-child { color: var(--text-soft); }
+.civ-yields { display: flex; flex-direction: column; gap: 1px; list-style: none; margin: 0; padding: 0; }
+.civ-yield { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 6px; align-items: center; font-size: var(--fs-small); }
+.civ-yield span:nth-child(2) { color: var(--text-soft); }
 
 /* ---------- the bottom bar ---------- */
 .civ-bottombar {
   position: sticky; bottom: 0; z-index: 10;
-  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
-  min-height: var(--header-h); padding: var(--space-2) var(--gutter);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-5);
+  min-height: var(--header-h); padding: 8px 20px;
   border-top: 1px solid var(--border); background: color-mix(in srgb, var(--bg-0) 94%, transparent);
 }
 .civ-bottombar__switch { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
-.civ-thumbs { display: flex; align-items: center; gap: var(--space-2); overflow-x: auto; }
+.civ-thumbs { display: flex; align-items: center; gap: 6px; overflow-x: auto; }
 .civ-thumb {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; padding: 0;
   width: 44px; height: 44px; border-radius: 50%; overflow: hidden; cursor: pointer;
-  border: 1px solid var(--border); background: var(--bg-2); color: var(--text-soft);
+  border: 1px solid var(--border); background: var(--bg-art); color: var(--text-soft);
 }
 .civ-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .civ-thumb[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
 .civ-thumb__letter { font-weight: 700; color: var(--text-soft); }
 .civ-current { display: flex; flex-direction: column; line-height: 1.25; white-space: nowrap; }
-.civ-current small { font-size: var(--fs-small); color: var(--text-2); }
-.civ-current strong { font-weight: 600; }
-.civ-chat { display: flex; align-items: center; gap: var(--space-2); flex: 1 1 auto; max-width: 560px; min-width: 0; }
-.civ-chat label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--fs-small); font-weight: 600; color: var(--text-2); white-space: nowrap; }
+.civ-current small { font-size: var(--fs-note); color: var(--text-2); }
+.civ-current strong { font-size: var(--fs-ui); font-weight: 600; }
+.civ-chat { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; max-width: 520px; min-width: 0; }
+.civ-chat label { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-note); font-weight: 600; color: var(--text-2); white-space: nowrap; }
 .civ-chat input {
-  flex: 1 1 auto; min-width: 0; min-height: 44px; padding-inline: var(--space-3);
-  border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-3); color: var(--text-1);
-  font: inherit; font-size: var(--fs-body);
+  flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 0 14px;
+  border: 1px solid var(--border-strong); border-radius: var(--r-md); background: var(--bg-3); color: var(--text-1);
+  font: inherit; font-size: var(--fs-ui);
 }
 .civ-chat input:disabled, .civ-ibtn:disabled, .civ-alert:disabled, .is-off { opacity: 0.45; cursor: not-allowed; }
 .civ-nav.is-off { cursor: not-allowed; }
@@ -201,12 +260,23 @@
 /* ---------- the phone ---------- */
 @media (max-width: 767px) {
   .civ-side { display: none; }
-  .civ-topbar { flex-wrap: wrap; gap: var(--space-2); padding: var(--space-2) var(--gutter); }
-  .civ-res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-1) var(--space-2); justify-content: stretch; }
-  .civ__main { padding: var(--space-4) var(--gutter); }
+  .civ-topbar { flex-wrap: wrap; gap: var(--space-2); padding: 10px 16px; }
+  .brand b { font-size: var(--fs-game); }
+  .nick { font-size: var(--fs-small); }
+  .civ-res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 10px; justify-content: stretch; font-size: var(--fs-ui); }
+  .civ-res li, .civ-counter { font-size: var(--fs-ui); }
+  .civ__main, .civ__main--game { padding: 12px 12px 20px; }
+  .civ__main--planet { padding: 12px 14px 20px; }
+  .civ__main--build, .civ__main--research, .civ__main--storage { padding: 16px 16px 24px; }
+  .civ-main__head h1 { font-size: var(--fs-title-phone); }
+  .civ .player__title { font-size: var(--fs-title-screen-phone); }
+  .civ__main--planet .player__title { font-size: var(--fs-title-planet-phone); }
   .civ-body { grid-template-columns: minmax(0, 1fr); }
-  .civ-body__id { border-right: 0; border-bottom: 1px solid var(--border); }
-  .civ-body__col + .civ-body__col, .civ-body__id + .civ-body__col { border-left: 0; border-top: 1px solid var(--border); }
+  .civ-body__col { padding: 12px 14px; }
+  .body-art { height: 128px; }
+  .body-art__image, .body-art__placeholder { width: 112px; height: 112px; }
+  .civ-body__id { border-right: 0; border-bottom: 1px solid var(--border-soft); }
+  .civ-body__col + .civ-body__col, .civ-body__id + .civ-body__col { border-left: 0; border-top: 1px solid var(--border-soft); }
   .civ-bottombar { display: none; }
   .civ-aside { grid-template-columns: minmax(0, 1fr); }
   .civ-topbar__id, .civ-topbar__tools { flex-wrap: wrap; }
@@ -223,7 +293,7 @@
   .civ-tabbar a, .civ-tabbar button {
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     min-height: 58px; padding: 0; border: 0; background: transparent; font: inherit;
-    text-decoration: none; font-size: var(--fs-small); font-weight: 600; color: var(--text-2); cursor: pointer;
+    text-decoration: none; font-size: var(--fs-note); font-weight: 600; color: var(--text-2); cursor: pointer;
   }
   .civ-tabbar a[aria-current="page"] { color: var(--accent-hover); box-shadow: inset 0 2px 0 var(--accent); }
   .civ-tabbar button.is-off { color: var(--text-2); cursor: not-allowed; }

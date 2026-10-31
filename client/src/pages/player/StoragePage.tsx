@@ -7,6 +7,7 @@ import { PlaceholderBlock } from './PlaceholderBlock';
 import { ScreenHead } from './ScreenHead';
 import { ModulesBlock, ProductionBlock, ResourcesBlock, StorageAlarm } from './StorageBlocks';
 import { Tabs, type TabItem } from './Tabs';
+import { galaxyPlace } from './planetText';
 import { usePlanetScreen } from './usePlanetScreen';
 import { useStock } from './useStock';
 
@@ -45,12 +46,9 @@ export function StoragePage() {
     <div className="civ-main__in">
       <ScreenHead
         breadcrumbs={[{ label: t('civ.nav.planet'), to: routes.planet }, { label: planet?.name ?? civilization.planetName ?? t('civ.untitled') }]}
-        subtitle={
-          planet?.coordinates
-            ? `${t('civ.sector')} ${planet.coordinates.sectorId} · ${t('civ.system')} ${planet.coordinates.systemId}${planet.coordinates.orbit === null ? '' : ` · ${t('civ.orbit')} ${planet.coordinates.orbit}`}`
-            : undefined
-        }
-        title={t('storage.title', { name: planet?.name ?? civilization.planetName ?? '' })}
+        subtitle={planet?.coordinates ? galaxyPlace(t, planet.coordinates) : undefined}
+        title={t('civ.nav.storage')}
+        titleNote={planet?.name ?? civilization.planetName ?? ''}
       />
       {planet && names ? <StorageAlarm names={names} planet={planet} /> : null}
       <Tabs active={active} label={t('storage.tabs')} onChange={(id) => setActive(id as TabId)} tabs={tabs} />

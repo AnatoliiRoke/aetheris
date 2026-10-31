@@ -80,6 +80,32 @@ export function artImage(imageKey: string | null | undefined): string | undefine
 }
 
 /**
+ * The class of the picture of a body. The key still comes from the reference table; the
+ * class only selects the glow the design gives that picture.
+ *
+ * @param imageKey The key of the picture of the type.
+ * @returns The classes of the picture frame.
+ */
+export function bodyArtClass(imageKey: string | null | undefined): string {
+  switch (imageKey) {
+    case 'art-12a':
+      return 'body-art body-art--earth';
+    case 'art-12b':
+      return 'body-art body-art--ember';
+    case 'art-12c':
+      return 'body-art body-art--icy';
+    case 'art-12d':
+      return 'body-art body-art--dune';
+    case 'art-12e':
+      return 'body-art body-art--oceanic';
+    case 'art-12f':
+      return 'body-art body-art--gas';
+    default:
+      return 'body-art';
+  }
+}
+
+/**
  * The pictures of the news items.
  */
 export const newsImages: Record<NewsImage, string> = {

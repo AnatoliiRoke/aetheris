@@ -1,9 +1,9 @@
 import { memo } from 'react';
 import { technologyStatuses, type Technology } from '../../api/researchApi';
-import { ResourceIcon } from '../../components/GameIcon';
+import { GameIcon, ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 import { formatAmount, formatDuration, formatSigned, lookup, reasonText } from './planetText';
-import { Countdown } from './QueueItem';
+import { ResearchProgress } from './QueueItem';
 import { reportRender } from './renderProbe';
 
 /**
@@ -66,11 +66,16 @@ export const TechnologyCard = memo(function TechnologyCard({
   if (status === technologyStatuses.unknown) {
     return (
       <li className="tech-card tech-card--unknown">
-        <div className="building-card__head">
-          <h3 className="building-card__name">{name}</h3>
-          <span className="chip">{t('research.status.unknown')}</span>
+        <div className="tech-card__head">
+          <span aria-hidden="true" className="tech-card__mark">
+            <GameIcon name="research" size={20} />
+          </span>
+          <div className="tech-card__id">
+            <h3 className="building-card__name">{name}</h3>
+            <span className="meta">{branchName}</span>
+          </div>
+          <span className="chip tech-status tech-status--unknown">{t('research.status.unknown')}</span>
         </div>
-        <span className="meta">{t('research.branchOf', { name: branchName })}</span>
         <p className="meta">{t('research.unknownText')}</p>
         <button className="btn btn--secondary" disabled title={t('research.unknownText')} type="button">
           {t('research.start')}
@@ -95,18 +100,26 @@ export const TechnologyCard = memo(function TechnologyCard({
   }
 
   const isShort = status === technologyStatuses.available && missing.size > 0;
+  const isResearching = status === technologyStatuses.researching;
   const disabledReason = isShort ? t('research.notEnough') : reasons.join('. ') || t(`research.status.${status}` as never);
-  const statusText = status === technologyStatuses.learned ? t('research.learnedLevel', { level: technology.learnedLevel }) : t(`research.status.${status}` as never);
+  const showsLearned = technology.learnedLevel > 0 && !isResearching && status !== technologyStatuses.queued;
+  const statusText = showsLearned ? t('research.learnedLevel', { level: technology.learnedLevel }) : t(`research.status.${status}` as never);
+  const statusClass = showsLearned ? technologyStatuses.learned : status;
   const percent = (multiplierValue: number) => `${formatSigned((multiplierValue - neutralMultiplier) * percentFactor, language)}%`;
+  const plateLabel = technology.learnedLevel > 0 ? t('research.nextLevel', { level: next?.level ?? technology.learnedLevel + 1 }) : t('planet.level', { level: next?.level ?? technology.learnedLevel + 1 });
 
   return (
     <li className="tech-card">
-      <div className="building-card__head">
-        <h3 className="building-card__name">{name}</h3>
-        <span className="chip">{statusText}</span>
+      <div className="tech-card__head">
+        <span aria-hidden="true" className="tech-card__mark">
+          <GameIcon name="research" size={20} />
+        </span>
+        <div className="tech-card__id">
+          <h3 className="building-card__name">{name}</h3>
+        </div>
+        <span className={`chip tech-status tech-status--${statusClass}`}>{statusText}</span>
       </div>
       <p className="building-card__text">{description}</p>
-      <span className="meta">{t('research.level', { learned: technology.learnedLevel, max: technology.maxLevel })}</span>
       {shownEffects.length > 0 ? (
         <div className="building-card__block">
           <span className="civ-label">{t('research.effectLabel')}</span>
@@ -114,12 +127,16 @@ export const TechnologyCard = memo(function TechnologyCard({
             {shownEffects.map((effect) => {
               const current = nowEffects.get(effect.effectType);
               const step = next ? effect.value - (current ?? neutralMultiplier) : null;
+              const value = current === undefined
+                ? step === null
+                  ? t('research.noEffectYet')
+                  : t('research.effectPerLevel', { value: `${formatSigned(step * percentFactor, language)}%` })
+                : percent(current);
 
               return (
                 <li className="effect-row" key={effect.effectType}>
                   <span>{lookup(language, `research.effectName.${effect.effectType}`, effect.effectType)}</span>
-                  <strong className="num">{current === undefined ? t('research.noEffectYet') : percent(current)}</strong>
-                  {step === null ? null : <span className="meta num">{t('research.effectPerLevel', { value: `${formatSigned(step * percentFactor, language)}%` })}</span>}
+                  <strong className="num">{value}</strong>
                 </li>
               );
             })}
@@ -127,14 +144,14 @@ export const TechnologyCard = memo(function TechnologyCard({
         </div>
       ) : null}
       {opens.length > 0 ? <span className="meta">{t('research.opens', { names: opens.map(unlockName).join(', ') })}</span> : null}
-      {status === technologyStatuses.researching && deadline !== null ? (
-        <span className="meta">
-          {t('research.timeLeftLabel')} <Countdown deadline={deadline} />
-        </span>
-      ) : null}
-      {next ? (
+      {isResearching && deadline !== null ? (
         <div className="building-card__next">
-          <span className="meta">{t('research.nextLevel', { level: next.level })}</span>
+          <span className="meta">{t('planet.level', { level: next?.level ?? technology.learnedLevel + 1 })}</span>
+          <ResearchProgress deadline={deadline} durationSeconds={(next?.durationSeconds ?? 0) / multiplier} label={t('research.timeLeftLabel')} />
+        </div>
+      ) : next ? (
+        <div className="building-card__next">
+          <span className="meta">{plateLabel}</span>
           <ul aria-label={t('build.requiredResources')} className="cost-list">
             {next.costs.map((cost) => {
               const short = missing.get(cost.resourceTypeId);
@@ -144,15 +161,15 @@ export const TechnologyCard = memo(function TechnologyCard({
                   <ResourceIcon groupCode={resourceGroupCode(cost.resourceTypeId)} />
                   <span className="cost-list__name">{resourceName(cost.resourceTypeId)}</span>
                   <span className="num">{formatAmount(cost.amount, language)}</span>
-                  {short === undefined ? null : <span className="cost-list__missing">{t('build.missingAmount', { amount: formatAmount(short, language) })}</span>}
+                  {short === undefined ? <span className="cost-list__missing" /> : <span className="cost-list__missing">{t('build.missingAmount', { amount: formatAmount(short, language) })}</span>}
                 </li>
               );
             })}
           </ul>
-          <dl className="facts facts--compact">
-            <dt>{t('research.duration')}</dt>
-            <dd className="num">{formatDuration(language, next.durationSeconds / multiplier)}</dd>
-          </dl>
+          <div className="tech-card__time">
+            <span>{t('research.duration')}</span>
+            <span className="num">{formatDuration(language, next.durationSeconds / multiplier)}</span>
+          </div>
         </div>
       ) : null}
       {reasons.length > 0 ? (
@@ -167,8 +184,8 @@ export const TechnologyCard = memo(function TechnologyCard({
           {t('research.start')}
         </button>
       ) : (
-        <button className="btn btn--secondary" disabled title={disabledReason} type="button">
-          {t('research.start')}
+        <button className="btn btn--secondary" disabled title={isResearching ? t('research.researchingNow') : disabledReason} type="button">
+          {isResearching ? t('research.researchingNow') : t('research.start')}
         </button>
       )}
     </li>

@@ -14,7 +14,7 @@ export function ResearchPlanetSelect({ tree, disabled, onChange }: { tree: Resea
   const { t, language } = useI18n();
 
   return (
-    <label className="field">
+    <label className="field research-planet">
       <span className="field__label">{t('research.planet')}</span>
       <select className="input" disabled={disabled} value={tree.selectedPlanetId ?? ''} onChange={(event) => onChange(Number(event.target.value))}>
         {tree.planets.map((planet) => (

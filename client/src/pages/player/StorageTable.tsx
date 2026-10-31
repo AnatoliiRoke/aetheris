@@ -16,7 +16,7 @@ export interface StorageColumn {
  */
 export type StorageRow =
   | { key: string | number; cells: ReactNode[]; details?: ReactNode }
-  | { key: string | number; heading: string };
+  | { key: string | number; heading: ReactNode };
 
 /**
  * A table of the storage screen. On a phone the table scrolls inside its own container, so the
