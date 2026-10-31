@@ -88,8 +88,9 @@ describe('GamePage', () => {
     renderPage('/game', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }) });
 
     expect(await screen.findByRole('heading', { name: 'Вітаємо, Pilot' })).toBeInTheDocument();
+    // The planets come with a separate request, so wait for them before the check of the banner.
+    expect(await screen.findByText('Nova')).toBeInTheDocument();
     expect(screen.queryByText('Підтверди пошту')).not.toBeInTheDocument();
-    expect(screen.getByText('Nova')).toBeInTheDocument();
   });
 
   it('shows the tree of the technologies with the real data', async () => {

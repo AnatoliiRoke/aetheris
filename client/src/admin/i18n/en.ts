@@ -338,6 +338,7 @@ export const adminEn: AdminMessages = {
   'admin.edit.error.costMissing': 'The level needs a cost: at least one resource.',
   'admin.edit.error.requirementsMissing': 'The level needs requirements; only the 1st level of the start building may have none.',
   'admin.edit.error.levelsInUse': 'A player has this level or waits for it in a queue: it cannot be removed.',
+  'admin.edit.error.inUse': 'Other rows refer to this row: it cannot be archived while they do.',
   'admin.edit.error.scopeInUse': 'The resource is already in stocks, balances or costs: its scope cannot be changed.',
   'admin.edit.error.currencyHasNoGroup': 'A currency of a civilization does not lie on a body, so it has no group.',
   'admin.edit.error.stateUnchanged': 'The row is already in this state.',

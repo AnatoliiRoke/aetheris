@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { OwnedPlanet, WorldReference } from '../../api/worldApi';
 import { useApi } from '../../api/useApi';
-
-/**
- * How often the bodies of the player are read again while the screen is open, in
- * milliseconds: a colony may change while the player watches, and the client only shows it.
- */
-const refreshIntervalMs = 15000;
+import { useReloadOnVisible } from './tabVisibility';
 
 /**
  * The state of the bodies of the player on a screen: the bodies themselves and the reference
@@ -26,7 +21,7 @@ export interface BodiesState {
 }
 
 /**
- * Reads the bodies of the player and the reference tables of the world, and keeps them fresh.
+ * Reads the bodies of the player and the reference tables of the world, and reads them again on the events of the page.
  * The tables never change while the screen is open, so they are read once.
  */
 export function useBodies(): BodiesState {
@@ -66,13 +61,13 @@ export function useBodies(): BodiesState {
   useEffect(() => {
     active.current = true;
     void reload();
-    const timer = window.setInterval(() => void reload(), refreshIntervalMs);
 
     return () => {
       active.current = false;
-      window.clearInterval(timer);
     };
   }, [reload]);
+
+  useReloadOnVisible(reload);
 
   return { bodies, reference, loaded, failed, reload };
 }

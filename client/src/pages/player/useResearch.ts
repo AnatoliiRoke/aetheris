@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ResearchTree } from '../../api/researchApi';
 import { useApi } from '../../api/useApi';
-
-/**
- * How often the tree of the technologies is read again while the page is open, in
- * milliseconds: a research finishes on the server and the client only shows it.
- */
-const refreshIntervalMs = 15000;
+import { useReloadOnVisible } from './tabVisibility';
 
 /**
  * The state of the tree of the technologies on a page: the last answer of the server and the
@@ -21,7 +16,7 @@ export interface ResearchState {
 }
 
 /**
- * Reads the tree of the technologies, keeps it fresh and takes the answers of the commands.
+ * Reads the tree of the technologies, reads it again on the events of the page and takes the answers of the commands.
  */
 export function useResearch(planetId: number | null): ResearchState {
   const { research } = useApi();
@@ -55,13 +50,13 @@ export function useResearch(planetId: number | null): ResearchState {
   useEffect(() => {
     active.current = true;
     void reload();
-    const timer = window.setInterval(() => void reload(), refreshIntervalMs);
 
     return () => {
       active.current = false;
-      window.clearInterval(timer);
     };
   }, [reload]);
+
+  useReloadOnVisible(reload);
 
   return { tree, receivedAt, failed, reload, apply };
 }

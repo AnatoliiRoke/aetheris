@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ApiError } from '../../api/http';
-import type { ProductionFactory, ProductionOrder, ProductionReason, ProductionRecipe, ProductionStack } from '../../api/productionApi';
+import type { ProductionFactory, ProductionReason, ProductionRecipe, ProductionStack, ProductionStorage } from '../../api/productionApi';
 import { useApi } from '../../api/useApi';
 import { Alert } from '../../components/Alert';
 import { TextField } from '../../components/FormField';
@@ -9,7 +9,6 @@ import { useI18n } from '../../i18n/useI18n';
 import type { EntityText } from '../../texts/context';
 import { useTexts } from '../../texts/useTexts';
 import { formatDuration, formatNumber, lookup } from './planetText';
-import { useNow } from './usePlanet';
 import { useProduction } from './useProduction';
 
 /**
@@ -18,17 +17,36 @@ import { useProduction } from './useProduction';
 const reasonPrefixes = ['production_', 'planets_', 'requirements_'];
 
 /**
- * The factory of a body with its recipes, its queue and the stock of the parts (task 00013).
- * The page only shows the rules; the server checks them on every command.
+ * The factory of a body with its recipes and the stock of the parts (task 00013). The queue of
+ * the batches is not here: the page shows the batches of all the factories in the standard
+ * queue (task 00020, section 7.5). The page only shows the rules; the server checks them on
+ * every command.
+ *
+ * @param planetId The body.
+ * @param onChanged What to tell the page after a command, so the queue of the production reads again.
+ * @param revision A number the page raises when something outside this panel changed the production, so the panel reads again.
  */
-export function ProductionPanel({ planetId }: { planetId: number }) {
+export function ProductionPanel({
+  planetId,
+  onChanged,
+  revision = 0,
+}: {
+  planetId: number;
+  onChanged?: () => void;
+  revision?: number;
+}) {
   const { t, language } = useI18n();
   const { production } = useApi();
   const { text } = useTexts();
-  const { factories, factory, stock, receivedAt, loaded, failed, reload, applyFactory, selectFactory } = useProduction(planetId);
+  const { factories, factory, stock, loaded, failed, reload, applyFactory, selectFactory } = useProduction(planetId);
   const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const now = useNow();
+
+  useEffect(() => {
+    if (revision > 0) {
+      void reload();
+    }
+  }, [revision, reload]);
 
   const run = async (action: () => Promise<ProductionFactory>, success: string) => {
     setBusy(true);
@@ -46,6 +64,7 @@ export function ProductionPanel({ planetId }: { planetId: number }) {
       await reload();
     } finally {
       setBusy(false);
+      onChanged?.();
     }
   };
 
@@ -102,21 +121,6 @@ export function ProductionPanel({ planetId }: { planetId: number }) {
         </p>
       ) : (
         <>
-          <ProductionQueue
-            orders={factory.queue}
-            recipes={factory.recipes}
-            language={language}
-            gameNow={factory.gameNow}
-            receivedAt={receivedAt}
-            now={now}
-            busy={busy}
-            onCancel={(order) =>
-              void run(
-                () => production.cancel(planetId, factory.planetBuildingId, order.orderId),
-                t('production.cancelled'),
-              )
-            }
-          />
           <RecipeList
             recipes={factory.recipes}
             language={language}
@@ -130,82 +134,8 @@ export function ProductionPanel({ planetId }: { planetId: number }) {
           />
         </>
       )}
-      <StockPanel stacks={stock?.stacks ?? []} capacity={stock?.storage.capacity ?? 0} stored={stock?.storage.stored ?? 0} />
+      <StockPanel stacks={stock?.stacks ?? []} storage={stock?.storage ?? null} />
     </section>
-  );
-}
-
-/**
- * The batches of the queue of the factory with the progress of the units.
- */
-function ProductionQueue({
-  orders,
-  recipes,
-  language,
-  gameNow,
-  receivedAt,
-  now,
-  busy,
-  onCancel,
-}: {
-  orders: ProductionOrder[];
-  recipes: ProductionRecipe[];
-  language: Language;
-  gameNow: string;
-  receivedAt: number;
-  now: number;
-  busy: boolean;
-  onCancel: (order: ProductionOrder) => void;
-}) {
-  const { t } = useI18n();
-  const { text } = useTexts();
-  const nameOf = useMemo(() => {
-    const byId = new Map(recipes.map((recipe) => [recipe.recipeId, recipe]));
-
-    return (recipeId: number) => {
-      const recipe = byId.get(recipeId);
-      const key = recipe?.nameKey;
-
-      return key ? (text(key) ?? key) : String(recipeId);
-    };
-  }, [recipes, text]);
-
-  if (orders.length === 0) {
-    return (
-      <div className="production-block">
-        <h3 className="panel__title">{t('production.queue')}</h3>
-        <p className="lead">{t('production.queueEmpty')}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="production-block">
-      <h3 className="panel__title">{t('production.queue')}</h3>
-      <ol className="queue-list">
-        {orders.map((order) => (
-          <li key={order.orderId} className="queue-item">
-            <div className="queue-item__body">
-              <strong>{nameOf(order.recipeId)}</strong>
-              <span className="meta num">
-                {t('production.batch', { made: order.producedQuantity, total: order.quantity })}
-              </span>
-              {order.isBlocked ? <span className="meta">{t('production.blocked')}</span> : null}
-              {order.nextUnitAt ? (
-                <span className="meta num">
-                  {t('production.nextUnit', {
-                    time: formatDuration(language, Math.max(0, secondsLeft(order.nextUnitAt, gameNow, receivedAt, now))),
-                  })}
-                </span>
-              ) : null}
-            </div>
-            <button className="btn btn--secondary" type="button" disabled={busy} onClick={() => onCancel(order)}>
-              {t('production.cancel')}
-            </button>
-          </li>
-        ))}
-      </ol>
-    </div>
   );
 }
 
@@ -312,17 +242,23 @@ function RecipeList({
 /**
  * The stock of the parts of the body with the mark of the race.
  */
-function StockPanel({ stacks, capacity, stored }: { stacks: ProductionStack[]; capacity: number; stored: number }) {
+function StockPanel({ stacks, storage }: { stacks: ProductionStack[]; storage: ProductionStorage | null }) {
   const { t, language } = useI18n();
   const { text } = useTexts();
+  const partName = (partTypeId: number) => {
+    const stack = stacks.find((entry) => entry.partTypeId === partTypeId);
+
+    return (stack ? text(stack.nameKey) : undefined) ?? t('production.part', { id: partTypeId });
+  };
+  const fullKinds = (storage?.kinds ?? []).filter((kind) => kind.isFull);
 
   return (
     <div className="production-block">
       <h3 className="panel__title">{t('production.stock')}</h3>
-      <p className="lead num">{t('production.stockCapacity', { stored: formatNumber(stored, language), capacity: formatNumber(capacity, language) })}</p>
-      {capacity > 0 && stored >= capacity ? (
+      <p className="lead num">{t('production.stockCapacity', { capacity: formatNumber(storage?.capacity ?? 0, language) })}</p>
+      {fullKinds.length > 0 ? (
         <Alert kind="error" title={t('production.storageFull.title')}>
-          {t('production.storageFull.text')}
+          {t('production.storageFull.text', { parts: fullKinds.map((kind) => partName(kind.partTypeId)).join(', ') })}
         </Alert>
       ) : null}
       {stacks.length === 0 ? (
@@ -343,17 +279,6 @@ function StockPanel({ stacks, capacity, stored }: { stacks: ProductionStack[]; c
       )}
     </div>
   );
-}
-
-/**
- * The real seconds left until a moment of game time, from the answer of the server and the
- * moment it was received.
- */
-function secondsLeft(finishesAt: string, gameNow: string, receivedAt: number, now: number): number {
-  const millisecondsPerSecond = 1000;
-  const gameSeconds = (Date.parse(finishesAt) - Date.parse(gameNow)) / millisecondsPerSecond;
-
-  return gameSeconds - (now - receivedAt) / millisecondsPerSecond;
 }
 
 /**

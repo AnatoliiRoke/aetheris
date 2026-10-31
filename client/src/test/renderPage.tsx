@@ -1,4 +1,5 @@
 import { render, type RenderResult } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { vi } from 'vitest';
 import { AppProviders, Pages } from '../App';
 import type { AuthApi, Me } from '../api/authApi';
@@ -8,7 +9,8 @@ import type { CurrencyBalanceFacts, EconomyApi, EconomyOverview, PopulationFacts
 import type { GameApi, Race } from '../api/gameApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
-import type { ProcessBuilding, ProcessBuildingSummary, ProcessesApi, TerraformingState, TerraformingTarget } from '../api/processesApi';
+import type { ActiveOrders } from '../api/activeOrders';
+import type { ProcessActiveOrder, ProcessBuilding, ProcessBuildingSummary, ProcessesApi, TerraformingState, TerraformingTarget } from '../api/processesApi';
 import type { ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionStock } from '../api/productionApi';
 import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
@@ -73,11 +75,18 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'world.resource.resource_3.name': 'Мідь',
     'world.resource.resource_18.name': 'Кредити',
     'world.resource_group.resource_group_1.name': 'Видобувні',
+    'world.object_type.object_type_5.name': 'Вулканічна',
+    'production.part_group.part_group_2.name': 'Корпусні модулі',
     'planets.building.building_1.name': 'Адміністративний центр',
     'planets.building.building_1.description': 'Головна будівля планети.',
     'planets.building.building_2.name': 'Науковий центр',
     'planets.building.building_5.name': 'Шахта заліза',
+    'planets.building.building_13.name': 'Завод',
     'planets.building.building_20.name': 'Фабрика утилізації',
+    'planets.building_category.group_1.name': 'Видобуток',
+    'planets.building_category.group_5.name': 'Населення',
+    'planets.building_category.group_8.name': 'Дослідження',
+    'planets.building_category.group_9.name': 'Торгівля',
     'research.branch.economy.name': 'Економіка',
     'research.technology.tech_1.name': 'Глибинний видобуток',
     'research.technology.tech_1.description': 'Шахти видобувають більше металів.',
@@ -99,6 +108,8 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'world.race.race_2.name': 'Kvarr',
     'world.resource.resource_1.name': 'Iron',
     'world.resource.resource_18.name': 'Credits',
+    'world.object_type.object_type_5.name': 'Volcanic',
+    'production.part_group.part_group_2.name': 'Hull modules',
     'planets.building.building_1.name': 'Administrative center',
     'research.branch.economy.name': 'Economy',
     'research.technology.tech_1.name': 'Deep extraction',
@@ -107,7 +118,12 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'production.recipe.recipe_1.description': 'The plates and beams from the raw materials.',
     'production.recipe.recipe_2.name': 'Hull module',
     'production.recipe.recipe_2.description': 'A module of the hull of a ship.',
+    'planets.building.building_13.name': 'Factory',
     'planets.building.building_20.name': 'Recycling factory',
+    'planets.building_category.group_1.name': 'Extraction',
+    'planets.building_category.group_5.name': 'Population',
+    'planets.building_category.group_8.name': 'Research',
+    'planets.building_category.group_9.name': 'Trade',
     'processes.process_type.ship_repair.name': 'Ship repair',
     'processes.process_type.recycling.name': 'Recycling',
     'processes.process_recipe.recipe_1.name': 'Repair of a ship on the orbit',
@@ -155,10 +171,9 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
     gameNow: '2026-10-26T12:00:00Z',
     timeMultiplier: 1,
     resources: [
-      { resourceTypeId: 1, resourceGroupId: 1, amount: 900, ratePerHour: 60 },
-      { resourceTypeId: 3, resourceGroupId: 1, amount: 500, ratePerHour: 0 },
+      { resourceTypeId: 1, resourceGroupId: 1, amount: 900, ratePerHour: 60, capacity: 10000, isFull: false, fullAt: null },
+      { resourceTypeId: 3, resourceGroupId: 1, amount: 500, ratePerHour: 0, capacity: 10000, isFull: false, fullAt: null },
     ],
-    storageGroups: [{ resourceGroupId: 1, capacity: 10000, stored: 1400, isFull: false, fullAt: null }],
     energy: { output: 10, consumption: 5, balance: 5, queuedBalance: 5 },
     queue: {
       slotCount: 2,
@@ -185,6 +200,7 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
         queuedLevel: 1,
         maxLevel: 20,
         effects: [{ effectType: 'level_cap', resourceTypeId: null, resourceGroupId: null, value: 1 }],
+        categoryId: 15,
         next: {
           level: 2,
           durationSeconds: 192,
@@ -206,6 +222,7 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
         queuedLevel: 0,
         maxLevel: 20,
         effects: [],
+        categoryId: 11,
         next: {
           level: 1,
           durationSeconds: 180,
@@ -236,6 +253,7 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
         queuedLevel: 1,
         maxLevel: 20,
         effects: [],
+        categoryId: 12,
         next: {
           level: 2,
           durationSeconds: 90,
@@ -249,7 +267,21 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
         },
       },
     ],
+    // The categories come in an order unlike their `sortOrder`, and one of them has no building.
+    buildingCategories: [
+      { id: 11, code: 'group_8', nameKey: 'planets.building_category.group_8.name', sortOrder: 8, imageKey: null },
+      { id: 13, code: 'group_9', nameKey: 'planets.building_category.group_9.name', sortOrder: 9, imageKey: null },
+      { id: 15, code: 'group_5', nameKey: 'planets.building_category.group_5.name', sortOrder: 5, imageKey: null },
+      { id: 12, code: 'group_1', nameKey: 'planets.building_category.group_1.name', sortOrder: 1, imageKey: null },
+    ],
     populationMax: 0,
+    name: 'Nova',
+    typeCode: 'object_type_5',
+    coordinates: { sectorId: 1, systemId: 3, orbit: 2 },
+    population: 310,
+    populationGrowthPerHour: 12,
+    timeToMaximum: '1.02:03:04',
+    depositRichness: [{ resourceTypeId: 1, coefficient: 1.5 }],
     resourceTypes: [
       { id: 1, code: 'resource_1', nameKey: 'world.resource.resource_1.name', resourceGroupId: 1 },
       { id: 3, code: 'resource_3', nameKey: 'world.resource.resource_3.name', resourceGroupId: 1 },
@@ -391,6 +423,7 @@ export function fakeProductionApi(overrides: Partial<ProductionApi> = {}): Produ
     factories: vi.fn().mockResolvedValue(sampleProductionFactories()),
     factory: vi.fn().mockResolvedValue(sampleProductionFactory()),
     stock: vi.fn().mockResolvedValue(sampleProductionStock()),
+    orders: vi.fn().mockResolvedValue(sampleProductionOrders()),
     enqueue: vi.fn().mockResolvedValue(sampleProductionFactory()),
     cancel: vi.fn().mockResolvedValue(sampleProductionFactory()),
     ...overrides,
@@ -452,7 +485,38 @@ export function sampleProductionFactory(overrides: Partial<ProductionFactory> = 
         isBlocked: false,
       },
     ],
-    storage: { capacity: 100, stored: 5, fullAt: null },
+    storage: { capacity: 100, kinds: [{ partTypeId: 3, quantity: 5, capacity: 100, isFull: false }] },
+    gameNow: '2026-10-26T12:00:00Z',
+    ...overrides,
+  };
+}
+
+/**
+ * The batches of all the factories of a body for the tests (task 00020, section 7.5): the same
+ * batch as the queue of `sampleProductionFactory`, with the places of the queue.
+ */
+export function sampleProductionOrders(overrides: Partial<ActiveOrders> = {}): ActiveOrders {
+  return {
+    planetId: 10,
+    queueSlots: 2,
+    queueUsedSlots: 1,
+    orders: [
+      {
+        orderId: 700,
+        planetBuildingId: 500,
+        buildingNameKey: 'planets.building.building_13.name',
+        recipeId: 1,
+        nameKey: 'production.recipe.recipe_1.name',
+        quantity: 3,
+        producedQuantity: 1,
+        position: 1,
+        unitSeconds: 40,
+        startsAt: '2026-10-26T11:59:00Z',
+        nextUnitAt: '2026-10-26T12:00:00Z',
+        finishesAt: '2026-10-26T12:02:00Z',
+        isBlocked: false,
+      },
+    ],
     gameNow: '2026-10-26T12:00:00Z',
     ...overrides,
   };
@@ -471,8 +535,8 @@ export function sampleProductionFactories(): ProductionFactorySummary[] {
 export function sampleProductionStock(overrides: Partial<ProductionStock> = {}): ProductionStock {
   return {
     planetId: 10,
-    stacks: [{ partTypeId: 3, markLevel: 2, hasRaceBonus: true, conditionPercent: 100, quantity: 4, nameKey: 'production.part_type.part_3.name', imageKey: null }],
-    storage: { capacity: 100, stored: 4, fullAt: null },
+    stacks: [{ partTypeId: 3, markLevel: 2, hasRaceBonus: true, conditionPercent: 100, quantity: 4, nameKey: 'production.part_type.part_3.name', imageKey: null, partGroupId: 2, partGroupNameKey: 'production.part_group.part_group_2.name' }],
+    storage: { capacity: 100, kinds: [{ partTypeId: 3, quantity: 4, capacity: 100, isFull: false }] },
     gameNow: '2026-10-26T12:00:00Z',
     ...overrides,
   };
@@ -485,6 +549,7 @@ export function fakeProcessesApi(overrides: Partial<ProcessesApi> = {}): Process
   return {
     buildings: vi.fn().mockResolvedValue(sampleProcessesBuildings()),
     building: vi.fn().mockResolvedValue(sampleProcessesBuilding()),
+    orders: vi.fn().mockResolvedValue(sampleProcessOrders()),
     enqueue: vi.fn().mockResolvedValue(sampleProcessesBuilding()),
     cancel: vi.fn().mockResolvedValue(sampleProcessesBuilding()),
     terraforming: vi.fn().mockResolvedValue(sampleTerraforming()),
@@ -612,6 +677,38 @@ export function sampleProcessesBuilding(overrides: Partial<ProcessBuilding> = {}
 }
 
 /**
+ * The orders of all the buildings of a body that run a process for the tests (task 00020,
+ * section 7.5): the same order as the queue of `sampleProcessesBuilding`, with the places.
+ */
+export function sampleProcessOrders(overrides: Partial<ActiveOrders<ProcessActiveOrder>> = {}): ActiveOrders<ProcessActiveOrder> {
+  return {
+    planetId: 10,
+    queueSlots: 2,
+    queueUsedSlots: 1,
+    orders: [
+      {
+        orderId: 800,
+        planetBuildingId: 600,
+        buildingNameKey: 'planets.building.building_20.name',
+        recipeId: 1,
+        nameKey: 'processes.process_recipe.recipe_1.name',
+        processTypeNameKey: 'processes.process_type.ship_repair.name',
+        quantity: 2,
+        producedQuantity: 1,
+        position: 1,
+        unitSeconds: 60,
+        startsAt: '2026-10-26T11:59:00Z',
+        nextUnitAt: '2026-10-26T12:00:00Z',
+        finishesAt: '2026-10-26T12:01:00Z',
+        isBlocked: false,
+      },
+    ],
+    gameNow: '2026-10-26T12:00:00Z',
+    ...overrides,
+  };
+}
+
+/**
  * The list of the buildings of a body that run a process for the tests.
  */
 export function sampleProcessesBuildings(): ProcessBuildingSummary[] {
@@ -700,15 +797,15 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
 }
 
 /**
- * Renders the site at an address with fake server interfaces.
+ * The fake server interfaces of the tests that a test may override.
  */
-export function renderPage(
-  path: string,
-  options: { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; game?: GameApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi } = {},
-): RenderResult & { api: Api } {
-  window.history.replaceState(null, '', path);
+type FakeApis = { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; game?: GameApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi };
 
-  const api: Api = {
+/**
+ * The server interfaces of a test: every one is a fake unless the test gives its own.
+ */
+function buildApi(options: FakeApis): Api {
+  return {
     auth: options.auth ?? fakeAuthApi(),
     content: options.content ?? mockContentApi,
     economy: options.economy ?? fakeEconomyApi(),
@@ -720,11 +817,33 @@ export function renderPage(
     texts: options.texts ?? fakeTextsApi(),
     world: options.world ?? fakeWorldApi(),
   };
+}
+
+/**
+ * Renders the site at an address with fake server interfaces.
+ */
+export function renderPage(path: string, options: FakeApis = {}): RenderResult & { api: Api } {
+  window.history.replaceState(null, '', path);
+
+  const api = buildApi(options);
   const result = render(
     <AppProviders api={api}>
       <Pages />
     </AppProviders>,
   );
+
+  return { ...result, api };
+}
+
+/**
+ * Renders one component, not a page, inside the providers of the site with fake server
+ * interfaces, for a component that no page shows at the moment.
+ */
+export function renderPanel(panel: ReactNode, options: FakeApis = {}): RenderResult & { api: Api } {
+  window.history.replaceState(null, '', '/');
+
+  const api = buildApi(options);
+  const result = render(<AppProviders api={api}>{panel}</AppProviders>);
 
   return { ...result, api };
 }

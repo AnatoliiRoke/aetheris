@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ProcessBuilding, ProcessBuildingSummary } from '../../api/processesApi';
 import { useApi } from '../../api/useApi';
-
-/**
- * How often the buildings are read again while the page is open, in milliseconds: a unit of
- * a process finishes on the server and the client only shows it.
- */
-const refreshIntervalMs = 15000;
+import { useReloadOnVisible } from './tabVisibility';
 
 /**
  * How long after the moment of the next unit the building is read again, in milliseconds, so
@@ -16,7 +11,7 @@ const unitReadyDelayMs = 1000;
 
 /**
  * The longest wait for the next unit, in milliseconds: the timers of the browser hold no
- * longer delay, and the periodic read covers the rest.
+ * longer delay, so a longer wait is cut and the read that follows sets the next one.
  */
 const longestWaitMs = 2147483647;
 
@@ -36,7 +31,7 @@ export interface ProcessesState {
 }
 
 /**
- * Reads the buildings of a body that run a process, keeps them fresh and takes the answers
+ * Reads the buildings of a body that run a process, reads them again on the events of the page and takes the answers
  * of the commands.
  */
 export function useProcesses(planetId: number | null): ProcessesState {
@@ -94,13 +89,13 @@ export function useProcesses(planetId: number | null): ProcessesState {
   useEffect(() => {
     active.current = true;
     void reload();
-    const timer = window.setInterval(() => void reload(), refreshIntervalMs);
 
     return () => {
       active.current = false;
-      window.clearInterval(timer);
     };
   }, [reload]);
+
+  useReloadOnVisible(reload);
 
   // The building that is open is read on its own, because it holds the recipes and the
   // queue. The answer arrives after the page is drawn, so it never blocks the first one.
@@ -126,8 +121,8 @@ export function useProcesses(planetId: number | null): ProcessesState {
     };
   }, [planetId, effectiveId, processes, applyBuilding, refreshCount]);
 
-  // The next unit of the queue is read when it is due, so the queue moves at its own moment and
-  // not only with the periodic read.
+  // The next unit of the queue is read when it is due, so the queue moves at its own moment, not on
+  // a periodic read.
   useEffect(() => {
     const nextUnitAt = building?.queue.find((order) => order.nextUnitAt !== null && !order.isBlocked)?.nextUnitAt;
 
@@ -136,8 +131,13 @@ export function useProcesses(planetId: number | null): ProcessesState {
     }
 
     const waitMs = Date.parse(nextUnitAt) - Date.parse(building.gameNow) - (Date.now() - receivedAt) + unitReadyDelayMs;
-    // A unit that is already late waits for the periodic read, so a slow server is not asked every second.
-    const timer = window.setTimeout(() => void reload(), waitMs > 0 ? Math.min(waitMs, longestWaitMs) : refreshIntervalMs);
+    // A unit that is already late waits for the next event (a command, a finished queue record or
+    // the tab becoming visible), so a slow server is not asked every second.
+    if (waitMs <= 0) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => void reload(), Math.min(waitMs, longestWaitMs));
 
     return () => window.clearTimeout(timer);
   }, [building, receivedAt, reload]);

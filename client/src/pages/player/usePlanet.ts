@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Planet } from '../../api/planetApi';
 import { useApi } from '../../api/useApi';
-
-/**
- * How often the body is read again while the page is open, in milliseconds: the balance grows
- * on the server and the client only shows it.
- */
-const refreshIntervalMs = 15000;
+import { useReloadOnVisible } from './tabVisibility';
 
 /**
  * The state of a body on a page: the last answer of the server and the moment it came.
@@ -20,7 +15,7 @@ export interface PlanetState {
 }
 
 /**
- * Reads a body, keeps it fresh and takes the answers of the commands.
+ * Reads a body, reads it again on the events of the page and takes the answers of the commands.
  */
 export function usePlanet(planetId: number | null): PlanetState {
   const { planets } = useApi();
@@ -54,28 +49,13 @@ export function usePlanet(planetId: number | null): PlanetState {
   useEffect(() => {
     active.current = true;
     void reload();
-    const timer = window.setInterval(() => void reload(), refreshIntervalMs);
 
     return () => {
       active.current = false;
-      window.clearInterval(timer);
     };
   }, [reload]);
 
+  useReloadOnVisible(reload);
+
   return { planet, receivedAt, failed, reload, apply };
-}
-
-/**
- * The current time, renewed every second, for the timers of the queue.
- */
-export function useNow(): number {
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  return now;
 }

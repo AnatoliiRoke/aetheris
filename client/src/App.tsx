@@ -23,9 +23,12 @@ import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { LandingPage } from './pages/landing/LandingPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { AccountPage } from './pages/player/AccountPage';
+import { BuildPage } from './pages/player/BuildPage';
 import { CivilizationPage } from './pages/player/CivilizationPage';
 import { GamePage } from './pages/player/GamePage';
 import { PlanetPage } from './pages/player/PlanetPage';
+import { ResearchPage } from './pages/player/ResearchPage';
+import { StoragePage } from './pages/player/StoragePage';
 import { routes } from './router/context';
 import { RouterProvider } from './router/Router';
 import { useRouter } from './router/useRouter';
@@ -54,6 +57,9 @@ const pages: Record<string, () => ReactNode> = {
 const playerPages: Record<string, () => ReactNode> = {
   [routes.game]: () => <GamePage />,
   [routes.planet]: () => <PlanetPage />,
+  [routes.planetBuild]: () => <BuildPage />,
+  [routes.planetResearch]: () => <ResearchPage />,
+  [routes.planetStorage]: () => <StoragePage />,
   [routes.civilization]: () => <CivilizationPage />,
   [routes.account]: () => <AccountPage />,
 };

@@ -1,4 +1,4 @@
-import type { BuildingEffect, Planet, ResourceAmount, UnmetRequirement } from '../../api/planetApi';
+import type { BuildingEffect, Planet, PlanetResource, ResourceAmount, UnmetRequirement } from '../../api/planetApi';
 import { dictionaries, format, type Language, type MessageParams } from '../../i18n/context';
 import type { MessageKey } from '../../i18n/uk';
 import type { EntityText } from '../../texts/context';
@@ -85,6 +85,45 @@ export function formatNumber(value: number, language: Language): string {
   return new Intl.NumberFormat(language === 'uk' ? 'uk-UA' : 'en-GB', { maximumFractionDigits: 1 }).format(value);
 }
 
+/**
+ * Finds the resource of a body that is the nearest to its limit: a full resource first, then the
+ * one with the largest share of its capacity. The summary of a body uses it, because every
+ * resource has the capacity of its own and there is no total of the storage.
+ *
+ * @param resources The resources of the body.
+ * @returns The resource, or `null` when no resource has a capacity.
+ */
+export function fullestResource(resources: PlanetResource[]): PlanetResource | null {
+  const share = (resource: PlanetResource) => (resource.isFull ? Number.POSITIVE_INFINITY : resource.amount / resource.capacity);
+
+  return resources
+    .filter((resource) => resource.capacity > 0)
+    .reduce<PlanetResource | null>((best, resource) => (best === null || share(resource) > share(best) ? resource : best), null);
+}
+
+/**
+ * The thin space between the thousands, as the storage blocks of the design write them.
+ */
+const thousandsSeparator = '\u2009';
+
+/**
+ * An amount of the storage: the number of the language with a thin space between the thousands in
+ * Ukrainian, so "4 200 / 4 200" reads as in the design.
+ */
+export function formatAmount(value: number, language: Language): string {
+  const text = formatNumber(value, language);
+
+  return language === 'uk' ? text.replace(/[\u00a0\u202f]/g, thousandsSeparator) : text;
+}
+
+/**
+ * A coefficient or a multiplier in the format of the language, with two digits after the
+ * comma: a richness of 1.25 or an effect of 1.05 must not round to a tenth.
+ */
+export function formatCoefficient(value: number, language: Language): string {
+  return new Intl.NumberFormat(language === 'uk' ? 'uk-UA' : 'en-GB', { maximumFractionDigits: 2 }).format(value);
+}
+
 const millisecondsPerSecond = 1000;
 const secondsPerMinute = 60;
 const secondsPerHour = 3600;
@@ -114,4 +153,25 @@ export function secondsLeft(planet: Planet, finishesAt: string, receivedAt: numb
   const multiplier = planet.timeMultiplier > 0 ? planet.timeMultiplier : 1;
 
   return gameSeconds / multiplier - (now - receivedAt) / millisecondsPerSecond;
+}
+
+/**
+ * The moment a record of a queue ends on the clock of the browser, in milliseconds. The server
+ * sends the end in game time with the time multiplier; the client counts the real time from the
+ * moment the answer came, so the timer runs between the reads without asking the server.
+ *
+ * @param gameNow The game time of the answer.
+ * @param timeMultiplier How many game seconds pass in a real second.
+ * @param finishesAt The end of the record in game time, or `null` while it waits.
+ * @param receivedAt The moment the answer came, in milliseconds.
+ * @returns The moment on the clock of the browser, or `null` for a waiting record.
+ */
+export function deadlineFor(gameNow: string, timeMultiplier: number, finishesAt: string | null, receivedAt: number): number | null {
+  if (!finishesAt) {
+    return null;
+  }
+
+  const multiplier = timeMultiplier > 0 ? timeMultiplier : 1;
+
+  return receivedAt + (Date.parse(finishesAt) - Date.parse(gameNow)) / multiplier;
 }

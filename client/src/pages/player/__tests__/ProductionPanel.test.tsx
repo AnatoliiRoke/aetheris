@@ -15,16 +15,18 @@ describe('ProductionPanel', () => {
 
     const panel = await screen.findByRole('region', { name: 'Виробництво' });
 
-    const queue = (await within(panel).findByRole('heading', { name: 'Черга заводу' })).closest('div')!;
-    expect(within(queue).getByText('Зроблено 1 з 3')).toBeInTheDocument();
+    // The queue of the batches moved out of the panel into the standard queue of the page (task 00020, section 7.5).
+    const queue = await screen.findByRole('region', { name: 'Черга виробництва' });
+    expect(within(queue).getByText(/Зроблено 1 з 3/)).toBeInTheDocument();
 
-    const recipes = within(panel).getByRole('heading', { name: 'Рецепти' }).closest('div')!;
+    const recipes = (await within(panel).findByRole('heading', { name: 'Рецепти' })).closest('div')!;
     expect(within(recipes).getByText('Будматеріали')).toBeInTheDocument();
     expect(within(recipes).getByText('Корпусний модуль')).toBeInTheDocument();
     expect(within(recipes).getByText('На одиницю: Залізо 4')).toBeInTheDocument();
 
     const stock = within(panel).getByRole('heading', { name: 'Склад деталей' }).closest('div')!;
-    expect(within(stock).getByText('Місць: 4 з 100')).toBeInTheDocument();
+    expect(within(stock).getByText('Місткість кожного виду деталі: 100')).toBeInTheDocument();
+    expect(within(stock).queryByText('Склад заповнений')).not.toBeInTheDocument();
     expect(within(stock).getByText('З бонусом раси')).toBeInTheDocument();
     expect(within(stock).getByText('Мк. II')).toBeInTheDocument();
     expect(within(stock).getByText('Корпус «Оса» Мк. II')).toBeInTheDocument();
@@ -53,17 +55,18 @@ describe('ProductionPanel', () => {
     expect(production.enqueue).toHaveBeenCalledWith(10, 500, 1, 1);
     expect(await screen.findByText('Партію поставлено в чергу заводу.')).toBeInTheDocument();
 
-    await user.click(within(panel).getByRole('button', { name: 'Скасувати' }));
+    const queue = await screen.findByRole('region', { name: 'Черга виробництва' });
+    await user.click(within(queue).getByRole('button', { name: /Скасувати/ }));
 
     expect(production.cancel).toHaveBeenCalledWith(10, 500, 700);
   });
 
-  it('warns when the storage of the parts is full', async () => {
+  it('warns which kind of part has no room left', async () => {
     const production = fakeProductionApi({
       stock: vi.fn().mockResolvedValue({
         planetId: 10,
         stacks: [],
-        storage: { capacity: 10, stored: 10, fullAt: null },
+        storage: { capacity: 10, kinds: [{ partTypeId: 3, quantity: 10, capacity: 10, isFull: true }] },
         gameNow: '2026-10-26T12:00:00Z',
       }),
     });
@@ -73,6 +76,7 @@ describe('ProductionPanel', () => {
     const panel = await screen.findByRole('region', { name: 'Виробництво' });
 
     await waitFor(() => expect(within(panel).getByText('Склад заповнений')).toBeInTheDocument());
+    expect(within(panel).getByText('Місця немає для: Деталь №3. Їх виробництво зупиниться, поки не звільниш склад.')).toBeInTheDocument();
   });
 
   it('says that the planet has no factory', async () => {

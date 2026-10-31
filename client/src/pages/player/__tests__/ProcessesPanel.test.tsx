@@ -22,10 +22,11 @@ describe('ProcessesPanel', () => {
 
     const panel = await screen.findByRole('region', { name: 'Процеси' });
 
-    const queue = (await within(panel).findByRole('heading', { name: 'Черга процесів' })).closest('div')!;
-    expect(within(queue).getByText('Зроблено 1 з 2')).toBeInTheDocument();
+    // The queue of the orders moved out of the panel into the standard queue of the page (task 00020, section 7.5).
+    const queue = await screen.findByRole('region', { name: 'Черга процесів' });
+    expect(within(queue).getByText(/Зроблено 1 з 2/)).toBeInTheDocument();
 
-    const recipes = within(panel).getByRole('heading', { name: 'Рецепти процесів' }).closest('div')!;
+    const recipes = (await within(panel).findByRole('heading', { name: 'Рецепти процесів' })).closest('div')!;
     expect(within(recipes).getByText('Ремонт корабля на орбіті')).toBeInTheDocument();
     expect(within(recipes).getByText('Розбирання деталі')).toBeInTheDocument();
     expect(within(recipes).getByText('Процес: Ремонт корабля')).toBeInTheDocument();
@@ -84,7 +85,7 @@ describe('ProcessesPanel', () => {
           { partTypeId: 3, markLevel: 1, hasRaceBonus: false, conditionPercent: 100, quantity: 5, nameKey: 'production.part.part_3.name', imageKey: null },
           { partTypeId: 3, markLevel: 1, hasRaceBonus: false, conditionPercent: 40, quantity: 2, nameKey: 'production.part.part_3.name', imageKey: null },
         ],
-        storage: { capacity: 100, stored: 7, fullAt: null },
+        storage: { capacity: 100, kinds: [{ partTypeId: 3, quantity: 7, capacity: 100, isFull: false }] },
         gameNow: '2026-10-26T12:00:00Z',
       }),
     });
@@ -128,17 +129,18 @@ describe('ProcessesPanel', () => {
     });
     expect(await screen.findByText('Замовлення поставлено в чергу.')).toBeInTheDocument();
 
-    await user.click(within(panel).getByRole('button', { name: 'Скасувати' }));
+    const queue = await screen.findByRole('region', { name: 'Черга процесів' });
+    await user.click(within(queue).getByRole('button', { name: /Скасувати/ }));
 
     expect(processes.cancel).toHaveBeenCalledWith(10, 600, 800);
   });
 
-  it('warns when the storage of the parts is full', async () => {
+  it('warns which kind of part has no room left', async () => {
     const production = fakeProductionApi({
       stock: vi.fn().mockResolvedValue({
         planetId: 10,
         stacks: [],
-        storage: { capacity: 10, stored: 10, fullAt: null },
+        storage: { capacity: 10, kinds: [{ partTypeId: 3, quantity: 10, capacity: 10, isFull: true }] },
         gameNow: '2026-10-26T12:00:00Z',
       }),
     });
@@ -148,6 +150,8 @@ describe('ProcessesPanel', () => {
     const panel = await screen.findByRole('region', { name: 'Процеси' });
 
     await waitFor(() => expect(within(panel).getByText('Склад заповнений')).toBeInTheDocument());
+    expect(within(panel).getByText('Місця немає для: Деталь №3. Процеси зупиняться, поки не звільниш склад.')).toBeInTheDocument();
+    expect(within(panel).getByText('Місткість кожного виду деталі: 10')).toBeInTheDocument();
   });
 
   it('says that the planet has no building that runs a process', async () => {

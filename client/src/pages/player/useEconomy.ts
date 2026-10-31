@@ -2,12 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CurrencyBalanceFacts, EconomyOverview, PopulationFacts } from '../../api/economyApi';
 import { ApiError } from '../../api/http';
 import { useApi } from '../../api/useApi';
-
-/**
- * How often the economy is read again while the page is open, in milliseconds: the population
- * grows and the balances grow with it on the server, and the client only shows them.
- */
-const refreshIntervalMs = 15000;
+import { useReloadOnVisible } from './tabVisibility';
 
 /**
  * The state of the economy on a page: the balances of the currencies of the civilization and,
@@ -98,13 +93,13 @@ export function useEconomy(planetId: number | null = null): EconomyState {
   useEffect(() => {
     active.current = true;
     void reload();
-    const timer = window.setInterval(() => void reload(), refreshIntervalMs);
 
     return () => {
       active.current = false;
-      window.clearInterval(timer);
     };
   }, [reload]);
+
+  useReloadOnVisible(reload);
 
   const loaded = overviewLoaded && (planetId === null || populationLoaded);
 

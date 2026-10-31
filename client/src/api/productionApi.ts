@@ -1,3 +1,4 @@
+import type { ActiveOrders } from './activeOrders';
 import type { HttpClient } from './http';
 import { camelize } from './planetApi';
 
@@ -82,12 +83,25 @@ export interface ProductionOrder {
 }
 
 /**
- * The storage of the parts of a body.
+ * The parts of one kind on a body against the room of the kind.
+ */
+export interface ProductionPartKind {
+  partTypeId: number;
+  /** How many parts of the kind lie on the body, in every stack of the kind. */
+  quantity: number;
+  /** How many parts of the kind the storage holds. */
+  capacity: number;
+  /** Whether the kind has no room left. */
+  isFull: boolean;
+}
+
+/**
+ * The storage of the parts of a body: every kind of part has the same room of its own.
  */
 export interface ProductionStorage {
+  /** How many parts of every kind the storage holds. */
   capacity: number;
-  stored: number;
-  fullAt: string | null;
+  kinds: ProductionPartKind[];
 }
 
 /**
@@ -111,6 +125,10 @@ export interface ProductionStack {
   quantity: number;
   nameKey: string;
   imageKey: string | null;
+  /** The group of the part, so the storage screen groups the parts by it (task 00020). */
+  partGroupId: number;
+  /** The localisation key of the name of the group. */
+  partGroupNameKey: string | null;
 }
 
 /**
@@ -121,6 +139,8 @@ export interface ProductionApi {
   factories(planetId: number): Promise<ProductionFactorySummary[]>;
   factory(planetId: number, planetBuildingId: number): Promise<ProductionFactory>;
   stock(planetId: number): Promise<ProductionStock>;
+  /** Every batch of every factory of the body in one list (task 00020, section 7.5). */
+  orders(planetId: number): Promise<ActiveOrders>;
   enqueue(planetId: number, planetBuildingId: number, recipeId: number, quantity: number): Promise<ProductionFactory>;
   cancel(planetId: number, planetBuildingId: number, orderId: number): Promise<ProductionFactory>;
 }
@@ -140,6 +160,9 @@ export function createProductionApi(http: HttpClient): ProductionApi {
     },
     async stock(planetId) {
       return camelize<ProductionStock>(await http.get<unknown>(`${prefix}/stock?planet_id=${planetId}`));
+    },
+    async orders(planetId) {
+      return camelize<ActiveOrders>(await http.get<unknown>(`${prefix}/orders?planet_id=${planetId}`));
     },
     async enqueue(planetId, planetBuildingId, recipeId, quantity) {
       return camelize<ProductionFactory>(

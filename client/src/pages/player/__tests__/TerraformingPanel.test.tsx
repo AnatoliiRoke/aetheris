@@ -2,7 +2,9 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../api/http';
-import { fakeAuthApi, fakeProcessesApi, renderPage, sampleTerraforming, sampleTerraformingTarget, signedInMe } from '../../../test/renderPage';
+import { fakeAuthApi, fakeProcessesApi, renderPanel, sampleTerraforming, sampleTerraformingTarget, signedInMe } from '../../../test/renderPage';
+import { ProcessesPanel } from '../ProcessesPanel';
+import { TerraformingPanel } from '../TerraformingPanel';
 
 /**
  * A signed-in player with a civilization and a confirmed address.
@@ -13,7 +15,14 @@ describe('TerraformingPanel', () => {
   it('is an action of its own, apart from the queues of the buildings', async () => {
     const user = userEvent.setup();
     const processes = fakeProcessesApi();
-    renderPage('/planet', { auth: signedIn(), processes });
+    // The panel is no longer shown by a page, so it is drawn on its own, next to the processes panel.
+    renderPanel(
+      <>
+        <TerraformingPanel />
+        <ProcessesPanel planetId={10} />
+      </>,
+      { auth: signedIn(), processes },
+    );
 
     const panel = await screen.findByRole('region', { name: 'Тераформінг' });
 
@@ -38,7 +47,7 @@ describe('TerraformingPanel', () => {
   it('asks to confirm before the device is spent', async () => {
     const user = userEvent.setup();
     const processes = fakeProcessesApi();
-    renderPage('/planet', { auth: signedIn(), processes });
+    renderPanel(<TerraformingPanel />, { auth: signedIn(), processes });
 
     const panel = await screen.findByRole('region', { name: 'Тераформінг' });
     const start = await within(panel).findByRole('button', { name: 'Запустити пристрій' });
@@ -70,7 +79,7 @@ describe('TerraformingPanel', () => {
     const processes = fakeProcessesApi({
       terraforming: vi.fn().mockResolvedValue(sampleTerraforming({ targets: [sampleTerraformingTarget({ shipIds: [] })] })),
     });
-    renderPage('/planet', { auth: signedIn(), processes });
+    renderPanel(<TerraformingPanel />, { auth: signedIn(), processes });
 
     const panel = await screen.findByRole('region', { name: 'Тераформінг' });
     await user.selectOptions(await within(panel).findByLabelText('Вільна планета'), '70');
@@ -84,7 +93,7 @@ describe('TerraformingPanel', () => {
     const processes = fakeProcessesApi({
       terraforming: vi.fn().mockResolvedValue(sampleTerraforming({ targets: [] })),
     });
-    renderPage('/planet', { auth: signedIn(), processes });
+    renderPanel(<TerraformingPanel />, { auth: signedIn(), processes });
 
     const panel = await screen.findByRole('region', { name: 'Тераформінг' });
     const start = await within(panel).findByRole('button', { name: 'Запустити пристрій' });
@@ -98,7 +107,7 @@ describe('TerraformingPanel', () => {
     const processes = fakeProcessesApi({
       terraform: vi.fn().mockRejectedValue(new ApiError(422, 'processes_target_not_colonizable')),
     });
-    renderPage('/planet', { auth: signedIn(), processes });
+    renderPanel(<TerraformingPanel />, { auth: signedIn(), processes });
 
     const panel = await screen.findByRole('region', { name: 'Тераформінг' });
     await user.selectOptions(await within(panel).findByLabelText('Вільна планета'), '70');

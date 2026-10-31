@@ -1,0 +1,52 @@
+/* AETHERIS — the screens of the planet, the construction, the research and the storage
+   (task 00020). Only the tokens of tokens.css and the components of ui-art/05. */
+
+/* ---------- the head of the content of a screen ---------- */
+.screen-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-3); }
+.screen-head__text { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.screen-head__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+/* ---------- the card of a body ---------- */
+.planet-card { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: var(--space-5); }
+.planet-card__facts { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.planet-card__deposits { display: flex; flex-direction: column; gap: var(--space-2); }
+.deposit-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-1) var(--space-4); list-style: none; margin: 0; padding: 0; }
+.deposit-rows li { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-small); }
+.deposit-rows li span:nth-of-type(1) { flex: 1 1 auto; color: var(--text-soft); }
+
+/* ---------- the standard queue ---------- */
+.queue-item--free { justify-content: center; border-style: dashed; color: var(--text-2); }
+.queue-item .track { width: 100%; }
+.queue-item__body { flex: 1 1 200px; min-width: 0; }
+.queue-item .btn { min-height: 44px; }
+
+/* ---------- the tabs ---------- */
+.tabs { display: flex; flex-wrap: wrap; gap: var(--space-1); border-bottom: 1px solid var(--border); }
+.tabs__tab {
+  min-height: 44px; padding-inline: var(--space-4); border: 0; border-bottom: 2px solid transparent;
+  background: transparent; color: var(--text-2); font: inherit; font-weight: 600; cursor: pointer;
+}
+.tabs__tab:hover { color: var(--text-1); }
+.tabs__tab[aria-selected="true"] { color: var(--text-1); border-bottom-color: var(--accent); }
+.tabs__tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- the technologies ---------- */
+.tech-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-3); }
+.tech-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-2); }
+.tech-card .btn { align-self: stretch; min-height: 44px; }
+
+/* ---------- the placeholder of a block without data ---------- */
+.placeholder-block { border-style: dashed; border-color: var(--border-strong); }
+.placeholder-block__skeleton { display: flex; flex-direction: column; gap: var(--space-2); }
+.skel { display: block; height: var(--space-3); border-radius: var(--r-full); background: var(--bg-3); }
+.skel--wide { width: 100%; }
+.skel--mid { width: 70%; }
+.skel--short { width: 40%; }
+
+/* ---------- the phone ---------- */
+@media (max-width: 767px) {
+  .planet-card { grid-template-columns: minmax(0, 1fr); }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; }
+  .tabs__tab { flex: 0 0 auto; }
+  .screen-head__actions .btn { min-height: 44px; }
+}

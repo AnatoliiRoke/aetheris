@@ -337,6 +337,7 @@ export const adminUk = {
   'admin.edit.error.costMissing': 'Рівень потребує вартості: хоча б один ресурс.',
   'admin.edit.error.requirementsMissing': 'Рівень потребує вимог; без вимог може бути лише 1-й рівень стартової будівлі.',
   'admin.edit.error.levelsInUse': 'Гравець уже має цей рівень або чекає його в черзі: рівень не можна прибрати.',
+  'admin.edit.error.inUse': 'На запис посилаються інші записи: його не можна архівувати, доки вони є.',
   'admin.edit.error.scopeInUse': 'Ресурс уже лежить на складах, у балансах або у вартостях: область дії не можна змінити.',
   'admin.edit.error.currencyHasNoGroup': 'Валюта цивілізації не лежить на планеті, тож групи в неї немає.',
   'admin.edit.error.stateUnchanged': 'Запис уже в цьому стані.',

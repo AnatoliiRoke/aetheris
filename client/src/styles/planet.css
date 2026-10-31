@@ -3,6 +3,7 @@
 .panel__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
 .num { font-variant-numeric: tabular-nums; }
 .planet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-5); }
+.planet-column { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
 .planet-subtitle { font-size: var(--fs-body); font-weight: 600; }
 
 .planet-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-lg); }
@@ -16,6 +17,16 @@
 .storage-list { display: flex; flex-direction: column; gap: var(--space-3); list-style: none; margin: 0; padding: 0; }
 .storage-row { display: grid; grid-template-columns: minmax(96px, max-content) minmax(120px, 1fr) max-content max-content; align-items: center; gap: var(--space-3); }
 .storage-row__meter { width: 100%; height: var(--space-3); accent-color: var(--accent); }
+
+/* The storage by resource (task 00020, decision of 31.10.2026): under the name of a group a row for
+   every resource with the amount against the capacity of the resource, the bar and the badge. */
+.storage-groups { display: flex; flex-direction: column; gap: var(--space-4); }
+.storage-group { display: flex; flex-direction: column; gap: var(--space-2); }
+.storage-group__title { margin: 0; font-size: var(--fs-small); font-weight: 600; text-transform: uppercase; color: var(--text-2); }
+.storage-resources { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-1) var(--space-5); list-style: none; margin: 0; padding: 0; }
+.storage-resource { display: grid; grid-template-columns: minmax(96px, 130px) minmax(64px, 1fr) max-content; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; }
+.storage-resource__name { color: var(--text-1); overflow-wrap: anywhere; }
+.storage-resource__value { display: inline-flex; align-items: center; justify-content: flex-end; gap: var(--space-2); font-weight: 600; white-space: nowrap; }
 
 .badge { display: inline-flex; align-items: center; padding: var(--space-1) var(--space-3); border-radius: var(--r-full); border: 1px solid var(--border-strong); font-size: var(--fs-small); color: var(--text-1); white-space: nowrap; }
 .badge--warning { border-color: var(--warning); color: var(--warning); }
@@ -53,4 +64,6 @@
 @media (max-width: 480px) {
   .storage-row { grid-template-columns: 1fr max-content; }
   .storage-row__meter { grid-column: 1 / -1; }
+  .storage-resource { grid-template-columns: 1fr max-content; }
+  .storage-resource .track { grid-column: 1 / -1; order: 3; }
 }

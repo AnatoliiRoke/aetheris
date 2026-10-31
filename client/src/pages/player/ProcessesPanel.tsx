@@ -4,7 +4,6 @@ import type { NamedItem } from '../../api/planetApi';
 import type {
   ProcessBuilding,
   ProcessIngredient,
-  ProcessOrder,
   ProcessOrderRequest,
   ProcessPartSubject,
   ProcessReason,
@@ -19,7 +18,7 @@ import { useI18n } from '../../i18n/useI18n';
 import type { EntityText } from '../../texts/context';
 import { useTexts } from '../../texts/useTexts';
 import { formatDuration, formatNumber, lookup } from './planetText';
-import { useNow, usePlanet } from './usePlanet';
+import { usePlanet } from './usePlanet';
 import { useProcesses } from './useProcesses';
 
 /**
@@ -28,22 +27,39 @@ import { useProcesses } from './useProcesses';
 const reasonPrefixes = ['processes_', 'planets_'];
 
 /**
- * The processes of a body (task 00014): the buildings that run them, the queue of the
- * building that is open, its recipes and the storage of the parts when the processes work
- * with them.
+ * The processes of a body (task 00014): the buildings that run them, their recipes and the
+ * storage of the parts when the processes work with them. The queue of the orders is not here:
+ * the page shows the orders of all the buildings in the standard queue (task 00020, section 7.5).
  *
  * The panel is the same for every kind of process: the server sends the recipes, the
  * ingredients and the reasons, so the code of the client knows no kind of process.
+ *
+ * @param planetId The body.
+ * @param onChanged What to tell the page after a command, so the queue of the processes reads again.
+ * @param revision A number the page raises when something outside this panel changed the processes, so the panel reads again.
  */
-export function ProcessesPanel({ planetId }: { planetId: number }) {
+export function ProcessesPanel({
+  planetId,
+  onChanged,
+  revision = 0,
+}: {
+  planetId: number;
+  onChanged?: () => void;
+  revision?: number;
+}) {
   const { t, language } = useI18n();
   const { processes } = useApi();
   const { text } = useTexts();
-  const { buildings, building, receivedAt, loaded, failed, reload, applyBuilding, selectBuilding } = useProcesses(planetId);
+  const { buildings, building, loaded, failed, reload, applyBuilding, selectBuilding } = useProcesses(planetId);
   const { planet } = usePlanet(planetId);
   const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const now = useNow();
+
+  useEffect(() => {
+    if (revision > 0) {
+      void reload();
+    }
+  }, [revision, reload]);
 
   // The recipes name the resources and the groups by their id, so the names come from the
   // body and from the texts of the game data.
@@ -105,6 +121,7 @@ export function ProcessesPanel({ planetId }: { planetId: number }) {
       await reload();
     } finally {
       setBusy(false);
+      onChanged?.();
     }
   };
 
@@ -161,21 +178,6 @@ export function ProcessesPanel({ planetId }: { planetId: number }) {
         </p>
       ) : (
         <>
-          <ProcessQueue
-            orders={building.queue}
-            recipes={building.recipes}
-            language={language}
-            gameNow={building.gameNow}
-            receivedAt={receivedAt}
-            now={now}
-            busy={busy}
-            onCancel={(order) =>
-              void run(
-                () => processes.cancel(planetId, building.planetBuildingId, order.orderId),
-                t('processes.cancelled'),
-              )
-            }
-          />
           <ProcessRecipes
             recipes={building.recipes}
             language={language}
@@ -198,80 +200,6 @@ export function ProcessesPanel({ planetId }: { planetId: number }) {
       )}
       {usesParts ? <ProcessStorage stock={stock} /> : null}
     </section>
-  );
-}
-
-/**
- * The orders of the queue of the building with the progress of the units.
- */
-function ProcessQueue({
-  orders,
-  recipes,
-  language,
-  gameNow,
-  receivedAt,
-  now,
-  busy,
-  onCancel,
-}: {
-  orders: ProcessOrder[];
-  recipes: ProcessRecipe[];
-  language: Language;
-  gameNow: string;
-  receivedAt: number;
-  now: number;
-  busy: boolean;
-  onCancel: (order: ProcessOrder) => void;
-}) {
-  const { t } = useI18n();
-  const { text } = useTexts();
-  const nameOf = useMemo(() => {
-    const byId = new Map(recipes.map((recipe) => [recipe.recipeId, recipe]));
-
-    return (recipeId: number) => {
-      const recipe = byId.get(recipeId);
-      const key = recipe?.nameKey;
-
-      return key ? (text(key) ?? key) : String(recipeId);
-    };
-  }, [recipes, text]);
-
-  if (orders.length === 0) {
-    return (
-      <div className="processes-block">
-        <h3 className="panel__title">{t('processes.queue')}</h3>
-        <p className="lead">{t('processes.queueEmpty')}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="processes-block">
-      <h3 className="panel__title">{t('processes.queue')}</h3>
-      <ol className="queue-list">
-        {orders.map((order) => (
-          <li key={order.orderId} className="queue-item">
-            <div className="queue-item__body">
-              <strong>{nameOf(order.recipeId)}</strong>
-              <span className="meta num">
-                {t('processes.batch', { made: order.producedQuantity, total: order.quantity })}
-              </span>
-              {order.isBlocked ? <span className="meta">{t('processes.blocked')}</span> : null}
-              {order.nextUnitAt ? (
-                <span className="meta num">
-                  {t('processes.nextUnit', {
-                    time: formatDuration(language, Math.max(0, secondsLeft(order.nextUnitAt, gameNow, 1, receivedAt, now))),
-                  })}
-                </span>
-              ) : null}
-            </div>
-            <button className="btn btn--secondary" type="button" disabled={busy} onClick={() => onCancel(order)}>
-              {t('processes.cancel')}
-            </button>
-          </li>
-        ))}
-      </ol>
-    </div>
   );
 }
 
@@ -599,18 +527,21 @@ function ProcessStorage({ stock }: { stock: ProductionStock | null }) {
   const { t, language } = useI18n();
   const { text } = useTexts();
   const capacity = stock?.storage.capacity ?? 0;
-  const stored = stock?.storage.stored ?? 0;
   const stacks = stock?.stacks ?? [];
+  const partName = (partTypeId: number) => {
+    const stack = stacks.find((entry) => entry.partTypeId === partTypeId);
+
+    return (stack ? text(stack.nameKey) : undefined) ?? t('processes.part', { id: partTypeId });
+  };
+  const fullKinds = (stock?.storage.kinds ?? []).filter((kind) => kind.isFull);
 
   return (
     <div className="processes-block">
       <h3 className="panel__title">{t('processes.storage')}</h3>
-      <p className="lead num">
-        {t('processes.storageCapacity', { stored: formatNumber(stored, language), capacity: formatNumber(capacity, language) })}
-      </p>
-      {capacity > 0 && stored >= capacity ? (
+      <p className="lead num">{t('processes.storageCapacity', { capacity: formatNumber(capacity, language) })}</p>
+      {fullKinds.length > 0 ? (
         <Alert kind="error" title={t('processes.storageFull.title')}>
-          {t('processes.storageFull.text')}
+          {t('processes.storageFull.text', { parts: fullKinds.map((kind) => partName(kind.partTypeId)).join(', ') })}
         </Alert>
       ) : null}
       {stacks.length === 0 ? (
@@ -671,18 +602,6 @@ function usePartStorage(planetId: number, relevant: boolean): ProductionStock | 
   }, [reload]);
 
   return stock;
-}
-
-/**
- * The real seconds left until a moment of game time, from the answer of the server and the
- * moment it was received.
- */
-function secondsLeft(finishesAt: string, gameNow: string, multiplier: number, receivedAt: number, now: number): number {
-  const millisecondsPerSecond = 1000;
-  const gameSeconds = (Date.parse(finishesAt) - Date.parse(gameNow)) / millisecondsPerSecond;
-  const speed = multiplier > 0 ? multiplier : 1;
-
-  return gameSeconds / speed - (now - receivedAt) / millisecondsPerSecond;
 }
 
 /**

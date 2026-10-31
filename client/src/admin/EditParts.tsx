@@ -30,6 +30,7 @@ const editErrorKeys: Record<string, AdminMessageKey> = {
   requirements_missing: 'admin.edit.error.requirementsMissing',
   levels_in_use: 'admin.edit.error.levelsInUse',
   scope_in_use: 'admin.edit.error.scopeInUse',
+  in_use: 'admin.edit.error.inUse',
   currency_has_no_group: 'admin.edit.error.currencyHasNoGroup',
   state_unchanged: 'admin.edit.error.stateUnchanged',
   invalid: 'admin.edit.error.invalid',

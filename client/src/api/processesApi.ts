@@ -1,3 +1,4 @@
+import type { ActiveOrder, ActiveOrders } from './activeOrders';
 import type { HttpClient } from './http';
 import { camelize } from './planetApi';
 
@@ -88,6 +89,14 @@ export interface ProcessOrder {
 }
 
 /**
+ * An order of the queue of a process of a body with the name of the kind of the process
+ * (task 00020, section 7.5).
+ */
+export interface ProcessActiveOrder extends ActiveOrder {
+  processTypeNameKey: string;
+}
+
+/**
  * What the order needs besides the recipe and the number of units: the resource the process
  * takes and gives and the part it works on with its condition.
  */
@@ -170,6 +179,8 @@ export interface TerraformingResult {
 export interface ProcessesApi {
   buildings(planetId: number): Promise<ProcessBuildingSummary[]>;
   building(planetId: number, planetBuildingId: number): Promise<ProcessBuilding>;
+  /** Every order of every building of the body that runs a process, in one list (task 00020, section 7.5). */
+  orders(planetId: number): Promise<ActiveOrders<ProcessActiveOrder>>;
   enqueue(
     planetId: number,
     planetBuildingId: number,
@@ -194,6 +205,9 @@ export function createProcessesApi(http: HttpClient): ProcessesApi {
     },
     async building(planetId, planetBuildingId) {
       return camelize<ProcessBuilding>(await http.get<unknown>(`${prefix}/buildings/${planetBuildingId}?planet_id=${planetId}`));
+    },
+    async orders(planetId) {
+      return camelize<ActiveOrders<ProcessActiveOrder>>(await http.get<unknown>(`${prefix}/orders?planet_id=${planetId}`));
     },
     async enqueue(planetId, planetBuildingId, recipeId, quantity, request) {
       return camelize<ProcessBuilding>(

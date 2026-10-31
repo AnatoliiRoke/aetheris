@@ -58,6 +58,20 @@ export interface Building {
   maxLevel: number;
   effects: BuildingEffect[];
   next: NextLevel;
+  /** The category of the building, a row of the data: the group of its tile on the building page (task 00020). */
+  categoryId: number;
+}
+
+/**
+ * A category of the buildings: the group of the tiles on the building page. The name comes from
+ * the texts of the game data by `nameKey`; the order is the one of the data.
+ */
+export interface BuildingCategory {
+  id: number;
+  code: string;
+  nameKey: string;
+  sortOrder: number;
+  imageKey: string | null;
 }
 
 /**
@@ -75,23 +89,19 @@ export interface QueueItem {
 }
 
 /**
- * The amount of a resource on a body now.
+ * The amount of a resource on a body now with the limit of the resource: every resource has the
+ * capacity the storage of its group gives, and a full resource stops its own production only.
  */
 export interface PlanetResource {
   resourceTypeId: number;
   resourceGroupId: number;
   amount: number;
   ratePerHour: number;
-}
-
-/**
- * The storage of a resource group.
- */
-export interface StorageGroup {
-  resourceGroupId: number;
+  /** How much of this resource the storage of the body holds. */
   capacity: number;
-  stored: number;
+  /** Whether the resource is full and its production stands still. */
   isFull: boolean;
+  /** The moment of game time the resource is or will be full, or `null` when it does not fill. */
   fullAt: string | null;
 }
 
@@ -106,6 +116,23 @@ export interface NamedItem {
 }
 
 /**
+ * The place of a body in the galaxy (task 00020).
+ */
+export interface PlanetCoordinates {
+  sectorId: number;
+  systemId: number;
+  orbit: number | null;
+}
+
+/**
+ * The richness of a deposit of a body: the resource and the coefficient of it (task 00020).
+ */
+export interface DepositRichness {
+  resourceTypeId: number;
+  coefficient: number;
+}
+
+/**
  * Everything the client shows about a body (`GET /api/v1/planets/{id}`).
  */
 export interface Planet {
@@ -113,13 +140,28 @@ export interface Planet {
   gameNow: string;
   timeMultiplier: number;
   resources: PlanetResource[];
-  storageGroups: StorageGroup[];
   energy: { output: number; consumption: number; balance: number; queuedBalance: number };
   queue: { slotCount: number; items: QueueItem[] };
   buildings: Building[];
+  /** The categories of the buildings with their order; the building page groups the tiles by them (task 00020). */
+  buildingCategories: BuildingCategory[];
   populationMax: number;
   resourceTypes: NamedItem[];
   resourceGroups: NamedItem[];
+  /** The name the owner gave the body (task 00020). */
+  name: string | null;
+  /** The code of the type of the body; the client reads the name and the picture from the reference table. */
+  typeCode: string | null;
+  /** The place of the body in the galaxy (task 00020). */
+  coordinates: PlanetCoordinates | null;
+  /** The population of the body now (task 00020). */
+  population: number;
+  /** How much the population grows with in an hour; it is negative when it dies down (task 00020). */
+  populationGrowthPerHour: number;
+  /** The time to the largest population, as the server sends it (task 00020). */
+  timeToMaximum: string | null;
+  /** The richness coefficients of the deposits by resource (task 00020). */
+  depositRichness: DepositRichness[];
 }
 
 /**

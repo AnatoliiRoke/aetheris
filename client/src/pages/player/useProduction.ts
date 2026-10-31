@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ProductionFactory, ProductionFactorySummary, ProductionStock } from '../../api/productionApi';
 import { useApi } from '../../api/useApi';
-
-/**
- * How often the factory is read again while the page is open, in milliseconds: a batch
- * finishes on the server and the client only shows it.
- */
-const refreshIntervalMs = 15000;
+import { useReloadOnVisible } from './tabVisibility';
 
 /**
  * How long after the moment of the next unit the factory is read again, in milliseconds, so
@@ -16,7 +11,7 @@ const unitReadyDelayMs = 1000;
 
 /**
  * The longest wait for the next unit, in milliseconds: the timers of the browser hold no
- * longer delay, and the periodic read covers the rest.
+ * longer delay, so a longer wait is cut and the read that follows sets the next one.
  */
 const longestWaitMs = 2147483647;
 
@@ -37,7 +32,7 @@ export interface ProductionState {
 }
 
 /**
- * Reads the factories of a body and the stock of its parts, keeps them fresh and takes the
+ * Reads the factories of a body and the stock of its parts, reads them again on the events of the page and takes the
  * answers of the commands.
  */
 export function useProduction(planetId: number | null): ProductionState {
@@ -100,13 +95,13 @@ export function useProduction(planetId: number | null): ProductionState {
   useEffect(() => {
     active.current = true;
     void reload();
-    const timer = window.setInterval(() => void reload(), refreshIntervalMs);
 
     return () => {
       active.current = false;
-      window.clearInterval(timer);
     };
   }, [reload]);
+
+  useReloadOnVisible(reload);
 
   // The factory that is open is read on its own, because it holds the recipes and the
   // queue. The answer arrives after the page is drawn, so it never blocks the first one.
@@ -132,8 +127,8 @@ export function useProduction(planetId: number | null): ProductionState {
     };
   }, [planetId, effectiveId, production, applyFactory, refreshCount]);
 
-  // The next unit of the queue is read when it is due, so the queue moves at its own moment and
-  // not only with the periodic read.
+  // The next unit of the queue is read when it is due, so the queue moves at its own moment, not on
+  // a periodic read.
   useEffect(() => {
     const nextUnitAt = factory?.queue.find((order) => order.nextUnitAt !== null && !order.isBlocked)?.nextUnitAt;
 
@@ -142,8 +137,13 @@ export function useProduction(planetId: number | null): ProductionState {
     }
 
     const waitMs = Date.parse(nextUnitAt) - Date.parse(factory.gameNow) - (Date.now() - receivedAt) + unitReadyDelayMs;
-    // A unit that is already late waits for the periodic read, so a slow server is not asked every second.
-    const timer = window.setTimeout(() => void reload(), waitMs > 0 ? Math.min(waitMs, longestWaitMs) : refreshIntervalMs);
+    // A unit that is already late waits for the next event (a command, a finished queue record or
+    // the tab becoming visible), so a slow server is not asked every second.
+    if (waitMs <= 0) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => void reload(), Math.min(waitMs, longestWaitMs));
 
     return () => window.clearTimeout(timer);
   }, [factory, receivedAt, reload]);

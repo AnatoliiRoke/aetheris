@@ -10,15 +10,15 @@ import { useSession } from '../../session/useSession';
 import { useTexts } from '../../texts/useTexts';
 import { BodyIdentity, Deposits, FactBar } from './CivilizationParts';
 import { CivShell } from './CivShell';
-import { EnergyPanel, QueuePanel } from './PlanetPanels';
-import { formatNumber, namer } from './planetText';
+import { BuildingQueue } from './BuildingQueue';
+import { EnergyPanel } from './PlanetPanels';
+import { formatNumber, fullestResource, namer } from './planetText';
 import { ProcessesPanel } from './ProcessesPanel';
 import { ProductionPanel } from './ProductionPanel';
 import { ResearchPanel } from './ResearchPanel';
-import { TerraformingPanel } from './TerraformingPanel';
 import { useBodies } from './useBodies';
 import { useEconomy } from './useEconomy';
-import { useNow, usePlanet } from './usePlanet';
+import { usePlanet } from './usePlanet';
 import { useResourceGroups } from './useResourceGroups';
 import { useResourceNames } from './useResourceNames';
 
@@ -131,17 +131,18 @@ function BodyCard({
   const { text } = useTexts();
   const { planets } = useApi();
   const { session } = useSession();
-  const { planet: data, receivedAt, apply } = usePlanet(planet.planetId);
+  const { planet: data, receivedAt, apply, reload } = usePlanet(planet.planetId);
   const { population } = useEconomy(planet.planetId);
-  const now = useNow();
   const confirmed = session.status === 'signed-in' && session.me.emailConfirmed;
 
   const onCancel = (item: QueueItem) =>
     void planets.cancel(planet.planetId, item.id).then((answer) => apply(answer));
 
   const typeName = type ? text(type.nameKey) ?? type.nameKey : t('civ.unknownType');
-  const storage = data?.storageGroups[0] ?? null;
-  const stored = storage?.stored ?? 0;
+  // Every resource has the capacity of its own, so the bar of the storage shows the resource that
+  // is the nearest to its limit: a full resource first, then the one with the most of its capacity.
+  const storage = fullestResource(data?.resources ?? []);
+  const stored = storage?.amount ?? 0;
   const capacity = storage?.capacity ?? 0;
   const energy = data?.energy ?? null;
   const balance = energy?.balance ?? 0;
@@ -188,7 +189,7 @@ function BodyCard({
             warning={energy !== null && balance < consumption}
           />
           <FactBar
-            label={t('civ.storage')}
+            label={storage && data ? `${t('civ.storage')} · ${namer(data, language, text).resource(storage.resourceTypeId)}` : t('civ.storage')}
             percent={capacity > 0 ? (stored / capacity) * 100 : 0}
             tone="store"
             value={
@@ -205,11 +206,11 @@ function BodyCard({
         {data && confirmed ? (
           <>
             <EnergyPanel planet={data} />
-            <QueuePanel
+            <BuildingQueue
               busy={false}
               names={namer(data, language, text)}
-              now={now}
               onCancel={onCancel}
+              onFinished={() => void reload()}
               planet={data}
               receivedAt={receivedAt}
             />
@@ -245,7 +246,6 @@ function BodyCard({
             <ResearchPanel planetId={planet.planetId} />
             <ProductionPanel planetId={planet.planetId} />
             <ProcessesPanel planetId={planet.planetId} />
-            <TerraformingPanel />
           </>
         ) : (
           <p className="meta">{t('civ.lockedUntilConfirmed')}</p>
