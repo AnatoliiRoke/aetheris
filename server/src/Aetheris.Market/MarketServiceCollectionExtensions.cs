@@ -8,6 +8,7 @@ using Aetheris.Market.Events;
 using Aetheris.Market.Services;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Aetheris.Market;
 
@@ -36,6 +37,7 @@ public static class MarketServiceCollectionExtensions
         services.AddScoped<MarketUnitOfWork>();
         services.AddScoped<MarketBootstrapService>();
         services.AddScoped<MarketCatalog>();
+        services.TryAddScoped<IMarketEvents, NullMarketEvents>();
         services.AddScoped<MarketTradeService>();
         services.AddScoped<MarketReadService>();
         services.AddScoped<IScheduledEventHandler, MarketDeliveryHandler>();

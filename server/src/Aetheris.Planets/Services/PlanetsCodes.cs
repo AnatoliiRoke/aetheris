@@ -45,12 +45,6 @@ public static class BuildingEffectTypes
     public const string MarketLotLimit = "market_lot_limit";
 
     /// <summary>
-    /// Raises the speed the goods travel through the portal of the body; the level of the portal
-    /// gives the speed (task 00024, section 3, point 8).
-    /// </summary>
-    public const string PortalDeliveryFactor = "portal_delivery_factor";
-
-    /// <summary>
     /// Gets every effect type, in the order of the form of the admin panel (task 00023).
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -65,7 +59,6 @@ public static class BuildingEffectTypes
         LevelCap,
         PartStorageCapacity,
         MarketLotLimit,
-        PortalDeliveryFactor,
     ];
 
     /// <summary>

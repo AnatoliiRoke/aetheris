@@ -18704,14 +18704,7 @@
           "from_level": 7
         }
       ],
-      "effects": [
-        {
-          "type": "portal_delivery_factor",
-          "base": 1,
-          "growth": 1,
-          "step": 0.5
-        }
-      ],
+      "effects": [],
       "requirements": [
         {
           "type": "technology_level",

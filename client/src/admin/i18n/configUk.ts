@@ -136,10 +136,6 @@ export const configDescriptionsUk: Record<string, string> = {
     'Кількість лотів ринку цивілізації на першому рівні торгового центру.',
   'config.world.seed.market.lot_limit.step.description':
     'Кількість лотів ринку, яку додає кожен наступний рівень торгового центру.',
-  'config.world.seed.market.delivery_factor.base.description':
-    'Швидкість доставлення через портал на першому рівні порталу.',
-  'config.world.seed.market.delivery_factor.step.description':
-    'Швидкість доставлення через портал, яку додає кожен наступний рівень порталу.',
   'config.world.naming.sector_template.description': 'Шаблон назви сектора: {index}.',
   'config.world.naming.system_template.description': 'Шаблон назви зоряної системи: {sector}, {number}.',
   'config.world.naming.body_template.description': 'Шаблон назви тіла: {system}, {orbit}.',
@@ -189,8 +185,8 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.market.delivery.base_seconds.description': 'Час доставки без відстані, у секундах.',
   'config.market.delivery.seconds_per_distance.description': 'Скільки секунд доставки додає кожна одиниця відстані між планетами.',
   'config.market.delivery.energy_resource_code.description': 'Код ресурсу, яким покупець платить за доставку (енергострижні).',
-  'config.market.delivery.energy_per_tonne.description': 'Скільки енергії коштує доставка однієї тонни ресурсу.',
-  'config.market.delivery.energy_per_part.description': 'Скільки енергії коштує доставка однієї деталі.',
+  'config.market.delivery.energy_per_tonne_distance.description':
+    'Скільки енергострижнів коштує доставка однієї тонни товару на одну одиницю відстані.',
   'config.market.list.page_size.description': 'Найбільше рядків, які повертає одне читання ринку.',
   'config.market.exchange.base_rate.description': 'Курс обміну за рівного потоку: скільки кредитів коштує одна одиниця торгової валюти.',
   'config.market.exchange.min_rate.description': 'Найнижчий курс обміну.',

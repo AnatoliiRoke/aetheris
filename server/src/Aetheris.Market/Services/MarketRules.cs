@@ -58,37 +58,33 @@ public static class MarketRules
     public static decimal KeptShare(decimal commissionPercent) => (Hundred - commissionPercent) / Hundred;
 
     /// <summary>
-    /// Gets the delivery fee of a lot of resources.
+    /// Gets the delivery fee in energy rods: it depends on the mass of the goods and on the
+    /// distance, and a portal has no levels and no speed (task 00024, answer of the author).
     /// </summary>
-    /// <param name="quantity">How many units.</param>
-    /// <param name="weight">The weight of one unit in tonnes.</param>
-    /// <param name="perTonne">The fee of a tonne.</param>
-    /// <returns>The fee.</returns>
-    public static long ResourceEnergy(long quantity, decimal weight, decimal perTonne) =>
-        (long)decimal.Ceiling(quantity * weight * perTonne);
-
-    /// <summary>
-    /// Gets the delivery fee of a lot of parts.
-    /// </summary>
-    /// <param name="quantity">How many parts.</param>
-    /// <param name="perPart">The fee of a part.</param>
-    /// <returns>The fee.</returns>
-    public static long PartEnergy(long quantity, decimal perPart) =>
-        (long)decimal.Ceiling(quantity * perPart);
-
-    /// <summary>
-    /// Gets the time of a delivery in seconds.
-    /// </summary>
+    /// <param name="mass">The mass of the whole lot in tonnes.</param>
     /// <param name="distance">The distance between the two bodies.</param>
-    /// <param name="portalFactor">The speed of the slower of the two portals; never below one.</param>
     /// <param name="settings">The settings of the market.</param>
-    /// <returns>The seconds, at least one.</returns>
-    public static long DeliverySeconds(double distance, long portalFactor, MarketSettings settings)
+    /// <returns>The fee; zero only when the distance or the coefficient is zero.</returns>
+    public static long DeliveryEnergy(decimal mass, double distance, MarketSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        decimal factor = Math.Max(1, portalFactor);
-        decimal seconds = (settings.DeliveryBaseSeconds + ((decimal)distance * settings.DeliverySecondsPerDistance)) / factor;
+        decimal fee = mass * (decimal)distance * settings.EnergyPerTonneDistance;
+
+        return fee <= 0 ? 0 : Math.Max(1, (long)decimal.Ceiling(fee));
+    }
+
+    /// <summary>
+    /// Gets the time of a delivery in seconds: the same for every civilization.
+    /// </summary>
+    /// <param name="distance">The distance between the two bodies.</param>
+    /// <param name="settings">The settings of the market.</param>
+    /// <returns>The seconds, at least one.</returns>
+    public static long DeliverySeconds(double distance, MarketSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        decimal seconds = settings.DeliveryBaseSeconds + ((decimal)distance * settings.DeliverySecondsPerDistance);
 
         return Math.Max(1, (long)decimal.Ceiling(seconds));
     }

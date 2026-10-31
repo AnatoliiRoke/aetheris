@@ -294,7 +294,7 @@ public sealed class PartStockService
 
         bool isTerraformingDevice = part.Attributes.ContainsKey(PartAttributeKeys.TerraformingDevice);
 
-        return new PartFacts(part.Id, part.Code, part.NameKey, part.MarkLevel, part.IsArchived, cost, isTerraformingDevice);
+        return new PartFacts(part.Id, part.Code, part.NameKey, part.MarkLevel, part.IsArchived, cost, isTerraformingDevice, part.Weight);
     }
 
     /// <summary>
@@ -442,6 +442,7 @@ public sealed record PartStackInfo(int PartTypeId, int MarkLevel, bool HasRaceBo
 /// <param name="IsArchived">Whether the part is archived.</param>
 /// <param name="ResourceCost">The resources of one part by the recipe that makes it, by the resource.</param>
 /// <param name="IsTerraformingDevice">Whether the part is a one-shot device of the terraforming, by its mark in the attributes (task 00014, section 11).</param>
+/// <param name="Weight">The weight of one part in tonnes (task 00027); the market counts the delivery fee by it (task 00024).</param>
 public sealed record PartFacts(
     int PartTypeId,
     string Code,
@@ -449,4 +450,5 @@ public sealed record PartFacts(
     int MarkLevel,
     bool IsArchived,
     IReadOnlyDictionary<int, decimal> ResourceCost,
-    bool IsTerraformingDevice = false);
+    bool IsTerraformingDevice = false,
+    decimal Weight = 0m);

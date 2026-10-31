@@ -960,8 +960,6 @@ def main() -> None:
     cap_step = coefficient(parameters, "world.seed.level_cap.step")
     lot_limit_base = coefficient(parameters, "world.seed.market.lot_limit.base")
     lot_limit_step = coefficient(parameters, "world.seed.market.lot_limit.step")
-    delivery_factor_base = coefficient(parameters, "world.seed.market.delivery_factor.base")
-    delivery_factor_step = coefficient(parameters, "world.seed.market.delivery_factor.step")
     cost_factor = ONE + cost_growth
     duration_factor = ONE + duration_growth
     catalog = load_json(DEPENDENCY)
@@ -1101,7 +1099,6 @@ def main() -> None:
             effects.append(effect("market_lot_limit", lot_limit_base, ONE, lot_limit_step))
         elif row["name"] == "Портал":
             building_class = "portal"
-            effects.append(effect("portal_delivery_factor", delivery_factor_base, ONE, delivery_factor_step))
         elif row["name"] in PRODUCTS or row["name"] in MODULE_FACTORY.values():
             building_class = "production"
         if not effects and building_class in {"", "sensor", "defence", "trade_center", "portal", "converter", "recycling", "shipyard", "production", "research_center"}:

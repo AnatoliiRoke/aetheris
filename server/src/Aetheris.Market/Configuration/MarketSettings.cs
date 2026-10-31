@@ -14,8 +14,7 @@ namespace Aetheris.Market.Configuration;
 /// <param name="DeliveryBaseSeconds">The time of a delivery with no distance, in seconds.</param>
 /// <param name="DeliverySecondsPerDistance">The seconds a unit of the distance adds.</param>
 /// <param name="EnergyResourceCode">The code of the resource of the delivery fee.</param>
-/// <param name="EnergyPerTonne">The fee of a tonne of a resource.</param>
-/// <param name="EnergyPerPart">The fee of a part.</param>
+/// <param name="EnergyPerTonneDistance">The fee of a tonne carried over a unit of the distance.</param>
 /// <param name="PageSize">The largest number of rows of a read.</param>
 /// <param name="ExchangeBaseRate">The rate with an even flow.</param>
 /// <param name="ExchangeMinRate">The lowest rate.</param>
@@ -32,8 +31,7 @@ public sealed record MarketSettings(
     decimal DeliveryBaseSeconds,
     decimal DeliverySecondsPerDistance,
     string EnergyResourceCode,
-    decimal EnergyPerTonne,
-    decimal EnergyPerPart,
+    decimal EnergyPerTonneDistance,
     int PageSize,
     decimal ExchangeBaseRate,
     decimal ExchangeMinRate,
@@ -60,8 +58,7 @@ public sealed record MarketSettings(
             Number(config, MarketConfigKeys.DeliveryBaseSeconds),
             Number(config, MarketConfigKeys.DeliverySecondsPerDistance),
             config.GetRaw(MarketConfigKeys.EnergyResourceCode) ?? Default(MarketConfigKeys.EnergyResourceCode),
-            Number(config, MarketConfigKeys.EnergyPerTonne),
-            Number(config, MarketConfigKeys.EnergyPerPart),
+            Number(config, MarketConfigKeys.EnergyPerTonneDistance),
             (int)Number(config, MarketConfigKeys.PageSize),
             Number(config, MarketConfigKeys.ExchangeBaseRate),
             Number(config, MarketConfigKeys.ExchangeMinRate),
