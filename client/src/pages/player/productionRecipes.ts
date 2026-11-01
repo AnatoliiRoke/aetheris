@@ -11,7 +11,7 @@ export const allRecipes = 'all';
 /**
  * The value of the filter by group that keeps the recipes of the resources, which have no group of parts.
  */
-export const resourceGroup = 'resources';
+export const resourcesGroupKey = 'resources';
 
 /**
  * The chips of the filter by availability: the identifier of the chip and what it keeps.
@@ -31,17 +31,17 @@ export interface RecipeFilter {
   availability: string;
   /** The type of the factory, or {@link allRecipes}. */
   factory: string;
-  /** The identifier of the group of the parts, {@link resourceGroup} or {@link allRecipes}. */
+  /** The identifier of the group of the parts, {@link resourcesGroupKey} or {@link allRecipes}. */
   group: string;
 }
 
 /**
- * The key a recipe is grouped by: the group of its part, or {@link resourceGroup}.
+ * The key a recipe is grouped by: the group of its part, or {@link resourcesGroupKey}.
  *
  * @param recipe The recipe.
  */
 export function groupKeyOf(recipe: ProductionRecipe): string {
-  return recipe.partGroupId === null ? resourceGroup : String(recipe.partGroupId);
+  return recipe.partGroupId === null ? resourcesGroupKey : String(recipe.partGroupId);
 }
 
 /**

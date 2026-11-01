@@ -65,7 +65,7 @@ export function ResearchPage() {
   const visible = useMemo(
     () =>
       activeBranch
-        ? filterTechnologies(activeBranch.technologies, query, status, (technology) => `${text(technology.nameKey) ?? technology.nameKey} ${text(technology.descriptionKey) ?? ''}`)
+        ? filterTechnologies(activeBranch.technologies, query, status, (technology) => text(technology.nameKey) ?? technology.nameKey)
         : [],
     [activeBranch, query, status, text],
   );
@@ -167,7 +167,6 @@ export function ResearchPage() {
                   {visible.map((technology) => (
                     <TechnologyCard
                       busy={busy || tree.selectedPlanetId === null}
-                      description={text(technology.descriptionKey) ?? technology.descriptionKey}
                       key={technology.id}
                       branchName={text(activeBranch.nameKey) ?? activeBranch.nameKey}
                       deadline={deadlines.get(technology.id) ?? null}

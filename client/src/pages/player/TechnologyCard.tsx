@@ -14,7 +14,7 @@ const neutralMultiplier = 1;
 const percentFactor = 100;
 
 /**
- * A technology of the tree as the design draws it: the name and the state, the description, the
+ * A technology of the tree as the design draws it: the name and the state, the
  * effect now and per level, the cost of the next level one resource at a time with what is
  * short, the time, the reasons it is closed and the button that starts its research. The button
  * is inactive with the reason beside it when the server would refuse; the server checks
@@ -23,7 +23,6 @@ const percentFactor = 100;
  *
  * @param technology The technology.
  * @param name The name of the technology.
- * @param description The description of the technology.
  * @param branchName The name of the branch of the technology.
  * @param resourceName The name of a resource by its identifier.
  * @param resourceGroupCode The code of the group of a resource, for its icon.
@@ -35,7 +34,6 @@ const percentFactor = 100;
 export const TechnologyCard = memo(function TechnologyCard({
   technology,
   name,
-  description,
   branchName,
   resourceName,
   resourceGroupCode,
@@ -46,7 +44,6 @@ export const TechnologyCard = memo(function TechnologyCard({
 }: {
   technology: Technology;
   name: string;
-  description: string;
   branchName: string;
   resourceName: (id: number) => string;
   resourceGroupCode: (id: number) => string | null;
@@ -115,7 +112,6 @@ export const TechnologyCard = memo(function TechnologyCard({
         </div>
         <span className={`chip tech-status tech-status--${statusClass}`}>{statusText}</span>
       </div>
-      <p className="building-card__text">{description}</p>
       {shownEffects.length > 0 ? (
         <div className="building-card__block">
           <span className="civ-label">{t('research.effectLabel')}</span>

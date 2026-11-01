@@ -68,7 +68,8 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     expect(within(tabs).getByRole('tab', { name: 'Флот', selected: false })).toBeInTheDocument();
 
     const tile = (await screen.findByRole('heading', { name: 'Глибинний видобуток' })).closest('li')!;
-    expect(within(tile).getByText('Шахти видобувають більше металів.')).toBeInTheDocument();
+    // The description is not on the tile (the generic text of the data says nothing the name does not).
+    expect(within(tile).queryByText('Шахти видобувають більше металів.')).not.toBeInTheDocument();
     // The effect now (nothing learned yet) and what the next level adds, from the server's numbers.
     expect(within(tile).getByText('Видобуток металів')).toBeInTheDocument();
     expect(within(tile).getByText('+5% / рівень')).toBeInTheDocument();
@@ -109,7 +110,7 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     expect(await screen.findByText('Черга досліджень заповнена')).toBeInTheDocument();
   });
 
-  it('searches the technologies of the branch by name and by description', async () => {
+  it('searches the technologies of the branch by name', async () => {
     const user = userEvent.setup();
     renderPage('/planet/research', { auth: signedIn(), research: fakeResearchApi({ tree: vi.fn().mockResolvedValue(tree()) }), ...texts });
 
@@ -120,11 +121,13 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     expect(screen.getByRole('heading', { name: 'Логістика складів' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Глибинний видобуток' })).not.toBeInTheDocument();
 
-    // The description is searched too.
+    // The description is not searched: it is not on the tile.
     await user.clear(search);
     await user.type(search, 'реактори');
+    expect(screen.getByText('Нічого не знайдено. Змініть пошук або фільтр.')).toBeInTheDocument();
+    await user.clear(search);
+    await user.type(search, 'плазм');
     expect(screen.getByRole('heading', { name: 'Плазмова енергетика' })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Логістика складів' })).not.toBeInTheDocument();
 
     await user.clear(search);
     await user.type(search, 'такого немає');

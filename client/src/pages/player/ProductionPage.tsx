@@ -12,12 +12,14 @@ import { ProductionQueue } from './ProductionQueue';
 import { RecipeCard } from './RecipeCard';
 import { ScreenHead } from './ScreenHead';
 import { galaxyPlace } from './planetText';
-import { allRecipes, availabilityFilters, factoryOf, filterRecipes, groupRecipes, resourceGroup } from './productionRecipes';
+import { allRecipes, availabilityFilters, factoryOf, filterRecipes, groupRecipes, resourcesGroupKey } from './productionRecipes';
 import { noticeFromError, type Notice } from './screenNotice';
 import { useProductionOrders } from './useActiveOrders';
 import { usePlanet } from './usePlanet';
 import { useRecipes } from './useRecipes';
+import { useResourceGroups } from './useResourceGroups';
 import { useCurrentPlanetId, useShellActions } from './useShell';
+import { useWorldReference } from './useWorldReference';
 
 /**
  * The prefixes of the error codes of the production that have their own text for the player.
@@ -38,6 +40,7 @@ export function ProductionPage() {
   useDocumentTitle(t('meta.production.title'));
 
   const planetId = useCurrentPlanetId();
+  const resourceGroupCode = useResourceGroups(useWorldReference());
   const { planet } = usePlanet(planetId);
   const { list, failed, reload } = useRecipes(planetId);
   const orders = useProductionOrders(planetId, () => void reload());
@@ -85,7 +88,7 @@ export function ProductionPage() {
   const visible = useMemo(
     () =>
       recipes
-        ? filterRecipes(recipes, { query, availability, factory, group }, (recipe) => `${text(recipe.nameKey) ?? recipe.nameKey} ${text(recipe.descriptionKey) ?? ''}`)
+        ? filterRecipes(recipes, { query, availability, factory, group }, (recipe) => text(recipe.nameKey) ?? recipe.nameKey)
         : [],
     [recipes, query, availability, factory, group, text],
   );
@@ -208,7 +211,7 @@ export function ProductionPage() {
                 <option value={allRecipes}>{t('production.allGroups')}</option>
                 {groups.map((entry) => (
                   <option key={entry.key} value={entry.key}>
-                    {entry.key === resourceGroup ? t('production.groupResources') : (text(entry.nameKey ?? '') ?? entry.nameKey ?? entry.key)}
+                    {entry.key === resourcesGroupKey ? t('production.groupResources') : (text(entry.nameKey ?? '') ?? entry.nameKey ?? entry.key)}
                   </option>
                 ))}
               </select>
@@ -226,11 +229,11 @@ export function ProductionPage() {
             groupRecipes(visible).map((entry) => (
               <section aria-labelledby={`production-${entry.key}`} className="build-category" key={entry.key}>
                 <h2 className="build-category__title" id={`production-${entry.key}`}>
-                  {entry.key === resourceGroup ? t('production.groupResources') : (text(entry.nameKey ?? '') ?? entry.nameKey ?? entry.key)}
+                  {entry.key === resourcesGroupKey ? t('production.groupResources') : (text(entry.nameKey ?? '') ?? entry.nameKey ?? entry.key)}
                 </h2>
                 <ul className="building-grid">
                   {entry.recipes.map((recipe) => (
-                    <RecipeCard busy={busy} factoryName={factoryNameOf(recipe.buildingTypeId)} key={recipe.recipeId} onProduce={onProduce} recipe={recipe} />
+                    <RecipeCard busy={busy} factoryName={factoryNameOf(recipe.buildingTypeId)} key={recipe.recipeId} onProduce={onProduce} recipe={recipe} resourceGroupCode={resourceGroupCode} />
                   ))}
                 </ul>
               </section>

@@ -24,7 +24,15 @@ describe('the production screen (task 00032)', () => {
     expect(within(recipes).getByText('Будматеріали')).toBeInTheDocument();
     expect(within(recipes).getByText('Корпусний модуль')).toBeInTheDocument();
     expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
-    expect(within(recipes).getByText('На одиницю: Залізо 4')).toBeInTheDocument();
+    // The cost of a unit is a list of resources one by one, like on the other screens, and the time of a unit.
+    const materials = within(within(recipes).getByText('Будматеріали').closest('li')!);
+    const cost = materials.getByRole('list', { name: 'Потрібні ресурси' });
+    expect(within(cost).getByText('Залізо')).toBeInTheDocument();
+    expect(within(cost).getByText('4')).toBeInTheDocument();
+    expect(materials.getByText('Час виробництва')).toBeInTheDocument();
+    expect(within(recipes).queryByText(/На одиницю/)).toBeNull();
+    // The description of a recipe is not on the tile.
+    expect(within(recipes).queryByText('Плити й балки з сировини.')).toBeNull();
     expect(within(recipes).getByText('Спершу збудуй: Верф')).toBeInTheDocument();
     expect(within(recipes).getAllByRole('button', { name: 'Виробляти' })).toHaveLength(1);
   });

@@ -11,7 +11,7 @@ type Names = ReturnType<typeof namer>;
 const buildingLevelRequirement = 'building_level';
 
 /**
- * A building as the design draws it: the name and the level, the description, the effects of the
+ * A building as the design draws it: the name and the level, the effects of the
  * level built, the resources of the next level one by one with what is short, the time, the
  * energy once it is done, and the button that queues it. The button is inactive with the reasons
  * in its hint when the server would refuse; the server checks everything again.
@@ -55,7 +55,6 @@ export function BuildingCard({
         <h3 className="building-card__name">{name}</h3>
         <span className="badge">{building.level > 0 ? t('planet.level', { level: building.level }) : isClosed ? t('build.closed') : t('planet.notBuilt')}</span>
       </div>
-      <p className="building-card__text">{lookup(language, building.descriptionKey, '', undefined, names.entities)}</p>
       {building.queuedLevel > building.level ? <p className="meta">{t('planet.queuedTo', { level: building.queuedLevel })}</p> : null}
       <div className="building-card__block">
         <span className="civ-label">{t('build.effects')}</span>
