@@ -407,13 +407,6 @@
       "description": "Credits of a new civilization."
     },
     {
-      "key": "world.seed.start.silicore_ore",
-      "value": "400",
-      "minimum": "0",
-      "maximum": "1000000000",
-      "description": "Silicore ore of a new civilization."
-    },
-    {
       "key": "world.seed.technology.bonus",
       "value": "0.08",
       "minimum": "0",

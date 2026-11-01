@@ -368,7 +368,6 @@ START_NAMES = {
     "Залізна руда": "world.seed.start.iron_ore",
     "Будматеріали": "world.seed.start.building_materials",
     "Кредити": "world.seed.start.credits",
-    "Силікорова руда": "world.seed.start.silicore_ore",
 }
 START_BUILDINGS = {"Адміністративний центр", "Житловий комплекс (Міста)", "Склад", "Сонячна електростанція"}
 METAL_NAMES = {

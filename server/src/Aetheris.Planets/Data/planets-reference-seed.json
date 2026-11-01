@@ -5816,7 +5816,7 @@
       },
       "costs": [
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -5824,11 +5824,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -6017,7 +6017,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -6025,11 +6025,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -6266,7 +6266,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -6274,11 +6274,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -6527,7 +6527,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -6535,11 +6535,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -6770,7 +6770,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -6778,11 +6778,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -7025,7 +7025,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -7033,11 +7033,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -7280,7 +7280,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -7288,11 +7288,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -7487,7 +7487,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -7495,11 +7495,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -7736,7 +7736,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -7744,11 +7744,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -7985,7 +7985,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -7993,11 +7993,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -8234,7 +8234,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -8242,11 +8242,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -8489,7 +8489,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -8497,11 +8497,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -8744,7 +8744,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -8752,11 +8752,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -8999,7 +8999,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -9007,11 +9007,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -9254,7 +9254,7 @@
           "significant": 2
         },
         {
-          "resource": "resource_20",
+          "resource": "resource_27",
           "base": 40,
           "growth": 1.5,
           "step": 0,
@@ -9262,11 +9262,11 @@
           "significant": 2
         },
         {
-          "resource": "resource_27",
+          "resource": "resource_20",
           "base": 40,
           "growth": 1.5,
           "step": 0,
-          "from_level": 1,
+          "from_level": 4,
           "significant": 2
         },
         {
@@ -9489,16 +9489,8 @@
       },
       "costs": [
         {
-          "resource": "resource_6",
+          "resource": "resource_1",
           "base": 100,
-          "growth": 1.5,
-          "step": 0,
-          "from_level": 1,
-          "significant": 2
-        },
-        {
-          "resource": "resource_20",
-          "base": 50,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -9510,6 +9502,22 @@
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
+          "significant": 2
+        },
+        {
+          "resource": "resource_6",
+          "base": 100,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 4,
+          "significant": 2
+        },
+        {
+          "resource": "resource_20",
+          "base": 50,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 4,
           "significant": 2
         },
         {

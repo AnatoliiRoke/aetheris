@@ -1665,10 +1665,6 @@
         {
           "resource": "resource_27",
           "amount": 1000
-        },
-        {
-          "resource": "resource_6",
-          "amount": 400
         }
       ],
       "name": {
@@ -1717,10 +1713,6 @@
         {
           "resource": "resource_27",
           "amount": 1000
-        },
-        {
-          "resource": "resource_6",
-          "amount": 400
         }
       ],
       "name": {
@@ -1769,10 +1761,6 @@
         {
           "resource": "resource_27",
           "amount": 1000
-        },
-        {
-          "resource": "resource_6",
-          "amount": 400
         }
       ],
       "name": {
@@ -1821,10 +1809,6 @@
         {
           "resource": "resource_27",
           "amount": 1000
-        },
-        {
-          "resource": "resource_6",
-          "amount": 400
         }
       ],
       "name": {

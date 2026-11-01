@@ -282,6 +282,38 @@ public sealed class BalancedEconomyTests
     }
 
     /// <summary>
+    /// The way out of a mistake (task 00030): a player who spent all the building materials and
+    /// all the energy can still build the mines, the plant of the building materials and the
+    /// first levels of the solar plant from ores and credits alone, and credits never stop coming.
+    /// </summary>
+    [Fact]
+    public void The_way_out_of_a_mistake_costs_ores_and_credits_only()
+    {
+        const int WayOutLevels = 3;
+        HashSet<string> allowed = [.. World.Resources.Where(resource => resource.Group == "resource_group_1" || NameOf[resource.Code] == "Кредити").Select(resource => resource.Code)];
+        string materials = World.Resources.Single(resource => NameOf[resource.Code] == "Будматеріали").Code;
+        string materialsFactory = Production.Recipes.Single(recipe => recipe.Resource == materials).Factory!;
+        SeedBuildingType plant = Planets.BuildingTypes
+            .Where(type => type.Effects.Any(effect => effect.Type == "energy_output"))
+            .OrderBy(type => type.Effects.First(effect => effect.Type == "energy_output").Base)
+            .First();
+        IReadOnlyList<SeedBuildingType> wayOut =
+        [
+            .. Planets.BuildingTypes.Where(type => type.BuildingClass == "mine"),
+            Planets.BuildingTypes.Single(type => type.Code == materialsFactory),
+            plant,
+        ];
+
+        Assert.All(wayOut, type =>
+        {
+            for (int level = 1; level <= WayOutLevels; level++)
+            {
+                Assert.All(BuildingPrices(type, level).Keys, resource => Assert.True(allowed.Contains(resource), $"{type.Code} level {level} asks for {NameOf[resource]}"));
+            }
+        });
+    }
+
+    /// <summary>
     /// The higher levels need minerals: from the tenth level of a building and the eighth of a
     /// technology every level asks for a mineral (item 9 of the task).
     /// </summary>

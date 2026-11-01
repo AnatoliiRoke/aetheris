@@ -61,7 +61,7 @@ public sealed class ChosenSeedTests
 
     private const int BranchCount = 2;
 
-    private const int StartResourceCount = 4;
+    private const int StartResourceCount = 3;
 
     private const int StartBuildingCount = 4;
 

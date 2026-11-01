@@ -131,10 +131,6 @@ def main() -> None:
             if moment <= horizon:
                 spent[NAME_OF_CODE[resource]] += amount
         print(f"  {horizon} h: " + ", ".join(f"{name} {amount}" for name, amount in sorted(spent.items(), key=lambda row: -row[1])))
-    plant = BUILDING_BY_NAME["Сонячна електростанція"]
-    silicore = CODE_OF_NAME["Силікорова руда"]
-    upgrade = sum(building_cost(BUILDINGS[plant], level).get(silicore, 0) for level in (2, 3))
-    print(f"  silicore for the second and the third level of the solar plant: {upgrade}")
     print(f"  the start stock of the seed: " + ", ".join(f"{NAME_OF_CODE[row['resource']]} {row['amount']}" for row in WORLD["races"][0]["start_resources"]))
     print(f"First mining ship: day {result['days']:.1f}, done={result['done']}, market purchases {result['bought']:.0f} credits")
     print("  levels:", result["levels"])

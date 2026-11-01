@@ -178,7 +178,6 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.world.seed.start.iron_ore.description': 'Залізна руда нової цивілізації.',
   'config.world.seed.start.building_materials.description': 'Будматеріали нової цивілізації.',
   'config.world.seed.start.credits.description': 'Кредити нової цивілізації.',
-  'config.world.seed.start.silicore_ore.description': 'Силікорова руда нової цивілізації.',
   'config.world.seed.technology.bonus.description': 'Частка, на яку технологія з бонусом збільшує свій множник за кожен рівень.',
   'config.world.seed.technology.shortening.description': 'Частка, на яку технологія скорочує час будівництва чи виробництва за кожен рівень.',
   'config.world.seed.part.growth.description': 'Частка, на яку характеристики й вага деталі зростають за кожну попередню деталь її групи.',

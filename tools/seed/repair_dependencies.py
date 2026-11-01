@@ -33,6 +33,13 @@ gives the same file. The rules (each with the reason):
    it the administrative centre, the science centre and mathematics wait for each other
    (item 2 of the task).
 
+7. The way out of a mistake (task 00030): the first three levels of a mine, a quarry or a station
+   of the extraction group do not ask for building materials, and the first three levels of the
+   solar plant ask for iron ore and credits instead of silicore and building materials. A player
+   who spent all the building materials or all the energy can still build the mine of the
+   tectonite, the plant of the building materials and the plant of the power from credits and
+   ore alone, and credits never stop coming.
+
 Run: python3 tools/seed/repair_dependencies.py
 """
 
@@ -139,7 +146,25 @@ def fix_tiers(item: dict) -> None:
                 if name not in tier and name not in LUCK and not (level < FIRST_PRODUCED_LEVEL and name in LATE_PRODUCED):
                     tier.append(name)
         tier.sort(key=order_key)
+    recover(item, tiers)
     item["tiers"] = tiers
+
+
+RECOVERY_LEVELS = 3
+SOLAR = "Сонячна електростанція"
+MATERIALS = "Будматеріали"
+EXTRACTION = "Видобуток на планеті"
+
+
+def recover(item: dict, tiers: list[list[str]]) -> None:
+    """The first levels of the buildings that lead out of a mistake cost ore and credits only."""
+    if item["kind"] != "budivlia":
+        return
+    for index in range(min(RECOVERY_LEVELS, len(tiers))):
+        if item["group"] == EXTRACTION:
+            tiers[index] = [name for name in tiers[index] if name != MATERIALS]
+        elif item["name"] == SOLAR:
+            tiers[index] = ["Залізна руда", "Кредити"]
 
 
 ORDER = [
