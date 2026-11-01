@@ -506,7 +506,8 @@ export function sampleMyLot(overrides: Partial<MyLot> = {}): MyLot {
 export function fakeMarketApi(overrides: Partial<MarketApi> = {}): MarketApi {
   return {
     overview: vi.fn().mockResolvedValue(sampleMarketOverview()),
-    lots: vi.fn().mockResolvedValue({ items: [sampleMarketLot()], energyRodBalance: 8, destinationHasPortal: true }),
+    lots: vi.fn().mockResolvedValue({ items: [sampleMarketLot()], energyRodBalance: 8, destinationHasPortal: true, total: 1, offset: 0, limit: 100 }),
+    lotGroups: vi.fn().mockResolvedValue([{ resourceTypeId: 1, partTypeId: null, lotCount: 3, minPricePerUnit: 4, totalQuantity: 1500 }]),
     myLots: vi.fn().mockResolvedValue([sampleMyLot()]),
     deliveries: vi.fn().mockResolvedValue({ incoming: [], outgoing: [] }),
     deals: vi.fn().mockResolvedValue([]),

@@ -369,3 +369,30 @@
 @media (prefers-reduced-motion: reduce) {
   .mk-skel { animation: none; }
 }
+
+/* ---------- the view of the lots, the groups and the pager (task 00026) ---------- */
+.mk-viewbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.mk-viewbar__count { font-size: var(--fs-small); color: var(--text-2); }
+.mk-seg--compact { display: inline-flex; width: auto; }
+.mk-seg--compact .mk-seg__item { flex: 0 0 auto; padding: 6px 18px; }
+.mk-chip--focus { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; }
+.mk-groupsort { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 10px 4px; }
+.mk-groups { margin: 0; padding: 0; list-style: none; }
+.mk-group { display: grid; grid-template-columns: minmax(190px, 1.4fr) minmax(0, 2.2fr) auto; align-items: center; gap: 14px; min-height: 58px; padding: 6px 10px; border-bottom: 1px solid var(--track); }
+.mk-group:last-child { border-bottom: 0; }
+.mk-group:hover { background: color-mix(in srgb, var(--border) 31%, transparent); }
+.mk-group__item { display: flex; align-items: center; gap: 10px; min-width: 0; font-weight: 500; }
+.mk-group__facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; font-size: var(--fs-ui); color: var(--text-soft); }
+.mk-group__qty { color: var(--text-2); }
+.mk-group__open { gap: 6px; }
+.mk-group__open svg { transform: rotate(-90deg); }
+.mk-pager { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.mk-pager__range { min-width: 140px; text-align: center; font-size: var(--fs-ui); color: var(--text-soft); }
+@media (max-width: 767px) {
+  .mk-group { grid-template-columns: 1fr; gap: 8px; padding: 12px 10px; }
+  .mk-group__open { width: 100%; min-height: 44px; }
+  .mk-pager .mk-btn { flex: 1 1 0; }
+  .mk-pager__range { min-width: 0; }
+  .mk-seg--compact { display: flex; width: 100%; }
+  .mk-seg--compact .mk-seg__item { flex: 1 1 0; }
+}

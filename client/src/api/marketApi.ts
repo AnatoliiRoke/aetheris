@@ -93,6 +93,11 @@ export interface MarketLot {
  */
 export interface MarketLots {
   items: MarketLot[];
+  /** How many lots match, all the pages together. */
+  total: number;
+  offset: number;
+  /** How many lots a page may hold. */
+  limit: number;
   /** The energy rods on the chosen body, or `null` when no body was chosen. */
   energyRodBalance: number | null;
   /** Whether the chosen body has a portal, or `null` when no body was chosen. */
@@ -100,16 +105,41 @@ export interface MarketLots {
 }
 
 /**
- * What a player looks for on the market. A body of the player makes the answer carry the cost of
- * the delivery to it.
+ * The orders the lots may be listed in; the server sorts, so the order holds over every page.
+ */
+export type LotSort = 'created' | 'price' | 'total' | 'quantity' | 'item' | 'time' | 'rods';
+
+/**
+ * What a player looks for on the market, in what order and which page. A body of the player makes
+ * the answer carry the cost of the delivery to it.
  */
 export interface LotsQuery {
   marketLevelId?: number;
-  resourceTypeId?: number;
-  partTypeId?: number;
+  /** The resources to show; without both lists every item is shown. */
+  resourceTypeIds?: number[];
+  /** The parts to show. */
+  partTypeIds?: number[];
+  minPrice?: number;
+  maxPrice?: number;
   maxSum?: number;
   offset?: number;
+  limit?: number;
   planetId?: number;
+  sort?: LotSort;
+  descending?: boolean;
+  /** The items in the order of their names (`r12`, `p3`), for the sort by item. */
+  itemOrder?: string[];
+}
+
+/**
+ * The lots of one item: how many there are, the lowest price of a unit and the whole quantity.
+ */
+export interface LotGroup {
+  resourceTypeId: number | null;
+  partTypeId: number | null;
+  lotCount: number;
+  minPricePerUnit: number;
+  totalQuantity: number;
 }
 
 /**
@@ -251,6 +281,7 @@ export interface ListLotRequest {
 export interface MarketApi {
   overview(): Promise<MarketOverview>;
   lots(query: LotsQuery): Promise<MarketLots>;
+  lotGroups(query: LotsQuery): Promise<LotGroup[]>;
   myLots(): Promise<MyLot[]>;
   deliveries(): Promise<MarketDeliveries>;
   deals(offset?: number): Promise<MarketDeal[]>;
@@ -267,14 +298,34 @@ export interface MarketApi {
 const prefix = '/api/v1/market';
 
 /**
- * Builds the query string of a read from the values that are set.
+ * Builds the query string of a read from the values that are set; a list is written with commas.
  */
-function queryString(values: Record<string, number | undefined>): string {
+function queryString(values: Record<string, number | string | readonly number[] | readonly string[] | undefined>): string {
   const parts = Object.entries(values)
-    .filter((entry): entry is [string, number] => entry[1] !== undefined)
-    .map(([key, value]) => `${key}=${value}`);
+    .filter((entry): entry is [string, number | string | readonly number[] | readonly string[]] => entry[1] !== undefined)
+    .map(([key, value]) => `${key}=${encodeURIComponent(Array.isArray(value) ? value.join(',') : String(value))}`);
 
   return parts.length === 0 ? '' : `?${parts.join('&')}`;
+}
+
+/**
+ * The query of the lots as the server reads it.
+ */
+function lotsParameters(query: LotsQuery): Record<string, number | string | readonly number[] | readonly string[] | undefined> {
+  return {
+    market_level_id: query.marketLevelId,
+    resource_type_ids: query.resourceTypeIds,
+    part_type_ids: query.partTypeIds,
+    min_price: query.minPrice,
+    max_price: query.maxPrice,
+    max_sum: query.maxSum,
+    offset: query.offset,
+    limit: query.limit,
+    planet_id: query.planetId,
+    sort: query.sort,
+    direction: query.descending === undefined ? undefined : query.descending ? 'desc' : 'asc',
+    item_order: query.itemOrder,
+  };
 }
 
 /**
@@ -286,18 +337,10 @@ export function createMarketApi(http: HttpClient): MarketApi {
       return camelize<MarketOverview>(await http.get<unknown>(`${prefix}/overview`));
     },
     async lots(query) {
-      return camelize<MarketLots>(
-        await http.get<unknown>(
-          `${prefix}/lots${queryString({
-            market_level_id: query.marketLevelId,
-            resource_type_id: query.resourceTypeId,
-            part_type_id: query.partTypeId,
-            max_sum: query.maxSum,
-            offset: query.offset,
-            planet_id: query.planetId,
-          })}`,
-        ),
-      );
+      return camelize<MarketLots>(await http.get<unknown>(`${prefix}/lots${queryString(lotsParameters(query))}`));
+    },
+    async lotGroups(query) {
+      return camelize<LotGroup[]>(await http.get<unknown>(`${prefix}/lot-groups${queryString({ ...lotsParameters(query), sort: undefined, direction: undefined, item_order: undefined, offset: undefined, limit: undefined })}`));
     },
     async myLots() {
       return camelize<MyLot[]>(await http.get<unknown>(`${prefix}/my-lots`));

@@ -128,19 +128,11 @@ public sealed class MarketReadService
     }
 
     /// <summary>
-    /// Gets the open lots a player sees, newest first. With a body of the player named, every lot
-    /// also carries what the delivery to that body costs and why the player cannot buy it.
+    /// Gets the lots a player sees: the open lots of the levels the player may read, narrowed by the
+    /// filter. The same query serves the list and the groups, so they never disagree.
     /// </summary>
-    /// <param name="playerId">The player.</param>
-    /// <param name="filter">What the player looks for.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The lots; the lots of the player are among them and cannot be bought.</returns>
-    public async Task<LotsDto> LotsAsync(string playerId, LotFilter filter, CancellationToken cancellationToken)
+    private async Task<IQueryable<MarketLotEntity>> VisibleLotsAsync(string playerId, LotFilter filter, CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrEmpty(playerId);
-        ArgumentNullException.ThrowIfNull(filter);
-
-        MarketSettings settings = MarketSettings.From(_config);
         IReadOnlyDictionary<int, MarketLevelEntity> levels = await _catalog.LevelsAsync(cancellationToken).ConfigureAwait(false);
         List<int> sectors = [.. (await _world.GetOwnedPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false)).Select(planet => planet.SectorId).Distinct()];
         List<int> galacticLevels = [.. levels.Values.Where(level => level.IsActive && level.Visibility == MarketVisibilities.Galactic).Select(level => level.Id)];
@@ -155,14 +147,14 @@ public sealed class MarketReadService
             query = query.Where(lot => lot.MarketLevelId == levelId);
         }
 
-        if (filter.ResourceTypeId is { } resourceTypeId)
+        if (filter.ResourceTypeIds is not null || filter.PartTypeIds is not null)
         {
-            query = query.Where(lot => lot.ResourceTypeId == resourceTypeId);
-        }
+            List<int> resourceIds = [.. filter.ResourceTypeIds ?? []];
+            List<int> partIds = [.. filter.PartTypeIds ?? []];
 
-        if (filter.PartTypeId is { } partTypeId)
-        {
-            query = query.Where(lot => lot.PartTypeId == partTypeId);
+            query = query.Where(lot =>
+                (lot.ResourceTypeId != null && resourceIds.Contains(lot.ResourceTypeId.Value))
+                || (lot.PartTypeId != null && partIds.Contains(lot.PartTypeId.Value)));
         }
 
         if (filter.SellerPlayerId is { Length: > 0 } sellerId)
@@ -170,23 +162,127 @@ public sealed class MarketReadService
             query = query.Where(lot => lot.SellerPlayerId == sellerId);
         }
 
+        if (filter.MinPrice is { } minPrice)
+        {
+            query = query.Where(lot => lot.PricePerUnit >= minPrice);
+        }
+
+        if (filter.MaxPrice is { } maxPrice)
+        {
+            query = query.Where(lot => lot.PricePerUnit <= maxPrice);
+        }
+
         if (filter.MaxSum is { } maxSum)
         {
             query = query.Where(lot => lot.Quantity * lot.PricePerUnit <= maxSum);
         }
 
-        List<MarketLotEntity> lots = await query
-            .OrderByDescending(lot => lot.Id)
-            .Skip(Math.Max(0, filter.Offset))
-            .Take(settings.PageSize)
+        return query;
+    }
+
+    /// <summary>
+    /// Gets the lots a player sees by item: how many lots each item has, the lowest price of a
+    /// unit and the quantity of all of them, so a player with hundreds of lots finds an item first.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="filter">What the player looks for; the sort and the page do not apply.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The groups.</returns>
+    public async Task<IReadOnlyList<LotGroupDto>> LotGroupsAsync(string playerId, LotFilter filter, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+        ArgumentNullException.ThrowIfNull(filter);
+
+        IQueryable<MarketLotEntity> query = await VisibleLotsAsync(playerId, filter, cancellationToken).ConfigureAwait(false);
+
+        return await query
+            .GroupBy(lot => new { lot.ResourceTypeId, lot.PartTypeId })
+            .Select(group => new LotGroupDto(group.Key.ResourceTypeId, group.Key.PartTypeId, group.Count(), group.Min(lot => lot.PricePerUnit), group.Sum(lot => lot.Quantity)))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Gets a page of the lots a player sees. With a body of the player named, every lot also carries
+    /// what the delivery to that body costs and why the player cannot buy it.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="filter">What the player looks for, in what order and which page.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The page of the lots with the number of all the lots that match; the lots of the player are among them and cannot be bought.</returns>
+    public async Task<LotsDto> LotsAsync(string playerId, LotFilter filter, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+        ArgumentNullException.ThrowIfNull(filter);
+
+        MarketSettings settings = MarketSettings.From(_config);
+        IQueryable<MarketLotEntity> query = await VisibleLotsAsync(playerId, filter, cancellationToken).ConfigureAwait(false);
+        int total = await query.CountAsync(cancellationToken).ConfigureAwait(false);
+        int limit = filter.Limit is > 0 ? Math.Min(filter.Limit, settings.PageSize) : settings.PageSize;
+        int offset = Math.Max(0, filter.Offset);
+        bool descending = filter.Descending;
+        IReadOnlyDictionary<long, double> distances = new Dictionary<long, double>();
+        List<MarketLotEntity> lots;
+
+        if (filter.PlanetId is { } sortPlanetId && filter.Sort is LotSorts.Time or LotSorts.Rods)
+        {
+            distances = await _world
+                .GetPlanetDistancesAsync(sortPlanetId, await query.Select(lot => lot.SellerPlanetId).Distinct().ToListAsync(cancellationToken).ConfigureAwait(false), cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        if (filter.Sort is LotSorts.Item or LotSorts.Time or LotSorts.Rods)
+        {
+            // The order of an item, of a distance or of a fee is not a column, so the lightweight rows of
+            // the lots that match are ordered here and only the page is read in full.
+            MarketWeights sortWeights = filter.Sort == LotSorts.Rods ? await _catalog.WeightsAsync(cancellationToken).ConfigureAwait(false) : new MarketWeights(new Dictionary<int, decimal>(), new Dictionary<int, decimal>());
+            Dictionary<string, int> rank = (filter.ItemOrder ?? []).Select((key, index) => (key, index)).ToDictionary(pair => pair.key, pair => pair.index, StringComparer.Ordinal);
+            var rows = await query
+                .Select(lot => new { lot.Id, lot.SellerPlanetId, lot.Quantity, lot.ResourceTypeId, lot.PartTypeId })
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+            IEnumerable<long> ordered = (descending
+                ? rows.OrderByDescending(row => SortKey(row.Id, row.SellerPlanetId, row.Quantity, row.ResourceTypeId, row.PartTypeId)).ThenByDescending(row => row.Id)
+                : rows.OrderBy(row => SortKey(row.Id, row.SellerPlanetId, row.Quantity, row.ResourceTypeId, row.PartTypeId)).ThenBy(row => row.Id))
+                .Select(row => row.Id);
+            List<long> pageIds = [.. ordered.Skip(offset).Take(limit)];
+            Dictionary<long, MarketLotEntity> page = await _db.MarketLots.AsNoTracking()
+                .Where(lot => pageIds.Contains(lot.Id))
+                .ToDictionaryAsync(lot => lot.Id, cancellationToken)
+                .ConfigureAwait(false);
+
+            lots = [.. pageIds.Select(id => page[id])];
+
+            double SortKey(long id, long planetId, long quantity, int? resourceTypeId, int? partTypeId)
+            {
+                _ = id;
+
+                return filter.Sort switch
+                {
+                    LotSorts.Item => rank.GetValueOrDefault(resourceTypeId is { } r ? $"r{r}" : $"p{partTypeId}", int.MaxValue),
+                    LotSorts.Time => distances.GetValueOrDefault(planetId),
+                    _ => distances.GetValueOrDefault(planetId) * (double)(sortWeights.UnitWeight(resourceTypeId, partTypeId) * quantity),
+                };
+            }
+        }
+        else
+        {
+            IOrderedQueryable<MarketLotEntity> ordered = filter.Sort switch
+            {
+                LotSorts.Price => descending ? query.OrderByDescending(lot => lot.PricePerUnit) : query.OrderBy(lot => lot.PricePerUnit),
+                LotSorts.Total => descending ? query.OrderByDescending(lot => lot.Quantity * lot.PricePerUnit) : query.OrderBy(lot => lot.Quantity * lot.PricePerUnit),
+                LotSorts.Quantity => descending ? query.OrderByDescending(lot => lot.Quantity) : query.OrderBy(lot => lot.Quantity),
+                _ => descending ? query.OrderByDescending(lot => lot.Id) : query.OrderBy(lot => lot.Id),
+            };
+
+            lots = await ordered.ThenBy(lot => lot.Id).Skip(offset).Take(limit).ToListAsync(cancellationToken).ConfigureAwait(false);
+        }
 
         IReadOnlyDictionary<string, PlayerCardDto> cards = await CardsAsync(lots.Select(lot => lot.SellerPlayerId), cancellationToken).ConfigureAwait(false);
 
         if (filter.PlanetId is not { } planetId)
         {
-            return new LotsDto([.. lots.Select(lot => ToItem(lot, cards, null, null, null))], null, null);
+            return new LotsDto([.. lots.Select(lot => ToItem(lot, cards, null, null, null))], null, null, total, offset, limit);
         }
 
         if (await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false) is not { } planet
@@ -202,7 +298,7 @@ public sealed class MarketReadService
         long energyHave = energyId is { } energyResourceId ? stock.GetValueOrDefault(energyResourceId) : 0;
         long tradeHave = (await _economy.GetBalanceAsync(playerId, currencies.TradeResourceTypeId, cancellationToken).ConfigureAwait(false)).Amount;
         MarketWeights weights = await _catalog.WeightsAsync(cancellationToken).ConfigureAwait(false);
-        IReadOnlyDictionary<long, double> distances = await _world
+        distances = await _world
             .GetPlanetDistancesAsync(planetId, [.. lots.Select(lot => lot.SellerPlanetId).Distinct()], cancellationToken)
             .ConfigureAwait(false);
 
@@ -235,7 +331,7 @@ public sealed class MarketReadService
             items.Add(ToItem(lot, cards, seconds, energy, reason));
         }
 
-        return new LotsDto(items, energyHave, hasPortal);
+        return new LotsDto(items, energyHave, hasPortal, total, offset, limit);
     }
 
     /// <summary>
@@ -497,22 +593,59 @@ public sealed class MarketReadService
     }
 }
 
-/// <summary>What a player looks for on the market.</summary>
+/// <summary>The orders the lots of the market may be listed in.</summary>
+public static class LotSorts
+{
+    /// <summary>Newest first by default: the order the lots were put up in.</summary>
+    public const string Created = "created";
+
+    /// <summary>By the price of a unit.</summary>
+    public const string Price = "price";
+
+    /// <summary>By the price of the whole lot.</summary>
+    public const string Total = "total";
+
+    /// <summary>By the quantity of the lot.</summary>
+    public const string Quantity = "quantity";
+
+    /// <summary>By the item, in the order the client names.</summary>
+    public const string Item = "item";
+
+    /// <summary>By the time of the delivery to the chosen body.</summary>
+    public const string Time = "time";
+
+    /// <summary>By the fee of the delivery to the chosen body.</summary>
+    public const string Rods = "rods";
+}
+
+/// <summary>What a player looks for on the market, in what order and which page.</summary>
 /// <param name="MarketLevelId">The level of the market.</param>
-/// <param name="ResourceTypeId">The resource.</param>
-/// <param name="PartTypeId">The part.</param>
+/// <param name="ResourceTypeIds">The resources to show, or <see langword="null"/> for every item.</param>
+/// <param name="PartTypeIds">The parts to show, or <see langword="null"/> for every item.</param>
 /// <param name="SellerPlayerId">The seller.</param>
+/// <param name="MinPrice">The lowest price of a unit.</param>
+/// <param name="MaxPrice">The highest price of a unit.</param>
 /// <param name="MaxSum">The largest price of a whole lot.</param>
 /// <param name="Offset">How many lots to skip.</param>
+/// <param name="Limit">How many lots to return; never more than the page size of the configuration.</param>
 /// <param name="PlanetId">The body of the player the goods would arrive at.</param>
+/// <param name="Sort">The order, one of <see cref="LotSorts"/>.</param>
+/// <param name="Descending">Whether the order is from the largest to the smallest.</param>
+/// <param name="ItemOrder">The items in the order of their names, as <c>r{id}</c> and <c>p{id}</c>, for the sort by item.</param>
 public sealed record LotFilter(
     int? MarketLevelId = null,
-    int? ResourceTypeId = null,
-    int? PartTypeId = null,
+    IReadOnlyCollection<int>? ResourceTypeIds = null,
+    IReadOnlyCollection<int>? PartTypeIds = null,
     string? SellerPlayerId = null,
+    long? MinPrice = null,
+    long? MaxPrice = null,
     long? MaxSum = null,
     int Offset = 0,
-    long? PlanetId = null);
+    int Limit = 0,
+    long? PlanetId = null,
+    string Sort = LotSorts.Created,
+    bool Descending = true,
+    IReadOnlyList<string>? ItemOrder = null);
 
 /// <summary>The directions of a deal in the history of a player.</summary>
 public static class MarketDealDirections

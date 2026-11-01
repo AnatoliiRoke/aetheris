@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { GameIcon } from '../../../components/GameIcon';
-import type { MarketLot } from '../../../api/marketApi';
+import type { LotSort, LotsQuery, MarketLot } from '../../../api/marketApi';
 import { useApi } from '../../../api/useApi';
 import { useI18n } from '../../../i18n/useI18n';
 import { useTexts } from '../../../texts/useTexts';
@@ -10,13 +10,23 @@ import { ItemCell, EmptyBox, RodIcon, SellerPill, TradeIcon } from './MarketBits
 import { ListSkeleton, ReadError } from './MarketStates';
 import { lotReasonKeys } from './lotReasons';
 import { useIsPhone } from './useIsPhone';
-import type { ItemView } from './useMarketItems';
+import type { CatalogItem, ItemView } from './useMarketItems';
 import { useRead } from './useRead';
+import { useDebounced } from './useDebounced';
+import { LotGroupsView } from './LotGroupsView';
+import { Pager } from './Pager';
 
 type Kind = 'all' | 'res' | 'prod' | 'part';
 type SortKey = 'item' | 'qty' | 'price' | 'total' | 'time' | 'rods';
+type View = 'list' | 'groups';
 
 const kinds: readonly Kind[] = ['all', 'res', 'prod', 'part'];
+const searchDelayMs = 300;
+
+/**
+ * The names of the sorts of the screen and the orders the server knows them by.
+ */
+const sortNames: Record<SortKey, LotSort> = { item: 'item', qty: 'quantity', price: 'price', total: 'total', time: 'time', rods: 'rods' };
 
 /**
  * A lot with what the screen needs to show it: its look, its seller and the reason it cannot be bought.
@@ -28,13 +38,15 @@ interface LotRow {
 }
 
 /**
- * The tab "Buy": the filters, the table of the lots (cards on a phone) and the button that opens the
- * dialog of the purchase. The server counts the delivery time, the fee and the reason a lot cannot
- * be bought for the body that is chosen; the client only sorts and filters what it got.
+ * The tab "Buy": the filters, the table of the lots (cards on a phone), the groups by item and the
+ * button that opens the dialog of the purchase. The server filters, sorts and cuts the pages, so the
+ * order and the search hold over every lot of the market, however many there are; the server also
+ * counts the delivery time, the fee and the reason a lot cannot be bought for the body that is chosen.
  *
  * @param levelId The chosen level of the market.
  * @param planetId The body of the player the goods would arrive at.
  * @param itemView How an item looks.
+ * @param catalog Every item the market may list, with its name.
  * @param onBuy What to do when the player opens the purchase of a lot.
  * @param reloadKey A number that changes when the lots must be read again, after a command.
  */
@@ -42,12 +54,14 @@ export function LotsView({
   levelId,
   planetId,
   itemView,
+  catalog,
   onBuy,
   reloadKey,
 }: {
   levelId: number | null;
   planetId: number | null;
   itemView: (resourceTypeId: number | null, partTypeId: number | null) => ItemView;
+  catalog: CatalogItem[];
   onBuy: (lot: MarketLot) => void;
   reloadKey: number;
 }) {
@@ -56,57 +70,80 @@ export function LotsView({
   const { market } = useApi();
   const phone = useIsPhone();
   const stock = useStock(planetId);
+  const [view, setView] = useState<View>('list');
   const [kind, setKind] = useState<Kind>('all');
   const [search, setSearch] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [focus, setFocus] = useState<{ resourceTypeId: number | null; partTypeId: number | null } | null>(null);
   const [sort, setSort] = useState<{ key: SortKey; direction: 1 | -1 }>({ key: 'time', direction: 1 });
-
-  const load = useCallback(
-    () => market.lots({ marketLevelId: levelId ?? undefined, planetId: planetId ?? undefined }).then((answer) => ({ answer, reloadKey })),
-    [market, levelId, planetId, reloadKey],
-  );
-  const read = useRead(load, levelId !== null);
+  const [paging, setPaging] = useState<{ signature: string; offset: number }>({ signature: '', offset: 0 });
+  const settledSearch = useDebounced(search.trim().toLowerCase(), searchDelayMs);
+  const settledMin = useDebounced(parseWhole(minPrice), searchDelayMs);
+  const settledMax = useDebounced(parseWhole(maxPrice), searchDelayMs);
 
   const produced = useMemo(() => new Set(stock.stock?.producedResourceTypeIds ?? []), [stock.stock]);
 
-  const rows = useMemo(() => {
-    const items = read.data?.answer.items ?? [];
-    const needle = search.trim().toLowerCase();
-    const low = parseWhole(minPrice);
-    const high = parseWhole(maxPrice);
-    const decorated: LotRow[] = items.map((lot) => ({
-      lot,
-      view: itemView(lot.resourceTypeId, lot.partTypeId),
-      reason: lot.unavailableReason,
-    }));
-    const kept = decorated.filter(({ lot, view }) => {
-      const lotKind: Kind = lot.partTypeId !== null ? 'part' : produced.has(lot.resourceTypeId ?? 0) ? 'prod' : 'res';
+  // The items the filters leave: the name and the kind are known to the client, the lots to the server.
+  const itemFilter = useMemo(() => {
+    if (focus) {
+      return { resourceTypeIds: focus.resourceTypeId === null ? [] : [focus.resourceTypeId], partTypeIds: focus.partTypeId === null ? [] : [focus.partTypeId] };
+    }
 
-      return (
-        (kind === 'all' || kind === lotKind) &&
-        (needle === '' || view.name.toLowerCase().includes(needle)) &&
-        (low === null || lot.pricePerUnit >= low) &&
-        (high === null || lot.pricePerUnit <= high)
-      );
+    if (kind === 'all' && settledSearch === '') {
+      return null;
+    }
+
+    const kept = catalog.filter((item) => {
+      const itemKind: Kind = item.partTypeId !== null ? 'part' : produced.has(item.resourceTypeId ?? 0) ? 'prod' : 'res';
+
+      return (kind === 'all' || kind === itemKind) && (settledSearch === '' || item.name.toLowerCase().includes(settledSearch));
     });
-    const keyOf: Record<SortKey, (row: LotRow) => number | string> = {
-      item: (row) => row.view.name,
-      qty: (row) => row.lot.quantity,
-      price: (row) => row.lot.pricePerUnit,
-      total: (row) => row.lot.totalPrice,
-      time: (row) => row.lot.deliverySeconds ?? 0,
-      rods: (row) => row.lot.energyRodAmount ?? 0,
+
+    return {
+      resourceTypeIds: kept.flatMap((item) => (item.resourceTypeId === null ? [] : [item.resourceTypeId])),
+      partTypeIds: kept.flatMap((item) => (item.partTypeId === null ? [] : [item.partTypeId])),
     };
+  }, [focus, kind, settledSearch, catalog, produced]);
+  const nothingMatches = itemFilter !== null && itemFilter.resourceTypeIds.length === 0 && itemFilter.partTypeIds.length === 0;
 
-    return kept.sort((a, b) => {
-      const x = keyOf[sort.key](a);
-      const y = keyOf[sort.key](b);
-      const order = typeof x === 'string' ? x.localeCompare(String(y), language) : x - Number(y);
+  const filterQuery = useMemo<LotsQuery>(
+    () => ({
+      marketLevelId: levelId ?? undefined,
+      planetId: planetId ?? undefined,
+      resourceTypeIds: itemFilter?.resourceTypeIds,
+      partTypeIds: itemFilter?.partTypeIds,
+      minPrice: settledMin ?? undefined,
+      maxPrice: settledMax ?? undefined,
+    }),
+    [levelId, planetId, itemFilter, settledMin, settledMax],
+  );
+  const signature = JSON.stringify([filterQuery, sort]);
+  const offset = paging.signature === signature ? paging.offset : 0;
 
-      return order === 0 ? a.lot.id - b.lot.id : order * sort.direction;
-    });
-  }, [read.data, itemView, produced, kind, search, minPrice, maxPrice, sort, language]);
+  const load = useCallback(
+    () =>
+      market
+        .lots({
+          ...filterQuery,
+          sort: sortNames[sort.key],
+          descending: sort.direction === -1,
+          offset,
+          itemOrder: sort.key === 'item' ? catalog.map((item) => item.key) : undefined,
+        })
+        .then((answer) => ({ answer, reloadKey })),
+    [market, filterQuery, sort, offset, catalog, reloadKey],
+  );
+  const read = useRead(load, levelId !== null && view === 'list' && !nothingMatches);
+  const loadGroups = useCallback(() => market.lotGroups(filterQuery).then((groups) => ({ groups, reloadKey })), [market, filterQuery, reloadKey]);
+  const groupsRead = useRead(loadGroups, levelId !== null && view === 'groups' && !nothingMatches);
+
+  const rows = useMemo<LotRow[]>(
+    () => (nothingMatches ? [] : (read.data?.answer.items ?? []).map((lot) => ({ lot, view: itemView(lot.resourceTypeId, lot.partTypeId), reason: lot.unavailableReason }))),
+    [read.data, itemView, nothingMatches],
+  );
+  const total = nothingMatches ? 0 : (read.data?.answer.total ?? 0);
+  const limit = read.data?.answer.limit ?? 0;
 
   const reasonText = (reason: string | null) =>
     reason === null ? null : reason in lotReasonKeys ? t(lotReasonKeys[reason]) : text(reason) ?? reason;
@@ -116,6 +153,16 @@ export function LotsView({
     setSearch('');
     setMinPrice('');
     setMaxPrice('');
+    setFocus(null);
+  };
+  const showItem = (resourceTypeId: number | null, partTypeId: number | null) => {
+    setFocus({ resourceTypeId, partTypeId });
+    setView('list');
+  };
+  const go = (next: number) => {
+    setPaging({ signature, offset: Math.max(0, next) });
+    // A new page starts at its top, as a new screen does.
+    window.scrollTo({ top: 0 });
   };
   const rodsHave = read.data?.answer.energyRodBalance ?? null;
   const noPortal = read.data?.answer.destinationHasPortal === false;
@@ -164,16 +211,47 @@ export function LotsView({
           <span>{t('market.noPortalBuy')}</span>
         </div>
       ) : null}
-      {read.failed && read.data === null ? <ReadError onRetry={() => void read.reload()} /> : null}
-      {read.loading && read.data === null && !read.failed ? <ListSkeleton /> : null}
-      {read.data !== null && rows.length === 0 ? (
+      <div className="mk-viewbar">
+        <div aria-label={t('market.viewAria')} className="mk-seg mk-seg--compact" role="group">
+          {(
+            [
+              ['list', 'market.viewList'],
+              ['groups', 'market.viewGroups'],
+            ] as const
+          ).map(([id, label]) => (
+            <button aria-pressed={view === id} className="mk-seg__item" key={id} onClick={() => setView(id)} type="button">
+              {t(label)}
+            </button>
+          ))}
+        </div>
+        {focus ? (
+          <button className="mk-chip mk-chip--focus" onClick={() => setFocus(null)} type="button">
+            {t('market.focusItem', { name: itemView(focus.resourceTypeId, focus.partTypeId).name })}
+            <GameIcon name="close" size={14} />
+          </button>
+        ) : null}
+        {view === 'list' && !nothingMatches && read.data !== null ? <span className="mk-viewbar__count">{t('market.foundLots', { count: formatInteger(total, language) })}</span> : null}
+      </div>
+      {view === 'groups' ? (
+        <LotGroupsView
+          failed={groupsRead.failed}
+          groups={nothingMatches ? [] : (groupsRead.data?.groups ?? null)}
+          itemView={itemView}
+          onReset={resetFilters}
+          onRetry={() => void groupsRead.reload()}
+          onShow={showItem}
+        />
+      ) : null}
+      {view === 'list' && !nothingMatches && read.failed && read.data === null ? <ReadError onRetry={() => void read.reload()} /> : null}
+      {view === 'list' && !nothingMatches && read.loading && read.data === null && !read.failed ? <ListSkeleton /> : null}
+      {view === 'list' && (read.data !== null || nothingMatches) && rows.length === 0 ? (
         <EmptyBox icon="market" title={t('market.noLots')}>
           <button className="mk-btn mk-btn--secondary" onClick={resetFilters} type="button">
             {t('market.reset')}
           </button>
         </EmptyBox>
       ) : null}
-      {read.data !== null && rows.length > 0 && !phone ? (
+      {view === 'list' && read.data !== null && rows.length > 0 && !phone ? (
         <section className="mk-panel">
           <div aria-label={t('market.lotsAria')} className="mk-table mk-table--buy" role="table">
             <div role="rowgroup">
@@ -268,7 +346,7 @@ export function LotsView({
           </div>
         </section>
       ) : null}
-      {read.data !== null && rows.length > 0 && phone ? (
+      {view === 'list' && read.data !== null && rows.length > 0 && phone ? (
         <div className="mk-cards">
           <div aria-label={t('market.sortAria')} className="mk-sortchips" role="group">
             {(
@@ -340,6 +418,7 @@ export function LotsView({
           })}
         </div>
       ) : null}
+      {view === 'list' && read.data !== null && total > limit && limit > 0 ? <Pager limit={limit} offset={offset} onGo={go} total={total} /> : null}
     </>
   );
 }

@@ -165,7 +165,18 @@ public sealed record LotListItemDto(
 /// <param name="Items">The lots.</param>
 /// <param name="EnergyRodBalance">The energy rods on the chosen body, or <see langword="null"/> without one.</param>
 /// <param name="DestinationHasPortal">Whether the chosen body has a portal, or <see langword="null"/> without one.</param>
-public sealed record LotsDto(IReadOnlyList<LotListItemDto> Items, long? EnergyRodBalance, bool? DestinationHasPortal);
+/// <param name="Total">How many lots match, all pages together.</param>
+/// <param name="Offset">How many lots were skipped.</param>
+/// <param name="Limit">How many lots the page may hold.</param>
+public sealed record LotsDto(IReadOnlyList<LotListItemDto> Items, long? EnergyRodBalance, bool? DestinationHasPortal, int Total, int Offset, int Limit);
+
+/// <summary>The lots of one item: how many there are, the lowest price of a unit and the whole quantity.</summary>
+/// <param name="ResourceTypeId">The resource, or <see langword="null"/> for a part.</param>
+/// <param name="PartTypeId">The part, or <see langword="null"/> for a resource.</param>
+/// <param name="LotCount">How many lots the item has.</param>
+/// <param name="MinPricePerUnit">The lowest price of a unit.</param>
+/// <param name="TotalQuantity">The quantity of all the lots.</param>
+public sealed record LotGroupDto(int? ResourceTypeId, int? PartTypeId, int LotCount, long MinPricePerUnit, long TotalQuantity);
 
 /// <summary>A delivery in the list of the deliveries of a player.</summary>
 /// <param name="Id">The delivery.</param>

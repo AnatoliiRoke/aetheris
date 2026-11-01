@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Claims;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Security;
@@ -33,18 +34,21 @@ public static class MarketEndpoints
             .RequireRateLimiting(RateLimitGroups.Command);
 
         market.MapGet("/lots", async (
-            [FromQuery(Name = "market_level_id")] int? levelId,
-            [FromQuery(Name = "resource_type_id")] int? resourceTypeId,
-            [FromQuery(Name = "part_type_id")] int? partTypeId,
-            [FromQuery(Name = "seller_player_id")] string? sellerPlayerId,
-            [FromQuery(Name = "max_sum")] long? maxSum,
-            [FromQuery(Name = "offset")] int? offset,
-            [FromQuery(Name = "planet_id")] long? planetId,
+            HttpContext context,
             ClaimsPrincipal user,
             MarketReadService reads,
             CancellationToken cancellationToken) =>
             Results.Json(
-                await reads.LotsAsync(PlayerId(user), new LotFilter(levelId, resourceTypeId, partTypeId, sellerPlayerId, maxSum, offset ?? 0, planetId), cancellationToken).ConfigureAwait(false),
+                await reads.LotsAsync(PlayerId(user), ReadFilter(context.Request.Query), cancellationToken).ConfigureAwait(false),
+                MarketJson.Options));
+
+        market.MapGet("/lot-groups", async (
+            HttpContext context,
+            ClaimsPrincipal user,
+            MarketReadService reads,
+            CancellationToken cancellationToken) =>
+            Results.Json(
+                await reads.LotGroupsAsync(PlayerId(user), ReadFilter(context.Request.Query), cancellationToken).ConfigureAwait(false),
                 MarketJson.Options));
 
         market.MapGet("/overview", async (ClaimsPrincipal user, MarketReadService reads, CancellationToken cancellationToken) =>
@@ -84,6 +88,32 @@ public static class MarketEndpoints
             Results.Json(await trade.LimitAsync(PlayerId(user), cancellationToken).ConfigureAwait(false), MarketJson.Options));
 
         return endpoints;
+    }
+
+    /// <summary>
+    /// Reads what a player looks for from the query of a request: the lists are separated by commas.
+    /// </summary>
+    private static LotFilter ReadFilter(IQueryCollection query)
+    {
+        static List<int>? Ids(string? text) =>
+            text is null ? null : [.. text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(part => int.TryParse(part, NumberStyles.None, CultureInfo.InvariantCulture, out int id) ? id : 0).Where(id => id > 0)];
+
+        static long? Number(string? text) => long.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out long value) ? value : null;
+
+        return new LotFilter(
+            MarketLevelId: (int?)Number(query["market_level_id"]),
+            ResourceTypeIds: Ids(query["resource_type_ids"]),
+            PartTypeIds: Ids(query["part_type_ids"]),
+            SellerPlayerId: query["seller_player_id"],
+            MinPrice: Number(query["min_price"]),
+            MaxPrice: Number(query["max_price"]),
+            MaxSum: Number(query["max_sum"]),
+            Offset: (int)(Number(query["offset"]) ?? 0),
+            Limit: (int)(Number(query["limit"]) ?? 0),
+            PlanetId: Number(query["planet_id"]),
+            Sort: string.IsNullOrEmpty(query["sort"]) ? LotSorts.Created : query["sort"].ToString(),
+            Descending: !string.Equals(query["direction"], "asc", StringComparison.Ordinal),
+            ItemOrder: ((string?)query["item_order"])?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
     }
 
     private static string PlayerId(ClaimsPrincipal user) =>

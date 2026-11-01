@@ -73,7 +73,7 @@ export function MarketPage() {
   const loadDeliveries = useCallback(() => market.deliveries(), [market]);
   const deliveries = useRead(loadDeliveries);
   const planets = useMarketPlanets(overview.data);
-  const itemView = useMarketItems();
+  const { itemView, catalog } = useMarketItems();
   const nowMs = useGameClock(overview);
   const balances = useShellSelector((state) => state.balances);
 
@@ -234,7 +234,7 @@ export function MarketPage() {
           )
         ) : (
           <>
-            {tab === 'buy' ? <LotsView itemView={itemView} levelId={level?.id ?? null} onBuy={(lot) => { setProblem(null); setDialogLot(lot); }} planetId={currentPlanetId} reloadKey={lotsKey} /> : null}
+            {tab === 'buy' ? <LotsView catalog={catalog} itemView={itemView} levelId={level?.id ?? null} onBuy={(lot) => { setProblem(null); setDialogLot(lot); }} planetId={currentPlanetId} reloadKey={lotsKey} /> : null}
             {tab === 'sell' ? <SellView busy={busy} error={problem} initialPlanetId={currentPlanetId} itemView={itemView} level={level} onList={(request) => void onList(request)} overview={overview.data} planets={planets} /> : null}
             {tab === 'mine' ? <MineView busy={busy} failed={mine.failed} itemView={itemView} levels={levels} lots={mine.data} nowMs={nowMs()} onCancel={(lot) => void onCancel(lot)} onRetry={() => void mine.reload()} /> : null}
             {tab === 'del' ? <DeliveriesView deliveries={deliveries.data} failed={deliveries.failed} itemView={itemView} nowMs={nowMs} onArrive={() => refreshEverything(currentPlanetId)} onRetry={() => void deliveries.reload()} planets={planets} timeMultiplier={overview.data.timeMultiplier} /> : null}

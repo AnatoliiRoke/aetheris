@@ -137,12 +137,18 @@ describe('the tab Buy', () => {
     ]);
   });
 
-  it('filters by the kind and the text and tells when nothing is left', async () => {
+  it('asks the server for the items that match the search and tells when nothing is left', async () => {
     const user = userEvent.setup();
-    renderMarket({ market: fakeMarketApi() });
+    const market = fakeMarketApi();
+    renderMarket({ market });
 
     await screen.findByRole('table', { name: 'Лоти для купівлі' });
     await user.type(screen.getByRole('textbox', { name: 'Пошук товару' }), 'мідь');
+
+    await waitFor(() => expect(market.lots).toHaveBeenLastCalledWith(expect.objectContaining({ resourceTypeIds: [3] })));
+
+    await user.clear(screen.getByRole('textbox', { name: 'Пошук товару' }));
+    await user.type(screen.getByRole('textbox', { name: 'Пошук товару' }), 'такого немає');
 
     expect(await screen.findByText('Немає лотів за вашими фільтрами.')).toBeInTheDocument();
 
@@ -151,25 +157,80 @@ describe('the tab Buy', () => {
     expect(await screen.findByRole('table', { name: 'Лоти для купівлі' })).toBeInTheDocument();
   });
 
-  it('sorts by a column and tells the direction', async () => {
+  it('sends the range of the price and the kind of the item to the server', async () => {
     const user = userEvent.setup();
-    const market = fakeMarketApi({
-      lots: vi.fn().mockResolvedValue({
-        items: [sampleMarketLot({ id: 1, quantity: 5, pricePerUnit: 9, totalPrice: 45 }), sampleMarketLot({ id: 2, quantity: 7, pricePerUnit: 3, totalPrice: 21 })],
-        energyRodBalance: 8,
-        destinationHasPortal: true,
-      }),
-    });
+    const market = fakeMarketApi();
+    renderMarket({ market });
+
+    await screen.findByRole('table', { name: 'Лоти для купівлі' });
+    await user.type(screen.getByRole('textbox', { name: 'від' }), '50');
+    await user.type(screen.getByRole('textbox', { name: 'до' }), '90');
+
+    await waitFor(() => expect(market.lots).toHaveBeenLastCalledWith(expect.objectContaining({ minPrice: 50, maxPrice: 90 })));
+
+    await user.click(screen.getByRole('button', { name: 'Деталі' }));
+
+    await waitFor(() => expect(market.lots).toHaveBeenLastCalledWith(expect.objectContaining({ resourceTypeIds: [], partTypeIds: [3] })));
+  });
+
+  it('sorts on the server by a column and tells the direction', async () => {
+    const user = userEvent.setup();
+    const market = fakeMarketApi();
     renderMarket({ market });
 
     await screen.findByRole('table', { name: 'Лоти для купівлі' });
     await user.click(screen.getByRole('button', { name: /Сортувати: Ціна за од\./ }));
 
-    const rows = screen.getAllByRole('row').slice(1);
-
-    expect(within(rows[0]).getByText('21')).toBeInTheDocument();
-    expect(within(rows[1]).getByText('45')).toBeInTheDocument();
+    await waitFor(() => expect(market.lots).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'price', descending: false, offset: 0 })));
     expect(screen.getByRole('columnheader', { name: /Ціна за од\./ })).toHaveAttribute('aria-sort', 'ascending');
+
+    await user.click(screen.getByRole('button', { name: /Сортувати: Ціна за од\./ }));
+
+    await waitFor(() => expect(market.lots).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'price', descending: true })));
+  });
+
+  it('sorts by the name of the item in the order of the names', async () => {
+    const user = userEvent.setup();
+    const market = fakeMarketApi();
+    renderMarket({ market });
+
+    await screen.findByRole('table', { name: 'Лоти для купівлі' });
+    await user.click(screen.getByRole('button', { name: /Сортувати: Товар/ }));
+
+    await waitFor(() => expect(market.lots).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'item', itemOrder: expect.arrayContaining(['r1', 'r3']) })));
+  });
+
+  it('moves between the pages of a long list', async () => {
+    const user = userEvent.setup();
+    const market = fakeMarketApi({
+      lots: vi.fn().mockResolvedValue({ items: [sampleMarketLot()], energyRodBalance: 8, destinationHasPortal: true, total: 250, offset: 0, limit: 100 }),
+    });
+    renderMarket({ market });
+
+    expect(await screen.findByText('1–100 з 250')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Назад' })).toBeDisabled();
+
+    await user.click(screen.getByRole('button', { name: 'Далі' }));
+
+    await waitFor(() => expect(market.lots).toHaveBeenLastCalledWith(expect.objectContaining({ offset: 100 })));
+  });
+
+  it('groups the lots by item and opens the lots of one item', async () => {
+    const user = userEvent.setup();
+    const market = fakeMarketApi();
+    renderMarket({ market });
+
+    await screen.findByRole('table', { name: 'Лоти для купівлі' });
+    await user.click(screen.getByRole('button', { name: 'За товаром' }));
+
+    expect(await screen.findByText('Лотів: 3')).toBeInTheDocument();
+    expect(market.lotGroups).toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: /Показати лоти: Залізо/ }));
+
+    expect(await screen.findByRole('table', { name: 'Лоти для купівлі' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Товар: Залізо/ })).toBeInTheDocument();
+    await waitFor(() => expect(market.lots).toHaveBeenLastCalledWith(expect.objectContaining({ resourceTypeIds: [1], partTypeIds: [] })));
   });
 
   it('warns that there is no portal on the chosen body', async () => {
@@ -491,7 +552,7 @@ describe('the language and the data', () => {
 
   it('reads every number from the server: no lot is made up when the server has none', async () => {
     const market = fakeMarketApi({
-      lots: vi.fn().mockResolvedValue({ items: [], energyRodBalance: 0, destinationHasPortal: true }),
+      lots: vi.fn().mockResolvedValue({ items: [], energyRodBalance: 0, destinationHasPortal: true, total: 0, offset: 0, limit: 100 }),
       myLots: vi.fn().mockResolvedValue([sampleMyLot()]),
     });
     renderMarket({ market });
