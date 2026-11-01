@@ -1,0 +1,540 @@
+/* AETHERIS — Map screen. Exported from the design canvas.
+   Tokens in :root; .mN classes are generated from the design. */
+:root{
+  --bg-0: #070B16;
+  --bg-1: #0B1020;
+  --bg-2: #141B33;
+  --bg-3: #1C2544;
+  --border: rgba(160,190,255,0.16);
+  --border-strong: rgba(160,190,255,0.28);
+  --text-1: #E8EEFF;
+  --text-2: #9AA7C7;
+  --text-soft: #C3CCE4;
+  --accent: #2EC4C4;
+  --accent-hover: #4FDADA;
+  --danger-text: #FF8A66;
+  --warning: #F2C14E;
+  --success: #4CD08A;
+  --nebula-label: #C9B8FF;
+  --res-metal: #B4BFD3;
+  --res-fuel: #FF9F4A;
+  --danger: #FF6B3D;
+  --on-accent: #070B16;
+  --font: Inter, Roboto, system-ui, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#070B16}
+[data-btn]:hover{filter:brightness(1.18)}
+[data-btn]:active{filter:brightness(0.88)}
+button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid #4FDADA;outline-offset:2px}
+input::placeholder{color:#8E9BBB}
+[data-pulse]{animation:mapPulse 1.6s ease-in-out infinite}
+[data-spin]{animation:mapSpin 0.9s linear infinite}
+@keyframes mapPulse{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes mapSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+
+/* generated */
+.m1{font-family: Inter, Roboto, system-ui, Arial, sans-serif; color: var(--text-1); font-size: 16px; line-height: 1.5; background-color: var(--bg-0); min-height: 100vh; display: flex; flex-direction: column}
+.m2{position: sticky; top: 0; z-index: 50; height: 64px; display: flex; align-items: center; gap: 14px; padding: 0 20px; background: rgba(7,11,22,0.92); border-bottom: 1px solid var(--border); backdrop-filter: blur(10px)}
+.m3{display: flex; align-items: center; gap: 10px; flex: 0 0 auto}
+.m4{width: 28px; height: 28px; border-radius: 7px; background: var(--accent); color: var(--bg-0); display: flex; align-items: center; justify-content: center}
+.m5{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.m6{font-weight: 700; font-size: 18px; letter-spacing: 0.04em; line-height: 1.2}
+.m7{display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px 0 5px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--border); flex: 0 0 auto}
+.m8{width: 26px; height: 26px; border-radius: 50%; background: rgba(108,141,184,0.18); color: #6C8DB8; display: flex; align-items: center; justify-content: center}
+.m9{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.m10{font-size: 14px; font-weight: 600; white-space: nowrap}
+.m11{padding: 2px 8px; border-radius: 6px; border: 1px solid var(--border-strong); color: var(--text-2); font-size: 12px; font-weight: 600; flex: 0 0 auto}
+.m12{display: flex; justify-content: center; gap: 8px; flex: 1 1 auto; min-width: 0}
+.m13{display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 10px; background: var(--bg-2); border: 1px solid var(--border)}
+.m14{color: #3DD9A6; display: flex}
+.m15{position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap}
+.m16{font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m17{color: var(--text-soft); display: flex}
+.m18{color: #FFE066; display: flex}
+.m19{display: flex; align-items: center; gap: 8px; flex: 0 0 auto}
+.m20{display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,107,61,0.45); background: rgba(255,107,61,0.10); color: var(--danger-text); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap}
+.m21{font-variant-numeric: tabular-nums}
+.m22{display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(242,193,78,0.45); background: rgba(242,193,78,0.10); color: var(--warning); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap}
+.m23{width: 1px; height: 28px; background: var(--border); margin: 0 4px}
+.m24{position: relative; width: 44px; height: 44px; border-radius: 10px; border: 0; background: transparent; color: var(--text-soft); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m25{position: absolute; top: 5px; right: 3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: var(--bg-0); font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; font-variant-numeric: tabular-nums}
+.m26{width: 44px; height: 44px; border-radius: 10px; border: 0; background: transparent; color: var(--text-soft); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m27{flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: stretch}
+.m28{flex: 0 0 220px; padding: 12px; background: rgba(11,16,32,0.6); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px}
+.m29{position: relative; display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px 0 16px; border-radius: 10px; background: transparent; color: var(--text-soft); font-size: 15px; font-weight: 500; text-decoration: none}
+.m30{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.m31{flex: 1 1 auto}
+.m32{position: relative; display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px 0 16px; border-radius: 10px; background: rgba(46,196,196,0.12); color: var(--accent-hover); font-size: 15px; font-weight: 600; text-decoration: none}
+.m33{position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 8px rgba(46,196,196,0.7)}
+.m34{min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(46,196,196,0.18); color: var(--accent-hover); font-size: 12px; font-weight: 700; line-height: 20px; text-align: center}
+.m35{flex: 999 1 560px; min-width: 0; padding: 16px 24px 24px; display: flex; flex-direction: column; gap: 14px}
+.m36{display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 16px}
+.m37{display: contents}
+.m38{grid-column: 1; grid-row: 1; margin: 0; font-size: 56px; font-weight: 700; line-height: 1.2}
+.m39{grid-column: 1 / -1; grid-row: 2; display: flex; flex-wrap: wrap; align-items: center; margin: 2px 0 0 -8px}
+.m40{display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 8px; color: var(--text-1); font-size: 14px; font-weight: 600}
+.m41{grid-column: 2; grid-row: 1; display: flex; padding: 3px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--border)}
+.m42{display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border: 0; border-radius: 9px; background: rgba(46,196,196,0.16); color: var(--accent-hover); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer}
+.m43{display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border: 0; border-radius: 9px; background: transparent; color: var(--text-soft); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer}
+.m44{position: relative; z-index: 45; max-width: 480px}
+.m45{position: absolute; left: 14px; top: 12px; color: var(--text-2); display: flex}
+.m46{width: 100%; height: 44px; padding: 0 44px 0 44px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 15px}
+.m47{position: absolute; right: 0; top: 0; width: 44px; height: 44px; border: 0; background: transparent; color: var(--text-2); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m48{position: absolute; left: 0; right: 0; top: 50px; padding: 6px; background: var(--bg-2); border: 1px solid var(--border-strong); border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.55)}
+.m49{padding: 4px 10px 6px; font-size: 12px; color: var(--text-2)}
+.m50{display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; align-items: center; width: 100%; min-height: 52px; padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text-1); font-family: inherit; text-align: left; cursor: pointer}
+.m51{width: 32px; height: 32px; border-radius: 8px; background: var(--bg-3); color: #FFE9C2; display: flex; align-items: center; justify-content: center}
+.m52{min-width: 0}
+.m53{display: block; font-size: 15px; font-weight: 600}
+.m54{font-size: 12px; font-weight: 500; color: var(--text-2)}
+.m55{display: block; font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
+.m56{width: 32px; height: 32px; border-radius: 8px; background: var(--bg-3); color: var(--text-soft); display: flex; align-items: center; justify-content: center}
+.m57{position: relative; height: 640px; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; background-color: var(--bg-0); background-image: radial-gradient(ellipse 75% 65% at 50% 45%, var(--bg-1) 0%, var(--bg-0) 78%)}
+.m58{position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 7% 12%, rgba(232,238,255,0.55) 50%, transparent 51%), radial-gradient(1px 1px at 31% 71%, rgba(232,238,255,0.4) 50%, transparent 51%), radial-gradient(1.5px 1.5px at 52% 22%, rgba(127,224,238,0.45) 50%, transparent 51%), radial-gradient(1px 1px at 74% 58%, rgba(232,238,255,0.45) 50%, transparent 51%), radial-gradient(1px 1px at 88% 13%, rgba(232,238,255,0.5) 50%, transparent 51%), radial-gradient(1px 1px at 18% 43%, rgba(232,238,255,0.3) 50%, transparent 51%), radial-gradient(1px 1px at 63% 89%, rgba(232,238,255,0.35) 50%, transparent 51%); background-size: 420px 420px}
+.m59{position: absolute; inset: 0; cursor: grab; touch-action: none; outline-offset: -4px}
+.m60{position: absolute; left: 50%; top: 50%; width: 1100px; height: 640px; margin-left: -550px; margin-top: -320px; transform: translate(0px, 0px) scale(0.95); transform-origin: 50% 50%; transition: transform 0.25s ease}
+.m61{position: absolute; left: 330px; top: 140px; width: 440px; height: 360px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(232,210,170,0.10), rgba(142,107,255,0.05) 45%, transparent 70%)}
+.m62{position: absolute; left: 90px; top: 70px; width: 270px; height: 200px; border-radius: 48% 52% 44% 56% / 55% 45% 55% 45%; border: 1.5px solid var(--border-strong); background: radial-gradient(ellipse at 50% 50%, rgba(108,141,184,0.13), rgba(108,141,184,0.03) 70%); box-shadow: none; color: var(--text-1); font-family: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0}
+.m63{font-size: 18px; font-weight: 600; line-height: 1.2}
+.m64{display: flex; flex-wrap: wrap; justify-content: center; gap: 6px}
+.m65{display: flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; background: rgba(76,208,138,0.14); border: 1px solid rgba(76,208,138,0.5); color: var(--success); font-size: 12px; font-weight: 600}
+.m66{font-size: 12px; color: var(--text-soft); font-variant-numeric: tabular-nums}
+.m67{position: absolute; left: 410px; top: 40px; width: 250px; height: 180px; border-radius: 55% 45% 60% 40% / 45% 55% 45% 55%; border: 1.5px solid var(--border-strong); background: radial-gradient(ellipse at 50% 50%, rgba(142,107,255,0.13), rgba(142,107,255,0.03) 70%); box-shadow: none; color: var(--text-1); font-family: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0}
+.m68{position: absolute; left: 380px; top: 250px; width: 310px; height: 220px; border-radius: 50% 50% 42% 58% / 52% 48% 52% 48%; border: 2px solid var(--accent); background: radial-gradient(ellipse at 50% 50%, rgba(46,196,196,0.22), rgba(46,196,196,0.03) 70%); box-shadow: 0 0 32px rgba(46,196,196,0.3); color: var(--text-1); font-family: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0}
+.m69{display: flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; background: rgba(46,196,196,0.16); border: 1px solid rgba(46,196,196,0.55); color: var(--accent-hover); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m70{position: absolute; left: 730px; top: 80px; width: 270px; height: 210px; border-radius: 45% 55% 50% 50% / 60% 40% 60% 40%; border: 1.5px solid var(--border-strong); background: radial-gradient(ellipse at 50% 50%, rgba(208,138,78,0.13), rgba(208,138,78,0.03) 70%); box-shadow: none; color: var(--text-1); font-family: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0}
+.m71{position: absolute; left: 80px; top: 320px; width: 250px; height: 220px; border-radius: 52% 48% 58% 42% / 48% 52% 48% 52%; border: 1.5px solid var(--border-strong); background: radial-gradient(ellipse at 50% 50%, rgba(127,224,238,0.13), rgba(127,224,238,0.03) 70%); box-shadow: none; color: var(--text-1); font-family: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0}
+.m72{position: absolute; left: 740px; top: 340px; width: 290px; height: 200px; border-radius: 58% 42% 45% 55% / 50% 50% 50% 50%; border: 1.5px solid var(--border-strong); background: radial-gradient(ellipse at 50% 50%, rgba(210,68,60,0.13), rgba(210,68,60,0.03) 70%); box-shadow: none; color: var(--text-1); font-family: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0}
+.m73{position: absolute; left: 470px; top: 500px; width: 220px; height: 120px; border-radius: 50%; border: 1.5px solid var(--border-strong); background: radial-gradient(ellipse at 50% 50%, rgba(108,141,184,0.13), rgba(108,141,184,0.03) 70%); box-shadow: none; color: var(--text-1); font-family: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0}
+.m74{position: absolute; left: 535px; top: 462px; transform: translate(-50%, 0); height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--accent); color: var(--bg-0); font-family: inherit; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.45)}
+.m75{position: absolute; left: 12px; top: 12px; z-index: 16; width: 214px; padding: 6px; border-radius: 12px; background: rgba(11,16,32,0.9); border: 1px solid var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.35)}
+.m76{display: flex; align-items: center; gap: 8px; width: 100%; height: 36px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text-1); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer}
+.m77{flex: 1 1 auto; text-align: left}
+.m78{font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums}
+.m79{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transform: rotate(180deg)}
+.m80{display: flex; flex-direction: column; gap: 0; padding-top: 4px; margin-top: 4px; border-top: 1px solid rgba(160,190,255,0.12)}
+.m81{display: flex; align-items: center; gap: 8px; width: 100%; height: 34px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 500; text-align: left; cursor: pointer; white-space: nowrap}
+.m82{width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--accent); background: var(--accent); color: var(--bg-0); display: flex; align-items: center; justify-content: center; flex: 0 0 auto}
+.m83{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.m84{color: var(--accent-hover); display: flex}
+.m85{color: var(--text-1); display: flex}
+.m86{color: var(--res-metal); display: flex}
+.m87{color: var(--nebula-label); display: flex}
+.m88{color: var(--res-fuel); display: flex}
+.m89{display: flex; align-items: center; gap: 8px; width: 100%; height: 34px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 500; text-align: left; cursor: pointer; white-space: nowrap; opacity: 0.45; cursor: not-allowed}
+.m90{color: var(--text-2); display: flex}
+.m91{position: absolute; right: 12px; top: 12px; width: 168px; height: 98px; border-radius: 10px; background: rgba(7,11,22,0.85); border: 1px solid var(--border-strong); overflow: hidden; z-index: 15}
+.m92{position: absolute; left: 20.454545454545457%; top: 26.5625%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(160,190,255,0.5)}
+.m93{position: absolute; left: 48.63636363636364%; top: 20.3125%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(160,190,255,0.5)}
+.m94{position: absolute; left: 48.63636363636364%; top: 56.25%; width: 6px; height: 6px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--accent)}
+.m95{position: absolute; left: 78.63636363636364%; top: 28.90625%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(160,190,255,0.5)}
+.m96{position: absolute; left: 18.636363636363637%; top: 67.1875%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(160,190,255,0.5)}
+.m97{position: absolute; left: 80.45454545454545%; top: 68.75%; width: 6px; height: 6px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--accent)}
+.m98{position: absolute; left: 52.72727272727272%; top: 87.5%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(160,190,255,0.5)}
+.m99{position: absolute; left: 10.287081339712916%; top: 0%; width: 79.42583732057417%; height: 100%; border: 1.5px solid var(--accent); border-radius: 3px; background: rgba(46,196,196,0.08)}
+.m100{position: absolute; left: 6px; bottom: 3px; font-size: 10px; font-weight: 600; color: var(--text-soft)}
+.m101{position: absolute; left: 16px; bottom: 16px; z-index: 18; display: flex; flex-direction: column; align-items: flex-start; gap: 8px}
+.m102{display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border-strong); background: rgba(20,27,51,0.94); color: var(--text-1); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer}
+.m103{position: absolute; right: 16px; bottom: 16px; z-index: 18; display: flex; flex-direction: column; align-items: flex-end; gap: 8px}
+.m104{padding: 2px 8px; border-radius: 6px; background: rgba(7,11,22,0.85); border: 1px solid var(--border); color: var(--text-soft); font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap}
+.m105{width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-strong); background: rgba(20,27,51,0.94); color: var(--text-1); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m106{width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(46,196,196,0.6); background: rgba(20,27,51,0.94); color: var(--accent-hover); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m107{flex: 0 0 340px; align-self: flex-start; margin: 16px 20px 24px 0; padding: 16px; background: rgba(20,27,51,0.86); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.35)}
+.m108{position: relative}
+.m109{aspect-ratio: 16 / 9; border-radius: 12px; border: 1.5px dashed rgba(160,190,255,0.35); background: radial-gradient(ellipse at 50% 50%, rgba(46,196,196,0.16), var(--bg-1) 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; overflow: hidden}
+.m110{width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-soft); display: flex; align-items: center; justify-content: center}
+.m111{font-size: 12px; color: var(--text-2)}
+.m112{position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-strong); background: rgba(7,11,22,0.85); color: var(--text-1); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m113{display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 14px}
+.m114{margin: 0; font-size: 22px; font-weight: 600; line-height: 1.2}
+.m115{display: flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-soft); font-size: 12px; font-weight: 600}
+.m116{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.m117{margin-top: 12px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 12px; font-size: 14px; align-items: center}
+.m118{color: var(--text-2)}
+.m119{text-align: right; font-variant-numeric: tabular-nums}
+.m120{display: flex; justify-content: flex-end}
+.m121{display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px 2px 5px; border-radius: 999px; background: rgba(46,196,196,0.14); border: 1px solid rgba(46,196,196,0.55); color: var(--accent-hover); font-size: 13px; font-weight: 600}
+.m122{margin-top: 16px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(46,196,196,0.08); border: 1px solid rgba(46,196,196,0.22)}
+.m123{flex: 1 1 auto; font-size: 13px; color: var(--text-soft)}
+.m124{font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right}
+.m125{margin-top: 16px; display: flex; flex-direction: column; gap: 8px}
+.m126{display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border: 0; border-radius: 10px; background: var(--accent); color: var(--bg-0); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 0 20px rgba(46,196,196,0.25)}
+.m127{position: sticky; bottom: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding: 8px 20px; background: rgba(7,11,22,0.92); border-top: 1px solid var(--border); backdrop-filter: blur(10px)}
+.m128{display: flex; gap: 8px; overflow-x: auto; flex: 1 1 420px; min-width: 0; padding: 2px}
+.m129{flex: 0 0 auto; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 4px; border-radius: 999px; border: 1px solid var(--accent); background: rgba(46,196,196,0.12); color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer}
+.m130{width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8 0%, #3FA37A 36%, #1F5F6B 70%, #0B2433 100%)}
+.m131{flex: 0 0 auto; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 4px; border-radius: 999px; border: 1px solid var(--border); background: rgba(20,27,51,0.8); color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer}
+.m132{width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #A9DDF2 36%, #4F8DB0 70%, #1A3550 100%)}
+.m133{width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFC48A 0%, #E0592E 36%, #7A1F14 70%, #2A0A08 100%)}
+.m134{width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FBE3A6 0%, #D9A350 38%, #8A5A26 72%, #2E1C0C 100%)}
+.m135{width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.30), rgba(255,255,255,0) 45%), radial-gradient(circle at 72% 78%, rgba(7,11,22,0.7), rgba(7,11,22,0) 62%), repeating-linear-gradient(168deg, #E6C08E 0 5px, #B57944 5px 9px, #D9A066 9px 13px, #8F5A33 13px 16px)}
+.m136{display: flex; align-items: center; gap: 8px; flex: 0 1 480px; min-width: 260px}
+.m137{flex: 1 1 auto; min-width: 0; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 15px}
+.m138{flex: 0 0 auto; width: 44px; height: 44px; border-radius: 10px; border: 0; background: var(--accent); color: var(--bg-0); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m139{display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--accent-hover); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer}
+.m140{color: var(--text-2); font-size: 14px; padding: 0 2px}
+.m141{position: absolute; left: 50%; top: 50%; width: 1100px; height: 640px; margin-left: -550px; margin-top: -320px; transform: translate(0px, 0px) scale(1); transform-origin: 50% 50%; transition: transform 0.25s ease}
+.m142{position: absolute; left: 160px; top: 110px; width: 340px; height: 220px; border-radius: 52% 48% 55% 45% / 45% 55% 45% 55%; background: radial-gradient(ellipse at 40% 45%, rgba(142,107,255,0.30), rgba(46,196,196,0.14) 55%, rgba(46,196,196,0) 75%); border: 1.5px dashed rgba(185,166,255,0.5)}
+.m143{position: absolute; left: 176px; top: 86px; display: flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 6px; background: rgba(7,11,22,0.8); color: var(--nebula-label); font-size: 11px; font-weight: 600; white-space: nowrap}
+.m144{position: absolute; left: 320px; top: 130px; width: 400px; height: 400px; border-radius: 50%; border: 1.5px dashed rgba(46,196,196,0.55); background: radial-gradient(circle, rgba(46,196,196,0.05), rgba(46,196,196,0) 70%)}
+.m145{position: absolute; left: 500px; top: 110px; width: 280px; height: 280px; border-radius: 50%; border: 1.5px dashed rgba(46,196,196,0.55); background: radial-gradient(circle, rgba(46,196,196,0.05), rgba(46,196,196,0) 70%)}
+.m146{position: absolute; left: 560px; top: 529px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m147{position: absolute; left: 995px; top: 615px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m148{position: absolute; left: 874px; top: 325px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m149{position: absolute; left: 80px; top: 55px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m150{position: absolute; left: 143px; top: 232px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m151{position: absolute; left: 140px; top: 248px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m152{position: absolute; left: 1049px; top: 612px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m153{position: absolute; left: 926px; top: 406px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m154{position: absolute; left: 297px; top: 594px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m155{position: absolute; left: 890px; top: 239px; width: 5px; height: 5px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m156{position: absolute; left: 270px; top: 83px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m157{position: absolute; left: 938px; top: 179px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m158{position: absolute; left: 384px; top: 534px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m159{position: absolute; left: 31px; top: 36px; width: 2px; height: 2px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m160{position: absolute; left: 870px; top: 212px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m161{position: absolute; left: 1059px; top: 316px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m162{position: absolute; left: 210px; top: 411px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m163{position: absolute; left: 284px; top: 181px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m164{position: absolute; left: 560px; top: 94px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m165{position: absolute; left: 879px; top: 318px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m166{position: absolute; left: 252px; top: 482px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m167{position: absolute; left: 139px; top: 363px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m168{position: absolute; left: 235px; top: 327px; width: 5px; height: 5px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m169{position: absolute; left: 440px; top: 121px; width: 5px; height: 5px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m170{position: absolute; left: 897px; top: 454px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m171{position: absolute; left: 324px; top: 164px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m172{position: absolute; left: 985px; top: 433px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m173{position: absolute; left: 44px; top: 488px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m174{position: absolute; left: 49px; top: 488px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m175{position: absolute; left: 669px; top: 29px; width: 5px; height: 5px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m176{position: absolute; left: 1044px; top: 556px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m177{position: absolute; left: 205px; top: 242px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m178{position: absolute; left: 1068px; top: 469px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m179{position: absolute; left: 221px; top: 359px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m180{position: absolute; left: 1063px; top: 210px; width: 2px; height: 2px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m181{position: absolute; left: 514px; top: 592px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m182{position: absolute; left: 105px; top: 367px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m183{position: absolute; left: 923px; top: 319px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m184{position: absolute; left: 715px; top: 106px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m185{position: absolute; left: 904px; top: 40px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m186{position: absolute; left: 937px; top: 502px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m187{position: absolute; left: 195px; top: 148px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m188{position: absolute; left: 836px; top: 81px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m189{position: absolute; left: 912px; top: 248px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m190{position: absolute; left: 116px; top: 335px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m191{position: absolute; left: 1053px; top: 338px; width: 5px; height: 5px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m192{position: absolute; left: 948px; top: 244px; width: 5px; height: 5px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m193{position: absolute; left: 754px; top: 519px; width: 2px; height: 2px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m194{position: absolute; left: 938px; top: 34px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m195{position: absolute; left: 1060px; top: 432px; width: 5px; height: 5px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m196{position: absolute; left: 841px; top: 28px; width: 2px; height: 2px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m197{position: absolute; left: 557px; top: 24px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m198{position: absolute; left: 239px; top: 496px; width: 2px; height: 2px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m199{position: absolute; left: 72px; top: 556px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m200{position: absolute; left: 992px; top: 233px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m201{position: absolute; left: 957px; top: 188px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m202{position: absolute; left: 1030px; top: 387px; width: 2px; height: 2px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m203{position: absolute; left: 703px; top: 85px; width: 2px; height: 2px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m204{position: absolute; left: 159px; top: 89px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m205{position: absolute; left: 742px; top: 34px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m206{position: absolute; left: 794px; top: 537px; width: 4px; height: 4px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m207{position: absolute; left: 622px; top: 94px; width: 3px; height: 3px; border-radius: 50%; background: rgba(200,212,240,0.32)}
+.m208{position: absolute; left: 960px; top: 110px; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.35); background: rgba(28,37,68,0.75); color: var(--text-soft); font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums}
+.m209{position: absolute; left: 150px; top: 560px; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.35); background: rgba(28,37,68,0.75); color: var(--text-soft); font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums}
+.m210{position: absolute; left: 300px; top: 480px; margin: -9px 0 0 -9px; color: rgba(180,191,211,0.35); display: flex}
+.m211{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.m212{position: absolute; left: 860px; top: 520px; margin: -9px 0 0 -9px; color: rgba(180,191,211,0.35); display: flex}
+.m213{position: absolute; left: 200px; top: 190px; margin: -9px 0 0 -9px; color: rgba(180,191,211,0.35); display: flex}
+.m214{position: absolute; left: 985px; top: 330px; margin: -9px 0 0 -9px; color: rgba(180,191,211,0.35); display: flex}
+.m215{position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none}
+.m216{stroke: var(--text-soft); stroke-width: 1.5; stroke-dasharray: 6 6; opacity: 0.85}
+.m217{position: absolute; left: 628px; top: 384px; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px; padding: 3px 9px 3px 5px; border-radius: 999px; background: rgba(20,27,51,0.95); border: 1px solid var(--border-strong); font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none}
+.m218{width: 20px; height: 20px; border-radius: 50%; background: var(--bg-3); color: var(--text-1); display: flex; align-items: center; justify-content: center; transform: rotate(27deg)}
+.m219{position: absolute; left: 455px; top: 335px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--res-metal); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: none}
+.m220{position: absolute; top: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 10px; color: var(--text-2); text-shadow: 0 1px 3px var(--bg-0)}
+.m221{position: absolute; left: 612px; top: 382px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--res-metal); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: none}
+.m222{position: absolute; left: 590px; top: 236px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--res-metal); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: none}
+.m223{position: absolute; left: 520px; top: 330px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: none}
+.m224{position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin-left: -4.5px; margin-top: -4.5px; border-radius: 50%; background: #E8F6FF; box-shadow: 0 0 13px rgba(46,196,196,0.6)}
+.m225{position: absolute; inset: 3px; border-radius: 50%; border: 2px solid var(--accent)}
+.m226{position: absolute; right: -4px; top: -4px; width: 15px; height: 15px; border-radius: 50%; background: var(--accent); color: var(--bg-0); display: flex; align-items: center; justify-content: center}
+.m227{position: absolute; top: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; font-family: Inter, Roboto, system-ui, Arial, sans-serif; font-size: 11px; font-weight: 700; color: var(--text-1); text-shadow: 0 1px 3px var(--bg-0)}
+.m228{position: absolute; left: 640px; top: 250px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: none}
+.m229{position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin-left: -3.5px; margin-top: -3.5px; border-radius: 50%; background: #E8F6FF; box-shadow: 0 0 11px rgba(46,196,196,0.6)}
+.m230{position: absolute; left: 700px; top: 420px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: 0 0 0 3px rgba(46,196,196,0.9), 0 0 24px rgba(46,196,196,0.55)}
+.m231{position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin-left: -4px; margin-top: -4px; border-radius: 50%; background: #FFE9C2; box-shadow: 0 0 12px rgba(255,214,150,0.45)}
+.m232{position: absolute; top: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; font-family: Inter, Roboto, system-ui, Arial, sans-serif; font-size: 11px; font-weight: 500; color: var(--text-soft); text-shadow: 0 1px 3px var(--bg-0)}
+.m233{position: absolute; left: 420px; top: 262px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: none}
+.m234{position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin-left: -3px; margin-top: -3px; border-radius: 50%; background: #FFE9C2; box-shadow: 0 0 10px rgba(255,214,150,0.45)}
+.m235{position: absolute; left: -5px; top: -3px; color: var(--nebula-label); display: flex}
+.m236{position: absolute; left: 455px; top: 200px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: none}
+.m237{position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin-left: -2.5px; margin-top: -2.5px; border-radius: 50%; background: #FFE9C2; box-shadow: 0 0 9px rgba(255,214,150,0.45)}
+.m238{position: absolute; left: 600px; top: 470px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: none}
+.m239{position: absolute; left: 380px; top: 400px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: none}
+.m240{position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin-left: -3.5px; margin-top: -3.5px; border-radius: 50%; background: #FFE9C2; box-shadow: 0 0 11px rgba(255,214,150,0.45)}
+.m241{position: absolute; left: 560px; top: 180px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: none}
+.m242{position: absolute; left: 700px; top: 320px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: none}
+.m243{position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin-left: -2px; margin-top: -2px; border-radius: 50%; background: #FFE9C2; box-shadow: 0 0 8px rgba(255,214,150,0.45)}
+.m244{position: absolute; left: 470px; top: 445px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: none}
+.m245{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transform: rotate(0deg)}
+.m246{position: absolute; left: 47.27272727272727%; top: 51.5625%; width: 5px; height: 5px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--accent)}
+.m247{position: absolute; left: 58.18181818181818%; top: 39.0625%; width: 5px; height: 5px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--accent)}
+.m248{position: absolute; left: 63.63636363636363%; top: 65.625%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255,233,194,0.7)}
+.m249{position: absolute; left: 38.18181818181819%; top: 40.9375%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255,233,194,0.7)}
+.m250{position: absolute; left: 41.36363636363637%; top: 31.25%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255,233,194,0.7)}
+.m251{position: absolute; left: 54.54545454545454%; top: 73.4375%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255,233,194,0.7)}
+.m252{position: absolute; left: 34.54545454545455%; top: 62.5%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255,233,194,0.7)}
+.m253{position: absolute; left: 50.90909090909091%; top: 28.125%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255,233,194,0.7)}
+.m254{position: absolute; left: 63.63636363636363%; top: 50%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255,233,194,0.7)}
+.m255{position: absolute; left: 42.72727272727273%; top: 69.53125%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255,233,194,0.7)}
+.m256{position: absolute; left: 12.272727272727273%; top: 0%; width: 75.45454545454547%; height: 100%; border: 1.5px solid var(--accent); border-radius: 3px; background: rgba(46,196,196,0.08)}
+.m257{width: 270px; padding: 12px; border-radius: 12px; background: rgba(20,27,51,0.96); border: 1px solid var(--border-strong); box-shadow: 0 12px 32px rgba(0,0,0,0.5); display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px 10px; align-items: center}
+.m258{position: relative; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center}
+.m259{width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8, #3FA37A 40%, #1F5F6B 75%); outline: 2px solid var(--accent); outline-offset: 1px}
+.m260{position: absolute; right: -3px; top: -3px; color: var(--accent); display: flex}
+.m261{font-size: 13px; color: var(--text-soft); line-height: 1.3}
+.m262{width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8, #3FA37A 40%, #1F5F6B 75%); outline: 1px solid rgba(232,238,255,0.6); outline-offset: 1px}
+.m263{position: absolute; right: -3px; top: -3px; color: var(--text-1); display: flex}
+.m264{width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8, #3FA37A 40%, #1F5F6B 75%); outline: 1.5px dashed rgba(232,238,255,0.75); outline-offset: 1px}
+.m265{position: absolute; right: -3px; top: -3px; color: var(--success); display: flex}
+.m266{width: 16px; height: 16px; border-radius: 50%; background: #2A3554; opacity: 0.7; outline: 1px dashed rgba(160,190,255,0.4); outline-offset: 1px}
+.m267{position: absolute; left: 5px; top: 4px; color: var(--text-soft); display: flex}
+.m268{width: 0; height: 0}
+.m269{position: absolute; left: 1px; top: 1px; color: var(--res-metal); display: flex}
+.m270{width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.30), rgba(255,255,255,0) 45%), radial-gradient(circle at 72% 78%, rgba(7,11,22,0.7), rgba(7,11,22,0) 62%), repeating-linear-gradient(168deg, #E6C08E 0 5px, #B57944 5px 9px, #D9A066 9px 13px, #8F5A33 13px 16px)}
+.m271{position: absolute; left: 2px; top: 2px; color: var(--res-fuel); display: flex}
+.m272{position: absolute; left: 1px; top: 2px; color: var(--nebula-label); display: flex}
+.m273{width: 18px; height: 18px; border-radius: 50%; border: 1.5px dashed rgba(46,196,196,0.8)}
+.m274{width: 20px; height: 0; border-top: 1.5px dashed var(--text-soft)}
+.m275{position: absolute; left: 5px; top: 5px; color: var(--text-1); display: flex}
+.m276{aspect-ratio: 16 / 9; border-radius: 12px; border: 1.5px dashed rgba(160,190,255,0.35); background: radial-gradient(circle at 50% 50%, rgba(255,214,150,0.10), var(--bg-1) 65%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; overflow: hidden}
+.m277{display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 15px; font-weight: 600; opacity: 0.45; cursor: not-allowed}
+.m278{margin: 4px 0 0; display: flex; gap: 6px; font-size: 12px; color: var(--text-2); line-height: 1.4}
+.m279{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto;margin-top:1px}
+.m280{position: absolute; left: 50%; top: 50%; width: 640px; height: 640px; margin-left: -320px; margin-top: -320px; transform: translate(0px, 0px) scale(0.96); transform-origin: 50% 50%; transition: transform 0.25s ease}
+.m281{position: absolute; left: 263px; top: 263px; width: 114px; height: 114px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m282{position: absolute; left: 320px; top: 263px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m283{position: absolute; left: 240px; top: 240px; width: 160px; height: 160px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m284{position: absolute; left: 320px; top: 240px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m285{position: absolute; left: 217px; top: 217px; width: 206px; height: 206px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m286{position: absolute; left: 320px; top: 217px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m287{position: absolute; left: 194px; top: 194px; width: 252px; height: 252px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m288{position: absolute; left: 320px; top: 194px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m289{position: absolute; left: 171px; top: 171px; width: 298px; height: 298px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m290{position: absolute; left: 320px; top: 171px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m291{position: absolute; left: 148px; top: 148px; width: 344px; height: 344px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m292{position: absolute; left: 320px; top: 148px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m293{position: absolute; left: 125px; top: 125px; width: 390px; height: 390px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m294{position: absolute; left: 320px; top: 125px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m295{position: absolute; left: 102px; top: 102px; width: 436px; height: 436px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m296{position: absolute; left: 320px; top: 102px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m297{position: absolute; left: 79px; top: 79px; width: 482px; height: 482px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m298{position: absolute; left: 320px; top: 79px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m299{position: absolute; left: 56px; top: 56px; width: 528px; height: 528px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m300{position: absolute; left: 320px; top: 56px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m301{position: absolute; left: 33px; top: 33px; width: 574px; height: 574px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m302{position: absolute; left: 320px; top: 33px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m303{position: absolute; left: 10px; top: 10px; width: 620px; height: 620px; border-radius: 50%; border: 1px solid rgba(160,190,255,0.14)}
+.m304{position: absolute; left: 320px; top: 10px; transform: translate(-50%, -50%); padding: 0 4px; border-radius: 4px; background: var(--bg-0); color: var(--text-2); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m305{position: absolute; left: 292px; top: 292px; width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle, #FFF8E0 0%, #FFD27A 38%, #F29A3E 66%, rgba(242,154,62,0) 72%); box-shadow: 0 0 60px 18px rgba(255,190,90,0.30)}
+.m306{position: absolute; left: 631px; top: 319px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m307{position: absolute; left: 629px; top: 347px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m308{position: absolute; left: 624px; top: 369px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m309{position: absolute; left: 623px; top: 399px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m310{position: absolute; left: 611px; top: 412px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m311{position: absolute; left: 602px; top: 441px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m312{position: absolute; left: 590px; top: 465px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m313{position: absolute; left: 588px; top: 482px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m314{position: absolute; left: 574px; top: 497px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m315{position: absolute; left: 555px; top: 513px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m316{position: absolute; left: 543px; top: 538px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m317{position: absolute; left: 528px; top: 550px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m318{position: absolute; left: 512px; top: 565px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m319{position: absolute; left: 482px; top: 580px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m320{position: absolute; left: 467px; top: 594px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m321{position: absolute; left: 447px; top: 598px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m322{position: absolute; left: 426px; top: 607px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m323{position: absolute; left: 404px; top: 614px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m324{position: absolute; left: 377px; top: 627px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m325{position: absolute; left: 358px; top: 627px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m326{position: absolute; left: 334px; top: 629px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m327{position: absolute; left: 310px; top: 633px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m328{position: absolute; left: 291px; top: 627px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m329{position: absolute; left: 267px; top: 625px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m330{position: absolute; left: 244px; top: 621px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m331{position: absolute; left: 222px; top: 616px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m332{position: absolute; left: 193px; top: 606px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m333{position: absolute; left: 178px; top: 590px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m334{position: absolute; left: 161px; top: 582px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m335{position: absolute; left: 134px; top: 574px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m336{position: absolute; left: 124px; top: 560px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m337{position: absolute; left: 99px; top: 543px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m338{position: absolute; left: 93px; top: 527px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m339{position: absolute; left: 74px; top: 513px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m340{position: absolute; left: 56px; top: 490px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m341{position: absolute; left: 48px; top: 460px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m342{position: absolute; left: 35px; top: 444px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m343{position: absolute; left: 24px; top: 422px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m344{position: absolute; left: 25px; top: 408px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m345{position: absolute; left: 16px; top: 387px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m346{position: absolute; left: 13px; top: 358px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m347{position: absolute; left: 13px; top: 341px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m348{position: absolute; left: 12px; top: 308px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m349{position: absolute; left: 11px; top: 287px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m350{position: absolute; left: 15px; top: 262px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m351{position: absolute; left: 20px; top: 236px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m352{position: absolute; left: 30px; top: 215px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m353{position: absolute; left: 32px; top: 194px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m354{position: absolute; left: 50px; top: 174px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m355{position: absolute; left: 59px; top: 154px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m356{position: absolute; left: 63px; top: 139px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m357{position: absolute; left: 86px; top: 113px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m358{position: absolute; left: 100px; top: 103px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m359{position: absolute; left: 110px; top: 94px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m360{position: absolute; left: 140px; top: 72px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m361{position: absolute; left: 153px; top: 62px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m362{position: absolute; left: 176px; top: 49px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m363{position: absolute; left: 191px; top: 37px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m364{position: absolute; left: 210px; top: 25px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m365{position: absolute; left: 237px; top: 16px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m366{position: absolute; left: 262px; top: 17px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m367{position: absolute; left: 283px; top: 14px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m368{position: absolute; left: 302px; top: 9px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m369{position: absolute; left: 324px; top: 10px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m370{position: absolute; left: 342px; top: 14px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m371{position: absolute; left: 370px; top: 11px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m372{position: absolute; left: 390px; top: 21px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m373{position: absolute; left: 419px; top: 21px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m374{position: absolute; left: 436px; top: 32px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m375{position: absolute; left: 461px; top: 43px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m376{position: absolute; left: 485px; top: 59px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m377{position: absolute; left: 501px; top: 70px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m378{position: absolute; left: 512px; top: 76px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m379{position: absolute; left: 530px; top: 93px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m380{position: absolute; left: 548px; top: 113px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m381{position: absolute; left: 564px; top: 132px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m382{position: absolute; left: 584px; top: 157px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m383{position: absolute; left: 593px; top: 169px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m384{position: absolute; left: 604px; top: 186px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m385{position: absolute; left: 610px; top: 209px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m386{position: absolute; left: 614px; top: 234px; width: 2px; height: 2px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m387{position: absolute; left: 625px; top: 250px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m388{position: absolute; left: 630px; top: 288px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m389{position: absolute; left: 623px; top: 297px; width: 3px; height: 3px; border-radius: 50%; background: rgba(180,191,211,0.6)}
+.m390{position: absolute; left: 381px; top: 269px; width: 44px; height: 44px; margin: -22px 0 0 -22px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-1); cursor: pointer}
+.m391{position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8 0%, #3FA37A 36%, #1F5F6B 70%, #0B2433 100%); opacity: 1; outline: 2px solid var(--accent); outline-offset: 3px; box-shadow: 0 0 16px rgba(46,196,196,0.45)}
+.m392{position: absolute; left: 27px; top: 1px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); color: var(--bg-0); border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center}
+.m393{position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 1px; white-space: nowrap; font-family: Inter, Roboto, system-ui, Arial, sans-serif; font-size: 11px; font-weight: 600; color: var(--text-1); text-shadow: 0 1px 3px var(--bg-0)}
+.m394{position: absolute; left: 236px; top: 379px; width: 36px; height: 36px; margin: -18px 0 0 -18px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-1); cursor: pointer}
+.m395{position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFC48A 0%, #E0592E 36%, #7A1F14 70%, #2A0A08 100%); opacity: 1; outline: 1.5px dashed rgba(232,238,255,0.75); outline-offset: 3px; box-shadow: none}
+.m396{position: absolute; left: 18px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-3); color: var(--text-1); border: 1px solid rgba(232,238,255,0.6); display: flex; align-items: center; justify-content: center}
+.m397{position: absolute; left: 442px; top: 405px; width: 40px; height: 40px; margin: -20px 0 0 -20px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-1); cursor: pointer}
+.m398{position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8 0%, #3FA37A 36%, #1F5F6B 70%, #0B2433 100%); opacity: 1; outline: 1px solid rgba(232,238,255,0.6); outline-offset: 3px; box-shadow: 0 0 0 3px rgba(46,196,196,0.9), 0 0 24px rgba(46,196,196,0.55)}
+.m399{position: absolute; left: 23px; top: 1px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-3); color: var(--text-1); border: 1px solid rgba(160,190,255,0.5); display: flex; align-items: center; justify-content: center}
+.m400{position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 18px; display: flex; align-items: center; gap: 4px; white-space: nowrap; padding: 1px 7px 1px 4px; border-radius: 999px; background: rgba(20,27,51,0.94); border: 1px solid var(--border-strong); font-family: Inter, Roboto, system-ui, Arial, sans-serif; font-size: 10px; font-weight: 600; color: var(--text-soft)}
+.m401{color: #E0584F; display: flex}
+.m402{position: absolute; left: 221px; top: 179px; width: 36px; height: 36px; margin: -18px 0 0 -18px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-1); cursor: pointer}
+.m403{position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FBE3A6 0%, #D9A350 38%, #8A5A26 72%, #2E1C0C 100%); opacity: 1; outline: 1.5px dashed rgba(232,238,255,0.75); outline-offset: 3px; box-shadow: none}
+.m404{position: absolute; left: 20px; top: 0px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-3); color: var(--text-1); border: 1px solid rgba(232,238,255,0.6); display: flex; align-items: center; justify-content: center}
+.m405{position: absolute; left: 35px; top: 0px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-3); color: var(--success); border: 1px solid rgba(76,208,138,0.6); display: flex; align-items: center; justify-content: center}
+.m406{position: absolute; left: 264px; top: 531px; width: 60px; height: 60px; margin: -30px 0 0 -30px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-1); cursor: pointer}
+.m407{position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.30), rgba(255,255,255,0) 45%), radial-gradient(circle at 72% 78%, rgba(7,11,22,0.7), rgba(7,11,22,0) 62%), repeating-linear-gradient(168deg, #E6C08E 0 5px, #B57944 5px 9px, #D9A066 9px 13px, #8F5A33 13px 16px); opacity: 1; outline: 1px solid rgba(232,238,255,0.25); outline-offset: 3px; box-shadow: none}
+.m408{position: absolute; left: 41px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-3); color: var(--res-fuel); border: 1px solid rgba(255,159,74,0.6); display: flex; align-items: center; justify-content: center}
+.m409{position: absolute; left: 433px; top: 107px; width: 36px; height: 36px; margin: -18px 0 0 -18px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-1); cursor: pointer}
+.m410{position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #4A5675, var(--bg-3) 70%); opacity: 0.55; outline: 1px dashed rgba(160,190,255,0.4); outline-offset: 3px; box-shadow: none}
+.m411{position: absolute; left: 19px; top: 1px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-3); color: var(--text-soft); border: 1px solid rgba(160,190,255,0.4); display: flex; align-items: center; justify-content: center}
+.m412{position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 1px; white-space: nowrap; font-family: Inter, Roboto, system-ui, Arial, sans-serif; font-size: 11px; font-weight: 600; color: var(--text-2); text-shadow: 0 1px 3px var(--bg-0)}
+.m413{position: absolute; left: 96px; top: 180px; width: 46px; height: 46px; margin: -23px 0 0 -23px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-1); cursor: pointer}
+.m414{position: absolute; left: 50%; top: 50%; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #CDE6FF 0%, #3D86D6 38%, #164A8A 70%, #071C38 100%); opacity: 1; outline: 1px solid rgba(232,238,255,0.6); outline-offset: 3px; box-shadow: none}
+.m415{position: absolute; left: 29px; top: 1px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-3); color: var(--text-1); border: 1px solid rgba(160,190,255,0.5); display: flex; align-items: center; justify-content: center}
+.m416{color: #7FE0EE; display: flex}
+.m417{position: absolute; left: 615px; top: 224px; width: 44px; height: 44px; margin: -22px 0 0 -22px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-1); cursor: pointer}
+.m418{position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 1px solid rgba(180,191,211,0.45); color: var(--res-metal); display: flex; align-items: center; justify-content: center; background: rgba(7,11,22,0.7); box-shadow: none}
+.m419{position: absolute; right: 12px; top: 12px; width: 168px; height: 168px; border-radius: 10px; background: rgba(7,11,22,0.85); border: 1px solid var(--border-strong); overflow: hidden; z-index: 15}
+.m420{position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -2px 0 0 -2px; border-radius: 50%; background: #FFD27A}
+.m421{position: absolute; left: 59.575555538987224%; top: 41.96515487891826%; width: 5px; height: 5px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--accent)}
+.m422{position: absolute; left: 36.81677178722404%; top: 59.23099577252465%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(232,238,255,0.6)}
+.m423{position: absolute; left: 69.07088353110309%; top: 63.35357640879779%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(232,238,255,0.6)}
+.m424{position: absolute; left: 34.58513327306564%; top: 27.985288809733337%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(232,238,255,0.6)}
+.m425{position: absolute; left: 41.18397627619538%; top: 82.9018484579714%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(232,238,255,0.6)}
+.m426{position: absolute; left: 67.67853853615621%; top: 16.751504706406035%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(232,238,255,0.6)}
+.m427{position: absolute; left: 15.018016033547427%; top: 28.140830350380302%; width: 3px; height: 3px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(232,238,255,0.6)}
+.m428{position: absolute; left: 0%; top: 0%; width: 100%; height: 100%; border: 1.5px solid var(--accent); border-radius: 3px; background: rgba(46,196,196,0.08)}
+.m429{aspect-ratio: 16 / 9; border-radius: 12px; border: 1.5px dashed rgba(160,190,255,0.35); background: radial-gradient(circle at 50% 120%, rgba(46,196,196,0.12), var(--bg-1) 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; overflow: hidden}
+.m430{font-weight: 700; font-size: 15px; letter-spacing: 0.04em}
+.m431{display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px 2px 5px; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border-strong); font-size: 13px; font-weight: 600}
+.m432{font-weight: 400; color: var(--text-2)}
+.m433{margin: 18px 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2)}
+.m434{display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; border: 1px dashed var(--border-strong); color: var(--text-soft); font-size: 14px}
+.m435{position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8 0%, #3FA37A 36%, #1F5F6B 70%, #0B2433 100%); opacity: 1; outline: 2px solid var(--accent); outline-offset: 3px; box-shadow: 0 0 0 3px rgba(46,196,196,0.9), 0 0 24px rgba(46,196,196,0.55)}
+.m436{position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8 0%, #3FA37A 36%, #1F5F6B 70%, #0B2433 100%); opacity: 1; outline: 1px solid rgba(232,238,255,0.6); outline-offset: 3px; box-shadow: none}
+.m437{display: flex; flex-wrap: wrap; gap: 6px}
+.m438{display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 6px; border-radius: 8px; background: var(--bg-3); font-size: 13px; color: var(--text-soft)}
+.m439{color: #7DB2FF; display: flex}
+.m440{border-radius: 16px; border: 1px solid var(--border); background: rgba(20,27,51,0.86); overflow: hidden}
+.m441{display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; border-bottom: 1px solid var(--border)}
+.m442{display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer}
+.m443{width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--accent); background: var(--accent); color: var(--bg-0); display: flex; align-items: center; justify-content: center}
+.m444{display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; opacity: 0.45; cursor: not-allowed}
+.m445{overflow-x: auto}
+.m446{min-width: 860px}
+.m447{display: grid; grid-template-columns: minmax(200px, 2fr) minmax(130px, 1.1fr) minmax(150px, 1.3fr) minmax(230px, 2fr) 110px 150px; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2)}
+.m448{text-align: right}
+.m449{position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)}
+.m450{display: grid; grid-template-columns: minmax(200px, 2fr) minmax(130px, 1.1fr) minmax(150px, 1.3fr) minmax(230px, 2fr) 110px 150px; gap: 12px; align-items: center; padding: 4px 16px; border-bottom: 1px solid rgba(160,190,255,0.08); background: transparent; font-size: 14px}
+.m451{display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 6px 0 0; border: 0; border-radius: 8px; background: transparent; color: var(--text-1); font-family: inherit; font-size: 15px; font-weight: 600; text-align: left; cursor: pointer}
+.m452{width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8 0%, #3FA37A 36%, #1F5F6B 70%, #0B2433 100%); border: 2px solid var(--accent); color: var(--text-soft); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; opacity: 1}
+.m453{color: var(--text-soft)}
+.m454{color: var(--text-soft); font-size: 13px; font-variant-numeric: tabular-nums}
+.m455{text-align: right; font-variant-numeric: tabular-nums; font-weight: 600}
+.m456{display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer}
+.m457{width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFC48A 0%, #E0592E 36%, #7A1F14 70%, #2A0A08 100%); border: 1.5px dashed rgba(232,238,255,0.75); color: var(--text-soft); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; opacity: 1}
+.m458{display: inline-flex; align-items: center; gap: 5px; color: var(--text-soft); font-size: 13px}
+.m459{width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8 0%, #3FA37A 36%, #1F5F6B 70%, #0B2433 100%); border: 1px solid var(--border-strong); color: var(--text-soft); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; opacity: 1}
+.m460{display: grid; grid-template-columns: minmax(200px, 2fr) minmax(130px, 1.1fr) minmax(150px, 1.3fr) minmax(230px, 2fr) 110px 150px; gap: 12px; align-items: center; padding: 4px 16px; border-bottom: 1px solid rgba(160,190,255,0.08); background: rgba(46,196,196,0.08); font-size: 14px}
+.m461{width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FBE3A6 0%, #D9A350 38%, #8A5A26 72%, #2E1C0C 100%); border: 1.5px dashed rgba(232,238,255,0.75); color: var(--text-soft); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; opacity: 1}
+.m462{width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.30), rgba(255,255,255,0) 45%), radial-gradient(circle at 72% 78%, rgba(7,11,22,0.7), rgba(7,11,22,0) 62%), repeating-linear-gradient(168deg, #E6C08E 0 5px, #B57944 5px 9px, #D9A066 9px 13px, #8F5A33 13px 16px); border: 1px solid var(--border-strong); color: var(--text-soft); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; opacity: 1}
+.m463{width: 28px; height: 28px; border-radius: 50%; background: var(--bg-3); border: 1px solid var(--border-strong); color: var(--text-soft); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; opacity: 0.7}
+.m464{width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #CDE6FF 0%, #3D86D6 38%, #164A8A 70%, #071C38 100%); border: 1px solid var(--border-strong); color: var(--text-soft); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; opacity: 1}
+.m465{width: 28px; height: 28px; border-radius: 50%; background: var(--bg-3); border: 1px solid var(--border-strong); color: var(--text-soft); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; opacity: 1}
+.m466{display: inline-flex; align-items: center; gap: 5px; color: var(--text-1)}
+.m467{position: absolute; left: 50%; top: 16px; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 10px 10px 10px 14px; border-radius: 12px; background: rgba(20,27,51,0.96); border: 1px solid rgba(46,196,196,0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.5)}
+.m468{font-size: 14px; color: var(--text-1); flex: 1 1 220px}
+.m469{display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-radius: 10px; background: var(--accent); color: var(--bg-0); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap}
+.m470{font-family: Inter, Roboto, system-ui, Arial, sans-serif; color: var(--text-1); font-size: 16px; line-height: 1.5; background-color: var(--bg-0); width: 100%; max-width: 430px; height: 100vh; height: 100dvh; margin: 0 auto; position: relative; overflow: hidden; display: flex; flex-direction: column}
+.m471{position: relative; z-index: 50; height: 56px; flex: 0 0 auto; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 12px; background: rgba(7,11,22,0.92); border-bottom: 1px solid var(--border)}
+.m472{width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: var(--bg-0); display: flex; align-items: center; justify-content: center}
+.m473{font-weight: 700; font-size: 16px; letter-spacing: 0.04em; margin-left: 6px; flex: 1 1 auto}
+.m474{position: relative; width: 44px; height: 44px; border-radius: 10px; border: 1px solid rgba(255,107,61,0.45); background: rgba(255,107,61,0.10); color: var(--danger-text); display: flex; align-items: center; justify-content: center}
+.m475{width: 44px; height: 44px; border-radius: 10px; border: 1px solid rgba(255,107,61,0.45); background: rgba(255,107,61,0.10); color: var(--danger-text); display: flex; align-items: center; justify-content: center}
+.m476{width: 44px; height: 44px; border-radius: 10px; border: 1px solid rgba(242,193,78,0.45); background: rgba(242,193,78,0.10); color: var(--warning); display: flex; align-items: center; justify-content: center}
+.m477{position: relative; width: 44px; height: 44px; border-radius: 10px; border: 0; background: transparent; color: var(--text-soft); display: flex; align-items: center; justify-content: center}
+.m478{position: absolute; top: 5px; right: 3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: var(--bg-0); font-size: 11px; font-weight: 700; line-height: 18px; text-align: center}
+.m479{position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column}
+.m480{flex: 1 1 auto; min-height: 0; min-width: 0; padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 8px}
+.m481{grid-column: 1; grid-row: 1; margin: 0; font-size: 34px; font-weight: 700; line-height: 1.2}
+.m482{position: relative; z-index: 45; max-width: none}
+.m483{position: relative; flex: 1 1 auto; min-height: 300px; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; background-color: var(--bg-0); background-image: radial-gradient(ellipse 75% 65% at 50% 45%, var(--bg-1) 0%, var(--bg-0) 78%)}
+.m484{position: absolute; left: 50%; top: 50%; width: 640px; height: 640px; margin-left: -320px; margin-top: -320px; transform: translate(-75.67326585141706px, -272.9869911901097px) scale(0.62); transform-origin: 50% 50%; transition: transform 0.25s ease}
+.m485{position: absolute; left: 0; right: 0; top: 0; z-index: 16; padding: 8px 0 8px 8px; background: linear-gradient(rgba(7,11,22,0.85), rgba(7,11,22,0))}
+.m486{display: flex; gap: 6px; overflow-x: auto; padding-right: 8px}
+.m487{flex: 0 0 auto; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border-strong); background: rgba(20,27,51,0.94); color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer}
+.m488{flex: 0 0 auto; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border-strong); background: rgba(20,27,51,0.94); color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; opacity: 0.45; cursor: not-allowed}
+.m489{position: absolute; right: 12px; top: 64px; width: 104px; height: 104px; border-radius: 10px; background: rgba(7,11,22,0.85); border: 1px solid var(--border-strong); overflow: hidden; z-index: 15}
+.m490{position: absolute; left: 22.951931918199858%; top: 63.35357640879781%; width: 77.04806808180014%; height: 36.64642359120219%; border: 1.5px solid var(--accent); border-radius: 3px; background: rgba(46,196,196,0.08)}
+.m491{position: absolute; left: 12px; bottom: 12px; z-index: 18; display: flex; flex-direction: column; align-items: flex-start; gap: 8px}
+.m492{position: absolute; right: 12px; bottom: 12px; z-index: 18; display: flex; flex-direction: column; align-items: flex-end; gap: 8px}
+.m493{position: absolute; left: 0; right: 0; bottom: -60px; height: 506px; max-height: calc(100% + 52px); overflow-y: auto; z-index: 65; padding: 8px 16px 20px; background: var(--bg-2); border: 1px solid var(--border-strong); border-bottom: 0; border-radius: 20px 20px 0 0; box-shadow: 0 -12px 40px rgba(0,0,0,0.55)}
+.m494{display: flex; align-items: center; justify-content: center; width: 88px; height: 28px; margin: -4px auto 4px; padding: 0; border: 0; background: transparent; cursor: grab}
+.m495{width: 40px; height: 4px; border-radius: 2px; background: rgba(160,190,255,0.45)}
+.m496{position: relative; z-index: 60; flex: 0 0 auto; height: 60px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: rgba(7,11,22,0.96); border-top: 1px solid var(--border)}
+.m497{position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--text-2); font-size: 11px; font-weight: 500; text-decoration: none}
+.m498{position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--accent-hover); font-size: 11px; font-weight: 600; text-decoration: none}
+.m499{position: absolute; top: 0; left: 24%; right: 24%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent)}
+.m500{position: absolute; left: 50%; top: 50%; width: 1100px; height: 640px; margin-left: -550px; margin-top: -320px; transform: translate(0px, 0px) scale(0.5); transform-origin: 50% 50%; transition: transform 0.25s ease}
+.m501{position: absolute; left: 700px; top: 420px; width: 32px; height: 32px; margin: -16px 0 0 -16px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; box-shadow: none}
+.m502{position: absolute; right: 12px; top: 64px; width: 104px; height: 61px; border-radius: 10px; background: rgba(7,11,22,0.85); border: 1px solid var(--border-strong); overflow: hidden; z-index: 15}
+.m503{position: absolute; left: 16.727272727272727%; top: 0%; width: 66.54545454545456%; height: 100%; border: 1.5px solid var(--accent); border-radius: 3px; background: rgba(46,196,196,0.08)}

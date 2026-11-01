@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map — Lyra system</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="map.css">
+</head>
+<body>
+<div class="m1">
+
+
+
+<header class="m2">
+  <div class="m3">
+    <span aria-hidden="true" class="m4"><svg viewBox="0 0 24 24" width="16" height="16" class="m5"><path d="M6 19L12 5l6 14 M8.5 14h7"></path></svg></span>
+    <span class="m6">AETHERIS</span>
+  </div>
+  <span class="m7">
+    <span class="m8"><svg viewBox="0 0 24 24" width="15" height="15" role="img" aria-label="Terran" class="m9"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"></path></svg></span>
+    <span class="m10">Командор Вега</span>
+  </span>
+  <span class="m11">Standard</span>
+  <div class="m12">
+    
+      <span title="Credits" class="m13">
+        <span class="m14"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M15 9.5a3.5 3.5 0 1 0 0 5"></path></svg></span>
+        <span class="m15">Credits</span>
+        <span class="m16">48 260</span>
+      </span>
+    
+      <span title="Trade currency" class="m13">
+        <span class="m17"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M4 8h15l-3-3 M20 16H5l3 3"></path></svg></span>
+        <span class="m15">Trade currency</span>
+        <span class="m16">1 240</span>
+      </span>
+    
+      <span title="Energy" class="m13">
+        <span class="m18"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M13 2L4 14h7l-1 8 9-12h-7z"></path></svg></span>
+        <span class="m15">Energy</span>
+        <span class="m16">3 410</span>
+      </span>
+    
+  </div>
+  <div class="m19">
+    <button type="button" data-btn="" class="m20"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3v4 M12 17v4 M3 12h4 M17 12h4 M12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10z M12 11v2"></path></svg>Attack <span class="m21">14:32</span></button>
+    <button type="button" data-btn="" class="m20"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M4 4l10 10 M14 18l4-4 M17 17l3 3 M20 4L10 14 M10 18l-4-4 M7 17l-3 3"></path></svg>Battle on</button>
+    <button type="button" data-btn="" class="m22"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M3 8l9-5 9 5v8l-9 5-9-5z M3 8l9 5 9-5 M12 13v8"></path></svg>Storage full</button>
+    <span aria-hidden="true" class="m23"></span>
+    <button type="button" data-btn="" aria-label="Mail: 3 unread" class="m24"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" class="m9"><path d="M3 6h18v12H3z M3 7l9 6 9-6"></path></svg><span class="m25">3</span></button>
+    <button type="button" data-btn="" aria-label="Settings" class="m26"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" class="m9"><path d="M4 6h9 M17 6h3 M15 4v4 M4 12h3 M11 12h9 M9 10v4 M4 18h11 M19 18h1 M17 16v4"></path></svg></button>
+    <button type="button" data-btn="" aria-label="Sign out" class="m26"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" class="m9"><path d="M15 4h4v16h-4 M10 8l-4 4 4 4 M6 12h10"></path></svg></button>
+  </div>
+</header>
+
+
+
+
+
+<div class="m27">
+
+
+
+<nav aria-label="Menu" class="m28">
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M4 4h7v7H4z M13 4h7v7h-7z M4 13h7v7H4z M13 13h7v7h-7z"></path></svg>
+      <span class="m31">Overview</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M12 6a6 6 0 1 0 0 12a6 6 0 1 0 0-12z M3 14c2 1.5 6 2 9 1.5s7-2 9-4.5"></path></svg>
+      <span class="m31">Planet</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M3 10l9-6 9 6v10H3z M7 20v-6h10v6 M7 17h10"></path></svg>
+      <span class="m31">Storage</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M3 20V10l5 3V10l5 3V6h4l1 14z M3 20h18"></path></svg>
+      <span class="m31">Production</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M12 2c3 3 4 7 4 11l-4 3-4-3c0-4 1-8 4-11z M8 13l-3 3v3l3-2 M16 13l3 3v3l-3-2"></path></svg>
+      <span class="m31">Shipyard</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M4 7l6 5-6 5 M12 7l6 5-6 5"></path></svg>
+      <span class="m31">Fleets</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="page" class="m32">
+      <span class="m33"></span>
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14"></path></svg>
+      <span class="m31">Map</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M9 3h6 M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3 M7 14h10"></path></svg>
+      <span class="m31">Research</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M4 9l2-5h12l2 5 M4 9h16v11H4z M9 20v-6h6v6"></path></svg>
+      <span class="m31">Market</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M5 20v-6 M12 20V8 M19 20v-10 M3 20h18"></path></svg>
+      <span class="m31">Ranking</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M3 6h18v12H3z M3 7l9 6 9-6"></path></svg>
+      <span class="m31">Mail</span>
+      <span class="m34">3</span>
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7 M12 17v.01"></path></svg>
+      <span class="m31">Help</span>
+      
+    </a>
+  
+    <a href="#" data-btn="" aria-current="false" class="m29">
+      
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="m30"><path d="M4 6h9 M17 6h3 M15 4v4 M4 12h3 M11 12h9 M9 10v4 M4 18h11 M19 18h1 M17 16v4"></path></svg>
+      <span class="m31">Settings</span>
+      
+    </a>
+  
+</nav>
+
+
+
+<main class="m35">
+  <div class="m36">
+    <div class="m37">
+      <h1 class="m38">Map</h1>
+      <nav aria-label="Map levels" class="m39">
+        
+          
+          <button type="button" data-btn="" title="Zoom out to this level" class="m139"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" class="m9"><path d="M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4z M4 12c0-5 6-8 10-6 M20 12c0 5-6 8-10 6"></path></svg>Galaxy</button>
+          
+        
+          <span aria-hidden="true" class="m140">›</span>
+          <button type="button" data-btn="" title="Zoom out to this level" class="m139"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" class="m9"><path d="M4 6l8-3 8 3v12l-8 3-8-3z M12 3v18"></path></svg>Sector 3</button>
+          
+        
+          <span aria-hidden="true" class="m140">›</span>
+          
+          <span aria-current="location" class="m40"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" class="m9"><path d="M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4z M12 5a7 7 0 1 0 0 14a7 7 0 1 0 0-14z"></path></svg>Lyra system</span>
+        
+      </nav>
+    </div>
+    <div role="group" aria-label="View" class="m41">
+      
+        <button type="button" data-btn="" aria-pressed="true" class="m42"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14"></path></svg>Map</button>
+      
+        <button type="button" data-btn="" aria-pressed="false" class="m43"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M8 6h12 M8 12h12 M8 18h12 M4 6h.01 M4 12h.01 M4 18h.01"></path></svg>List</button>
+      
+    </div>
+  </div>
+
+  
+  <div class="m44">
+    <label for="map-search" class="m15">Search the map</label>
+    <span aria-hidden="true" class="m45"><svg viewBox="0 0 24 24" width="20" height="20" class="m9"><path d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13z M15.5 15.5L20 20"></path></svg></span>
+    <input id="map-search" type="search" autocomplete="off" value="" placeholder="System, planet or player" aria-expanded="false" aria-controls="map-search-results" class="m46">
+    
+    
+  </div>
+
+  
+  
+  <div class="m57">
+    <div aria-hidden="true" class="m58"></div>
+
+    
+    <div tabindex="0" role="application" aria-label="Map. Arrows move, + and − zoom, Esc closes the card" class="m59">
+      <div class="m280">
+
+        
+        
+
+        
+        
+
+        
+        
+          
+            <div aria-hidden="true" class="m281"></div>
+            <span aria-hidden="true" class="m282">1</span>
+          
+            <div aria-hidden="true" class="m283"></div>
+            <span aria-hidden="true" class="m284">2</span>
+          
+            <div aria-hidden="true" class="m285"></div>
+            <span aria-hidden="true" class="m286">3</span>
+          
+            <div aria-hidden="true" class="m287"></div>
+            <span aria-hidden="true" class="m288">4</span>
+          
+            <div aria-hidden="true" class="m289"></div>
+            <span aria-hidden="true" class="m290">5</span>
+          
+            <div aria-hidden="true" class="m291"></div>
+            <span aria-hidden="true" class="m292">6</span>
+          
+            <div aria-hidden="true" class="m293"></div>
+            <span aria-hidden="true" class="m294">7</span>
+          
+            <div aria-hidden="true" class="m295"></div>
+            <span aria-hidden="true" class="m296">8</span>
+          
+            <div aria-hidden="true" class="m297"></div>
+            <span aria-hidden="true" class="m298">9</span>
+          
+            <div aria-hidden="true" class="m299"></div>
+            <span aria-hidden="true" class="m300">10</span>
+          
+            <div aria-hidden="true" class="m301"></div>
+            <span aria-hidden="true" class="m302">11</span>
+          
+            <div aria-hidden="true" class="m303"></div>
+            <span aria-hidden="true" class="m304">12</span>
+          
+          <div role="img" aria-label="Star Lyra" class="m305"></div>
+          
+            
+              <span aria-hidden="true" class="m306"></span>
+            
+              <span aria-hidden="true" class="m307"></span>
+            
+              <span aria-hidden="true" class="m308"></span>
+            
+              <span aria-hidden="true" class="m309"></span>
+            
+              <span aria-hidden="true" class="m310"></span>
+            
+              <span aria-hidden="true" class="m311"></span>
+            
+              <span aria-hidden="true" class="m312"></span>
+            
+              <span aria-hidden="true" class="m313"></span>
+            
+              <span aria-hidden="true" class="m314"></span>
+            
+              <span aria-hidden="true" class="m315"></span>
+            
+              <span aria-hidden="true" class="m316"></span>
+            
+              <span aria-hidden="true" class="m317"></span>
+            
+              <span aria-hidden="true" class="m318"></span>
+            
+              <span aria-hidden="true" class="m319"></span>
+            
+              <span aria-hidden="true" class="m320"></span>
+            
+              <span aria-hidden="true" class="m321"></span>
+            
+              <span aria-hidden="true" class="m322"></span>
+            
+              <span aria-hidden="true" class="m323"></span>
+            
+              <span aria-hidden="true" class="m324"></span>
+            
+              <span aria-hidden="true" class="m325"></span>
+            
+              <span aria-hidden="true" class="m326"></span>
+            
+              <span aria-hidden="true" class="m327"></span>
+            
+              <span aria-hidden="true" class="m328"></span>
+            
+              <span aria-hidden="true" class="m329"></span>
+            
+              <span aria-hidden="true" class="m330"></span>
+            
+              <span aria-hidden="true" class="m331"></span>
+            
+              <span aria-hidden="true" class="m332"></span>
+            
+              <span aria-hidden="true" class="m333"></span>
+            
+              <span aria-hidden="true" class="m334"></span>
+            
+              <span aria-hidden="true" class="m335"></span>
+            
+              <span aria-hidden="true" class="m336"></span>
+            
+              <span aria-hidden="true" class="m337"></span>
+            
+              <span aria-hidden="true" class="m338"></span>
+            
+              <span aria-hidden="true" class="m339"></span>
+            
+              <span aria-hidden="true" class="m340"></span>
+            
+              <span aria-hidden="true" class="m341"></span>
+            
+              <span aria-hidden="true" class="m342"></span>
+            
+              <span aria-hidden="true" class="m343"></span>
+            
+              <span aria-hidden="true" class="m344"></span>
+            
+              <span aria-hidden="true" class="m345"></span>
+            
+              <span aria-hidden="true" class="m346"></span>
+            
+              <span aria-hidden="true" class="m347"></span>
+            
+              <span aria-hidden="true" class="m348"></span>
+            
+              <span aria-hidden="true" class="m349"></span>
+            
+              <span aria-hidden="true" class="m350"></span>
+            
+              <span aria-hidden="true" class="m351"></span>
+            
+              <span aria-hidden="true" class="m352"></span>
+            
+              <span aria-hidden="true" class="m353"></span>
+            
+              <span aria-hidden="true" class="m354"></span>
+            
+              <span aria-hidden="true" class="m355"></span>
+            
+              <span aria-hidden="true" class="m356"></span>
+            
+              <span aria-hidden="true" class="m357"></span>
+            
+              <span aria-hidden="true" class="m358"></span>
+            
+              <span aria-hidden="true" class="m359"></span>
+            
+              <span aria-hidden="true" class="m360"></span>
+            
+              <span aria-hidden="true" class="m361"></span>
+            
+              <span aria-hidden="true" class="m362"></span>
+            
+              <span aria-hidden="true" class="m363"></span>
+            
+              <span aria-hidden="true" class="m364"></span>
+            
+              <span aria-hidden="true" class="m365"></span>
+            
+              <span aria-hidden="true" class="m366"></span>
+            
+              <span aria-hidden="true" class="m367"></span>
+            
+              <span aria-hidden="true" class="m368"></span>
+            
+              <span aria-hidden="true" class="m369"></span>
+            
+              <span aria-hidden="true" class="m370"></span>
+            
+              <span aria-hidden="true" class="m371"></span>
+            
+              <span aria-hidden="true" class="m372"></span>
+            
+              <span aria-hidden="true" class="m373"></span>
+            
+              <span aria-hidden="true" class="m374"></span>
+            
+              <span aria-hidden="true" class="m375"></span>
+            
+              <span aria-hidden="true" class="m376"></span>
+            
+              <span aria-hidden="true" class="m377"></span>
+            
+              <span aria-hidden="true" class="m378"></span>
+            
+              <span aria-hidden="true" class="m379"></span>
+            
+              <span aria-hidden="true" class="m380"></span>
+            
+              <span aria-hidden="true" class="m381"></span>
+            
+              <span aria-hidden="true" class="m382"></span>
+            
+              <span aria-hidden="true" class="m383"></span>
+            
+              <span aria-hidden="true" class="m384"></span>
+            
+              <span aria-hidden="true" class="m385"></span>
+            
+              <span aria-hidden="true" class="m386"></span>
+            
+              <span aria-hidden="true" class="m387"></span>
+            
+              <span aria-hidden="true" class="m388"></span>
+            
+              <span aria-hidden="true" class="m389"></span>
+            
+          
+          
+            <button type="button" data-btn="" aria-label="Aurora, Earth-like, My planet, Orbit 2" aria-pressed="true" class="m390">
+              <span class="m435"></span>
+              
+              
+                <span class="m392"><svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true" class="m5"><path d="M5 20V10l7-5 7 5v10z M10 20v-5h4v5"></path></svg></span>
+              
+              <span class="m393">Aurora</span>
+              
+            </button>
+          
+            <button type="button" data-btn="" aria-label="Lyra-3, Volcanic, Free planet, Orbit 3" aria-pressed="false" class="m394">
+              <span class="m395"></span>
+              
+              
+                <span class="m396"><svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true" class="m5"><path d="M12 5v14 M5 12h14"></path></svg></span>
+              
+              <span class="m393">Lyra-3</span>
+              
+            </button>
+          
+            <button type="button" data-btn="" aria-label="Isar, Earth-like, Player colony Krell_77, Orbit 5" aria-pressed="false" class="m397">
+              <span class="m436"></span>
+              
+              
+                <span class="m399"><svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true" class="m5"><path d="M5 21V4 M5 4h12l-2 4 2 4H5"></path></svg></span>
+              
+              <span class="m393">Isar</span>
+              
+                <span class="m400">
+                  <span class="m401"><svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" class="m116"><path d="M4 20L12 3l8 17-8-5z"></path></svg></span>Krell_77<svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true" class="m116"><path d="M5 21V4 M5 4h12l-2 4 2 4H5"></path></svg>
+                </span>
+              
+            </button>
+          
+            <button type="button" data-btn="" aria-label="Lyra-6, Desert, Terraformed, Orbit 6" aria-pressed="false" class="m402">
+              <span class="m403"></span>
+              
+              
+                <span class="m404"><svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true" class="m5"><path d="M12 5v14 M5 12h14"></path></svg></span>
+              
+                <span class="m405"><svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true" class="m5"><path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14z M5 19l7-7"></path></svg></span>
+              
+              <span class="m393">Lyra-6</span>
+              
+            </button>
+          
+            <button type="button" data-btn="" aria-label="Typhon, Gas Giant, Gas giant, Orbit 8" aria-pressed="false" class="m406">
+              <span class="m407"></span>
+              
+              
+                <span class="m408"><svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true" class="m5"><path d="M8 21l2-10h4l2 10 M6 21h12 M12 11V7 M8 7h8 M10 3h4v4h-4z"></path></svg></span>
+              
+              <span class="m393">Typhon</span>
+              
+            </button>
+          
+            <button type="button" data-btn="" aria-label="Unknown: a radar is needed, Orbit 9" aria-pressed="false" class="m409">
+              <span class="m410"></span>
+              
+              
+                <span class="m411"><svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true" class="m5"><path d="M8.5 8.5a3.5 3.5 0 1 1 4.9 3.2c-.8.4-1.4 1.2-1.4 2.3 M12 19v.01"></path></svg></span>
+              
+              <span class="m412">?</span>
+              
+            </button>
+          
+            <button type="button" data-btn="" aria-label="Nereus, Oceanic, Player colony SkyNexa, Orbit 10" aria-pressed="false" class="m413">
+              <span class="m414"></span>
+              
+              
+                <span class="m415"><svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true" class="m5"><path d="M5 21V4 M5 4h12l-2 4 2 4H5"></path></svg></span>
+              
+              <span class="m393">Nereus</span>
+              
+                <span class="m400">
+                  <span class="m416"><svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" class="m116"><path d="M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16z M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8z"></path></svg></span>SkyNexa<svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true" class="m116"><path d="M5 21V4 M5 4h12l-2 4 2 4H5"></path></svg>
+                </span>
+              
+            </button>
+          
+            <button type="button" data-btn="" aria-label="Lyra Belt, Asteroid field, Asteroid field, Orbit 12" aria-pressed="false" class="m417">
+              
+              <span class="m418"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m211"><path d="M6 8h.01 M12 6h.01 M17.5 9h.01 M8 14h.01 M14 13h.01 M18.5 16h.01 M11 18.5h.01"></path></svg></span>
+              
+              <span class="m393">Lyra Belt</span>
+              
+            </button>
+          
+        
+
+        
+        
+      </div>
+    </div>
+
+    
+    
+      <div role="group" aria-label="Layers" class="m75">
+        
+          <button type="button" data-btn="" aria-expanded="true" class="m76"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3l9 5-9 5-9-5z M3 13l9 5 9-5"></path></svg><span class="m77">Layers</span><span class="m78">6 / 6</span><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m79"><path d="M6 9l6 6 6-6"></path></svg></button>
+        
+        
+          <div class="m80">
+            
+              <button type="button" data-btn="" aria-pressed="true" class="m81">
+                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
+                <span class="m84"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M5 20V10l7-5 7 5v10z M10 20v-5h4v5"></path></svg></span>
+                <span>Mine</span>
+              </button>
+            
+              <button type="button" data-btn="" aria-pressed="true" class="m81">
+                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
+                <span class="m17"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M5 21V4 M5 4h12l-2 4 2 4H5"></path></svg></span>
+                <span>Other colonies</span>
+              </button>
+            
+              <button type="button" data-btn="" aria-pressed="true" class="m81">
+                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
+                <span class="m85"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 5v14 M5 12h14"></path></svg></span>
+                <span>Free planets</span>
+              </button>
+            
+              <button type="button" data-btn="" aria-pressed="true" class="m81">
+                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
+                <span class="m86"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M6 8h.01 M12 6h.01 M17.5 9h.01 M8 14h.01 M14 13h.01 M18.5 16h.01 M11 18.5h.01"></path></svg></span>
+                <span>Asteroid fields</span>
+              </button>
+            
+              <button type="button" data-btn="" aria-pressed="true" class="m81">
+                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
+                <span class="m87"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M7 18a4 4 0 0 1-.6-8A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 .5 9.5z"></path></svg></span>
+                <span>Nebulae</span>
+              </button>
+            
+              <button type="button" data-btn="" aria-pressed="true" class="m81">
+                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
+                <span class="m88"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M4 9h16 M3.2 13h17.6 M5 17h14"></path></svg></span>
+                <span>Gas giants</span>
+              </button>
+            
+            
+              <button type="button" disabled="" aria-disabled="true" title="Coming soon" class="m89">
+                <span class="m90"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
+                <span>Fleets</span>
+              </button>
+            
+              <button type="button" disabled="" aria-disabled="true" title="Coming soon" class="m89">
+                <span class="m90"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
+                <span>Clan</span>
+              </button>
+            
+              <button type="button" disabled="" aria-disabled="true" title="Coming soon" class="m89">
+                <span class="m90"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
+                <span>Enemies</span>
+              </button>
+            
+              <button type="button" disabled="" aria-disabled="true" title="Coming soon" class="m89">
+                <span class="m90"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
+                <span>Pirates</span>
+              </button>
+            
+          </div>
+        
+      </div>
+    
+
+    
+    
+      <div role="img" aria-label="Mini-map: the frame shows the visible area" class="m419">
+        
+          <span class="m420"></span>
+        
+          <span class="m421"></span>
+        
+          <span class="m422"></span>
+        
+          <span class="m423"></span>
+        
+          <span class="m424"></span>
+        
+          <span class="m425"></span>
+        
+          <span class="m426"></span>
+        
+          <span class="m427"></span>
+        
+        <span class="m428"></span>
+        <span class="m100">Lyra system</span>
+      </div>
+
+      
+      <div class="m101">
+        
+        <button type="button" data-btn="" aria-expanded="false" aria-controls="map-legend" class="m102"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 11v6 M12 7.5v.01"></path></svg>Legend</button>
+      </div>
+
+      
+      <div class="m103">
+        <span class="m104">×1.0 · 1 AU</span>
+        <button type="button" data-btn="" aria-label="Zoom in" class="m105"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M12 5v14 M5 12h14"></path></svg></button>
+        <button type="button" data-btn="" aria-label="Zoom out" class="m105"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M5 12h14"></path></svg></button>
+        <button type="button" data-btn="" aria-label="My planet" title="My planet" class="m106"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M12 3v3 M12 18v3 M3 12h3 M18 12h3 M12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10z M12 11.5v1"></path></svg></button>
+      </div>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+  </div>
+  
+
+  
+  
+</main>
+
+
+
+<aside aria-label="Object card" class="m107">
+  
+  <div class="m108">
+    <div role="img" aria-label="ART-12a placeholder" class="m429">
+      <span class="m430">ART-12a</span><span class="m111">16:9 · Earth-like</span>
+      
+    </div>
+    <button type="button" data-btn="" aria-label="Close" class="m112"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M6 6l12 12 M18 6L6 18"></path></svg></button>
+  </div>
+  <div class="m113">
+    <h2 class="m114">Aurora</h2>
+    <span class="m115"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m116"><path d="M12 6a6 6 0 1 0 0 12a6 6 0 1 0 0-12z M3 14c2 1.5 6 2 9 1.5s7-2 9-4.5"></path></svg>Earth-like</span>
+  </div>
+  <div class="m117">
+    
+      <span class="m118">Size</span>
+      <span class="m119">Medium</span>
+    
+      <span class="m118">Place</span>
+      <span class="m119">Sector 3 · System Lyra · Orbit 2</span>
+    
+    <span class="m118">Owner</span>
+    <span class="m120">
+      
+      <span class="m121"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="m116"><path d="M5 20V10l7-5 7 5v10z M10 20v-5h4v5"></path></svg>You</span>
+      
+      
+    </span>
+  </div>
+
+  
+    <h3 class="m433">Known deposits</h3>
+    
+      <div class="m437">
+        
+          <span class="m438"><span class="m86"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M3 17h18l-3.5-9h-11z M7 8l1.5-3h7L17 8"></path></svg></span>Iron</span>
+        
+          <span class="m438"><span class="m86"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"></path></svg></span>Titanium</span>
+        
+          <span class="m438"><span class="m86"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 1 0 0-17z M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6z"></path></svg></span>Copper</span>
+        
+          <span class="m438"><span class="m439"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M9 3h6l3 5v8l-3 5H9l-3-5V8z M6 8h12 M6 16h12"></path></svg></span>Quartz</span>
+        
+      </div>
+    
+    
+  
+
+  
+
+  <div class="m122">
+    <span class="m84"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
+    <span class="m123">Travel time</span>
+    <span class="m124">You are here</span>
+  </div>
+
+  <div class="m125">
+    
+      <button type="button" data-btn="" class="m126"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 6a6 6 0 1 0 0 12a6 6 0 1 0 0-12z M15 9l4-4 M15 5h4v4"></path></svg>Open planet</button>
+      
+    
+      
+      <button type="button" disabled="" aria-disabled="true" aria-describedby="fleet-note" title="A fleet is needed: fleets arrive later" class="m277"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z M9 12l2 2 4-4"></path></svg>Escort</button>
+    
+    <p id="fleet-note" class="m278"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="m279"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg>A fleet is needed: fleets arrive later</p>
+  </div>
+</aside>
+
+</div>
+
+
+
+<footer class="m127">
+  <div role="group" aria-label="Planet switcher" class="m128">
+    
+      <button type="button" data-btn="" aria-pressed="true" class="m129">
+        <span class="m130"></span>Aurora
+      </button>
+    
+      <button type="button" data-btn="" aria-pressed="false" class="m131">
+        <span class="m132"></span>Boreas
+      </button>
+    
+      <button type="button" data-btn="" aria-pressed="false" class="m131">
+        <span class="m133"></span>Ignis-9
+      </button>
+    
+      <button type="button" data-btn="" aria-pressed="false" class="m131">
+        <span class="m134"></span>Dune Seth
+      </button>
+    
+      <button type="button" data-btn="" aria-pressed="false" class="m131">
+        <span class="m135"></span>Orpheus
+      </button>
+    
+  </div>
+  <div class="m136">
+    <label for="map-chat" class="m15">Global chat</label>
+    <input id="map-chat" type="text" placeholder="Message all players…" class="m137">
+    <button type="button" data-btn="" aria-label="Send" class="m138"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M4 12l16-8-6 16-2-7z"></path></svg></button>
+  </div>
+</footer>
+
+
+
+
+</div>
+</body>
+</html>
