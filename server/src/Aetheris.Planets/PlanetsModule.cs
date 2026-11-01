@@ -73,6 +73,7 @@ public sealed class PlanetsModule : IPlanetsModule
         services.AddScoped<PlanetStartPackage>();
         services.TryAddScoped<ITechnologyLevels, NoTechnologyLevels>();
         services.AddScoped<IPlanetsModule, PlanetsModule>();
+        services.AddScoped<Aetheris.World.Visibility.IRadarLevels, Services.PlanetsRadarLevels>();
 
         // The economy module asks for the effects of the buildings of a body; the contract is
         // declared by the economy module and implemented here (task 00015).

@@ -115,6 +115,27 @@ public sealed record WorldSettings
     /// <summary>Gets the fixed travel time inside a star system.</summary>
     public TimeSpan InSystemTravelTime { get; init; }
 
+    /// <summary>Gets the travel time between two star systems per unit of distance.</summary>
+    public TimeSpan TravelTimePerDistance { get; init; }
+
+    /// <summary>Gets the distance between two neighbouring orbits of a system.</summary>
+    public double MapOrbitDistanceStep { get; init; }
+
+    /// <summary>Gets how near to an object a point of the map must lie to be taken for it.</summary>
+    public double MapSnapRadius { get; init; }
+
+    /// <summary>Gets the largest number of results of the search on the map.</summary>
+    public int MapSearchLimit { get; init; }
+
+    /// <summary>Gets the range a level of the radar adds.</summary>
+    public double RadarRangePerLevel { get; init; }
+
+    /// <summary>Gets a value indicating whether the test stub of the radar is on.</summary>
+    public bool RadarStubEnabled { get; init; }
+
+    /// <summary>Gets the level of the radar the test stub gives every body.</summary>
+    public int RadarStubLevel { get; init; }
+
     /// <summary>Gets the largest number of newcomers in one star system.</summary>
     public int MaxNewbiesPerSystem { get; init; }
 
@@ -193,6 +214,13 @@ public sealed record WorldSettings
             FieldRespawnInSystemProbability = ReadDouble(config, WorldConfigKeys.FieldRespawnInSystemProbability),
             GasGiantStationLimit = ReadInt32(config, WorldConfigKeys.GasGiantStationLimit),
             InSystemTravelTime = TimeSpan.FromSeconds(ReadDouble(config, WorldConfigKeys.InSystemTravelSeconds)),
+            TravelTimePerDistance = TimeSpan.FromSeconds(ReadDouble(config, WorldConfigKeys.TravelSecondsPerDistance)),
+            MapOrbitDistanceStep = ReadDouble(config, WorldConfigKeys.MapOrbitDistanceStep),
+            MapSnapRadius = ReadDouble(config, WorldConfigKeys.MapSnapRadius),
+            MapSearchLimit = ReadInt32(config, WorldConfigKeys.MapSearchLimit),
+            RadarRangePerLevel = ReadDouble(config, WorldConfigKeys.RadarRangePerLevel),
+            RadarStubEnabled = ReadBoolean(config, WorldConfigKeys.RadarStubEnabled),
+            RadarStubLevel = ReadInt32(config, WorldConfigKeys.RadarStubLevel),
             MaxNewbiesPerSystem = ReadInt32(config, WorldConfigKeys.MaxNewbiesPerSystem),
             HomeNameMinLength = ReadInt32(config, WorldConfigKeys.HomeNameMinLength),
             HomeNameMaxLength = ReadInt32(config, WorldConfigKeys.HomeNameMaxLength),

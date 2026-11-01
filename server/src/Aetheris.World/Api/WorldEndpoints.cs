@@ -7,6 +7,7 @@ using Aetheris.Core.Security;
 using Aetheris.World.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
 namespace Aetheris.World.Api;
@@ -80,6 +81,30 @@ public static class WorldEndpoints
 
         world.MapGet("/sectors", async (WorldQueryService queries, CancellationToken cancellationToken) =>
             Results.Json(await queries.GetSectorsAsync(cancellationToken).ConfigureAwait(false), WorldJson.Options));
+
+        // The map screen (task 00034): every read passes the visibility of the player.
+        world.MapGet("/map/galaxy", async (ClaimsPrincipal user, WorldMapService map, CancellationToken cancellationToken) =>
+            Results.Json(await map.GetGalaxyAsync(PlayerId(user), cancellationToken).ConfigureAwait(false), WorldJson.Options));
+
+        world.MapGet("/map/sectors/{sectorId:int}", async (int sectorId, [FromQuery(Name = "from_planet_id")] long? fromPlanetId, ClaimsPrincipal user, WorldMapService map, CancellationToken cancellationToken) =>
+            Results.Json(await map.GetSectorAsync(PlayerId(user), sectorId, fromPlanetId, cancellationToken).ConfigureAwait(false), WorldJson.Options));
+
+        world.MapGet("/map/systems/{systemId:long}", async (long systemId, [FromQuery(Name = "from_planet_id")] long? fromPlanetId, ClaimsPrincipal user, WorldMapService map, CancellationToken cancellationToken) =>
+            Results.Json(await map.GetSystemAsync(PlayerId(user), systemId, fromPlanetId, cancellationToken).ConfigureAwait(false), WorldJson.Options));
+
+        world.MapGet("/map/search", async ([FromQuery(Name = "q")] string? query, ClaimsPrincipal user, WorldMapService map, CancellationToken cancellationToken) =>
+            Results.Json(await map.SearchAsync(PlayerId(user), query, cancellationToken).ConfigureAwait(false), WorldJson.Options));
+
+        world.MapGet("/map/target", async (
+            [FromQuery(Name = "sector_id")] int sectorId,
+            [FromQuery(Name = "x")] double x,
+            [FromQuery(Name = "y")] double y,
+            [FromQuery(Name = "z")] double z,
+            [FromQuery(Name = "from_planet_id")] long? fromPlanetId,
+            ClaimsPrincipal user,
+            WorldMapService map,
+            CancellationToken cancellationToken) =>
+            Results.Json(await map.GetTargetAsync(PlayerId(user), sectorId, x, y, z, fromPlanetId, cancellationToken).ConfigureAwait(false), WorldJson.Options));
 
         world.MapGet("/sectors/{sectorId:int}/systems", async (int sectorId, ClaimsPrincipal user, WorldQueryService queries, CancellationToken cancellationToken) =>
             Results.Json(await queries.GetSystemsAsync(PlayerId(user), sectorId, cancellationToken).ConfigureAwait(false), WorldJson.Options));

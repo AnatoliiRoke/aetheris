@@ -115,6 +115,30 @@ public static class WorldConfigKeys
     /// <summary>The fixed travel time inside a star system, in game seconds.</summary>
     public const string InSystemTravelSeconds = "world.travel.in_system_seconds";
 
+    /// <summary>The travel time between two systems per unit of distance, in game seconds (task 00034).</summary>
+    public const string TravelSecondsPerDistance = "world.travel.seconds_per_distance";
+
+    /// <summary>The distance between two neighbouring orbits of a system, in the units of the map (task 00034).</summary>
+    public const string MapOrbitDistanceStep = "world.map.orbit_distance_step";
+
+    /// <summary>How near to an object a point of the map must lie to be taken for the object (task 00034).</summary>
+    public const string MapSnapRadius = "world.map.snap_radius";
+
+    /// <summary>The largest number of results of the search on the map (task 00034).</summary>
+    public const string MapSearchLimit = "world.map.search_limit";
+
+    /// <summary>The range a level of the radar adds, in the units of the map (task 00034).</summary>
+    public const string RadarRangePerLevel = "world.radar.range_per_level";
+
+    /// <summary>
+    /// The test stub of the radar: while it is on, every body of every player counts as having a
+    /// radar of the level <see cref="RadarStubLevel"/>; off, the level of the real building decides.
+    /// </summary>
+    public const string RadarStubEnabled = "world.radar.stub_enabled";
+
+    /// <summary>The level of the radar the stub gives every body (task 00034).</summary>
+    public const string RadarStubLevel = "world.radar.stub_level";
+
     /// <summary>The largest number of newcomers who start in one star system.</summary>
     public const string MaxNewbiesPerSystem = "world.start.max_newbies_per_system";
 
@@ -205,6 +229,13 @@ public static class WorldConfigKeys
         new(FieldRespawnInSystemProbability, "0.3", "0", "1", "Probability that a replacement field lies on the outermost orbit of a system."),
         new(GasGiantStationLimit, "5", "0", "1000", "Largest number of stations on one gas giant."),
         new(InSystemTravelSeconds, "600", "0", "86400", "Fixed travel time inside a star system, in game seconds."),
+        new(TravelSecondsPerDistance, "36", "0", "86400", "Travel time between two star systems per unit of distance, in game seconds."),
+        new(MapOrbitDistanceStep, "0.6", "0", "1000000", "Distance between two neighbouring orbits of a star system, in the units of the map."),
+        new(MapSnapRadius, "15", "0", "1000000", "How near to a star system or a field a point of the map must lie to be taken for it, in the units of the map."),
+        new(MapSearchLimit, "20", "1", "1000", "Largest number of results of the search on the map."),
+        new(RadarRangePerLevel, "150", "0", "1000000", "Range a level of the radar adds, in the units of the map; the range of a radar is its level times this."),
+        new(RadarStubEnabled, "true", null, null, "Test stub: every body counts as having a radar of the stub level, so the whole map around it is open; off, the level of the real radar decides."),
+        new(RadarStubLevel, "10", "0", "1000", "Level of the radar the test stub gives every body."),
         new(MaxNewbiesPerSystem, "3", "1", "100", "Largest number of newcomers who start in one star system."),
         new(RevealAll, "false", null, null, "Development switch: every player sees the whole map."),
         new(FreeBodiesPageSize, "100", "1", "10000", "Largest number of free bodies returned at once."),

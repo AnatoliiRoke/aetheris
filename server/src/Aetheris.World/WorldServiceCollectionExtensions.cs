@@ -45,7 +45,8 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<IHomePlanetStore, LegacyHomePlanetStore>();
         services.AddScoped<FieldService>();
         services.AddScoped<WorldQueryService>();
-        services.AddScoped<IWorldVisibility, OwnBodiesVisibility>();
+        services.AddScoped<IWorldVisibility, RadarVisibility>();
+        services.AddScoped<WorldMapService>();
         services.AddScoped<IWorldModule, WorldModule>();
         services.AddScoped<IScheduledEventHandler, FieldRespawnHandler>();
         services.AddScoped<GenerationRunService>();

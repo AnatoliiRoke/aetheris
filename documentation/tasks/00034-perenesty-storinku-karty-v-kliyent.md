@@ -1,6 +1,6 @@
 # Задача 00034 — Перенести сторінку «Карта» в клієнт
 
-> **Статус:** ✏️ ЧЕРНЕТКА (01.11.2026). Чекає затвердження автором; поки статус «чернетка», агент задачу не виконує. Значення за замовчуванням у [00034-pytannia.md](00034-pytannia.md).
+> **Статус:** ▶ У РОБОТІ (затверджено автором 01.11.2026). Значення за замовчуванням у [00034-pytannia.md](00034-pytannia.md).
 > **Етап:** 1 (production/01)
 > **Макет-джерело:** `documentation/design/aetheris-map-html` (статичний HTML і `map.css`; задача дизайну [00033](00033-dyzain-storinky-karty.md)). Десять екранів: `map-galaxy`, `map-sector`, `map-system`, `map-system-en`, `map-list`, `map-loading`, `map-fog`, `map-error`, `map-mobile-system`, `map-mobile-sector`; зміст у `index.html`.
 > **Попередники:** [00010](00010-ekran-keruvannia-tsyvilizatsiieiu.md) і [00020](00020-perenesty-chotyry-novi-storinky-hry.md) (оболонка гри, спільна рамка екранів, стандартні панелі, картинка плашки `CardArt`), [00026](00026-perenesty-storinku-torhivli-v-kliyent.md) (зразок такого перенесення), [00004](00004-heneratsiia-vsesvitu.md) (світ, видимість, радар як місце підключення).
