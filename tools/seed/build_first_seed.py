@@ -240,7 +240,10 @@ MODULES_EN = {
     "Протиракетна система": "Missile-defence system",
     "Модуль передачі": "Transfer module",
     "Колоніальний модуль": "Colony module",
-    "Кріокапсула": "Cryocapsule",
+    "Кріокапсула (Террани)": "Cryocapsule (Terrans)",
+    "Кріокапсула (Літаріони)": "Cryocapsule (Litari)",
+    "Кріокапсула (Драккури)": "Cryocapsule (Drakkuri)",
+    "Кріокапсула (Вейрани)": "Cryocapsule (Veirani)",
     "Житловий модуль": "Housing module",
     "Орбітальний склад": "Orbital warehouse",
     "Ремонтні майстерні": "Repair workshops",
@@ -376,6 +379,14 @@ METAL_NAMES = {
     "Силікорова руда", "Тектонітова руда", "Дейтерій",
 }
 
+# The race of every capsule of inhabitants: the inhabitants belong to one race, every race makes its own capsules.
+CAPSULE_RACES = {
+    "Кріокапсула (Террани)": "race_1",
+    "Кріокапсула (Літаріони)": "race_2",
+    "Кріокапсула (Драккури)": "race_3",
+    "Кріокапсула (Вейрани)": "race_4",
+}
+
 OTHER_STATS = {
     "Відновлювач щитів": ["char_shield_restore", "char_energy_use"],
     "Бортовий комп'ютер": ["char_fuel_use", "char_speed", "char_crew", "char_energy_use"],
@@ -385,7 +396,10 @@ OTHER_STATS = {
     "Протиракетна система": ["char_missiles", "char_range", "char_energy_use"],
     "Модуль передачі": ["char_transfer_speed", "char_transfer_volume", "char_energy_use"],
     "Колоніальний модуль": ["char_deploy_time", "char_colonists", "char_energy_use"],
-    "Кріокапсула": ["char_inhabitants"],
+    "Кріокапсула (Террани)": ["char_inhabitants"],
+    "Кріокапсула (Літаріони)": ["char_inhabitants"],
+    "Кріокапсула (Драккури)": ["char_inhabitants"],
+    "Кріокапсула (Вейрани)": ["char_inhabitants"],
 }
 
 BASE_STATS = {
@@ -948,6 +962,7 @@ def module_characteristics(name: str, group: str, index: int, cost_base: Decimal
                 # The capsule holds a fixed number of inhabitants, taken from the coefficient and not from the curve of the group.
                 stats[code] = value_row(capsule_inhabitants)
                 attributes["population_capsule"] = {"number": num(capsule_inhabitants)}
+                attributes["capsule_race"] = {"code": CAPSULE_RACES[name]}
             else:
                 put(code)
     elif group == "Модулі бази":
@@ -1113,8 +1128,8 @@ def main() -> None:
     techs = [row for row in items if row["kind"] == "rozvytok"]
     modules = [row for row in items if row["kind"] == "modul"]
     hulls = [row for row in items if row["kind"] == "korpus"]
-    if (len(buildings), len(techs), len(modules), len(hulls)) != (56, 19, 80, 27):
-        fail("the dependency file does not have 56/19/80/27")
+    if (len(buildings), len(techs), len(modules), len(hulls)) != (56, 19, 83, 27):
+        fail("the dependency file does not have 56/19/83/27")
 
     perelik = {kind: path.read_text(encoding="utf-8") for kind, path in PERELIK.items()}
     mismatches = []
@@ -1495,7 +1510,10 @@ def main() -> None:
             "weight": num(part_factor ** (module_number - 1)),
             "characteristics": stats,
         })
-        recipes.append(part_recipe(part_code, row, MODULE_FACTORY[row["group"]], building_code, codes, tech_code, output_quantity, part_time(index), part_amounts(row, index), len(recipes) + 1, None))
+        recipe = part_recipe(part_code, row, MODULE_FACTORY[row["group"]], building_code, codes, tech_code, output_quantity, part_time(index), part_amounts(row, index), len(recipes) + 1, None)
+        # Only the race of a capsule makes it.
+        recipe["race"] = CAPSULE_RACES.get(row["name"])
+        recipes.append(recipe)
 
     hull_index = {name: 0 for name in hull_group_names}
     for hull_number, row in enumerate(hulls, start=1):

@@ -166,6 +166,13 @@ public static class PartAttributeKeys
     public const string PopulationCapsule = "population_capsule";
 
     /// <summary>
+    /// The race of a capsule of inhabitants, as the neutral code of the race: the inhabitants of
+    /// the capsule belong to this race, so only a player of the race can use the capsule
+    /// (task 00031).
+    /// </summary>
+    public const string CapsuleRace = "capsule_race";
+
+    /// <summary>
     /// Gets every key of an attribute, in the order of the form of the admin panel.
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -179,6 +186,7 @@ public static class PartAttributeKeys
         Mass,
         TerraformingDevice,
         PopulationCapsule,
+        CapsuleRace,
     ];
 }
 

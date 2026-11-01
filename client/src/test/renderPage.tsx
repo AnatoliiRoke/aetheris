@@ -646,7 +646,7 @@ export function sampleProductionFactories(): ProductionFactorySummary[] {
 export function sampleProductionStock(overrides: Partial<ProductionStock> = {}): ProductionStock {
   return {
     planetId: 10,
-    stacks: [{ partTypeId: 3, markLevel: 2, hasRaceBonus: true, conditionPercent: 100, quantity: 4, nameKey: 'production.part_type.part_3.name', imageKey: null, partGroupId: 2, partGroupNameKey: 'production.part_group.part_group_2.name', capsuleInhabitants: 0 }],
+    stacks: [{ partTypeId: 3, markLevel: 2, hasRaceBonus: true, conditionPercent: 100, quantity: 4, nameKey: 'production.part_type.part_3.name', imageKey: null, partGroupId: 2, partGroupNameKey: 'production.part_group.part_group_2.name', capsuleInhabitants: 0, capsuleUsable: false }],
     storage: { capacity: 100, kinds: [{ partTypeId: 3, quantity: 4, capacity: 100, isFull: false }] },
     gameNow: '2026-10-26T12:00:00Z',
     producedResourceTypeIds: [],

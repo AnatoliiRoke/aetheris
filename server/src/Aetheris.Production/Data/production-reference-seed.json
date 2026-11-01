@@ -2425,8 +2425,8 @@
       "mark_level": 1,
       "sort_order": 80,
       "name": {
-        "uk": "Кріокапсула",
-        "en": "Cryocapsule"
+        "uk": "Кріокапсула (Террани)",
+        "en": "Cryocapsule (Terrans)"
       },
       "description": {
         "uk": "Модуль групи «Інші корабельні».",
@@ -2435,6 +2435,9 @@
       "attributes": {
         "population_capsule": {
           "number": 100
+        },
+        "capsule_race": {
+          "code": "race_1"
         }
       },
       "weight": 1862.182013,
@@ -2445,10 +2448,94 @@
       }
     },
     {
+      "code": "part_m_81",
+      "group": "pg_10",
+      "mark_level": 1,
+      "sort_order": 81,
+      "name": {
+        "uk": "Кріокапсула (Літаріони)",
+        "en": "Cryocapsule (Litari)"
+      },
+      "description": {
+        "uk": "Модуль групи «Інші корабельні».",
+        "en": "Module of the Other ship modules group."
+      },
+      "attributes": {
+        "population_capsule": {
+          "number": 100
+        },
+        "capsule_race": {
+          "code": "race_2"
+        }
+      },
+      "weight": 2048.400215,
+      "characteristics": {
+        "char_inhabitants": {
+          "number": 100
+        }
+      }
+    },
+    {
+      "code": "part_m_82",
+      "group": "pg_10",
+      "mark_level": 1,
+      "sort_order": 82,
+      "name": {
+        "uk": "Кріокапсула (Драккури)",
+        "en": "Cryocapsule (Drakkuri)"
+      },
+      "description": {
+        "uk": "Модуль групи «Інші корабельні».",
+        "en": "Module of the Other ship modules group."
+      },
+      "attributes": {
+        "population_capsule": {
+          "number": 100
+        },
+        "capsule_race": {
+          "code": "race_3"
+        }
+      },
+      "weight": 2253.240236,
+      "characteristics": {
+        "char_inhabitants": {
+          "number": 100
+        }
+      }
+    },
+    {
+      "code": "part_m_83",
+      "group": "pg_10",
+      "mark_level": 1,
+      "sort_order": 83,
+      "name": {
+        "uk": "Кріокапсула (Вейрани)",
+        "en": "Cryocapsule (Veirani)"
+      },
+      "description": {
+        "uk": "Модуль групи «Інші корабельні».",
+        "en": "Module of the Other ship modules group."
+      },
+      "attributes": {
+        "population_capsule": {
+          "number": 100
+        },
+        "capsule_race": {
+          "code": "race_4"
+        }
+      },
+      "weight": 2478.56426,
+      "characteristics": {
+        "char_inhabitants": {
+          "number": 100
+        }
+      }
+    },
+    {
       "code": "part_h_1",
       "group": "pg_12",
       "mark_level": 1,
-      "sort_order": 81,
+      "sort_order": 84,
       "name": {
         "uk": "Винищувач «Сапсан»",
         "en": "Fighter Sapsan"
@@ -2474,7 +2561,7 @@
       "code": "part_h_2",
       "group": "pg_12",
       "mark_level": 1,
-      "sort_order": 82,
+      "sort_order": 85,
       "name": {
         "uk": "Важкий винищувач «Шершень»",
         "en": "Heavy fighter Hornet"
@@ -2500,7 +2587,7 @@
       "code": "part_h_3",
       "group": "pg_12",
       "mark_level": 1,
-      "sort_order": 83,
+      "sort_order": 86,
       "name": {
         "uk": "Торпедоносець «Гадюка»",
         "en": "Torpedo bomber Viper"
@@ -2526,7 +2613,7 @@
       "code": "part_h_4",
       "group": "pg_12",
       "mark_level": 1,
-      "sort_order": 84,
+      "sort_order": 87,
       "name": {
         "uk": "Важкий торпедоносець «Кобра»",
         "en": "Heavy torpedo bomber Cobra"
@@ -2552,7 +2639,7 @@
       "code": "part_h_5",
       "group": "pg_13",
       "mark_level": 1,
-      "sort_order": 85,
+      "sort_order": 88,
       "name": {
         "uk": "«Ґедзь»",
         "en": "Gadfly"
@@ -2578,7 +2665,7 @@
       "code": "part_h_6",
       "group": "pg_13",
       "mark_level": 1,
-      "sort_order": 86,
+      "sort_order": 89,
       "name": {
         "uk": "«Цикада»",
         "en": "Cicada"
@@ -2604,7 +2691,7 @@
       "code": "part_h_7",
       "group": "pg_13",
       "mark_level": 1,
-      "sort_order": 87,
+      "sort_order": 90,
       "name": {
         "uk": "«Кліщ»",
         "en": "Tick"
@@ -2630,7 +2717,7 @@
       "code": "part_h_8",
       "group": "pg_14",
       "mark_level": 1,
-      "sort_order": 88,
+      "sort_order": 91,
       "name": {
         "uk": "Корвет «Коршун»",
         "en": "Corvette Kite"
@@ -2656,7 +2743,7 @@
       "code": "part_h_9",
       "group": "pg_14",
       "mark_level": 1,
-      "sort_order": 89,
+      "sort_order": 92,
       "name": {
         "uk": "Фрегат «Барракуда»",
         "en": "Frigate Barracuda"
@@ -2682,7 +2769,7 @@
       "code": "part_h_10",
       "group": "pg_14",
       "mark_level": 1,
-      "sort_order": 90,
+      "sort_order": 93,
       "name": {
         "uk": "Есмінець «Акула»",
         "en": "Destroyer Shark"
@@ -2708,7 +2795,7 @@
       "code": "part_h_11",
       "group": "pg_14",
       "mark_level": 1,
-      "sort_order": 91,
+      "sort_order": 94,
       "name": {
         "uk": "Легкий крейсер «Ягуар»",
         "en": "Light cruiser Jaguar"
@@ -2734,7 +2821,7 @@
       "code": "part_h_12",
       "group": "pg_14",
       "mark_level": 1,
-      "sort_order": 92,
+      "sort_order": 95,
       "name": {
         "uk": "Крейсер «Носоріг»",
         "en": "Cruiser Rhino"
@@ -2760,7 +2847,7 @@
       "code": "part_h_13",
       "group": "pg_14",
       "mark_level": 1,
-      "sort_order": 93,
+      "sort_order": 96,
       "name": {
         "uk": "Важкий крейсер «Бегемот»",
         "en": "Heavy cruiser Behemoth"
@@ -2786,7 +2873,7 @@
       "code": "part_h_14",
       "group": "pg_15",
       "mark_level": 1,
-      "sort_order": 94,
+      "sort_order": 97,
       "name": {
         "uk": "Броненосець «Панцирник»",
         "en": "Armored ship Pangolin"
@@ -2812,7 +2899,7 @@
       "code": "part_h_15",
       "group": "pg_15",
       "mark_level": 1,
-      "sort_order": 95,
+      "sort_order": 98,
       "name": {
         "uk": "Лінкор «Кракен»",
         "en": "Battleship Kraken"
@@ -2838,7 +2925,7 @@
       "code": "part_h_16",
       "group": "pg_15",
       "mark_level": 1,
-      "sort_order": 96,
+      "sort_order": 99,
       "name": {
         "uk": "Важкий лінкор «Мамонт»",
         "en": "Heavy battleship Mammoth"
@@ -2864,7 +2951,7 @@
       "code": "part_h_17",
       "group": "pg_15",
       "mark_level": 1,
-      "sort_order": 97,
+      "sort_order": 100,
       "name": {
         "uk": "Дредноут «Горгона»",
         "en": "Dreadnought Gorgon"
@@ -2890,7 +2977,7 @@
       "code": "part_h_18",
       "group": "pg_16",
       "mark_level": 1,
-      "sort_order": 98,
+      "sort_order": 101,
       "name": {
         "uk": "Дестроєр «Каратель»",
         "en": "Devastator Punisher"
@@ -2916,7 +3003,7 @@
       "code": "part_h_19",
       "group": "pg_16",
       "mark_level": 1,
-      "sort_order": 99,
+      "sort_order": 102,
       "name": {
         "uk": "Супер-лінкор «Тиранозавр»",
         "en": "Super battleship Tyrannosaurus"
@@ -2942,7 +3029,7 @@
       "code": "part_h_20",
       "group": "pg_16",
       "mark_level": 1,
-      "sort_order": 100,
+      "sort_order": 103,
       "name": {
         "uk": "Супер-дредноут «Левіафан»",
         "en": "Super dreadnought Leviathan"
@@ -2968,7 +3055,7 @@
       "code": "part_h_21",
       "group": "pg_17",
       "mark_level": 1,
-      "sort_order": 101,
+      "sort_order": 104,
       "name": {
         "uk": "Малий транспорт «Жук»",
         "en": "Small transport Beetle"
@@ -2994,7 +3081,7 @@
       "code": "part_h_22",
       "group": "pg_17",
       "mark_level": 1,
-      "sort_order": 102,
+      "sort_order": 105,
       "name": {
         "uk": "Середній транспорт «Бик»",
         "en": "Medium transport Bull"
@@ -3020,7 +3107,7 @@
       "code": "part_h_23",
       "group": "pg_17",
       "mark_level": 1,
-      "sort_order": 103,
+      "sort_order": 106,
       "name": {
         "uk": "Великий транспорт «Слон»",
         "en": "Large transport Elephant"
@@ -3046,7 +3133,7 @@
       "code": "part_h_24",
       "group": "pg_17",
       "mark_level": 1,
-      "sort_order": 104,
+      "sort_order": 107,
       "name": {
         "uk": "Важкий транспорт «Кит»",
         "en": "Heavy transport Whale"
@@ -3072,7 +3159,7 @@
       "code": "part_h_25",
       "group": "pg_18",
       "mark_level": 1,
-      "sort_order": 105,
+      "sort_order": 108,
       "name": {
         "uk": "Орбітальна база",
         "en": "Orbital base"
@@ -3098,7 +3185,7 @@
       "code": "part_h_26",
       "group": "pg_18",
       "mark_level": 1,
-      "sort_order": 106,
+      "sort_order": 109,
       "name": {
         "uk": "Космобаза",
         "en": "Space base"
@@ -3124,7 +3211,7 @@
       "code": "part_h_27",
       "group": "pg_18",
       "mark_level": 1,
-      "sort_order": 107,
+      "sort_order": 110,
       "name": {
         "uk": "Видобувна станція",
         "en": "Mining station"
@@ -7395,11 +7482,11 @@
       "duration_seconds": 1300,
       "sort_order": 80,
       "name": {
-        "uk": "Кріокапсула",
-        "en": "Cryocapsule"
+        "uk": "Кріокапсула (Террани)",
+        "en": "Cryocapsule (Terrans)"
       },
       "description": {
-        "uk": "Виробництво «Кріокапсула».",
+        "uk": "Виробництво «Кріокапсула (Террани)».",
         "en": "Production of the part."
       },
       "ingredients": [
@@ -7431,16 +7518,157 @@
           "target_level": 10
         }
       ],
-      "race": null
+      "race": "race_1"
     },
     {
       "code": "recipe_81",
+      "part": "part_m_81",
+      "resource": null,
+      "factory": "building_49",
+      "output_quantity": 1,
+      "duration_seconds": 1500,
+      "sort_order": 81,
+      "name": {
+        "uk": "Кріокапсула (Літаріони)",
+        "en": "Cryocapsule (Litari)"
+      },
+      "description": {
+        "uk": "Виробництво «Кріокапсула (Літаріони)».",
+        "en": "Production of the part."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 410
+        },
+        {
+          "resource": "resource_23",
+          "part": null,
+          "amount": 410
+        },
+        {
+          "resource": "resource_27",
+          "part": null,
+          "amount": 520
+        }
+      ],
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_8",
+          "target_level": 12
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_16",
+          "target_level": 10
+        }
+      ],
+      "race": "race_2"
+    },
+    {
+      "code": "recipe_82",
+      "part": "part_m_82",
+      "resource": null,
+      "factory": "building_49",
+      "output_quantity": 1,
+      "duration_seconds": 1900,
+      "sort_order": 82,
+      "name": {
+        "uk": "Кріокапсула (Драккури)",
+        "en": "Cryocapsule (Drakkuri)"
+      },
+      "description": {
+        "uk": "Виробництво «Кріокапсула (Драккури)».",
+        "en": "Production of the part."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 500
+        },
+        {
+          "resource": "resource_23",
+          "part": null,
+          "amount": 500
+        },
+        {
+          "resource": "resource_27",
+          "part": null,
+          "amount": 620
+        }
+      ],
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_8",
+          "target_level": 12
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_16",
+          "target_level": 10
+        }
+      ],
+      "race": "race_3"
+    },
+    {
+      "code": "recipe_83",
+      "part": "part_m_83",
+      "resource": null,
+      "factory": "building_49",
+      "output_quantity": 1,
+      "duration_seconds": 2200,
+      "sort_order": 83,
+      "name": {
+        "uk": "Кріокапсула (Вейрани)",
+        "en": "Cryocapsule (Veirani)"
+      },
+      "description": {
+        "uk": "Виробництво «Кріокапсула (Вейрани)».",
+        "en": "Production of the part."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 590
+        },
+        {
+          "resource": "resource_23",
+          "part": null,
+          "amount": 590
+        },
+        {
+          "resource": "resource_27",
+          "part": null,
+          "amount": 740
+        }
+      ],
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_8",
+          "target_level": 12
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_16",
+          "target_level": 10
+        }
+      ],
+      "race": "race_4"
+    },
+    {
+      "code": "recipe_84",
       "part": "part_h_1",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 300,
-      "sort_order": 81,
+      "sort_order": 84,
       "name": {
         "uk": "Винищувач «Сапсан»",
         "en": "Fighter Sapsan"
@@ -7481,13 +7709,13 @@
       "race": null
     },
     {
-      "code": "recipe_82",
+      "code": "recipe_85",
       "part": "part_h_2",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 360,
-      "sort_order": 82,
+      "sort_order": 85,
       "name": {
         "uk": "Важкий винищувач «Шершень»",
         "en": "Heavy fighter Hornet"
@@ -7538,13 +7766,13 @@
       "race": null
     },
     {
-      "code": "recipe_83",
+      "code": "recipe_86",
       "part": "part_h_3",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 430,
-      "sort_order": 83,
+      "sort_order": 86,
       "name": {
         "uk": "Торпедоносець «Гадюка»",
         "en": "Torpedo bomber Viper"
@@ -7590,13 +7818,13 @@
       "race": null
     },
     {
-      "code": "recipe_84",
+      "code": "recipe_87",
       "part": "part_h_4",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 520,
-      "sort_order": 84,
+      "sort_order": 87,
       "name": {
         "uk": "Важкий торпедоносець «Кобра»",
         "en": "Heavy torpedo bomber Cobra"
@@ -7647,13 +7875,13 @@
       "race": null
     },
     {
-      "code": "recipe_85",
+      "code": "recipe_88",
       "part": "part_h_5",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 300,
-      "sort_order": 85,
+      "sort_order": 88,
       "name": {
         "uk": "«Ґедзь»",
         "en": "Gadfly"
@@ -7689,13 +7917,13 @@
       "race": null
     },
     {
-      "code": "recipe_86",
+      "code": "recipe_89",
       "part": "part_h_6",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 360,
-      "sort_order": 86,
+      "sort_order": 89,
       "name": {
         "uk": "«Цикада»",
         "en": "Cicada"
@@ -7741,13 +7969,13 @@
       "race": null
     },
     {
-      "code": "recipe_87",
+      "code": "recipe_90",
       "part": "part_h_7",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 430,
-      "sort_order": 87,
+      "sort_order": 90,
       "name": {
         "uk": "«Кліщ»",
         "en": "Tick"
@@ -7788,13 +8016,13 @@
       "race": null
     },
     {
-      "code": "recipe_88",
+      "code": "recipe_91",
       "part": "part_h_8",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 300,
-      "sort_order": 88,
+      "sort_order": 91,
       "name": {
         "uk": "Корвет «Коршун»",
         "en": "Corvette Kite"
@@ -7845,13 +8073,13 @@
       "race": null
     },
     {
-      "code": "recipe_89",
+      "code": "recipe_92",
       "part": "part_h_9",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 360,
-      "sort_order": 89,
+      "sort_order": 92,
       "name": {
         "uk": "Фрегат «Барракуда»",
         "en": "Frigate Barracuda"
@@ -7907,13 +8135,13 @@
       "race": null
     },
     {
-      "code": "recipe_90",
+      "code": "recipe_93",
       "part": "part_h_10",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 430,
-      "sort_order": 90,
+      "sort_order": 93,
       "name": {
         "uk": "Есмінець «Акула»",
         "en": "Destroyer Shark"
@@ -7964,13 +8192,13 @@
       "race": null
     },
     {
-      "code": "recipe_91",
+      "code": "recipe_94",
       "part": "part_h_11",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 520,
-      "sort_order": 91,
+      "sort_order": 94,
       "name": {
         "uk": "Легкий крейсер «Ягуар»",
         "en": "Light cruiser Jaguar"
@@ -8026,13 +8254,13 @@
       "race": null
     },
     {
-      "code": "recipe_92",
+      "code": "recipe_95",
       "part": "part_h_12",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 620,
-      "sort_order": 92,
+      "sort_order": 95,
       "name": {
         "uk": "Крейсер «Носоріг»",
         "en": "Cruiser Rhino"
@@ -8088,13 +8316,13 @@
       "race": null
     },
     {
-      "code": "recipe_93",
+      "code": "recipe_96",
       "part": "part_h_13",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 750,
-      "sort_order": 93,
+      "sort_order": 96,
       "name": {
         "uk": "Важкий крейсер «Бегемот»",
         "en": "Heavy cruiser Behemoth"
@@ -8155,13 +8383,13 @@
       "race": null
     },
     {
-      "code": "recipe_94",
+      "code": "recipe_97",
       "part": "part_h_14",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 300,
-      "sort_order": 94,
+      "sort_order": 97,
       "name": {
         "uk": "Броненосець «Панцирник»",
         "en": "Armored ship Pangolin"
@@ -8207,13 +8435,13 @@
       "race": null
     },
     {
-      "code": "recipe_95",
+      "code": "recipe_98",
       "part": "part_h_15",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 360,
-      "sort_order": 95,
+      "sort_order": 98,
       "name": {
         "uk": "Лінкор «Кракен»",
         "en": "Battleship Kraken"
@@ -8269,13 +8497,13 @@
       "race": null
     },
     {
-      "code": "recipe_96",
+      "code": "recipe_99",
       "part": "part_h_16",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 430,
-      "sort_order": 96,
+      "sort_order": 99,
       "name": {
         "uk": "Важкий лінкор «Мамонт»",
         "en": "Heavy battleship Mammoth"
@@ -8336,13 +8564,13 @@
       "race": null
     },
     {
-      "code": "recipe_97",
+      "code": "recipe_100",
       "part": "part_h_17",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 520,
-      "sort_order": 97,
+      "sort_order": 100,
       "name": {
         "uk": "Дредноут «Горгона»",
         "en": "Dreadnought Gorgon"
@@ -8403,13 +8631,13 @@
       "race": null
     },
     {
-      "code": "recipe_98",
+      "code": "recipe_101",
       "part": "part_h_18",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 300,
-      "sort_order": 98,
+      "sort_order": 101,
       "name": {
         "uk": "Дестроєр «Каратель»",
         "en": "Devastator Punisher"
@@ -8470,13 +8698,13 @@
       "race": null
     },
     {
-      "code": "recipe_99",
+      "code": "recipe_102",
       "part": "part_h_19",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 360,
-      "sort_order": 99,
+      "sort_order": 102,
       "name": {
         "uk": "Супер-лінкор «Тиранозавр»",
         "en": "Super battleship Tyrannosaurus"
@@ -8542,13 +8770,13 @@
       "race": null
     },
     {
-      "code": "recipe_100",
+      "code": "recipe_103",
       "part": "part_h_20",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 430,
-      "sort_order": 100,
+      "sort_order": 103,
       "name": {
         "uk": "Супер-дредноут «Левіафан»",
         "en": "Super dreadnought Leviathan"
@@ -8614,13 +8842,13 @@
       "race": null
     },
     {
-      "code": "recipe_101",
+      "code": "recipe_104",
       "part": "part_h_21",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 300,
-      "sort_order": 101,
+      "sort_order": 104,
       "name": {
         "uk": "Малий транспорт «Жук»",
         "en": "Small transport Beetle"
@@ -8661,13 +8889,13 @@
       "race": null
     },
     {
-      "code": "recipe_102",
+      "code": "recipe_105",
       "part": "part_h_22",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 360,
-      "sort_order": 102,
+      "sort_order": 105,
       "name": {
         "uk": "Середній транспорт «Бик»",
         "en": "Medium transport Bull"
@@ -8718,13 +8946,13 @@
       "race": null
     },
     {
-      "code": "recipe_103",
+      "code": "recipe_106",
       "part": "part_h_23",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 430,
-      "sort_order": 103,
+      "sort_order": 106,
       "name": {
         "uk": "Великий транспорт «Слон»",
         "en": "Large transport Elephant"
@@ -8775,13 +9003,13 @@
       "race": null
     },
     {
-      "code": "recipe_104",
+      "code": "recipe_107",
       "part": "part_h_24",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 520,
-      "sort_order": 104,
+      "sort_order": 107,
       "name": {
         "uk": "Важкий транспорт «Кит»",
         "en": "Heavy transport Whale"
@@ -8832,13 +9060,13 @@
       "race": null
     },
     {
-      "code": "recipe_105",
+      "code": "recipe_108",
       "part": "part_h_25",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 300,
-      "sort_order": 105,
+      "sort_order": 108,
       "name": {
         "uk": "Орбітальна база",
         "en": "Orbital base"
@@ -8894,13 +9122,13 @@
       "race": null
     },
     {
-      "code": "recipe_106",
+      "code": "recipe_109",
       "part": "part_h_26",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 360,
-      "sort_order": 106,
+      "sort_order": 109,
       "name": {
         "uk": "Космобаза",
         "en": "Space base"
@@ -8961,13 +9189,13 @@
       "race": null
     },
     {
-      "code": "recipe_107",
+      "code": "recipe_110",
       "part": "part_h_27",
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
       "duration_seconds": 430,
-      "sort_order": 107,
+      "sort_order": 110,
       "name": {
         "uk": "Видобувна станція",
         "en": "Mining station"
@@ -9018,13 +9246,13 @@
       "race": null
     },
     {
-      "code": "recipe_r_108",
+      "code": "recipe_r_111",
       "part": null,
       "resource": "resource_20",
       "factory": "building_31",
       "output_quantity": 100,
       "duration_seconds": 600,
-      "sort_order": 108,
+      "sort_order": 111,
       "name": {
         "uk": "Будматеріали",
         "en": "Building materials"
@@ -9049,13 +9277,13 @@
       "race": null
     },
     {
-      "code": "recipe_r_109",
+      "code": "recipe_r_112",
       "part": null,
       "resource": "resource_21",
       "factory": "building_32",
       "output_quantity": 100,
       "duration_seconds": 600,
-      "sort_order": 109,
+      "sort_order": 112,
       "name": {
         "uk": "Оптоволокно",
         "en": "Optical fiber"
@@ -9085,13 +9313,13 @@
       "race": null
     },
     {
-      "code": "recipe_r_110",
+      "code": "recipe_r_113",
       "part": null,
       "resource": "resource_22",
       "factory": "building_33",
       "output_quantity": 100,
       "duration_seconds": 600,
-      "sort_order": 110,
+      "sort_order": 113,
       "name": {
         "uk": "Мікропроцесори",
         "en": "Microprocessors"
@@ -9121,13 +9349,13 @@
       "race": null
     },
     {
-      "code": "recipe_r_111",
+      "code": "recipe_r_114",
       "part": null,
       "resource": "resource_23",
       "factory": "building_34",
       "output_quantity": 100,
       "duration_seconds": 600,
-      "sort_order": 111,
+      "sort_order": 114,
       "name": {
         "uk": "Композити",
         "en": "Composites"
@@ -9157,13 +9385,13 @@
       "race": null
     },
     {
-      "code": "recipe_r_112",
+      "code": "recipe_r_115",
       "part": null,
       "resource": "resource_24",
       "factory": "building_35",
       "output_quantity": 100,
       "duration_seconds": 600,
-      "sort_order": 112,
+      "sort_order": 115,
       "name": {
         "uk": "Енергострижні",
         "en": "Energy rods"
@@ -9193,13 +9421,13 @@
       "race": null
     },
     {
-      "code": "recipe_r_113",
+      "code": "recipe_r_116",
       "part": null,
       "resource": "resource_25",
       "factory": "building_36",
       "output_quantity": 100,
       "duration_seconds": 600,
-      "sort_order": 113,
+      "sort_order": 116,
       "name": {
         "uk": "Нановолокно",
         "en": "Nanofiber"
@@ -9229,13 +9457,13 @@
       "race": null
     },
     {
-      "code": "recipe_r_114",
+      "code": "recipe_r_117",
       "part": null,
       "resource": "resource_26",
       "factory": "building_37",
       "output_quantity": 100,
       "duration_seconds": 600,
-      "sort_order": 114,
+      "sort_order": 117,
       "name": {
         "uk": "Титановий сплав",
         "en": "Titanium alloy"
@@ -9265,13 +9493,13 @@
       "race": null
     },
     {
-      "code": "recipe_r_115",
+      "code": "recipe_r_118",
       "part": null,
       "resource": "resource_16",
       "factory": "building_38",
       "output_quantity": 100,
       "duration_seconds": 600,
-      "sort_order": 115,
+      "sort_order": 118,
       "name": {
         "uk": "Збагачений Уран",
         "en": "Enriched uranium"

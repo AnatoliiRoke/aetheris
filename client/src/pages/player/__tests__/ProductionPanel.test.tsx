@@ -138,7 +138,7 @@ describe('ProductionPanel', () => {
     const production = fakeProductionApi({
       stock: vi.fn().mockResolvedValue(
         sampleProductionStock({
-          stacks: [first, { ...first, partTypeId: 9, markLevel: 1, hasRaceBonus: false, quantity: 2, nameKey: 'production.part_type.part_m_80.name', capsuleInhabitants: 100 }],
+          stacks: [first, { ...first, partTypeId: 9, markLevel: 1, hasRaceBonus: false, quantity: 2, nameKey: 'production.part_type.part_m_80.name', capsuleInhabitants: 100, capsuleUsable: true }],
         }),
       ),
     });
@@ -163,7 +163,7 @@ describe('ProductionPanel', () => {
     const user = userEvent.setup();
     const [first] = sampleProductionStock().stacks;
     const production = fakeProductionApi({
-      stock: vi.fn().mockResolvedValue(sampleProductionStock({ stacks: [{ ...first!, capsuleInhabitants: 100 }] })),
+      stock: vi.fn().mockResolvedValue(sampleProductionStock({ stacks: [{ ...first!, capsuleInhabitants: 100, capsuleUsable: true }] })),
       useCapsule: vi.fn().mockRejectedValue(new ApiError(400, 'production_part_missing')),
     });
 
@@ -173,5 +173,19 @@ describe('ProductionPanel', () => {
     await user.click(await within(panel).findByRole('button', { name: /Використати капсулу/ }));
 
     expect(await screen.findByText('Такої деталі на планеті немає')).toBeInTheDocument();
+  });
+
+  it('shows a capsule of another race as one that can be sold but not deployed', async () => {
+    const [first] = sampleProductionStock().stacks;
+    const production = fakeProductionApi({
+      stock: vi.fn().mockResolvedValue(sampleProductionStock({ stacks: [{ ...first!, capsuleInhabitants: 100, capsuleUsable: false }] })),
+    });
+
+    renderPage('/planet', { auth: signedIn(), production });
+
+    const panel = await screen.findByRole('region', { name: 'Виробництво' });
+
+    expect(await within(panel).findByText('Інша раса: можна продати, не розгорнути')).toBeInTheDocument();
+    expect(within(panel).queryByRole('button', { name: /Використати капсулу/ })).toBeNull();
   });
 });

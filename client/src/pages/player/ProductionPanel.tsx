@@ -326,9 +326,13 @@ function StockPanel({
                     )}
                   </span>
                   {stack.capsuleInhabitants > 0 && stack.conditionPercent >= fullCondition ? (
-                    <button type="button" className="btn btn--secondary" disabled={busy} onClick={() => onUseCapsule(stack.partTypeId)}>
-                      {t('production.useCapsule', { inhabitants: formatNumber(stack.capsuleInhabitants, language) })}
-                    </button>
+                    stack.capsuleUsable ? (
+                      <button type="button" className="btn btn--secondary" disabled={busy} onClick={() => onUseCapsule(stack.partTypeId)}>
+                        {t('production.useCapsule', { inhabitants: formatNumber(stack.capsuleInhabitants, language) })}
+                      </button>
+                    ) : (
+                      <span className="badge">{t('production.capsuleOtherRace')}</span>
+                    )
                   ) : null}
                 </div>
                 {rows.length > 0 ? <CharacteristicList language={language} rows={rows} /> : null}

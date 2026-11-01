@@ -23,6 +23,11 @@ namespace Aetheris.Production.Services;
 /// full body is wasted and the player is told so before in the client.
 /// </para>
 /// <para>
+/// The inhabitants belong to one race, named by the attribute <see cref="PartAttributeKeys.CapsuleRace"/>:
+/// every race makes the capsules of its own race, a capsule can be sold to a player of another
+/// race, but only a player of the race of the capsule can use it.
+/// </para>
+/// <para>
 /// The storage of the parts is locked first and the population after it, as everywhere in the
 /// game, so two uses never take the same capsule.
 /// </para>
@@ -82,7 +87,7 @@ public sealed class PopulationCapsuleService
     /// <param name="partTypeId">The kind of the capsule.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>How many inhabitants the capsule gave and the population of the body after that.</returns>
-    /// <exception cref="GameException">The body is not a colony of the player, the part is not a capsule, or the body has no such capsule.</exception>
+    /// <exception cref="GameException">The body is not a colony of the player, the part is not a capsule, the capsule holds inhabitants of another race, or the body has no such capsule.</exception>
     public Task<CapsuleUseDto> UseAsync(string playerId, long planetId, int partTypeId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
@@ -106,6 +111,16 @@ public sealed class PopulationCapsuleService
                 if (inhabitants <= 0)
                 {
                     throw new GameException(ProductionErrorCodes.NotACapsule, "The part is not a capsule of inhabitants.");
+                }
+
+                // The inhabitants belong to one race; the capsule of another race may be bought and sold but not used.
+                string? raceCode = await PlayerRaceCode.ReadAsync(_world, playerId, cancellationToken).ConfigureAwait(false);
+
+                if (raceCode is null
+                    || !part!.Attributes.TryGetValue(PartAttributeKeys.CapsuleRace, out PartAttributeInfo? capsuleRace)
+                    || !string.Equals(capsuleRace.CodeValue, raceCode, StringComparison.Ordinal))
+                {
+                    throw new GameException(ProductionErrorCodes.CapsuleOtherRace, "The capsule holds inhabitants of another race.");
                 }
 
                 await _stock.LockAsync(planetId, facts.SectorId, cancellationToken).ConfigureAwait(false);

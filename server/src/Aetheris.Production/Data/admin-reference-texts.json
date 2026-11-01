@@ -30,6 +30,7 @@
   "admin.reference.attribute.slot_size": { "uk": "Розмір слота", "en": "Slot size" },
   "admin.reference.attribute.mass": { "uk": "Маса", "en": "Mass" },
   "admin.reference.attribute.population_capsule": { "uk": "Кріокапсула: мешканців", "en": "Cryocapsule: inhabitants" },
+  "admin.reference.attribute.capsule_race": { "uk": "Кріокапсула: раса мешканців", "en": "Cryocapsule: race of the inhabitants" },
   "admin.reference.attribute.terraforming_device": { "uk": "Пристрій тераформінгу (позначка)", "en": "Terraforming device (mark)" },
   "admin.reference.damage_kind.energy": { "uk": "Енергетичний", "en": "Energy" },
   "admin.reference.damage_kind.thermal": { "uk": "Термічний", "en": "Thermal" },

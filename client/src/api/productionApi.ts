@@ -133,6 +133,8 @@ export interface ProductionStack {
   partGroupNameKey: string | null;
   /** How many inhabitants one part of the stack adds when used, or 0 when the part is not a capsule (task 00031). */
   capsuleInhabitants: number;
+  /** Whether the player can use the capsule: its inhabitants belong to the race of the player. */
+  capsuleUsable: boolean;
 }
 
 /**

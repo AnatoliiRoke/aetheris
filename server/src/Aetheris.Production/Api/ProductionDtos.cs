@@ -214,6 +214,7 @@ public sealed record ProductionStockDto(
 /// <param name="PartGroupId">The group of the part, so the client groups the parts by it (task 00020).</param>
 /// <param name="PartGroupNameKey">The localisation key of the name of the group.</param>
 /// <param name="CapsuleInhabitants">How many inhabitants the part holds when it is a capsule of inhabitants, otherwise zero (task 00031).</param>
+/// <param name="CapsuleUsable">Whether the player can use the capsule: the inhabitants belong to the race of the player (task 00031).</param>
 public sealed record ProductionStackDto(
     int PartTypeId,
     int MarkLevel,
@@ -224,7 +225,8 @@ public sealed record ProductionStackDto(
     string? ImageKey,
     int PartGroupId = 0,
     string? PartGroupNameKey = null,
-    long CapsuleInhabitants = 0);
+    long CapsuleInhabitants = 0,
+    bool CapsuleUsable = false);
 
 /// <summary>
 /// A characteristic of the parts with the groups that have it (task 00027, section 3.2).

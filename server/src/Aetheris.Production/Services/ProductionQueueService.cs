@@ -537,6 +537,10 @@ public sealed class ProductionQueueService
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
+        string? raceCode = stacks.Any(stack => catalog.FindPart(stack.PartTypeId)?.Attributes.ContainsKey(PartAttributeKeys.PopulationCapsule) == true)
+            ? await PlayerRaceCode.ReadAsync(_world, playerId, cancellationToken).ConfigureAwait(false)
+            : null;
+
         List<ProductionStackDto> rows =
         [
             .. stacks.Select(stack =>
@@ -556,7 +560,11 @@ public sealed class ProductionQueueService
                     group?.NameKey,
                     part is not null && part.Attributes.TryGetValue(PartAttributeKeys.PopulationCapsule, out PartAttributeInfo? capsule)
                         ? (long)(capsule.NumberValue ?? 0)
-                        : 0);
+                        : 0,
+                    raceCode is not null
+                        && part is not null
+                        && part.Attributes.TryGetValue(PartAttributeKeys.CapsuleRace, out PartAttributeInfo? capsuleRace)
+                        && string.Equals(capsuleRace.CodeValue, raceCode, StringComparison.Ordinal));
             }),
         ];
 

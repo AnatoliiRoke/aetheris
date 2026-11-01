@@ -42,6 +42,11 @@ public static class ProductionErrorCodes
     /// <summary>The part is not a capsule of inhabitants.</summary>
     public const string NotACapsule = "production_not_a_capsule";
 
+    /// <summary>
+    /// The capsule holds inhabitants of another race than the race of the player.
+    /// </summary>
+    public const string CapsuleOtherRace = "production_capsule_other_race";
+
     /// <summary>The body has no building of the level the recipe needs.</summary>
     public const string RequirementBuildingLevel = "production_requirement_building_level";
 
