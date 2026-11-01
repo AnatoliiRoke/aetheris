@@ -1,11 +1,11 @@
 # Задача 00033 — Дизайн сторінки «Карта»
 
-> **Статус:** ⏳ ЧЕКАЄ автора: потрібен макет у Claude Design (створено 01.11.2026). Реалізація в клієнті йде окремою задачею після макета (за зразком 00025 → 00026).
+> **Статус:** ✅ ВИКОНАНО автором (макет у `documentation/design/aetheris-map-html`, 01.11.2026). Перенесення в клієнт: [00034](00034-perenesty-storinku-karty-v-kliyent.md).
 > **Інструмент:** Claude Design (тип «Design»; візуальний макет на полотні).
 > **Спільно з:** [задача 00008](00008-dyzain-ekrana-keruvannya-tsyvilizatsiieiu.md) (екран керування цивілізацією), та сама оболонка й стиль, що в [00016](00016-dyzain-storinky-planety.md), [00017](00017-dyzain-storinky-budivnytstva.md), [00018](00018-dyzain-storinky-doslidzhen.md), [00019](00019-dyzain-ekrana-skladu.md), [00025](00025-dyzain-storinky-torhivli.md).
 > **Основа:** [задача 00010](00010-ekran-keruvannia-tsyvilizatsiieiu.md) (оболонка гри: шапка, ліве меню з пунктом «Карта», смужка планет, координати «Сектор · Система · Орбіта») і [задача 00020](00020-perenesty-chotyry-novi-storinky-hry.md) (спільна рамка екранів, стандартні панелі й черги, сітка плашок, адаптивність).
 > **Документи:** [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md), [ui-art/02 Екрани](../ui-art/02-ekrany-ta-navihatsiia.md) (розділ 5 «Карта»), [game-design/09 Світ і карта](../game-design/09-svit-ta-karta.md), [game-design/03 Розвиток планет](../game-design/03-rozvytok-planet.md), [game-design/05 Флот](../game-design/05-flot-ta-korabli.md), [game-design/07 PvE](../game-design/07-pve-piraty-ta-zahrozy.md).
-> **Макет-джерело оболонки:** `documentation/design/aetheris-civ` та `documentation/design/AETHERIS_4_pages`: оболонку (шапка, ліве меню, нижня смужка) переносимо без змін. Готовий макет автор кладе в `documentation/design/AETHERIS_map`.
+> **Макет-джерело оболонки:** `documentation/design/aetheris-civ` та `documentation/design/AETHERIS_4_pages`: оболонку (шапка, ліве меню, нижня смужка) переносимо без змін. Готовий макет автор поклав у `documentation/design/aetheris-map-html`.
 
 ## 1. Мета
 Макет **сторінки «Карта»**: екрана, де гравець бачить свій всесвіт у трьох масштабах (галактика → сектор → система), свої планети й те, що відкрили радари, обирає об'єкт і бачить його картку з діями. Пункт «Карта» в лівому меню зараз неактивний («Скоро»); макет робить його повноцінним екраном. Оболонка та сама, змінюється лише середня область.
@@ -139,4 +139,4 @@ Output a design-tokens table (colors, fonts, spacing, radii, shadows) and a list
 
 ## 8. Результат виконання
 
-(заповнюється після того, як автор покладе макет у `documentation/design/AETHERIS_map`)
+Макет зроблено автором у Claude Design й лежить у `documentation/design/aetheris-map-html` (статичний HTML + `map.css`, класи згенеровано як `.mN`): `index.html` (зміст), `map-galaxy`, `map-sector`, `map-system` (і англійський `map-system-en`), `map-list`, `map-loading`, `map-fog`, `map-error`, `map-mobile-system`, `map-mobile-sector` (англійська). Усі три масштаби, вид списком, стани й мобільні розкладки є; картка об'єкта, шари, легенда, міні-карта й пошук показані. Три відкриті питання розділу 7 закрито в [00034](00034-perenesty-storinku-karty-v-kliyent.md) (рішення за замовчуванням).
