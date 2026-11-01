@@ -16,6 +16,8 @@ public static class MarketJson
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
         DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        // An empty field is sent as null, never left out: the client reads `null` as "nothing", and a
+        // missing field would be read as a value that is not there.
+        DefaultIgnoreCondition = JsonIgnoreCondition.Never,
     };
 }

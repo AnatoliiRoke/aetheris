@@ -301,6 +301,10 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
         // The Economy module fills its tables once the bodies, the research and the world modules
         // have their own reference data, because the numbers of the game live in them (task 00015).
         await scope.ServiceProvider.GetRequiredService<IEconomyModule>().EnsureAsync().ConfigureAwait(false);
+
+        // The Market module fills its levels of the market once the bodies, the production and the
+        // economy modules have their own reference data, because a lot reads them (task 00024).
+        await scope.ServiceProvider.GetRequiredService<IMarketModule>().EnsureAsync().ConfigureAwait(false);
     }
 }
 
