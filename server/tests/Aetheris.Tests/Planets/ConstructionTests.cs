@@ -249,6 +249,19 @@ public sealed class ConstructionTests
         PlanetOverviewDto accepted = await construction.EnqueueAsync(player.PlanetId, refusedType.Id, now, Token);
 
         Assert.True(accepted.Energy.QueuedBalance >= 0);
+
+        // The plant cannot be cancelled while the consumer after it rests on its energy
+        // (task 00029): the balance would go below zero once the queue is done.
+        long plantRecord = accepted.Queue.Items.Single(item => item.BuildingTypeId == plant.Id).Id;
+        GameException blocked = await Assert.ThrowsAsync<GameException>(() => construction.CancelAsync(player.PlanetId, plantRecord, now, Token));
+        Assert.Equal(PlanetsErrorCodes.EnergyShort, blocked.Code);
+
+        // The consumer can go first, and then the plant.
+        long consumerRecord = accepted.Queue.Items.Single(item => item.BuildingTypeId == refusedType.Id).Id;
+        await construction.CancelAsync(player.PlanetId, consumerRecord, now, Token);
+        PlanetOverviewDto freed = await construction.CancelAsync(player.PlanetId, plantRecord, now, Token);
+
+        Assert.DoesNotContain(freed.Queue.Items, item => item.BuildingTypeId == plant.Id);
     }
 
     /// <summary>

@@ -737,7 +737,7 @@ export const uk = {
   'planet.energyNote': 'Будівля, через яку баланс стане від’ємним, у чергу не потрапить.',
   'planet.resourcesSubtitle': 'Видобуток за годину',
   'planet.storageNoCapacity': '{amount} · без складу',
-  'planet.storageNoCapacityHint': 'Для цієї групи ще немає складу, тож ліміту немає. Збудуйте склад, щоб з’явилась місткість.',
+  'planet.storageNoCapacityHint': 'Для цієї групи немає складу, тож видобуток не нараховується. Збудуйте склад, щоб з’явилась місткість.',
   'build.effects': 'Ефекти',
   'build.noEffects': '—',
   'build.requiredResources': 'Потрібні ресурси',

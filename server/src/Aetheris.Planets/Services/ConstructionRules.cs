@@ -252,13 +252,13 @@ public static class PlanetOverviewBuilder
 
             // Every resource has the capacity its group gets from the storage and is full on its
             // own: a full resource stops its own production, the others of the group go on. A
-            // group without a storage (capacity zero) has no limit: its resources are never full
-            // (the one rule of a zero capacity, task 00020, section 7.9).
+            // group without a storage (capacity zero) has no room: nothing is produced into it,
+            // so the rate shown is zero (task 00029).
             long amount = figures.Amounts.GetValueOrDefault(resource.Id);
             long capacity = capacities.GetValueOrDefault(resourceGroupId);
             DateTimeOffset? fullAt = figures.FullAt.GetValueOrDefault(resource.Id);
             bool isFull = fullAt is { } moment && moment <= figures.Now;
-            decimal rate = isFull ? 0 : rates.GetValueOrDefault(resource.Id);
+            decimal rate = isFull || capacity <= 0 ? 0 : rates.GetValueOrDefault(resource.Id);
             decimal weight = resource.Weight;
 
             if (amount > 0 || rate > 0 || capacity > 0 || figures.Deposits.ContainsKey(resource.Id))

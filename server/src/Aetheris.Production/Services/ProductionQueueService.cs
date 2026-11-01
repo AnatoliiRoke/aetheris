@@ -1231,10 +1231,14 @@ public sealed class ProductionQueueService
         PlanetOverviewDto? planet = await _planets.GetPlanetAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
         PlanetResourceDto? resource = planet?.Resources.FirstOrDefault(entry => entry.ResourceTypeId == resourceTypeId);
 
-        // The one rule of a zero capacity (task 00020, section 7.9), the same as in the economy
-        // of the body: a group without a storage has no limit, a group with one stops the
-        // production when the next unit does not fit.
-        return resource is null || resource.Capacity <= 0 || resource.Amount + recipe.OutputQuantity <= resource.Capacity;
+        // The same rule as in the economy of the body (task 00029): a group without a storage has
+        // no room, so a plant makes nothing into it; a group with one stops the production when
+        // the next unit does not fit. The room is counted in tonnes like everywhere else (task
+        // 00027): the capacity is a weight, not a count of units. A resource that is not in the
+        // list has no storage at all.
+        return resource is not null
+            && resource.Capacity > 0
+            && (resource.Amount + recipe.OutputQuantity) * resource.Weight <= resource.Capacity;
     }
 
     /// <summary>

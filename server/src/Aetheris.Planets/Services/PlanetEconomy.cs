@@ -229,7 +229,7 @@ public static class PlanetEconomy
     /// resources of the group go on. The amounts are whole numbers: the fraction of a unit is
     /// left out, and the resource that fills gets exactly its capacity. An amount over the
     /// capacity (a refund) stays and counts as full. A group with no capacity at all has no
-    /// limit: its resources never fill (decision 7.9 of task 00020).
+    /// room: nothing is added to its resources (task 00029).
     /// </para>
     /// <para>
     /// The room of a resource is counted in tonnes (task 00027, decision 1): the amount of the
@@ -267,17 +267,14 @@ public static class PlanetEconomy
             decimal rate = rates.GetValueOrDefault(resourceTypeId);
             decimal weight = weights.GetValueOrDefault(resourceTypeId);
 
-            // The one rule of a zero capacity (task 00020, section 7.9): a group without a storage
-            // has no limit. Its resources are never full and never stop the production; the
-            // limit begins with the first storage that gives the group a capacity.
+            // A group without a storage (capacity zero) has no room: nothing is mined or made
+            // into it, the stored amount stays as it is. Mines and plants work only into a
+            // storage (task 00029, the author's decision of 01.11.2026, which replaces the
+            // earlier rule of an unlimited group). The resource is not "full" either: it simply
+            // has nowhere to go until the first storage gives the group a capacity.
             if (capacity <= 0)
             {
                 fullAt[resourceTypeId] = null;
-
-                if (rate > 0)
-                {
-                    result[resourceTypeId] = stored + (long)decimal.Floor(rate * elapsedTicks / TimeSpan.TicksPerHour);
-                }
 
                 continue;
             }

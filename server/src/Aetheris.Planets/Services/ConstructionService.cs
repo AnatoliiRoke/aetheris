@@ -207,6 +207,24 @@ public sealed class ConstructionService
                     .. session.Queue.Where(entry => entry.BuildingTypeId == cancelled.BuildingTypeId && entry.TargetLevel >= cancelled.TargetLevel),
                 ];
 
+                // A record that gives energy cannot be cancelled when the later records already
+                // rest on that energy: the balance of the body would go below zero once the
+                // queue is done (task 00029; the same rule as the one of the queueing, decision 7
+                // of task 00011).
+                PlanetFigures figures = session.Figures(now);
+                Dictionary<int, int> remainingLevels = new(figures.Levels);
+
+                foreach (ConstructionQueueItemEntity item in session.Queue.Except(removed))
+                {
+                    remainingLevels[item.BuildingTypeId] = Math.Max(remainingLevels.GetValueOrDefault(item.BuildingTypeId), item.TargetLevel);
+                }
+
+                if (PlanetEconomy.Energy(session.Catalog, remainingLevels, figures.Bonuses).Balance < 0
+                    && PlanetEconomy.Energy(session.Catalog, figures.QueuedLevels(), figures.Bonuses).Balance >= 0)
+                {
+                    throw new GameException(PlanetsErrorCodes.EnergyShort, "The record gives the energy the later records need.");
+                }
+
                 // The cost returns to the balances it was paid from: the resources of the body to
                 // the body and the currencies to the balance of the civilization (task 00015).
                 Dictionary<int, long> refund = removed

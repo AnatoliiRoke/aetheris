@@ -187,6 +187,39 @@ public sealed class StorageCapacityTests
     }
 
     /// <summary>
+    /// A mine on a body without any storage mines nothing (task 00029): the amount stays and
+    /// the rate shown is zero until the first storage gives the group a capacity.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_mine_without_a_storage_mines_nothing()
+    {
+        await PlanetsTestData.ResetAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+
+        int iron = await PlanetsTestData.SetDepositAsync(services, player.PlanetId, SeedCodes.Iron, 1.5m);
+        DateTimeOffset start = PlanetsTestData.GameNow(services);
+
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.IronMine, 1);
+        await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, new Dictionary<int, long> { [iron] = 7 }, start);
+
+        PlanetResourceDto idle = (await PlanetsTestData.ReadAsync(services, player.PlanetId, start.AddHours(10))).Resources.Single(resource => resource.ResourceTypeId == iron);
+
+        Assert.Equal(0, idle.Capacity);
+        Assert.Equal(7, idle.Amount);
+        Assert.Equal(0, idle.RatePerHour);
+
+        // The first storage opens the room and the mine works.
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.MetalStorage, 1);
+        PlanetResourceDto working = (await PlanetsTestData.ReadAsync(services, player.PlanetId, start.AddSeconds(1))).Resources.Single(resource => resource.ResourceTypeId == iron);
+
+        Assert.True(working.Capacity > 0);
+        Assert.True(working.RatePerHour > 0);
+    }
+
+    /// <summary>
     /// A refund over the capacity is not cut: the cancel of a record returns the whole cost
     /// even when the resource is already full, and the resource counts as full (task 00011).
     /// </summary>

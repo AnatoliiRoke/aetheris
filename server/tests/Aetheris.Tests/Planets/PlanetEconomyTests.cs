@@ -212,11 +212,11 @@ public sealed class PlanetEconomyTests
     }
 
     /// <summary>
-    /// The one rule of a zero capacity (task 00020, section 7.9): a produced resource whose group
-    /// has no storage is not full and does not stop; it grows by its rate without a limit.
+    /// A group without a storage has no room (task 00029): a produced resource keeps what it
+    /// has, nothing is added, and it is not "full" either.
     /// </summary>
     [Fact]
-    public void A_produced_resource_without_a_capacity_is_not_full_and_does_not_stop()
+    public void A_produced_resource_without_a_capacity_gets_nothing_and_is_not_full()
     {
         AccumulationResult result = PlanetEconomy.Accumulate(
             Catalog(),
@@ -227,20 +227,27 @@ public sealed class PlanetEconomyTests
             Start,
             Start.AddHours(5));
 
-        Assert.Equal(90, result.Amounts[Beams]);
+        Assert.Equal(40, result.Amounts[Beams]);
         Assert.Null(result.FullAt[Beams]);
+    }
 
-        // Nothing stored and nothing made: not full either.
-        AccumulationResult idle = PlanetEconomy.Accumulate(
+    /// <summary>
+    /// A mine without any storage mines nothing (task 00029): the stored amount stays.
+    /// </summary>
+    [Fact]
+    public void A_mine_without_a_storage_mines_nothing()
+    {
+        AccumulationResult result = PlanetEconomy.Accumulate(
             Catalog(),
-            new Dictionary<int, long>(),
-            new Dictionary<int, decimal> { [Beams] = 0m },
+            new Dictionary<int, long> { [Iron] = 100 },
+            new Dictionary<int, decimal> { [Iron] = 50m },
             new Dictionary<int, long>(),
             Weights(),
             Start,
-            Start.AddHours(5));
+            Start.AddHours(10));
 
-        Assert.Null(idle.FullAt[Beams]);
+        Assert.Equal(100, result.Amounts[Iron]);
+        Assert.Null(result.FullAt[Iron]);
     }
 
     /// <summary>

@@ -739,7 +739,7 @@ export const en: Messages = {
   'planet.energyNote': 'A building that would make the balance negative cannot be queued.',
   'planet.resourcesSubtitle': 'Production per hour',
   'planet.storageNoCapacity': '{amount} · no storage',
-  'planet.storageNoCapacityHint': 'This group has no storage yet, so there is no limit. Build a storage to get a capacity.',
+  'planet.storageNoCapacityHint': 'This group has no storage, so nothing is mined into it. Build a storage to get a capacity.',
   'build.effects': 'Effects',
   'build.noEffects': '—',
   'build.requiredResources': 'Required resources',
