@@ -79,11 +79,17 @@ public sealed class MarketLotListTests
         using IServiceScope read = _factory.Services.CreateScope();
         MarketReadService reads = read.ServiceProvider.GetRequiredService<MarketReadService>();
 
-        LotsDto first = await reads.LotsAsync(viewerId, new LotFilter(Sort: LotSorts.Price, Descending: false, Limit: 100), Token);
-        LotsDto second = await reads.LotsAsync(viewerId, new LotFilter(Sort: LotSorts.Price, Descending: false, Limit: 100, Offset: 100), Token);
+        LotsDto standard = await reads.LotsAsync(viewerId, new LotFilter(), Token);
+
+        // A page holds forty lots unless the player asks for fewer.
+        Assert.Equal(40, standard.Items.Count);
+        Assert.Equal(250, standard.Total);
+
+        LotsDto first = await reads.LotsAsync(viewerId, new LotFilter(Sort: LotSorts.Price, Descending: false, Limit: 40), Token);
+        LotsDto second = await reads.LotsAsync(viewerId, new LotFilter(Sort: LotSorts.Price, Descending: false, Limit: 40, Offset: 40), Token);
 
         Assert.Equal(250, first.Total);
-        Assert.Equal(100, first.Items.Count);
+        Assert.Equal(40, first.Items.Count);
         Assert.Equal(first.Items.Select(lot => lot.PricePerUnit).Order(), first.Items.Select(lot => lot.PricePerUnit));
         Assert.True(second.Items[0].PricePerUnit >= first.Items[^1].PricePerUnit);
 
@@ -94,15 +100,15 @@ public sealed class MarketLotListTests
         LotsDto iron = await reads.LotsAsync(viewerId, new LotFilter(ResourceTypeIds: [ironId], PartTypeIds: [], MinPrice: 100), Token);
 
         Assert.All(iron.Items, lot => Assert.True(lot.ResourceTypeId == ironId && lot.PricePerUnit >= 100));
-        Assert.Equal(iron.Total, iron.Items.Count);
+        Assert.Equal(Math.Min(40, iron.Total), iron.Items.Count);
 
         LotsDto none = await reads.LotsAsync(viewerId, new LotFilter(ResourceTypeIds: [], PartTypeIds: []), Token);
 
         Assert.Equal(0, none.Total);
 
-        LotsDto byItem = await reads.LotsAsync(viewerId, new LotFilter(Sort: LotSorts.Item, Descending: false, ItemOrder: [$"r{copperId}", $"r{ironId}"], Limit: 100), Token);
+        LotsDto byItem = await reads.LotsAsync(viewerId, new LotFilter(Sort: LotSorts.Item, Descending: false, ItemOrder: [$"r{copperId}", $"r{ironId}"], Limit: 40), Token);
 
-        LotsDto lastPage = await reads.LotsAsync(viewerId, new LotFilter(Sort: LotSorts.Item, Descending: false, ItemOrder: [$"r{copperId}", $"r{ironId}"], Limit: 100, Offset: 200), Token);
+        LotsDto lastPage = await reads.LotsAsync(viewerId, new LotFilter(Sort: LotSorts.Item, Descending: false, ItemOrder: [$"r{copperId}", $"r{ironId}"], Limit: 40, Offset: 200), Token);
 
         // 125 lots of the first item come first, then the lots of the second one.
         Assert.All(byItem.Items, lot => Assert.Equal(copperId, lot.ResourceTypeId));

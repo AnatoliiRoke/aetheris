@@ -202,6 +202,18 @@ export interface MarketDeal {
 }
 
 /**
+ * A page of the deals of a player.
+ */
+export interface MarketDeals {
+  items: MarketDeal[];
+  /** How many deals the player has, all the pages together. */
+  total: number;
+  offset: number;
+  /** How many deals a page holds. */
+  limit: number;
+}
+
+/**
  * What a purchase costs, counted by the server without doing it.
  */
 export interface MarketQuote {
@@ -284,7 +296,7 @@ export interface MarketApi {
   lotGroups(query: LotsQuery): Promise<LotGroup[]>;
   myLots(): Promise<MyLot[]>;
   deliveries(): Promise<MarketDeliveries>;
-  deals(offset?: number): Promise<MarketDeal[]>;
+  deals(offset?: number): Promise<MarketDeals>;
   rate(): Promise<MarketRate>;
   rateHistory(): Promise<RateHistory>;
   quote(lotId: number, planetId: number): Promise<MarketQuote>;
@@ -349,7 +361,7 @@ export function createMarketApi(http: HttpClient): MarketApi {
       return camelize<MarketDeliveries>(await http.get<unknown>(`${prefix}/deliveries`));
     },
     async deals(offset) {
-      return camelize<MarketDeal[]>(await http.get<unknown>(`${prefix}/deals${queryString({ offset })}`));
+      return camelize<MarketDeals>(await http.get<unknown>(`${prefix}/deals${queryString({ offset })}`));
     },
     async rate() {
       return camelize<MarketRate>(await http.get<unknown>(`${prefix}/rate`));

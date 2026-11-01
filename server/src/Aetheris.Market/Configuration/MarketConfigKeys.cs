@@ -82,7 +82,7 @@ public static class MarketConfigKeys
         new(EnergyResourceCode, "resource_17", null, null, "The code of the resource the buyer pays the delivery with."),
         new(EnergyPerTonneDistance, "0.01", "0", "1000000", "The energy rods a delivery costs for one tonne of the goods carried over one unit of the distance."),
         new(DeliveryRecentHours, "24", "0", "720", "How long a delivery that has arrived stays in the list of the deliveries, in hours."),
-        new(PageSize, "100", "1", "1000", "The largest number of rows one read of the market returns."),
+        new(PageSize, "40", "1", "1000", "The largest number of rows one read of the market returns."),
         new(ExchangeBaseRate, "100", "1", "1000000", "The rate of the exchange when the flow of the market is even: credits for one unit of the trade currency."),
         new(ExchangeMinRate, "50", "1", "1000000", "The lowest rate of the exchange."),
         new(ExchangeMaxRate, "200", "1", "1000000", "The highest rate of the exchange."),

@@ -203,16 +203,16 @@ describe('the tab Buy', () => {
   it('moves between the pages of a long list', async () => {
     const user = userEvent.setup();
     const market = fakeMarketApi({
-      lots: vi.fn().mockResolvedValue({ items: [sampleMarketLot()], energyRodBalance: 8, destinationHasPortal: true, total: 250, offset: 0, limit: 100 }),
+      lots: vi.fn().mockResolvedValue({ items: [sampleMarketLot()], energyRodBalance: 8, destinationHasPortal: true, total: 250, offset: 0, limit: 40 }),
     });
     renderMarket({ market });
 
-    expect(await screen.findByText('1–100 з 250')).toBeInTheDocument();
+    expect(await screen.findByText('1–40 з 250')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Назад' })).toBeDisabled();
 
     await user.click(screen.getByRole('button', { name: 'Далі' }));
 
-    await waitFor(() => expect(market.lots).toHaveBeenLastCalledWith(expect.objectContaining({ offset: 100 })));
+    await waitFor(() => expect(market.lots).toHaveBeenLastCalledWith(expect.objectContaining({ offset: 40 })));
   });
 
   it('groups the lots by item and opens the lots of one item', async () => {
@@ -505,7 +505,11 @@ describe('my lots, deliveries, exchange and history', () => {
   it('shows the history of the deals with the direction in words', async () => {
     const user = userEvent.setup();
     const market = fakeMarketApi({
-      deals: vi.fn().mockResolvedValue([
+      deals: vi.fn().mockResolvedValue({
+        total: 1,
+        offset: 0,
+        limit: 40,
+        items: [
         {
           id: 1,
           direction: 'bought',
@@ -518,7 +522,8 @@ describe('my lots, deliveries, exchange and history', () => {
           commission: 100,
           createdAt: '2026-10-26T14:32:00Z',
         },
-      ]),
+        ],
+      }),
     });
     renderMarket({ market });
 
@@ -527,6 +532,32 @@ describe('my lots, deliveries, exchange and history', () => {
     expect(await screen.findByText('Куплено')).toBeInTheDocument();
     expect(screen.getByText('26.10 14:32')).toBeInTheDocument();
     expect(screen.getByText('Vektor_Prime')).toBeInTheDocument();
+  });
+
+  it('moves between the pages of the history, forty deals on a page', async () => {
+    const user = userEvent.setup();
+    const deal = {
+      id: 1,
+      direction: 'sold',
+      counterparty: { playerId: 'u2', nickname: 'Vektor_Prime', raceNameKey: null, raceColorKey: null },
+      resourceTypeId: 1,
+      partTypeId: null,
+      quantity: 5,
+      pricePerUnit: 4,
+      sum: 20,
+      commission: 1,
+      createdAt: '2026-10-26T14:32:00Z',
+    };
+    const market = fakeMarketApi({ deals: vi.fn().mockResolvedValue({ items: [deal], total: 100, offset: 0, limit: 40 }) });
+    renderMarket({ market });
+
+    await user.click(await screen.findByRole('tab', { name: /^Історія/ }));
+
+    expect(await screen.findByText('1–40 з 100')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Далі' }));
+
+    await waitFor(() => expect(market.deals).toHaveBeenLastCalledWith(40));
   });
 
   it('tells that there are no deals yet', async () => {
@@ -552,7 +583,7 @@ describe('the language and the data', () => {
 
   it('reads every number from the server: no lot is made up when the server has none', async () => {
     const market = fakeMarketApi({
-      lots: vi.fn().mockResolvedValue({ items: [], energyRodBalance: 0, destinationHasPortal: true, total: 0, offset: 0, limit: 100 }),
+      lots: vi.fn().mockResolvedValue({ items: [], energyRodBalance: 0, destinationHasPortal: true, total: 0, offset: 0, limit: 40 }),
       myLots: vi.fn().mockResolvedValue([sampleMyLot()]),
     });
     renderMarket({ market });

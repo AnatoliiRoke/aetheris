@@ -278,3 +278,10 @@ public sealed record RateHistoryDto(IReadOnlyList<RatePointDto> Points, decimal?
 /// <param name="Min">The lowest price.</param>
 /// <param name="Max">The highest price.</param>
 public sealed record PriceLimitDto(long Min, long Max);
+
+/// <summary>A page of the deals of a player.</summary>
+/// <param name="Items">The deals of the page, newest first.</param>
+/// <param name="Total">How many deals the player has, all the pages together.</param>
+/// <param name="Offset">How many deals were skipped.</param>
+/// <param name="Limit">How many deals a page may hold.</param>
+public sealed record DealsDto(IReadOnlyList<DealItemDto> Items, int Total, int Offset, int Limit);

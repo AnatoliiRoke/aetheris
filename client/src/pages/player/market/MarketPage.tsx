@@ -90,7 +90,8 @@ export function MarketPage() {
   const rate = useRead(loadRate, tab === 'ex');
   const loadHistory = useCallback(() => market.rateHistory(), [market]);
   const rateHistory = useRead(loadHistory, tab === 'ex');
-  const loadDeals = useCallback(() => market.deals(), [market]);
+  const [dealsOffset, setDealsOffset] = useState(0);
+  const loadDeals = useCallback(() => market.deals(dealsOffset), [market, dealsOffset]);
   const deals = useRead(loadDeals, tab === 'hist');
 
   useEffect(
@@ -239,7 +240,7 @@ export function MarketPage() {
             {tab === 'mine' ? <MineView busy={busy} failed={mine.failed} itemView={itemView} levels={levels} lots={mine.data} nowMs={nowMs()} onCancel={(lot) => void onCancel(lot)} onRetry={() => void mine.reload()} /> : null}
             {tab === 'del' ? <DeliveriesView deliveries={deliveries.data} failed={deliveries.failed} itemView={itemView} nowMs={nowMs} onArrive={() => refreshEverything(currentPlanetId)} onRetry={() => void deliveries.reload()} planets={planets} timeMultiplier={overview.data.timeMultiplier} /> : null}
             {tab === 'ex' ? <ExchangeView busy={busy} credits={creditsBalance} error={problem} history={rateHistory.data} onExchange={(id, amount) => void onExchange(id, amount)} overview={overview.data} rate={rate.data} trade={tradeBalance} /> : null}
-            {tab === 'hist' ? <HistoryView deals={deals.data} failed={deals.failed} itemView={itemView} onRetry={() => void deals.reload()} /> : null}
+            {tab === 'hist' ? <HistoryView deals={deals.data} failed={deals.failed} itemView={itemView} onPage={(offset) => { setDealsOffset(offset); window.scrollTo({ top: 0 }); }} onRetry={() => void deals.reload()} /> : null}
           </>
         )}
       </div>

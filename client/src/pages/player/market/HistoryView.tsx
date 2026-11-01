@@ -1,10 +1,11 @@
 import { GameIcon } from '../../../components/GameIcon';
-import type { MarketDeal } from '../../../api/marketApi';
+import type { MarketDeal, MarketDeals } from '../../../api/marketApi';
 import { useI18n } from '../../../i18n/useI18n';
 import { useTexts } from '../../../texts/useTexts';
 import { formatInteger, formatStamp } from './marketFormat';
 import { EmptyBox, ItemCell, SellerPill } from './MarketBits';
 import { ListSkeleton, ReadError } from './MarketStates';
+import { Pager } from './Pager';
 import { useIsPhone } from './useIsPhone';
 import type { ItemView } from './useMarketItems';
 
@@ -27,25 +28,30 @@ function DirectionChip({ bought }: { bought: boolean }) {
 /**
  * The tab "History": the deals of the player, bought and sold, with the other side of each deal.
  *
- * @param deals The deals, or `null` while they are read.
+ * @param deals The page of the deals, or `null` while it is read.
  * @param failed Whether the read failed.
  * @param itemView How an item looks.
+ * @param onPage What to do when the player moves to another page; it gets the offset of the page.
  * @param onRetry What to do when the player asks to read again.
  */
 export function HistoryView({
-  deals,
+  deals: page,
   failed,
   itemView,
+  onPage,
   onRetry,
 }: {
-  deals: MarketDeal[] | null;
+  deals: MarketDeals | null;
   failed: boolean;
   itemView: (resourceTypeId: number | null, partTypeId: number | null) => ItemView;
+  onPage: (offset: number) => void;
   onRetry: () => void;
 }) {
   const { t, language } = useI18n();
   const { text } = useTexts();
   const phone = useIsPhone();
+
+  const deals = page?.items ?? null;
 
   if (deals === null) {
     return failed ? <ReadError onRetry={onRetry} /> : <ListSkeleton />;
@@ -63,8 +69,11 @@ export function HistoryView({
     />
   );
 
+  const pager = page && page.total > page.limit ? <Pager limit={page.limit} offset={page.offset} onGo={onPage} total={page.total} /> : null;
+
   if (phone) {
     return (
+      <>
       <div className="mk-cards">
         {deals.map((deal) => {
           const view = itemView(deal.resourceTypeId, deal.partTypeId);
@@ -93,10 +102,13 @@ export function HistoryView({
           );
         })}
       </div>
+      {pager}
+      </>
     );
   }
 
   return (
+    <>
     <section className="mk-panel">
       <div aria-label={t('market.tHist')} className="mk-table mk-table--hist" role="table">
         <div role="rowgroup">
@@ -147,5 +159,7 @@ export function HistoryView({
         </div>
       </div>
     </section>
+    {pager}
+    </>
   );
 }

@@ -347,7 +347,6 @@ public sealed class MarketReadService
         List<MarketLotEntity> lots = await _db.MarketLots.AsNoTracking()
             .Where(lot => lot.SellerPlayerId == playerId && lot.State == MarketLotStates.Open)
             .OrderByDescending(lot => lot.Id)
-            .Take(MarketSettings.From(_config).PageSize)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
@@ -383,7 +382,6 @@ public sealed class MarketReadService
                     StartedAt = deal.CreatedAt,
                     SourcePlanetId = lot.SellerPlanetId,
                 })
-            .Take(settings.PageSize)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
@@ -514,23 +512,25 @@ public sealed class MarketReadService
     /// <param name="playerId">The player.</param>
     /// <param name="offset">How many deals to skip.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The deals.</returns>
-    public async Task<IReadOnlyList<DealItemDto>> DealsAsync(string playerId, int offset, CancellationToken cancellationToken)
+    /// <returns>The page of the deals with the number of all the deals of the player.</returns>
+    public async Task<DealsDto> DealsAsync(string playerId, int offset, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        List<MarketDealEntity> deals = await _db.MarketDeals.AsNoTracking()
-            .Where(deal => deal.BuyerPlayerId == playerId || deal.SellerPlayerId == playerId)
+        int limit = MarketSettings.From(_config).PageSize;
+        IQueryable<MarketDealEntity> mine = _db.MarketDeals.AsNoTracking().Where(deal => deal.BuyerPlayerId == playerId || deal.SellerPlayerId == playerId);
+        int total = await mine.CountAsync(cancellationToken).ConfigureAwait(false);
+        List<MarketDealEntity> deals = await mine
             .OrderByDescending(deal => deal.Id)
             .Skip(Math.Max(0, offset))
-            .Take(MarketSettings.From(_config).PageSize)
+            .Take(limit)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         IReadOnlyDictionary<string, PlayerCardDto> cards = await CardsAsync(
             deals.SelectMany(deal => new[] { deal.SellerPlayerId, deal.BuyerPlayerId }),
             cancellationToken).ConfigureAwait(false);
 
-        return
+        return new DealsDto(
         [
             .. deals.Select(deal =>
             {
@@ -549,7 +549,10 @@ public sealed class MarketReadService
                     deal.Commission,
                     deal.CreatedAt);
             }),
-        ];
+        ],
+            total,
+            Math.Max(0, offset),
+            limit);
     }
 
     private static LotListItemDto ToItem(
