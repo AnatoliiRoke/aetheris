@@ -49,13 +49,13 @@ public sealed class ChosenSeedTests
 
     private const int TechnologyCount = 20;
 
-    private const int PartCount = 106;
+    private const int PartCount = 107;
 
-    private const int ModuleCount = 79;
+    private const int ModuleCount = 80;
 
     private const int HullCount = 27;
 
-    private const int RecipeCount = 114;
+    private const int RecipeCount = 115;
 
     private const int PartGroupCount = 18;
 
@@ -65,7 +65,7 @@ public sealed class ChosenSeedTests
 
     private const int StartBuildingCount = 4;
 
-    private const int LastModuleSortOrder = 79;
+    private const int LastModuleSortOrder = 80;
 
     private const int SecondLevel = 2;
 

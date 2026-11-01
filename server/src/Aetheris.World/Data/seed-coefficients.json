@@ -428,6 +428,13 @@
       "description": "Fraction added to the characteristics and the weight of a part for every part before it in its group."
     },
     {
+      "key": "world.seed.capsule.inhabitants",
+      "value": "100",
+      "minimum": "1",
+      "maximum": "100000",
+      "description": "Inhabitants one cryocapsule adds to the population of a body."
+    },
+    {
       "key": "world.seed.field.group_4_total_min",
       "value": "0.03",
       "minimum": "0",

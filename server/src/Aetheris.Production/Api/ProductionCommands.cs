@@ -180,3 +180,77 @@ public sealed class CancelProductionCommand : Command<CancelProductionCommand.Re
         [property: JsonPropertyName("planet_building_id")] long? PlanetBuildingId,
         [property: JsonPropertyName("order_id")] long? OrderId);
 }
+
+/// <summary>
+/// Uses one capsule of inhabitants of a body: the capsule leaves the storage of the parts and
+/// its inhabitants join the population of the body (task 00031).
+/// </summary>
+public sealed class UsePopulationCapsuleCommand : Command<UsePopulationCapsuleCommand.Request, JsonElement>
+{
+    /// <summary>
+    /// The route of the command.
+    /// </summary>
+    public const string RoutePath = "/api/v1/production/use-capsule";
+
+    /// <summary>
+    /// The action code of the command.
+    /// </summary>
+    public const string Code = "production.use_capsule";
+
+    private readonly PopulationCapsuleService _capsules;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UsePopulationCapsuleCommand"/> class.
+    /// </summary>
+    /// <param name="capsules">The use of the capsules.</param>
+    public UsePopulationCapsuleCommand(PopulationCapsuleService capsules)
+    {
+        ArgumentNullException.ThrowIfNull(capsules);
+
+        _capsules = capsules;
+    }
+
+    /// <inheritdoc />
+    public override string Route => RoutePath;
+
+    /// <inheritdoc />
+    public override string ActionCode => Code;
+
+    /// <inheritdoc />
+    public override void DefineRules(AbstractValidator<Request> rules)
+    {
+        ArgumentNullException.ThrowIfNull(rules);
+
+        rules.RuleFor(request => request.PlanetId).NotNull();
+        rules.RuleFor(request => request.PartTypeId).NotNull().GreaterThan(0);
+    }
+
+    /// <inheritdoc />
+    public override OwnedObjectReference? GetTarget(Request request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        return new(PlanetOwnerResolver.Type, request.PlanetId!.Value.ToString(CultureInfo.InvariantCulture));
+    }
+
+    /// <inheritdoc />
+    public override async Task<JsonElement> ExecuteAsync(Request request, CommandContext context, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        CapsuleUseDto result = await _capsules
+            .UseAsync(context.PlayerId, request.PlanetId!.Value, request.PartTypeId!.Value, cancellationToken)
+            .ConfigureAwait(false);
+
+        return JsonSerializer.SerializeToElement(result, ProductionJson.Options);
+    }
+
+    /// <summary>
+    /// The request: the body and the kind of the capsule.
+    /// </summary>
+    /// <param name="PlanetId">The body whose population grows.</param>
+    /// <param name="PartTypeId">The kind of the capsule.</param>
+    public sealed record Request(
+        [property: JsonPropertyName("planet_id")] long? PlanetId,
+        [property: JsonPropertyName("part_type_id")] int? PartTypeId);
+}

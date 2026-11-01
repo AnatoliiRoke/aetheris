@@ -553,7 +553,10 @@ public sealed class ProductionQueueService
                     part?.NameKey ?? string.Empty,
                     part?.ImageKey,
                     part?.PartGroupId ?? 0,
-                    group?.NameKey);
+                    group?.NameKey,
+                    part is not null && part.Attributes.TryGetValue(PartAttributeKeys.PopulationCapsule, out PartAttributeInfo? capsule)
+                        ? (long)(capsule.NumberValue ?? 0)
+                        : 0);
             }),
         ];
 

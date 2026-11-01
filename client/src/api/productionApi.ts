@@ -131,6 +131,20 @@ export interface ProductionStack {
   partGroupId: number;
   /** The localisation key of the name of the group. */
   partGroupNameKey: string | null;
+  /** How many inhabitants one part of the stack adds when used, or 0 when the part is not a capsule (task 00031). */
+  capsuleInhabitants: number;
+}
+
+/**
+ * The result of the use of a capsule of inhabitants (task 00031).
+ */
+export interface CapsuleUse {
+  planetId: number;
+  partTypeId: number;
+  /** How many inhabitants the capsule gave. */
+  inhabitants: number;
+  /** The population of the body after the use. */
+  population: number;
 }
 
 /**
@@ -219,6 +233,8 @@ export interface ProductionApi {
   characteristicParts(): Promise<PartCharacteristics[]>;
   enqueue(planetId: number, planetBuildingId: number, recipeId: number, quantity: number): Promise<ProductionFactory>;
   cancel(planetId: number, planetBuildingId: number, orderId: number): Promise<ProductionFactory>;
+  /** Uses one capsule of inhabitants of the body (task 00031). */
+  useCapsule(planetId: number, partTypeId: number): Promise<CapsuleUse>;
 }
 
 const prefix = '/api/v1/production';
@@ -255,6 +271,9 @@ export function createProductionApi(http: HttpClient): ProductionApi {
           quantity,
         }),
       );
+    },
+    async useCapsule(planetId, partTypeId) {
+      return camelize<CapsuleUse>(await http.command<unknown>(`${prefix}/use-capsule`, { planet_id: planetId, part_type_id: partTypeId }));
     },
     async cancel(planetId, planetBuildingId, orderId) {
       return camelize<ProductionFactory>(

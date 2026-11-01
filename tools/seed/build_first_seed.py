@@ -240,6 +240,7 @@ MODULES_EN = {
     "Протиракетна система": "Missile-defence system",
     "Модуль передачі": "Transfer module",
     "Колоніальний модуль": "Colony module",
+    "Кріокапсула": "Cryocapsule",
     "Житловий модуль": "Housing module",
     "Орбітальний склад": "Orbital warehouse",
     "Ремонтні майстерні": "Repair workshops",
@@ -384,6 +385,7 @@ OTHER_STATS = {
     "Протиракетна система": ["char_missiles", "char_range", "char_energy_use"],
     "Модуль передачі": ["char_transfer_speed", "char_transfer_volume", "char_energy_use"],
     "Колоніальний модуль": ["char_deploy_time", "char_colonists", "char_energy_use"],
+    "Кріокапсула": ["char_inhabitants"],
 }
 
 BASE_STATS = {
@@ -429,6 +431,7 @@ CHARACTERISTICS = [
     ("char_transfer_volume", "Обсяг передачі", "Transfer volume", "Скільки модуль передає за раз.", "How much the module sends at once."),
     ("char_deploy_time", "Час розгортання", "Deployment time", "Скільки триває розгортання.", "How long deployment takes.", {"uk": "с", "en": "s"}),
     ("char_colonists", "Місткість колоністів", "Colonist capacity", "Скільки колоністів модуль везе.", "Colonists the module carries."),
+    ("char_inhabitants", "Мешканців у капсулі", "Inhabitants in the capsule", "Скільки мешканців додає одна капсула до населення планети.", "Inhabitants one capsule adds to the population of a body."),
     ("char_population", "Місткість населення", "Population capacity", "Скільки населення модуль вміщує.", "Population the module holds."),
     ("char_storage", "Місткість складу", "Storage capacity", "Скільки тонн тримає склад.", "Tonnes the warehouse holds.", {"uk": "т", "en": "t"}),
     ("char_repair_speed", "Швидкість ремонту", "Repair speed", "Як швидко йде ремонт.", "How fast a repair proceeds."),
@@ -888,7 +891,7 @@ def patch_fields(world: dict, codes: dict[str, str], parameters: dict[str, Decim
     notes.append("Every asteroid field has the three crystals together, 3 to 7 per cent in all, 1 per cent at least each; the ore groups of the fields take three or four ores. The generator keeps the total share of a field between 70 and 95 per cent.")
 
 
-def module_characteristics(name: str, group: str, index: int, cost_base: Decimal, cost_factor: Decimal, trade_levels: int) -> tuple[dict, dict]:
+def module_characteristics(name: str, group: str, index: int, cost_base: Decimal, cost_factor: Decimal, trade_levels: int, capsule_inhabitants: Decimal) -> tuple[dict, dict]:
     amount = curve(cost_base, cost_factor, index)
     stats: dict[str, dict] = {}
     attributes: dict[str, dict] = {}
@@ -941,7 +944,12 @@ def module_characteristics(name: str, group: str, index: int, cost_base: Decimal
             put("char_dig_speed")
     elif group == "Інші корабельні":
         for code in OTHER_STATS[name]:
-            put(code)
+            if code == "char_inhabitants":
+                # The capsule holds a fixed number of inhabitants, taken from the coefficient and not from the curve of the group.
+                stats[code] = value_row(capsule_inhabitants)
+                attributes["population_capsule"] = {"number": num(capsule_inhabitants)}
+            else:
+                put(code)
     elif group == "Модулі бази":
         for code in BASE_STATS[name]:
             if code == "char_trade_lots":
@@ -1105,8 +1113,8 @@ def main() -> None:
     techs = [row for row in items if row["kind"] == "rozvytok"]
     modules = [row for row in items if row["kind"] == "modul"]
     hulls = [row for row in items if row["kind"] == "korpus"]
-    if (len(buildings), len(techs), len(modules), len(hulls)) != (56, 19, 79, 27):
-        fail("the dependency file does not have 56/19/79/27")
+    if (len(buildings), len(techs), len(modules), len(hulls)) != (56, 19, 80, 27):
+        fail("the dependency file does not have 56/19/80/27")
 
     perelik = {kind: path.read_text(encoding="utf-8") for kind, path in PERELIK.items()}
     mismatches = []
@@ -1474,7 +1482,7 @@ def main() -> None:
     for module_number, row in enumerate(modules, start=1):
         index = group_index[row["group"]]
         group_index[row["group"]] = index + 1
-        stats, attributes = module_characteristics(row["name"], row["group"], index, cost_base, part_factor, trade_levels)
+        stats, attributes = module_characteristics(row["name"], row["group"], index, cost_base, part_factor, trade_levels, coefficient(parameters, "world.seed.capsule.inhabitants"))
         part_code = f"part_m_{module_number}"
         parts.append({
             "code": part_code,

@@ -19,6 +19,9 @@ import { useShellActions } from './useShell';
  */
 const reasonPrefixes = ['production_', 'planets_', 'requirements_'];
 
+/** The condition of a whole part in per cent: only a whole capsule can be used. */
+const fullCondition = 100;
+
 /**
  * The factory of a body with its recipes and the stock of the parts (task 00013). The queue of
  * the batches is not here: the page shows the batches of all the factories in the standard
@@ -69,6 +72,27 @@ export function ProductionPanel({
     } finally {
       setBusy(false);
       onChanged?.();
+      refreshAfterCommand(planetId);
+    }
+  };
+
+  const spendCapsule = async (partTypeId: number) => {
+    setBusy(true);
+    setNotice(null);
+
+    try {
+      const used = await production.useCapsule(planetId, partTypeId);
+      await reload();
+      setNotice({ kind: 'success', text: t('production.capsuleUsed', { inhabitants: formatNumber(used.inhabitants, language) }) });
+    } catch (error) {
+      const code = error instanceof ApiError ? error.code : 'internal_error';
+      setNotice({
+        kind: 'error',
+        text: reasonPrefixes.some((prefix) => code.startsWith(prefix)) ? lookup(language, `reason.${code}`, code) : t('error.generic.text'),
+      });
+      await reload();
+    } finally {
+      setBusy(false);
       refreshAfterCommand(planetId);
     }
   };
@@ -139,7 +163,7 @@ export function ProductionPanel({
           />
         </>
       )}
-      <StockPanel stacks={stock?.stacks ?? []} storage={stock?.storage ?? null} />
+      <StockPanel stacks={stock?.stacks ?? []} storage={stock?.storage ?? null} busy={busy} onUseCapsule={(partTypeId) => void spendCapsule(partTypeId)} />
     </section>
   );
 }
@@ -247,7 +271,17 @@ function RecipeList({
 /**
  * The stock of the parts of the body with the mark of the race and the weight of every part.
  */
-function StockPanel({ stacks, storage }: { stacks: ProductionStack[]; storage: ProductionStorage | null }) {
+function StockPanel({
+  stacks,
+  storage,
+  busy,
+  onUseCapsule,
+}: {
+  stacks: ProductionStack[];
+  storage: ProductionStorage | null;
+  busy: boolean;
+  onUseCapsule: (partTypeId: number) => void;
+}) {
   const { t, language } = useI18n();
   const { text } = useTexts();
   const characteristics = useCharacteristics();
@@ -291,6 +325,11 @@ function StockPanel({ stacks, storage }: { stacks: ProductionStack[]; storage: P
                       </span>
                     )}
                   </span>
+                  {stack.capsuleInhabitants > 0 && stack.conditionPercent >= fullCondition ? (
+                    <button type="button" className="btn btn--secondary" disabled={busy} onClick={() => onUseCapsule(stack.partTypeId)}>
+                      {t('production.useCapsule', { inhabitants: formatNumber(stack.capsuleInhabitants, language) })}
+                    </button>
+                  ) : null}
                 </div>
                 {rows.length > 0 ? <CharacteristicList language={language} rows={rows} /> : null}
               </li>

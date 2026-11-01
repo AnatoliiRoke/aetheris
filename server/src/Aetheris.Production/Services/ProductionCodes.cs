@@ -159,6 +159,13 @@ public static class PartAttributeKeys
     public const string TerraformingDevice = "terraforming_device";
 
     /// <summary>
+    /// The mark of a capsule of inhabitants: a part with this attribute holds as many inhabitants
+    /// as the number of the attribute and gives them to the population of a body when it is used
+    /// (task 00031).
+    /// </summary>
+    public const string PopulationCapsule = "population_capsule";
+
+    /// <summary>
     /// Gets every key of an attribute, in the order of the form of the admin panel.
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -171,6 +178,7 @@ public static class PartAttributeKeys
         SlotSize,
         Mass,
         TerraformingDevice,
+        PopulationCapsule,
     ];
 }
 

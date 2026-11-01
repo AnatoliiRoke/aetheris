@@ -41,6 +41,7 @@ public static class ProductionServiceCollectionExtensions
         services.AddScoped<ProductionQueueService>();
         services.AddScoped<CharacteristicQueryService>();
         services.AddScoped<PartStockService>();
+        services.AddScoped<PopulationCapsuleService>();
         services.AddScoped<IResourceUsage, ProductionResourceUsage>();
         services.AddScoped<IProductionModule, ProductionModule>();
         services.AddScoped<IScheduledEventHandler, ProductionUnitReadyHandler>();
@@ -54,6 +55,7 @@ public static class ProductionServiceCollectionExtensions
 
         services.AddCommand<EnqueueProductionCommand>();
         services.AddCommand<CancelProductionCommand>();
+        services.AddCommand<UsePopulationCapsuleCommand>();
 
         return services;
     }

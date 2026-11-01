@@ -213,6 +213,7 @@ public sealed record ProductionStockDto(
 /// <param name="ImageKey">The key of the picture of the part, or <see langword="null"/>.</param>
 /// <param name="PartGroupId">The group of the part, so the client groups the parts by it (task 00020).</param>
 /// <param name="PartGroupNameKey">The localisation key of the name of the group.</param>
+/// <param name="CapsuleInhabitants">How many inhabitants the part holds when it is a capsule of inhabitants, otherwise zero (task 00031).</param>
 public sealed record ProductionStackDto(
     int PartTypeId,
     int MarkLevel,
@@ -222,7 +223,8 @@ public sealed record ProductionStackDto(
     string NameKey,
     string? ImageKey,
     int PartGroupId = 0,
-    string? PartGroupNameKey = null);
+    string? PartGroupNameKey = null,
+    long CapsuleInhabitants = 0);
 
 /// <summary>
 /// A characteristic of the parts with the groups that have it (task 00027, section 3.2).
@@ -308,3 +310,14 @@ public sealed record PartCharacteristicValueDto(
     int CharacteristicId,
     decimal NumberValue,
     IReadOnlyDictionary<int, decimal> Levels);
+
+/// <summary>The result of the use of a capsule of inhabitants (task 00031).</summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="PartTypeId">The kind of the capsule.</param>
+/// <param name="Inhabitants">How many inhabitants the capsule gave.</param>
+/// <param name="Population">The population of the body after the use; a population above the largest one dies down.</param>
+public sealed record CapsuleUseDto(
+    long PlanetId,
+    int PartTypeId,
+    long Inhabitants,
+    long Population);

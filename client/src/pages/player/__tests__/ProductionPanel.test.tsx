@@ -1,7 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { fakeAuthApi, fakeProductionApi, renderPage, sampleProductionFactory, signedInMe } from '../../../test/renderPage';
+import { ApiError } from '../../../api/http';
+import { fakeAuthApi, fakeProductionApi, renderPage, sampleProductionFactory, sampleProductionStock, signedInMe } from '../../../test/renderPage';
 
 /**
  * A signed-in player with a civilization and a confirmed address.
@@ -129,5 +130,48 @@ describe('ProductionPanel', () => {
     const panel = await screen.findByRole('region', { name: 'Виробництво' });
 
     expect(await within(panel).findByText('У цього заводу ще немає рецептів.')).toBeInTheDocument();
+  });
+
+  it('uses a capsule of inhabitants from the stock and tells how many joined', async () => {
+    const user = userEvent.setup();
+    const [first] = sampleProductionStock().stacks;
+    const production = fakeProductionApi({
+      stock: vi.fn().mockResolvedValue(
+        sampleProductionStock({
+          stacks: [first, { ...first, partTypeId: 9, markLevel: 1, hasRaceBonus: false, quantity: 2, nameKey: 'production.part_type.part_m_80.name', capsuleInhabitants: 100 }],
+        }),
+      ),
+    });
+
+    renderPage('/planet', { auth: signedIn(), production });
+
+    const panel = await screen.findByRole('region', { name: 'Виробництво' });
+    const stock = (await within(panel).findByRole('heading', { name: 'Склад деталей' })).closest('div')!;
+
+    // Only the stack of the capsule has the button.
+    const buttons = within(stock).getAllByRole('button', { name: /Використати капсулу/ });
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]).toHaveTextContent('+100 мешканців');
+
+    await user.click(buttons[0]!);
+
+    expect(production.useCapsule).toHaveBeenCalledWith(10, 9);
+    expect(await screen.findByText(/Капсулу використано: до населення додано 100 мешканців/)).toBeInTheDocument();
+  });
+
+  it('says why a capsule was refused', async () => {
+    const user = userEvent.setup();
+    const [first] = sampleProductionStock().stacks;
+    const production = fakeProductionApi({
+      stock: vi.fn().mockResolvedValue(sampleProductionStock({ stacks: [{ ...first!, capsuleInhabitants: 100 }] })),
+      useCapsule: vi.fn().mockRejectedValue(new ApiError(400, 'production_part_missing')),
+    });
+
+    renderPage('/planet', { auth: signedIn(), production });
+
+    const panel = await screen.findByRole('region', { name: 'Виробництво' });
+    await user.click(await within(panel).findByRole('button', { name: /Використати капсулу/ }));
+
+    expect(await screen.findByText('Такої деталі на планеті немає')).toBeInTheDocument();
   });
 });

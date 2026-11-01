@@ -39,6 +39,9 @@ public static class ProductionErrorCodes
     /// <summary>The body is not a colony of the player.</summary>
     public const string PlanetUnknown = "production_planet_unknown";
 
+    /// <summary>The part is not a capsule of inhabitants.</summary>
+    public const string NotACapsule = "production_not_a_capsule";
+
     /// <summary>The body has no building of the level the recipe needs.</summary>
     public const string RequirementBuildingLevel = "production_requirement_building_level";
 
