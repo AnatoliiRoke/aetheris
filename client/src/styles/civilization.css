@@ -101,7 +101,7 @@
 .civ__main { position: relative; flex: 1 1 auto; min-width: 0; padding: 20px 24px; }
 .civ__main--planet { padding: 16px 24px 24px; }
 .civ__main--build { padding: 24px 28px 40px; }
-.civ__main--research, .civ__main--production, .civ__main--storage, .civ__main--market { padding: 20px 28px 40px; }
+.civ__main--research, .civ__main--production, .civ__main--storage, .civ__main--market, .civ__main--map { padding: 20px 28px 40px; }
 .civ__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.22; pointer-events: none; z-index: 0; }
 .civ-main__in { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 16px; }
 .civ__main--game .civ-main__in { gap: 14px; }
@@ -270,7 +270,7 @@
   .civ-res li, .civ-counter { font-size: var(--fs-ui); }
   .civ__main, .civ__main--game { padding: 12px 12px 20px; }
   .civ__main--planet { padding: 12px 14px 20px; }
-  .civ__main--build, .civ__main--research, .civ__main--production, .civ__main--storage, .civ__main--market { padding: 16px 16px 24px; }
+  .civ__main--build, .civ__main--research, .civ__main--production, .civ__main--storage, .civ__main--market, .civ__main--map { padding: 16px 16px 24px; }
   .civ-main__head h1 { font-size: var(--fs-title-phone); }
   .civ .player__title { font-size: var(--fs-title-screen-phone); }
   .civ__main--planet .player__title { font-size: var(--fs-title-planet-phone); }

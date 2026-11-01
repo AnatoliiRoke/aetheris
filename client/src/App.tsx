@@ -9,6 +9,7 @@ import { HttpClient } from './api/http';
 import { mockContentApi } from './api/mockContentApi';
 import { createPlanetApi } from './api/planetApi';
 import { createProcessesApi } from './api/processesApi';
+import { createMapApi } from './api/mapApi';
 import { createProductionApi } from './api/productionApi';
 import { createResearchApi } from './api/researchApi';
 import { createTextsApi } from './api/textsApi';
@@ -48,6 +49,7 @@ const GamePage = lazy(() => import('./pages/player/GamePage').then((module) => (
 const MarketPage = lazy(() => import('./pages/player/market/MarketPage').then((module) => ({ default: module.MarketPage })));
 const PlanetPage = lazy(() => import('./pages/player/PlanetPage').then((module) => ({ default: module.PlanetPage })));
 const ProductionPage = lazy(() => import('./pages/player/ProductionPage').then((module) => ({ default: module.ProductionPage })));
+const MapPage = lazy(() => import('./pages/player/map/MapPage').then((module) => ({ default: module.MapPage })));
 const ResearchPage = lazy(() => import('./pages/player/ResearchPage').then((module) => ({ default: module.ResearchPage })));
 const StoragePage = lazy(() => import('./pages/player/StoragePage').then((module) => ({ default: module.StoragePage })));
 
@@ -69,6 +71,7 @@ const playerPages: Record<string, () => ReactNode> = {
   [routes.planet]: () => <PlanetPage />,
   [routes.planetBuild]: () => <BuildPage />,
   [routes.planetProduction]: () => <ProductionPage />,
+  [routes.map]: () => <MapPage />,
   [routes.planetResearch]: () => <ResearchPage />,
   [routes.planetStorage]: () => <StoragePage />,
   [routes.market]: () => <MarketPage />,
@@ -81,7 +84,7 @@ const playerPages: Record<string, () => ReactNode> = {
  * frame is one element above them, so it stays mounted when the player goes from one of them to
  * another: its data is not read again and its blocks are not drawn again.
  */
-const framedPaths: ReadonlySet<string> = new Set([routes.game, routes.planet, routes.planetBuild, routes.planetProduction, routes.planetResearch, routes.planetStorage, routes.market]);
+const framedPaths: ReadonlySet<string> = new Set([routes.game, routes.planet, routes.planetBuild, routes.planetProduction, routes.planetResearch, routes.planetStorage, routes.map, routes.market]);
 
 /**
  * Shows the page of the current address.
@@ -215,6 +218,7 @@ export default function App() {
       content: mockContentApi,
       economy: createEconomyApi(http),
       game: createGameApi(http),
+      map: createMapApi(http),
       market: createMarketApi(http),
       planets: createPlanetApi(http),
       processes: createProcessesApi(http),

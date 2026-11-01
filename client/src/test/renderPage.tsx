@@ -12,6 +12,7 @@ import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
 import type { ActiveOrders } from '../api/activeOrders';
 import type { ProcessActiveOrder, ProcessBuilding, ProcessBuildingSummary, ProcessesApi, TerraformingState, TerraformingTarget } from '../api/processesApi';
+import type { MapApi, MapGalaxy, MapOwner, MapResourceShare, MapSectorView, MapSystemView } from '../api/mapApi';
 import type { Characteristic, PartCharacteristics, ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionRecipeList, ProductionStock } from '../api/productionApi';
 import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
@@ -995,6 +996,82 @@ export function fakeWorldApi(overrides: Partial<WorldApi> = {}): WorldApi {
 }
 
 /**
+ * The map of the galaxy for the tests (task 00034): two sectors, the first is the one of the
+ * player's home body.
+ */
+export function sampleMapGalaxy(overrides: Partial<MapGalaxy> = {}): MapGalaxy {
+  return {
+    sectors: [
+      { id: 1, name: 'Aldara', x: 0, y: 0, z: 0, isNewbie: true, systemCount: 4, ownPlanetCount: 1 },
+      { id: 2, name: 'Borea', x: 1500, y: 0, z: 0, isNewbie: false, systemCount: 6, ownPlanetCount: 0 },
+    ],
+    sectorSize: 1000,
+    seesOnlyOwn: false,
+    ...overrides,
+  };
+}
+
+/**
+ * The map of the first sector for the tests: the home system, an open one, two stars the player
+ * only knows of, a nebula, a free field and the range of a radar.
+ */
+export function sampleMapSector(overrides: Partial<MapSectorView> = {}): MapSectorView {
+  return {
+    sectorId: 1,
+    name: 'Aldara',
+    sectorSize: 1000,
+    systems: [
+      { id: 3, number: 1, name: 'Lyra', x: 200, y: 200, z: 0, inNebula: false, state: 'open', objectCount: 4, ownPlanetCount: 1, distance: 0, travelSeconds: 600 },
+      { id: 4, number: 2, name: 'Vega', x: 420, y: 260, z: 0, inNebula: true, state: 'open', objectCount: 2, ownPlanetCount: 0, distance: 230, travelSeconds: 8280 },
+      { id: 5, number: 3, name: null, x: 700, y: 640, z: 0, inNebula: false, state: 'known', objectCount: 0, ownPlanetCount: 0, distance: 640, travelSeconds: 23040 },
+      { id: 6, number: 4, name: null, x: 760, y: 700, z: 0, inNebula: false, state: 'known', objectCount: 0, ownPlanetCount: 0, distance: 700, travelSeconds: 25200 },
+    ],
+    nebulas: [{ id: 1, objectId: 90, name: 'Arena', x: 450, y: 250, z: 0, radius: 120, blocksJumpDrive: true }],
+    fields: [{ objectId: 91, objectTypeId: 10, name: 'Field A-12', x: 300, y: 500, z: 0, mass: 1200000, distance: 300, travelSeconds: 10800 }],
+    radars: [{ planetId: 10, x: 200, y: 200, z: 0, radius: 1500 }],
+    seesOnlyOwn: false,
+    ...overrides,
+  };
+}
+
+/**
+ * The map of the home system for the tests: the star, the player's body, a free body, a body of
+ * another player, a place the player only knows of and a field on the outer orbit.
+ */
+export function sampleMapSystem(overrides: Partial<MapSystemView> = {}): MapSystemView {
+  const none = { planetId: null as number | null, sizeClassId: null as number | null, size: null as number | null, isOwn: false, isFree: false, isTerraformed: false, owner: null as MapOwner | null, stationLimit: null, mass: null as number | null, resources: [] as MapResourceShare[], distance: 0.6 as number | null, travelSeconds: 600 as number | null };
+
+  return {
+    system: { id: 3, number: 1, name: 'Lyra', x: 200, y: 200, z: 0, inNebula: false, state: 'open', objectCount: 5, ownPlanetCount: 1, distance: 0, travelSeconds: 600 },
+    sectorName: 'Aldara',
+    orbitCount: 12,
+    objects: [
+      { ...none, id: 100, state: 'open', orbit: null, objectClass: 'star', objectTypeId: 5, name: 'Lyra', planetId: null },
+      { ...none, id: 101, state: 'open', orbit: 2, objectClass: 'planet', objectTypeId: 5, name: 'Nova', planetId: 10, sizeClassId: 1, size: 4, isOwn: true, resources: [{ resourceId: 1, coefficient: 1.2 }], distance: 0 },
+      { ...none, id: 102, state: 'open', orbit: 3, objectClass: 'planet', objectTypeId: 5, name: 'Lyra-3', planetId: 11, sizeClassId: 1, size: 3, isFree: true, resources: [{ resourceId: 3, coefficient: 0.9 }] },
+      { ...none, id: 103, state: 'open', orbit: 5, objectClass: 'planet', objectTypeId: 5, name: 'Icar', planetId: 12, sizeClassId: 1, size: 4, owner: { nickname: 'Krell_77', raceCode: 'race_3', raceNameKey: 'world.race.race_3.name', raceColorKey: 'race-3' }, distance: 1.8 },
+      { ...none, id: 104, state: 'known', orbit: 9, objectClass: 'unknown', objectTypeId: null, name: null, planetId: null },
+      { ...none, id: 105, state: 'open', orbit: 12, objectClass: 'asteroid_field', objectTypeId: 10, name: 'Lyra Belt', mass: 800000, resources: [{ resourceId: 1, coefficient: 0.5 }], distance: 6 },
+    ],
+    ...overrides,
+  };
+}
+
+/**
+ * A map API whose every method is a spy; a test overrides what it needs (task 00034).
+ */
+export function fakeMapApi(overrides: Partial<MapApi> = {}): MapApi {
+  return {
+    galaxy: vi.fn().mockResolvedValue(sampleMapGalaxy()),
+    sector: vi.fn().mockResolvedValue(sampleMapSector()),
+    system: vi.fn().mockResolvedValue(sampleMapSystem()),
+    search: vi.fn().mockResolvedValue([{ kind: 'system', sectorId: 1, systemId: 3, objectId: null, objectTypeId: null, name: 'Lyra', systemName: 'Lyra', orbit: null }]),
+    target: vi.fn().mockResolvedValue({ kind: 'point', targetId: null, sectorId: 1, x: 500, y: 500, z: 0, name: null, nearSystemId: 3, nearSystemName: 'Lyra', inNebula: false, jumpForbidden: false, state: 'unknown', distance: 420.5, travelSeconds: 15138, errors: [] }),
+    ...overrides,
+  };
+}
+
+/**
  * A signed-in account for the tests.
  */
 export function signedInMe(overrides: Partial<Me> = {}): Me {
@@ -1013,7 +1090,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
 /**
  * The fake server interfaces of the tests that a test may override.
  */
-type FakeApis = { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; game?: GameApi; market?: MarketApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi };
+type FakeApis = { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; game?: GameApi; map?: MapApi; market?: MarketApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi };
 
 /**
  * The server interfaces of a test: every one is a fake unless the test gives its own.
@@ -1024,6 +1101,7 @@ function buildApi(options: FakeApis): Api {
     content: options.content ?? mockContentApi,
     economy: options.economy ?? fakeEconomyApi(),
     game: options.game ?? fakeGameApi(),
+    map: options.map ?? fakeMapApi(),
     market: options.market ?? fakeMarketApi(),
     planets: options.planets ?? fakePlanetApi(),
     processes: options.processes ?? fakeProcessesApi(),

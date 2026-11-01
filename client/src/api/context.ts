@@ -3,6 +3,7 @@ import type { AuthApi } from './authApi';
 import type { ContentApi } from './contentApi';
 import type { EconomyApi } from './economyApi';
 import type { GameApi } from './gameApi';
+import type { MapApi } from './mapApi';
 import type { MarketApi } from './marketApi';
 import type { PlanetApi } from './planetApi';
 import type { ProcessesApi } from './processesApi';
@@ -19,6 +20,7 @@ export interface Api {
   content: ContentApi;
   economy: EconomyApi;
   game: GameApi;
+  map: MapApi;
   market: MarketApi;
   planets: PlanetApi;
   processes: ProcessesApi;

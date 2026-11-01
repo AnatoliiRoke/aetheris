@@ -5,6 +5,7 @@ import { useRouter } from '../../router/useRouter';
 import { CivFooter } from './CivFooter';
 import { CivHeader } from './CivHeader';
 import { CivMenu } from './CivMenu';
+import { MapTargetProvider } from './map/MapTargetContext';
 import { CivTabbar } from './CivTabbar';
 import { EmailBanner } from './EmailBanner';
 import { reportRender } from './renderProbe';
@@ -65,6 +66,10 @@ function mainClass(path: string): string {
     return 'civ__main civ__main--storage';
   }
 
+  if (path === routes.map) {
+    return 'civ__main civ__main--map';
+  }
+
   if (path === routes.market) {
     return 'civ__main civ__main--market';
   }
@@ -90,6 +95,7 @@ export function CivShell({ children }: { children: ReactNode }) {
   const { path } = useRouter();
 
   return (
+    <MapTargetProvider>
     <div className="civ">
       <ShellLoader />
       <CivHeader />
@@ -111,5 +117,6 @@ export function CivShell({ children }: { children: ReactNode }) {
       <CivFooter />
       <CivTabbar />
     </div>
+    </MapTargetProvider>
   );
 }

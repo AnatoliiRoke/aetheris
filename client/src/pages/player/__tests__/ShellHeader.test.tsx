@@ -190,7 +190,7 @@ describe('the menu, the tabs of the phone and the bottom bar of the design (task
     const labels = [...menu.querySelectorAll('.civ-nav__label')].map((label) => label.textContent);
     expect(labels).toEqual(menuOrder);
 
-    const withScreen = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Виробництво', 'Дослідження', 'Ринок', 'Налаштування'];
+    const withScreen = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Виробництво', 'Карта', 'Дослідження', 'Ринок', 'Налаштування'];
 
     for (const label of menuOrder) {
       if (withScreen.includes(label)) {
@@ -246,7 +246,7 @@ describe('the menu, the tabs of the phone and the bottom bar of the design (task
     const tabs = container.querySelector<HTMLElement>('.civ-tabbar')!;
 
     expect(within(tabs).getByRole('link', { current: 'page' })).toHaveTextContent('Будівництво');
-    expect(within(tabs).getByRole('button', { name: 'Карта' })).toBeDisabled();
+    expect(within(tabs).getByRole('link', { name: 'Карта' })).toHaveAttribute('href', '/map');
 
     await user.click(within(tabs).getByRole('button', { name: 'Ще' }));
 

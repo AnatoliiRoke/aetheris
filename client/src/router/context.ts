@@ -17,6 +17,7 @@ export const routes = {
   planetProduction: '/planet/production',
   planetResearch: '/planet/research',
   planetStorage: '/planet/storage',
+  map: '/map',
   market: '/market',
   civilization: '/civilization',
   account: '/account',
