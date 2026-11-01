@@ -105,7 +105,7 @@ public sealed class PlanetStartPackage : IHomePlanetStore, IStartBuildingPlacer
             async () =>
             {
                 await EnsureStateAsync(planetId, sectorId, null, cancellationToken).ConfigureAwait(false);
-                await PlaceBuildingAsync(planetId, sectorId, buildingTypeId, level, cancellationToken).ConfigureAwait(false);
+                await PlaceStartBuildingsAsync(planetId, sectorId, buildingTypeId, level, cancellationToken).ConfigureAwait(false);
 
                 return true;
             },
@@ -189,6 +189,31 @@ public sealed class PlanetStartPackage : IHomePlanetStore, IStartBuildingPlacer
             {
                 row.Amount += amount;
             }
+        }
+    }
+
+    /// <summary>
+    /// Places the start buildings of a new body: the building of the race and every other type the
+    /// data flags as a start building (task 00030: the administrative centre, the housing, the
+    /// warehouse and the solar plant), all at the level of the race.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="sectorId">The sector.</param>
+    /// <param name="raceBuildingTypeId">The start building of the race.</param>
+    /// <param name="level">The level.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the buildings are placed.</returns>
+    public async Task PlaceStartBuildingsAsync(long planetId, int sectorId, int raceBuildingTypeId, int level, CancellationToken cancellationToken)
+    {
+        List<int> flagged = await _dbContext.BuildingTypes.AsNoTracking()
+            .Where(type => type.IsStartBuilding && !type.IsArchived)
+            .Select(type => type.Id)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (int buildingTypeId in flagged.Append(raceBuildingTypeId).Distinct().Order())
+        {
+            await PlaceBuildingAsync(planetId, sectorId, buildingTypeId, level, cancellationToken).ConfigureAwait(false);
         }
     }
 

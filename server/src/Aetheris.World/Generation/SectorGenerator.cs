@@ -111,9 +111,11 @@ public static class SectorGenerator
             candidate => candidate.GenerationWeight);
 
         long mass = random.NextInclusive(type.MassMin ?? 0, type.MassMax ?? 0);
-        IReadOnlyList<ResourceShare> composition = LimitShares(
+        IReadOnlyList<ResourceShare> composition = FitShares(
             RollComposition(random, config.Reference, type.Id),
-            config.Settings.FieldMaxCompositionShare);
+            config.Settings.FieldMinCompositionShare,
+            config.Settings.FieldMaxCompositionShare,
+            config.Reference.FixedShareResourceIds(config.Settings.FieldFixedShareGroups));
 
         return new FieldPlan(type.Id, name, orbit, position, mass, composition);
     }
@@ -324,6 +326,51 @@ public static class SectorGenerator
             {
                 Coefficient = decimal.Round(share.Coefficient * maximumTotal / total, CoefficientDecimals, MidpointRounding.ToZero),
             }),
+        ];
+    }
+
+    /// <summary>
+    /// Fits a composition into the smallest and the largest total share: the shares that are
+    /// not fixed are scaled together, so the total lies in the bounds and the empty rock is at
+    /// most the rest (task 00030: a field holds at least seventy per cent of resources).
+    /// </summary>
+    /// <param name="shares">The shares.</param>
+    /// <param name="minimumTotal">The smallest total share.</param>
+    /// <param name="maximumTotal">The largest total share.</param>
+    /// <param name="fixedResourceIds">The resources whose shares stay as rolled.</param>
+    /// <returns>The fitted shares.</returns>
+    public static IReadOnlyList<ResourceShare> FitShares(
+        IReadOnlyList<ResourceShare> shares,
+        decimal minimumTotal,
+        decimal maximumTotal,
+        IReadOnlySet<int> fixedResourceIds)
+    {
+        ArgumentNullException.ThrowIfNull(shares);
+        ArgumentNullException.ThrowIfNull(fixedResourceIds);
+
+        decimal fixedTotal = shares.Where(share => fixedResourceIds.Contains(share.ResourceId)).Sum(share => share.Coefficient);
+        decimal flexibleTotal = shares.Where(share => !fixedResourceIds.Contains(share.ResourceId)).Sum(share => share.Coefficient);
+
+        if (flexibleTotal <= 0)
+        {
+            return shares;
+        }
+
+        decimal total = fixedTotal + flexibleTotal;
+        decimal target = Math.Clamp(total, minimumTotal, maximumTotal) - fixedTotal;
+
+        if (target == flexibleTotal || target <= 0)
+        {
+            return shares;
+        }
+
+        decimal factor = target / flexibleTotal;
+
+        return
+        [
+            .. shares.Select(share => fixedResourceIds.Contains(share.ResourceId)
+                ? share
+                : share with { Coefficient = decimal.Round(share.Coefficient * factor, CoefficientDecimals, MidpointRounding.ToZero) }),
         ];
     }
 

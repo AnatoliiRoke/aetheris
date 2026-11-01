@@ -1,3 +1,4 @@
+using Aetheris.Core.Numbers;
 using System.Text.Json;
 using Aetheris.Core.Data;
 using Aetheris.Core.Text;
@@ -67,7 +68,9 @@ public static class ResearchReferenceSeed
 
         int steps = level - 1;
 
-        return (long)Math.Round((formula.Base * Math.Pow(formula.Growth, steps)) + (formula.Step * steps), MidpointRounding.AwayFromZero);
+        double value = (formula.Base * Math.Pow(formula.Growth, steps)) + (formula.Step * steps);
+
+        return (long)Math.Round(RoundNumbers.ToSignificant(value, formula.Significant), MidpointRounding.AwayFromZero);
     }
 
     /// <summary>
@@ -440,4 +443,7 @@ public record SeedGrowth
 
     /// <summary>Gets the amount added per level.</summary>
     public double Step { get; init; }
+
+    /// <summary>Gets the number of significant digits the value is rounded to, so the numbers read round; zero keeps the value as it is.</summary>
+    public int Significant { get; init; }
 }

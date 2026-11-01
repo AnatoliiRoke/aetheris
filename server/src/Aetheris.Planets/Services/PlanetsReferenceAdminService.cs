@@ -459,14 +459,7 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
 
         await CheckCategoryAsync(failures, values, stored, cancellationToken).ConfigureAwait(false);
 
-        // One type is the start building of a race without one: a second flag would make the
-        // choice ambiguous.
-        if (values.IsStartBuilding && await _dbContext.BuildingTypes.AnyAsync(
-            type => type.IsStartBuilding && !type.IsArchived && type.Id != (stored == null ? 0 : stored.Id),
-            cancellationToken).ConfigureAwait(false))
-        {
-            AdminReferenceRules.Fail(failures, StartField, AdminReferenceErrors.Duplicate);
-        }
+        // Several types may be flagged as start buildings (task 00030): a new body gets all of them.
 
         await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), stored?.ImageKey, cancellationToken)
             .ConfigureAwait(false);

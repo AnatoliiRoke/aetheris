@@ -43,6 +43,9 @@ public static class AdminEditErrors
     /// <summary>The shares of a composition exceed the largest total share.</summary>
     public const string ShareTooLarge = "share_too_large";
 
+    /// <summary>The shares of a composition add up to less than the smallest total.</summary>
+    public const string ShareTooSmall = "share_too_small";
+
     /// <summary>The resource may not lie on a body.</summary>
     public const string NotAllowedOnBody = "not_allowed_on_body";
 
@@ -377,6 +380,10 @@ public sealed class WorldAdminEditService
                 if (shares.Sum(share => share.Coefficient) > settings.FieldMaxCompositionShare)
                 {
                     Add(errors, "composition_ids", AdminEditErrors.ShareTooLarge);
+                }
+                else if (shares.Count > 0 && shares.Sum(share => share.Coefficient) < settings.FieldMinCompositionShare)
+                {
+                    Add(errors, "composition_ids", AdminEditErrors.ShareTooSmall);
                 }
 
                 // The outermost orbit holds one field: a field comes back only when it is free.

@@ -88,6 +88,12 @@ public static class WorldConfigKeys
     /// <summary>The largest share of a field composition; the rest is always empty rock.</summary>
     public const string FieldMaxCompositionShare = "world.field.max_composition_share";
 
+    /// <summary>The smallest share of a field composition; the rest is empty rock (task 00030).</summary>
+    public const string FieldMinCompositionShare = "world.field.min_composition_share";
+
+    /// <summary>The codes of the resource groups whose shares in a field are kept as rolled, comma separated (task 00030).</summary>
+    public const string FieldFixedShareGroups = "world.field.fixed_share_groups";
+
     /// <summary>The probability that a new planet is rich: every deposit gets the rich range of its rule.</summary>
     public const string RichPlanetProbability = "world.planet.rich_probability";
 
@@ -190,6 +196,8 @@ public static class WorldConfigKeys
         new(NebulaRadarMultiplier, "0.5", "0", "10", "Multiplier of the radar range inside a nebula."),
         new(NebulaBlocksJumpDrive, "true", null, null, "Whether a nebula forbids the jump drive."),
         new(FieldMaxCompositionShare, "0.95", "0", "1", "Largest share of a field composition; the rest is empty rock."),
+        new(FieldMinCompositionShare, "0.7", "0", "1", "Smallest share of a field composition; the empty rock is at most the rest."),
+        new(FieldFixedShareGroups, "resource_group_4", null, null, "Codes of the resource groups whose shares in a field are not rescaled to fit the largest and the smallest total, comma separated."),
         new(RichPlanetProbability, "0.03", "0", "1", "Probability that a new planet is rich: every deposit gets the rich range of its rule."),
         new(DepositCoefficientMin, "0.8", "0", "1000", "Smallest coefficient of a deposit of a body, checked in the generation rules and the admin panel."),
         new(DepositCoefficientMax, "1.9", "0", "1000", "Largest coefficient of a deposit of a body, checked in the generation rules and the admin panel."),

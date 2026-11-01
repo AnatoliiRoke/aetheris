@@ -156,6 +156,20 @@ public sealed class WorldReferenceData
     public ReferenceObjectType? FindType(int objectTypeId) => ObjectTypes.FirstOrDefault(type => type.Id == objectTypeId);
 
     /// <summary>
+    /// Gets the resources of some resource groups.
+    /// </summary>
+    /// <param name="groupCodes">The codes of the groups.</param>
+    /// <returns>The identifiers of the resources of those groups.</returns>
+    public IReadOnlySet<int> FixedShareResourceIds(IReadOnlyCollection<string> groupCodes)
+    {
+        ArgumentNullException.ThrowIfNull(groupCodes);
+
+        HashSet<int> groupIds = [.. Groups.Where(group => groupCodes.Contains(group.Code)).Select(group => group.Id)];
+
+        return Resources.Where(resource => groupIds.Contains(resource.ResourceGroupId)).Select(resource => resource.Id).ToHashSet();
+    }
+
+    /// <summary>
     /// Tells whether a resource may lie on a body.
     /// </summary>
     /// <param name="resourceId">The resource.</param>

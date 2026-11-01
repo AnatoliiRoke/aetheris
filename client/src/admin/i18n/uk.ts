@@ -261,6 +261,7 @@ export const adminUk = {
   'admin.edit.error.classMismatch': 'Тип іншого класу.',
   'admin.edit.error.duplicate': 'Ресурс указано двічі.',
   'admin.edit.error.shareTooLarge': 'Сума часток більша за дозволену межу.',
+  'admin.edit.error.shareTooSmall': 'Сума часток менша за дозволену межу: порожньої породи не може бути більше за решту.',
   'admin.edit.error.notAllowedOnBody': 'Цей ресурс не може лежати на планеті.',
   'admin.edit.error.orbitTaken': 'Орбіта зайнята іншим обʼєктом.',
   'admin.edit.error.fixedBySystem': 'Координати поля в системі задає система.',

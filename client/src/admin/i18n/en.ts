@@ -262,6 +262,7 @@ export const adminEn: AdminMessages = {
   'admin.edit.error.classMismatch': 'A type of another class.',
   'admin.edit.error.duplicate': 'The resource appears twice.',
   'admin.edit.error.shareTooLarge': 'The shares exceed the allowed limit.',
+  'admin.edit.error.shareTooSmall': 'The shares are below the allowed minimum: the empty rock may be at most the rest.',
   'admin.edit.error.notAllowedOnBody': 'This resource cannot lie on a planet.',
   'admin.edit.error.orbitTaken': 'Another object holds the orbit.',
   'admin.edit.error.fixedBySystem': 'The system sets the coordinates of a field on its orbit.',

@@ -16,6 +16,7 @@ const editErrorKeys: Record<string, AdminMessageKey> = {
   class_mismatch: 'admin.edit.error.classMismatch',
   duplicate: 'admin.edit.error.duplicate',
   share_too_large: 'admin.edit.error.shareTooLarge',
+  share_too_small: 'admin.edit.error.shareTooSmall',
   not_allowed_on_body: 'admin.edit.error.notAllowedOnBody',
   orbit_taken: 'admin.edit.error.orbitTaken',
   fixed_by_system: 'admin.edit.error.fixedBySystem',

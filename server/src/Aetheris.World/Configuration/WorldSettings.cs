@@ -88,6 +88,12 @@ public sealed record WorldSettings
     /// <summary>Gets the largest share of a field composition.</summary>
     public decimal FieldMaxCompositionShare { get; init; }
 
+    /// <summary>Gets the smallest share of a field composition.</summary>
+    public decimal FieldMinCompositionShare { get; init; }
+
+    /// <summary>Gets the codes of the resource groups whose shares in a field are kept as rolled.</summary>
+    public IReadOnlyList<string> FieldFixedShareGroups { get; init; } = [];
+
     /// <summary>Gets the probability that a new planet is rich.</summary>
     public double RichPlanetProbability { get; init; }
 
@@ -178,6 +184,8 @@ public sealed record WorldSettings
             NebulaRadarMultiplier = ReadDouble(config, WorldConfigKeys.NebulaRadarMultiplier),
             NebulaBlocksJumpDrive = ReadBoolean(config, WorldConfigKeys.NebulaBlocksJumpDrive),
             FieldMaxCompositionShare = (decimal)ReadDouble(config, WorldConfigKeys.FieldMaxCompositionShare),
+            FieldMinCompositionShare = (decimal)ReadDouble(config, WorldConfigKeys.FieldMinCompositionShare),
+            FieldFixedShareGroups = [.. ReadText(config, WorldConfigKeys.FieldFixedShareGroups).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)],
             RichPlanetProbability = ReadDouble(config, WorldConfigKeys.RichPlanetProbability),
             DepositCoefficientMin = (decimal)ReadDouble(config, WorldConfigKeys.DepositCoefficientMin),
             DepositCoefficientMax = (decimal)ReadDouble(config, WorldConfigKeys.DepositCoefficientMax),

@@ -100,8 +100,8 @@ public sealed class PlanetsBootstrapService
             _texts.Invalidate();
         }
 
-        // The start building is a flag of the data (task 00022, decision 5); with several
-        // flagged types the oldest one wins.
+        // The start buildings are a flag of the data (task 00022, decision 5; task 00030): the
+        // oldest flagged type is the one the races get, and a new body gets every flagged type.
         PlanetsSettings settings = PlanetsSettings.From(_config);
         int? startTypeId = await _dbContext.BuildingTypes.AsNoTracking()
             .Where(type => type.IsStartBuilding)
@@ -133,7 +133,7 @@ public sealed class PlanetsBootstrapService
 
                     if (home.StartBuildingTypeId is { } buildingTypeId)
                     {
-                        await _startPackage.PlaceBuildingAsync(home.PlanetId, home.SectorId, buildingTypeId, home.StartBuildingLevel, cancellationToken).ConfigureAwait(false);
+                        await _startPackage.PlaceStartBuildingsAsync(home.PlanetId, home.SectorId, buildingTypeId, home.StartBuildingLevel, cancellationToken).ConfigureAwait(false);
                     }
 
                     return true;
