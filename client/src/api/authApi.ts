@@ -36,6 +36,13 @@ export interface Me {
 }
 
 /**
+ * Whether the game actions are open to the account: the address is confirmed or the server does not demand it.
+ */
+export function canPlay(me: Me): boolean {
+  return me.emailConfirmed || me.emailConfirmationRequired === false;
+}
+
+/**
  * A new account (task 00006, decision 1).
  */
 export interface Registration {
@@ -80,6 +87,8 @@ interface MeAnswer {
   nickname: string;
   email: string;
   email_confirmed: boolean;
+  email_confirmation_required?: boolean;
+  account_tier?: string;
   nickname_changed_at: string | null;
   civilization: CivilizationAnswer | null;
 }
@@ -155,6 +164,8 @@ export function createAuthApi(http: HttpClient): AuthApi {
           nickname: answer.nickname,
           email: answer.email,
           emailConfirmed: answer.email_confirmed,
+          emailConfirmationRequired: answer.email_confirmation_required ?? false,
+          accountTier: answer.account_tier,
           nicknameChangedAt: answer.nickname_changed_at,
           civilization: answer.civilization ? toCivilization(answer.civilization) : null,
         };

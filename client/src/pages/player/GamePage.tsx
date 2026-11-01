@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react';
 import type { QueueItem } from '../../api/planetApi';
 import type { OwnedPlanet } from '../../api/worldApi';
 import { useApi } from '../../api/useApi';
+import { canPlay } from '../../api/authApi';
 import { Alert } from '../../components/Alert';
 import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
@@ -52,7 +53,7 @@ export function GamePage() {
         ) : null}
         <p className="lead">{t('civ.lead')}</p>
         <h2 className="civ-main__title">{t('civ.planets')}</h2>
-        {session.me.emailConfirmed ? (
+        {canPlay(session.me) ? (
           <Link className="btn btn--secondary" to={routes.planet}>
             {t('player.game.build')}
           </Link>
@@ -140,7 +141,7 @@ const BodyCard = memo(function BodyCard({
   const { session } = useSession();
   const { planet: data, receivedAt, apply, reload } = usePlanet(planet.planetId);
   const { population } = useEconomy(planet.planetId);
-  const confirmed = session.status === 'signed-in' && session.me.emailConfirmed;
+  const confirmed = session.status === 'signed-in' && canPlay(session.me);
 
   const onCancel = (item: QueueItem) =>
     void planets.cancel(planet.planetId, item.id).then((answer) => apply(answer));

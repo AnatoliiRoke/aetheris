@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ApiError } from '../../api/http';
+import { canPlay } from '../../api/authApi';
 import { useApi } from '../../api/useApi';
 import { Alert } from '../../components/Alert';
 import { useI18n } from '../../i18n/useI18n';
@@ -15,7 +16,7 @@ export function EmailBanner() {
   const { session } = useSession();
   const [state, setState] = useState<'idle' | 'busy' | 'sent' | 'too-soon' | 'failed'>('idle');
 
-  if (session.status !== 'signed-in' || session.me.emailConfirmed || session.me.emailConfirmationRequired === false) {
+  if (session.status !== 'signed-in' || canPlay(session.me)) {
     return null;
   }
 
