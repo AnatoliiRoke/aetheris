@@ -203,5 +203,12 @@ public sealed class PlanetsModule : IPlanetsModule
         _queries.GetBuildingEffectTotalAsync(planetId, effectType, cancellationToken);
 
     /// <inheritdoc />
+    public Task<IReadOnlyDictionary<long, long>> GetBuildingEffectTotalsAsync(
+        IReadOnlyCollection<long> planetIds,
+        string effectType,
+        CancellationToken cancellationToken = default) =>
+        _queries.GetBuildingEffectTotalsAsync(planetIds, effectType, cancellationToken);
+
+    /// <inheritdoc />
     public void InvalidateCatalog() => _queries.InvalidateCatalog();
 }

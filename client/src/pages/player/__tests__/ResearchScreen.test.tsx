@@ -61,7 +61,7 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     renderPage('/planet/research', { auth: signedIn(), research: fakeResearchApi({ tree: vi.fn().mockResolvedValue(tree()) }), ...texts });
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Дослідження' })).toBeInTheDocument();
-    expect(await screen.findByRole('region', { name: 'Черга досліджень' })).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: 'Дослідження' })).toBeInTheDocument();
     const tabs = await screen.findByRole('tablist', { name: 'Гілки технологій' });
 
     expect(within(tabs).getByRole('tab', { name: 'Економіка', selected: true })).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     expect(within(tile).getByText('Залізо')).toBeInTheDocument();
     expect(within(tile).getByText('200')).toBeInTheDocument();
     expect(within(tile).getByText('0:05:00')).toBeInTheDocument();
-    expect(within(tile).getByRole('button', { name: 'Дослідити' })).toBeEnabled();
+    expect(within(tile).getByRole('button', { name: 'У чергу' })).toBeEnabled();
   });
 
   it('keeps a closed technology inactive and says why', async () => {
@@ -83,7 +83,7 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
 
     const tile = (await screen.findByRole('heading', { name: 'Плазмова енергетика' })).closest('li')!;
 
-    expect(within(tile).getByRole('button', { name: 'Дослідити' })).toBeDisabled();
+    expect(within(tile).getByRole('button', { name: 'У чергу' })).toBeDisabled();
     expect(within(tile).getByText('Потрібен науковий центр рівня 5.')).toBeInTheDocument();
   });
 
@@ -93,7 +93,7 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     renderPage('/planet/research', { auth: signedIn(), research, ...texts });
 
     const tile = (await screen.findByRole('heading', { name: 'Глибинний видобуток' })).closest('li')!;
-    await user.click(within(tile).getByRole('button', { name: 'Дослідити' }));
+    await user.click(within(tile).getByRole('button', { name: 'У чергу' }));
 
     expect(research.enqueue).toHaveBeenCalledWith(10, 1, 1);
   });
@@ -104,7 +104,7 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     renderPage('/planet/research', { auth: signedIn(), research, ...texts });
 
     const tile = (await screen.findByRole('heading', { name: 'Глибинний видобуток' })).closest('li')!;
-    await user.click(within(tile).getByRole('button', { name: 'Дослідити' }));
+    await user.click(within(tile).getByRole('button', { name: 'У чергу' }));
 
     expect(await screen.findByText('Черга досліджень заповнена')).toBeInTheDocument();
   });
@@ -114,7 +114,7 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     renderPage('/planet/research', { auth: signedIn(), research: fakeResearchApi({ tree: vi.fn().mockResolvedValue(tree()) }), ...texts });
 
     await screen.findByRole('heading', { name: 'Глибинний видобуток' });
-    const search = screen.getByRole('searchbox', { name: 'Пошук технології' });
+    const search = screen.getByRole('searchbox', { name: 'Пошук технологій' });
 
     await user.type(search, 'логіст');
     expect(screen.getByRole('heading', { name: 'Логістика складів' })).toBeInTheDocument();
@@ -191,7 +191,7 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
   it('draws only the common frame and marks the research as the current section', async () => {
     const { container } = renderPage('/planet/research', { auth: signedIn() });
 
-    await screen.findByRole('region', { name: 'Черга досліджень' });
+    await screen.findByRole('region', { name: 'Дослідження' });
 
     expect(container.querySelectorAll('header')).toHaveLength(1);
     expect(container.querySelectorAll('.civ-side')).toHaveLength(1);
@@ -203,8 +203,8 @@ describe('ResearchPage: the screen of the research (task 00020)', () => {
     renderPage('/planet/research', { auth: signedIn(), research: fakeResearchApi({ tree: vi.fn().mockResolvedValue(tree()) }), ...texts });
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Research' })).toBeInTheDocument();
-    expect(await screen.findByRole('region', { name: 'Research queue' })).toBeInTheDocument();
-    expect(await screen.findByRole('searchbox', { name: 'Search for a technology' })).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: 'Research' })).toBeInTheDocument();
+    expect(await screen.findByRole('searchbox', { name: 'Search technologies' })).toBeInTheDocument();
     expect(screen.getByRole('group', { name: 'State' })).toBeInTheDocument();
   });
 });

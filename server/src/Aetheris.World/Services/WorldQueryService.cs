@@ -490,7 +490,7 @@ public sealed class WorldQueryService
         return await _dbContext.Planets.AsNoTracking()
             .Where(planet => planet.OwnerPlayerId == playerId)
             .OrderBy(planet => planet.Id)
-            .Select(planet => new OwnedPlanet(planet.Id, planet.SectorId))
+            .Select(planet => new OwnedPlanet(planet.Id, planet.SectorId, planet.Name))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 

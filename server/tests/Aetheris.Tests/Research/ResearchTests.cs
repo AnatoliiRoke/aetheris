@@ -667,6 +667,9 @@ public sealed class ResearchTests
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.IronMine, 5);
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.PowerPlant, 10);
 
+        // A mine works only into a storage (task 00029).
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.MetalStorage, 5);
+
         TechnologyEntityCosts technology = (await CheapestTechnologiesAsync(services, int.MaxValue, 1))
             .First(entry => entry.Costs.ContainsKey(ironId));
 

@@ -131,7 +131,7 @@ describe('/planet/build: the closed building', () => {
     const card = (await screen.findByRole('heading', { name: 'Науковий центр' })).closest('li')!;
 
     expect(within(card).getByText('Закрито')).toBeInTheDocument();
-    expect(within(card).getByText('Потрібна технологія, вона відкриється з дослідженнями')).toBeInTheDocument();
+    expect(within(card).getByText('Потрібна технологія: 3, рівень 1')).toBeInTheDocument();
   });
 
   it('stays Not built, with the cost and what to prepare, when the requirement is one level short', async () => {
@@ -211,7 +211,7 @@ describe('/game: the empty queue of the design', () => {
       world: fakeWorldApi({ reference: vi.fn().mockResolvedValue(sampleWorldReference()) }),
     });
 
-    const queue = await screen.findByRole('region', { name: 'Черга будівництва' });
+    const queue = await screen.findByRole('region', { name: 'Будівництво' });
 
     expect(within(queue).getByText('Черга порожня — планета не росте.')).toBeInTheDocument();
     expect(within(queue).getByRole('link', { name: '+ Додати будівництво' })).toHaveAttribute('href', '/planet/build');

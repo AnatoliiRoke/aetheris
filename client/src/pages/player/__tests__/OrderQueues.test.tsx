@@ -121,10 +121,10 @@ describe('ProductionQueue: the batches of all the factories in one standard queu
     const queue = screen.getByRole('region', { name: 'Черга виробництва' });
     const records = within(queue).getAllByRole('listitem');
 
-    // Three batches of two factories, and the one free place of the four.
-    expect(records).toHaveLength(4);
+    // Three batches of two factories; the free place is not drawn, as in the design.
+    expect(records).toHaveLength(3);
     expect(within(queue).getByText('Місць: 3 з 4')).toBeInTheDocument();
-    expect(within(queue).getAllByText('Вільне місце')).toHaveLength(1);
+    expect(within(queue).queryAllByText('Вільне місце')).toHaveLength(0);
 
     expect(within(records[0]).getByText('Будматеріали')).toBeInTheDocument();
     expect(within(records[0]).getByText('Зроблено 1 з 3 · Завод')).toBeInTheDocument();
@@ -219,7 +219,7 @@ describe('ProductionQueue: the batches of all the factories in one standard queu
 
     expect(within(queue).getByText(/У черзі виробництва порожньо/)).toBeInTheDocument();
     expect(within(queue).getByText('Місць: 0 з 3')).toBeInTheDocument();
-    expect(within(queue).getAllByText('Вільне місце')).toHaveLength(3);
+    expect(within(queue).queryAllByText('Вільне місце')).toHaveLength(0);
   });
 
   it('falls back to the number of the recipe when the server names none', () => {
@@ -285,7 +285,7 @@ describe('ProcessQueue: the orders of all the buildings in one standard queue', 
     const queue = screen.getByRole('region', { name: 'Черга процесів' });
     const records = within(queue).getAllByRole('listitem');
 
-    expect(records).toHaveLength(4);
+    expect(records).toHaveLength(2);
     expect(within(queue).getByText('Місць: 2 з 4')).toBeInTheDocument();
     expect(within(records[0]).getByText('Розбирання деталі')).toBeInTheDocument();
     expect(within(records[0]).getByText('Розбирання · Зроблено 1 з 2 · Фабрика утилізації')).toBeInTheDocument();
@@ -323,6 +323,6 @@ describe('ProcessQueue: the orders of all the buildings in one standard queue', 
     const queue = screen.getByRole('region', { name: 'Черга процесів' });
 
     expect(within(queue).getByText(/У черзі процесів порожньо/)).toBeInTheDocument();
-    expect(within(queue).getAllByText('Вільне місце')).toHaveLength(2);
+    expect(within(queue).queryAllByText('Вільне місце')).toHaveLength(0);
   });
 });

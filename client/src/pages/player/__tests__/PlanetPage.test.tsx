@@ -53,7 +53,7 @@ describe('GamePage queue', () => {
     const user = userEvent.setup();
     renderPage('/game', { auth: signedIn() });
 
-    const queue = await screen.findByRole('region', { name: 'Черга будівництва' });
+    const queue = await screen.findByRole('region', { name: 'Будівництво' });
     expect(await within(queue).findByText('Шахта заліза, рівень 1')).toBeInTheDocument();
 
     // The menu has an item of the same name that opens the construction; the card opens the planet.

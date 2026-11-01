@@ -60,7 +60,7 @@ describe('the queues of the production and of the processes on /planet', () => {
     expect(within(production).getByText(/Зроблено 1 з 3/)).toBeInTheDocument();
     expect(within(processes).getByText(/Зроблено 1 з 2/)).toBeInTheDocument();
     expect(within(production).getByText('Місць: 1 з 2')).toBeInTheDocument();
-    expect(within(production).getAllByText('Вільне місце')).toHaveLength(1);
+    expect(within(production).queryAllByText('Вільне місце')).toHaveLength(0);
   });
 
   it('keeps the old panels without a second list of the same orders and with the forms they had', async () => {
@@ -202,9 +202,9 @@ describe('the queues of the production and of the processes on /planet', () => {
     const processQueue = await screen.findByRole('region', { name: 'Черга процесів' });
 
     expect(within(productionQueue).getByText(/У черзі виробництва порожньо/)).toBeInTheDocument();
-    expect(within(productionQueue).getAllByText('Вільне місце')).toHaveLength(3);
+    expect(within(productionQueue).queryAllByText('Вільне місце')).toHaveLength(0);
     expect(within(processQueue).getByText(/У черзі процесів порожньо/)).toBeInTheDocument();
-    expect(within(processQueue).getAllByText('Вільне місце')).toHaveLength(2);
+    expect(within(processQueue).queryAllByText('Вільне місце')).toHaveLength(0);
   });
 
   it('says that the queues load, and that they could not, with a way to try again', async () => {

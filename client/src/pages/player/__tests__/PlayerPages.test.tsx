@@ -96,22 +96,21 @@ describe('GamePage', () => {
 
   it('shows the tree of the technologies with the real data', async () => {
     const research = fakeResearchApi();
-    renderPage('/game', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
+    renderPage('/planet/research', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
 
-    const panel = await screen.findByRole('region', { name: 'Дослідження' });
+    const panel = await screen.findByRole('region', { name: 'Технології' });
 
     expect(await within(panel).findByText('Глибинний видобуток')).toBeInTheDocument();
-    expect(within(panel).getByText('Рівень: 0 з 10')).toBeInTheDocument();
-    expect(within(panel).getByText('Науковий центр: рівень 2.')).toBeInTheDocument();
+    expect(screen.getByText('Науковий центр · рівень 2')).toBeInTheDocument();
     expect(research.tree).toHaveBeenCalledWith(10);
   });
 
   it('puts a technology in the queue and returns the whole cost', async () => {
     const user = userEvent.setup();
     const research = fakeResearchApi();
-    renderPage('/game', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
+    renderPage('/planet/research', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
 
-    await user.click(await screen.findByRole('button', { name: 'Дослідити' }));
+    await user.click(await screen.findByRole('button', { name: 'У чергу' }));
 
     await waitFor(() => expect(research.enqueue).toHaveBeenCalledWith(10, 1, 1));
   });
@@ -135,13 +134,13 @@ describe('GamePage', () => {
       queueUsedSlots: 1,
     });
     const research = fakeResearchApi({ enqueue: vi.fn().mockResolvedValue(queuedTree) });
-    renderPage('/game', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
+    renderPage('/planet/research', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
 
-    await user.click(await screen.findByRole('button', { name: 'Дослідити' }));
+    await user.click(await screen.findByRole('button', { name: 'У чергу' }));
 
     const panel = screen.getByRole('region', { name: 'Дослідження' });
-    expect(await within(panel).findByText('Глибинний видобуток, рівень 1')).toBeInTheDocument();
-    expect(within(panel).getByText('Місць: 1 з 2')).toBeInTheDocument();
+    expect(await within(panel).findByText('Глибинний видобуток · рівень 1')).toBeInTheDocument();
+    expect(within(panel).getByText('1 / 2 слотів використано')).toBeInTheDocument();
     expect(within(panel).queryByText(/NaN/)).not.toBeInTheDocument();
     expect(research.tree).toHaveBeenCalledTimes(1);
   });
@@ -149,9 +148,9 @@ describe('GamePage', () => {
   it('says why the server refused a research', async () => {
     const user = userEvent.setup();
     const research = fakeResearchApi({ enqueue: vi.fn().mockRejectedValue(new ApiError(422, 'research_queue_full')) });
-    renderPage('/game', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
+    renderPage('/planet/research', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
 
-    await user.click(await screen.findByRole('button', { name: 'Дослідити' }));
+    await user.click(await screen.findByRole('button', { name: 'У чергу' }));
 
     expect(await screen.findByText('Черга досліджень заповнена')).toBeInTheDocument();
   });
@@ -159,7 +158,7 @@ describe('GamePage', () => {
   it('starts the research from the chosen planet', async () => {
     const user = userEvent.setup();
     const research = fakeResearchApi();
-    renderPage('/game', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
+    renderPage('/planet/research', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
 
     const select = await screen.findByRole('combobox', { name: 'Планета дослідження' });
     expect(within(select).getByRole('option', { name: 'Vega: Немає наукового центру потрібного рівня' })).toBeInTheDocument();
@@ -180,10 +179,13 @@ describe('GamePage', () => {
         }),
       ),
     });
-    renderPage('/game', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
+    renderPage('/planet/research', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) }), research });
 
-    const panel = await screen.findByRole('region', { name: 'Дослідження' });
-    expect(await within(panel).findByText('Скоро')).toBeInTheDocument();
+    const user = userEvent.setup();
+    const panel = await screen.findByRole('region', { name: 'Технології' });
+    await user.click(within(panel).getByRole('tab', { name: /fleet/ }));
+
+    expect(await within(panel).findByText(/Ця гілка поки порожня/)).toBeInTheDocument();
   });
 
   it('keeps the research closed until the e-mail is confirmed', async () => {

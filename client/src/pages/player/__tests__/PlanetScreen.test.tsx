@@ -147,7 +147,7 @@ describe('PlanetPage: the screen of the planet', () => {
 
     const building = await screen.findByRole('region', { name: 'Черга будівництва' });
     expect(within(building).getByText('Черга порожня.')).toBeInTheDocument();
-    expect(within(building).getAllByText('Вільне місце')).toHaveLength(2);
+    expect(within(building).queryAllByText('Вільне місце')).toHaveLength(0);
 
     const researches = await screen.findByRole('region', { name: 'Черга досліджень' });
     expect(await within(researches).findByText('Черга досліджень порожня.')).toBeInTheDocument();

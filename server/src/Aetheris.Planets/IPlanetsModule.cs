@@ -166,6 +166,19 @@ public interface IPlanetsModule
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the sum of one effect of the buildings of several bodies at once (task 00029), so a
+    /// module that needs it for every body of a player does not read the buildings body by body.
+    /// </summary>
+    /// <param name="planetIds">The bodies.</param>
+    /// <param name="effectType">The effect type, one of <see cref="Services.BuildingEffectTypes"/>.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The sum by body; a body without the effect has zero.</returns>
+    Task<IReadOnlyDictionary<long, long>> GetBuildingEffectTotalsAsync(
+        IReadOnlyCollection<long> planetIds,
+        string effectType,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the localisation keys of the names of the building types, for the modules that
     /// name a building they open (task 00012, decision 9).
     /// </summary>

@@ -339,33 +339,26 @@ public sealed class PlanetQueryService
         BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
         int? buildingTypeId = catalog.FindByClass(buildingClass)?.Id;
 
-        List<long> planetIds = await _dbContext.PlanetStates.AsNoTracking()
+        // The bodies the state rows of the module list, confirmed by the owner the world names:
+        // one query of the owned bodies of the world replaces the facts of every body.
+        HashSet<long> stateIds = [.. await _dbContext.PlanetStates.AsNoTracking()
             .Where(state => state.OwnerPlayerId == playerId)
-            .OrderBy(state => state.PlanetId)
             .Select(state => state.PlanetId)
             .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+            .ConfigureAwait(false)];
+        IReadOnlyList<OwnedPlanet> owned = await _world.GetOwnedPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false);
+        List<long> planetIds = [.. owned.Where(planet => stateIds.Contains(planet.PlanetId)).Select(planet => planet.PlanetId)];
 
-        Dictionary<long, int> levels = buildingTypeId is null
+        Dictionary<long, int> levels = buildingTypeId is null || planetIds.Count == 0
             ? []
             : await _dbContext.PlanetBuildings.AsNoTracking()
                 .Where(building => planetIds.Contains(building.PlanetId) && building.BuildingTypeId == buildingTypeId)
                 .ToDictionaryAsync(building => building.PlanetId, building => building.Level, cancellationToken)
                 .ConfigureAwait(false);
 
-        List<PlanetBuildingLevel> planets = [];
-
-        foreach (long planetId in planetIds)
-        {
-            PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
-
-            if (facts is null || !string.Equals(facts.OwnerPlayerId, playerId, StringComparison.Ordinal))
-            {
-                continue;
-            }
-
-            planets.Add(new PlanetBuildingLevel(planetId, facts.Name, levels.GetValueOrDefault(planetId)));
-        }
+        List<PlanetBuildingLevel> planets = [.. owned
+            .Where(planet => stateIds.Contains(planet.PlanetId))
+            .Select(planet => new PlanetBuildingLevel(planet.PlanetId, planet.Name, levels.GetValueOrDefault(planet.PlanetId)))];
 
         return planets;
     }
@@ -404,6 +397,48 @@ public sealed class PlanetQueryService
         return (long)decimal.Floor(PlanetEconomy.Effects(catalog, levels)
             .Where(entry => string.Equals(entry.Effect.EffectType, effectType, StringComparison.Ordinal))
             .Sum(entry => entry.Effect.Value));
+    }
+
+    /// <summary>
+    /// Gets the sum of one effect of the buildings of several bodies at once, in one read of the
+    /// buildings and not one read for every body (task 00029).
+    /// </summary>
+    /// <param name="planetIds">The bodies.</param>
+    /// <param name="effectType">The effect type, one of <see cref="BuildingEffectTypes"/>.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The sum by body; a body without the effect has zero.</returns>
+    public async Task<IReadOnlyDictionary<long, long>> GetBuildingEffectTotalsAsync(
+        IReadOnlyCollection<long> planetIds,
+        string effectType,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(planetIds);
+        ArgumentException.ThrowIfNullOrEmpty(effectType);
+
+        Dictionary<long, long> totals = planetIds.Distinct().ToDictionary(planetId => planetId, _ => 0L);
+
+        if (totals.Count == 0)
+        {
+            return totals;
+        }
+
+        BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
+        var rows = await _dbContext.PlanetBuildings.AsNoTracking()
+            .Where(building => planetIds.Contains(building.PlanetId))
+            .Select(building => new { building.PlanetId, building.BuildingTypeId, building.Level })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (var group in rows.GroupBy(row => row.PlanetId))
+        {
+            Dictionary<int, int> levels = group.ToDictionary(row => row.BuildingTypeId, row => row.Level);
+
+            totals[group.Key] = (long)decimal.Floor(PlanetEconomy.Effects(catalog, levels)
+                .Where(entry => string.Equals(entry.Effect.EffectType, effectType, StringComparison.Ordinal))
+                .Sum(entry => entry.Effect.Value));
+        }
+
+        return totals;
     }
 
     /// <summary>

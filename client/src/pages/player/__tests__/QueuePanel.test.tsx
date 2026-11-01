@@ -69,7 +69,7 @@ describe('QueuePanel', () => {
 
     expect(within(panel).getByText('Черга порожня.')).toBeInTheDocument();
     expect(within(panel).getByText('Місць: 0 з 2')).toBeInTheDocument();
-    expect(within(panel).getAllByText('Вільне місце')).toHaveLength(2);
+    expect(within(panel).queryAllByText('Вільне місце')).toHaveLength(0);
     expect(within(panel).queryByRole('timer')).not.toBeInTheDocument();
   });
 
@@ -77,7 +77,7 @@ describe('QueuePanel', () => {
     renderPanel([entry()]);
 
     expect(screen.getByRole('timer')).toHaveTextContent('Залишилось 0:00:03');
-    expect(screen.getByText('Вільне місце')).toBeInTheDocument();
+    expect(screen.queryByText('Вільне місце')).not.toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(secondMilliseconds);

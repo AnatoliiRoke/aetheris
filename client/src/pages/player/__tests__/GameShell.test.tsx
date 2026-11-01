@@ -88,7 +88,7 @@ describe('the common frame of the screens of the game (task 00020, section 8.1)'
 
     await user.click(within(container.querySelector<HTMLElement>('.civ-side')!).getByRole('link', { name: 'Дослідження' }));
     expect(window.location.pathname).toBe('/planet/research');
-    expect(await screen.findByRole('region', { name: 'Черга досліджень' })).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: 'Дослідження' })).toBeInTheDocument();
     expect(container.querySelectorAll('.civ-side')).toHaveLength(1);
   });
 

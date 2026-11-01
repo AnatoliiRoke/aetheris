@@ -278,8 +278,21 @@ public sealed class MarketTradeService
                 if (sum > 0)
                 {
                     int tradeId = (await _catalog.CurrenciesAsync(cancellationToken).ConfigureAwait(false)).TradeResourceTypeId;
-                    await _economy.TakeAsync(playerId, new Dictionary<int, long> { [tradeId] = sum }, cancellationToken).ConfigureAwait(false);
-                    await _economy.GiveAsync(lot.SellerPlayerId, new Dictionary<int, long> { [tradeId] = sum - commission }, cancellationToken).ConfigureAwait(false);
+
+                    // The balances of two players are locked in the order of the identifiers of the
+                    // players, whoever buys, so two players who buy from each other at once never
+                    // wait for each other's balance (task 00029). The payment is in one transaction,
+                    // so paying the seller before taking from the buyer changes nothing for them.
+                    if (string.CompareOrdinal(playerId, lot.SellerPlayerId) < 0)
+                    {
+                        await _economy.TakeAsync(playerId, new Dictionary<int, long> { [tradeId] = sum }, cancellationToken).ConfigureAwait(false);
+                        await _economy.GiveAsync(lot.SellerPlayerId, new Dictionary<int, long> { [tradeId] = sum - commission }, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await _economy.GiveAsync(lot.SellerPlayerId, new Dictionary<int, long> { [tradeId] = sum - commission }, cancellationToken).ConfigureAwait(false);
+                        await _economy.TakeAsync(playerId, new Dictionary<int, long> { [tradeId] = sum }, cancellationToken).ConfigureAwait(false);
+                    }
                 }
 
                 long seconds = MarketRules.DeliverySeconds(distance, settings);
@@ -448,12 +461,15 @@ public sealed class MarketTradeService
         int used = await _db.MarketLots.AsNoTracking()
             .CountAsync(lot => lot.SellerPlayerId == playerId && lot.State == MarketLotStates.Open, cancellationToken)
             .ConfigureAwait(false);
-        long limit = 0;
+        IReadOnlyList<OwnedPlanet> owned = await _world.GetOwnedPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
-        foreach (OwnedPlanet owned in await _world.GetOwnedPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false))
-        {
-            limit = Math.Max(limit, await _planets.GetBuildingEffectTotalAsync(owned.PlanetId, BuildingEffectTypes.MarketLotLimit, cancellationToken).ConfigureAwait(false));
-        }
+        // The best of the bodies: the buildings of all the bodies are read at once.
+        long limit = (await _planets
+            .GetBuildingEffectTotalsAsync([.. owned.Select(planet => planet.PlanetId)], BuildingEffectTypes.MarketLotLimit, cancellationToken)
+            .ConfigureAwait(false))
+            .Values
+            .DefaultIfEmpty(0)
+            .Max();
 
         return new LotLimitDto(used, (int)Math.Min(limit, int.MaxValue));
     }

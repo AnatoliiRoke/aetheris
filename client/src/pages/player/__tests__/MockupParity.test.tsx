@@ -9,13 +9,11 @@ import {
   fakeProductionApi,
   fakeResearchApi,
   fakeTextsApi,
-  fakeWorldApi,
   renderPage,
   sampleResearchTree,
   sampleProductionStock,
   samplePlanet,
   sampleTexts,
-  sampleWorldReference,
   signedInMe,
 } from '../../../test/renderPage';
 import { setRenderProbe } from '../renderProbe';
@@ -111,19 +109,20 @@ describe('/planet: the elements of the design', () => {
     expect(screen.queryByText(/Склад заповнений/)).not.toBeInTheDocument();
   });
 
-  it('writes the free slots in the head of the queue', async () => {
+  it('keeps the free slots out of the head of the queue, as the design has it', async () => {
     renderPage('/planet', { auth: signedIn() });
 
     const queue = await screen.findByRole('region', { name: 'Черга будівництва' });
 
     expect(within(queue).getByText('Місць: 1 з 2')).toBeInTheDocument();
-    expect(within(queue).getByText('+1 слот доступний')).toBeInTheDocument();
+    expect(within(queue).queryByText(/^\+\d+ слот/)).not.toBeInTheDocument();
   });
 
-  it('writes the free slots in the plural of the language', async () => {
+  it('keeps the free slots out of the head of the queue whatever the number of them', async () => {
     renderPage('/planet', { auth: signedIn(), planets: withPlanet({ queue: { slotCount: 5, items: [] } }) });
 
-    expect(await screen.findByText('+5 слотів доступно')).toBeInTheDocument();
+    expect(await screen.findByText('Місць: 0 з 5')).toBeInTheDocument();
+    expect(screen.queryByText(/^\+\d+ слот/)).not.toBeInTheDocument();
   });
 
   it('reads the type of the body by its identifier, not by its code', async () => {
@@ -153,12 +152,12 @@ describe('/planet/build: the elements of the design', () => {
     expect(crumbs.querySelector('[aria-current="page"]')?.textContent).toBe('Nova');
   });
 
-  it('writes the free slots in the head of the queue', async () => {
+  it('keeps the free slots out of the head of the queue, as the design has it', async () => {
     renderPage('/planet/build', { auth: signedIn() });
 
     const queue = await screen.findByRole('region', { name: 'Черга будівництва' });
 
-    expect(within(queue).getByText('+1 слот доступний')).toBeInTheDocument();
+    expect(within(queue).queryByText(/^\+\d+ слот/)).not.toBeInTheDocument();
   });
 
   it('labels the effects and the required resources, and shows what is short in each row', async () => {
@@ -254,7 +253,7 @@ describe('/planet/research: the elements of the design', () => {
     const tile = (await screen.findByRole('heading', { name: 'Глибинний видобуток' })).closest('li')!;
     const copper = within(tile).getByText('Мідь').closest('li')!;
     const iron = within(tile).getByText('Залізо').closest('li')!;
-    const button = within(tile).getByRole('button', { name: 'Дослідити' });
+    const button = within(tile).getByRole('button', { name: 'У чергу' });
 
     expect(within(copper).getByText('не вистачає 50')).toBeInTheDocument();
     expect(within(iron).queryByText(/не вистачає/)).not.toBeInTheDocument();
@@ -279,7 +278,8 @@ describe('/planet/research: the elements of the design', () => {
 
     expect(within(tile).getByText('Ефект')).toBeInTheDocument();
     expect(within(tile).getByText('+16%')).toBeInTheDocument();
-    expect(within(tile).getByText('+8% / рівень')).toBeInTheDocument();
+    // A learned technology shows the effect it has now; the step of a level shows only before the first level.
+    expect(within(tile).queryByText(/\/ рівень/)).not.toBeInTheDocument();
   });
 
   it('shows an unknown technology dimmed, with the name and the branch only', async () => {
@@ -290,10 +290,10 @@ describe('/planet/research: the elements of the design', () => {
 
     expect(tile).toHaveClass('tech-card--unknown');
     expect(within(tile).getByText('Невідома')).toBeInTheDocument();
-    expect(within(tile).getByText('Гілка: Економіка')).toBeInTheDocument();
+    expect(within(tile).getByText('Економіка')).toBeInTheDocument();
     expect(within(tile).queryByText('Цього опису не видно.')).not.toBeInTheDocument();
     expect(within(tile).queryByRole('list')).not.toBeInTheDocument();
-    expect(within(tile).getByRole('button', { name: 'Дослідити' })).toBeDisabled();
+    expect(within(tile).getByRole('button', { name: 'У чергу' })).toBeDisabled();
   });
 
   it('keeps the unknown and the closed technologies under the chip Closed', async () => {
@@ -320,12 +320,12 @@ describe('/planet/research: the elements of the design', () => {
     expect(within(screen.getByRole('navigation', { name: 'Навігація сторінкою' })).getByText('Дослідження')).toBeInTheDocument();
   });
 
-  it('writes the free slots in the head of the research queue', async () => {
+  it('keeps the free slots out of the head of the research queue, as the design has it', async () => {
     renderPage('/planet/research', { auth: signedIn(), research: fakeResearchApi({ tree: vi.fn().mockResolvedValue(sampleResearchTree()) }), ...researchTexts });
 
-    const queue = await screen.findByRole('region', { name: 'Черга досліджень' });
+    const queue = await screen.findByRole('region', { name: 'Дослідження' });
 
-    expect(within(queue).getByText('+2 слоти доступні')).toBeInTheDocument();
+    expect(within(queue).queryByText(/^\+\d+ слот/)).not.toBeInTheDocument();
   });
 });
 
@@ -351,7 +351,8 @@ describe('/planet/storage: the elements of the design', () => {
     const table = await screen.findByRole('table', { name: 'Ресурси' });
     const iron = within(table).getByText('Залізо').closest('tr')!;
 
-    expect(within(iron).getByText('зупинено')).toBeInTheDocument();
+    // A full resource shows no rate (the mockup draws a dash) and the badge says it stands still.
+    expect(within(iron).getByText('—')).toBeInTheDocument();
     expect(within(iron).getByText('100%')).toBeInTheDocument();
     expect(within(iron).getByText('Повний')).toBeInTheDocument();
   });
@@ -368,8 +369,8 @@ describe('/planet/storage: the elements of the design', () => {
     const production = await screen.findByRole('table', { name: 'Продукція' });
     const row = within(production).getByText('Будматеріали').closest('tr')!;
 
-    expect(within(production).getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['Назва', 'Кількість', 'Заповнення', 'Вага', 'Обсяг']);
-    expect(within(row).getByText('630 / 2 500')).toBeInTheDocument();
+    expect(within(production).getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['Назва', 'Кількість', 'Заповнення']);
+    expect((row.textContent ?? '').replace(/\s/g, ' ')).toContain('630 / 2 500');
     expect(within(row).getByText('25%')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Недоступно' })).not.toBeInTheDocument();
   });
@@ -377,7 +378,7 @@ describe('/planet/storage: the elements of the design', () => {
   it('shows the alarm with the advice and the way to the construction', async () => {
     renderPage('/planet/storage', apis());
 
-    const alarm = await screen.findByText(/^Склад заповнений, видобуток зупинено: Залізо\. Збудуйте більше місткості\./);
+    const alarm = await screen.findByText(/^Склад заповнений — видобуток зупинено: Залізо\. Збудуйте більше місткості\./);
 
     expect(within(alarm).getByRole('link', { name: 'До будівництва' })).toHaveAttribute('href', '/planet/build');
   });
@@ -399,17 +400,5 @@ describe('/planet/storage: the elements of the design', () => {
     expect(within(row).getByText('50 · без складу')).toBeInTheDocument();
     expect(within(row).queryByRole('progressbar')).not.toBeInTheDocument();
     expect(within(row).queryByText('Повний')).not.toBeInTheDocument();
-  });
-});
-
-describe('/game: the elements of the design', () => {
-  it('has the collect button of the design, inactive with the reason in the hint', async () => {
-    renderPage('/game', { auth: signedIn(), world: fakeWorldApi({ reference: vi.fn().mockResolvedValue(sampleWorldReference()) }) });
-
-    const queue = await screen.findByRole('region', { name: 'Черга будівництва' });
-    const button = within(queue).getByRole('button', { name: 'Забрати' });
-
-    expect(button).toBeDisabled();
-    expect(button).toHaveAttribute('title', expect.stringMatching(/^Скоро: /));
   });
 });

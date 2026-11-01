@@ -64,7 +64,7 @@ describe('the standard queue panel (task 00020, section 8.1)', () => {
     // A waiting record has no timer yet: it shows how long it takes.
     expect(within(panel).getByText('0:01:05')).toBeInTheDocument();
     expect(within(panel).getAllByRole('timer')).toHaveLength(1);
-    expect(within(panel).getAllByText('Вільне місце')).toHaveLength(1);
+    expect(within(panel).queryAllByText('Вільне місце')).toHaveLength(0);
     expect(within(panel).getAllByRole('button', { name: /Скасувати/ })).toHaveLength(2);
   });
 
@@ -72,7 +72,7 @@ describe('the standard queue panel (task 00020, section 8.1)', () => {
     renderPanel([]);
 
     expect(screen.getByText('Порожньо')).toBeInTheDocument();
-    expect(screen.getAllByText('Вільне місце')).toHaveLength(3);
+    expect(screen.queryAllByText('Вільне місце')).toHaveLength(0);
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
   });
 
@@ -144,7 +144,7 @@ describe('the queues on the screens of the game', () => {
       expect(within(queue).getByText('Шахта заліза, рівень 1')).toBeInTheDocument();
       expect(within(queue).getByText('Місць: 1 з 2')).toBeInTheDocument();
       expect(within(queue).getByRole('timer')).toBeInTheDocument();
-      expect(within(queue).getAllByText('Вільне місце')).toHaveLength(1);
+      expect(within(queue).queryAllByText('Вільне місце')).toHaveLength(0);
       expect(within(queue).getByRole('button', { name: /Скасувати: Шахта заліза, рівень 1/ })).toBeInTheDocument();
 
       // The structure of the panel, without the timer text and the link of the screen, is the same.
@@ -179,21 +179,27 @@ describe('the queues on the screens of the game', () => {
       });
     const shapes: string[] = [];
 
-    for (const path of ['/planet', '/planet/research']) {
+    // The research screen names its queue after the screen and marks the records with the icon of
+    // the design (mockups), so the two screens differ in the title and the dot of the record; the
+    // rest of the panel is the same one.
+    for (const [path, title, record, slots] of [
+      ['/planet', 'Черга досліджень', 'Глибинний видобуток, рівень 1', 'Місць: 1 з 2'],
+      ['/planet/research', 'Дослідження', 'Глибинний видобуток · рівень 1', '1 / 2 слотів використано'],
+    ] as const) {
       const research = fakeResearchApi({ tree: vi.fn().mockResolvedValue(queued()) });
       const { unmount } = renderPage(path, { auth: signedIn(), research });
-      const queue = await screen.findByRole('region', { name: 'Черга досліджень' });
+      const queue = await screen.findByRole('region', { name: title });
 
-      await within(queue).findByText('Глибинний видобуток, рівень 1');
+      await within(queue).findByText(record);
       expect(queue).toHaveClass('queue-panel');
-      expect(within(queue).getByText('Місць: 1 з 2')).toBeInTheDocument();
+      expect(within(queue).getByText(slots)).toBeInTheDocument();
       expect(within(queue).getByText('Залізо 200')).toBeInTheDocument();
       expect(within(queue).getByRole('timer')).toBeInTheDocument();
-      expect(within(queue).getAllByText('Вільне місце')).toHaveLength(1);
+      expect(within(queue).queryAllByText('Вільне місце')).toHaveLength(0);
 
       shapes.push(
         [...queue.querySelectorAll('.queue-item')]
-          .map((item) => `${item.className}|${item.querySelectorAll('button').length}|${item.querySelectorAll('[role="progressbar"]').length}`)
+          .map((item) => `${item.querySelectorAll('button').length}|${item.querySelectorAll('[role="progressbar"]').length}`)
           .join(';'),
       );
       unmount();

@@ -319,7 +319,8 @@ public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int? 
 /// <summary>A body that belongs to a player.</summary>
 /// <param name="PlanetId">The body.</param>
 /// <param name="SectorId">The sector of the body.</param>
-public sealed record OwnedPlanet(long PlanetId, int SectorId);
+/// <param name="Name">The name of the body, when it has one.</param>
+public sealed record OwnedPlanet(long PlanetId, int SectorId, string? Name = null);
 
 /// <summary>
 /// A body of a player with everything the screen of the civilization shows about it
