@@ -54,11 +54,14 @@ export function FieldError({ codes }: { codes: string[] | undefined }) {
 
 /**
  * A labelled input of a card with its errors.
+ *
+ * When the label is hidden, because the column of a table already names it, the label stays in the
+ * document for the reader of the screen, but it takes no place on it.
  */
-export function CardField({ label, codes, hint, children }: { label: string; codes?: string[]; hint?: string; children: ReactNode }) {
+export function CardField({ label, codes, hint, hideLabel, children }: { label: string; codes?: string[]; hint?: string; hideLabel?: boolean; children: ReactNode }) {
   return (
     <label className="admin-field">
-      <span>{label}</span>
+      <span className={hideLabel ? 'admin-field__label--hidden' : undefined}>{label}</span>
       {children}
       {hint ? <span className="hint">{hint}</span> : null}
       <FieldError codes={codes} />

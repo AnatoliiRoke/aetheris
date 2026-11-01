@@ -581,6 +581,11 @@ interface FieldInputProps {
   imageMaxBytes: number;
   options: RowsByKind;
   failure: EditFailure | null;
+  /**
+   * Whether the label of the field is not shown, because the column of a table already names it.
+   * The label stays in the document for the reader of the screen.
+   */
+  hideLabel?: boolean;
 }
 
 /**
@@ -588,7 +593,7 @@ interface FieldInputProps {
  * inputs.
  */
 function FieldInput(props: FieldInputProps) {
-  const { field, path, value, row, siblings, onChange, languages, maxLength, options, failure } = props;
+  const { field, path, value, row, siblings, onChange, languages, maxLength, options, failure, hideLabel } = props;
   const { t } = useAdminText();
   const name = useWorldName();
   const label = name(field.label_key, field.name);
@@ -599,7 +604,7 @@ function FieldInput(props: FieldInputProps) {
       return field.has_languages ? (
         <div className="admin-form admin-form--inline">
           {languages.map((language) => (
-            <CardField key={language} label={`${label} (${language})`} codes={failure?.fields[`${path}.${language}`]}>
+            <CardField key={language} label={`${label} (${language})`} codes={failure?.fields[`${path}.${language}`]} hideLabel={hideLabel}>
               <input
                 className="input"
                 maxLength={maxLength}
@@ -610,14 +615,14 @@ function FieldInput(props: FieldInputProps) {
           ))}
         </div>
       ) : (
-        <CardField label={label} codes={codes}>
+        <CardField label={label} codes={codes} hideLabel={hideLabel}>
           <input className="input" maxLength={maxLength} value={typeof value === 'string' ? value : ''} onChange={(event) => onChange(event.target.value)} />
         </CardField>
       );
 
     case 'number':
       return (
-        <CardField label={label} codes={codes}>
+        <CardField label={label} codes={codes} hideLabel={hideLabel}>
           <input className="input" inputMode={field.is_decimal ? 'decimal' : 'numeric'} value={value === null || value === undefined ? '' : String(value)} onChange={(event) => onChange(event.target.value)} />
         </CardField>
       );
@@ -633,7 +638,7 @@ function FieldInput(props: FieldInputProps) {
 
     case 'select':
       return (
-        <CardField label={label} codes={codes}>
+        <CardField label={label} codes={codes} hideLabel={hideLabel}>
           <select className="input" value={typeof value === 'string' ? value : ''} onChange={(event) => onChange(event.target.value)}>
             {field.is_required ? null : <option value="">{t('admin.reference.none')}</option>}
             {(field.options ?? []).map((option) => (
@@ -650,7 +655,7 @@ function FieldInput(props: FieldInputProps) {
       const rows = options[kindName ?? ''] ?? [];
 
       return (
-        <CardField label={label} codes={codes}>
+        <CardField label={label} codes={codes} hideLabel={hideLabel}>
           <select
             className="input"
             value={typeof value === 'number' ? String(value) : ''}
@@ -690,6 +695,11 @@ function dependentKind(field: ReferenceField, row: ReferenceValues, siblings: Re
 /**
  * The rows of a list field: the levels, the costs, the effects or the requirements, each row with
  * the inputs of the columns of the field, added and removed in place.
+ *
+ * The levels of a building are drawn in two rows: the number of the level and the time of its
+ * build in the first, the blocks of the costs, the effects and the requirements under them,
+ * aligned by the upper edge. The costs are a table whose headers of the columns are shown once,
+ * above the rows, and not a label over every resource.
  */
 function ListInput(props: FieldInputProps) {
   const { field, path, value, onChange, failure } = props;
@@ -709,6 +719,67 @@ function ListInput(props: FieldInputProps) {
 
     return fresh;
   };
+
+  if (field.type === 'costs' || field.type === 'effects' || field.type === 'requirements') {
+    return <ListTable {...props} rows={rows} onRowsChange={onChange} />;
+  }
+
+  if (field.type === 'levels') {
+    // The number of the level and the time of its build go in the first row; the blocks of the
+    // costs, the effects and the requirements go under them.
+    const blocks = columns.filter((column) => column.type === 'costs' || column.type === 'effects' || column.type === 'requirements');
+    const head = columns.filter((column) => column.type !== 'costs' && column.type !== 'effects' && column.type !== 'requirements');
+
+    return (
+      <fieldset className="admin-shares-editor">
+        <legend>{name(field.label_key, field.name)}</legend>
+        <FieldError codes={failure?.fields[path]} />
+        {rows.map((entry, index) => (
+          <div className="admin-levels__row" key={index}>
+            <div className="admin-levels__head">
+              {head.map((column) => (
+                <FieldInput
+                  key={column.name}
+                  {...props}
+                  field={column}
+                  path={`${path}.${index}.${column.name}`}
+                  value={entry[column.name]}
+                  row={entry}
+                  siblings={columns}
+                  onChange={(changed) => update(index, { ...entry, [column.name]: changed })}
+                />
+              ))}
+              <button className="btn btn--secondary" type="button" onClick={() => onChange(rows.filter((_, position) => position !== index))}>
+                {t('admin.card.remove')}
+              </button>
+            </div>
+            {blocks.length > 0 ? (
+              <div className="admin-levels__blocks">
+                {blocks.map((column) => (
+                  <FieldInput
+                    key={column.name}
+                    {...props}
+                    field={column}
+                    path={`${path}.${index}.${column.name}`}
+                    value={entry[column.name]}
+                    row={entry}
+                    siblings={columns}
+                    onChange={(changed) => update(index, { ...entry, [column.name]: changed })}
+                  />
+                ))}
+              </div>
+            ) : null}
+            <FieldError codes={failure?.fields[`${path}.${index}`]} />
+          </div>
+        ))}
+        <div className="admin-form__actions">
+          <button className="btn btn--secondary" type="button" onClick={() => onChange([...rows, added()])}>
+            {t('admin.reference.addRow', { name: name(field.label_key, field.name) })}
+          </button>
+        </div>
+      </fieldset>
+    );
+  }
 
   return (
     <fieldset className="admin-shares-editor">
@@ -738,6 +809,71 @@ function ListInput(props: FieldInputProps) {
       ))}
       <div className="admin-form__actions">
         <button className="btn btn--secondary" type="button" onClick={() => onChange([...rows, added()])}>
+          {t('admin.reference.addRow', { name: name(field.label_key, field.name) })}
+        </button>
+      </div>
+    </fieldset>
+  );
+}
+
+/**
+ * The rows of a list field as a table: the headers of the columns are shown once, above the rows,
+ * and not a label over every value. The costs of a level are such a table, with the columns
+ * «Ресурс» and «Кількість», and so are the effects and the requirements of a level.
+ */
+function ListTable(props: FieldInputProps & { rows: ReferenceValues[]; onRowsChange: (rows: ReferenceValues[]) => void }) {
+  const { field, path, rows, onRowsChange, failure } = props;
+  const { t } = useAdminText();
+  const name = useWorldName();
+  const columns = field.fields ?? [];
+
+  const update = (index: number, changed: ReferenceValues) => onRowsChange(rows.map((entry, position) => (position === index ? changed : entry)));
+  const added = (): ReferenceValues => emptyValues(columns);
+
+  return (
+    <fieldset className="admin-shares-editor">
+      <legend>{name(field.label_key, field.name)}</legend>
+      <FieldError codes={failure?.fields[path]} />
+      <table className="admin-costs">
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th key={column.name} scope="col">
+                {name(column.label_key, column.name)}
+              </th>
+            ))}
+            <th scope="col" aria-label={t('admin.card.remove')} />
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((entry, index) => (
+            <tr key={index}>
+              {columns.map((column) => (
+                <td key={column.name} className="admin-costs__cell">
+                  <FieldInput
+                    {...props}
+                    field={column}
+                    hideLabel
+                    path={`${path}.${index}.${column.name}`}
+                    value={entry[column.name]}
+                    row={entry}
+                    siblings={columns}
+                    onChange={(changed) => update(index, { ...entry, [column.name]: changed })}
+                  />
+                </td>
+              ))}
+              <td className="admin-costs__remove">
+                <button className="btn btn--secondary" type="button" onClick={() => onRowsChange(rows.filter((_, position) => position !== index))}>
+                  {t('admin.card.remove')}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <FieldError codes={failure?.fields[`${path}.0`]} />
+      <div className="admin-form__actions">
+        <button className="btn btn--secondary" type="button" onClick={() => onRowsChange([...rows, added()])}>
           {t('admin.reference.addRow', { name: name(field.label_key, field.name) })}
         </button>
       </div>

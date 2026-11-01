@@ -56,6 +56,7 @@
   --fs-h3: clamp(20px, calc(0.19vw + 19.26px), 22px);
   --fs-body: 16px;
   --fs-small: 13px;
+  --fs-tiny: 12px;
 
   /* Spacing */
   --space-1: 4px;
