@@ -21,4 +21,8 @@ description = "Throwaway passwords of the test accounts"
 paths = [
   '''(^|/)tests/''',
   '''(^|/)__tests__/''',
+  # The documents describe the check itself (an example line of the test of the scanner) and the
+  # reference page of the author keeps the name of a storage key of a mockup; neither holds a key.
+  '''^documentation/tasks/00021-ci-vynyatky-gitleaks-stabilizatsiia-testiv-zalezhnosti\.md$''',
+  '''^documentation/references/vybir-zi-zorianoi-federatsii\.html$''',
 ]

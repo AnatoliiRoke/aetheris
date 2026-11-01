@@ -1,7 +1,9 @@
 using System.Net;
 using Aetheris.Core.Errors;
+using Aetheris.Host.Data;
 using Aetheris.Host.Security;
 using Aetheris.Tests.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aetheris.Tests.Accounts;
@@ -106,6 +108,10 @@ public sealed class SignInTests
         TestAccount account = await TestAccounts.RegisterConfirmedAsync(_factory);
 
         using IServiceScope scope = _factory.Services.CreateScope();
+
+        // The failures of the address are counted over a window of minutes, so the failures other
+        // tests made from the same address would lock it before this test begins (task 00029).
+        await scope.ServiceProvider.GetRequiredService<AetherisDbContext>().SignInAttempts.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
         string? previous = await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, SecurityKeys.LoginIpMaxFailedAttempts, "3");
 
         try
