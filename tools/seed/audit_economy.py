@@ -124,6 +124,18 @@ def main() -> None:
             print(f"  {name:20} -- no consumer")
     print()
     result = play()
+    print("Start package: the spend of the first day and of the first two days of the play (what the start stock must cover):")
+    for horizon in (24, 48):
+        spent: dict[str, int] = defaultdict(int)
+        for moment, resource, amount in result["spent"]:
+            if moment <= horizon:
+                spent[NAME_OF_CODE[resource]] += amount
+        print(f"  {horizon} h: " + ", ".join(f"{name} {amount}" for name, amount in sorted(spent.items(), key=lambda row: -row[1])))
+    plant = BUILDING_BY_NAME["Сонячна електростанція"]
+    silicore = CODE_OF_NAME["Силікорова руда"]
+    upgrade = sum(building_cost(BUILDINGS[plant], level).get(silicore, 0) for level in (2, 3))
+    print(f"  silicore for the second and the third level of the solar plant: {upgrade}")
+    print(f"  the start stock of the seed: " + ", ".join(f"{NAME_OF_CODE[row['resource']]} {row['amount']}" for row in WORLD["races"][0]["start_resources"]))
     print(f"First mining ship: day {result['days']:.1f}, done={result['done']}, market purchases {result['bought']:.0f} credits")
     print("  levels:", result["levels"])
     print("  waited for:", result["waited"])
@@ -239,6 +251,7 @@ def play(verbose: bool = False) -> dict:
     queue_b: list[dict] = []
     queue_r: list[dict] = []
     log: list[str] = []
+    spend_log: list[tuple[float, str, int]] = []
     bought = 0.0
     waited: dict[str, float] = defaultdict(float)
     credits = CODE_OF_NAME["Кредити"]
@@ -315,6 +328,7 @@ def play(verbose: bool = False) -> dict:
     def pay(cost: dict[str, int]) -> None:
         nonlocal bought
         for resource, amount in cost.items():
+            spend_log.append((time, resource, amount))
             missing = max(0.0, amount - stock[resource])
             if missing > 0 and NAME_OF_CODE[resource] in LUCK:
                 stock[credits] -= missing * MARKET_PRICE
@@ -479,6 +493,7 @@ def play(verbose: bool = False) -> dict:
         "waited": dict(sorted(waited.items(), key=lambda row: -row[1])[:6]),
         "levels": {BUILDINGS[c]["name"]["uk"]: l for c, l in levels.items() if l > 1 or c in targets},
         "log": log,
+        "spent": spend_log,
     }
     return result
 

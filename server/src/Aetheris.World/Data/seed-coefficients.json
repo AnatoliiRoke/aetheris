@@ -408,7 +408,7 @@
     },
     {
       "key": "world.seed.start.silicore_ore",
-      "value": "300",
+      "value": "400",
       "minimum": "0",
       "maximum": "1000000000",
       "description": "Silicore ore of a new civilization."
