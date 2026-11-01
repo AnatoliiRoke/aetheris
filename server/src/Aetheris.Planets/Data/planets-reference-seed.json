@@ -130,7 +130,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -138,7 +138,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -146,7 +146,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -154,7 +154,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -162,7 +162,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 11,
@@ -170,7 +170,7 @@
         },
         {
           "resource": "resource_21",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 13,
@@ -178,7 +178,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -186,7 +186,7 @@
         },
         {
           "resource": "resource_17",
-          "base": 10,
+          "base": 3.333,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -1922,7 +1922,7 @@
       "costs": [
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -1930,7 +1930,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 2,
@@ -1938,7 +1938,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -1946,7 +1946,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -1954,7 +1954,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -2262,7 +2262,7 @@
       "costs": [
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -2270,7 +2270,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -2278,7 +2278,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 6,
@@ -2286,7 +2286,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -2294,7 +2294,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -2302,7 +2302,7 @@
         },
         {
           "resource": "resource_18",
-          "base": 10,
+          "base": 3.333,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -2601,7 +2601,7 @@
       "costs": [
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -2609,7 +2609,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -2617,7 +2617,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -2625,7 +2625,7 @@
         },
         {
           "resource": "resource_21",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 9,
@@ -2633,7 +2633,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -2641,7 +2641,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -2972,7 +2972,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -2980,7 +2980,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -2988,7 +2988,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -2996,7 +2996,7 @@
         },
         {
           "resource": "resource_23",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -3004,7 +3004,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -3012,7 +3012,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -3020,7 +3020,7 @@
         },
         {
           "resource": "resource_19",
-          "base": 10,
+          "base": 3.333,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -3345,7 +3345,7 @@
       "costs": [
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -3353,7 +3353,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -3361,7 +3361,7 @@
         },
         {
           "resource": "resource_21",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -3369,7 +3369,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -3377,7 +3377,7 @@
         },
         {
           "resource": "resource_25",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 6,
@@ -3385,7 +3385,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -3638,7 +3638,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -3646,7 +3646,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -3654,7 +3654,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -3662,7 +3662,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -3670,7 +3670,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -3678,7 +3678,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -4015,7 +4015,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -4023,7 +4023,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -4031,7 +4031,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -4039,7 +4039,7 @@
         },
         {
           "resource": "resource_3",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -4047,7 +4047,7 @@
         },
         {
           "resource": "resource_23",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -4055,7 +4055,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -4063,7 +4063,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -4071,7 +4071,7 @@
         },
         {
           "resource": "resource_17",
-          "base": 10,
+          "base": 3.333,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -4294,7 +4294,7 @@
       "costs": [
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -4302,7 +4302,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -4310,7 +4310,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 48,
+          "base": 15.9984,
           "growth": 1.5,
           "step": 0,
           "from_level": 6,
@@ -4318,7 +4318,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -4326,7 +4326,7 @@
         },
         {
           "resource": "resource_21",
-          "base": 48,
+          "base": 15.9984,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -4334,7 +4334,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -5019,7 +5019,7 @@
       "costs": [
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -5027,7 +5027,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -5035,7 +5035,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 48,
+          "base": 15.9984,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -5043,7 +5043,7 @@
         },
         {
           "resource": "resource_21",
-          "base": 48,
+          "base": 15.9984,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -5051,7 +5051,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -5059,7 +5059,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -5067,7 +5067,7 @@
         },
         {
           "resource": "resource_18",
-          "base": 12,
+          "base": 3.9996,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -5488,7 +5488,7 @@
       "costs": [
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -5496,7 +5496,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -5504,7 +5504,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 48,
+          "base": 15.9984,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -5512,7 +5512,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -5520,7 +5520,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -5857,7 +5857,7 @@
       "costs": [
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -5865,7 +5865,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -5873,7 +5873,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -6050,7 +6050,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -6058,7 +6058,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -6066,7 +6066,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -6074,7 +6074,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -6299,7 +6299,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -6307,7 +6307,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -6315,7 +6315,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -6323,7 +6323,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -6560,7 +6560,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -6568,7 +6568,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -6576,7 +6576,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -6584,7 +6584,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -6803,7 +6803,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -6811,7 +6811,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -6819,7 +6819,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -6827,7 +6827,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -7058,7 +7058,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -7066,7 +7066,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -7074,7 +7074,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -7082,7 +7082,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -7313,7 +7313,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -7321,7 +7321,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -7329,7 +7329,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -7337,7 +7337,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -7520,7 +7520,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -7528,7 +7528,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -7536,7 +7536,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -7544,7 +7544,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -7769,7 +7769,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -7777,7 +7777,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -7785,7 +7785,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -7793,7 +7793,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -8018,7 +8018,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -8026,7 +8026,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -8034,7 +8034,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -8042,7 +8042,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -8267,7 +8267,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -8275,7 +8275,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -8283,7 +8283,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -8291,7 +8291,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -8522,7 +8522,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -8530,7 +8530,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -8538,7 +8538,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -8546,7 +8546,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -8777,7 +8777,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -8785,7 +8785,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -8793,7 +8793,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -8801,7 +8801,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -9032,7 +9032,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -9040,7 +9040,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -9048,7 +9048,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -9056,7 +9056,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -9287,7 +9287,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -9295,7 +9295,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -9303,7 +9303,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -9311,7 +9311,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 16,
+          "base": 5.3328,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -9530,7 +9530,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -9538,7 +9538,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -9546,7 +9546,7 @@
         },
         {
           "resource": "resource_6",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -9554,7 +9554,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -9562,7 +9562,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -9570,7 +9570,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -9787,7 +9787,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -9795,7 +9795,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -9803,7 +9803,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -9811,7 +9811,7 @@
         },
         {
           "resource": "resource_4",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -9819,7 +9819,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -9827,7 +9827,7 @@
         },
         {
           "resource": "resource_12",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -9996,7 +9996,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -10004,7 +10004,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -10012,7 +10012,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -10020,7 +10020,7 @@
         },
         {
           "resource": "resource_3",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 6,
@@ -10028,7 +10028,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -10036,7 +10036,7 @@
         },
         {
           "resource": "resource_16",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -10253,7 +10253,7 @@
       "costs": [
         {
           "resource": "resource_2",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -10261,7 +10261,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -10269,7 +10269,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 50,
+          "base": 16.665,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -10277,7 +10277,7 @@
         },
         {
           "resource": "resource_4",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -10285,7 +10285,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -10502,7 +10502,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 120,
+          "base": 39.996,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -10510,7 +10510,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -10518,7 +10518,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -10526,7 +10526,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -10534,7 +10534,7 @@
         },
         {
           "resource": "resource_19",
-          "base": 12,
+          "base": 3.9996,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -10871,7 +10871,7 @@
       "costs": [
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -10879,7 +10879,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -10887,7 +10887,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 48,
+          "base": 15.9984,
           "growth": 1.5,
           "step": 0,
           "from_level": 6,
@@ -10895,7 +10895,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -10903,7 +10903,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -11144,7 +11144,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 120,
+          "base": 39.996,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -11152,7 +11152,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -11160,7 +11160,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -11168,7 +11168,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -11176,7 +11176,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -11184,7 +11184,7 @@
         },
         {
           "resource": "resource_17",
-          "base": 12,
+          "base": 3.9996,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -11509,7 +11509,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 120,
+          "base": 39.996,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -11517,7 +11517,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -11525,7 +11525,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -11533,7 +11533,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -11541,7 +11541,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -11872,7 +11872,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 120,
+          "base": 39.996,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -11880,7 +11880,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -11888,7 +11888,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -11896,7 +11896,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -11904,7 +11904,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -11912,7 +11912,7 @@
         },
         {
           "resource": "resource_18",
-          "base": 12,
+          "base": 3.9996,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -12237,7 +12237,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 120,
+          "base": 39.996,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -12245,7 +12245,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -12253,7 +12253,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -12261,7 +12261,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -12269,7 +12269,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -12582,7 +12582,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 120,
+          "base": 39.996,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -12590,7 +12590,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -12598,7 +12598,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -12606,7 +12606,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -12614,7 +12614,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -12622,7 +12622,7 @@
         },
         {
           "resource": "resource_19",
-          "base": 12,
+          "base": 3.9996,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -12953,7 +12953,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 120,
+          "base": 39.996,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -12961,7 +12961,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -12969,7 +12969,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -12977,7 +12977,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -12985,7 +12985,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -13274,7 +13274,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 120,
+          "base": 39.996,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -13282,7 +13282,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -13290,7 +13290,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -13298,7 +13298,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -13306,7 +13306,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 24,
+          "base": 7.9992,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -13314,7 +13314,7 @@
         },
         {
           "resource": "resource_17",
-          "base": 12,
+          "base": 3.9996,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -13603,7 +13603,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -13611,7 +13611,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -13619,7 +13619,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -13627,7 +13627,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -13635,7 +13635,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -13643,7 +13643,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -13992,7 +13992,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -14000,7 +14000,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -14008,7 +14008,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -14016,7 +14016,7 @@
         },
         {
           "resource": "resource_4",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -14024,7 +14024,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -14032,7 +14032,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 12,
@@ -14040,7 +14040,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -14048,7 +14048,7 @@
         },
         {
           "resource": "resource_18",
-          "base": 15,
+          "base": 4.9995,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -14427,7 +14427,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -14435,7 +14435,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -14443,7 +14443,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -14451,7 +14451,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -14459,7 +14459,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -14467,7 +14467,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -14822,7 +14822,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -14830,7 +14830,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -14838,7 +14838,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -14846,7 +14846,7 @@
         },
         {
           "resource": "resource_4",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 6,
@@ -14854,7 +14854,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -14862,7 +14862,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -14870,7 +14870,7 @@
         },
         {
           "resource": "resource_19",
-          "base": 15,
+          "base": 4.9995,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -15177,7 +15177,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -15185,7 +15185,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -15193,7 +15193,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -15201,7 +15201,7 @@
         },
         {
           "resource": "resource_2",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -15209,7 +15209,7 @@
         },
         {
           "resource": "resource_4",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 9,
@@ -15217,7 +15217,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -15225,7 +15225,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -15520,7 +15520,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -15528,7 +15528,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -15536,7 +15536,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -15544,7 +15544,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 9,
@@ -15552,7 +15552,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -15560,7 +15560,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -15568,7 +15568,7 @@
         },
         {
           "resource": "resource_17",
-          "base": 15,
+          "base": 4.9995,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -15881,7 +15881,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -15889,7 +15889,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -15897,7 +15897,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -15905,7 +15905,7 @@
         },
         {
           "resource": "resource_4",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -15913,7 +15913,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -15921,7 +15921,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -16144,7 +16144,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -16152,7 +16152,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -16160,7 +16160,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -16168,7 +16168,7 @@
         },
         {
           "resource": "resource_23",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -16176,7 +16176,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -16184,7 +16184,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -16192,7 +16192,7 @@
         },
         {
           "resource": "resource_18",
-          "base": 15,
+          "base": 4.9995,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -16517,7 +16517,7 @@
       "costs": [
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -16525,7 +16525,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -16533,7 +16533,7 @@
         },
         {
           "resource": "resource_6",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -16541,7 +16541,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -16549,7 +16549,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -16557,7 +16557,7 @@
         },
         {
           "resource": "resource_21",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 12,
@@ -16565,7 +16565,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -16890,7 +16890,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -16898,7 +16898,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -16906,7 +16906,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -16914,7 +16914,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -16922,7 +16922,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -16930,7 +16930,7 @@
         },
         {
           "resource": "resource_23",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 12,
@@ -16938,7 +16938,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -16946,7 +16946,7 @@
         },
         {
           "resource": "resource_19",
-          "base": 15,
+          "base": 4.9995,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -17271,7 +17271,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 150,
+          "base": 49.995,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -17279,7 +17279,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -17287,7 +17287,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -17295,7 +17295,7 @@
         },
         {
           "resource": "resource_8",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -17303,7 +17303,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -17586,7 +17586,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 200,
+          "base": 66.66,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -17594,7 +17594,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -17602,7 +17602,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -17610,7 +17610,7 @@
         },
         {
           "resource": "resource_2",
-          "base": 200,
+          "base": 66.66,
           "growth": 1.5,
           "step": 0,
           "from_level": 4,
@@ -17618,7 +17618,7 @@
         },
         {
           "resource": "resource_23",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -17626,7 +17626,7 @@
         },
         {
           "resource": "resource_9",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -17634,7 +17634,7 @@
         },
         {
           "resource": "resource_26",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 12,
@@ -17642,7 +17642,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 14,
@@ -17650,7 +17650,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -17658,7 +17658,7 @@
         },
         {
           "resource": "resource_17",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -18019,7 +18019,7 @@
       "costs": [
         {
           "resource": "resource_6",
-          "base": 200,
+          "base": 66.66,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -18027,7 +18027,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -18035,7 +18035,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -18043,7 +18043,7 @@
         },
         {
           "resource": "resource_21",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -18051,7 +18051,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 7,
@@ -18059,7 +18059,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -18240,7 +18240,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 200,
+          "base": 66.66,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -18248,7 +18248,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -18256,7 +18256,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -18264,7 +18264,7 @@
         },
         {
           "resource": "resource_2",
-          "base": 200,
+          "base": 66.66,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -18272,7 +18272,7 @@
         },
         {
           "resource": "resource_3",
-          "base": 200,
+          "base": 66.66,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -18280,7 +18280,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -18288,7 +18288,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -18625,7 +18625,7 @@
       "costs": [
         {
           "resource": "resource_1",
-          "base": 200,
+          "base": 66.66,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -18633,7 +18633,7 @@
         },
         {
           "resource": "resource_20",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -18641,7 +18641,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 100,
+          "base": 33.33,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -18649,7 +18649,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 80,
+          "base": 26.664,
           "growth": 1.5,
           "step": 0,
           "from_level": 8,
@@ -18657,7 +18657,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -18665,7 +18665,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 40,
+          "base": 13.332,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -18673,7 +18673,7 @@
         },
         {
           "resource": "resource_18",
-          "base": 20,
+          "base": 6.666,
           "growth": 1.5,
           "step": 0,
           "from_level": 15,
@@ -19010,7 +19010,7 @@
       "costs": [
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -19018,7 +19018,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -19026,7 +19026,7 @@
         },
         {
           "resource": "resource_21",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -19034,7 +19034,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -19042,7 +19042,7 @@
         },
         {
           "resource": "resource_11",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,
@@ -19313,7 +19313,7 @@
       "costs": [
         {
           "resource": "resource_20",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -19321,7 +19321,7 @@
         },
         {
           "resource": "resource_27",
-          "base": 75,
+          "base": 24.9975,
           "growth": 1.5,
           "step": 0,
           "from_level": 1,
@@ -19329,7 +19329,7 @@
         },
         {
           "resource": "resource_21",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -19337,7 +19337,7 @@
         },
         {
           "resource": "resource_24",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 5,
@@ -19345,7 +19345,7 @@
         },
         {
           "resource": "resource_22",
-          "base": 60,
+          "base": 19.998,
           "growth": 1.5,
           "step": 0,
           "from_level": 6,
@@ -19353,7 +19353,7 @@
         },
         {
           "resource": "resource_10",
-          "base": 30,
+          "base": 9.999,
           "growth": 1.5,
           "step": 0,
           "from_level": 10,

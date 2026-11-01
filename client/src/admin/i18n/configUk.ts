@@ -183,6 +183,8 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.world.seed.part.growth.description': 'Частка, на яку характеристики й вага деталі зростають за кожну попередню деталь її групи.',
   'config.world.seed.field.group_4_total_min.description': 'Найменша сумарна частка трьох кристалів у астероїдному полі.',
   'config.world.seed.field.group_4_total_max.description': 'Найбільша сумарна частка трьох кристалів у астероїдному полі.',
+  'config.world.seed.cost.building_scale.description': 'Множник ціни будівель: будівля будується один раз, тому коштує третину бази.',
+  'config.world.seed.part.cost_scale.description': 'Множник складників модулів і корпусів: деталі виробляють регулярно й у великих кількостях, тому вони коштують удвічі більше бази.',
   'config.world.seed.race.bonus.description': 'Частка бойового бонусу раси до модулів своєї групи.',
   'config.world.seed.level_cap.base.description': 'База формули межі рівнів стартової будівлі.',
   'config.world.seed.level_cap.growth.description': 'Множник формули межі рівнів стартової будівлі.',

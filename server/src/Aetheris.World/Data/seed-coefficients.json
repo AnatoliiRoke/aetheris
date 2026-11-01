@@ -387,21 +387,21 @@
     },
     {
       "key": "world.seed.start.iron_ore",
-      "value": "1000",
+      "value": "500",
       "minimum": "0",
       "maximum": "1000000000",
       "description": "Iron ore of a new civilization."
     },
     {
       "key": "world.seed.start.building_materials",
-      "value": "500",
+      "value": "300",
       "minimum": "0",
       "maximum": "1000000000",
       "description": "Building materials of a new civilization."
     },
     {
       "key": "world.seed.start.credits",
-      "value": "1000",
+      "value": "600",
       "minimum": "0",
       "maximum": "1000000000",
       "description": "Credits of a new civilization."
@@ -440,6 +440,20 @@
       "minimum": "0",
       "maximum": "1",
       "description": "Largest total share of the three resources of the fourth group in an asteroid field."
+    },
+    {
+      "key": "world.seed.cost.building_scale",
+      "value": "0.3333",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the price of a building: a building is built once, so it costs a third of the base."
+    },
+    {
+      "key": "world.seed.part.cost_scale",
+      "value": "2",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the ingredients of a module or a hull: parts are made regularly and in large numbers, so they cost twice the base."
     }
   ]
 }

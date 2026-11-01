@@ -1656,15 +1656,15 @@
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 1000
-        },
-        {
-          "resource": "resource_20",
           "amount": 500
         },
         {
+          "resource": "resource_20",
+          "amount": 300
+        },
+        {
           "resource": "resource_27",
-          "amount": 1000
+          "amount": 600
         }
       ],
       "name": {
@@ -1704,15 +1704,15 @@
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 1000
-        },
-        {
-          "resource": "resource_20",
           "amount": 500
         },
         {
+          "resource": "resource_20",
+          "amount": 300
+        },
+        {
           "resource": "resource_27",
-          "amount": 1000
+          "amount": 600
         }
       ],
       "name": {
@@ -1752,15 +1752,15 @@
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 1000
-        },
-        {
-          "resource": "resource_20",
           "amount": 500
         },
         {
+          "resource": "resource_20",
+          "amount": 300
+        },
+        {
           "resource": "resource_27",
-          "amount": 1000
+          "amount": 600
         }
       ],
       "name": {
@@ -1800,15 +1800,15 @@
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 1000
-        },
-        {
-          "resource": "resource_20",
           "amount": 500
         },
         {
+          "resource": "resource_20",
+          "amount": 300
+        },
+        {
           "resource": "resource_27",
-          "amount": 1000
+          "amount": 600
         }
       ],
       "name": {

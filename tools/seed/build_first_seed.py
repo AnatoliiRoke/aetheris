@@ -655,7 +655,7 @@ def center_requirements(center_levels: list[int], science_center: str) -> list[d
 
 def planet_costs(tiers: list[list[str]], codes: dict[str, str], parameters: dict[str, Decimal], group: str, factor: Decimal) -> list[dict]:
     """The cost rows of a building: a resource is paid from the level it first appears, at the base of its class."""
-    base = coefficient(parameters, "world.seed.cost.base") * group_multiplier(parameters, group)
+    base = coefficient(parameters, "world.seed.cost.base") * group_multiplier(parameters, group) * coefficient(parameters, "world.seed.cost.building_scale")
     digits = significant(parameters)
     rows = []
     for name, level in first_seen(tiers).items():
@@ -1399,7 +1399,7 @@ def main() -> None:
     def part_amounts(row: dict, index: int) -> dict[str, int]:
         """Units of every ingredient of a part: the base of its class, rising with the place of the part in its group."""
         return {
-            name: whole(rounded(coefficient(parameters, "world.seed.cost.base") * resource_scale(parameters, name) * curve(ONE, part_ingredient_factor, index), digits))
+            name: whole(rounded(coefficient(parameters, "world.seed.cost.base") * coefficient(parameters, "world.seed.part.cost_scale") * resource_scale(parameters, name) * curve(ONE, part_ingredient_factor, index), digits))
             for name in row["resources"]
         }
 
