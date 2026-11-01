@@ -328,6 +328,7 @@ public static class AuthEndpoints
         UserManager<IdentityUser> userManager,
         AetherisDbContext dbContext,
         IWorldModule world,
+        SecuritySettings securitySettings,
         HttpContext httpContext)
     {
         string? userId = principal.GetPlayerId();
@@ -349,6 +350,7 @@ public static class AuthEndpoints
             nickname = user.UserName,
             email = user.Email,
             email_confirmed = user.EmailConfirmed,
+            email_confirmation_required = securitySettings.RequireConfirmedEmail,
             nickname_changed_at = profile?.NicknameChangedAt,
             account_tier = AccountTiers.Of(),
             civilization = await world.GetCivilizationAsync(user.Id, cancellationToken),

@@ -90,6 +90,9 @@ public sealed class SecuritySettings
     /// <summary>Gets the time between two changes of the nickname.</summary>
     public TimeSpan NicknameChangeInterval => TimeSpan.FromDays(Read(SecurityKeys.NicknameChangeIntervalDays));
 
+    /// <summary>Gets a value indicating whether an account must confirm its e-mail address before it runs game actions.</summary>
+    public bool RequireConfirmedEmail => ReadInt32(SecurityKeys.RequireConfirmedEmail) != 0;
+
     /// <summary>Gets the lifetime of the e-mail confirmation link.</summary>
     public TimeSpan ConfirmationLifetime => TimeSpan.FromHours(Read(SecurityKeys.ConfirmationLifetimeHours));
 

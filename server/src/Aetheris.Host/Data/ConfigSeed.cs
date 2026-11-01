@@ -63,6 +63,7 @@ public static class ConfigSeed
         new(SecurityKeys.NicknameMaxLength, "20", "1", "64", "Largest nickname length."),
         new(SecurityKeys.NicknameCharacters, "A-Za-zЀ-ӿ0-9 _-", null, null, "Characters a nickname may contain: listed as they are, a-z is a range, a dash at the end is the dash itself."),
         new(SecurityKeys.NicknameChangeIntervalDays, "30", "0", "3650", "Days between two changes of the nickname."),
+        new(SecurityKeys.RequireConfirmedEmail, "0", "0", "1", "1: an account must confirm its e-mail address before it runs game actions; 0: it plays without the confirmation (the setting of the development)."),
         new(SecurityKeys.ConfirmationLifetimeHours, "24", "1", "720", "Lifetime of the e-mail confirmation link, in hours; read at start."),
         new(SecurityKeys.ConfirmationResendMinutes, "5", "0", "1440", "Smallest pause between two confirmation e-mails, in minutes."),
         new(SecurityKeys.ResetLifetimeMinutes, "60", "5", "1440", "Lifetime of the password reset link, in minutes; read at start."),

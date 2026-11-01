@@ -28,6 +28,7 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.security.account.nickname_characters.description':
     'Символи, дозволені в нікнеймі: перелічені як є, a-z означає діапазон, дефіс у кінці означає сам дефіс.',
   'config.security.account.nickname_change_days.description': 'Днів між двома змінами нікнейму.',
+  'config.security.account.require_confirmed_email.description': '1: акаунт має підтвердити адресу пошти, перш ніж виконувати дії гри; 0: грає без підтвердження (так на час розробки). Щоб повернути обов’язкове підтвердження, поставте 1.',
   'config.security.account.confirmation_hours.description': 'Тривалість дії посилання підтвердження email, у годинах; читається під час старту.',
   'config.security.account.confirmation_resend_minutes.description': 'Найменша пауза між двома листами підтвердження, у хвилинах.',
   'config.security.account.reset_minutes.description': 'Тривалість дії посилання скидання пароля, у хвилинах; читається під час старту.',

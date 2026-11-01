@@ -1,5 +1,6 @@
 using Aetheris.Core.Commands;
 using Aetheris.Host.Data;
+using Aetheris.Host.Security;
 using Aetheris.World;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,19 +33,23 @@ public sealed class AccountGate
 {
     private readonly AetherisDbContext _dbContext;
     private readonly IWorldModule _world;
+    private readonly SecuritySettings _settings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AccountGate"/> class.
     /// </summary>
     /// <param name="dbContext">The database context.</param>
     /// <param name="world">The world module.</param>
-    public AccountGate(AetherisDbContext dbContext, IWorldModule world)
+    /// <param name="settings">The settings of the security.</param>
+    public AccountGate(AetherisDbContext dbContext, IWorldModule world, SecuritySettings settings)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(settings);
 
         _dbContext = dbContext;
         _world = world;
+        _settings = settings;
     }
 
     /// <summary>
@@ -65,7 +70,7 @@ public sealed class AccountGate
             .SingleOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        if (!confirmed && !await IsAllowedUnconfirmedAsync(command.ActionCode, cancellationToken).ConfigureAwait(false))
+        if (_settings.RequireConfirmedEmail && !confirmed && !await IsAllowedUnconfirmedAsync(command.ActionCode, cancellationToken).ConfigureAwait(false))
         {
             return Core.Errors.GameErrorCodes.EmailNotConfirmed;
         }

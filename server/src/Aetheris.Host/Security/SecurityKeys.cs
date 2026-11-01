@@ -67,6 +67,12 @@ public static class SecurityKeys
     /// <summary>The days between two changes of the nickname.</summary>
     public const string NicknameChangeIntervalDays = "security.account.nickname_change_days";
 
+    /// <summary>
+    /// Whether an account must confirm its e-mail address before it plays; off at the start of the
+    /// development, turning it on is this one value (nothing else in the code changes).
+    /// </summary>
+    public const string RequireConfirmedEmail = "security.account.require_confirmed_email";
+
     /// <summary>The lifetime of the e-mail confirmation link, in hours.</summary>
     public const string ConfirmationLifetimeHours = "security.account.confirmation_hours";
 

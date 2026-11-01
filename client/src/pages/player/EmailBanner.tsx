@@ -15,7 +15,7 @@ export function EmailBanner() {
   const { session } = useSession();
   const [state, setState] = useState<'idle' | 'busy' | 'sent' | 'too-soon' | 'failed'>('idle');
 
-  if (session.status !== 'signed-in' || session.me.emailConfirmed) {
+  if (session.status !== 'signed-in' || session.me.emailConfirmed || session.me.emailConfirmationRequired === false) {
     return null;
   }
 

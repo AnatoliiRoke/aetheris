@@ -2,6 +2,7 @@ using System.Net;
 using Aetheris.Core.Errors;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Data;
+using Aetheris.Host.Security;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Tests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,11 @@ public sealed class AccountGateTests
     [Fact]
     public async Task An_unconfirmed_account_runs_only_the_allowed_actions()
     {
+        using (IServiceScope on = _factory.Services.CreateScope())
+        {
+            await AetherisTestFactory.SetParameterAsync(on.ServiceProvider, SecurityKeys.RequireConfirmedEmail, "1");
+        }
+
         using HttpClient client = _factory.CreateBrowserClient();
         await TestAccounts.SignInAsync(client, await TestAccounts.RegisterAsync(_factory));
 
@@ -55,6 +61,29 @@ public sealed class AccountGateTests
     }
 
     /// <summary>
+    /// The confirmation of the address is off at the start of the development: an account that did
+    /// not confirm it runs the game actions (the unfinished onboarding still stops them); one value of
+    /// the settings turns the demand back on.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_confirmation_of_the_address_is_not_demanded_while_the_setting_is_off()
+    {
+        using (IServiceScope off = _factory.Services.CreateScope())
+        {
+            await AetherisTestFactory.SetParameterAsync(off.ServiceProvider, SecurityKeys.RequireConfirmedEmail, "0");
+        }
+
+        using HttpClient client = _factory.CreateBrowserClient();
+        await TestAccounts.SignInAsync(client, await TestAccounts.RegisterAsync(_factory));
+
+        HttpResponseMessage gameAction = await TestAccounts.SendCommandAsync(client, TestGameActionCommand.RoutePath, new { }, "gate-off");
+
+        Assert.Equal(HttpStatusCode.Forbidden, gameAction.StatusCode);
+        Assert.Equal(AccountGateErrorCodes.OnboardingRequired, await TestAccounts.ReadErrorAsync(gameAction));
+    }
+
+    /// <summary>
     /// The list of the allowed actions lives in the database: a new row lets the action pass
     /// the confirmation check at once, without a release.
     /// </summary>
@@ -62,6 +91,11 @@ public sealed class AccountGateTests
     [Fact]
     public async Task The_allowed_actions_change_in_the_database_without_a_release()
     {
+        using (IServiceScope on = _factory.Services.CreateScope())
+        {
+            await AetherisTestFactory.SetParameterAsync(on.ServiceProvider, SecurityKeys.RequireConfirmedEmail, "1");
+        }
+
         using HttpClient client = _factory.CreateBrowserClient();
         await TestAccounts.SignInAsync(client, await TestAccounts.RegisterAsync(_factory));
 

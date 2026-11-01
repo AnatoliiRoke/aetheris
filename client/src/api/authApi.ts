@@ -27,6 +27,8 @@ export interface Me {
   nickname: string;
   email: string;
   emailConfirmed: boolean;
+  /** Whether the server demands the confirmation of the address before the game actions; the banner shows only then. */
+  emailConfirmationRequired?: boolean;
   nicknameChangedAt: string | null;
   /** The status of the account, a code the server names (`standard`, later `premium`). */
   accountTier?: string;
