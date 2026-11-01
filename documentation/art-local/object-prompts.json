@@ -1,0 +1,2172 @@
+[
+  {
+    "kind": "resource",
+    "code": "resource_1",
+    "file": "resource_1.webp",
+    "size": "1280x720",
+    "group": "Руди",
+    "name_uk": "Залізна руда",
+    "name_en": "Iron ore",
+    "prompt": "A heavy chunk of raw iron ore with rust-red and brown rock, metallic grey veins and a few bright steel flecks. Palette: rust red, brown, steel grey. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_2",
+    "file": "resource_2.webp",
+    "size": "1280x720",
+    "group": "Руди",
+    "name_uk": "Титанова руда",
+    "name_en": "Titanium ore",
+    "prompt": "A rough lump of titanium ore, silver-blue metallic crystals growing out of dark grey rock. Palette: silver blue, cold grey. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_3",
+    "file": "resource_3.webp",
+    "size": "1280x720",
+    "group": "Руди",
+    "name_uk": "Іридієва руда",
+    "name_en": "Iridium ore",
+    "prompt": "A pile of iridium ore, dense pale-gold and white lustrous nuggets with a rainbow sheen on the facets. Palette: pale gold, white, faint rainbow sheen. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_4",
+    "file": "resource_4.webp",
+    "size": "1280x720",
+    "group": "Руди",
+    "name_uk": "Кобальтова руда",
+    "name_en": "Cobalt ore",
+    "prompt": "Cobalt ore, deep royal-blue mineral blocks with glassy blue highlights in black rock. Palette: deep blue, black. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_5",
+    "file": "resource_5.webp",
+    "size": "1280x720",
+    "group": "Руди",
+    "name_uk": "Уранова руда",
+    "name_en": "Uranium ore",
+    "prompt": "Uranium ore, dark heavy rock streaked with glowing toxic yellow-green veins that cast a soft green light. Palette: yellow-green glow, charcoal. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_6",
+    "file": "resource_6.webp",
+    "size": "1280x720",
+    "group": "Руди",
+    "name_uk": "Силікорова руда",
+    "name_en": "Silicore ore",
+    "prompt": "Silicore ore, a grey-violet rock cut by thin crystalline silicon veins, faintly reflective like polished chip silicon. Palette: grey violet, silver. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_7",
+    "file": "resource_7.webp",
+    "size": "1280x720",
+    "group": "Руди",
+    "name_uk": "Тектонітова руда",
+    "name_en": "Tectonite ore",
+    "prompt": "Tectonite ore, dark basalt plates with thin cracks glowing orange like cooling magma. Palette: black basalt, orange glow. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_8",
+    "file": "resource_8.webp",
+    "size": "1280x720",
+    "group": "Мінерали",
+    "name_uk": "Кварцит",
+    "name_en": "Quartzite",
+    "prompt": "Quartzite, a cluster of milky white and translucent quartz crystals and rounded pale stone. Palette: milky white, pale blue. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_9",
+    "file": "resource_9.webp",
+    "size": "1280x720",
+    "group": "Мінерали",
+    "name_uk": "Обсидіан",
+    "name_en": "Obsidian",
+    "prompt": "Obsidian, sharp black volcanic glass shards with glossy edges that reflect a thin cyan light. Palette: glossy black, cyan reflections. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_10",
+    "file": "resource_10.webp",
+    "size": "1280x720",
+    "group": "Мінерали",
+    "name_uk": "Лінтрій",
+    "name_en": "Lintrium",
+    "prompt": "Lintrium, a soft fibrous turquoise mineral that looks like bundled stone threads with a pearly sheen. Palette: turquoise, pearl. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_11",
+    "file": "resource_11.webp",
+    "size": "1280x720",
+    "group": "Мінерали",
+    "name_uk": "Орекс",
+    "name_en": "Orex",
+    "prompt": "Orex, rough orange-red translucent mineral nuggets, warm like amber with darker inclusions. Palette: amber orange, deep red. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_12",
+    "file": "resource_12.webp",
+    "size": "1280x720",
+    "group": "Пальне",
+    "name_uk": "Дейтерій",
+    "name_en": "Deuterium",
+    "prompt": "Deuterium fuel, a transparent canister of cold blue-white liquid with glowing droplets and frosty vapor. Palette: ice blue, white. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_13",
+    "file": "resource_13.webp",
+    "size": "1280x720",
+    "group": "Пальне",
+    "name_uk": "Гелій-3",
+    "name_en": "Helium-3",
+    "prompt": "Helium-3 fuel, a glass flask with a slow pale pink-gold gas swirling inside and tiny sparks. Palette: pale pink, soft gold. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_14",
+    "file": "resource_14.webp",
+    "size": "1280x720",
+    "group": "Пальне",
+    "name_uk": "Темна матерія",
+    "name_en": "Dark matter",
+    "prompt": "Dark matter, a perfectly black floating sphere with a thin violet halo that bends the stars behind it. Palette: black, violet rim. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_15",
+    "file": "resource_15.webp",
+    "size": "1280x720",
+    "group": "Пальне",
+    "name_uk": "Ефір",
+    "name_en": "Ether",
+    "prompt": "Ether, a golden luminous mist that gathers into a glowing cloud with fine bright threads. Palette: gold, warm white. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_16",
+    "file": "resource_16.webp",
+    "size": "1280x720",
+    "group": "Пальне",
+    "name_uk": "Збагачений Уран",
+    "name_en": "Enriched uranium",
+    "prompt": "Enriched uranium, a rack of neat glowing green fuel rods in a metal cradle with a soft toxic glow. Palette: bright green, dark steel. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_17",
+    "file": "resource_17.webp",
+    "size": "1280x720",
+    "group": "Кристали",
+    "name_uk": "Квартан",
+    "name_en": "Quartan",
+    "prompt": "Quartan crystals, a cluster of clean hexagonal blue crystals with sharp facets and an inner glow. Palette: electric blue, white. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_18",
+    "file": "resource_18.webp",
+    "size": "1280x720",
+    "group": "Кристали",
+    "name_uk": "Стобій",
+    "name_en": "Stobium",
+    "prompt": "Stobium crystals, tall thin red-violet spikes that grow from a dark base and shimmer at the tips. Palette: ruby red, violet. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_19",
+    "file": "resource_19.webp",
+    "size": "1280x720",
+    "group": "Кристали",
+    "name_uk": "Туманій",
+    "name_en": "Tumanium",
+    "prompt": "Tumanium crystals, pale lilac and white misty crystal pillars with fog drifting between them. Palette: lilac, mist white. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_20",
+    "file": "resource_20.webp",
+    "size": "1280x720",
+    "group": "Вироблені ресурси",
+    "name_uk": "Будматеріали",
+    "name_en": "Building materials",
+    "prompt": "Building materials, a neat stack of concrete slabs, steel beams and rebar bundles with yellow edge marks. Palette: concrete grey, steel, safety yellow. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_21",
+    "file": "resource_21.webp",
+    "size": "1280x720",
+    "group": "Вироблені ресурси",
+    "name_uk": "Оптоволокно",
+    "name_en": "Optical fiber",
+    "prompt": "Optical fiber, a large spool wound with hair-thin fibers that carry running points of cyan and magenta light. Palette: cyan, magenta, black spool. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_22",
+    "file": "resource_22.webp",
+    "size": "1280x720",
+    "group": "Вироблені ресурси",
+    "name_uk": "Мікропроцесори",
+    "name_en": "Microprocessors",
+    "prompt": "Microprocessors, several square chips on a dark board with gold pins and fine glowing circuit traces. Palette: silicon grey, gold, cyan traces. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_23",
+    "file": "resource_23.webp",
+    "size": "1280x720",
+    "group": "Вироблені ресурси",
+    "name_uk": "Композити",
+    "name_en": "Composites",
+    "prompt": "Composites, layered sheets of woven dark carbon fabric and pale resin, fanned out like a stack of panels. Palette: carbon black, pale resin. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_24",
+    "file": "resource_24.webp",
+    "size": "1280x720",
+    "group": "Вироблені ресурси",
+    "name_uk": "Енергострижні",
+    "name_en": "Energy rods",
+    "prompt": "Energy rods, a rack of glowing yellow-cyan rods with metal caps, light flowing along each rod. Palette: yellow, cyan, dark steel. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_25",
+    "file": "resource_25.webp",
+    "size": "1280x720",
+    "group": "Вироблені ресурси",
+    "name_uk": "Нановолокно",
+    "name_en": "Nanofiber",
+    "prompt": "Nanofiber, a skein of shimmering ultra-fine threads that catch light in silver and violet. Palette: silver, violet shimmer. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_26",
+    "file": "resource_26.webp",
+    "size": "1280x720",
+    "group": "Вироблені ресурси",
+    "name_uk": "Титановий сплав",
+    "name_en": "Titanium alloy",
+    "prompt": "Titanium alloy, three heavy ingots with stamped hexagon marks and a cool blue-silver metallic finish. Palette: blue silver, graphite. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_27",
+    "file": "resource_27.webp",
+    "size": "1280x720",
+    "group": "Баланси цивілізації",
+    "name_uk": "Кредити",
+    "name_en": "Credits",
+    "prompt": "Credits, a small stack of round hexagon-stamped coins with a bright teal edge glow. Palette: teal, brushed silver. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_28",
+    "file": "resource_28.webp",
+    "size": "1280x720",
+    "group": "Баланси цивілізації",
+    "name_uk": "Торгова валюта",
+    "name_en": "Trade currency",
+    "prompt": "Trade currency, a violet exchange token with two arrows curling round each other and a soft purple glow. Palette: violet, lilac glow. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_29",
+    "file": "resource_29.webp",
+    "size": "1280x720",
+    "group": "Баланси цивілізації",
+    "name_uk": "Енергія",
+    "name_en": "Energy",
+    "prompt": "Energy, a glowing orb of yellow lightning held inside a ring, bright arcs reaching out. Palette: bright yellow, white. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_30",
+    "file": "resource_30.webp",
+    "size": "1280x720",
+    "group": "Баланси цивілізації",
+    "name_uk": "Населення",
+    "name_en": "Population",
+    "prompt": "Population, a small crowd of calm human silhouettes standing in front of a glowing city dome. Palette: warm white, soft teal. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "resource",
+    "code": "resource_31",
+    "file": "resource_31.webp",
+    "size": "1280x720",
+    "group": "Баланси цивілізації",
+    "name_uk": "Реальна валюта",
+    "name_en": "Premium currency",
+    "prompt": "Premium currency, a rare crystalline golden-white coin that floats and throws sparkling light. Palette: gold, white sparkle. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_1",
+    "file": "building_1.webp",
+    "size": "1280x720",
+    "group": "Головні й населення",
+    "name_uk": "Адміністративний центр",
+    "name_en": "Administrative center",
+    "prompt": "A broad administrative center with a central tower, glass wings and the flag mast, the seat of the whole colony. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_2",
+    "file": "building_2.webp",
+    "size": "1280x720",
+    "group": "Головні й населення",
+    "name_uk": "Житловий комплекс (Міста)",
+    "name_en": "Housing complex",
+    "prompt": "A housing complex of tall residential blocks connected by sky bridges, hundreds of lit windows. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_3",
+    "file": "building_3.webp",
+    "size": "1280x720",
+    "group": "Головні й населення",
+    "name_uk": "Медичний центр",
+    "name_en": "Medical center",
+    "prompt": "A medical center, a clean white building with a glowing cross-shaped atrium and a landing pad for ambulances. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_4",
+    "file": "building_4.webp",
+    "size": "1280x720",
+    "group": "Головні й населення",
+    "name_uk": "Банк",
+    "name_en": "Bank",
+    "prompt": "A bank, a heavy dark building with a golden vault door visible through a glass facade and a ring of light above it. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_5",
+    "file": "building_5.webp",
+    "size": "1280x720",
+    "group": "Головні й населення",
+    "name_uk": "Будівельний комбінат",
+    "name_en": "Construction plant",
+    "prompt": "A construction plant, cranes and gantries over a half-finished modular building, welding sparks. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_6",
+    "file": "building_6.webp",
+    "size": "1280x720",
+    "group": "Головні й населення",
+    "name_uk": "Космопорт",
+    "name_en": "Spaceport",
+    "prompt": "A spaceport, wide landing fields with docked transport ships and a control tower. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_7",
+    "file": "building_7.webp",
+    "size": "1280x720",
+    "group": "Склади",
+    "name_uk": "Склад",
+    "name_en": "Warehouse",
+    "prompt": "A warehouse, a long hangar with wide doors, stacked cargo containers outside. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_8",
+    "file": "building_8.webp",
+    "size": "1280x720",
+    "group": "Склади",
+    "name_uk": "Бункер",
+    "name_en": "Bunker",
+    "prompt": "A bunker, a low reinforced dome half buried in the ground with thick armored doors and a small beacon. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_9",
+    "file": "building_9.webp",
+    "size": "1280x720",
+    "group": "Наука",
+    "name_uk": "Науковий центр",
+    "name_en": "Science center",
+    "prompt": "A science center, a round building with a rotating antenna dish and glowing laboratory windows. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_10",
+    "file": "building_10.webp",
+    "size": "1280x720",
+    "group": "Наука",
+    "name_uk": "Конструкторське бюро",
+    "name_en": "Design bureau",
+    "prompt": "A design bureau, an angular studio building with a large holographic blueprint of a ship floating in its atrium. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_11",
+    "file": "building_11.webp",
+    "size": "1280x720",
+    "group": "Наука",
+    "name_uk": "Археологічний центр",
+    "name_en": "Archaeology center",
+    "prompt": "An archaeology center, an excavation site with a lit tent complex and an ancient alien relic being lifted from the ground. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_12",
+    "file": "building_12.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Шахта залізної руди",
+    "name_en": "Iron ore mine",
+    "prompt": "An iron ore mine, an open pit with a headframe tower and a conveyor, red-brown rock walls. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_13",
+    "file": "building_13.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Шахта титанової руди",
+    "name_en": "Titanium ore mine",
+    "prompt": "A titanium ore mine, an excavation with silver-blue ore walls, drills and a loading crane. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_14",
+    "file": "building_14.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Шахта іридієвої руди",
+    "name_en": "Iridium ore mine",
+    "prompt": "An iridium ore mine, a deep shaft with a pale-gold glint in the rock and a delicate extraction gantry. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_15",
+    "file": "building_15.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Шахта кобальтової руди",
+    "name_en": "Cobalt ore mine",
+    "prompt": "A cobalt ore mine, a pit cut in deep blue rock with ore carts on rails. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_16",
+    "file": "building_16.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Шахта уранової руди",
+    "name_en": "Uranium ore mine",
+    "prompt": "A uranium ore mine, a sealed shaft with warning lights, sheathed tunnels and a green glow from the rock. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_17",
+    "file": "building_17.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Шахта силікорової руди",
+    "name_en": "Silicore mine",
+    "prompt": "A silicore mine, a terraced cut in grey-violet rock with precise cutting machines. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_18",
+    "file": "building_18.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Шахта тектонітової руди",
+    "name_en": "Tectonite ore mine",
+    "prompt": "A tectonite ore mine, a mine in black basalt with glowing orange fissures and heat-shielded machines. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_19",
+    "file": "building_19.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Кар'єр кварциту",
+    "name_en": "Quartzite quarry",
+    "prompt": "A quartzite quarry, a pale stepped quarry with cutting rigs and stacked white blocks. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_20",
+    "file": "building_20.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Кар'єр обсидіану",
+    "name_en": "Obsidian quarry",
+    "prompt": "An obsidian quarry, a quarry of black glassy rock with sharp edges and a crane lifting a slab. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_21",
+    "file": "building_21.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Кар'єр лінтрію",
+    "name_en": "Lintrium quarry",
+    "prompt": "A lintrium quarry, a turquoise fibrous rock face with long extraction arms. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_22",
+    "file": "building_22.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Кар'єр орексу",
+    "name_en": "Orex quarry",
+    "prompt": "An orex quarry, an orange-red rock quarry with warm lights and haul trucks. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_23",
+    "file": "building_23.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Копальня квартану",
+    "name_en": "Quartan mine",
+    "prompt": "A quartan mine, a cavern mouth lined with large blue crystals and light rails. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_24",
+    "file": "building_24.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Копальня стобію",
+    "name_en": "Stobium mine",
+    "prompt": "A stobium mine, a shaft among tall red-violet crystal spikes with careful extraction tools. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_25",
+    "file": "building_25.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Копальня туманію",
+    "name_en": "Tumanium mine",
+    "prompt": "A tumanium mine, a misty crater with pale lilac crystal pillars and drifting fog around the equipment. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_26",
+    "file": "building_26.webp",
+    "size": "1280x720",
+    "group": "Видобуток на планеті",
+    "name_uk": "Станція дейтерію",
+    "name_en": "Deuterium station",
+    "prompt": "A deuterium station, tall tanks and pipes on the shore of an ice-blue sea, vapor rising. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_27",
+    "file": "building_27.webp",
+    "size": "1280x720",
+    "group": "Енергетика",
+    "name_uk": "Сонячна електростанція",
+    "name_en": "Solar power plant",
+    "prompt": "A solar power plant, rows of large mirrored panels turned to a bright star, light flares on the glass. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_28",
+    "file": "building_28.webp",
+    "size": "1280x720",
+    "group": "Енергетика",
+    "name_uk": "Теплова електростанція",
+    "name_en": "Thermal power plant",
+    "prompt": "A thermal power plant, a heavy plant with big chimneys and glowing pipes, warm steam. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_29",
+    "file": "building_29.webp",
+    "size": "1280x720",
+    "group": "Енергетика",
+    "name_uk": "Ядерна електростанція",
+    "name_en": "Nuclear power plant",
+    "prompt": "A nuclear power plant, a containment dome with cooling towers and a soft blue glow from a service door. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_30",
+    "file": "building_30.webp",
+    "size": "1280x720",
+    "group": "Енергетика",
+    "name_uk": "Термоядерна електростанція",
+    "name_en": "Fusion power plant",
+    "prompt": "A fusion power plant, a huge ring reactor hall with a bright white-blue plasma core visible through the roof. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_31",
+    "file": "building_31.webp",
+    "size": "1280x720",
+    "group": "Виробництво ресурсів",
+    "name_uk": "Завод будматеріалів",
+    "name_en": "Building-materials plant",
+    "prompt": "A building-materials plant, mixers, silos and stacks of finished concrete slabs on a production line. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_32",
+    "file": "building_32.webp",
+    "size": "1280x720",
+    "group": "Виробництво ресурсів",
+    "name_uk": "Оптоволоконний завод",
+    "name_en": "Optical-fiber plant",
+    "prompt": "An optical-fiber plant, a bright hall with long drawing towers and glowing fibers falling like threads of light. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_33",
+    "file": "building_33.webp",
+    "size": "1280x720",
+    "group": "Виробництво ресурсів",
+    "name_uk": "Фабрика мікропроцесорів",
+    "name_en": "Microprocessor factory",
+    "prompt": "A microprocessor factory, a clean-room building with a glass front, wafer robots and cyan light. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_34",
+    "file": "building_34.webp",
+    "size": "1280x720",
+    "group": "Виробництво ресурсів",
+    "name_uk": "Завод композитів",
+    "name_en": "Composites plant",
+    "prompt": "A composites plant, a long hall with autoclaves and rolls of dark carbon fabric being laid by arms. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_35",
+    "file": "building_35.webp",
+    "size": "1280x720",
+    "group": "Виробництво ресурсів",
+    "name_uk": "Завод енергострижнів",
+    "name_en": "Energy-rod plant",
+    "prompt": "An energy-rod plant, a facility with charging towers where glowing rods are lowered into cradles. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_36",
+    "file": "building_36.webp",
+    "size": "1280x720",
+    "group": "Виробництво ресурсів",
+    "name_uk": "Завод нановолокна",
+    "name_en": "Nanofiber plant",
+    "prompt": "A nanofiber plant, a compact tall plant with fine shimmering threads spun between vertical frames. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_37",
+    "file": "building_37.webp",
+    "size": "1280x720",
+    "group": "Виробництво ресурсів",
+    "name_uk": "Металургійний завод",
+    "name_en": "Metallurgical plant",
+    "prompt": "A metallurgical plant, blast furnaces, a glowing ladle pouring molten metal and sparks in the dark. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_38",
+    "file": "building_38.webp",
+    "size": "1280x720",
+    "group": "Виробництво ресурсів",
+    "name_uk": "Завод збагачення урану",
+    "name_en": "Uranium enrichment plant",
+    "prompt": "A uranium enrichment plant, rows of centrifuge halls behind security fences with a green glow. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_39",
+    "file": "building_39.webp",
+    "size": "1280x720",
+    "group": "Виробництво ресурсів",
+    "name_uk": "Перетворювач матерії",
+    "name_en": "Matter converter",
+    "prompt": "A matter converter, a strange ring machine where a beam turns raw stone into glowing particles of other matter. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_40",
+    "file": "building_40.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Фабрика двигунів",
+    "name_en": "Engine factory",
+    "prompt": "An engine factory, a plant with test stands where a bright ion exhaust flares from a mounted engine. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_41",
+    "file": "building_41.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Завод реакторів",
+    "name_en": "Reactor plant",
+    "prompt": "A reactor plant, an assembly hall with a half-built reactor core on a crane and blue arc light. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_42",
+    "file": "building_42.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Завод енергетичної зброї",
+    "name_en": "Energy-weapon plant",
+    "prompt": "An energy-weapon plant, a factory with laser barrels on racks and a test range lit by a red beam. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_43",
+    "file": "building_43.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Завод кінетичної зброї",
+    "name_en": "Kinetic-weapon plant",
+    "prompt": "A kinetic-weapon plant, a gun foundry with cannon barrels, shell conveyors and sparks. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_44",
+    "file": "building_44.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Ливарний завод",
+    "name_en": "Foundry",
+    "prompt": "A foundry, a huge casting hall pouring bright metal into molds, heavy cranes and fiery glow. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_45",
+    "file": "building_45.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Завод щитів",
+    "name_en": "Shield plant",
+    "prompt": "A shield plant, a hall with emitter rings where a shimmering energy dome is being tested. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_46",
+    "file": "building_46.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Фабрика боєприпасів",
+    "name_en": "Ammunition factory",
+    "prompt": "An ammunition factory, assembly lines with missiles and shells under protective shields and warning lamps. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_47",
+    "file": "building_47.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Фабрика бурових установок",
+    "name_en": "Drill factory",
+    "prompt": "A drill factory, big industrial drill bits and rigs being assembled under gantries. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_48",
+    "file": "building_48.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Завод точних приладів",
+    "name_en": "Precision-instrument plant",
+    "prompt": "A precision-instrument plant, a bright laboratory-factory with tiny robotic arms and glass cabinets. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_49",
+    "file": "building_49.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Індустріальний комплекс",
+    "name_en": "Industrial complex",
+    "prompt": "An industrial complex, a dense sprawl of chimneys, pipes, hangars and cranes under a hazy sky. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_50",
+    "file": "building_50.webp",
+    "size": "1280x720",
+    "group": "Виробництво модулів",
+    "name_uk": "Фабрика утилізації",
+    "name_en": "Recycling factory",
+    "prompt": "A recycling factory, scrap heaps being fed into sorters, green status lights and falling metal sparks. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_51",
+    "file": "building_51.webp",
+    "size": "1280x720",
+    "group": "Флот і оборона",
+    "name_uk": "Верф",
+    "name_en": "Shipyard",
+    "prompt": "A shipyard, a huge dry dock with a half-built starship in a scaffolding frame and welding light. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_52",
+    "file": "building_52.webp",
+    "size": "1280x720",
+    "group": "Флот і оборона",
+    "name_uk": "Радар",
+    "name_en": "Radar",
+    "prompt": "A radar, a big dish antenna on a tower with a faint scanning beam sweeping the dark sky. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_53",
+    "file": "building_53.webp",
+    "size": "1280x720",
+    "group": "Флот і оборона",
+    "name_uk": "Планетарна гармата",
+    "name_en": "Planetary gun",
+    "prompt": "A planetary gun, a massive turret on a fortified base aiming at the sky, a muzzle glow ready. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_54",
+    "file": "building_54.webp",
+    "size": "1280x720",
+    "group": "Флот і оборона",
+    "name_uk": "Планетарний щит",
+    "name_en": "Planetary shield",
+    "prompt": "A planetary shield, a ring of tall emitter pylons raising a translucent teal dome over a small settlement. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_55",
+    "file": "building_55.webp",
+    "size": "1280x720",
+    "group": "Торгівля й логістика",
+    "name_uk": "Торговий центр",
+    "name_en": "Trade center",
+    "prompt": "A trade center, a modern market hall with glowing sign boards, cargo drones and a crowded square. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "building",
+    "code": "building_56",
+    "file": "building_56.webp",
+    "size": "1280x720",
+    "group": "Торгівля й логістика",
+    "name_uk": "Портал",
+    "name_en": "Portal",
+    "prompt": "A portal, a large circular gate standing on a platform with a bright blue swirling opening inside. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_1",
+    "file": "tech_1.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Математика",
+    "name_en": "Mathematics",
+    "prompt": "An emblem illustration for the research \"Mathematics\". Mathematics: glowing geometric solids, a golden spiral and floating equations over a dark grid. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_2",
+    "file": "tech_2.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Фізика",
+    "name_en": "Physics",
+    "prompt": "An emblem illustration for the research \"Physics\". Physics: a pendulum of light, a prism splitting a beam and orbiting particles in a faint field. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_3",
+    "file": "tech_3.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Ядерна фізика",
+    "name_en": "Nuclear physics",
+    "prompt": "An emblem illustration for the research \"Nuclear physics\". Nuclear physics: an atom with a bright nucleus, orbiting electrons and a green-yellow chain reaction. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_4",
+    "file": "tech_4.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Термоядерний синтез",
+    "name_en": "Thermonuclear fusion",
+    "prompt": "An emblem illustration for the research \"Thermonuclear fusion\". Thermonuclear fusion: two small suns merging into one bright white star inside a magnetic ring. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_5",
+    "file": "tech_5.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Геологія",
+    "name_en": "Geology",
+    "prompt": "An emblem illustration for the research \"Geology\". Geology: a cutaway of a planet crust with colorful layers, crystals and a drill probe. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_6",
+    "file": "tech_6.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Електроніка",
+    "name_en": "Electronics",
+    "prompt": "An emblem illustration for the research \"Electronics\". Electronics: a glowing circuit board with traces, a chip and flowing cyan current. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_7",
+    "file": "tech_7.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Енергетика",
+    "name_en": "Power engineering",
+    "prompt": "An emblem illustration for the research \"Power engineering\". Power engineering: a lightning bolt entering a power grid tower with arcs between coils. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_8",
+    "file": "tech_8.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Будівництво",
+    "name_en": "Construction",
+    "prompt": "An emblem illustration for the research \"Construction\". Construction: a holographic blueprint of a building with scaffolding and a crane silhouette. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_9",
+    "file": "tech_9.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Кібернетика",
+    "name_en": "Cybernetics",
+    "prompt": "An emblem illustration for the research \"Cybernetics\". Cybernetics: a human hand and a robotic hand almost touching, with neural light between them. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_10",
+    "file": "tech_10.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Робототехніка",
+    "name_en": "Robotics",
+    "prompt": "An emblem illustration for the research \"Robotics\". Robotics: a delicate robotic arm assembling a small glowing part on a workbench. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_11",
+    "file": "tech_11.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Економіка",
+    "name_en": "Economics",
+    "prompt": "An emblem illustration for the research \"Economics\". Economics: rising bars and a coin with trade arrows, a glowing market graph. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_12",
+    "file": "tech_12.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Археологія",
+    "name_en": "Archaeology",
+    "prompt": "An emblem illustration for the research \"Archaeology\". Archaeology: an ancient alien relic with glowing carved symbols half uncovered in sand. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_13",
+    "file": "tech_13.webp",
+    "size": "1280x720",
+    "group": "Економіка",
+    "name_uk": "Кристалографія",
+    "name_en": "Crystallography",
+    "prompt": "An emblem illustration for the research \"Crystallography\". Crystallography: a perfect lattice of crystals with beams of light splitting across the facets. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_14",
+    "file": "tech_14.webp",
+    "size": "1280x720",
+    "group": "Економіка",
+    "name_uk": "Газова інженерія",
+    "name_en": "Gas engineering",
+    "prompt": "An emblem illustration for the research \"Gas engineering\". Gas engineering: pressure tanks, pipes and a swirling glowing gas cloud. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_15",
+    "file": "tech_15.webp",
+    "size": "1280x720",
+    "group": "Економіка",
+    "name_uk": "Логістика складів",
+    "name_en": "Warehouse logistics",
+    "prompt": "An emblem illustration for the research \"Warehouse logistics\". Warehouse logistics: a grid of containers with a holographic route and a loader drone. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_16",
+    "file": "tech_16.webp",
+    "size": "1280x720",
+    "group": "Економіка",
+    "name_uk": "Демографія",
+    "name_en": "Demography",
+    "prompt": "An emblem illustration for the research \"Demography\". Demography: a glowing tree of small human silhouettes growing like branches over a city. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_17",
+    "file": "tech_17.webp",
+    "size": "1280x720",
+    "group": "Економіка",
+    "name_uk": "Колоніальне управління",
+    "name_en": "Colonial administration",
+    "prompt": "An emblem illustration for the research \"Colonial administration\". Colonial administration: a planet with small flags and a network of lines linking colonies. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_18",
+    "file": "tech_18.webp",
+    "size": "1280x720",
+    "group": "Фундаментальні науки",
+    "name_uk": "Перетворення матерії",
+    "name_en": "Matter conversion",
+    "prompt": "An emblem illustration for the research \"Matter conversion\". Matter conversion: a beam turning a rough stone into glowing particles that form a different object. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_19",
+    "file": "tech_19.webp",
+    "size": "1280x720",
+    "group": "Економіка",
+    "name_uk": "Торговельне право",
+    "name_en": "Trade law",
+    "prompt": "An emblem illustration for the research \"Trade law\". Trade law: balanced scales with a coin on one side and a contract scroll on the other, soft golden light. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "technology",
+    "code": "tech_20",
+    "file": "tech_20.webp",
+    "size": "1280x720",
+    "group": "Економіка",
+    "name_uk": "Стабілізація порталу",
+    "name_en": "Portal stabilization",
+    "prompt": "An emblem illustration for the research \"Portal stabilization\". Portal stabilization: a swirling portal ring held steady by four glowing anchor beams. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_1",
+    "file": "part_m_1.webp",
+    "size": "1280x720",
+    "group": "Двигуни",
+    "name_uk": "Реактивний двигун",
+    "name_en": "Jet engine",
+    "prompt": "A jet engine, a compact metal nozzle with a bright orange exhaust flame and heat shimmer. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_2",
+    "file": "part_m_2.webp",
+    "size": "1280x720",
+    "group": "Двигуни",
+    "name_uk": "Плазмовий двигун",
+    "name_en": "Plasma engine",
+    "prompt": "A plasma engine, a wide nozzle with a magnetic ring and a violet-white plasma jet. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_3",
+    "file": "part_m_3.webp",
+    "size": "1280x720",
+    "group": "Двигуни",
+    "name_uk": "Іонний двигун",
+    "name_en": "Ion engine",
+    "prompt": "An ion engine, a long slim engine with grid rings and a thin cold blue ion beam. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_4",
+    "file": "part_m_4.webp",
+    "size": "1280x720",
+    "group": "Двигуни",
+    "name_uk": "Гравітаційний двигун",
+    "name_en": "Gravity engine",
+    "prompt": "A gravity engine, a spherical drive floating inside rings that bend the light around it. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_5",
+    "file": "part_m_5.webp",
+    "size": "1280x720",
+    "group": "Двигуни",
+    "name_uk": "Гіпердвигун",
+    "name_en": "Hyperdrive",
+    "prompt": "A hyperdrive, a sleek engine with a glowing spiral core and streaking stars behind it. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_6",
+    "file": "part_m_6.webp",
+    "size": "1280x720",
+    "group": "Двигуни",
+    "name_uk": "Джамп-двигун",
+    "name_en": "Jump drive",
+    "prompt": "A jump drive, a ring-shaped drive with a bright tear in space opening in its center. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_7",
+    "file": "part_m_7.webp",
+    "size": "1280x720",
+    "group": "Реактори",
+    "name_uk": "Ядерний реактор",
+    "name_en": "Nuclear reactor",
+    "prompt": "A nuclear reactor, a compact heavy core with cooling fins and a steady blue glow. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_8",
+    "file": "part_m_8.webp",
+    "size": "1280x720",
+    "group": "Реактори",
+    "name_uk": "Імпульсний реактор",
+    "name_en": "Pulse reactor",
+    "prompt": "A pulse reactor, a reactor that flashes rhythmic bright pulses along its coils. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_9",
+    "file": "part_m_9.webp",
+    "size": "1280x720",
+    "group": "Реактори",
+    "name_uk": "Термоядерний реактор",
+    "name_en": "Fusion reactor",
+    "prompt": "A fusion reactor, a toroidal ring with a bright white plasma line in the middle. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_10",
+    "file": "part_m_10.webp",
+    "size": "1280x720",
+    "group": "Реактори",
+    "name_uk": "Реактор холодного синтезу",
+    "name_en": "Cold-fusion reactor",
+    "prompt": "A cold-fusion reactor, a clean frosted capsule reactor with a calm cyan light and ice crystals on it. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_11",
+    "file": "part_m_11.webp",
+    "size": "1280x720",
+    "group": "Реактори",
+    "name_uk": "Гравітаційний реактор",
+    "name_en": "Gravity reactor",
+    "prompt": "A gravity reactor, a dark sphere held by rings, small bright matter streams spiraling in. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_12",
+    "file": "part_m_12.webp",
+    "size": "1280x720",
+    "group": "Реактори",
+    "name_uk": "Важкий реактор",
+    "name_en": "Heavy reactor",
+    "prompt": "A heavy reactor, a massive armored reactor block with thick pipes and a hot orange core. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_13",
+    "file": "part_m_13.webp",
+    "size": "1280x720",
+    "group": "Енергетична зброя",
+    "name_uk": "Легкий лазер",
+    "name_en": "Light laser",
+    "prompt": "A light laser, a slim turret with a thin red beam. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_14",
+    "file": "part_m_14.webp",
+    "size": "1280x720",
+    "group": "Енергетична зброя",
+    "name_uk": "Важкий лазер",
+    "name_en": "Heavy laser",
+    "prompt": "A heavy laser, a large turret with a long barrel and a thick red-orange beam. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_15",
+    "file": "part_m_15.webp",
+    "size": "1280x720",
+    "group": "Енергетична зброя",
+    "name_uk": "Імпульсний лазер",
+    "name_en": "Pulse laser",
+    "prompt": "A pulse laser, a turret firing a train of short bright red pulses. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_16",
+    "file": "part_m_16.webp",
+    "size": "1280x720",
+    "group": "Енергетична зброя",
+    "name_uk": "Плазмова гармата",
+    "name_en": "Plasma cannon",
+    "prompt": "A plasma cannon, a thick barrel launching a glowing green-white plasma bolt. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_17",
+    "file": "part_m_17.webp",
+    "size": "1280x720",
+    "group": "Енергетична зброя",
+    "name_uk": "Іонна гармата",
+    "name_en": "Ion cannon",
+    "prompt": "An ion cannon, a ringed barrel emitting a crackling blue ion arc. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_18",
+    "file": "part_m_18.webp",
+    "size": "1280x720",
+    "group": "Енергетична зброя",
+    "name_uk": "Мікрохвильовий випромінювач",
+    "name_en": "Microwave emitter",
+    "prompt": "A microwave emitter, a dish emitter with faint rippling waves of heat in the air. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_19",
+    "file": "part_m_19.webp",
+    "size": "1280x720",
+    "group": "Енергетична зброя",
+    "name_uk": "Частинковий прискорювач",
+    "name_en": "Particle accelerator",
+    "prompt": "A particle accelerator, a long ring cannon with bright particle streams circulating inside. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_20",
+    "file": "part_m_20.webp",
+    "size": "1280x720",
+    "group": "Енергетична зброя",
+    "name_uk": "Орексова гармата",
+    "name_en": "Orex cannon",
+    "prompt": "An orex cannon, a heavy cannon fed by orange-red orex crystals that glow in its breech. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_21",
+    "file": "part_m_21.webp",
+    "size": "1280x720",
+    "group": "Кінетична зброя",
+    "name_uk": "Кінетична гармата",
+    "name_en": "Kinetic cannon",
+    "prompt": "A kinetic cannon, a sturdy steel gun with a muzzle flash. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_22",
+    "file": "part_m_22.webp",
+    "size": "1280x720",
+    "group": "Кінетична зброя",
+    "name_uk": "Скорострільна гармата",
+    "name_en": "Autocannon",
+    "prompt": "An autocannon, a multi-barrel rotary cannon with a stream of tracer rounds. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_23",
+    "file": "part_m_23.webp",
+    "size": "1280x720",
+    "group": "Кінетична зброя",
+    "name_uk": "Рейкова гармата",
+    "name_en": "Railgun",
+    "prompt": "A railgun, a long twin-rail gun with blue sparks running along the rails. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_24",
+    "file": "part_m_24.webp",
+    "size": "1280x720",
+    "group": "Кінетична зброя",
+    "name_uk": "РПУ-X1",
+    "name_en": "Launcher X1",
+    "prompt": "A missile launcher X1, a small launcher rack with a single missile ready. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_25",
+    "file": "part_m_25.webp",
+    "size": "1280x720",
+    "group": "Кінетична зброя",
+    "name_uk": "РПУ-X2",
+    "name_en": "Launcher X2",
+    "prompt": "A missile launcher X2, a medium launcher with two missiles in side-by-side tubes. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_26",
+    "file": "part_m_26.webp",
+    "size": "1280x720",
+    "group": "Кінетична зброя",
+    "name_uk": "РПУ-X3",
+    "name_en": "Launcher X3",
+    "prompt": "A missile launcher X3, a large launcher with three heavy missiles in a tube cluster. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_27",
+    "file": "part_m_27.webp",
+    "size": "1280x720",
+    "group": "Броня",
+    "name_uk": "Сталева плита",
+    "name_en": "Steel plate",
+    "prompt": "A steel plate, a thick dull steel armor plate with bolts and scratches. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_28",
+    "file": "part_m_28.webp",
+    "size": "1280x720",
+    "group": "Броня",
+    "name_uk": "Сегментна броня",
+    "name_en": "Segmented armor",
+    "prompt": "Segmented armor, overlapping armor segments like a shell, each with a small highlight. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_29",
+    "file": "part_m_29.webp",
+    "size": "1280x720",
+    "group": "Броня",
+    "name_uk": "Кобальтова броня",
+    "name_en": "Cobalt armor",
+    "prompt": "Cobalt armor, deep blue armor plates with a glossy finish. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_30",
+    "file": "part_m_30.webp",
+    "size": "1280x720",
+    "group": "Броня",
+    "name_uk": "Титанова плита",
+    "name_en": "Titanium plate",
+    "prompt": "A titanium plate, a clean silver-blue plate with a hexagon pattern. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_31",
+    "file": "part_m_31.webp",
+    "size": "1280x720",
+    "group": "Броня",
+    "name_uk": "Композитна броня",
+    "name_en": "Composite armor",
+    "prompt": "Composite armor, layered dark composite panels with visible weave. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_32",
+    "file": "part_m_32.webp",
+    "size": "1280x720",
+    "group": "Броня",
+    "name_uk": "Іридієва плита",
+    "name_en": "Iridium plate",
+    "prompt": "An iridium plate, a bright pale-gold plate that looks very dense and polished. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_33",
+    "file": "part_m_33.webp",
+    "size": "1280x720",
+    "group": "Броня",
+    "name_uk": "Наноплита",
+    "name_en": "Nanoplate",
+    "prompt": "A nanoplate, a plate with a faintly shimmering nano-lattice surface that seems to move. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_34",
+    "file": "part_m_34.webp",
+    "size": "1280x720",
+    "group": "Броня",
+    "name_uk": "Адаптивна броня",
+    "name_en": "Adaptive armor",
+    "prompt": "Adaptive armor, plates in motion that shift color toward the threat, with soft color ripples. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_35",
+    "file": "part_m_35.webp",
+    "size": "1280x720",
+    "group": "Щити",
+    "name_uk": "Силовий щит",
+    "name_en": "Force shield",
+    "prompt": "A force shield, a shield emitter projecting a translucent teal dome. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_36",
+    "file": "part_m_36.webp",
+    "size": "1280x720",
+    "group": "Щити",
+    "name_uk": "Кварцовий щит",
+    "name_en": "Quartz shield",
+    "prompt": "A quartz shield, a shield made of clear quartz facets that refract light. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_37",
+    "file": "part_m_37.webp",
+    "size": "1280x720",
+    "group": "Щити",
+    "name_uk": "Магнітний щит",
+    "name_en": "Magnetic shield",
+    "prompt": "A magnetic shield, an emitter with visible curved field lines in blue and violet. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_38",
+    "file": "part_m_38.webp",
+    "size": "1280x720",
+    "group": "Щити",
+    "name_uk": "Гравітаційний щит",
+    "name_en": "Gravity shield",
+    "prompt": "A gravity shield, a dark sphere surrounded by bent light and orbiting small debris. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_39",
+    "file": "part_m_39.webp",
+    "size": "1280x720",
+    "group": "Щити",
+    "name_uk": "Нейтронний щит",
+    "name_en": "Neutron shield",
+    "prompt": "A neutron shield, a dense white-grey shield surface with fine particle sparks. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_40",
+    "file": "part_m_40.webp",
+    "size": "1280x720",
+    "group": "Щити",
+    "name_uk": "Плазмовий щит",
+    "name_en": "Plasma shield",
+    "prompt": "A plasma shield, a shield glowing like hot plasma in pink and white. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_41",
+    "file": "part_m_41.webp",
+    "size": "1280x720",
+    "group": "Щити",
+    "name_uk": "Орексовий щит",
+    "name_en": "Orex shield",
+    "prompt": "An orex shield, an orange-red crystal-shaped energy shield around an orex core. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_42",
+    "file": "part_m_42.webp",
+    "size": "1280x720",
+    "group": "Щити",
+    "name_uk": "Ефірний щит",
+    "name_en": "Ether shield",
+    "prompt": "An ether shield, a golden luminous veil of ether with soft waves. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_43",
+    "file": "part_m_43.webp",
+    "size": "1280x720",
+    "group": "Боєприпаси",
+    "name_uk": "Сталевий снаряд",
+    "name_en": "Steel shell",
+    "prompt": "A steel shell, a plain steel artillery shell on a stand. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_44",
+    "file": "part_m_44.webp",
+    "size": "1280x720",
+    "group": "Боєприпаси",
+    "name_uk": "Кобальтовий снаряд",
+    "name_en": "Cobalt shell",
+    "prompt": "A cobalt shell, a deep-blue shell with a sharp tip. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_45",
+    "file": "part_m_45.webp",
+    "size": "1280x720",
+    "group": "Боєприпаси",
+    "name_uk": "Рейковий стрижень",
+    "name_en": "Rail slug",
+    "prompt": "A rail slug, a dense metal slug with a glowing blue trail. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_46",
+    "file": "part_m_46.webp",
+    "size": "1280x720",
+    "group": "Боєприпаси",
+    "name_uk": "Стріла-X1",
+    "name_en": "Arrow X1",
+    "prompt": "Arrow X1 missile, a small slim missile with small fins and an orange exhaust. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_47",
+    "file": "part_m_47.webp",
+    "size": "1280x720",
+    "group": "Боєприпаси",
+    "name_uk": "Блискавка-X1",
+    "name_en": "Lightning X1",
+    "prompt": "Lightning X1 missile, a fast missile surrounded by crackling electric arcs. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_48",
+    "file": "part_m_48.webp",
+    "size": "1280x720",
+    "group": "Боєприпаси",
+    "name_uk": "Спис-X2",
+    "name_en": "Spear X2",
+    "prompt": "Spear X2 missile, a long armor-piercing missile with a sharp needle nose. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_49",
+    "file": "part_m_49.webp",
+    "size": "1280x720",
+    "group": "Боєприпаси",
+    "name_uk": "Валькірія-X3",
+    "name_en": "Valkyrie X3",
+    "prompt": "Valkyrie X3 missile, a large heavy missile with winged fins and a white-gold exhaust. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_50",
+    "file": "part_m_50.webp",
+    "size": "1280x720",
+    "group": "Боєприпаси",
+    "name_uk": "Термоядерна торпеда",
+    "name_en": "Fusion torpedo",
+    "prompt": "A fusion torpedo, a large torpedo with a glowing fusion core visible along its body. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_51",
+    "file": "part_m_51.webp",
+    "size": "1280x720",
+    "group": "Боєприпаси",
+    "name_uk": "Протонна торпеда",
+    "name_en": "Proton torpedo",
+    "prompt": "A proton torpedo, a torpedo with a pulsing bright blue-white proton warhead. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_52",
+    "file": "part_m_52.webp",
+    "size": "1280x720",
+    "group": "Боєприпаси",
+    "name_uk": "Уранова торпеда",
+    "name_en": "Uranium torpedo",
+    "prompt": "A uranium torpedo, a heavy dark torpedo with green glowing warhead sections. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_53",
+    "file": "part_m_53.webp",
+    "size": "1280x720",
+    "group": "Видобуток",
+    "name_uk": "Модуль геологорозвідки",
+    "name_en": "Survey module",
+    "prompt": "A survey module, a scanning pod with a slim antenna array and a ground-scanning cone of light. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_54",
+    "file": "part_m_54.webp",
+    "size": "1280x720",
+    "group": "Видобуток",
+    "name_uk": "Бурова установка",
+    "name_en": "Drill rig",
+    "prompt": "A drill rig, a robust drilling head with rotating teeth and sparks. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_55",
+    "file": "part_m_55.webp",
+    "size": "1280x720",
+    "group": "Видобуток",
+    "name_uk": "Кристалічний екстрактор",
+    "name_en": "Crystal extractor",
+    "prompt": "A crystal extractor, a precise claw-and-laser tool holding a glowing blue crystal. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_56",
+    "file": "part_m_56.webp",
+    "size": "1280x720",
+    "group": "Видобуток",
+    "name_uk": "Збирач ефіру",
+    "name_en": "Ether collector",
+    "prompt": "An ether collector, a funnel-shaped collector drawing golden ether mist into a container. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_57",
+    "file": "part_m_57.webp",
+    "size": "1280x720",
+    "group": "Видобуток",
+    "name_uk": "Туманнісний збирач",
+    "name_en": "Nebula collector",
+    "prompt": "A nebula collector, a wide net-like scoop trailing violet-teal nebula gas. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_58",
+    "file": "part_m_58.webp",
+    "size": "1280x720",
+    "group": "Розвідка й маскування",
+    "name_uk": "Астросканер",
+    "name_en": "Astroscanner",
+    "prompt": "An astroscanner, a telescopic scanner with a lens array and faint star maps projected in front of it. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_59",
+    "file": "part_m_59.webp",
+    "size": "1280x720",
+    "group": "Розвідка й маскування",
+    "name_uk": "Корабельний радар",
+    "name_en": "Ship radar",
+    "prompt": "A ship radar, a rotating compact radar dish with a sweeping green-cyan beam. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_60",
+    "file": "part_m_60.webp",
+    "size": "1280x720",
+    "group": "Розвідка й маскування",
+    "name_uk": "Археологічний модуль",
+    "name_en": "Archaeology module",
+    "prompt": "An archaeology module, a delicate scanning arm brushing an ancient relic with soft light. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_61",
+    "file": "part_m_61.webp",
+    "size": "1280x720",
+    "group": "Розвідка й маскування",
+    "name_uk": "Радіооптичне маскування",
+    "name_en": "Radio-optical camouflage",
+    "prompt": "Radio-optical camouflage, a ship panel half transparent, bending the background light around it. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_62",
+    "file": "part_m_62.webp",
+    "size": "1280x720",
+    "group": "Розвідка й маскування",
+    "name_uk": "Детектор маскування",
+    "name_en": "Camouflage detector",
+    "prompt": "A camouflage detector, a sensor head with several lenses revealing a hidden ghost outline. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_63",
+    "file": "part_m_63.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Відновлювач щитів",
+    "name_en": "Shield restorer",
+    "prompt": "A shield restorer, a module with a glowing teal coil that rebuilds a broken shield ring. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_64",
+    "file": "part_m_64.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Бортовий комп'ютер",
+    "name_en": "Onboard computer",
+    "prompt": "An onboard computer, a rack of glowing processor blocks and a small holographic display. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_65",
+    "file": "part_m_65.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Збирач уламків",
+    "name_en": "Debris collector",
+    "prompt": "A debris collector, a magnetic scoop pulling small wreckage into a bin. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_66",
+    "file": "part_m_66.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Вантажний відсік",
+    "name_en": "Cargo hold",
+    "prompt": "A cargo hold, a boxy container module with a open door and crates inside. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_67",
+    "file": "part_m_67.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Великий вантажний відсік",
+    "name_en": "Large cargo hold",
+    "prompt": "A large cargo hold, a very big container module with sliding doors and rows of crates. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_68",
+    "file": "part_m_68.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Протиракетна система",
+    "name_en": "Missile-defence system",
+    "prompt": "A missile-defence system, a turret with small quick guns and tracking beams aimed at incoming missiles. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_69",
+    "file": "part_m_69.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Модуль передачі",
+    "name_en": "Transfer module",
+    "prompt": "A transfer module, a docking tube with a glowing connector passing cargo between two ships. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_70",
+    "file": "part_m_70.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Колоніальний модуль",
+    "name_en": "Colony module",
+    "prompt": "A colony module, a sealed capsule with a landing frame and a small green seedling dome. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_71",
+    "file": "part_m_71.webp",
+    "size": "1280x720",
+    "group": "Модулі бази",
+    "name_uk": "Житловий модуль",
+    "name_en": "Housing module",
+    "prompt": "A housing module, a stacked living module with rows of small lit windows. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_72",
+    "file": "part_m_72.webp",
+    "size": "1280x720",
+    "group": "Модулі бази",
+    "name_uk": "Орбітальний склад",
+    "name_en": "Orbital warehouse",
+    "prompt": "An orbital warehouse, a station module with big docking arms and stacked containers. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_73",
+    "file": "part_m_73.webp",
+    "size": "1280x720",
+    "group": "Модулі бази",
+    "name_uk": "Ремонтні майстерні",
+    "name_en": "Repair workshops",
+    "prompt": "Repair workshops, a station bay with robotic arms welding a damaged armor plate. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_74",
+    "file": "part_m_74.webp",
+    "size": "1280x720",
+    "group": "Модулі бази",
+    "name_uk": "Школа командирів",
+    "name_en": "Commander school",
+    "prompt": "A commander school, a training module with a holographic tactical map table and cadet silhouettes. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_75",
+    "file": "part_m_75.webp",
+    "size": "1280x720",
+    "group": "Модулі бази",
+    "name_uk": "Торговий центр",
+    "name_en": "Trade center",
+    "prompt": "A trade center module, a station market ring with glowing signs and docked cargo ships. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_76",
+    "file": "part_m_76.webp",
+    "size": "1280x720",
+    "group": "Модулі бази",
+    "name_uk": "Орбітальний термоядерний реактор",
+    "name_en": "Orbital fusion reactor",
+    "prompt": "An orbital fusion reactor, a big station fusion ring with a bright core and cooling panels. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_77",
+    "file": "part_m_77.webp",
+    "size": "1280x720",
+    "group": "Модулі бази",
+    "name_uk": "Збагачувач ізотопів гелію",
+    "name_en": "Helium-isotope enricher",
+    "prompt": "A helium-isotope enricher, a station module of spinning centrifuges and glass tanks of pale gas. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_78",
+    "file": "part_m_78.webp",
+    "size": "1280x720",
+    "group": "Модулі бази",
+    "name_uk": "Екстрактор темної матерії",
+    "name_en": "Dark-matter extractor",
+    "prompt": "A dark-matter extractor, a heavy station module with a containment ring around a black sphere. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_79",
+    "file": "part_m_79.webp",
+    "size": "1280x720",
+    "group": "Модулі бази",
+    "name_uk": "Джамп-модуль",
+    "name_en": "Jump module",
+    "prompt": "A jump module, a station gate frame with a bright rift forming in the middle. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_80",
+    "file": "part_m_80.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Кріокапсула (Террани)",
+    "name_en": "Cryocapsule (Terrans)",
+    "prompt": "A cryocapsule of the Terrans, a sleek steel-grey and blue capsule with a frosted window showing sleeping human figures, a small blue status light. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_81",
+    "file": "part_m_81.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Кріокапсула (Літаріони)",
+    "name_en": "Cryocapsule (Litari)",
+    "prompt": "A cryocapsule of the Litari, an icy cyan and white crystalline capsule with a frosted window showing sleeping figures, glittering frost. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_82",
+    "file": "part_m_82.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Кріокапсула (Драккури)",
+    "name_en": "Cryocapsule (Drakkuri)",
+    "prompt": "A cryocapsule of the Drakkuri, a dark capsule with red-orange ember lines and a window showing sleeping reptilian figures, warm glow. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "module",
+    "code": "part_m_83",
+    "file": "part_m_83.webp",
+    "size": "1280x720",
+    "group": "Інші корабельні",
+    "name_uk": "Кріокапсула (Вейрани)",
+    "name_en": "Cryocapsule (Veirani)",
+    "prompt": "A cryocapsule of the Veirani, a sand-amber capsule with elegant curves and a window showing sleeping tall figures, golden light. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_1",
+    "file": "part_h_1.webp",
+    "size": "1280x720",
+    "group": "Легкі",
+    "name_uk": "Винищувач «Сапсан»",
+    "name_en": "Fighter Sapsan",
+    "prompt": "A small agile fighter, a sharp single-seat starfighter with swept wings in flight. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_2",
+    "file": "part_h_2.webp",
+    "size": "1280x720",
+    "group": "Легкі",
+    "name_uk": "Важкий винищувач «Шершень»",
+    "name_en": "Heavy fighter Hornet",
+    "prompt": "A heavy fighter, a sturdy armored starfighter with twin engines and heavy guns. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_3",
+    "file": "part_h_3.webp",
+    "size": "1280x720",
+    "group": "Легкі",
+    "name_uk": "Торпедоносець «Гадюка»",
+    "name_en": "Torpedo bomber Viper",
+    "prompt": "A torpedo bomber, a compact bomber with a big torpedo slung under its belly. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_4",
+    "file": "part_h_4.webp",
+    "size": "1280x720",
+    "group": "Легкі",
+    "name_uk": "Важкий торпедоносець «Кобра»",
+    "name_en": "Heavy torpedo bomber Cobra",
+    "prompt": "A heavy torpedo bomber, a wide bomber with two large torpedoes and thick armor. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_5",
+    "file": "part_h_5.webp",
+    "size": "1280x720",
+    "group": "Дрони",
+    "name_uk": "«Ґедзь»",
+    "name_en": "Gadfly",
+    "prompt": "A tiny gadfly-like drone craft with thin wings, quick and light. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_6",
+    "file": "part_h_6.webp",
+    "size": "1280x720",
+    "group": "Дрони",
+    "name_uk": "«Цикада»",
+    "name_en": "Cicada",
+    "prompt": "A cicada-like scout craft with a long body and a pair of lifted wing panels. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_7",
+    "file": "part_h_7.webp",
+    "size": "1280x720",
+    "group": "Дрони",
+    "name_uk": "«Кліщ»",
+    "name_en": "Tick",
+    "prompt": "A tick-like boarding craft, a low round body with grabbing clamps. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_8",
+    "file": "part_h_8.webp",
+    "size": "1280x720",
+    "group": "Середні",
+    "name_uk": "Корвет «Коршун»",
+    "name_en": "Corvette Kite",
+    "prompt": "A corvette, a small fast warship with a clean hull and a ring of turrets. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_9",
+    "file": "part_h_9.webp",
+    "size": "1280x720",
+    "group": "Середні",
+    "name_uk": "Фрегат «Барракуда»",
+    "name_en": "Frigate Barracuda",
+    "prompt": "A frigate, a long slim warship with a row of turrets and a bright engine block. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_10",
+    "file": "part_h_10.webp",
+    "size": "1280x720",
+    "group": "Середні",
+    "name_uk": "Есмінець «Акула»",
+    "name_en": "Destroyer Shark",
+    "prompt": "A destroyer, a sharp-nosed warship with a wedge hull and rows of weapons. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_11",
+    "file": "part_h_11.webp",
+    "size": "1280x720",
+    "group": "Середні",
+    "name_uk": "Легкий крейсер «Ягуар»",
+    "name_en": "Light cruiser Jaguar",
+    "prompt": "A light cruiser, a balanced warship with a long deck and a raised command tower. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_12",
+    "file": "part_h_12.webp",
+    "size": "1280x720",
+    "group": "Середні",
+    "name_uk": "Крейсер «Носоріг»",
+    "name_en": "Cruiser Rhino",
+    "prompt": "A cruiser, a big warship with heavy armor, a central tower and many turrets. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_13",
+    "file": "part_h_13.webp",
+    "size": "1280x720",
+    "group": "Середні",
+    "name_uk": "Важкий крейсер «Бегемот»",
+    "name_en": "Heavy cruiser Behemoth",
+    "prompt": "A heavy cruiser, a massive armored warship with a broad hull and large guns. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_14",
+    "file": "part_h_14.webp",
+    "size": "1280x720",
+    "group": "Важкі",
+    "name_uk": "Броненосець «Панцирник»",
+    "name_en": "Armored ship Pangolin",
+    "prompt": "An armored ship, a squat heavily plated warship with thick shell-like plates. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_15",
+    "file": "part_h_15.webp",
+    "size": "1280x720",
+    "group": "Важкі",
+    "name_uk": "Лінкор «Кракен»",
+    "name_en": "Battleship Kraken",
+    "prompt": "A battleship, a huge warship with big main guns on its bow and a tall bridge. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_16",
+    "file": "part_h_16.webp",
+    "size": "1280x720",
+    "group": "Важкі",
+    "name_uk": "Важкий лінкор «Мамонт»",
+    "name_en": "Heavy battleship Mammoth",
+    "prompt": "A heavy battleship, an enormous warship with layered armor and giant cannons. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_17",
+    "file": "part_h_17.webp",
+    "size": "1280x720",
+    "group": "Важкі",
+    "name_uk": "Дредноут «Горгона»",
+    "name_en": "Dreadnought Gorgon",
+    "prompt": "A dreadnought, a gigantic warship with an imposing front and a serpent-like head ornament. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_18",
+    "file": "part_h_18.webp",
+    "size": "1280x720",
+    "group": "Надважкі",
+    "name_uk": "Дестроєр «Каратель»",
+    "name_en": "Devastator Punisher",
+    "prompt": "A devastator, a bulky siege warship with a huge forward cannon. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_19",
+    "file": "part_h_19.webp",
+    "size": "1280x720",
+    "group": "Надважкі",
+    "name_uk": "Супер-лінкор «Тиранозавр»",
+    "name_en": "Super battleship Tyrannosaurus",
+    "prompt": "A super battleship, a colossal predator-shaped warship with big jaws-like prow weapons. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_20",
+    "file": "part_h_20.webp",
+    "size": "1280x720",
+    "group": "Надважкі",
+    "name_uk": "Супер-дредноут «Левіафан»",
+    "name_en": "Super dreadnought Leviathan",
+    "prompt": "A super dreadnought, the biggest flagship, a leviathan hull with huge engines and a shining command spire. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_21",
+    "file": "part_h_21.webp",
+    "size": "1280x720",
+    "group": "Цивільні",
+    "name_uk": "Малий транспорт «Жук»",
+    "name_en": "Small transport Beetle",
+    "prompt": "A small transport, a boxy cargo ship with a small cockpit and a container on its back. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_22",
+    "file": "part_h_22.webp",
+    "size": "1280x720",
+    "group": "Цивільні",
+    "name_uk": "Середній транспорт «Бик»",
+    "name_en": "Medium transport Bull",
+    "prompt": "A medium transport, a strong hauler with a clear cargo frame and two engines. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_23",
+    "file": "part_h_23.webp",
+    "size": "1280x720",
+    "group": "Цивільні",
+    "name_uk": "Великий транспорт «Слон»",
+    "name_en": "Large transport Elephant",
+    "prompt": "A large transport, a very long hauler with a huge cargo spine and big engines. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_24",
+    "file": "part_h_24.webp",
+    "size": "1280x720",
+    "group": "Цивільні",
+    "name_uk": "Важкий транспорт «Кит»",
+    "name_en": "Heavy transport Whale",
+    "prompt": "A heavy transport, a vast whale-shaped carrier with big cargo doors. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_25",
+    "file": "part_h_25.webp",
+    "size": "1280x720",
+    "group": "Корпуси споруд",
+    "name_uk": "Орбітальна база",
+    "name_en": "Orbital base",
+    "prompt": "An orbital base, a compact ring station with docking arms around a planet's edge. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_26",
+    "file": "part_h_26.webp",
+    "size": "1280x720",
+    "group": "Корпуси споруд",
+    "name_uk": "Космобаза",
+    "name_en": "Space base",
+    "prompt": "A space base, a large multi-ring space station with solar wings and many docks. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  },
+  {
+    "kind": "hull",
+    "code": "part_h_27",
+    "file": "part_h_27.webp",
+    "size": "1280x720",
+    "group": "Корпуси споруд",
+    "name_uk": "Видобувна станція",
+    "name_en": "Mining station",
+    "prompt": "A mining station, a station with big drilling arms and a stream of ore into a processing core. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+  }
+]
