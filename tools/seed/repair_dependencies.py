@@ -76,7 +76,7 @@ AFFINITY = {
     "engine": ["Обсидіан", "Орекс", "Лінтрій", "Кварцит"],
     "arms": ["Орекс", "Лінтрій", "Обсидіан", "Кварцит"],
     "optics": ["Лінтрій", "Кварцит", "Орекс", "Обсидіан"],
-    "science": ["Кварцит", "Обсидіан", "Лінтрій", "Орекс"],
+    "science": ["Кварцит", "Обсидіан", "Орекс", "Лінтрій"],
 }
 CHOICE_WIDTH = 3
 BUILDING_PROFILE = {
@@ -110,16 +110,25 @@ TECHNOLOGY_PROFILE = {
     "Економічні розвитки": "optics",
 }
 TECHNOLOGY_OVERRIDES = {
-    "Енергетика": "engine",
+    "Математика": "science",
+    "Геологія": "science",
+    "Будівництво": "science",
+    "Археологія": "science",
+    "Фізика": "engine",
     "Ядерна фізика": "engine",
     "Термоядерний синтез": "engine",
+    "Енергетика": "engine",
     "Газова інженерія": "engine",
     "Електроніка": "optics",
     "Кібернетика": "optics",
-    "Геологія": "science",
-    "Будівництво": "science",
+    "Кристалографія": "optics",
+    "Економіка": "optics",
+    "Торговельне право": "optics",
+    "Демографія": "optics",
     "Робототехніка": "arms",
     "Логістика складів": "arms",
+    "Колоніальне управління": "arms",
+    "Стабілізація порталу": "arms",
 }
 # The crystals: every second item that lives to the late levels needs one, in turn, from the
 # fifteenth level of a building and the thirteenth of a technology.
@@ -255,46 +264,236 @@ def profile_of(item: dict) -> str:
     return TECHNOLOGY_OVERRIDES.get(item["name"]) or TECHNOLOGY_PROFILE.get(item["group"], "science")
 
 
-def assign_minerals(catalog: dict) -> None:
-    """Gives every building and technology its minerals and crystals, balancing the demand."""
-    asked = {name: 0 for name in MINERALS}
-    crystal_asked = {name: 0 for name in CRYSTALS}
-    eligible = 0
+COEFFICIENTS = ROOT / "server" / "src" / "Aetheris.World" / "Data" / "seed-coefficients.json"
+GROUP_KEYS = {
+    "Головні й населення": "main",
+    "Склади": "storage",
+    "Наука": "science",
+    "Видобуток на планеті": "extraction",
+    "Енергетика": "power",
+    "Виробництво ресурсів": "resource_production",
+    "Виробництво модулів": "module_production",
+    "Флот і оборона": "fleet",
+    "Торгівля й логістика": "trade",
+}
+MODULE_PROFILE = {
+    "Двигуни": "engine",
+    "Реактори": "engine",
+    "Енергетична зброя": "arms",
+    "Кінетична зброя": "arms",
+    "Броня": "arms",
+    "Щити": "arms",
+    "Боєприпаси": "arms",
+    "Видобуток": "science",
+    "Розвідка й маскування": "optics",
+    "Інші корабельні": "science",
+    "Модулі бази": "science",
+}
+# Modules named after a mineral or fitted to one keep it.
+FIXED_MODULE_MINERALS = {
+    "Орексова гармата": ["Орекс"],
+    "Орексовий щит": ["Орекс"],
+    "Кварцовий щит": ["Кварцит", "Лінтрій"],
+    "Астросканер": ["Кварцит", "Лінтрій"],
+    "Корабельний радар": ["Кварцит", "Лінтрій"],
+}
 
+
+# Modules of science and optics that the file leaves without a mineral and that ask for one here,
+# so the quartzite and the lintrium, which only science and optics take, are asked for as often
+# as the obsidian and the orex of the engines and the arms.
+EXTRA_MODULE_MINERAL = {
+    "Бурова установка",
+    "Збирач ефіру",
+    "Радіооптичне маскування",
+    "Детектор маскування",
+    "Бортовий комп'ютер",
+    "Протиракетна система",
+}
+
+
+# The list of the modules of the author (perelik-3) names the tumanium for the nebula collector;
+# the dependency file lacks it, and the tumanium has no other module.
+MODULE_CRYSTAL = {"Туманнісний збирач": "Туманій"}
+
+
+def load_coefficients() -> dict[str, float]:
+    rows = json.loads(COEFFICIENTS.read_text(encoding="utf-8"))["parameters"]
+    return {row["key"]: float(row["value"]) for row in rows}
+
+
+def spread(values: dict[str, float]) -> float:
+    mean = sum(values.values()) / len(values)
+    return (max(values.values()) - min(values.values())) / mean if mean else 0.0
+
+
+def balance(slots: list[dict], totals: dict[str, float], counts: dict[str, int] | None = None) -> None:
+    """Hands out the minerals so that the quantity and the number of places of every mineral stay level.
+
+    A slot is a place that needs a mineral: its weight is the quantity it will ask for, its
+    options are the first minerals of its affinity, and `owner` lists what the same item took.
+    The heaviest slots go first and each takes the option with the smallest total so far; then
+    moves and exchanges of places go on while the sum of the two spreads (of the quantity and of
+    the number of places) falls.
+    """
+    counts = counts if counts is not None else {name: 0 for name in totals}
+
+    for slot in sorted(slots, key=lambda row: -row["weight"]):
+        options = [name for name in slot["options"] if name not in slot["owner"]]
+        pick = min(options, key=lambda name: (totals[name], slot["options"].index(name)))
+        totals[pick] += slot["weight"]
+        counts[pick] += 1
+        slot["owner"].append(pick)
+        slot["pick"] = pick
+
+    def score() -> float:
+        return 2 * spread(totals) + spread({name: float(value) for name, value in counts.items()})
+
+    for _ in range(100):
+        moved = False
+        for slot in slots:
+            current = slot["pick"]
+            best_score, best_name = score(), current
+            for name in slot["options"]:
+                if name == current or name in slot["owner"]:
+                    continue
+                totals[current] -= slot["weight"]; totals[name] += slot["weight"]
+                counts[current] -= 1; counts[name] += 1
+                value = score()
+                totals[name] -= slot["weight"]; totals[current] += slot["weight"]
+                counts[name] -= 1; counts[current] += 1
+                if value < best_score - 1e-9:
+                    best_score, best_name = value, name
+            if best_name != current:
+                totals[current] -= slot["weight"]; totals[best_name] += slot["weight"]
+                counts[current] -= 1; counts[best_name] += 1
+                slot["owner"][slot["owner"].index(current)] = best_name
+                slot["pick"] = best_name
+                moved = True
+        if not moved:
+            current_score = score()
+            for first in slots:
+                for second in slots:
+                    one, two = first["pick"], second["pick"]
+                    if first is second or first["owner"] is second["owner"] or one == two:
+                        continue
+                    if two not in first["options"] or one not in second["options"] or two in first["owner"] or one in second["owner"]:
+                        continue
+                    delta = first["weight"] - second["weight"]
+                    totals[one] -= delta
+                    totals[two] += delta
+                    # The numbers of places do not change in an exchange of two places.
+                    value = score()
+                    if value < current_score - 1e-9:
+                        first["owner"][first["owner"].index(one)] = two
+                        second["owner"][second["owner"].index(two)] = one
+                        first["pick"], second["pick"] = two, one
+                        current_score = value
+                        moved = True
+                    else:
+                        totals[one] += delta
+                        totals[two] -= delta
+        if not moved:
+            break
+
+
+def assign_minerals(catalog: dict) -> None:
+    """Gives every building, technology and module its minerals and crystals, balancing the quantities."""
+    coefficients = load_coefficients()
+    building_growth = 1 + coefficients["world.seed.cost.growth"]
+    technology_growth = 1 + coefficients["world.seed.cost.technology_growth"]
+    part_growth = 1 + coefficients["world.seed.part.ingredient_growth"]
+
+    # Buildings and technologies: the weight of a slot is the sum of its prices over the levels it is paid.
+    slots: list[dict] = []
     for item in catalog["items"]:
         if item["kind"] not in {"budivlia", "rozvytok"}:
             continue
         is_building = item["kind"] == "budivlia"
         first = BUILDING_FROM if is_building else TECHNOLOGY_FROM
+        factor = coefficients[f"world.seed.cost.group.{GROUP_KEYS[item['group']]}"] if is_building else coefficients["world.seed.cost.technology"]
+        growth = building_growth if is_building else technology_growth
         top = AFFINITY[profile_of(item)][:CHOICE_WIDTH]
-        levels = len(item["tiers"])
-        chosen: list[str] = []
-
-        for rank in range(2):
-            if levels < first + rank * SECOND_AFTER:
+        owner: list[str] = []
+        # A technology lives longer than a building and asks for a third mineral at the late levels,
+        # of any affinity: the third place is what makes the quantities even.
+        for rank in range(2 if is_building else 3):
+            start = first + rank * SECOND_AFTER
+            if len(item["tiers"]) < start:
                 break
-            options = [name for name in top if name not in chosen]
-            pick = min(options, key=lambda name: (asked[name], top.index(name)))
-            asked[pick] += 1
-            chosen.append(pick)
+            slots.append({
+                "item": item,
+                "start": start,
+                "weight": factor * sum(growth ** (level - start) for level in range(start, len(item["tiers"]) + 1)),
+                "options": top if rank < 2 else AFFINITY[profile_of(item)],
+                "owner": owner,
+            })
+    # Buildings and technologies are balanced each by itself, so no mineral is asked for mostly by
+    # the buildings while another is asked for mostly by the technologies.
+    balance([slot for slot in slots if slot["item"]["kind"] == "budivlia"], {name: 0.0 for name in MINERALS})
+    balance([slot for slot in slots if slot["item"]["kind"] == "rozvytok"], {name: 0.0 for name in MINERALS})
+    for slot in slots:
+        item = slot["item"]
+        for level in range(slot["start"], len(item["tiers"]) + 1):
+            item["tiers"][level - 1].append(slot["pick"])
 
-        for rank, name in enumerate(chosen):
-            for level in range(first + rank * SECOND_AFTER, levels + 1):
-                item["tiers"][level - 1].append(name)
+    # The crystals: every second item that lives to the late levels asks for one, in turn.
+    crystal_asked = {name: 0 for name in CRYSTALS}
+    eligible = 0
+    for item in catalog["items"]:
+        if item["kind"] not in {"budivlia", "rozvytok"}:
+            continue
+        crystal_from = BUILDING_CRYSTAL_FROM if item["kind"] == "budivlia" else TECHNOLOGY_CRYSTAL_FROM
+        if len(item["tiers"]) < crystal_from:
+            continue
+        eligible += 1
+        if eligible % ASKS_CRYSTAL_EVERY == 1:
+            crystal = min(CRYSTALS, key=lambda name: (crystal_asked[name], CRYSTALS.index(name)))
+            crystal_asked[crystal] += 1
+            for level in range(crystal_from, len(item["tiers"]) + 1):
+                item["tiers"][level - 1].append(crystal)
+    for item in catalog["items"]:
+        if item["kind"] in {"budivlia", "rozvytok"}:
+            for tier in item["tiers"]:
+                tier.sort(key=order_key)
 
-        crystal_from = BUILDING_CRYSTAL_FROM if is_building else TECHNOLOGY_CRYSTAL_FROM
-
-        if levels >= crystal_from:
-            eligible += 1
-            if eligible % ASKS_CRYSTAL_EVERY == 1:
-                crystal = min(CRYSTALS, key=lambda name: (crystal_asked[name], CRYSTALS.index(name)))
-                crystal_asked[crystal] += 1
-                for level in range(crystal_from, levels + 1):
-                    item["tiers"][level - 1].append(crystal)
-
-        for tier in item["tiers"]:
-            tier.sort(key=order_key)
-            # recover() ran before; its levels hold no mineral, so nothing there changes
+    # The modules: the number of minerals of a module stays as the file has it; which minerals are
+    # handed out again, the weight of a place is the quantity of the part (it grows with the place
+    # of the part in its group), so the quantity of every mineral in the modules is level too.
+    module_slots: list[dict] = []
+    position: dict[str, int] = {}
+    totals = {name: 0.0 for name in MINERALS}
+    for item in catalog["items"]:
+        if item["kind"] != "modul":
+            continue
+        index = position.get(item["group"], 0)
+        position[item["group"]] = index + 1
+        count = sum(1 for name in item["resources"] if name in MINERALS)
+        if count == 0 and item["name"] in EXTRA_MODULE_MINERAL:
+            count = 1
+        item["resources"] = [name for name in item["resources"] if name not in MINERALS]
+        if item["name"] in MODULE_CRYSTAL and MODULE_CRYSTAL[item["name"]] not in item["resources"]:
+            item["resources"].append(MODULE_CRYSTAL[item["name"]])
+        fixed = FIXED_MODULE_MINERALS.get(item["name"])
+        if fixed is not None:
+            item["resources"].extend(fixed)
+            for name in fixed:
+                totals[name] += part_growth ** index
+            continue
+        owner: list[str] = []
+        for _ in range(count):
+            module_slots.append({
+                "item": item,
+                "weight": part_growth ** index,
+                "options": AFFINITY[MODULE_PROFILE[item["group"]]][:CHOICE_WIDTH],
+                "owner": owner,
+            })
+    balance(module_slots, totals)
+    for slot in module_slots:
+        slot["item"]["resources"].append(slot["pick"])
+    for item in catalog["items"]:
+        if item["kind"] == "modul":
+            item["resources"].sort(key=order_key)
 
 
 def main() -> None:

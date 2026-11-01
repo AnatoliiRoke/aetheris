@@ -107,6 +107,25 @@ def demand() -> dict[str, dict[str, int]]:
     return rows
 
 
+def quantities() -> dict[str, dict[str, int]]:
+    """Units of every mineral and crystal: to take all the buildings and technologies to the top, and in one of each module."""
+    rows: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    for building in PLANETS["building_types"]:
+        for level in range(1, building["max_level"] + 1):
+            for resource, amount in building_cost(building, level).items():
+                rows[NAMES[resource]]["buildings"] += amount
+    for technology in RESEARCH["technologies"]:
+        for level in range(1, technology["max_level"] + 1):
+            for resource, amount in technology_cost(technology, level).items():
+                rows[NAMES[resource]]["technologies"] += amount
+    part_is_module = {part["code"]: part["code"].startswith("part_m") for part in PRODUCTION["parts"]}
+    for recipe in PRODUCTION["recipes"]:
+        if recipe["part"] and part_is_module[recipe["part"]]:
+            for ingredient in recipe["ingredients"]:
+                rows[NAMES[ingredient["resource"]]]["modules"] += ingredient["amount"]
+    return rows
+
+
 def main() -> None:
     price, where = largest_price()
     cap = warehouse_capacity(20)
@@ -122,6 +141,13 @@ def main() -> None:
             print(f"  {name:20} " + " / ".join(str(row.get(kind, 0)) for kind in ("buildings", "technologies", "modules", "hulls", "recipes")))
         elif name not in ("Енергія", "Населення", "Торгова валюта", "Реальна валюта", "Кредити"):
             print(f"  {name:20} -- no consumer")
+    print()
+    print("Minerals and crystals (units: buildings to the top / technologies to the top / one of every module; modules asking):")
+    units = quantities()
+    module_counts = demand()
+    for name in ("Кварцит", "Обсидіан", "Лінтрій", "Орекс", "Квартан", "Стобій", "Туманій"):
+        row = units[name]
+        print(f"  {name:10} {row.get('buildings', 0):>9} / {row.get('technologies', 0):>9} / {row.get('modules', 0):>6}   modules {module_counts[name].get('modules', 0)}")
     print()
     result = play()
     print("Start package: the spend of the first day and of the first two days of the play (what the start stock must cover):")

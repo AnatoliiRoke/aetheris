@@ -89,6 +89,16 @@
           "from_level": 13
         },
         {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
+        },
+        {
           "resource": "resource_21",
           "growth": {
             "base": 40,
@@ -244,7 +254,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -264,7 +274,7 @@
           "from_level": 10
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -292,6 +302,16 @@
             "significant": 2
           },
           "from_level": 16
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -731,7 +751,7 @@
           "from_level": 2
         },
         {
-          "resource": "resource_9",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -751,7 +771,7 @@
           "from_level": 12
         },
         {
-          "resource": "resource_11",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -759,6 +779,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_8",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -1294,7 +1324,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_9",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -1322,6 +1352,16 @@
             "significant": 2
           },
           "from_level": 14
+        },
+        {
+          "resource": "resource_9",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -1979,7 +2019,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -2002,6 +2042,16 @@
           "resource": "resource_3",
           "growth": {
             "base": 100,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
+        },
+        {
+          "resource": "resource_9",
+          "growth": {
+            "base": 20,
             "growth": 1.4,
             "step": 0,
             "significant": 2
@@ -2484,7 +2534,7 @@
           "from_level": 2
         },
         {
-          "resource": "resource_11",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -2504,7 +2554,7 @@
           "from_level": 10
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_8",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -2532,6 +2582,16 @@
             "significant": 2
           },
           "from_level": 16
+        },
+        {
+          "resource": "resource_9",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -2971,7 +3031,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_11",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -2989,6 +3049,16 @@
             "significant": 2
           },
           "from_level": 16
+        },
+        {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -3506,7 +3576,7 @@
           "from_level": 4
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -3526,7 +3596,7 @@
           "from_level": 12
         },
         {
-          "resource": "resource_9",
+          "resource": "resource_8",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -3544,6 +3614,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         },
         {
           "resource": "resource_22",
@@ -4263,6 +4343,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -4828,6 +4918,16 @@
             "significant": 2
           },
           "from_level": 14
+        },
+        {
+          "resource": "resource_8",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -5381,7 +5481,7 @@
           "from_level": 12
         },
         {
-          "resource": "resource_9",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -5389,6 +5489,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -5706,7 +5816,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -5716,7 +5826,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_9",
+          "resource": "resource_8",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -5734,6 +5844,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -6127,6 +6247,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_9",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -6624,7 +6754,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_11",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -6644,7 +6774,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_9",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -6662,6 +6792,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -7177,7 +7317,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -7185,6 +7325,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_8",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -7626,7 +7776,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_9",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -7644,6 +7794,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_9",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -8005,7 +8165,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -8025,7 +8185,7 @@
           "from_level": 10
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -8033,6 +8193,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_8",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -8546,7 +8716,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_9",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -8556,7 +8726,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_8",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -8574,6 +8744,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_9",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [
@@ -8965,7 +9145,7 @@
           "from_level": 5
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -8985,7 +9165,7 @@
           "from_level": 10
         },
         {
-          "resource": "resource_9",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -8993,6 +9173,16 @@
             "significant": 2
           },
           "from_level": 13
+        },
+        {
+          "resource": "resource_8",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
         }
       ],
       "effects": [

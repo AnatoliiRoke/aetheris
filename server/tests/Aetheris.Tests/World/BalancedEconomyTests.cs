@@ -373,6 +373,61 @@ public sealed class BalancedEconomyTests
     }
 
     /// <summary>
+    /// The quantities of the four minerals are level: the units to take every building to the top,
+    /// the units to take every technology to the top and the units in one of every module differ
+    /// by a few per cent from mineral to mineral, each of the three by itself (the author,
+    /// 01.11.2026: not one mineral in the buildings and another in the technologies).
+    /// </summary>
+    [Fact]
+    public void The_quantities_of_the_minerals_are_level_among_buildings_technologies_and_modules()
+    {
+        string[] minerals = [.. World.Resources.Where(resource => resource.Group == "resource_group_2").Select(resource => resource.Code)];
+        Dictionary<string, long> buildings = minerals.ToDictionary(code => code, _ => 0L);
+        Dictionary<string, long> technologies = minerals.ToDictionary(code => code, _ => 0L);
+        Dictionary<string, long> modules = minerals.ToDictionary(code => code, _ => 0L);
+
+        foreach (SeedBuildingType type in Planets.BuildingTypes)
+        {
+            for (int level = 1; level <= (type.MaxLevel ?? Planets.LevelCount); level++)
+            {
+                foreach ((string resource, long price) in BuildingPrices(type, level).Where(entry => buildings.ContainsKey(entry.Key)))
+                {
+                    buildings[resource] += price;
+                }
+            }
+        }
+
+        foreach (SeedTechnology technology in Research.Technologies)
+        {
+            for (int level = 1; level <= technology.MaxLevel; level++)
+            {
+                foreach ((string resource, long price) in TechnologyPrices(technology, level).Where(entry => technologies.ContainsKey(entry.Key)))
+                {
+                    technologies[resource] += price;
+                }
+            }
+        }
+
+        HashSet<string> moduleCodes = [.. Production.Parts.Where(part => part.Code.StartsWith("part_m_", StringComparison.Ordinal)).Select(part => part.Code)];
+
+        foreach (SeedIngredient ingredient in Production.Recipes.Where(recipe => recipe.Part is not null && moduleCodes.Contains(recipe.Part)).SelectMany(recipe => recipe.Ingredients))
+        {
+            if (ingredient.Resource is not null && modules.ContainsKey(ingredient.Resource))
+            {
+                modules[ingredient.Resource] += ingredient.Amount;
+            }
+        }
+
+        const double SpreadBuildings = 1.10;
+        const double SpreadTechnologies = 1.20;
+        const double SpreadModules = 1.10;
+
+        Assert.True(buildings.Values.Max() <= buildings.Values.Min() * SpreadBuildings, $"buildings {string.Join('/', buildings.Values)}");
+        Assert.True(technologies.Values.Max() <= technologies.Values.Min() * SpreadTechnologies, $"technologies {string.Join('/', technologies.Values)}");
+        Assert.True(modules.Values.Max() <= modules.Values.Min() * SpreadModules, $"modules {string.Join('/', modules.Values)}");
+    }
+
+    /// <summary>
     /// Energy, population, helium-3, dark matter and ether are not paid by a building or a
     /// technology: the first two are balances, the last three are for the modules and the fuel.
     /// </summary>
