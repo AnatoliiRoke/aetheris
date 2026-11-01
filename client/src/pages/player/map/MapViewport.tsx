@@ -75,6 +75,7 @@ export function MapViewportArea({
   const drag = useRef<{ x: number; y: number; moved: number } | null>(null);
   const pinch = useRef<number | null>(null);
   const [step, setStep] = useState(0);
+  const [fitScale, setFitScale] = useState(1);
   const onViewChangeRef = useRef(onViewChange);
 
   useEffect(() => {
@@ -123,6 +124,7 @@ export function MapViewportArea({
       const next = fitView(bounds, size.current, fitMargin);
 
       fit.current = next.k;
+      setFitScale(next.k);
       apply(next);
     };
 
@@ -142,6 +144,7 @@ export function MapViewportArea({
         const middle = screenToWorld(view.current, { x: before.width / 2, y: before.height / 2 });
 
         fit.current = fitView(bounds, size.current, fitMargin).k;
+        setFitScale(fit.current);
         apply(centerOn(view.current, middle, size.current));
       }
     });
@@ -187,7 +190,6 @@ export function MapViewportArea({
     }
 
     pointers.current.set(event.pointerId, pixelOf(event.clientX, event.clientY));
-    areaRef.current?.setPointerCapture?.(event.pointerId);
 
     if (pointers.current.size === 1) {
       drag.current = { x: event.clientX, y: event.clientY, moved: 0 };
@@ -226,7 +228,15 @@ export function MapViewportArea({
       const dx = event.clientX - current.x;
       const dy = event.clientY - current.y;
 
+      const wasStill = current.moved < dragThreshold;
+
       current.moved += Math.abs(dx) + Math.abs(dy);
+
+      // The pointer is captured only once it really drags: a press that stays still must reach the mark under it.
+      if (wasStill && current.moved >= dragThreshold) {
+        areaRef.current?.setPointerCapture?.(event.pointerId);
+      }
+
       current.x = event.clientX;
       current.y = event.clientY;
       apply({ ...view.current, x: view.current.x + dx, y: view.current.y + dy });
@@ -275,7 +285,7 @@ export function MapViewportArea({
     }
   };
 
-  const zoom = useMemo<MapZoom>(() => ({ scale: fit.current * 2 ** (step / stepsPerDoubling), fit: fit.current }), [step]);
+  const zoom = useMemo<MapZoom>(() => ({ scale: fitScale * 2 ** (step / stepsPerDoubling), fit: fitScale }), [step, fitScale]);
 
   return (
     <div className={picking ? 'map-area is-picking' : 'map-area'}>
