@@ -541,6 +541,9 @@ public sealed class WorldDatabaseTests
 
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
+
+        // The test stub of the radar gives every body a radar of the top level; without it a newcomer has none (task 00034).
+        await AetherisTestFactory.SetParameterAsync(services, WorldConfigKeys.RadarStubEnabled, "false");
         StartPlanetResult start = await services.GetRequiredService<IWorldModule>().AllocateStartPlanetAsync("watcher", Token);
         WorldQueryService queries = services.GetRequiredService<WorldQueryService>();
 

@@ -7,6 +7,7 @@ using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.World.Api;
+using Aetheris.World.Configuration;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;
 using Aetheris.World.Generation;
@@ -166,6 +167,12 @@ public sealed class WorldApiTests
     public async Task A_newcomer_takes_the_start_body_and_sees_only_it()
     {
         await WorldTestData.ResetWorldAsync(_factory);
+
+        // The test stub of the radar gives every body a radar of the top level; the newcomer here has none (task 00034).
+        using (IServiceScope stub = _factory.Services.CreateScope())
+        {
+            await AetherisTestFactory.SetParameterAsync(stub.ServiceProvider, WorldConfigKeys.RadarStubEnabled, "false");
+        }
 
         using HttpClient anonymous = _factory.CreateBrowserClient();
         HttpResponseMessage closed = await anonymous.GetAsync(WorldEndpoints.Prefix + "/sectors", Token);

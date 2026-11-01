@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * @param load The read; it may change between the draws, the last one is used.
  */
 export function useMapResource<T>(key: string | null, load: () => Promise<T>) {
-  const [state, setState] = useState<{ key: string | null; data: T | null; failed: boolean }>({ key: null, data: null, failed: false });
+  const [state, setState] = useState<{ key: string | null; data: T | null; failed: boolean; error: unknown }>({ key: null, data: null, failed: false, error: null });
   const [cache] = useState(() => new Map<string, T>());
   const loadRef = useRef(load);
 
@@ -27,9 +27,9 @@ export function useMapResource<T>(key: string | null, load: () => Promise<T>) {
       const data = await loadRef.current();
 
       cache.set(key, data);
-      setState({ key, data, failed: false });
-    } catch {
-      setState((previous) => ({ key, data: previous.key === key ? previous.data : null, failed: true }));
+      setState({ key, data, failed: false, error: null });
+    } catch (error) {
+      setState((previous) => ({ key, data: previous.key === key ? previous.data : null, failed: true, error }));
     }
   }, [key, cache]);
 
@@ -40,5 +40,5 @@ export function useMapResource<T>(key: string | null, load: () => Promise<T>) {
   const data = key === null ? null : state.key === key ? state.data : cache.get(key) ?? null;
   const failed = state.key === key && state.failed && data === null;
 
-  return { data, failed, loading: key !== null && data === null && !failed, reload };
+  return { data, failed, error: failed ? state.error : null, loading: key !== null && data === null && !failed, reload };
 }

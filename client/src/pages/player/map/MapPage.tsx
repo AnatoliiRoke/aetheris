@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { MapField, MapGalaxy, MapObject, MapSearchResult, MapSectorView, MapSystem, MapSystemView } from '../../../api/mapApi';
+import { ApiError } from '../../../api/http';
 import { useApi } from '../../../api/useApi';
 import { Alert } from '../../../components/Alert';
 import { GameIcon, type GameIconName } from '../../../components/GameIcon';
@@ -510,7 +511,10 @@ export function MapPage() {
       ) : null}
       {read.failed && !ready ? (
         <div className="panel">
-          <Alert kind="error">{t('map.loadFailed')}</Alert>
+          <Alert kind="error">
+            {t('map.loadFailed')}
+            {read.error instanceof ApiError ? <span className="meta"> {`(${read.error.status} ${read.error.code})`}</span> : null}
+          </Alert>
           <button className="btn btn--secondary" type="button" onClick={() => void read.reload()}>
             {t('planet.retry')}
           </button>
