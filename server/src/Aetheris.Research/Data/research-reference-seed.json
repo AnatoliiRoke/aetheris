@@ -79,7 +79,7 @@
           "from_level": 12
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -244,7 +244,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -264,9 +264,19 @@
           "from_level": 10
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_8",
           "growth": {
             "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_19",
+          "growth": {
+            "base": 10,
             "growth": 1.4,
             "step": 0,
             "significant": 2
@@ -721,7 +731,7 @@
           "from_level": 2
         },
         {
-          "resource": "resource_11",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -741,7 +751,7 @@
           "from_level": 12
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -1274,7 +1284,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_11",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -1284,9 +1294,19 @@
           "from_level": 8
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_17",
+          "growth": {
+            "base": 10,
             "growth": 1.4,
             "step": 0,
             "significant": 2
@@ -1959,7 +1979,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_9",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -2464,17 +2484,7 @@
           "from_level": 2
         },
         {
-          "resource": "resource_8",
-          "growth": {
-            "base": 20,
-            "growth": 1.4,
-            "step": 0,
-            "significant": 2
-          },
-          "from_level": 8
-        },
-        {
-          "resource": "resource_10",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -2492,6 +2502,26 @@
             "significant": 2
           },
           "from_level": 10
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_18",
+          "growth": {
+            "base": 10,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
         },
         {
           "resource": "resource_21",
@@ -2931,7 +2961,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -2942,16 +2972,6 @@
         },
         {
           "resource": "resource_11",
-          "growth": {
-            "base": 20,
-            "growth": 1.4,
-            "step": 0,
-            "significant": 2
-          },
-          "from_level": 8
-        },
-        {
-          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -3506,9 +3526,19 @@
           "from_level": 12
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_19",
+          "growth": {
+            "base": 10,
             "growth": 1.4,
             "step": 0,
             "significant": 2
@@ -4205,7 +4235,7 @@
           "from_level": 5
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -4225,7 +4255,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_8",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -4750,7 +4780,7 @@
           "from_level": 3
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -4773,6 +4803,16 @@
           "resource": "resource_10",
           "growth": {
             "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_17",
+          "growth": {
+            "base": 10,
             "growth": 1.4,
             "step": 0,
             "significant": 2
@@ -5321,7 +5361,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_8",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -5341,7 +5381,7 @@
           "from_level": 12
         },
         {
-          "resource": "resource_11",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -5349,16 +5389,6 @@
             "significant": 2
           },
           "from_level": 13
-        },
-        {
-          "resource": "resource_19",
-          "growth": {
-            "base": 10,
-            "growth": 1.4,
-            "step": 0,
-            "significant": 2
-          },
-          "from_level": 15
         }
       ],
       "effects": [
@@ -5686,9 +5716,19 @@
           "from_level": 8
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_18",
+          "growth": {
+            "base": 10,
             "growth": 1.4,
             "step": 0,
             "significant": 2
@@ -6069,6 +6109,16 @@
           "from_level": 1
         },
         {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
+        },
+        {
           "resource": "resource_8",
           "growth": {
             "base": 20,
@@ -6076,47 +6126,7 @@
             "step": 0,
             "significant": 2
           },
-          "from_level": 8
-        },
-        {
-          "resource": "resource_17",
-          "growth": {
-            "base": 10,
-            "growth": 1.4,
-            "step": 0,
-            "significant": 2
-          },
-          "from_level": 8
-        },
-        {
-          "resource": "resource_18",
-          "growth": {
-            "base": 10,
-            "growth": 1.4,
-            "step": 0,
-            "significant": 2
-          },
-          "from_level": 8
-        },
-        {
-          "resource": "resource_11",
-          "growth": {
-            "base": 20,
-            "growth": 1.4,
-            "step": 0,
-            "significant": 2
-          },
           "from_level": 13
-        },
-        {
-          "resource": "resource_19",
-          "growth": {
-            "base": 10,
-            "growth": 1.4,
-            "step": 0,
-            "significant": 2
-          },
-          "from_level": 15
         }
       ],
       "effects": [
@@ -6614,7 +6624,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -6634,9 +6644,19 @@
           "from_level": 8
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_19",
+          "growth": {
+            "base": 10,
             "growth": 1.4,
             "step": 0,
             "significant": 2
@@ -7157,7 +7177,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -7606,9 +7626,19 @@
           "from_level": 8
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_17",
+          "growth": {
+            "base": 10,
             "growth": 1.4,
             "step": 0,
             "significant": 2
@@ -7975,7 +8005,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -7995,7 +8025,7 @@
           "from_level": 10
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_8",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -8516,7 +8546,7 @@
           "from_level": 1
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -8526,7 +8556,7 @@
           "from_level": 8
         },
         {
-          "resource": "resource_11",
+          "resource": "resource_10",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -8536,14 +8566,14 @@
           "from_level": 13
         },
         {
-          "resource": "resource_17",
+          "resource": "resource_18",
           "growth": {
             "base": 10,
             "growth": 1.4,
             "step": 0,
             "significant": 2
           },
-          "from_level": 15
+          "from_level": 13
         }
       ],
       "effects": [
@@ -8935,29 +8965,9 @@
           "from_level": 5
         },
         {
-          "resource": "resource_11",
+          "resource": "resource_8",
           "growth": {
             "base": 20,
-            "growth": 1.4,
-            "step": 0,
-            "significant": 2
-          },
-          "from_level": 8
-        },
-        {
-          "resource": "resource_17",
-          "growth": {
-            "base": 10,
-            "growth": 1.4,
-            "step": 0,
-            "significant": 2
-          },
-          "from_level": 8
-        },
-        {
-          "resource": "resource_18",
-          "growth": {
-            "base": 10,
             "growth": 1.4,
             "step": 0,
             "significant": 2
@@ -8975,7 +8985,7 @@
           "from_level": 10
         },
         {
-          "resource": "resource_10",
+          "resource": "resource_9",
           "growth": {
             "base": 20,
             "growth": 1.4,

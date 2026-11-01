@@ -338,6 +338,41 @@ public sealed class BalancedEconomyTests
     }
 
     /// <summary>
+    /// The demand of the four minerals is level among the buildings and the technologies: the
+    /// most asked mineral is asked for by at most a quarter more of them than the least asked one,
+    /// and every crystal is asked for by a few, fewer than the minerals (the author, 01.11.2026).
+    /// </summary>
+    [Fact]
+    public void The_demand_of_the_minerals_and_of_the_crystals_is_level()
+    {
+        Dictionary<string, int> demand = World.Resources.ToDictionary(resource => resource.Code, _ => 0);
+
+        foreach (SeedBuildingType type in Planets.BuildingTypes)
+        {
+            foreach (string resource in BuildingPrices(type, type.MaxLevel ?? Planets.LevelCount).Keys)
+            {
+                demand[resource]++;
+            }
+        }
+
+        foreach (SeedTechnology technology in Research.Technologies)
+        {
+            foreach (string resource in TechnologyPrices(technology, technology.MaxLevel).Keys)
+            {
+                demand[resource]++;
+            }
+        }
+
+        int[] minerals = [.. World.Resources.Where(resource => resource.Group == "resource_group_2").Select(resource => demand[resource.Code])];
+        int[] crystals = [.. World.Resources.Where(resource => resource.Group == "resource_group_4").Select(resource => demand[resource.Code])];
+
+        Assert.True(minerals.Max() <= minerals.Min() * 1.25, $"minerals {string.Join('/', minerals)}");
+        Assert.True(crystals.Min() >= 5, $"crystals {string.Join('/', crystals)}");
+        Assert.True(crystals.Max() <= crystals.Min() * 1.5, $"crystals {string.Join('/', crystals)}");
+        Assert.True(crystals.Max() < minerals.Min(), "a crystal is asked for as often as a mineral");
+    }
+
+    /// <summary>
     /// Energy, population, helium-3, dark matter and ether are not paid by a building or a
     /// technology: the first two are balances, the last three are for the modules and the fuel.
     /// </summary>

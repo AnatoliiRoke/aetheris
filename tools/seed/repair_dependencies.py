@@ -15,9 +15,14 @@ gives the same file. The rules (each with the reason):
    below level 10 or of a technology below level 8. A home planet has one mineral of four and
    one crystal of three at random, so an early level that asked for one would depend on luck
    (levels 1-4 must not depend on many resources, item 6 of the task).
-4. From that level every building and technology needs a mineral of its own specialisation,
-   and from the second level after it a second one, so the higher levels need the minerals
-   that the asteroid fields and the trade bring (item 9 of the task).
+4. From that level every building and technology needs a mineral and, five levels later, a
+   second one. Minerals are not copied from the file but handed out again by the script: by
+   affinity (engines of obsidian, arms of orex, optics of lintrium, science and extraction of
+   quartzite) the mineral that is asked for least so far among the first three of the order, so
+   the four minerals are asked for by nearly the same number of buildings and technologies.
+   Every second item that lives to the late levels asks for one crystal, in turn, so the three
+   crystals are asked for by a few items each (item 9 of the task, the author's remark on the
+   spread of 01.11.2026).
 5. Energy leaves the recipes of the factories too, for the reason of rule 1.
 5a. A produced resource other than the building materials may not lie on the cost of a level
    below the fifth: the optical fiber, the microprocessors and the others need minerals that a
@@ -63,69 +68,75 @@ BUILDING_FROM = 10
 TECHNOLOGY_FROM = 8
 SECOND_AFTER = 5
 
-# The mineral of the specialisation of a group of buildings: the first is needed from the
-# threshold, the second five levels later.
-BUILDING_MINERALS = {
-    "Головні й населення": ["Кварцит", "Орекс"],
-    "Склади": ["Орекс", "Кварцит"],
-    "Наука": ["Кварцит", "Лінтрій"],
-    "Видобуток на планеті": ["Кварцит", "Обсидіан"],
-    "Енергетика": ["Орекс", "Лінтрій"],
-    "Виробництво ресурсів": ["Лінтрій", "Кварцит"],
-    "Виробництво модулів": ["Обсидіан", "Орекс"],
-    "Флот і оборона": ["Орекс", "Обсидіан"],
-    "Торгівля й логістика": ["Лінтрій", "Орекс"],
+# The minerals by affinity: the first is the one a kind of thing is made of best (engines of
+# obsidian, weapons and shields of orex, optics of lintrium, science and extraction of quartzite).
+# The script takes, among the first three of the order, the mineral that is asked for least so far,
+# so the demand of the four minerals stays level (the author: the spread must be small).
+AFFINITY = {
+    "engine": ["Обсидіан", "Орекс", "Лінтрій", "Кварцит"],
+    "arms": ["Орекс", "Лінтрій", "Обсидіан", "Кварцит"],
+    "optics": ["Лінтрій", "Кварцит", "Орекс", "Обсидіан"],
+    "science": ["Кварцит", "Обсидіан", "Лінтрій", "Орекс"],
 }
-FACTORY_MINERALS = {
-    "Фабрика двигунів": ["Обсидіан", "Орекс"],
-    "Завод реакторів": ["Орекс", "Обсидіан"],
-    "Завод енергетичної зброї": ["Орекс", "Лінтрій"],
-    "Завод кінетичної зброї": ["Орекс", "Кварцит"],
-    "Ливарний завод": ["Кварцит", "Орекс"],
-    "Завод щитів": ["Орекс", "Лінтрій"],
-    "Фабрика боєприпасів": ["Орекс", "Кварцит"],
-    "Фабрика бурових установок": ["Кварцит", "Обсидіан"],
-    "Завод точних приладів": ["Лінтрій", "Кварцит"],
+CHOICE_WIDTH = 3
+BUILDING_PROFILE = {
+    "Головні й населення": "science",
+    "Склади": "arms",
+    "Наука": "science",
+    "Видобуток на планеті": "science",
+    "Енергетика": "engine",
+    "Виробництво ресурсів": "optics",
+    "Виробництво модулів": "arms",
+    "Флот і оборона": "arms",
+    "Торгівля й логістика": "optics",
 }
-TECHNOLOGY_MINERALS = {
-    "Фундаментальні науки": ["Кварцит", "Лінтрій"],
-    "Економічні розвитки": ["Лінтрій", "Кварцит"],
+FACTORY_PROFILE = {
+    "Фабрика двигунів": "engine",
+    "Завод реакторів": "engine",
+    "Завод енергетичної зброї": "arms",
+    "Завод кінетичної зброї": "arms",
+    "Ливарний завод": "arms",
+    "Завод щитів": "arms",
+    "Фабрика боєприпасів": "arms",
+    "Фабрика бурових установок": "science",
+    "Завод точних приладів": "optics",
+    "Індустріальний комплекс": "science",
+    "Фабрика утилізації": "science",
+    "Верф": "engine",
+    "Космопорт": "engine",
+}
+TECHNOLOGY_PROFILE = {
+    "Фундаментальні науки": "science",
+    "Економічні розвитки": "optics",
 }
 TECHNOLOGY_OVERRIDES = {
-    "Економіка": ["Лінтрій", "Орекс"],
-    "Кристалографія": ["Кварцит", "Орекс"],
-    "Геологія": ["Кварцит", "Обсидіан"],
-    "Енергетика": ["Орекс", "Лінтрій"],
-    "Ядерна фізика": ["Орекс", "Кварцит"],
-    "Термоядерний синтез": ["Орекс", "Лінтрій"],
-    "Електроніка": ["Лінтрій", "Кварцит"],
-    "Логістика складів": ["Орекс", "Кварцит"],
-    "Торговельне право": ["Лінтрій", "Орекс"],
-    "Стабілізація порталу": ["Орекс", "Лінтрій"],
+    "Енергетика": "engine",
+    "Ядерна фізика": "engine",
+    "Термоядерний синтез": "engine",
+    "Газова інженерія": "engine",
+    "Електроніка": "optics",
+    "Кібернетика": "optics",
+    "Геологія": "science",
+    "Будівництво": "science",
+    "Робототехніка": "arms",
+    "Логістика складів": "arms",
 }
-# The crystals the late levels of some items need (the trade and the portal).
-CRYSTAL_ITEMS = {
-    "Торговий центр": ("Квартан", 15),
-    "Портал": ("Стобій", 15),
-    "Космопорт": ("Квартан", 15),
-    "Економіка": ("Туманій", 15),
-    "Торговельне право": ("Квартан", 15),
-    "Стабілізація порталу": ("Стобій", 15),
-    "Кристалографія": ("Туманій", 15),
-}
+# The crystals: every second item that lives to the late levels needs one, in turn, from the
+# fifteenth level of a building and the thirteenth of a technology.
+BUILDING_CRYSTAL_FROM = 15
+TECHNOLOGY_CRYSTAL_FROM = 13
+ASKS_CRYSTAL_EVERY = 2
 
 
 def fix_tiers(item: dict) -> None:
     is_building = item["kind"] == "budivlia"
     threshold = BUILDING_FROM if is_building else TECHNOLOGY_FROM
-    group_minerals = (
-        FACTORY_MINERALS.get(item["name"]) or BUILDING_MINERALS[item["group"]]
-        if is_building
-        else TECHNOLOGY_OVERRIDES.get(item["name"]) or TECHNOLOGY_MINERALS.get(item["group"], ["Кварцит", "Лінтрій"])
-    )
     tiers = []
     for level, tier in enumerate(item["tiers"], start=1):
         kept = [name for name in tier if name not in BALANCES and name not in COSMIC]
+        # Minerals and crystals are written again by assign_minerals, level by level, so that
+        # their demand stays level; deuterium and enriched uranium wait for the threshold.
+        kept = [name for name in kept if name not in MINERALS and name not in CRYSTALS]
         if level < threshold:
             kept = [name for name in kept if name not in LUCK]
         if level < FIRST_PRODUCED_LEVEL:
@@ -133,13 +144,6 @@ def fix_tiers(item: dict) -> None:
         tiers.append(kept)
 
     for level, tier in enumerate(tiers, start=1):
-        if level >= threshold and group_minerals[0] not in tier:
-            tier.append(group_minerals[0])
-        if level >= threshold + SECOND_AFTER and group_minerals[1] not in tier:
-            tier.append(group_minerals[1])
-        crystal = CRYSTAL_ITEMS.get(item["name"])
-        if crystal is not None and level >= crystal[1] and crystal[0] not in tier:
-            tier.append(crystal[0])
         # A resource that a lower level pays stays on every higher level.
         if level >= 2:
             for name in tiers[level - 2]:
@@ -245,6 +249,54 @@ def relax_centres(catalog: dict) -> int:
     return changed
 
 
+def profile_of(item: dict) -> str:
+    if item["kind"] == "budivlia":
+        return FACTORY_PROFILE.get(item["name"]) or BUILDING_PROFILE[item["group"]]
+    return TECHNOLOGY_OVERRIDES.get(item["name"]) or TECHNOLOGY_PROFILE.get(item["group"], "science")
+
+
+def assign_minerals(catalog: dict) -> None:
+    """Gives every building and technology its minerals and crystals, balancing the demand."""
+    asked = {name: 0 for name in MINERALS}
+    crystal_asked = {name: 0 for name in CRYSTALS}
+    eligible = 0
+
+    for item in catalog["items"]:
+        if item["kind"] not in {"budivlia", "rozvytok"}:
+            continue
+        is_building = item["kind"] == "budivlia"
+        first = BUILDING_FROM if is_building else TECHNOLOGY_FROM
+        top = AFFINITY[profile_of(item)][:CHOICE_WIDTH]
+        levels = len(item["tiers"])
+        chosen: list[str] = []
+
+        for rank in range(2):
+            if levels < first + rank * SECOND_AFTER:
+                break
+            options = [name for name in top if name not in chosen]
+            pick = min(options, key=lambda name: (asked[name], top.index(name)))
+            asked[pick] += 1
+            chosen.append(pick)
+
+        for rank, name in enumerate(chosen):
+            for level in range(first + rank * SECOND_AFTER, levels + 1):
+                item["tiers"][level - 1].append(name)
+
+        crystal_from = BUILDING_CRYSTAL_FROM if is_building else TECHNOLOGY_CRYSTAL_FROM
+
+        if levels >= crystal_from:
+            eligible += 1
+            if eligible % ASKS_CRYSTAL_EVERY == 1:
+                crystal = min(CRYSTALS, key=lambda name: (crystal_asked[name], CRYSTALS.index(name)))
+                crystal_asked[crystal] += 1
+                for level in range(crystal_from, levels + 1):
+                    item["tiers"][level - 1].append(crystal)
+
+        for tier in item["tiers"]:
+            tier.sort(key=order_key)
+            # recover() ran before; its levels hold no mineral, so nothing there changes
+
+
 def main() -> None:
     catalog = json.loads(DEPENDENCY.read_text(encoding="utf-8"))
     for item in catalog["items"]:
@@ -252,6 +304,7 @@ def main() -> None:
             fix_tiers(item)
         if item.get("recipe"):
             item["recipe"] = [name for name in item["recipe"] if name not in BALANCES]
+    assign_minerals(catalog)
     cap_centres(catalog)
     lowered = relax_centres(catalog)
     buildings, technologies = play(catalog)
