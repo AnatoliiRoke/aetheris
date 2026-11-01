@@ -249,6 +249,23 @@ public sealed class ReferenceKindTests
 
             (int id, _) = await ReferenceAdmin.ChangedAsync(await ReferenceAdmin.CreateAsync(admin, Resources, Resource(metals, "Вольфрам", "Tungsten", pngKey)));
             Assert.Equal(pngKey, (await ReferenceAdmin.ReadAsync(admin, Resources, id)).GetProperty("image_key").GetString());
+
+            // A resource group has a picture too, like every element the player sees.
+            (int groupId, int groupVersion) = await ReferenceAdmin.ChangedAsync(await ReferenceAdmin.CreateAsync(
+                admin,
+                Groups,
+                new { image_key = pngKey, name = ReferenceAdmin.Texts("Сплави", "Alloys"), description = ReferenceAdmin.Texts("Сплави металів", "Metal alloys"), allowed_on_planet = false }));
+            Assert.Equal(pngKey, (await ReferenceAdmin.ReadAsync(admin, Groups, groupId)).GetProperty("image_key").GetString());
+            await ReferenceAdmin.AssertFieldAsync(
+                await ReferenceAdmin.UpdateAsync(
+                    admin,
+                    Groups,
+                    groupId,
+                    groupVersion,
+                    new { image_key = new string('c', 32) + ".png", name = ReferenceAdmin.Texts("Сплави", "Alloys"), description = ReferenceAdmin.Texts("Сплави металів", "Metal alloys"), allowed_on_planet = false }),
+                HttpStatusCode.BadRequest,
+                AdminReferenceRules.ImageField,
+                AdminReferenceErrors.Unknown);
         }
         finally
         {
@@ -305,6 +322,29 @@ public sealed class ReferenceKindTests
         Assert.Equal(HttpStatusCode.Forbidden, (await moderation.GetAsync(AdminEndpoints.Prefix + "/reference/kinds", Token)).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await moderation.GetAsync(AdminEndpoints.Prefix + "/planets/buildings", Token)).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await ReferenceAdmin.CreateAsync(moderation, Resources, new { })).StatusCode);
+    }
+
+    /// <summary>
+    /// Every kind of an element of the game has a field for a picture, so the administrator can
+    /// upload it; only the kinds that are links or values of other rows have none (the placeholder
+    /// of a missing picture is the client's).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task Every_kind_of_an_element_has_a_picture_field()
+    {
+        await WorldTestData.ResetWorldAsync(_factory);
+
+        using IServiceScope scope = _factory.Services.CreateScope();
+        string[] withoutPicture = ["part_group_characteristic", "part_characteristic", "market_reference_price", "process_param"];
+        List<AdminReferenceDescriptor> descriptors = [.. scope.ServiceProvider.GetServices<IAdminReferenceService>().SelectMany(service => service.Descriptors)];
+
+        Assert.All(
+            descriptors.Where(descriptor => !withoutPicture.Contains(descriptor.Kind)),
+            descriptor => Assert.Contains(descriptor.Fields, field => field.Name == AdminReferenceRules.ImageField && field.Type == AdminReferenceFieldTypes.Image));
+        Assert.All(
+            descriptors.Where(descriptor => withoutPicture.Contains(descriptor.Kind)),
+            descriptor => Assert.DoesNotContain(descriptor.Fields, field => field.Type == AdminReferenceFieldTypes.Image));
     }
 
     private static object Resource(int groupId, string ukrainian, string english, string? imageKey = null) => new

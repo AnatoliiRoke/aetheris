@@ -150,6 +150,7 @@ public sealed class WorldDbContext : DbContext
         modelBuilder.Entity<ResourceGroupEntity>(entity =>
         {
             entity.ToTable("resource_group");
+            entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
             entity.Property(e => e.Code).HasMaxLength(CodeLength);
             entity.Property(e => e.NameKey).HasMaxLength(NameLength);
             entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);

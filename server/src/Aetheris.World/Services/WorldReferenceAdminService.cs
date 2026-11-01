@@ -157,6 +157,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             "admin.world_resource_group_archived",
             "admin.world_resource_group_restored"),
         [
+            new(AdminReferenceRules.ImageField, AdminReferenceFieldTypes.Image, LabelPrefix + "field.image"),
             new(AdminReferenceRules.NameField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.name", IsRequired: true, HasLanguages: true, InList: true),
             new(AdminReferenceRules.DescriptionField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.description", IsRequired: true, HasLanguages: true),
             new(AllowedOnPlanetField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.allowed_on_planet", InList: true),
@@ -197,7 +198,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     group.Id,
                     group.Code,
                     group.NameKey,
-                    null,
+                    group.ImageKey,
                     group.IsArchived,
                     group.Version,
                     new Dictionary<string, object?> { [AllowedOnPlanetField] = group.AllowedOnPlanet }))],
@@ -237,7 +238,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     group.Code,
                     group.NameKey,
                     group.DescriptionKey,
-                    null,
+                    group.ImageKey,
                     group.IsArchived,
                     group.Version,
                     ResourceGroupValues.Of(group, packs).ToDictionary());
@@ -423,6 +424,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             {
                 Dictionary<string, List<string>> failures = [];
                 AdminReferenceRules.CheckTexts(failures, _texts, values.Name, values.Description);
+                await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), null, cancellationToken).ConfigureAwait(false);
                 AdminReferenceRules.ThrowIfInvalid(failures);
 
                 string code = await _codes.NextAsync(WorldCodeGroups.ResourceGroup, cancellationToken).ConfigureAwait(false);
@@ -432,6 +434,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     NameKey = WorldTextKeys.Name(WorldTextKeys.ResourceGroup, code),
                     DescriptionKey = WorldTextKeys.Description(WorldTextKeys.ResourceGroup, code),
                     AllowedOnPlanet = values.AllowedOnPlanet,
+                    ImageKey = AdminReferenceRules.ImageKey(values.ImageKey),
                 };
 
                 _dbContext.ResourceGroups.Add(group);
@@ -460,12 +463,14 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
                 Dictionary<string, List<string>> failures = [];
                 AdminReferenceRules.CheckTexts(failures, _texts, values.Name, values.Description);
+                await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), group.ImageKey, cancellationToken).ConfigureAwait(false);
                 AdminReferenceRules.ThrowIfInvalid(failures);
 
                 IReadOnlyList<LocalizationPack> packs = await AdminReferenceRules.PacksAsync(_texts, cancellationToken).ConfigureAwait(false);
                 ResourceGroupValues before = ResourceGroupValues.Of(group, packs);
 
                 group.AllowedOnPlanet = values.AllowedOnPlanet;
+                group.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
                 group.Version++;
 
                 await _texts.SetAsync(
@@ -628,22 +633,25 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <param name="Name">The name by language.</param>
     /// <param name="Description">The description by language.</param>
     /// <param name="AllowedOnPlanet">Whether a resource of the group may lie on a body.</param>
+    /// <param name="ImageKey">The key of the picture.</param>
     private sealed record ResourceGroupValues(
         Dictionary<string, string>? Name,
         Dictionary<string, string>? Description,
-        bool AllowedOnPlanet)
+        bool AllowedOnPlanet,
+        string? ImageKey = null)
     {
         public static ResourceGroupValues Of(ResourceGroupEntity group, IReadOnlyList<LocalizationPack> packs) =>
-            new(AdminReferenceRules.TextsOf(packs, group.NameKey), AdminReferenceRules.TextsOf(packs, group.DescriptionKey), group.AllowedOnPlanet);
+            new(AdminReferenceRules.TextsOf(packs, group.NameKey), AdminReferenceRules.TextsOf(packs, group.DescriptionKey), group.AllowedOnPlanet, group.ImageKey);
 
         public static ResourceGroupValues Of(ResourceGroupEntity group, (Dictionary<string, string> Name, Dictionary<string, string> Description) texts) =>
-            new(texts.Name, texts.Description, group.AllowedOnPlanet);
+            new(texts.Name, texts.Description, group.AllowedOnPlanet, group.ImageKey);
 
         public (Dictionary<string, string> Name, Dictionary<string, string> Description) Trimmed(ILocalizationTexts texts) =>
             (Trim(texts, Name), Trim(texts, Description));
 
         public Dictionary<string, object?> ToDictionary() => new()
         {
+            [AdminReferenceRules.ImageField] = ImageKey,
             [AdminReferenceRules.NameField] = Name,
             [AdminReferenceRules.DescriptionField] = Description,
             [AllowedOnPlanetField] = AllowedOnPlanet,

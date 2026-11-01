@@ -22,16 +22,25 @@
 3. Сторінка «Виробництво» має шапку, стандартну чергу і плашки всіх рецептів усіх заводів із фільтрами й вибором кількості; закриті рецепти кажуть причину.
 4. Збірка, тести, формат, клієнт чисті; CI зелений.
 
-## 4. Що не входить
+## 4. Заглушка картинки
+Поки картинку елемента не завантажено, на плашці стоїть одна спільна заглушка. Промпт для її генерації в іншому агенті (англійською, суфікс стилю з задачі 00003 уже всередині), файл `ART-17.webp`, 1280×720:
+
+```
+A neutral placeholder emblem for an item whose picture is not made yet, in a space strategy game: a faintly glowing hexagonal holographic frame floating in the center, inside it a simple abstract symbol of three thin concentric rings and a small four-pointed star, teal and cyan light (#2EC4C4 accents) over a deep navy background (#0B1020 to #141B33), subtle drifting dust and a few distant stars, gentle vignette. The emblem stays inside the middle 60% of the frame so it survives any crop to 16:9, 4:3 or 1:1. Calm, quiet mood. Nothing that suggests a specific building, ship, planet, technology or resource. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark.
+```
+
+## 5. Що не входить
 Баланс витрат ресурсів (задача 00030), верф і польоти.
 
-## 5. Результат виконання
+## 6. Результат виконання
 
 **Зроблено**
 
 - Стиль фільтрів і плашок сторінки «Виробництво» той самий, що в дослідженнях: клас головної колонки `civ__main--production` (`CivShell`), правила пошуку, чипів фільтра, вибору, блока «наступний рівень» і черги в `gamepages.css` діють і для нього.
 - Плашка рецепта: «Потрібні ресурси» списком по одному ресурсу з іконкою (як у будівництві й дослідженнях), «Час виробництва», «У партії» лише коли партія більша за одиницю; суцільний рядок «На одиницю: …» прибрано.
 - З усіх плашок (будівлі, технології, рецепти) прибрано загальні описи даних («Будівля групи …», «Розвиток групи …», «Виробництво …»); пошук іде за назвою. Описи плашок процесів на сторінці планети лишилися.
+- Картинки в адмінці: перевірено всі види довідника. Поле картинки (завантаження PNG або WebP) мали будівлі, категорії будівель, технології, гілки технологій, ресурси, групи деталей, деталі, рецепти, характеристики, рівні ринку, типи й рецепти процесів. Не мали групи ресурсів: додано колонку `resource_group.image_key` (міграція `ResourceGroupImage`), поле в адмінці, перевірку ключа картинки. Види-зв'язки (характеристика групи, значення характеристики деталі, довідкова ціна ринку, параметр процесу) без картинки, бо це не елементи гри. Раси й типи небесних тіл не мають вигляду в адмінці зовсім (довідник лише в сиді); якщо потрібна й їхня картинка в адмінці, це окрема задача.
+- Тест `Every_kind_of_an_element_has_a_picture_field` (усі види елементів мають поле картинки), перевірка картинки групи ресурсів у `An_image_is_uploaded_and_served`.
 - Сітка плашок: `client/src/styles/planet.css` (3 / 2 / 1 колонки за ширинами 1430 і 1000 px).
 - Дослідження: `TechnologyCard`, `ResearchPage`, тексти `research.opens` прибрано.
 - Сервер: `ProductionQueueService.ReadRecipesAsync`, `GET /api/v1/production/recipes`, `ProductionRecipeListDto`, група деталі в `ProductionRecipeDto`, код причини `production_factory_not_built`.
