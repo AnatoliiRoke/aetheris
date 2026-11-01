@@ -6,6 +6,9 @@ import { fakeAuthApi, fakePlanetApi, fakeProductionApi, renderPage, samplePlanet
 
 const signedIn = () => fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) });
 
+/** The text of a row with the spaces of the numbers made plain, so the figures read as typed. */
+const plain = (row: HTMLElement) => (row.textContent ?? '').replace(/\s/g, ' ');
+
 const tabNames = ['Усе', 'Ресурси', 'Продукція', 'Модулі', 'Корпуси', 'Артефакти'];
 
 describe('StoragePage: the screen of the storage (task 00020)', () => {
@@ -31,14 +34,14 @@ describe('StoragePage: the screen of the storage (task 00020)', () => {
     const iron = within(block).getByText('Залізо').closest('tr')!;
     const copper = within(block).getByText('Мідь').closest('tr')!;
 
-    // The columns of the design plus the weight and the stored tonnes (task 00027).
-    expect(within(block).getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['Назва', 'Кількість', 'За годину', 'Заповнення', 'Вага', 'Обсяг', 'Видобувні']);
+    // The columns of the mockup: the name, the amount against the capacity, the rate and the fill.
+    expect(within(block).getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['Назва', 'Кількість', 'За годину', 'Заповнення', 'Видобувні']);
     // Every resource has the capacity of its own, so 900 of 10 000 is 9 percent of the iron and
     // 500 of 10 000 is 5 percent of the copper.
-    expect(within(iron).getByText('900 / 10 000')).toBeInTheDocument();
+    expect(plain(iron)).toContain('900 / 10 000');
     expect(within(iron).getByRole('progressbar', { name: 'Залізо' })).toHaveAttribute('aria-valuenow', '9');
     expect(within(iron).getByText('9%')).toBeInTheDocument();
-    expect(within(copper).getByText('500 / 10 000')).toBeInTheDocument();
+    expect(plain(copper)).toContain('500 / 10 000');
     expect(within(copper).getByRole('progressbar', { name: 'Мідь' })).toHaveAttribute('aria-valuenow', '5');
     expect(within(copper).getByText('5%')).toBeInTheDocument();
   });
@@ -61,11 +64,11 @@ describe('StoragePage: the screen of the storage (task 00020)', () => {
     const copper = within(block).getByText('Мідь').closest('tr')!;
 
     expect(within(iron).getByText('Повний')).toBeInTheDocument();
-    expect(within(iron).getByText('4 200 / 4 200')).toBeInTheDocument();
+    expect(plain(iron)).toContain('4 200 / 4 200');
     expect(within(copper).queryByText('Повний')).not.toBeInTheDocument();
-    expect(within(copper).getByText('0 / 4 200')).toBeInTheDocument();
+    expect(plain(copper)).toContain('0 / 4 200');
     // The alarm stands above the tabs with the advice and the way to the construction.
-    const alarm = screen.getByText(/^Склад заповнений, видобуток зупинено: Залізо\. Збудуйте більше місткості\./);
+    const alarm = screen.getByText(/^Склад заповнений — видобуток зупинено: Залізо\. Збудуйте більше місткості\./);
     expect(within(alarm).getByRole('link', { name: 'До будівництва' })).toHaveAttribute('href', '/planet/build');
   });
 
@@ -115,26 +118,9 @@ describe('StoragePage: the screen of the storage (task 00020)', () => {
     const row = within(table).getByText('Корпус «Оса» Мк. II').closest('tr')!;
 
     expect(within(row).getByText('Корпусні модулі')).toBeInTheDocument();
-    expect(within(row).getByText('4')).toBeInTheDocument();
-    // The kind of the part has its own room: its parts against the capacity of the kind.
-    expect(within(row).getByText('4 / 100')).toBeInTheDocument();
-    expect(within(row).queryByText('Повний')).not.toBeInTheDocument();
+    // The quantity with the unit, as the mockup draws it.
+    expect(row.textContent).toContain('4 шт.');
     expect(production.stock).toHaveBeenCalledWith(10);
-  });
-
-  it('marks a full kind of part with the badge against its own room', async () => {
-    const user = userEvent.setup();
-    const production = fakeProductionApi({
-      stock: vi.fn().mockResolvedValue(sampleProductionStock({ storage: { capacity: 4, kinds: [{ partTypeId: 3, quantity: 4, capacity: 4, isFull: true }] } })),
-    });
-    renderPage('/planet/storage', { auth: signedIn(), production });
-
-    await user.click(await screen.findByRole('tab', { name: 'Модулі' }));
-
-    const row = within(await screen.findByRole('table', { name: 'Модулі' })).getByText('Корпус «Оса» Мк. II').closest('tr')!;
-
-    expect(within(row).getByText('Повний')).toBeInTheDocument();
-    expect(within(row).getByText('4 / 4')).toBeInTheDocument();
   });
 
   it('says there are no parts yet', async () => {
