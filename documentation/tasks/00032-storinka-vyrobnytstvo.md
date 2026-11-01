@@ -29,6 +29,7 @@
 
 **Зроблено**
 
+- Стиль фільтрів і плашок сторінки «Виробництво» той самий, що в дослідженнях: клас головної колонки `civ__main--production` (`CivShell`), правила пошуку, чипів фільтра, вибору, блока «наступний рівень» і черги в `gamepages.css` діють і для нього.
 - Сітка плашок: `client/src/styles/planet.css` (3 / 2 / 1 колонки за ширинами 1430 і 1000 px).
 - Дослідження: `TechnologyCard`, `ResearchPage`, тексти `research.opens` прибрано.
 - Сервер: `ProductionQueueService.ReadRecipesAsync`, `GET /api/v1/production/recipes`, `ProductionRecipeListDto`, група деталі в `ProductionRecipeDto`, код причини `production_factory_not_built`.

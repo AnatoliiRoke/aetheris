@@ -53,6 +53,10 @@ function mainClass(path: string): string {
     return 'civ__main civ__main--build';
   }
 
+  if (path === routes.planetProduction) {
+    return 'civ__main civ__main--production';
+  }
+
   if (path === routes.planetResearch) {
     return 'civ__main civ__main--research';
   }
