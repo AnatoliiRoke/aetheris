@@ -18,9 +18,12 @@ from motifs_modules import HULLS, MODULES, TECHNOLOGIES  # noqa: E402
 from motifs_resources import RESOURCES  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-STYLE = "painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no letters, no numbers, no watermark."
+STYLE = "photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized."
 FRAME = "16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1."
 SIZE = "1280x720"
+
+# The resources that are a scene and not a thing on a table.
+SCENE_RESOURCES = {"resource_29", "resource_30"}
 
 
 def load(path):
@@ -47,17 +50,22 @@ def main():
 
     for resource in world["resources"]:
         subject, palette = RESOURCES[resource["code"]]
-        prompt = f"{subject}. Palette: {palette}. A single still-life subject centered on a dark rocky or metallic surface with a soft rim light and a shallow depth of field, a game resource illustration. {FRAME} {STYLE}"
+        if resource["code"] in SCENE_RESOURCES:
+            prompt = f"{subject}. Palette: {palette}. A photorealistic cinematic scene with believable real-world detail, one clear focal point, soft rim light and atmospheric depth. {FRAME} {STYLE}"
+            rows.append(row("resource", resource["code"], resource_groups[resource["group"]], resource["name"], prompt))
+            continue
+
+        prompt = f"{subject}. Palette: {palette}. A photorealistic macro product shot of a single subject centered on a dark rocky or metallic surface, studio lighting with a soft rim light, realistic textures such as crystal facets, rock grain and metal wear, shallow depth of field. {FRAME} {STYLE}"
         rows.append(row("resource", resource["code"], resource_groups[resource["group"]], resource["name"], prompt))
 
     for building in planets["building_types"]:
         subject = BUILDINGS[building["code"]]
-        prompt = f"{subject}. A wide establishing view of the building on an alien planet at dusk, small details for scale, one clear main structure, soft rim light, a game building illustration. {FRAME} {STYLE}"
+        prompt = f"{subject}. Photorealistic concept art, a wide establishing view of the building on an alien planet at dusk, believable real-world engineering and architecture, small people-sized details for scale, atmospheric haze, one clear main structure. {FRAME} {STYLE}"
         rows.append(row("building", building["code"], categories[building["category"]], building["name"], prompt))
 
     for technology in research["technologies"]:
         subject = TECHNOLOGIES[technology["code"]]
-        prompt = f"An emblem illustration for the research \"{technology['name']['en']}\". {subject}. Holographic and symbolic, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif and a faint hexagon frame behind it. {FRAME} {STYLE}"
+        prompt = f"An emblem illustration for the research \"{technology['name']['en']}\". {subject}. A realistic scientific scene or a physically plausible holographic projection rendered with real materials and lighting, glowing teal and cyan light accents (#2EC4C4), a calm composition with one clear central motif. {FRAME} {STYLE}"
         rows.append(row("technology", technology["code"], branches[technology["branch"]], technology["name"], prompt))
 
     for part in production["parts"]:
@@ -66,11 +74,11 @@ def main():
 
         if code.startswith("part_m_"):
             subject = MODULES[code]
-            prompt = f"{subject}. A single ship module shown alone on a dark holographic pedestal, three-quarter view, a clean technical illustration with soft rim light and a few small bright details, no ship hull around it. {FRAME} {STYLE}"
+            prompt = f"{subject}. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. {FRAME} {STYLE}"
             rows.append(row("module", code, group, part["name"], prompt))
         else:
             subject = HULLS[code]
-            prompt = f"{subject}. A single starship in empty space, three-quarter view, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. {FRAME} {STYLE}"
+            prompt = f"{subject}. A photorealistic render of a single starship in empty space, three-quarter view, realistic hull plating, panel lines and weathering, a neutral design with no race symbols and no lettering, lit by a distant star with a teal rim light. {FRAME} {STYLE}"
             rows.append(row("hull", code, group, part["name"], prompt))
 
     with open(os.path.join(ROOT, "documentation/art-local/object-prompts.json"), "w", encoding="utf-8") as handle:
@@ -92,7 +100,7 @@ def main():
         "",
         "## Правила",
         "",
-        f"1. **Один стиль для всіх.** Кожен промпт вже містить суфікс стилю з задачі 00003: `{STYLE}` Нічого дописувати не треба.",
+        f"1. **Один стиль для всіх.** Кожен промпт вже містить суфікс стилю: `{STYLE}` Нічого дописувати не треба. Стиль **реалістичний** (рішення автора 01.11.2026 для картинок об'єктів); це відрізняється від мальованого 2D з задачі 00003, яким зроблені лендінг і фони, тому суфікс тут свій.",
         f"2. **Один розмір: {SIZE} (16:9).** Плашки будівель, досліджень і рецептів показують картинку в рамці 16:9; предмет стоїть у середніх 60% кадру, тому картинку можна обрізати до 4:3 чи 1:1 для іконок і карток.",
         "3. **Один предмет у кадрі.** Без тексту, літер, цифр і водяних знаків. Розмір кадру й суфікс не змінювати між об'єктами, щоб картинки лишалися єдиним набором.",
         "4. **Назва файлу** це код об'єкта з даних гри + `.webp` (наприклад `building_12.webp`). Код стабільний, тому файл завжди відповідає своєму рядку довідника.",
