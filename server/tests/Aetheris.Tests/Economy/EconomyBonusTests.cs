@@ -63,18 +63,19 @@ public sealed class EconomyBonusTests
         Assert.Equal(10m, plain!.GrowthPerHour);
         Assert.Equal(10, plain.Amount);
 
-        // The medical centre of the first level has the multiplier 100 in the data. The growth in an
-        // hour is the limit times 5 per cent times that multiplier, and one hour from an empty body
-        // stops at the limit of 200 inhabitants.
+        // The medical centre of the sixth level has the multiplier 1.3 in the data (a twentieth of
+        // the base growth for a level, task 00030). The growth in an hour is the limit times
+        // 5 per cent times that multiplier.
+        const int level = 6;
         decimal bonus = await EconomyTestData.EffectValueAsync(
             services,
             EconomyTestData.MedicalCentreCode,
-            1,
+            level,
             EconomyCodes.PopulationGrowthBonusEffect);
 
-        Assert.Equal(100m, bonus);
+        Assert.Equal(1.3m, bonus);
 
-        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, EconomyTestData.MedicalCentreCode, 1);
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, EconomyTestData.MedicalCentreCode, level);
         await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 0, now.AddHours(-1));
 
         PopulationFacts? boosted = await economy.GetPopulationAsync(player.Account.UserId, player.PlanetId, Token);
@@ -83,7 +84,7 @@ public sealed class EconomyBonusTests
 
         Assert.NotNull(boosted);
         Assert.Equal(expectedGrowth, boosted!.GrowthPerHour);
-        Assert.Equal(200, boosted.Amount);
+        Assert.Equal(13, boosted.Amount);
         Assert.True(boosted.Amount > plain.Amount);
     }
 

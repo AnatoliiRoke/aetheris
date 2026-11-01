@@ -214,7 +214,7 @@ public static class ResearchReferenceSeed
                     {
                         Level = level,
                         DurationSeconds = ValueAt(technology.DurationSeconds, level),
-                        CostIds = [.. technology.Costs.Where(cost => level >= cost.FromLevel).Select(cost => new TechnologyLevelCostEntity { ResourceTypeId = resourceIds[cost.Resource], Amount = ValueAt(cost.Growth, level) })],
+                        CostIds = [.. technology.Costs.Where(cost => level >= cost.FromLevel).Select(cost => new TechnologyLevelCostEntity { ResourceTypeId = resourceIds[cost.Resource], Amount = ValueAt(cost.Growth, level - cost.FromLevel + 1) })],
                         EffectIds =
                         [
                             .. technology.Effects.Where(effect => effect.Level is null || effect.Level == level).Select(effect => new TechnologyLevelEffectEntity

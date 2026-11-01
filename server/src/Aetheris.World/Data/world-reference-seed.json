@@ -1239,7 +1239,7 @@
     {
       "object_type": "object_type_11",
       "code": "rule_group_13",
-      "min_picks": 2,
+      "min_picks": 3,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
       "rules": [
@@ -1323,7 +1323,7 @@
     {
       "object_type": "object_type_12",
       "code": "rule_group_15",
-      "min_picks": 2,
+      "min_picks": 3,
       "max_picks": 4,
       "extra_pick_probability": 0.5,
       "rules": [
@@ -1589,6 +1589,62 @@
           "coefficient_max": 0.25
         }
       ]
+    },
+    {
+      "object_type": "object_type_11",
+      "code": "rule_group_25",
+      "min_picks": 3,
+      "max_picks": 3,
+      "extra_pick_probability": 0,
+      "picks_all": true,
+      "rules": [
+        {
+          "resource": "resource_17",
+          "weight": 1,
+          "coefficient_min": 0.01,
+          "coefficient_max": 0.023333
+        },
+        {
+          "resource": "resource_18",
+          "weight": 1,
+          "coefficient_min": 0.01,
+          "coefficient_max": 0.023333
+        },
+        {
+          "resource": "resource_19",
+          "weight": 1,
+          "coefficient_min": 0.01,
+          "coefficient_max": 0.023333
+        }
+      ]
+    },
+    {
+      "object_type": "object_type_12",
+      "code": "rule_group_26",
+      "min_picks": 3,
+      "max_picks": 3,
+      "extra_pick_probability": 0,
+      "picks_all": true,
+      "rules": [
+        {
+          "resource": "resource_17",
+          "weight": 1,
+          "coefficient_min": 0.01,
+          "coefficient_max": 0.023333
+        },
+        {
+          "resource": "resource_18",
+          "weight": 1,
+          "coefficient_min": 0.01,
+          "coefficient_max": 0.023333
+        },
+        {
+          "resource": "resource_19",
+          "weight": 1,
+          "coefficient_min": 0.01,
+          "coefficient_max": 0.023333
+        }
+      ]
     }
   ],
   "races": [
@@ -1600,27 +1656,19 @@
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 100
+          "amount": 1000
         },
         {
           "resource": "resource_20",
-          "amount": 100
+          "amount": 500
         },
         {
           "resource": "resource_27",
-          "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "amount": 100
+          "amount": 1000
         },
         {
           "resource": "resource_6",
-          "amount": 100
-        },
-        {
-          "resource": "resource_30",
-          "amount": 100
+          "amount": 300
         }
       ],
       "name": {
@@ -1660,27 +1708,19 @@
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 100
+          "amount": 1000
         },
         {
           "resource": "resource_20",
-          "amount": 100
+          "amount": 500
         },
         {
           "resource": "resource_27",
-          "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "amount": 100
+          "amount": 1000
         },
         {
           "resource": "resource_6",
-          "amount": 100
-        },
-        {
-          "resource": "resource_30",
-          "amount": 100
+          "amount": 300
         }
       ],
       "name": {
@@ -1720,27 +1760,19 @@
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 100
+          "amount": 1000
         },
         {
           "resource": "resource_20",
-          "amount": 100
+          "amount": 500
         },
         {
           "resource": "resource_27",
-          "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "amount": 100
+          "amount": 1000
         },
         {
           "resource": "resource_6",
-          "amount": 100
-        },
-        {
-          "resource": "resource_30",
-          "amount": 100
+          "amount": 300
         }
       ],
       "name": {
@@ -1780,27 +1812,19 @@
       "start_resources": [
         {
           "resource": "resource_1",
-          "amount": 100
+          "amount": 1000
         },
         {
           "resource": "resource_20",
-          "amount": 100
+          "amount": 500
         },
         {
           "resource": "resource_27",
-          "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "amount": 100
+          "amount": 1000
         },
         {
           "resource": "resource_6",
-          "amount": 100
-        },
-        {
-          "resource": "resource_30",
-          "amount": 100
+          "amount": 300
         }
       ],
       "name": {

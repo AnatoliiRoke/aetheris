@@ -73,6 +73,59 @@ public static class PlanetsTestData
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync(Token));
+        long planetId = body.RootElement.GetProperty("planet_id").GetInt64();
+
+        await KeepOnlyTheMainBuildingAsync(factory, planetId);
+
+        return new PlanetsTestPlayer(client, account, planetId);
+    }
+
+    /// <summary>
+    /// Takes the extra start buildings (the housing, the warehouse and the solar plant) off a new
+    /// body and the energy use off the levels of the buildings, so the cases that count the
+    /// population, the storage, the capacity or one building start from the main building alone,
+    /// as before task 00030. The energy rules have cases of their own, which add the use they
+    /// check, and the seed has its tests in <c>BalancedEconomyTests</c>.
+    /// </summary>
+    /// <param name="factory">The test host.</param>
+    /// <param name="planetId">The body.</param>
+    /// <returns>A task that completes when the buildings are gone.</returns>
+    private static async Task KeepOnlyTheMainBuildingAsync(AetherisTestFactory factory, long planetId)
+    {
+        using IServiceScope scope = factory.Services.CreateScope();
+        PlanetsDbContext planets = scope.ServiceProvider.GetRequiredService<PlanetsDbContext>();
+        int mainTypeId = await planets.BuildingTypes.AsNoTracking()
+            .Where(type => type.Code == SeedCodes.AdminCenter)
+            .Select(type => type.Id)
+            .SingleAsync(Token);
+
+        await planets.PlanetBuildings
+            .Where(building => building.PlanetId == planetId && building.BuildingTypeId != mainTypeId)
+            .ExecuteDeleteAsync(Token);
+        await planets.BuildingLevelEffects
+            .Where(effect => effect.EffectType == BuildingEffectTypes.EnergyConsumption)
+            .ExecuteDeleteAsync(Token);
+        scope.ServiceProvider.GetRequiredService<BuildingCatalogCache>().Invalidate();
+    }
+
+    /// <summary>
+    /// Founds a civilization and leaves its whole start package on the home body.
+    /// </summary>
+    /// <param name="factory">The test host.</param>
+    /// <returns>The player.</returns>
+    public static async Task<PlanetsTestPlayer> FoundWithTheWholeStartAsync(AetherisTestFactory factory)
+    {
+        ArgumentNullException.ThrowIfNull(factory);
+
+        HttpClient client = factory.CreateBrowserClient();
+        TestAccount account = await TestAccounts.RegisterConfirmedAsync(factory);
+        await TestAccounts.SignInAsync(client, account);
+
+        int raceId = await CivilizationTestData.FirstRaceIdAsync(client);
+        HttpResponseMessage response = await CivilizationTestData.FoundAsync(client, raceId, "Дім", "found-" + Guid.NewGuid().ToString("N"));
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync(Token));
 
         return new PlanetsTestPlayer(client, account, body.RootElement.GetProperty("planet_id").GetInt64());
     }

@@ -3129,7 +3129,7 @@
       "resource": null,
       "factory": "building_40",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 1,
       "name": {
         "uk": "Реактивний двигун",
@@ -3148,22 +3148,22 @@
         {
           "resource": "resource_9",
           "part": null,
-          "amount": 100
+          "amount": 20
         },
         {
           "resource": "resource_12",
           "part": null,
-          "amount": 100
+          "amount": 20
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -3191,7 +3191,7 @@
       "resource": null,
       "factory": "building_40",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 2,
       "name": {
         "uk": "Плазмовий двигун",
@@ -3205,37 +3205,37 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_9",
           "part": null,
-          "amount": 100
+          "amount": 24
         },
         {
           "resource": "resource_12",
           "part": null,
-          "amount": 100
+          "amount": 24
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -3263,7 +3263,7 @@
       "resource": null,
       "factory": "building_40",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 3,
       "name": {
         "uk": "Іонний двигун",
@@ -3277,27 +3277,27 @@
         {
           "resource": "resource_9",
           "part": null,
-          "amount": 100
+          "amount": 29
         },
         {
           "resource": "resource_14",
           "part": null,
-          "amount": 100
+          "amount": 29
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -3325,7 +3325,7 @@
       "resource": null,
       "factory": "building_40",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 4,
       "name": {
         "uk": "Гравітаційний двигун",
@@ -3339,22 +3339,22 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -3382,7 +3382,7 @@
       "resource": null,
       "factory": "building_40",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 5,
       "name": {
         "uk": "Гіпердвигун",
@@ -3396,22 +3396,22 @@
         {
           "resource": "resource_17",
           "part": null,
-          "amount": 100
+          "amount": 21
         },
         {
           "resource": "resource_18",
           "part": null,
-          "amount": 100
+          "amount": 21
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -3444,7 +3444,7 @@
       "resource": null,
       "factory": "building_40",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 750,
       "sort_order": 6,
       "name": {
         "uk": "Джамп-двигун",
@@ -3458,7 +3458,7 @@
         {
           "resource": "resource_15",
           "part": null,
-          "amount": 100
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -3473,7 +3473,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 120
         }
       ],
       "requirements": [
@@ -3506,7 +3506,7 @@
       "resource": null,
       "factory": "building_41",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 7,
       "name": {
         "uk": "Ядерний реактор",
@@ -3525,17 +3525,17 @@
         {
           "resource": "resource_16",
           "part": null,
-          "amount": 100
+          "amount": 20
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -3563,7 +3563,7 @@
       "resource": null,
       "factory": "building_41",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 8,
       "name": {
         "uk": "Імпульсний реактор",
@@ -3577,22 +3577,22 @@
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 24
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -3620,7 +3620,7 @@
       "resource": null,
       "factory": "building_41",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 9,
       "name": {
         "uk": "Термоядерний реактор",
@@ -3634,27 +3634,27 @@
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_13",
           "part": null,
-          "amount": 100
+          "amount": 29
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -3682,7 +3682,7 @@
       "resource": null,
       "factory": "building_41",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 10,
       "name": {
         "uk": "Реактор холодного синтезу",
@@ -3696,22 +3696,22 @@
         {
           "resource": "resource_13",
           "part": null,
-          "amount": 100
+          "amount": 35
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -3739,7 +3739,7 @@
       "resource": null,
       "factory": "building_41",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 11,
       "name": {
         "uk": "Гравітаційний реактор",
@@ -3753,17 +3753,17 @@
         {
           "resource": "resource_15",
           "part": null,
-          "amount": 100
+          "amount": 41
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -3796,7 +3796,7 @@
       "resource": null,
       "factory": "building_41",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 750,
       "sort_order": 12,
       "name": {
         "uk": "Важкий реактор",
@@ -3810,12 +3810,12 @@
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 100
+          "amount": 250
         },
         {
           "resource": "resource_15",
           "part": null,
-          "amount": 100
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -3830,7 +3830,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 120
         }
       ],
       "requirements": [
@@ -3863,7 +3863,7 @@
       "resource": null,
       "factory": "building_42",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 13,
       "name": {
         "uk": "Легкий лазер",
@@ -3877,22 +3877,22 @@
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 20
         },
         {
           "resource": "resource_10",
           "part": null,
-          "amount": 100
+          "amount": 20
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -3920,7 +3920,7 @@
       "resource": null,
       "factory": "building_42",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 14,
       "name": {
         "uk": "Важкий лазер",
@@ -3934,27 +3934,27 @@
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 24
         },
         {
           "resource": "resource_10",
           "part": null,
-          "amount": 100
+          "amount": 24
         },
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 24
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -3982,7 +3982,7 @@
       "resource": null,
       "factory": "building_42",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 15,
       "name": {
         "uk": "Імпульсний лазер",
@@ -3996,22 +3996,22 @@
         {
           "resource": "resource_6",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 29
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -4039,7 +4039,7 @@
       "resource": null,
       "factory": "building_42",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 16,
       "name": {
         "uk": "Плазмова гармата",
@@ -4053,22 +4053,22 @@
         {
           "resource": "resource_9",
           "part": null,
-          "amount": 100
+          "amount": 35
         },
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 35
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -4096,7 +4096,7 @@
       "resource": null,
       "factory": "building_42",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 17,
       "name": {
         "uk": "Іонна гармата",
@@ -4110,17 +4110,17 @@
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 41
         },
         {
           "resource": "resource_14",
           "part": null,
-          "amount": 100
+          "amount": 41
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -4153,7 +4153,7 @@
       "resource": null,
       "factory": "building_42",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 750,
       "sort_order": 18,
       "name": {
         "uk": "Мікрохвильовий випромінювач",
@@ -4167,12 +4167,12 @@
         {
           "resource": "resource_6",
           "part": null,
-          "amount": 100
+          "amount": 250
         },
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -4182,7 +4182,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 120
         }
       ],
       "requirements": [
@@ -4210,7 +4210,7 @@
       "resource": null,
       "factory": "building_42",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 900,
       "sort_order": 19,
       "name": {
         "uk": "Частинковий прискорювач",
@@ -4224,22 +4224,22 @@
         {
           "resource": "resource_6",
           "part": null,
-          "amount": 100
+          "amount": 300
         },
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 60
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 150
         }
       ],
       "requirements": [
@@ -4267,7 +4267,7 @@
       "resource": null,
       "factory": "building_42",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 1100,
       "sort_order": 20,
       "name": {
         "uk": "Орексова гармата",
@@ -4281,22 +4281,22 @@
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 72
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 180
         }
       ],
       "requirements": [
@@ -4329,7 +4329,7 @@
       "resource": null,
       "factory": "building_43",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 21,
       "name": {
         "uk": "Кінетична гармата",
@@ -4348,7 +4348,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -4371,7 +4371,7 @@
       "resource": null,
       "factory": "building_43",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 22,
       "name": {
         "uk": "Скорострільна гармата",
@@ -4385,22 +4385,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -4423,7 +4423,7 @@
       "resource": null,
       "factory": "building_43",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 23,
       "name": {
         "uk": "Рейкова гармата",
@@ -4437,27 +4437,27 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 29
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -4485,7 +4485,7 @@
       "resource": null,
       "factory": "building_43",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 24,
       "name": {
         "uk": "РПУ-X1",
@@ -4499,22 +4499,22 @@
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_6",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -4537,7 +4537,7 @@
       "resource": null,
       "factory": "building_43",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 25,
       "name": {
         "uk": "РПУ-X2",
@@ -4551,17 +4551,17 @@
         {
           "resource": "resource_6",
           "part": null,
-          "amount": 100
+          "amount": 210
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -4594,7 +4594,7 @@
       "resource": null,
       "factory": "building_43",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 750,
       "sort_order": 26,
       "name": {
         "uk": "РПУ-X3",
@@ -4608,7 +4608,7 @@
         {
           "resource": "resource_6",
           "part": null,
-          "amount": 100
+          "amount": 250
         },
         {
           "resource": "resource_22",
@@ -4628,7 +4628,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 120
         }
       ],
       "requirements": [
@@ -4661,7 +4661,7 @@
       "resource": null,
       "factory": "building_44",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 27,
       "name": {
         "uk": "Сталева плита",
@@ -4680,7 +4680,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -4703,7 +4703,7 @@
       "resource": null,
       "factory": "building_44",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 28,
       "name": {
         "uk": "Сегментна броня",
@@ -4717,17 +4717,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -4750,7 +4750,7 @@
       "resource": null,
       "factory": "building_44",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 29,
       "name": {
         "uk": "Кобальтова броня",
@@ -4764,17 +4764,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -4797,7 +4797,7 @@
       "resource": null,
       "factory": "building_44",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 30,
       "name": {
         "uk": "Титанова плита",
@@ -4811,17 +4811,17 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -4844,7 +4844,7 @@
       "resource": null,
       "factory": "building_44",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 31,
       "name": {
         "uk": "Композитна броня",
@@ -4858,12 +4858,12 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 210
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -4891,7 +4891,7 @@
       "resource": null,
       "factory": "building_44",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 750,
       "sort_order": 32,
       "name": {
         "uk": "Іридієва плита",
@@ -4905,7 +4905,7 @@
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 100
+          "amount": 250
         },
         {
           "resource": "resource_23",
@@ -4915,7 +4915,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 120
         }
       ],
       "requirements": [
@@ -4938,7 +4938,7 @@
       "resource": null,
       "factory": "building_44",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 900,
       "sort_order": 33,
       "name": {
         "uk": "Наноплита",
@@ -4952,17 +4952,17 @@
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 150
         }
       ],
       "requirements": [
@@ -4985,7 +4985,7 @@
       "resource": null,
       "factory": "building_44",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 1100,
       "sort_order": 34,
       "name": {
         "uk": "Адаптивна броня",
@@ -4999,22 +4999,22 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 180
         }
       ],
       "requirements": [
@@ -5047,7 +5047,7 @@
       "resource": null,
       "factory": "building_45",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 35,
       "name": {
         "uk": "Силовий щит",
@@ -5061,17 +5061,17 @@
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 20
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -5094,7 +5094,7 @@
       "resource": null,
       "factory": "building_45",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 36,
       "name": {
         "uk": "Кварцовий щит",
@@ -5108,17 +5108,17 @@
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 24
         },
         {
           "resource": "resource_10",
           "part": null,
-          "amount": 100
+          "amount": 24
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -5141,7 +5141,7 @@
       "resource": null,
       "factory": "building_45",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 37,
       "name": {
         "uk": "Магнітний щит",
@@ -5155,22 +5155,22 @@
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 29
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -5193,7 +5193,7 @@
       "resource": null,
       "factory": "building_45",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 38,
       "name": {
         "uk": "Гравітаційний щит",
@@ -5207,22 +5207,22 @@
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 35
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -5250,7 +5250,7 @@
       "resource": null,
       "factory": "building_45",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 39,
       "name": {
         "uk": "Нейтронний щит",
@@ -5264,12 +5264,12 @@
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 41
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -5297,7 +5297,7 @@
       "resource": null,
       "factory": "building_45",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 750,
       "sort_order": 40,
       "name": {
         "uk": "Плазмовий щит",
@@ -5311,17 +5311,17 @@
         {
           "resource": "resource_9",
           "part": null,
-          "amount": 100
+          "amount": 50
         },
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 50
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 120
         }
       ],
       "requirements": [
@@ -5344,7 +5344,7 @@
       "resource": null,
       "factory": "building_45",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 900,
       "sort_order": 41,
       "name": {
         "uk": "Орексовий щит",
@@ -5358,22 +5358,22 @@
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 60
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 150
         }
       ],
       "requirements": [
@@ -5401,7 +5401,7 @@
       "resource": null,
       "factory": "building_45",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 1100,
       "sort_order": 42,
       "name": {
         "uk": "Ефірний щит",
@@ -5415,22 +5415,22 @@
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 72
         },
         {
           "resource": "resource_15",
           "part": null,
-          "amount": 100
+          "amount": 72
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 180
         }
       ],
       "requirements": [
@@ -5463,7 +5463,7 @@
       "resource": null,
       "factory": "building_46",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 43,
       "name": {
         "uk": "Сталевий снаряд",
@@ -5482,7 +5482,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -5505,7 +5505,7 @@
       "resource": null,
       "factory": "building_46",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 44,
       "name": {
         "uk": "Кобальтовий снаряд",
@@ -5519,17 +5519,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -5552,7 +5552,7 @@
       "resource": null,
       "factory": "building_46",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 45,
       "name": {
         "uk": "Рейковий стрижень",
@@ -5566,17 +5566,17 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 29
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -5599,7 +5599,7 @@
       "resource": null,
       "factory": "building_46",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 46,
       "name": {
         "uk": "Стріла-X1",
@@ -5613,17 +5613,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -5646,7 +5646,7 @@
       "resource": null,
       "factory": "building_46",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 47,
       "name": {
         "uk": "Блискавка-X1",
@@ -5660,12 +5660,12 @@
         {
           "resource": "resource_6",
           "part": null,
-          "amount": 100
+          "amount": 210
         },
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 41
         },
         {
           "resource": "resource_27",
@@ -5693,7 +5693,7 @@
       "resource": null,
       "factory": "building_46",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 750,
       "sort_order": 48,
       "name": {
         "uk": "Спис-X2",
@@ -5707,7 +5707,7 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 250
         },
         {
           "resource": "resource_22",
@@ -5722,7 +5722,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 120
         }
       ],
       "requirements": [
@@ -5745,7 +5745,7 @@
       "resource": null,
       "factory": "building_46",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 900,
       "sort_order": 49,
       "name": {
         "uk": "Валькірія-X3",
@@ -5759,22 +5759,22 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_26",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 150
         }
       ],
       "requirements": [
@@ -5807,7 +5807,7 @@
       "resource": null,
       "factory": "building_46",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 1100,
       "sort_order": 50,
       "name": {
         "uk": "Термоядерна торпеда",
@@ -5821,17 +5821,17 @@
         {
           "resource": "resource_13",
           "part": null,
-          "amount": 100
+          "amount": 72
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 180
         }
       ],
       "requirements": [
@@ -5854,7 +5854,7 @@
       "resource": null,
       "factory": "building_46",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 1300,
       "sort_order": 51,
       "name": {
         "uk": "Протонна торпеда",
@@ -5868,17 +5868,17 @@
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 86
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 210
         }
       ],
       "requirements": [
@@ -5901,7 +5901,7 @@
       "resource": null,
       "factory": "building_46",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 1500,
       "sort_order": 52,
       "name": {
         "uk": "Уранова торпеда",
@@ -5915,7 +5915,7 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 520
         },
         {
           "resource": "resource_16",
@@ -5925,7 +5925,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 260
         }
       ],
       "requirements": [
@@ -5948,7 +5948,7 @@
       "resource": null,
       "factory": "building_47",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 53,
       "name": {
         "uk": "Модуль геологорозвідки",
@@ -5962,17 +5962,17 @@
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 20
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -5995,7 +5995,7 @@
       "resource": null,
       "factory": "building_47",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 54,
       "name": {
         "uk": "Бурова установка",
@@ -6009,17 +6009,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -6047,7 +6047,7 @@
       "resource": null,
       "factory": "building_47",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 55,
       "name": {
         "uk": "Кристалічний екстрактор",
@@ -6061,17 +6061,17 @@
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 29
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -6094,7 +6094,7 @@
       "resource": null,
       "factory": "building_47",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 56,
       "name": {
         "uk": "Збирач ефіру",
@@ -6108,17 +6108,17 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -6141,7 +6141,7 @@
       "resource": null,
       "factory": "building_47",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 57,
       "name": {
         "uk": "Туманнісний збирач",
@@ -6155,12 +6155,12 @@
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 41
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -6188,7 +6188,7 @@
       "resource": null,
       "factory": "building_48",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 58,
       "name": {
         "uk": "Астросканер",
@@ -6202,32 +6202,32 @@
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 20
         },
         {
           "resource": "resource_10",
           "part": null,
-          "amount": 100
+          "amount": 20
         },
         {
           "resource": "resource_19",
           "part": null,
-          "amount": 100
+          "amount": 10
         },
         {
           "resource": "resource_21",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -6255,7 +6255,7 @@
       "resource": null,
       "factory": "building_48",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 59,
       "name": {
         "uk": "Корабельний радар",
@@ -6269,27 +6269,27 @@
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 24
         },
         {
           "resource": "resource_10",
           "part": null,
-          "amount": 100
+          "amount": 24
         },
         {
           "resource": "resource_21",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -6312,7 +6312,7 @@
       "resource": null,
       "factory": "building_48",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 60,
       "name": {
         "uk": "Археологічний модуль",
@@ -6326,17 +6326,17 @@
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 29
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -6359,7 +6359,7 @@
       "resource": null,
       "factory": "building_48",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 61,
       "name": {
         "uk": "Радіооптичне маскування",
@@ -6373,22 +6373,22 @@
         {
           "resource": "resource_6",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_21",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -6411,7 +6411,7 @@
       "resource": null,
       "factory": "building_48",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 62,
       "name": {
         "uk": "Детектор маскування",
@@ -6425,17 +6425,17 @@
         {
           "resource": "resource_6",
           "part": null,
-          "amount": 100
+          "amount": 210
         },
         {
           "resource": "resource_21",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -6463,7 +6463,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 63,
       "name": {
         "uk": "Відновлювач щитів",
@@ -6477,17 +6477,17 @@
         {
           "resource": "resource_11",
           "part": null,
-          "amount": 100
+          "amount": 20
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -6510,7 +6510,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 64,
       "name": {
         "uk": "Бортовий комп'ютер",
@@ -6524,22 +6524,22 @@
         {
           "resource": "resource_6",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_21",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -6567,7 +6567,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 65,
       "name": {
         "uk": "Збирач уламків",
@@ -6581,12 +6581,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -6609,7 +6609,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 66,
       "name": {
         "uk": "Вантажний відсік",
@@ -6623,17 +6623,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -6656,7 +6656,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 67,
       "name": {
         "uk": "Великий вантажний відсік",
@@ -6670,12 +6670,12 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 210
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -6703,7 +6703,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 750,
       "sort_order": 68,
       "name": {
         "uk": "Протиракетна система",
@@ -6717,7 +6717,7 @@
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 250
         },
         {
           "resource": "resource_21",
@@ -6732,7 +6732,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 120
         }
       ],
       "requirements": [
@@ -6760,7 +6760,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 900,
       "sort_order": 69,
       "name": {
         "uk": "Модуль передачі",
@@ -6774,22 +6774,22 @@
         {
           "resource": "resource_8",
           "part": null,
-          "amount": 100
+          "amount": 60
         },
         {
           "resource": "resource_21",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 150
         }
       ],
       "requirements": [
@@ -6812,7 +6812,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 1100,
       "sort_order": 70,
       "name": {
         "uk": "Колоніальний модуль",
@@ -6826,17 +6826,17 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 180
         }
       ],
       "requirements": [
@@ -6864,7 +6864,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 71,
       "name": {
         "uk": "Житловий модуль",
@@ -6878,17 +6878,17 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -6911,7 +6911,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 72,
       "name": {
         "uk": "Орбітальний склад",
@@ -6925,17 +6925,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -6958,7 +6958,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 73,
       "name": {
         "uk": "Ремонтні майстерні",
@@ -6972,22 +6972,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -7010,7 +7010,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 74,
       "name": {
         "uk": "Школа командирів",
@@ -7024,12 +7024,12 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -7052,7 +7052,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 75,
       "name": {
         "uk": "Торговий центр",
@@ -7066,12 +7066,12 @@
         {
           "resource": "resource_21",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -7104,7 +7104,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 750,
       "sort_order": 76,
       "name": {
         "uk": "Орбітальний термоядерний реактор",
@@ -7118,12 +7118,12 @@
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 250
         },
         {
           "resource": "resource_13",
           "part": null,
-          "amount": 100
+          "amount": 50
         },
         {
           "resource": "resource_23",
@@ -7133,7 +7133,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 120
         }
       ],
       "requirements": [
@@ -7156,7 +7156,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 900,
       "sort_order": 77,
       "name": {
         "uk": "Збагачувач ізотопів гелію",
@@ -7170,17 +7170,17 @@
         {
           "resource": "resource_12",
           "part": null,
-          "amount": 100
+          "amount": 60
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 150
         }
       ],
       "requirements": [
@@ -7213,7 +7213,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 1100,
       "sort_order": 78,
       "name": {
         "uk": "Екстрактор темної матерії",
@@ -7227,17 +7227,17 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 180
         }
       ],
       "requirements": [
@@ -7265,7 +7265,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 1300,
       "sort_order": 79,
       "name": {
         "uk": "Джамп-модуль",
@@ -7279,27 +7279,27 @@
         {
           "resource": "resource_15",
           "part": null,
-          "amount": 100
+          "amount": 86
         },
         {
           "resource": "resource_17",
           "part": null,
-          "amount": 100
+          "amount": 43
         },
         {
           "resource": "resource_18",
           "part": null,
-          "amount": 100
+          "amount": 43
         },
         {
           "resource": "resource_24",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 210
         }
       ],
       "requirements": [
@@ -7332,7 +7332,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 80,
       "name": {
         "uk": "Винищувач «Сапсан»",
@@ -7351,12 +7351,12 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -7379,7 +7379,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 81,
       "name": {
         "uk": "Важкий винищувач «Шершень»",
@@ -7393,22 +7393,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -7436,7 +7436,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 82,
       "name": {
         "uk": "Торпедоносець «Гадюка»",
@@ -7450,22 +7450,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -7488,7 +7488,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 83,
       "name": {
         "uk": "Важкий торпедоносець «Кобра»",
@@ -7502,22 +7502,22 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -7545,7 +7545,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 84,
       "name": {
         "uk": "«Ґедзь»",
@@ -7564,7 +7564,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -7587,7 +7587,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 85,
       "name": {
         "uk": "«Цикада»",
@@ -7601,17 +7601,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -7639,7 +7639,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 86,
       "name": {
         "uk": "«Кліщ»",
@@ -7653,17 +7653,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -7686,7 +7686,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 87,
       "name": {
         "uk": "Корвет «Коршун»",
@@ -7710,12 +7710,12 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -7743,7 +7743,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 88,
       "name": {
         "uk": "Фрегат «Барракуда»",
@@ -7757,27 +7757,27 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -7805,7 +7805,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 89,
       "name": {
         "uk": "Есмінець «Акула»",
@@ -7819,22 +7819,22 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -7862,7 +7862,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 90,
       "name": {
         "uk": "Легкий крейсер «Ягуар»",
@@ -7876,22 +7876,22 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -7924,7 +7924,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 620,
       "sort_order": 91,
       "name": {
         "uk": "Крейсер «Носоріг»",
@@ -7938,22 +7938,22 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 210
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 100
+          "amount": 210
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 83
         },
         {
           "resource": "resource_27",
@@ -7986,7 +7986,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 750,
       "sort_order": 92,
       "name": {
         "uk": "Важкий крейсер «Бегемот»",
@@ -8000,12 +8000,12 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 250
         },
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 100
+          "amount": 250
         },
         {
           "resource": "resource_22",
@@ -8020,7 +8020,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 120
         }
       ],
       "requirements": [
@@ -8053,7 +8053,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 93,
       "name": {
         "uk": "Броненосець «Панцирник»",
@@ -8077,12 +8077,12 @@
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -8105,7 +8105,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 94,
       "name": {
         "uk": "Лінкор «Кракен»",
@@ -8119,27 +8119,27 @@
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_26",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -8167,7 +8167,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 95,
       "name": {
         "uk": "Важкий лінкор «Мамонт»",
@@ -8181,27 +8181,27 @@
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_26",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -8234,7 +8234,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 96,
       "name": {
         "uk": "Дредноут «Горгона»",
@@ -8248,27 +8248,27 @@
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 100
+          "amount": 170
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_26",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -8301,7 +8301,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 97,
       "name": {
         "uk": "Дестроєр «Каратель»",
@@ -8320,22 +8320,22 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_26",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -8368,7 +8368,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 98,
       "name": {
         "uk": "Супер-лінкор «Тиранозавр»",
@@ -8382,27 +8382,27 @@
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_26",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -8440,7 +8440,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 99,
       "name": {
         "uk": "Супер-дредноут «Левіафан»",
@@ -8454,27 +8454,27 @@
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_25",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_26",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -8512,7 +8512,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 100,
       "name": {
         "uk": "Малий транспорт «Жук»",
@@ -8531,12 +8531,12 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -8559,7 +8559,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 101,
       "name": {
         "uk": "Середній транспорт «Бик»",
@@ -8573,22 +8573,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -8616,7 +8616,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 102,
       "name": {
         "uk": "Великий транспорт «Слон»",
@@ -8630,22 +8630,22 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -8673,7 +8673,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 520,
       "sort_order": 103,
       "name": {
         "uk": "Важкий транспорт «Кит»",
@@ -8687,22 +8687,22 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_26",
           "part": null,
-          "amount": 100
+          "amount": 69
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 86
         }
       ],
       "requirements": [
@@ -8730,7 +8730,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 300,
       "sort_order": 104,
       "name": {
         "uk": "Орбітальна база",
@@ -8754,17 +8754,17 @@
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 40
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 50
         }
       ],
       "requirements": [
@@ -8792,7 +8792,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 360,
       "sort_order": 105,
       "name": {
         "uk": "Космобаза",
@@ -8806,27 +8806,27 @@
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 100
+          "amount": 120
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_26",
           "part": null,
-          "amount": 100
+          "amount": 48
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -8859,7 +8859,7 @@
       "resource": null,
       "factory": "building_51",
       "output_quantity": 1,
-      "duration_seconds": 20,
+      "duration_seconds": 430,
       "sort_order": 106,
       "name": {
         "uk": "Видобувна станція",
@@ -8873,22 +8873,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 100
+          "amount": 140
         },
         {
           "resource": "resource_22",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 100
+          "amount": 58
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 72
         }
       ],
       "requirements": [
@@ -8915,8 +8915,8 @@
       "part": null,
       "resource": "resource_20",
       "factory": "building_31",
-      "output_quantity": 1,
-      "duration_seconds": 20,
+      "output_quantity": 100,
+      "duration_seconds": 600,
       "sort_order": 107,
       "name": {
         "uk": "Будматеріали",
@@ -8936,11 +8936,6 @@
           "resource": "resource_27",
           "part": null,
           "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "part": null,
-          "amount": 100
         }
       ],
       "requirements": [],
@@ -8951,8 +8946,8 @@
       "part": null,
       "resource": "resource_21",
       "factory": "building_32",
-      "output_quantity": 1,
-      "duration_seconds": 20,
+      "output_quantity": 100,
+      "duration_seconds": 600,
       "sort_order": 108,
       "name": {
         "uk": "Оптоволокно",
@@ -8977,11 +8972,6 @@
           "resource": "resource_27",
           "part": null,
           "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "part": null,
-          "amount": 100
         }
       ],
       "requirements": [],
@@ -8992,8 +8982,8 @@
       "part": null,
       "resource": "resource_22",
       "factory": "building_33",
-      "output_quantity": 1,
-      "duration_seconds": 20,
+      "output_quantity": 100,
+      "duration_seconds": 600,
       "sort_order": 109,
       "name": {
         "uk": "Мікропроцесори",
@@ -9018,11 +9008,6 @@
           "resource": "resource_27",
           "part": null,
           "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "part": null,
-          "amount": 100
         }
       ],
       "requirements": [],
@@ -9033,8 +9018,8 @@
       "part": null,
       "resource": "resource_23",
       "factory": "building_34",
-      "output_quantity": 1,
-      "duration_seconds": 20,
+      "output_quantity": 100,
+      "duration_seconds": 600,
       "sort_order": 110,
       "name": {
         "uk": "Композити",
@@ -9059,11 +9044,6 @@
           "resource": "resource_27",
           "part": null,
           "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "part": null,
-          "amount": 100
         }
       ],
       "requirements": [],
@@ -9074,8 +9054,8 @@
       "part": null,
       "resource": "resource_24",
       "factory": "building_35",
-      "output_quantity": 1,
-      "duration_seconds": 20,
+      "output_quantity": 100,
+      "duration_seconds": 600,
       "sort_order": 111,
       "name": {
         "uk": "Енергострижні",
@@ -9100,11 +9080,6 @@
           "resource": "resource_27",
           "part": null,
           "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "part": null,
-          "amount": 100
         }
       ],
       "requirements": [],
@@ -9115,8 +9090,8 @@
       "part": null,
       "resource": "resource_25",
       "factory": "building_36",
-      "output_quantity": 1,
-      "duration_seconds": 20,
+      "output_quantity": 100,
+      "duration_seconds": 600,
       "sort_order": 112,
       "name": {
         "uk": "Нановолокно",
@@ -9141,11 +9116,6 @@
           "resource": "resource_27",
           "part": null,
           "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "part": null,
-          "amount": 100
         }
       ],
       "requirements": [],
@@ -9156,8 +9126,8 @@
       "part": null,
       "resource": "resource_26",
       "factory": "building_37",
-      "output_quantity": 1,
-      "duration_seconds": 20,
+      "output_quantity": 100,
+      "duration_seconds": 600,
       "sort_order": 113,
       "name": {
         "uk": "Титановий сплав",
@@ -9182,11 +9152,6 @@
           "resource": "resource_27",
           "part": null,
           "amount": 100
-        },
-        {
-          "resource": "resource_29",
-          "part": null,
-          "amount": 100
         }
       ],
       "requirements": [],
@@ -9197,8 +9162,8 @@
       "part": null,
       "resource": "resource_16",
       "factory": "building_38",
-      "output_quantity": 1,
-      "duration_seconds": 20,
+      "output_quantity": 100,
+      "duration_seconds": 600,
       "sort_order": 114,
       "name": {
         "uk": "Збагачений Уран",
@@ -9216,11 +9181,6 @@
         },
         {
           "resource": "resource_27",
-          "part": null,
-          "amount": 100
-        },
-        {
-          "resource": "resource_29",
           "part": null,
           "amount": 100
         }

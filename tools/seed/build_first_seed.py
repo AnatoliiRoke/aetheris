@@ -354,6 +354,7 @@ POWER_PLANTS = {
     "Ядерна електростанція",
     "Термоядерна електростанція",
 }
+UNSPENT_ENERGY = POWER_PLANTS | {"Склад"}
 
 ENERGY_AMMO = {"Блискавка-X1", "Протонна торпеда", "Термоядерна торпеда"}
 COSMIC = {"Гелій-3", "Темна матерія", "Ефір"}
@@ -363,7 +364,13 @@ DEPOSIT_NAMES = {
     "Силікорова руда", "Тектонітова руда", "Кварцит", "Обсидіан", "Лінтрій", "Орекс",
     "Дейтерій", "Квартан", "Стобій", "Туманій",
 }
-START_NAMES = ["Залізна руда", "Будматеріали", "Кредити", "Енергія", "Силікорова руда", "Населення"]
+START_NAMES = {
+    "Залізна руда": "world.seed.start.iron_ore",
+    "Будматеріали": "world.seed.start.building_materials",
+    "Кредити": "world.seed.start.credits",
+    "Силікорова руда": "world.seed.start.silicore_ore",
+}
+START_BUILDINGS = {"Адміністративний центр", "Житловий комплекс (Міста)", "Склад", "Сонячна електростанція"}
 METAL_NAMES = {
     "Залізна руда", "Титанова руда", "Іридієва руда", "Кобальтова руда", "Уранова руда",
     "Силікорова руда", "Тектонітова руда", "Дейтерій",
@@ -487,12 +494,77 @@ def part_english(name: str) -> str:
     fail(f"missing English part name: {name}")
 
 
-def growth(base: Decimal, factor: Decimal, step: Decimal = Decimal(0)) -> dict:
-    return {"base": num(base), "growth": num(factor), "step": num(step)}
+def growth(base: Decimal, factor: Decimal, step: Decimal = Decimal(0), digits: int = 0) -> dict:
+    row = {"base": num(base), "growth": num(factor), "step": num(step)}
+    if digits > 0:
+        row["significant"] = digits
+    return row
 
 
 def curve(base: Decimal, factor: Decimal, index: int) -> Decimal:
     return base * (factor ** index)
+
+
+ORES = {
+    "Залізна руда", "Титанова руда", "Іридієва руда", "Кобальтова руда", "Уранова руда",
+    "Силікорова руда", "Тектонітова руда",
+}
+MINERALS = {"Кварцит", "Обсидіан", "Лінтрій", "Орекс"}
+CRYSTALS = {"Квартан", "Стобій", "Туманій"}
+FUELS = {"Дейтерій", "Гелій-3", "Темна матерія", "Ефір", "Збагачений Уран"}
+PRODUCED = {"Оптоволокно", "Мікропроцесори", "Композити", "Енергострижні", "Нановолокно", "Титановий сплав"}
+
+GROUP_MULTIPLIERS = {
+    "Головні й населення": "main",
+    "Склади": "storage",
+    "Наука": "science",
+    "Видобуток на планеті": "extraction",
+    "Енергетика": "power",
+    "Виробництво ресурсів": "resource_production",
+    "Виробництво модулів": "module_production",
+    "Флот і оборона": "fleet",
+    "Торгівля й логістика": "trade",
+}
+
+
+def resource_scale(parameters: dict[str, Decimal], name: str) -> Decimal:
+    """The share of the cost base a resource is paid in (a class of resources, data in the coefficients)."""
+    if name in ORES:
+        key = "group_1"
+    elif name in MINERALS:
+        key = "group_2"
+    elif name in CRYSTALS:
+        key = "group_4"
+    elif name in FUELS:
+        key = "group_3"
+    elif name == "Будматеріали":
+        key = "building_materials"
+    elif name in PRODUCED:
+        key = "group_5"
+    elif name == "Кредити":
+        key = "credits"
+    else:
+        fail(f"no cost scale for the resource {name}")
+    return coefficient(parameters, f"world.seed.cost.scale.{key}")
+
+
+def group_multiplier(parameters: dict[str, Decimal], group: str) -> Decimal:
+    return coefficient(parameters, f"world.seed.cost.group.{GROUP_MULTIPLIERS[group]}")
+
+
+def significant(parameters: dict[str, Decimal]) -> int:
+    return int(coefficient(parameters, "world.seed.cost.significant_digits"))
+
+
+def rounded(value: Decimal, digits: int) -> Decimal:
+    """Rounds a number to a few significant digits, as the server does when it reads the seed."""
+    if digits <= 0 or value == 0:
+        return value
+    magnitude = value.copy_abs().adjusted() + 1
+    exponent = Decimal(1).scaleb(magnitude - digits)
+    if exponent <= ONE:
+        return value.quantize(ONE, rounding=ROUND_HALF_UP)
+    return (value / exponent).quantize(ONE, rounding=ROUND_HALF_UP) * exponent
 
 
 def reserved_technology_codes() -> set[str]:
@@ -582,36 +654,45 @@ def center_requirements(center_levels: list[int], science_center: str) -> list[d
     return rows
 
 
-def planet_costs(tiers: list[list[str]], codes: dict[str, str], base: Decimal, factor: Decimal) -> list[dict]:
+def planet_costs(tiers: list[list[str]], codes: dict[str, str], parameters: dict[str, Decimal], group: str, factor: Decimal) -> list[dict]:
+    """The cost rows of a building: a resource is paid from the level it first appears, at the base of its class."""
+    base = coefficient(parameters, "world.seed.cost.base") * group_multiplier(parameters, group)
+    digits = significant(parameters)
     rows = []
     for name, level in first_seen(tiers).items():
         if name not in codes:
             fail(f"unknown resource in a cost: {name}")
         rows.append({
             "resource": codes[name],
-            "base": num(base),
+            "base": num(base * resource_scale(parameters, name)),
             "growth": num(factor),
             "step": 0,
             "from_level": level,
+            "significant": digits,
         })
     return rows
 
 
-def technology_costs(tiers: list[list[str]], codes: dict[str, str], base: Decimal, factor: Decimal) -> list[dict]:
+def technology_costs(tiers: list[list[str]], codes: dict[str, str], parameters: dict[str, Decimal], factor: Decimal) -> list[dict]:
+    """The cost rows of a technology, by the same rule as the buildings."""
+    base = coefficient(parameters, "world.seed.cost.base") * coefficient(parameters, "world.seed.cost.technology")
+    digits = significant(parameters)
     rows = []
     for name, level in first_seen(tiers).items():
         if name not in codes:
             fail(f"unknown resource in a research cost: {name}")
         rows.append({
             "resource": codes[name],
-            "growth": growth(base, factor),
+            "growth": growth(base * resource_scale(parameters, name), factor, digits=digits),
             "from_level": level,
         })
     return rows
 
 
-def effect(effect_type: str, base: Decimal, factor: Decimal, step: Decimal = Decimal(0), resource: str | None = None, group: str | None = None) -> dict:
+def effect(effect_type: str, base: Decimal, factor: Decimal, step: Decimal = Decimal(0), resource: str | None = None, group: str | None = None, digits: int = 0) -> dict:
     row = {"type": effect_type, "base": num(base), "growth": num(factor), "step": num(step)}
+    if digits > 0:
+        row["significant"] = digits
     if resource is not None:
         row["resource"] = resource
     if group is not None:
@@ -754,6 +835,58 @@ def build_world(world: dict, codes: dict[str, str], cost_base: Decimal, race_bon
         world["races"].append(race)
     notes.append("Race preferred bodies: Terrans terrestrial, Litari ice, Drakkuri volcanic, Veirani desert. The unsettled extraction bonus on that body is not seeded.")
     notes.append("Peaceful modules are named in the race traits. The bonus table has no per-part field, so they are not exclusive recipes.")
+
+
+def world_is_built(world: dict) -> bool:
+    """Whether the world seed already holds the 31 chosen resources (the structural rebuild is not repeated)."""
+    return len(world["resources"]) == len(RESOURCES) and [row["name"]["uk"] for row in world["resources"]] == [item[0] for item in RESOURCES]
+
+
+def apply_start_resources(world: dict, codes: dict[str, str], parameters: dict[str, Decimal]) -> None:
+    """The start stock of every race: the resources of the first hours, from the coefficients."""
+    start = [{"resource": codes[name], "amount": whole(coefficient(parameters, key))} for name, key in START_NAMES.items()]
+    for race in world["races"]:
+        race["start_resources"] = start
+
+
+def patch_fields(world: dict, codes: dict[str, str], parameters: dict[str, Decimal], notes: list[str]) -> None:
+    """Every asteroid field holds all three crystals at once, 3 to 7 per cent of its mass together (task 00030)."""
+    crystals = [codes[name] for name in ("Квартан", "Стобій", "Туманій")]
+    low = Decimal(coefficient(parameters, "world.seed.field.group_4_total_min")) / Decimal(len(crystals))
+    high = Decimal(coefficient(parameters, "world.seed.field.group_4_total_max")) / Decimal(len(crystals))
+    field_types = [row["code"] for row in world["object_types"] if row.get("object_class") == "asteroid_field"]
+    next_number = max(int(group["code"].rsplit("_", 1)[1]) for group in world["rule_groups"])
+    for object_type in field_types:
+        groups = [group for group in world["rule_groups"] if group["object_type"] == object_type]
+        existing = next((group for group in groups if {rule["resource"] for rule in group["rules"]} == set(crystals)), None)
+        rules = [
+            {"resource": code, "weight": 1, "coefficient_min": num(low), "coefficient_max": num(high)}
+            for code in crystals
+        ]
+        if existing is None:
+            next_number += 1
+            world["rule_groups"].append({
+                "object_type": object_type,
+                "code": f"rule_group_{next_number}",
+                "min_picks": len(crystals),
+                "max_picks": len(crystals),
+                "extra_pick_probability": 0,
+                "picks_all": True,
+                "rules": rules,
+            })
+        else:
+            existing["min_picks"] = existing["max_picks"] = len(crystals)
+            existing["extra_pick_probability"] = 0
+            existing["picks_all"] = True
+            existing["rules"] = rules
+        for group in groups:
+            if group is existing or group.get("picks_all"):
+                continue
+            # Ore groups: three or four ores of the field, so the total share reaches the smallest total.
+            if all(rule["resource"] in {f"resource_{index}" for index in range(1, 8)} for rule in group["rules"]):
+                group["min_picks"] = 3
+                group["max_picks"] = 4
+    notes.append("Every asteroid field has the three crystals together, 3 to 7 per cent in all, 1 per cent at least each; the ore groups of the fields take three or four ores. The generator keeps the total share of a field between 70 and 95 per cent.")
 
 
 def module_characteristics(name: str, group: str, index: int, cost_base: Decimal, cost_factor: Decimal, trade_levels: int) -> tuple[dict, dict]:
@@ -954,6 +1087,7 @@ def main() -> None:
     cost_growth = coefficient(parameters, "world.seed.cost.growth")
     duration_base = coefficient(parameters, "world.seed.duration.base_seconds")
     duration_growth = coefficient(parameters, "world.seed.duration.growth")
+    digits = significant(parameters)
     race_bonus = coefficient(parameters, "world.seed.race.bonus")
     cap_base = coefficient(parameters, "world.seed.level_cap.base")
     cap_growth = coefficient(parameters, "world.seed.level_cap.growth")
@@ -961,7 +1095,11 @@ def main() -> None:
     lot_limit_base = coefficient(parameters, "world.seed.market.lot_limit.base")
     lot_limit_step = coefficient(parameters, "world.seed.market.lot_limit.step")
     cost_factor = ONE + cost_growth
+    technology_factor = ONE + coefficient(parameters, "world.seed.cost.technology_growth")
     duration_factor = ONE + duration_growth
+    part_factor = ONE + coefficient(parameters, "world.seed.part.growth")
+    bonus_factor = ONE + coefficient(parameters, "world.seed.technology.bonus")
+    shortening_factor = ONE + coefficient(parameters, "world.seed.technology.shortening")
     catalog = load_json(DEPENDENCY)
     items = catalog["items"]
     buildings = [row for row in items if row["kind"] == "budivlia"]
@@ -1013,9 +1151,9 @@ def main() -> None:
     science_center = building_code["Науковий центр"]
     converter = building_code["Перетворювач матерії"]
     trade_levels = next(row["maxLevel"] for row in buildings if row["name"] == "Торговий центр")
-    duration = growth(duration_base, duration_factor)
-    shortening = growth(ONE, ONE / duration_factor)
-    bonus = growth(cost_factor, cost_factor)
+    tech_duration = growth(coefficient(parameters, "world.seed.duration.technology_seconds"), duration_factor, digits=digits)
+    shortening = growth(ONE / shortening_factor, ONE / shortening_factor)
+    bonus = growth(bonus_factor, bonus_factor)
     no_effect = []
 
     planet_buildings = []
@@ -1068,22 +1206,41 @@ def main() -> None:
             building_class = "mine"
             resource_name = MINE_RESOURCE[row["name"]]
             effect_type = "metal_production" if resource_name in METAL_NAMES else "crystal_production"
-            effects.append(effect(effect_type, cost_base, cost_factor, resource=codes[resource_name]))
+            if resource_name in MINERALS:
+                output_scale = "group_2"
+            elif resource_name in CRYSTALS:
+                output_scale = "group_4"
+            elif resource_name == "Дейтерій":
+                output_scale = "group_3"
+            else:
+                output_scale = None
+            output = coefficient(parameters, "world.seed.mine.base") * (coefficient(parameters, f"world.seed.mine.scale.{output_scale}") if output_scale else ONE)
+            effects.append(effect(effect_type, output, ONE + coefficient(parameters, "world.seed.mine.growth"), resource=codes[resource_name], digits=digits))
         elif row["name"] in POWER_PLANTS:
-            effects.append(effect("energy_output", cost_base, cost_factor))
+            plant = {
+                "Сонячна електростанція": "solar",
+                "Теплова електростанція": "thermal",
+                "Ядерна електростанція": "nuclear",
+                "Термоядерна електростанція": "fusion",
+            }[row["name"]]
+            effects.append(effect("energy_output", coefficient(parameters, f"world.seed.power.{plant}"), ONE + coefficient(parameters, "world.seed.power.growth"), digits=digits))
         elif row["name"] == "Науковий центр":
             building_class = "research_center"
         elif row["name"] == "Адміністративний центр":
             effects.append(effect("level_cap", cap_base, cap_growth, cap_step))
-            effects.append(effect("population_max", cost_base, cost_factor))
+            effects.append(effect("population_max", coefficient(parameters, "world.seed.population.admin"), ONE + coefficient(parameters, "world.seed.population.growth"), digits=digits))
         elif row["name"] == "Житловий комплекс (Міста)":
-            effects.append(effect("population_max", cost_base, cost_factor))
+            effects.append(effect("population_max", coefficient(parameters, "world.seed.population.housing"), ONE + coefficient(parameters, "world.seed.population.growth"), digits=digits))
         elif row["name"] == "Медичний центр":
-            effects.append(effect("population_growth_bonus", cost_base, cost_factor))
+            # A multiplier of the growth of the population: a fraction, so the values are listed by level.
+            step_bonus = coefficient(parameters, "world.seed.population.bonus")
+            effects.append({"type": "population_growth_bonus", "base": 0, "growth": 1, "step": 0, "values": [num(ONE + step_bonus * level) for level in range(1, row["maxLevel"] + 1)]})
         elif row["name"] == "Склад":
+            storage_base = coefficient(parameters, "world.seed.storage.base")
+            storage_factor = ONE + coefficient(parameters, "world.seed.storage.growth")
             for group_code, _uk, _en, _allowed in GROUPS:
-                effects.append(effect("storage_capacity", cost_base, cost_factor, group=group_code))
-            effects.append(effect("part_storage_capacity", cost_base, cost_factor))
+                effects.append(effect("storage_capacity", storage_base, storage_factor, group=group_code, digits=digits))
+            effects.append(effect("part_storage_capacity", coefficient(parameters, "world.seed.storage.part_base"), storage_factor, digits=digits))
         elif row["name"] == "Перетворювач матерії":
             building_class = "converter"
         elif row["name"] == "Фабрика утилізації":
@@ -1101,7 +1258,14 @@ def main() -> None:
             building_class = "portal"
         elif row["name"] in PRODUCTS or row["name"] in MODULE_FACTORY.values():
             building_class = "production"
-        if not effects and building_class in {"", "sensor", "defence", "trade_center", "portal", "converter", "recycling", "shipyard", "production", "research_center"}:
+        if row["name"] not in UNSPENT_ENERGY:
+            effects.append(effect(
+                "energy_consumption",
+                coefficient(parameters, "world.seed.energy.consumption") * group_multiplier(parameters, row["group"]),
+                ONE + coefficient(parameters, "world.seed.energy.growth"),
+                digits=digits,
+            ))
+        if not any(entry["type"] != "energy_consumption" for entry in effects) and building_class in {"", "sensor", "defence", "trade_center", "portal", "converter", "recycling", "shipyard", "production", "research_center"}:
             if row["name"] not in PRODUCTS and row["name"] not in MODULE_FACTORY.values() and row["name"] not in {"Перетворювач матерії", "Фабрика утилізації", "Верф"}:
                 no_effect.append(row["name"])
 
@@ -1111,11 +1275,11 @@ def main() -> None:
             "sort_order": len(planet_buildings) + 1,
             "name": text(row["name"], english(BUILDINGS_EN, row["name"], "building")),
             "description": text(f"Будівля групи «{row['group']}».", f"Building of the {dict(BUILDING_GROUPS)[row['group']]} group."),
-            "duration_seconds": duration,
-            "costs": planet_costs(row["tiers"], codes, cost_base, cost_factor),
+            "duration_seconds": growth(duration_base * group_multiplier(parameters, row["group"]), duration_factor, digits=digits),
+            "costs": planet_costs(row["tiers"], codes, parameters, row["group"], cost_factor),
             "effects": effects,
             "requirements": requirements,
-            "is_start_building": row["name"] == "Адміністративний центр",
+            "is_start_building": row["name"] in START_BUILDINGS,
             "building_class": building_class,
             "category": category,
             "max_level": row["maxLevel"],
@@ -1135,7 +1299,7 @@ def main() -> None:
 
     notes.append("Buildings without a numeric effect, left without one: " + ", ".join(no_effect))
     notes.append("No effect type exists for a construction queue, a fleet limit, a bunker share, a colony cap, a market commission, a portal discount, or fuel production. Bank income stays the credits flag earns_population_income.")
-    notes.append("Ores and deuterium use metal_production. Minerals and crystals use crystal_production. Power plants have energy_output and no energy_consumption, because energy is already a tier cost.")
+    notes.append("Ores and deuterium use metal_production. Minerals and crystals use crystal_production. Power plants have energy_output; every other building except the warehouse has energy_consumption (task 00030: energy and population are no longer costs, see tools/seed/repair_dependencies.py).")
     notes.append("Deposit requirements were added on extraction buildings. The dependency file does not carry them; the game already refuses a mine without the deposit.")
     notes.append("Admin keeps level_cap and population_max. The list says the admin center only caps levels; the economy reads population_max from it.")
 
@@ -1182,8 +1346,8 @@ def main() -> None:
             "research_center_level": row["centerLevels"][0],
             "name": text(row["name"], english(TECHS_EN, row["name"], "technology")),
             "description": text(f"Розвиток групи «{row['group']}».", "Technology of its branch."),
-            "duration_seconds": duration,
-            "costs": technology_costs(row["tiers"], codes, cost_base, cost_factor),
+            "duration_seconds": tech_duration,
+            "costs": technology_costs(row["tiers"], codes, parameters, technology_factor),
             "effects": effects,
             "requirements": requirements,
         })
@@ -1195,7 +1359,7 @@ def main() -> None:
             "requirements": requirements,
             "tiers": [[codes[name] for name in tier] for tier in row["tiers"]],
         })
-    matter_costs = technology_costs([["Кредити", "Енергія"]], codes, cost_base, cost_factor)
+    matter_costs = technology_costs([["Кредити"]], codes, parameters, technology_factor)
     technologies.append({
         "code": matter_code,
         "branch": fundamental,
@@ -1204,7 +1368,7 @@ def main() -> None:
         "research_center_level": techs[0]["centerLevels"][0],
         "name": text("Перетворення матерії", english(TECHS_EN, "Перетворення матерії", "technology")),
         "description": text("Перетворення однієї речовини на іншу.", "Conversion of one material into another."),
-        "duration_seconds": duration,
+        "duration_seconds": tech_duration,
         "costs": matter_costs,
         "effects": unlocks[matter_code],
         "requirements": [],
@@ -1215,7 +1379,7 @@ def main() -> None:
         "max_level": techs[0]["maxLevel"],
         "research_center_level": techs[0]["centerLevels"][0],
         "requirements": [],
-        "tiers": [[codes["Кредити"], codes["Енергія"]] for _ in range(techs[0]["maxLevel"])],
+        "tiers": [[codes["Кредити"]] for _ in range(techs[0]["maxLevel"])],
     })
     notes.append("Matter conversion has no center curve in the dependency file. Its single center field is the first center value of the other technologies, and it has no extra center rows.")
     notes.append("Module and hull unlocks are recipe requirements, not technology effects. A technology effect cannot point at a part before the production seed assigns its code.")
@@ -1226,8 +1390,22 @@ def main() -> None:
     old_production = load_json(PRODUCTION_SEED)
     mark_level = old_production["parts"][0]["mark_level"]
     output_quantity = old_production["recipes"][0]["output_quantity"]
-    batch_seconds = whole(duration_base)
-    ingredient_amount = whole(cost_base)
+    batch_seconds = whole(coefficient(parameters, "world.seed.duration.batch_seconds"))
+    batch_quantity = whole(coefficient(parameters, "world.seed.production.batch_quantity"))
+    batch_ingredient = whole(coefficient(parameters, "world.seed.production.ingredient"))
+    part_seconds = coefficient(parameters, "world.seed.duration.part_seconds")
+    part_duration_factor = ONE + coefficient(parameters, "world.seed.duration.part_growth")
+    part_ingredient_factor = ONE + coefficient(parameters, "world.seed.part.ingredient_growth")
+
+    def part_amounts(row: dict, index: int) -> dict[str, int]:
+        """Units of every ingredient of a part: the base of its class, rising with the place of the part in its group."""
+        return {
+            name: whole(rounded(coefficient(parameters, "world.seed.cost.base") * resource_scale(parameters, name) * curve(ONE, part_ingredient_factor, index), digits))
+            for name in row["resources"]
+        }
+
+    def part_time(index: int) -> int:
+        return whole(rounded(curve(part_seconds, part_duration_factor, index), digits))
 
     characteristics = []
     for index, spec in enumerate(CHARACTERISTICS, start=1):
@@ -1297,7 +1475,7 @@ def main() -> None:
     for module_number, row in enumerate(modules, start=1):
         index = group_index[row["group"]]
         group_index[row["group"]] = index + 1
-        stats, attributes = module_characteristics(row["name"], row["group"], index, cost_base, cost_factor, trade_levels)
+        stats, attributes = module_characteristics(row["name"], row["group"], index, cost_base, part_factor, trade_levels)
         part_code = f"part_m_{module_number}"
         parts.append({
             "code": part_code,
@@ -1307,16 +1485,16 @@ def main() -> None:
             "name": text(row["name"], english(MODULES_EN, row["name"], "module")),
             "description": text(f"Модуль групи «{row['group']}».", f"Module of the {MODULE_GROUPS_EN[row['group']]} group."),
             "attributes": attributes,
-            "weight": num(cost_factor ** (module_number - 1)),
+            "weight": num(part_factor ** (module_number - 1)),
             "characteristics": stats,
         })
-        recipes.append(part_recipe(part_code, row, MODULE_FACTORY[row["group"]], building_code, codes, tech_code, output_quantity, batch_seconds, ingredient_amount, len(recipes) + 1, None))
+        recipes.append(part_recipe(part_code, row, MODULE_FACTORY[row["group"]], building_code, codes, tech_code, output_quantity, part_time(index), part_amounts(row, index), len(recipes) + 1, None))
 
     hull_index = {name: 0 for name in hull_group_names}
     for hull_number, row in enumerate(hulls, start=1):
         index = hull_index[row["group"]]
         hull_index[row["group"]] = index + 1
-        amount = curve(cost_base, cost_factor, index)
+        amount = curve(cost_base, part_factor, index)
         part_code = f"part_h_{hull_number}"
         parts.append({
             "code": part_code,
@@ -1332,7 +1510,7 @@ def main() -> None:
                 "char_integrity": value_row(amount),
             },
         })
-        recipes.append(part_recipe(part_code, row, "Верф", building_code, codes, tech_code, output_quantity, batch_seconds, ingredient_amount, len(recipes) + 1, row["group"]))
+        recipes.append(part_recipe(part_code, row, "Верф", building_code, codes, tech_code, output_quantity, part_time(index), part_amounts(row, index), len(recipes) + 1, row["group"]))
 
     for building_name, resource_name in PRODUCTS.items():
         source = next(row for row in buildings if row["name"] == building_name)
@@ -1342,12 +1520,12 @@ def main() -> None:
             "part": None,
             "resource": codes[resource_name],
             "factory": building_code[building_name],
-            "output_quantity": output_quantity,
+            "output_quantity": batch_quantity,
             "duration_seconds": batch_seconds,
             "sort_order": len(recipes) + 1,
             "name": text(resource_name, english({name: en for name, en, *_rest in [(item[0], item[1]) for item in RESOURCES]}, resource_name, "resource")),
             "description": text(f"Виробництво «{resource_name}».", f"Production of {english({item[0]: item[1] for item in RESOURCES}, resource_name, 'resource')}."),
-            "ingredients": [{"resource": codes[name], "part": None, "amount": ingredient_amount} for name in source["recipe"]],
+            "ingredients": [{"resource": codes[name], "part": None, "amount": batch_ingredient} for name in source["recipe"]],
             "requirements": [],
             "race": None,
             "hull_group": None,
@@ -1406,7 +1584,10 @@ def main() -> None:
         recipe.pop("part_name", None)
 
     world = load_json(WORLD_SEED)
-    build_world(world, codes, cost_base, race_bonus, notes)
+    if not world_is_built(world):
+        build_world(world, codes, cost_base, race_bonus, notes)
+    apply_start_resources(world, codes, parameters)
+    patch_fields(world, codes, parameters, notes)
     known_resources = {row["code"] for row in world["resources"]}
     for group in world["rule_groups"]:
         for rule in group["rules"]:
@@ -1429,7 +1610,7 @@ def main() -> None:
     notes.append("Analysis 2.6 kept: Trade center is both a building and a module. Housing complex and Housing module are different rows.")
     notes.append("Processes name building classes orbital_workshop and module_repair. No chosen building has those classes.")
     notes.append("Fuel is one group, so admin can place ether, dark matter and helium-3 on a planet. Generation rules do not. Deuterium stays on ice planets and gas giants, so a terrestrial home can lack it.")
-    notes.append("The colony population counter stays economy.population.initial. The population resource is also in the start package, at the cost base, and is not that counter.")
+    notes.append("The colony population counter stays economy.population.initial. The start package no longer holds energy or population (task 00030): the stock of a civilization is iron ore, building materials, credits and silicore ore.")
 
     research_payload = {
         "level_count": techs[0]["maxLevel"],
@@ -1471,7 +1652,7 @@ def main() -> None:
         print("MISMATCH " + line)
 
 
-def part_recipe(part_code, row, factory_name, building_code, resource_codes, tech_codes, output_quantity, batch_seconds, ingredient_amount, sort_order, hull_group):
+def part_recipe(part_code, row, factory_name, building_code, resource_codes, tech_codes, output_quantity, batch_seconds, amounts, sort_order, hull_group):
     return {
         "code": f"recipe_{sort_order}",
         "part": part_code,
@@ -1482,7 +1663,7 @@ def part_recipe(part_code, row, factory_name, building_code, resource_codes, tec
         "sort_order": sort_order,
         "name": text(row["name"], part_english(row["name"])),
         "description": text(f"Виробництво «{row['name']}».", f"Production of the part."),
-        "ingredients": [{"resource": resource_codes[name], "part": None, "amount": ingredient_amount} for name in row["resources"]],
+        "ingredients": [{"resource": resource_codes[name], "part": None, "amount": amounts[name]} for name in row["resources"]],
         "requirements": [
             {"type": "technology_level", "target": tech_codes[name], "target_level": level}
             for name, level in row["sciences"].items()

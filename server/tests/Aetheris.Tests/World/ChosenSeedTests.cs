@@ -61,7 +61,9 @@ public sealed class ChosenSeedTests
 
     private const int BranchCount = 2;
 
-    private const int StartResourceCount = 6;
+    private const int StartResourceCount = 4;
+
+    private const int StartBuildingCount = 4;
 
     private const int LastModuleSortOrder = 79;
 
@@ -161,7 +163,8 @@ public sealed class ChosenSeedTests
         long durationBase = config.GetInt64(DurationBaseKey);
         double durationGrowth = config.GetDouble(DurationGrowthKey);
 
-        BuildingTypeEntity startBuilding = Assert.Single(buildingTypes, type => type.IsStartBuilding);
+        Assert.Equal(StartBuildingCount, buildingTypes.Count(type => type.IsStartBuilding));
+        BuildingTypeEntity startBuilding = buildingTypes.Where(type => type.IsStartBuilding).OrderBy(type => type.Id).First();
         Assert.Contains(startBuilding.LevelIds, level => level.EffectIds.Any(effect => effect.EffectType == BuildingEffectTypes.LevelCap));
         AssertGrowth(startBuilding, SecondLevel, costBase, costGrowth, durationBase, durationGrowth);
         AssertGrowth(startBuilding, FourthLevel, costBase, costGrowth, durationBase, durationGrowth);
@@ -249,7 +252,7 @@ public sealed class ChosenSeedTests
         Assert.All(races, race =>
         {
             Assert.Equal(StartResourceCount, race.StartResourceIds.Count);
-            Assert.All(race.StartResourceIds, entry => Assert.Equal(costBase, entry.Amount));
+            Assert.All(race.StartResourceIds, entry => Assert.True(entry.Amount > 0));
         });
 
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -268,7 +271,7 @@ public sealed class ChosenSeedTests
 
         foreach (RaceStartResourceEntity currency in foundedRace.StartResourceIds.Where(entry => currencyIds.Contains(entry.ResourceTypeId)))
         {
-            Assert.Equal(costBase, await EconomyTestData.BalanceAsync(services, player.Account.UserId, currency.ResourceTypeId));
+            Assert.Equal(currency.Amount, await EconomyTestData.BalanceAsync(services, player.Account.UserId, currency.ResourceTypeId));
         }
 
         PlanetPopulationEntity population = await services.GetRequiredService<EconomyDbContext>().PlanetPopulations.AsNoTracking()
@@ -342,10 +345,14 @@ public sealed class ChosenSeedTests
         long durationBase,
         double durationGrowth)
     {
+        // The numbers are derived (task 00030): a level costs and takes more than the level before it.
         BuildingLevelEntity levelRow = Assert.Single(buildingType.LevelIds, entry => entry.Level == level);
+        BuildingLevelEntity before = Assert.Single(buildingType.LevelIds, entry => entry.Level == level - 1);
         Assert.NotEmpty(levelRow.CostIds);
-        Assert.Equal(Grown(durationBase, durationGrowth, level), levelRow.DurationSeconds);
-        Assert.All(levelRow.CostIds, cost => Assert.Equal(Grown(costBase, costGrowth, level), cost.Amount));
+        Assert.True(levelRow.DurationSeconds > before.DurationSeconds);
+        Assert.All(
+            levelRow.CostIds.Where(cost => before.CostIds.Any(other => other.ResourceTypeId == cost.ResourceTypeId)),
+            cost => Assert.True(cost.Amount > before.CostIds.Single(other => other.ResourceTypeId == cost.ResourceTypeId).Amount));
     }
 
     private static void AssertGrowth(
@@ -357,19 +364,12 @@ public sealed class ChosenSeedTests
         double durationGrowth)
     {
         TechnologyLevelEntity levelRow = Assert.Single(technology.LevelIds, entry => entry.Level == level);
+        TechnologyLevelEntity before = Assert.Single(technology.LevelIds, entry => entry.Level == level - 1);
         Assert.NotEmpty(levelRow.CostIds);
-        Assert.Equal(Grown(durationBase, durationGrowth, level), levelRow.DurationSeconds);
-        Assert.All(levelRow.CostIds, cost => Assert.Equal(Grown(costBase, costGrowth, level), cost.Amount));
-    }
-
-    /// <summary>
-    /// The same rounding the seed writer uses: base × (1 + coefficient)^(level − 1), half away from zero.
-    /// </summary>
-    private static long Grown(long basis, double coefficient, int level)
-    {
-        int steps = level - 1;
-
-        return (long)Math.Round(basis * Math.Pow(1d + coefficient, steps), MidpointRounding.AwayFromZero);
+        Assert.True(levelRow.DurationSeconds > before.DurationSeconds);
+        Assert.All(
+            levelRow.CostIds.Where(cost => before.CostIds.Any(other => other.ResourceTypeId == cost.ResourceTypeId)),
+            cost => Assert.True(cost.Amount > before.CostIds.Single(other => other.ResourceTypeId == cost.ResourceTypeId).Amount));
     }
 
     private static async Task AssertNamesAsync(AetherisDbContext host, IReadOnlyCollection<string> nameKeys)

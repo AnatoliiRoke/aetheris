@@ -291,10 +291,13 @@ public sealed class CreditIncomeTests
         DateTimeOffset start = ConstructionService.Normalize(services.GetRequiredService<IGameClock>().GameNow.AddHours(-10));
         DateTimeOffset change = start.AddHours(6);
 
-        // The limit is 221: 121 of the administrative centre of the third level and 100 of the
-        // residential complex of the first level. The population is at it and the balance is empty
-        // ten hours ago.
-        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, 221, start);
+        // The limit is the one of the administrative centre of the third level and the residential
+        // complex of the first level, read from the data. The population is at it and the balance
+        // is empty ten hours ago.
+        decimal oldLimit =
+            await EconomyTestData.EffectValueAsync(services, SeedCodes.AdminCenter, 3, EconomyCodes.PopulationMaxEffect)
+            + await EconomyTestData.EffectValueAsync(services, SeedCodes.ResidentialComplex, 1, EconomyCodes.PopulationMaxEffect);
+        await EconomyTestData.SetPopulationAsync(services, player.PlanetId, player.Account.UserId, (long)oldLimit, start);
         await EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 0, start);
         Dictionary<int, long> richBalance = await BuildingsTests.RichBalanceAsync(services);
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, richBalance, start);
@@ -314,14 +317,15 @@ public sealed class CreditIncomeTests
             Assert.Equal(1, completed);
         }
 
-        // The second level of the complex has 110 in the data, so the new limit is 121 + 110 = 231.
+        // The second level of the complex holds more, so the new limit is the one of the third
+        // level of the centre and the second of the complex.
         decimal adminLimit = await EconomyTestData.EffectValueAsync(services, SeedCodes.AdminCenter, 3, EconomyCodes.PopulationMaxEffect);
         decimal housingLimit = await EconomyTestData.EffectValueAsync(services, SeedCodes.ResidentialComplex, 2, EconomyCodes.PopulationMaxEffect);
 
-        Assert.Equal(231m, adminLimit + housingLimit);
+        Assert.True(adminLimit + housingLimit > oldLimit);
 
-        // Paying for the level counts the income up to the present first: 221 inhabitants are
-        // already at the old limit, so ten hours bring 2210 credits, and the credit cost of the
+        // Paying for the level counts the income up to the present first: the inhabitants are
+        // already at the old limit, so ten hours bring ten times the limit in credits, and the credit cost of the
         // level is taken from that. The completion itself is in the past and adds nothing more.
         long creditCost = housing.LevelIds.Single(level => level.Level == 2).CostIds
             .Where(cost => cost.ResourceTypeId == creditsId)
@@ -330,7 +334,7 @@ public sealed class CreditIncomeTests
         using IServiceScope check = _factory.Services.CreateScope();
         CurrencyBalanceFacts balance = await check.ServiceProvider.GetRequiredService<IEconomyModule>().GetBalanceAsync(player.Account.UserId, creditsId, Token);
 
-        Assert.Equal(richBalance[creditsId] + (221 * 10) - creditCost, balance.Amount);
+        Assert.Equal(richBalance[creditsId] + ((long)oldLimit * 10) - creditCost, balance.Amount);
     }
 
     /// <summary>

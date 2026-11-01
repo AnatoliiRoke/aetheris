@@ -125,8 +125,11 @@ public sealed class NeutralCodeTests
             });
 
         Assert.Equal(SeedCodes.Terrestrial, Assert.Single(types, type => type.IsStartDefault).Code);
-        Assert.Equal(SeedCodes.AdminCenter, Assert.Single(buildings, building => building.IsStartBuilding).Code);
-        Assert.All(races, race => Assert.Equal(buildings.Single(building => building.IsStartBuilding).Id, race.StartBuildingTypeId));
+        BuildingTypeEntity main = buildings.Where(building => building.IsStartBuilding).OrderBy(building => building.Id).First();
+
+        Assert.Equal(SeedCodes.AdminCenter, main.Code);
+        Assert.Equal(4, buildings.Count(building => building.IsStartBuilding));
+        Assert.All(races, race => Assert.Equal(main.Id, race.StartBuildingTypeId));
     }
 
     /// <summary>

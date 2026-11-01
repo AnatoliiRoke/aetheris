@@ -184,7 +184,7 @@ public static class PlanetsReferenceSeed
                     {
                         Level = level,
                         DurationSeconds = ValueAt(type.DurationSeconds, level),
-                        CostIds = [.. type.Costs.Where(cost => level >= cost.FromLevel).Select(cost => new BuildingLevelCostEntity { ResourceTypeId = resourceIds[cost.Resource], Amount = ValueAt(cost, level) })],
+                        CostIds = [.. type.Costs.Where(cost => level >= cost.FromLevel).Select(cost => new BuildingLevelCostEntity { ResourceTypeId = resourceIds[cost.Resource], Amount = ValueAt(cost, level - cost.FromLevel + 1) })],
                         EffectIds =
                         [
                             .. type.Effects.Select(effect => new BuildingLevelEffectEntity
@@ -374,7 +374,7 @@ public sealed record SeedCost : SeedGrowth
     /// <summary>Gets the code of the resource.</summary>
     public string Resource { get; init; } = string.Empty;
 
-    /// <summary>Gets the first level that pays this resource. Earlier levels omit the row.</summary>
+    /// <summary>Gets the first level that pays this resource. Earlier levels omit the row, and the formula counts from this level: the cost at this level is the base (task 00030).</summary>
     public int FromLevel { get; init; } = 1;
 }
 

@@ -42,53 +42,59 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
           "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 6
+          "from_level": 8
         },
         {
           "resource": "resource_22",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 12
         },
         {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
           "resource": "resource_21",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 18
         }
@@ -130,108 +136,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -251,53 +227,59 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
           "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 4
+          "from_level": 8
         },
         {
           "resource": "resource_6",
           "growth": {
             "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 10
         },
         {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
           "resource": "resource_22",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 16
         }
@@ -621,108 +603,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -742,26 +694,19 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
@@ -769,19 +714,41 @@
           "resource": "resource_5",
           "growth": {
             "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 2
         },
         {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
+        },
+        {
           "resource": "resource_16",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 12
+        },
+        {
+          "resource": "resource_8",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
         }
       ],
       "effects": [
@@ -1199,108 +1166,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -1320,44 +1257,49 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
-          "resource": "resource_29",
+          "resource": "resource_11",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 1
+          "from_level": 8
         },
         {
-          "resource": "resource_13",
+          "resource": "resource_10",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 2
+          "from_level": 13
         },
         {
           "resource": "resource_4",
           "growth": {
             "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 14
         }
@@ -1879,108 +1821,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -2000,35 +1912,29 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
           "growth": {
             "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
@@ -2036,26 +1942,39 @@
           "resource": "resource_2",
           "growth": {
             "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 6
         },
         {
           "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 10
+          "from_level": 8
+        },
+        {
+          "resource": "resource_9",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
         },
         {
           "resource": "resource_7",
           "growth": {
             "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 14
         },
@@ -2063,8 +1982,9 @@
           "resource": "resource_3",
           "growth": {
             "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 18
         }
@@ -2073,8 +1993,8 @@
         {
           "type": "metal_production",
           "growth": {
-            "base": 1.1,
-            "growth": 1.1,
+            "base": 1.08,
+            "growth": 1.08,
             "step": 0
           }
         },
@@ -2426,108 +2346,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -2547,26 +2437,19 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
@@ -2574,35 +2457,49 @@
           "resource": "resource_6",
           "growth": {
             "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 2
         },
         {
           "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 4
+          "from_level": 8
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
         },
         {
           "resource": "resource_22",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 10
         },
         {
           "resource": "resource_21",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 16
         }
@@ -2926,108 +2823,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -3047,53 +2914,59 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
           "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 4
-        },
-        {
-          "resource": "resource_11",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 8
         },
         {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
           "resource": "resource_22",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 16
         }
@@ -3102,8 +2975,8 @@
         {
           "type": "energy_output",
           "growth": {
-            "base": 1.1,
-            "growth": 1.1,
+            "base": 1.08,
+            "growth": 1.08,
             "step": 0
           }
         },
@@ -3485,108 +3358,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -3606,35 +3449,29 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
@@ -3642,26 +3479,49 @@
           "resource": "resource_1",
           "growth": {
             "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 4
         },
         {
+          "resource": "resource_8",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
+        },
+        {
           "resource": "resource_23",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 12
         },
         {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
           "resource": "resource_22",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 18
         }
@@ -3670,8 +3530,8 @@
         {
           "type": "construction_time",
           "growth": {
-            "base": 1,
-            "growth": 0.833333,
+            "base": 0.961538,
+            "growth": 0.961538,
             "step": 0
           }
         },
@@ -4227,108 +4087,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -4348,46 +4178,61 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
           "resource": "resource_22",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 4
+          "from_level": 5
+        },
+        {
+          "resource": "resource_8",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
         },
         {
           "resource": "resource_21",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 8
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
         }
       ],
       "effects": [
@@ -4787,108 +4632,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -4908,26 +4723,19 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
@@ -4935,26 +4743,49 @@
           "resource": "resource_1",
           "growth": {
             "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 3
         },
         {
-          "resource": "resource_22",
+          "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 8
         },
         {
+          "resource": "resource_22",
+          "growth": {
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
           "resource": "resource_23",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 14
         }
@@ -4963,8 +4794,8 @@
         {
           "type": "production_time",
           "growth": {
-            "base": 1,
-            "growth": 0.833333,
+            "base": 0.961538,
+            "growth": 0.961538,
             "step": 0
           }
         },
@@ -5382,108 +5213,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -5503,45 +5304,69 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
-          "resource": "resource_29",
+          "resource": "resource_10",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 1
+          "from_level": 8
         },
         {
           "resource": "resource_22",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 12
+        },
+        {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_19",
+          "growth": {
+            "base": 10,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 15
         }
       ],
       "effects": [
         {
           "type": "credit_income_bonus",
           "growth": {
-            "base": 1.1,
-            "growth": 1.1,
+            "base": 1.08,
+            "growth": 1.08,
             "step": 0
           }
         },
@@ -5743,108 +5568,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -5864,37 +5659,41 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
           "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 4
+          "from_level": 8
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
         }
       ],
       "effects": [
@@ -6162,108 +5961,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -6283,63 +6052,79 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
-          "resource": "resource_29",
+          "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_17",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 3
-        },
-        {
-          "resource": "resource_18",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 8
         },
         {
+          "resource": "resource_17",
+          "growth": {
+            "base": 10,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
+        },
+        {
+          "resource": "resource_18",
+          "growth": {
+            "base": 10,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
+        },
+        {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
           "resource": "resource_19",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 10,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 16
+          "from_level": 15
         }
       ],
       "effects": [
         {
           "type": "crystal_production",
           "growth": {
-            "base": 1.1,
-            "growth": 1.1,
+            "base": 1.08,
+            "growth": 1.08,
             "step": 0
           }
         },
@@ -6721,108 +6506,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -6842,46 +6597,51 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
-          "resource": "resource_29",
+          "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 1
+          "from_level": 8
         },
         {
           "resource": "resource_12",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 2
-        },
-        {
-          "resource": "resource_13",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 8
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
         }
       ],
       "effects": [
@@ -7269,108 +7029,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -7390,45 +7120,59 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
-          "resource": "resource_29",
+          "resource": "resource_11",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 1
+          "from_level": 8
         },
         {
           "resource": "resource_22",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 8
+        },
+        {
+          "resource": "resource_8",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
         }
       ],
       "effects": [
         {
           "type": "storage_capacity",
           "growth": {
-            "base": 1.1,
-            "growth": 1.1,
+            "base": 1.08,
+            "growth": 1.08,
             "step": 0
           }
         },
@@ -7744,108 +7488,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -7865,44 +7579,57 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
-          "resource": "resource_29",
+          "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 1
+          "from_level": 8
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
         }
       ],
       "effects": [
         {
           "type": "population_max",
           "growth": {
-            "base": 1.1,
-            "growth": 1.1,
+            "base": 1.08,
+            "growth": 1.08,
             "step": 0
           }
         },
         {
           "type": "population_growth_bonus",
           "growth": {
-            "base": 1.1,
-            "growth": 1.1,
+            "base": 1.08,
+            "growth": 1.08,
             "step": 0
           }
         },
@@ -8140,108 +7867,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -8261,37 +7958,51 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
-          "resource": "resource_29",
+          "resource": "resource_8",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 1
+          "from_level": 8
         },
         {
           "resource": "resource_22",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 10
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
         }
       ],
       "effects": [
@@ -8655,108 +8366,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -8776,26 +8457,19 @@
         "en": "Conversion of one material into another."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         }
@@ -8825,28 +8499,51 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
         },
         {
-          "resource": "resource_29",
+          "resource": "resource_10",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 1
+          "from_level": 8
+        },
+        {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_17",
+          "growth": {
+            "base": 10,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 15
         }
       ],
       "effects": [
@@ -9120,108 +8817,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]
@@ -9241,64 +8908,81 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 1
-        },
-        {
-          "resource": "resource_17",
-          "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
-          },
-          "from_level": 3
         },
         {
           "resource": "resource_24",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 4
+          "from_level": 5
+        },
+        {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
+        },
+        {
+          "resource": "resource_17",
+          "growth": {
+            "base": 10,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
         },
         {
           "resource": "resource_18",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 10,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
-          "from_level": 6
+          "from_level": 8
         },
         {
           "resource": "resource_21",
           "growth": {
-            "base": 100,
-            "growth": 1.1,
-            "step": 0
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
           },
           "from_level": 10
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
         }
       ],
       "effects": [
@@ -9860,108 +9544,78 @@
           "type": "building_level",
           "target": "building_9",
           "target_level": 3,
-          "subject_level": 3
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 4,
           "subject_level": 4
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 5,
+          "target_level": 4,
           "subject_level": 6
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 6,
+          "target_level": 5,
           "subject_level": 7
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 7,
-          "subject_level": 8
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 8,
+          "target_level": 6,
           "subject_level": 9
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 9,
+          "target_level": 7,
           "subject_level": 11
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 10,
+          "target_level": 8,
           "subject_level": 12
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 11,
-          "subject_level": 13
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 12,
+          "target_level": 9,
           "subject_level": 14
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 13,
+          "target_level": 10,
           "subject_level": 16
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 14,
+          "target_level": 11,
           "subject_level": 17
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 15,
-          "subject_level": 18
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 16,
+          "target_level": 12,
           "subject_level": 19
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 17,
+          "target_level": 13,
           "subject_level": 21
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 18,
+          "target_level": 14,
           "subject_level": 22
         },
         {
           "type": "building_level",
           "target": "building_9",
-          "target_level": 19,
-          "subject_level": 23
-        },
-        {
-          "type": "building_level",
-          "target": "building_9",
-          "target_level": 20,
+          "target_level": 15,
           "subject_level": 24
         }
       ]

@@ -42,15 +42,16 @@ public sealed class BuildingsTests
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
     /// <summary>
-    /// A new civilization has the main building of level 1 and its start resources in the
+    /// A new civilization has the four start buildings of level 1 (the main building, the
+    /// housing, the warehouse and the solar plant, task 00030) and its start resources in the
     /// balance of the body.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task A_new_civilization_has_the_main_building_and_the_start_resources()
+    public async Task A_new_civilization_has_the_start_buildings_and_the_start_resources()
     {
         await PlanetsTestData.ResetAsync(_factory);
-        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundWithTheWholeStartAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
 
         RaceEntity race = await scope.ServiceProvider.GetRequiredService<WorldDbContext>().Races.AsNoTracking()
@@ -61,10 +62,14 @@ public sealed class BuildingsTests
 
         Assert.Equal(main.Id, race.StartBuildingTypeId);
 
-        PlanetBuildingEntity building = Assert.Single(await scope.ServiceProvider.GetRequiredService<PlanetsDbContext>().PlanetBuildings.AsNoTracking()
-            .Where(entry => entry.PlanetId == player.PlanetId)
-            .ToListAsync(Token));
-        Assert.Equal((main.Id, 1), (building.BuildingTypeId, building.Level));
+        PlanetsDbContext planets = scope.ServiceProvider.GetRequiredService<PlanetsDbContext>();
+        List<PlanetBuildingEntity> buildings = await planets.PlanetBuildings.AsNoTracking().Where(entry => entry.PlanetId == player.PlanetId).ToListAsync(Token);
+        HashSet<int> startTypeIds = [.. await planets.BuildingTypes.AsNoTracking().Where(type => type.IsStartBuilding).Select(type => type.Id).ToListAsync(Token)];
+
+        Assert.Equal(4, buildings.Count);
+        Assert.Equal(startTypeIds, buildings.Select(entry => entry.BuildingTypeId).ToHashSet());
+        Assert.All(buildings, entry => Assert.Equal(1, entry.Level));
+        Assert.Contains(buildings, entry => entry.BuildingTypeId == main.Id);
 
         HashSet<int> currencyIds = await PlanetsTestData.CurrencyIdsAsync(scope.ServiceProvider);
 

@@ -122,59 +122,67 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 4
+          "from_level": 4,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 11
+          "from_level": 11,
+          "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 13
+          "from_level": 13,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
       "effects": [
@@ -188,7 +196,15 @@
           "type": "population_max",
           "base": 100,
           "growth": 1.1,
-          "step": 0
+          "step": 0,
+          "significant": 2
+        },
+        {
+          "type": "energy_consumption",
+          "base": 6,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -1890,45 +1906,51 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 2
+          "from_level": 2,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 10
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
       "effects": [
@@ -1936,7 +1958,15 @@
           "type": "population_max",
           "base": 100,
           "growth": 1.1,
-          "step": 0
+          "step": 0,
+          "significant": 2
+        },
+        {
+          "type": "energy_consumption",
+          "base": 6,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -2199,7 +2229,7 @@
           "subject_level": 20
         }
       ],
-      "is_start_building": false,
+      "is_start_building": true,
       "building_class": "",
       "category": "group_1",
       "max_level": 20
@@ -2216,53 +2246,88 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 6
+          "from_level": 6,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "population_growth_bonus",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0
+          "base": 0,
+          "growth": 1,
+          "step": 0,
+          "values": [
+            1.05,
+            1.1,
+            1.15,
+            1.2,
+            1.25,
+            1.3,
+            1.35,
+            1.4,
+            1.45,
+            1.5,
+            1.55,
+            1.6,
+            1.65,
+            1.7,
+            1.75,
+            1.8,
+            1.85,
+            1.9,
+            1.95,
+            2
+          ]
+        },
+        {
+          "type": "energy_consumption",
+          "base": 6,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -2512,55 +2577,70 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 5
+          "from_level": 5,
+          "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 9
+          "from_level": 9,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 6,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -2868,55 +2948,70 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_23",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 6,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -3218,62 +3313,70 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 2
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 3
+          "from_level": 5,
+          "significant": 2
+        },
+        {
+          "resource": "resource_22",
+          "base": 40,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 5,
+          "significant": 2
         },
         {
           "resource": "resource_25",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 6
+          "from_level": 6,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 6,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -3503,102 +3606,116 @@
         "en": "Building of the Storages group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "storage_capacity",
-          "base": 100,
-          "growth": 1.1,
+          "base": 5000,
+          "growth": 1.4,
           "step": 0,
+          "significant": 2,
           "group": "resource_group_1"
         },
         {
           "type": "storage_capacity",
-          "base": 100,
-          "growth": 1.1,
+          "base": 5000,
+          "growth": 1.4,
           "step": 0,
+          "significant": 2,
           "group": "resource_group_2"
         },
         {
           "type": "storage_capacity",
-          "base": 100,
-          "growth": 1.1,
+          "base": 5000,
+          "growth": 1.4,
           "step": 0,
+          "significant": 2,
           "group": "resource_group_3"
         },
         {
           "type": "storage_capacity",
-          "base": 100,
-          "growth": 1.1,
+          "base": 5000,
+          "growth": 1.4,
           "step": 0,
+          "significant": 2,
           "group": "resource_group_4"
         },
         {
           "type": "storage_capacity",
-          "base": 100,
-          "growth": 1.1,
+          "base": 5000,
+          "growth": 1.4,
           "step": 0,
+          "significant": 2,
           "group": "resource_group_5"
         },
         {
           "type": "storage_capacity",
-          "base": 100,
-          "growth": 1.1,
+          "base": 5000,
+          "growth": 1.4,
           "step": 0,
+          "significant": 2,
           "group": "resource_group_6"
         },
         {
           "type": "part_storage_capacity",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0
+          "base": 200,
+          "growth": 1.4,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -3849,7 +3966,7 @@
           "subject_level": 20
         }
       ],
-      "is_start_building": false,
+      "is_start_building": true,
       "building_class": "",
       "category": "group_2",
       "max_level": 20
@@ -3866,62 +3983,78 @@
         "en": "Building of the Storages group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_3",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 5
+          "from_level": 5,
+          "significant": 2
         },
         {
           "resource": "resource_23",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 6,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -4121,62 +4254,70 @@
         "en": "Building of the Science group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_8",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 2
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 48,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 6
+          "from_level": 6,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 100,
-          "growth": 1.1,
+          "base": 48,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 10
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -4838,55 +4979,70 @@
         "en": "Building of the Science group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 48,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 4
+          "from_level": 5,
+          "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 100,
-          "growth": 1.1,
+          "base": 48,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -5284,55 +5440,62 @@
         "en": "Building of the Science group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_8",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 3
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 48,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -5646,47 +5809,52 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "metal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_1"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -5834,54 +6002,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "metal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_2"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -6077,54 +6251,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "metal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_3"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -6332,54 +6512,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "metal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_4"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -6569,54 +6755,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "metal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_5"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -6818,54 +7010,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "metal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_6"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -7067,54 +7265,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "metal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_7"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -7268,54 +7472,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "crystal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 18,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_8"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -7511,54 +7721,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "crystal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 18,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_9"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -7754,54 +7970,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "crystal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 18,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_10"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -7997,54 +8219,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "crystal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 18,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_11"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -8246,54 +8474,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "crystal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 9,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_17"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -8495,54 +8729,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "crystal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 9,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_18"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -8744,54 +8984,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "crystal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 9,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_19"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -8993,54 +9239,60 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 200,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 16,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "metal_production",
-          "base": 100,
-          "growth": 1.1,
+          "base": 30,
+          "growth": 1.35,
           "step": 0,
+          "significant": 2,
           "resource": "resource_12"
+        },
+        {
+          "type": "energy_consumption",
+          "base": 4.8,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -9230,74 +9482,76 @@
         "en": "Building of the Power group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_6",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_8",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 3
-        },
-        {
-          "resource": "resource_10",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 6
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "energy_output",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0
+          "base": 150,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -9476,7 +9730,7 @@
           "subject_level": 12
         }
       ],
-      "is_start_building": false,
+      "is_start_building": true,
       "building_class": "",
       "category": "group_5",
       "max_level": 12
@@ -9493,67 +9747,68 @@
         "en": "Building of the Power group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_12",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 2
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_4",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 5
+          "from_level": 5,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_12",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "energy_output",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0
+          "base": 400,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -9701,67 +9956,68 @@
         "en": "Building of the Power group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_16",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 3
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_3",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 6
+          "from_level": 6,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_16",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "energy_output",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0
+          "base": 1000,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -9957,67 +10213,60 @@
         "en": "Building of the Power group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 250,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_2",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 50,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_13",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 2
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_4",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 5
+          "from_level": 5,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 20,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
         {
           "type": "energy_output",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0
+          "base": 2500,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -10213,41 +10462,54 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 120,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         },
         {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -10561,48 +10823,62 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 48,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 6
+          "from_level": 6,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -10820,48 +11096,62 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 120,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         },
         {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -11163,48 +11453,62 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 120,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         },
         {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -11512,48 +11816,62 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 120,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         },
         {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -11855,48 +12173,62 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 120,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         },
         {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -12186,48 +12518,62 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 120,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         },
         {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -12535,48 +12881,62 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 120,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         },
         {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -12842,48 +13202,62 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 300,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 120,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_10",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         },
         {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_8",
+          "base": 24,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 7.2,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -13149,62 +13523,70 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 100,
-          "growth": 1.1,
+          "base": 30,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 4
+          "from_level": 10,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 10
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -13530,62 +13912,78 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_4",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 12
+          "from_level": 12,
+          "significant": 2
+        },
+        {
+          "resource": "resource_9",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -13941,62 +14339,70 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 100,
-          "growth": 1.1,
+          "base": 30,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 6
+          "from_level": 10,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 10
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -14328,55 +14734,70 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_4",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 6
+          "from_level": 6,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -14660,62 +15081,78 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_2",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 5
+          "from_level": 5,
+          "significant": 2
         },
         {
           "resource": "resource_4",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 9
+          "from_level": 9,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -14987,62 +15424,70 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_11",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 5
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 9
+          "from_level": 9,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -15332,55 +15777,70 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_4",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 4
+          "from_level": 4,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -15580,55 +16040,70 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_23",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_9",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -15930,69 +16405,78 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_8",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 2
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_6",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 5
+          "from_level": 5,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 12
+          "from_level": 12,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -16294,62 +16778,78 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_9",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         },
         {
           "resource": "resource_23",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 12
+          "from_level": 12,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -16651,48 +17151,62 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 150,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_9",
+          "base": 30,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 10,
+          "significant": 2
         },
         {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_11",
+          "base": 30,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -16952,76 +17466,94 @@
         "en": "Building of the Fleet and defence group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 200,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_2",
-          "base": 100,
-          "growth": 1.1,
+          "base": 200,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 4
+          "from_level": 4,
+          "significant": 2
         },
         {
           "resource": "resource_23",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 40,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         },
         {
           "resource": "resource_26",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 12
+          "from_level": 12,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 14
+          "from_level": 14,
+          "significant": 2
+        },
+        {
+          "resource": "resource_9",
+          "base": 40,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 12,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -17359,76 +17891,86 @@
         "en": "Building of the Fleet and defence group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_6",
-          "base": 100,
-          "growth": 1.1,
+          "base": 200,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_8",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 2
-        },
-        {
-          "resource": "resource_10",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 3
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 4
+          "from_level": 5,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 7
+          "from_level": 7,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 40,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 40,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 40,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 12,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -17586,62 +18128,78 @@
         "en": "Building of the Fleet and defence group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 200,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_2",
-          "base": 100,
-          "growth": 1.1,
+          "base": 200,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 5
+          "from_level": 5,
+          "significant": 2
         },
         {
           "resource": "resource_3",
-          "base": 100,
-          "growth": 1.1,
+          "base": 200,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
+        },
+        {
+          "resource": "resource_11",
+          "base": 40,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_9",
+          "base": 40,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 12,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -17955,69 +18513,70 @@
         "en": "Building of the Fleet and defence group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 100,
-          "growth": 1.1,
+          "base": 200,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_20",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
           "base": 100,
-          "growth": 1.1,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_11",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 4
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 80,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 8
+          "from_level": 8,
+          "significant": 2
         },
         {
-          "resource": "resource_15",
-          "base": 100,
-          "growth": 1.1,
+          "resource": "resource_11",
+          "base": 40,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 19
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_9",
+          "base": 40,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 15,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 12,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",
@@ -18331,52 +18890,51 @@
         "en": "Building of the Trade and logistics group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 3
+          "from_level": 5,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 5
+          "from_level": 5,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         }
       ],
       "effects": [
@@ -18385,6 +18943,13 @@
           "base": 2,
           "growth": 1,
           "step": 1
+        },
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
         }
       ],
       "requirements": [
@@ -18628,83 +19193,94 @@
         "en": "Building of the Trade and logistics group."
       },
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.2,
-        "step": 0
+        "base": 375,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 100,
-          "growth": 1.1,
+          "base": 75,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_29",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_30",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 1
-        },
-        {
-          "resource": "resource_24",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 2
-        },
-        {
-          "resource": "resource_8",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 3
-        },
-        {
-          "resource": "resource_17",
-          "base": 100,
-          "growth": 1.1,
-          "step": 0,
-          "from_level": 3
+          "from_level": 1,
+          "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 5
+          "from_level": 5,
+          "significant": 2
+        },
+        {
+          "resource": "resource_24",
+          "base": 60,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 5,
+          "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 100,
-          "growth": 1.1,
+          "base": 60,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 6
+          "from_level": 6,
+          "significant": 2
+        },
+        {
+          "resource": "resource_8",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_10",
+          "base": 30,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
+        },
+        {
+          "resource": "resource_17",
+          "base": 15,
+          "growth": 1.5,
+          "step": 0,
+          "from_level": 10,
+          "significant": 2
         },
         {
           "resource": "resource_18",
-          "base": 100,
-          "growth": 1.1,
+          "base": 15,
+          "growth": 1.5,
           "step": 0,
-          "from_level": 7
+          "from_level": 10,
+          "significant": 2
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "energy_consumption",
+          "base": 9,
+          "growth": 1.3,
+          "step": 0,
+          "significant": 2
+        }
+      ],
       "requirements": [
         {
           "type": "technology_level",

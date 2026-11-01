@@ -107,7 +107,7 @@ public sealed class AdminObjectEditingTests
             depleted = false,
             composition_ids = new[]
             {
-                new { resource_id = resources[SeedCodes.Iron], coefficient = 0.5m },
+                new { resource_id = resources[SeedCodes.Iron], coefficient = 0.6m },
                 new { resource_id = resources[SeedCodes.Quartzite], coefficient = 0.1m },
             },
         };

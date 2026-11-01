@@ -365,13 +365,24 @@ public static class SectorGenerator
         }
 
         decimal factor = target / flexibleTotal;
-
-        return
+        List<ResourceShare> fitted =
         [
             .. shares.Select(share => fixedResourceIds.Contains(share.ResourceId)
                 ? share
                 : share with { Coefficient = decimal.Round(share.Coefficient * factor, CoefficientDecimals, MidpointRounding.ToZero) }),
         ];
+
+        // The cut of the last digit may leave the total a little under the smallest total: the
+        // largest share that is not fixed takes what was cut.
+        decimal missing = Math.Clamp(total, minimumTotal, maximumTotal) - fitted.Sum(share => share.Coefficient);
+
+        if (missing > 0)
+        {
+            int index = fitted.IndexOf(fitted.Where(share => !fixedResourceIds.Contains(share.ResourceId)).MaxBy(share => share.Coefficient)!);
+            fitted[index] = fitted[index] with { Coefficient = fitted[index].Coefficient + missing };
+        }
+
+        return fitted;
     }
 
     private static T PickWeighted<T>(WorldRandom random, IReadOnlyList<T> items, Func<T, int> weight)

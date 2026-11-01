@@ -96,8 +96,9 @@ public sealed class StartCapitalTests
             .OrderBy(level => level.Level)
             .Select(level => level.EffectIds.Single(effect => effect.EffectType == EconomyCodes.PopulationGrowthBonusEffect).Value)];
 
-        // The values of the author for the first six levels.
-        Assert.Equal([100m, 110m, 121m, 133m, 146m, 161m], multipliers[..6]);
+        // The multiplier of the growth rises by a twentieth of the base growth at a level
+        // (task 00030: the earlier placeholder was a hundred times the growth).
+        Assert.Equal([1.05m, 1.10m, 1.15m, 1.20m, 1.25m, 1.30m], multipliers[..6]);
         Assert.Equal(multipliers.OrderBy(value => value), multipliers);
 
         IEconomyModule economy = services.GetRequiredService<IEconomyModule>();

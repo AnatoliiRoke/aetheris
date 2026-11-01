@@ -19,12 +19,17 @@ gives the same file. The rules (each with the reason):
    and from the second level after it a second one, so the higher levels need the minerals
    that the asteroid fields and the trade bring (item 9 of the task).
 5. Energy leaves the recipes of the factories too, for the reason of rule 1.
+5a. A produced resource other than the building materials may not lie on the cost of a level
+   below the fifth: the optical fiber, the microprocessors and the others need minerals that a
+   home planet may lack, and levels 1-4 must not wait for a chain of factories.
 6. The level of the science centre a level of a technology asks for is lowered, level by level,
    only where the whole tree would stop otherwise: the script plays the tree (the level cap of
    the administrative centre, the sciences every level asks for, the science centre every level
    of a technology asks for) and lowers the first level of a technology that waits for a science
    centre the play cannot raise, down to the level the centre has reached. It repeats until
-   every level of every building and technology is reached. Without
+   every level of every building and technology is reached. Before that a level of a technology
+   asks at most six tenths of its number in levels of the science centre, so the first ship does
+   not wait for a tall tree of buildings (item 10 of the task). Without
    it the administrative centre, the science centre and mathematics wait for each other
    (item 2 of the task).
 
@@ -34,6 +39,7 @@ Run: python3 tools/seed/repair_dependencies.py
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -43,6 +49,8 @@ BALANCES = {"Населення", "Енергія"}
 COSMIC = {"Гелій-3", "Темна матерія", "Ефір"}
 MINERALS = ["Кварцит", "Обсидіан", "Лінтрій", "Орекс"]
 CRYSTALS = ["Квартан", "Стобій", "Туманій"]
+LATE_PRODUCED = {"Оптоволокно", "Мікропроцесори", "Композити", "Енергострижні", "Нановолокно", "Титановий сплав"}
+FIRST_PRODUCED_LEVEL = 5
 LUCK = set(MINERALS) | set(CRYSTALS) | {"Дейтерій", "Збагачений Уран"}
 BUILDING_FROM = 10
 TECHNOLOGY_FROM = 8
@@ -113,6 +121,8 @@ def fix_tiers(item: dict) -> None:
         kept = [name for name in tier if name not in BALANCES and name not in COSMIC]
         if level < threshold:
             kept = [name for name in kept if name not in LUCK]
+        if level < FIRST_PRODUCED_LEVEL:
+            kept = [name for name in kept if name not in LATE_PRODUCED]
         tiers.append(kept)
 
     for level, tier in enumerate(tiers, start=1):
@@ -126,7 +136,7 @@ def fix_tiers(item: dict) -> None:
         # A resource that a lower level pays stays on every higher level.
         if level >= 2:
             for name in tiers[level - 2]:
-                if name not in tier and name not in LUCK:
+                if name not in tier and name not in LUCK and not (level < FIRST_PRODUCED_LEVEL and name in LATE_PRODUCED):
                     tier.append(name)
         tier.sort(key=order_key)
     item["tiers"] = tiers
@@ -176,6 +186,16 @@ def play(catalog: dict) -> tuple[dict[str, int], dict[str, int]]:
     return building_level, technology_level
 
 
+CENTRE_SLOPE = 0.6
+
+
+def cap_centres(catalog: dict) -> None:
+    """A level of a technology asks at most CENTRE_SLOPE of its number in the levels of the science centre."""
+    for item in catalog["items"]:
+        if item["kind"] == "rozvytok":
+            item["centerLevels"] = [min(value, max(1, math.ceil(CENTRE_SLOPE * (index + 1)))) for index, value in enumerate(item["centerLevels"])]
+
+
 def relax_centres(catalog: dict) -> int:
     """Lowers the science centre a level asks for where the play would stop; returns the rows changed."""
     technologies = {item["name"]: item for item in catalog["items"] if item["kind"] == "rozvytok"}
@@ -207,6 +227,7 @@ def main() -> None:
             fix_tiers(item)
         if item.get("recipe"):
             item["recipe"] = [name for name in item["recipe"] if name not in BALANCES]
+    cap_centres(catalog)
     lowered = relax_centres(catalog)
     buildings, technologies = play(catalog)
     stuck = [name for name, item in ((i["name"], i) for i in catalog["items"] if i["kind"] == "budivlia") if buildings[name] < item["maxLevel"]]
