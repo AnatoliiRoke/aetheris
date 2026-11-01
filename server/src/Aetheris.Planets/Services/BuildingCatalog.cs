@@ -91,6 +91,7 @@ public sealed record BuildingCategoryInfo(int Id, string Code, string NameKey, i
 /// <param name="Levels">The levels by number.</param>
 /// <param name="IsArchived">Whether the type is archived: its buildings work, no new building or level of it is offered.</param>
 /// <param name="CategoryId">The category of the type: the group of its tile on the building page.</param>
+/// <param name="ImageKey">The key of the picture of the type, or <see langword="null"/> for the placeholder.</param>
 public sealed record BuildingTypeInfo(
     int Id,
     string Code,
@@ -100,7 +101,8 @@ public sealed record BuildingTypeInfo(
     string BuildingClass,
     IReadOnlyDictionary<int, BuildingLevelInfo> Levels,
     bool IsArchived = false,
-    int CategoryId = 0)
+    int CategoryId = 0,
+    string? ImageKey = null)
 {
     /// <summary>
     /// Gets a value indicating whether a building of this type limits the levels of the others;
@@ -293,7 +295,8 @@ public sealed class BuildingCatalogCache
                             level.CostIds.ToDictionary(cost => cost.ResourceTypeId, cost => cost.Amount),
                             [.. level.EffectIds.Select(effect => new BuildingEffectInfo(effect.EffectType, effect.ResourceTypeId, effect.ResourceGroupId, effect.Value))])),
                     type.IsArchived,
-                    type.CategoryId)),
+                    type.CategoryId,
+                    type.ImageKey)),
             ],
             requirementInfos,
             resources.Resources,

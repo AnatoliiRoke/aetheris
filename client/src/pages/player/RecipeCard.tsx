@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import type { ProductionRecipe } from '../../api/productionApi';
+import { CardArt } from '../../components/CardArt';
 import { TextField } from '../../components/FormField';
 import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
@@ -41,6 +42,7 @@ export const RecipeCard = memo(function RecipeCard({
 
   return (
     <li className="building-card">
+      <CardArt imageKey={recipe.imageKey} label={text(recipe.nameKey) ?? recipe.nameKey} />
       <div className="building-card__head">
         <h3 className="building-card__name">{text(recipe.nameKey) ?? recipe.nameKey}</h3>
         {recipe.isAvailable ? <span className="badge">{t('production.available')}</span> : <span className="badge badge--warning">{t('production.closed')}</span>}

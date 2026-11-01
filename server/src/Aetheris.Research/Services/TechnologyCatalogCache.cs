@@ -129,7 +129,8 @@ public sealed class TechnologyCatalogCache
                             effect.UnlockKind,
                             effect.UnlockTargetId,
                             effect.Value))])),
-                technology.IsArchived)),
+                technology.IsArchived,
+                technology.ImageKey)),
         ],
         branches);
     }

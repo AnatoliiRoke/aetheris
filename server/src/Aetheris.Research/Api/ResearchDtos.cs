@@ -18,6 +18,7 @@ namespace Aetheris.Research.Api;
 /// <param name="ReasonCode">The localisation key of the reason the technology is not available, or <see langword="null"/>.</param>
 /// <param name="Levels">The levels of the technology.</param>
 /// <param name="CurrentEffects">What the technology gives at the level the player has learned, as the server counts it; empty when nothing is learned yet.</param>
+/// <param name="ImageKey">The key of the picture of the technology, or <see langword="null"/> for the placeholder.</param>
 public sealed record TechnologyDto(
     int Id,
     string Code,
@@ -33,7 +34,8 @@ public sealed record TechnologyDto(
     int AvailableCenterLevel,
     string? ReasonCode,
     IReadOnlyList<TechnologyLevelDto> Levels,
-    IReadOnlyList<TechnologyEffectDto>? CurrentEffects = null);
+    IReadOnlyList<TechnologyEffectDto>? CurrentEffects = null,
+    string? ImageKey = null);
 
 /// <summary>
 /// A level of a technology with its time, its costs and its effects (task 00012, section 3.2).

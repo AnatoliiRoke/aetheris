@@ -75,6 +75,7 @@ public sealed record TechnologyBranchInfo(int Id, string Code, string NameKey, i
 /// <param name="ResearchCenterLevel">The level of the science centre the research needs.</param>
 /// <param name="Levels">The levels by number.</param>
 /// <param name="IsArchived">Whether the technology is archived: it works for its owners, no new research of it starts.</param>
+/// <param name="ImageKey">The key of the picture, or <see langword="null"/> for the placeholder.</param>
 public sealed record TechnologyInfo(
     int Id,
     string Code,
@@ -85,7 +86,8 @@ public sealed record TechnologyInfo(
     int MaxLevel,
     int ResearchCenterLevel,
     IReadOnlyDictionary<int, TechnologyLevelInfo> Levels,
-    bool IsArchived = false);
+    bool IsArchived = false,
+    string? ImageKey = null);
 
 /// <summary>A level of a technology.</summary>
 /// <param name="Level">The level.</param>

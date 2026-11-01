@@ -56,6 +56,8 @@ export interface Technology {
   levels: TechnologyLevel[];
   /** What the technology gives at the level learned, as the server counts it; empty while nothing is learned. */
   currentEffects: TechnologyEffect[];
+  /** The key of the picture of the technology, or `null` for the placeholder. */
+  imageKey?: string | null;
 }
 
 /**

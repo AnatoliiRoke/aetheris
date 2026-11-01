@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { technologyStatuses, type Technology } from '../../api/researchApi';
+import { CardArt } from '../../components/CardArt';
 import { GameIcon, ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 import { formatAmount, formatDuration, formatSigned, lookup, reasonText } from './planetText';
@@ -103,6 +104,7 @@ export const TechnologyCard = memo(function TechnologyCard({
 
   return (
     <li className="tech-card">
+      <CardArt imageKey={technology.imageKey} label={name} />
       <div className="tech-card__head">
         <span aria-hidden="true" className="tech-card__mark">
           <GameIcon name="research" size={20} />

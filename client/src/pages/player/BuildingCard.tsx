@@ -1,4 +1,5 @@
 import type { Building, Planet } from '../../api/planetApi';
+import { CardArt } from '../../components/CardArt';
 import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 import { effectText, formatAmount, formatDuration, lookup, namer, reasonText, requirementText } from './planetText';
@@ -51,6 +52,7 @@ export function BuildingCard({
 
   return (
     <li className="building-card">
+      <CardArt imageKey={building.imageKey} label={name} />
       <div className="building-card__head">
         <h3 className="building-card__name">{name}</h3>
         <span className="badge">{building.level > 0 ? t('planet.level', { level: building.level }) : isClosed ? t('build.closed') : t('planet.notBuilt')}</span>

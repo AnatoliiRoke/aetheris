@@ -144,7 +144,8 @@ public sealed class ResearchTreeBuilder
             snapshot.AvailableCenterLevel,
             reason,
             [.. technology.Levels.Keys.Order().Select(level => BuildLevel(snapshot, technology, level, level == nextLevel ? unmet : [], level == nextLevel && learned < technology.MaxLevel))],
-            Effects(snapshot, technology.Levels.GetValueOrDefault(learned)));
+            Effects(snapshot, technology.Levels.GetValueOrDefault(learned)),
+            technology.ImageKey);
     }
 
     /// <summary>

@@ -22,6 +22,7 @@ import art12d from './images/art-12d.webp';
 import art12e from './images/art-12e.webp';
 import art12f from './images/art-12f.webp';
 import nebula from './images/nebula.webp';
+import placeholder from './images/art-17.webp';
 import type { NewsImage } from '../api/contentApi';
 
 /**
@@ -31,6 +32,8 @@ import type { NewsImage } from '../api/contentApi';
  * preload them before the script runs; every other picture is bundled and loaded lazily.
  */
 export const images = {
+  /** The one picture of a tile whose row has no picture yet (ART-17). */
+  placeholder,
   heroBackground: '/hero-bg.webp',
   heroStars: '/stars.webp',
   logoMark,

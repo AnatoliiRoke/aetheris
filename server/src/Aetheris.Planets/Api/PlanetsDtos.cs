@@ -140,6 +140,7 @@ public sealed record QueueItemDto(
 /// <param name="Effects">The effects of the level built.</param>
 /// <param name="Next">The next level that can be queued, with the reasons it cannot.</param>
 /// <param name="CategoryId">The category of the building: the group of its tile on the building page.</param>
+/// <param name="ImageKey">The key of the picture of the building, or <see langword="null"/> for the placeholder.</param>
 public sealed record BuildingDto(
     int BuildingTypeId,
     string Code,
@@ -150,7 +151,8 @@ public sealed record BuildingDto(
     int MaxLevel,
     IReadOnlyList<EffectDto> Effects,
     NextLevelDto Next,
-    int CategoryId = 0);
+    int CategoryId = 0,
+    string? ImageKey = null);
 
 /// <summary>The next level of a building and whether it can be queued now.</summary>
 /// <param name="Level">The level.</param>

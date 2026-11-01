@@ -66,6 +66,8 @@ export interface Building {
   next: NextLevel;
   /** The category of the building, a row of the data: the group of its tile on the building page (task 00020). */
   categoryId: number;
+  /** The key of the picture of the building, or `null` for the placeholder. */
+  imageKey?: string | null;
 }
 
 /**

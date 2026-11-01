@@ -312,7 +312,8 @@ public static class PlanetOverviewBuilder
                     Amounts(next.Missing),
                     next.EnergyAfter.Output,
                     next.EnergyAfter.Consumption),
-                type.CategoryId));
+                type.CategoryId,
+                type.ImageKey));
         }
 
         return new PlanetOverviewDto(
