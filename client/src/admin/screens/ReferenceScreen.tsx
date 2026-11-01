@@ -7,7 +7,7 @@ import type { Page } from '../adminApi';
 import { useAdmin } from '../adminContext';
 import { adminRoutes } from '../adminRoutes';
 import { AdminDialog } from '../AdminDialog';
-import { CardField, FailureBanner, FieldError, ReasonAndActions } from '../EditParts';
+import { ActionButtons, CardField, FailureBanner, FieldError, ReasonField, RemoveButton } from '../EditParts';
 import { describeFailure, parseNumber, type EditFailure } from '../editFailure';
 import { useAdminText, useWorldName } from '../i18n/useAdminText';
 import type {
@@ -444,10 +444,22 @@ function ReferenceForm({ kind, described, recordId }: { kind: ReferenceKind; des
 
   return (
     <form className="admin-form admin-card panel" onSubmit={(event) => void onSubmit(event)} noValidate aria-label={title}>
-      <div className="admin-form__actions">
+      <div className="admin-form__actions admin-form__actions--top">
         <Link className="btn btn--secondary" to={`${adminRoutes.reference}/${kind.kind}`}>
           {t('admin.reference.back')}
         </Link>
+        {editable ? (
+          <ActionButtons
+            busy={busy}
+            canSave={reason.trim().length > 0 && !missingTexts}
+            onCancel={() => navigate(`${adminRoutes.reference}/${kind.kind}`)}
+          />
+        ) : null}
+        {record && can(record.is_archived ? kind.permissions.restored : kind.permissions.archived) ? (
+          <button className="btn btn--secondary" type="button" onClick={() => setArchiving(true)}>
+            {t(record.is_archived ? 'admin.reference.restore' : 'admin.reference.archive')}
+          </button>
+        ) : null}
       </div>
       <h2 className="admin-screen__title">{title}</h2>
       {record ? (
@@ -487,21 +499,7 @@ function ReferenceForm({ kind, described, recordId }: { kind: ReferenceKind; des
       <FailureBanner failure={failure} onReload={reloadRecord} />
       {saved ? <Alert kind="success">{t('admin.reference.saved')}</Alert> : null}
       {editable ? (
-        <ReasonAndActions
-          reason={reason}
-          onReason={setReason}
-          codes={failure?.fields['reason']}
-          busy={busy}
-          canSave={reason.trim().length > 0 && !missingTexts}
-          onCancel={() => navigate(`${adminRoutes.reference}/${kind.kind}`)}
-        />
-      ) : null}
-      {record && can(record.is_archived ? kind.permissions.restored : kind.permissions.archived) ? (
-        <div className="admin-form__actions">
-          <button className="btn btn--secondary" type="button" onClick={() => setArchiving(true)}>
-            {t(record.is_archived ? 'admin.reference.restore' : 'admin.reference.archive')}
-          </button>
-        </div>
+        <ReasonField reason={reason} onReason={setReason} codes={failure?.fields['reason']} />
       ) : null}
       {archiving && record ? (
         <ArchiveDialog
@@ -548,11 +546,7 @@ function ArchiveDialog({ kind, record, onClose, onDone }: { kind: ReferenceKind;
   return (
     <AdminDialog title={title} onClose={onClose}>
       <p>{t(record.is_archived ? 'admin.reference.confirmRestore' : 'admin.reference.confirmArchive', { name: name(record.name_key, record.code) })}</p>
-      <label className="admin-field admin-field--wide">
-        <span>{t('admin.col.reason')}</span>
-        <input className="input" value={reason} placeholder={t('admin.config.reasonHint')} onChange={(event) => setReason(event.target.value)} />
-        <FieldError codes={failure?.fields['reason']} />
-      </label>
+      <ReasonField reason={reason} onReason={setReason} codes={failure?.fields['reason']} />
       <FailureBanner failure={failure} onReload={onDone} />
       <div className="admin-form__actions">
         <button className="btn btn--primary" type="button" disabled={busy || reason.trim().length === 0} onClick={() => void onConfirm()}>
@@ -726,8 +720,11 @@ function ListInput(props: FieldInputProps) {
 
   if (field.type === 'levels') {
     // The number of the level and the time of its build go in the first row; the blocks of the
-    // costs, the effects and the requirements go under them.
-    const blocks = columns.filter((column) => column.type === 'costs' || column.type === 'effects' || column.type === 'requirements');
+    // The number of the level and the time of its build go in the first row; the blocks of the
+    // costs and the effects go under them, aligned by the upper edge; the block of the
+    // requirements goes under them, in its own row.
+    const blocks = columns.filter((column) => column.type === 'costs' || column.type === 'effects');
+    const requirements = columns.filter((column) => column.type === 'requirements');
     const head = columns.filter((column) => column.type !== 'costs' && column.type !== 'effects' && column.type !== 'requirements');
 
     return (
@@ -749,13 +746,27 @@ function ListInput(props: FieldInputProps) {
                   onChange={(changed) => update(index, { ...entry, [column.name]: changed })}
                 />
               ))}
-              <button className="btn btn--secondary" type="button" onClick={() => onChange(rows.filter((_, position) => position !== index))}>
-                {t('admin.card.remove')}
-              </button>
+              <RemoveButton onClick={() => onChange(rows.filter((_, position) => position !== index))} />
             </div>
             {blocks.length > 0 ? (
               <div className="admin-levels__blocks">
                 {blocks.map((column) => (
+                  <FieldInput
+                    key={column.name}
+                    {...props}
+                    field={column}
+                    path={`${path}.${index}.${column.name}`}
+                    value={entry[column.name]}
+                    row={entry}
+                    siblings={columns}
+                    onChange={(changed) => update(index, { ...entry, [column.name]: changed })}
+                  />
+                ))}
+              </div>
+            ) : null}
+            {requirements.length > 0 ? (
+              <div className="admin-levels__blocks">
+                {requirements.map((column) => (
                   <FieldInput
                     key={column.name}
                     {...props}
@@ -800,9 +811,7 @@ function ListInput(props: FieldInputProps) {
                 onChange={(changed) => update(index, { ...entry, [column.name]: changed })}
               />
             ))}
-            <button className="btn btn--secondary" type="button" onClick={() => onChange(rows.filter((_, position) => position !== index))}>
-              {t('admin.card.remove')}
-            </button>
+            <RemoveButton onClick={() => onChange(rows.filter((_, position) => position !== index))} />
           </div>
           <FieldError codes={failure?.fields[`${path}.${index}`]} />
         </div>
@@ -863,9 +872,7 @@ function ListTable(props: FieldInputProps & { rows: ReferenceValues[]; onRowsCha
                 </td>
               ))}
               <td className="admin-costs__remove">
-                <button className="btn btn--secondary" type="button" onClick={() => onRowsChange(rows.filter((_, position) => position !== index))}>
-                  {t('admin.card.remove')}
-                </button>
+                <RemoveButton onClick={() => onRowsChange(rows.filter((_, position) => position !== index))} />
               </td>
             </tr>
           ))}

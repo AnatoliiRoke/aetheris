@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Alert } from '../components/Alert';
+import { TrashIcon } from '../components/Icons';
 import type { ReferenceRow } from './adminApi';
 import { parseNumber, type EditFailure } from './editFailure';
 import type { AdminMessageKey } from './i18n/uk';
@@ -50,6 +51,20 @@ export function FieldError({ codes }: { codes: string[] | undefined }) {
   }
 
   return <span className="admin-field__error">{codes.map((code) => (editErrorKeys[code] ? t(editErrorKeys[code]) : code)).join(' ')}</span>;
+}
+
+/**
+ * The button that takes a row away: the picture of the wastebasket, with the name of the action
+ * for the reader of the screen.
+ */
+export function RemoveButton({ onClick }: { onClick: () => void }) {
+  const { t } = useAdminText();
+
+  return (
+    <button className="btn btn--secondary admin-remove" type="button" title={t('admin.card.remove')} aria-label={t('admin.card.remove')} onClick={onClick}>
+      <TrashIcon className="btn__icon" />
+    </button>
+  );
 }
 
 /**
@@ -110,7 +125,7 @@ export function FailureBanner({ failure, onReload }: { failure: EditFailure | nu
 }
 
 /**
- * The mandatory reason of a change and the buttons of a card.
+ * The reason of a change and the buttons of a card.
  */
 export function ReasonAndActions({
   reason,
@@ -127,24 +142,60 @@ export function ReasonAndActions({
   canSave: boolean;
   onCancel: () => void;
 }) {
+  return (
+    <>
+      <ReasonField reason={reason} onReason={onReason} codes={codes} />
+      <ActionButtons busy={busy} canSave={canSave} onCancel={onCancel} />
+    </>
+  );
+}
+
+/**
+ * The reason of a change: the administrator writes why the row changes.
+ */
+export function ReasonField({
+  reason,
+  onReason,
+  codes,
+}: {
+  reason: string;
+  onReason: (value: string) => void;
+  codes?: string[];
+}) {
   const { t } = useAdminText();
 
   return (
-    <>
-      <label className="admin-field admin-field--wide">
-        <span>{t('admin.col.reason')}</span>
-        <input className="input" value={reason} placeholder={t('admin.config.reasonHint')} onChange={(event) => onReason(event.target.value)} />
-        <FieldError codes={codes} />
-      </label>
-      <div className="admin-form__actions">
-        <button className="btn btn--primary" type="submit" disabled={!canSave || busy}>
-          {t('admin.config.save')}
-        </button>
-        <button className="btn btn--secondary" type="button" onClick={onCancel}>
-          {t('admin.card.cancel')}
-        </button>
-      </div>
-    </>
+    <label className="admin-field admin-field--wide">
+      <span>{t('admin.col.reason')}</span>
+      <input className="input" value={reason} placeholder={t('admin.config.reasonHint')} onChange={(event) => onReason(event.target.value)} />
+      <FieldError codes={codes} />
+    </label>
+  );
+}
+
+/**
+ * The buttons of a card.
+ */
+export function ActionButtons({
+  busy,
+  canSave,
+  onCancel,
+}: {
+  busy: boolean;
+  canSave: boolean;
+  onCancel: () => void;
+}) {
+  const { t } = useAdminText();
+
+  return (
+    <div className="admin-form__actions">
+      <button className="btn btn--primary" type="submit" disabled={!canSave || busy}>
+        {t('admin.config.save')}
+      </button>
+      <button className="btn btn--secondary" type="button" onClick={onCancel}>
+        {t('admin.card.cancel')}
+      </button>
+    </div>
   );
 }
 

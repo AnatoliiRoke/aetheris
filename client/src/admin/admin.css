@@ -32,13 +32,20 @@
 .admin-form { display: flex; flex-direction: column; gap: var(--space-2); max-width: 720px; }
 .admin-form--inline { flex-direction: row; flex-wrap: wrap; align-items: flex-end; max-width: none; }
 .admin-form__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.admin-form__actions--top { position: sticky; top: 0; z-index: 5; padding-bottom: var(--space-1); background: var(--bg-1); }
 .admin-field { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-tiny); color: var(--text-2); min-width: 110px; }
-.admin-field--wide { flex: 1 1 240px; }
+.admin-field--wide { flex: 1 1 auto; min-width: 0; }
 .admin-field .input { min-height: 32px; }
 .admin-field .hint { font-size: var(--fs-tiny); }
 /* The label of a field whose column of a table already names it: it stays for the reader of the
    screen, but it takes no place on it. */
 .admin-field__label--hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* The buttons of the admin panel are small: the panel is dense and the words of the buttons are
+   long, so they take as little place as they can. */
+.admin-card .btn, .admin-dialog .btn, .admin-form .btn { padding: 0 6px; font-size: var(--fs-tiny); }
+.admin-remove { padding: 0; width: 32px; min-width: 32px; }
+.admin-remove svg { width: 16px; height: 16px; }
 
 .admin-table { display: flex; flex-direction: column; gap: var(--space-2); }
 .admin-table__tools { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-2); }
@@ -110,8 +117,7 @@
 .admin-costs__cell { min-width: 0; }
 .admin-costs__cell .admin-field { min-width: 0; }
 .admin-costs__cell .input { min-width: 0; }
-.admin-costs__remove { width: 118px; white-space: nowrap; }
-.admin-costs__remove .btn { padding: 0 var(--space-2); font-size: var(--fs-tiny); }
+.admin-costs__remove { width: 40px; white-space: nowrap; }
 
 /* The reference kinds (task 00023): the kinds on the left, the list or the form on the right. */
 .admin-reference { display: grid; grid-template-columns: minmax(160px, 200px) minmax(0, 1fr); gap: var(--space-3); align-items: start; }
