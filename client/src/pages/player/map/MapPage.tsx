@@ -502,8 +502,16 @@ export function MapPage() {
 
   return (
     <div className="civ-main__in">
-      <ScreenHead actions={modeSwitch} breadcrumbs={crumbs} title={t('civ.nav.map')} />
-      <MapSearch placeText={placeOfResult} search={(queryText) => map.search(queryText)} onChoose={onChooseResult} />
+      <ScreenHead
+        actions={
+          <>
+            <MapSearch placeText={placeOfResult} search={(queryText) => map.search(queryText)} onChoose={onChooseResult} />
+            {modeSwitch}
+          </>
+        }
+        breadcrumbs={crumbs}
+        title={t('civ.nav.map')}
+      />
       {fog ? (
         <Alert kind="info">
           <GameIcon name="mapRadar" size={16} /> {t('map.fog')} <Link to={routes.planetBuild}>{t('map.fogLink')}</Link>

@@ -2,14 +2,29 @@
    Only the tokens of tokens.css and the components of ui-art/05. The marks keep their size at any zoom: the
    world is scaled by one transform and every mark scales itself back by `--k`, the scale of the world. */
 
+/* The map takes the whole height the frame leaves: the screen, less the top bar, the bottom bar, the head and the gaps. */
+.civ__main--map { --map-h: max(420px, calc(100vh - 214px)); padding: 10px 20px 14px; }
+@supports (height: 100dvh) { .civ__main--map { --map-h: max(420px, calc(100dvh - 214px)); } }
+.civ__main--map .civ-main__in { gap: 10px; }
+.civ__main--map .player__title { font-size: 24px; }
+.civ__main--map .screen-head { align-items: center; }
+.civ__main--map .screen-head__text { gap: 2px; }
+
 .map-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-4); align-items: start; }
 
 /* ---------- the area ---------- */
 .map-area {
-  position: relative; min-width: 0; height: clamp(520px, calc(100vh - 340px), 780px);
+  position: relative; min-width: 0; height: var(--map-h);
   border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--bg-1); overflow: hidden;
 }
-.map-area__canvas { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; user-select: none; }
+/* The nebula behind the map (ART-18), darkened so the marks and the labels stay readable. */
+.map-area__canvas {
+  position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; user-select: none;
+  background:
+    linear-gradient(color-mix(in srgb, var(--bg-0) 30%, transparent), color-mix(in srgb, var(--bg-0) 30%, transparent)),
+    url('../assets/images/map-bg.webp') center / cover no-repeat,
+    var(--bg-1);
+}
 .map-area__canvas:active { cursor: grabbing; }
 .map-area__canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .map-area.is-picking .map-area__canvas { cursor: crosshair; }
@@ -159,17 +174,17 @@
 .map-badge--mine { border-color: var(--accent); color: var(--accent-hover); }
 
 /* ---------- the head: modes and search ---------- */
-.map-modes { display: inline-flex; padding: 3px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-2); }
+.map-modes { display: inline-flex; padding: 2px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-2); }
 .map-modes__button {
-  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 var(--space-4); border: 0; border-radius: var(--r-md);
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 var(--space-3); border: 0; border-radius: var(--r-sm);
   background: transparent; color: var(--text-soft); font: inherit; font-size: var(--fs-ui); font-weight: 600; cursor: pointer;
 }
 .map-modes__button[aria-pressed="true"] { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent-hover); }
-.map-search { position: relative; max-width: 520px; }
-.map-search .input { height: 44px; padding: 0 44px 0 40px; background: var(--bg-3); border-radius: var(--r-md); }
-.map-search__icon { position: absolute; left: 12px; top: 12px; color: var(--text-2); pointer-events: none; }
+.map-search { position: relative; width: 320px; max-width: 100%; }
+.map-search .input { height: 36px; min-height: 36px; padding: 0 36px 0 34px; background: var(--bg-3); border-radius: var(--r-md); font-size: var(--fs-ui); }
+.map-search__icon { position: absolute; left: 10px; top: 8px; color: var(--text-2); pointer-events: none; }
 .map-search__clear {
-  position: absolute; right: 4px; top: 4px; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0;
+  position: absolute; right: 2px; top: 2px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0;
   border: 0; border-radius: var(--r-md); background: transparent; color: var(--text-2); cursor: pointer;
 }
 .map-search__results {
@@ -187,7 +202,7 @@
 
 /* ---------- the card ---------- */
 .map-card {
-  position: relative; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4);
+  position: relative; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); max-height: var(--map-h); overflow-y: auto;
   border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--bg-2); box-shadow: var(--shadow-card);
 }
 .map-card__close {
@@ -227,7 +242,7 @@
 .map-table .num { text-align: right; }
 .map-table__name { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 600; }
 .map-skeleton {
-  height: clamp(520px, calc(100vh - 340px), 780px); border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--bg-1);
+  height: var(--map-h); border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--bg-1);
   animation: map-pulse 1.6s ease-in-out infinite;
 }
 @keyframes map-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
@@ -241,7 +256,8 @@
   .map-layout { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 767px) {
-  .map-area { height: clamp(420px, calc(100vh - 300px), 620px); }
+  .civ__main--map { --map-h: max(420px, calc(100dvh - 300px)); padding: 8px 12px 12px; }
+  .map-search { width: 100%; }
   .map-layers { left: var(--space-2); right: var(--space-2); top: var(--space-2); width: auto; }
   .map-layers__list { flex-direction: row; overflow-x: auto; padding-bottom: var(--space-2); }
   .map-layers__list li { flex: 0 0 auto; }
