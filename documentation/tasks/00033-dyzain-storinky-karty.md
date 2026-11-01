@@ -140,3 +140,5 @@ Output a design-tokens table (colors, fonts, spacing, radii, shadows) and a list
 ## 8. Результат виконання
 
 Макет зроблено автором у Claude Design й лежить у `documentation/design/aetheris-map-html` (статичний HTML + `map.css`, класи згенеровано як `.mN`): `index.html` (зміст), `map-galaxy`, `map-sector`, `map-system` (і англійський `map-system-en`), `map-list`, `map-loading`, `map-fog`, `map-error`, `map-mobile-system`, `map-mobile-sector` (англійська). Усі три масштаби, вид списком, стани й мобільні розкладки є; картка об'єкта, шари, легенда, міні-карта й пошук показані. Три відкриті питання розділу 7 закрито в [00034](00034-perenesty-storinku-karty-v-kliyent.md) (рішення за замовчуванням).
+
+Шапка з цього макета перенесена в гру (01.11.2026): лічильники кредитів, торгової валюти й енергії тепер плашки (висота 36, рамка, фон `bg-2`, лінійна іконка, число табличними цифрами), а блок статусу акаунту показує слово «Standard» / «Premium» у рамці. Статус дає сервер (`account_tier` у `GET /api/v1/auth/me`, поки що для всіх `standard`; код `premium` зарезервовано під монетизацію), клієнт лише перекладає код і фарбує платний. Рядок «Тариф: —» прибрано.

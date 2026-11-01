@@ -1,6 +1,5 @@
 import { memo } from 'react';
 import { images } from '../../assets/images';
-import { GameIcon } from '../../components/GameIcon';
 import { Glyph } from '../../components/Glyph';
 import { LangSwitch } from '../../components/LangSwitch';
 import { useI18n } from '../../i18n/useI18n';
@@ -9,10 +8,13 @@ import { Link } from '../../router/Router';
 import { useSession } from '../../session/useSession';
 import { useTexts } from '../../texts/useTexts';
 import { AlertPill, Counter, HeaderTools } from './CivHeaderParts';
-import { formatNumber } from './planetText';
+import { formatNumber, lookup } from './planetText';
 import { reportRender } from './renderProbe';
 import type { ShellState } from './shellStore';
 import { sameJson, useCurrentPlanetId, useShellSelector } from './useShell';
+
+/** The code of the paid status of an account: the server names the status, the client only colours this one. */
+const premiumTier = 'premium';
 
 /**
  * What the top bar shows from the shared state: the balances of the currencies with the keys of
@@ -61,6 +63,7 @@ export const CivHeader = memo(function CivHeader() {
   const { balances, energy, storageFull } = useShellSelector((state) => headerFacts(state, planetId), sameJson);
 
   const nickname = session.status === 'signed-in' ? session.me.nickname : '';
+  const tier = session.status === 'signed-in' ? session.me.accountTier ?? null : null;
   const raceName = civilization ? text(civilization.raceNameKey) ?? civilization.raceNameKey : '';
   const number = (value: number) => formatNumber(value, language);
   const credits = balances[0] ?? null;
@@ -78,18 +81,19 @@ export const CivHeader = memo(function CivHeader() {
           {nickname}
           {raceName ? <span className="visually-hidden">{t('civ.raceOf', { race: raceName })}</span> : null}
         </span>
-        <span className="chip civ-tariff is-off" title={t('civ.tariffSoon')}>
-          <GameIcon name="star" size={12} />
-          {t('civ.tariff')}: —
-        </span>
+        {tier ? (
+          <span className={tier === premiumTier ? 'civ-tier is-premium' : 'civ-tier'} title={t('civ.tierHint')}>
+            {lookup(language, `civ.tier.${tier}`, tier)}
+          </span>
+        ) : null}
       </div>
       <ul aria-label={t('civ.resources')} className="civ-res">
         {balances.length === 0 ? (
-          <Counter icon="shapeCoin" label={creditsName} title={creditsName} tone="credits" value={null} />
+          <Counter icon="coinCredits" label={creditsName} title={creditsName} tone="credits" value={null} />
         ) : (
           balances.map((balance, index) => (
             <Counter
-              icon="shapeCoin"
+              icon="coinCredits"
               key={balance.id}
               label={text(balance.nameKey) ?? creditsName}
               title={`${text(balance.nameKey) ?? creditsName}: ${number(balance.amount)} (${t('economy.income')}: ${balance.income > 0 ? '+' : ''}${number(balance.income)}${t('economy.perHourShort')})`}
@@ -98,7 +102,7 @@ export const CivHeader = memo(function CivHeader() {
             />
           ))
         )}
-        {balances.length < 2 ? <Counter icon="shapeTrade" label={t('civ.tradeCurrency')} title={t('civ.tradeCurrencySoon')} tone="trade" value={null} /> : null}
+        {balances.length < 2 ? <Counter icon="exchange" label={t('civ.tradeCurrency')} title={t('civ.tradeCurrencySoon')} tone="trade" value={null} /> : null}
         <Counter
           icon="shapeBolt"
           label={t('civ.energy')}

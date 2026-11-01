@@ -40,8 +40,8 @@ describe('the header of the game has every element of the design (task 00020, se
     expect(nick).toHaveTextContent(', раса Терани');
     expect(nick.querySelector('.glyph--race-1')).not.toBeNull();
 
-    // The plan: no data on the server, so a dash.
-    expect(header.querySelector('.civ-tariff')).toHaveTextContent('Тариф: —');
+    // The status of the account comes from the server: every account is Standard until a paid status exists.
+    expect(header.querySelector('.civ-tier')).toHaveTextContent('Standard');
 
     // The counters: the credits are real, the trade currency is a dash, the energy is the balance of the body.
     const counters = within(within(header).getByRole('list', { name: 'Ресурси' }));
@@ -67,7 +67,6 @@ describe('the header of the game has every element of the design (task 00020, se
     const header = await loadedHeader(container);
 
     const placeholders = [
-      header.querySelector<HTMLElement>('.civ-tariff')!,
       header.querySelector<HTMLElement>('.civ-counter--trade')!,
       within(header).getByRole('button', { name: 'Атака' }),
       within(header).getByRole('button', { name: 'Бій' }),
@@ -85,6 +84,21 @@ describe('the header of the game has every element of the design (task 00020, se
     expect(chat.value).toBe('');
     expect(chat.getAttribute('title')).toMatch(/^Глобальний чат|з’явиться/);
     expect(within(container.querySelector<HTMLElement>('.civ-bottombar')!).getByRole('button', { name: 'Надіслати' })).toBeDisabled();
+  });
+
+  it('shows the status of the account the server names, and the paid one in its own colour', async () => {
+    const premium = renderPage('/planet', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe({ accountTier: 'premium' })) }) });
+    const header = await loadedHeader(premium.container);
+
+    expect(header.querySelector('.civ-tier')).toHaveTextContent('Premium');
+    expect(header.querySelector('.civ-tier.is-premium')).not.toBeNull();
+    premium.unmount();
+
+    // An answer without a status draws no status at all, never a made-up one.
+    const none = renderPage('/planet', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe({ accountTier: undefined })) }) });
+    const bare = await loadedHeader(none.container);
+
+    expect(bare.querySelector('.civ-tier')).toBeNull();
   });
 
   it('draws the sign of the race from the data of the race, not from the number of the race', async () => {

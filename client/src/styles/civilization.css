@@ -47,16 +47,19 @@
   border: 1px solid var(--border); background: var(--bg-2);
   font-size: var(--fs-ui); font-weight: 600;
 }
-.civ-res { flex: 1 1 auto; display: flex; justify-content: center; gap: 22px; min-width: 0; list-style: none; margin: 0; padding: 0; font-size: var(--fs-game); }
+.civ-res { flex: 1 1 auto; display: flex; justify-content: center; gap: var(--space-2); min-width: 0; list-style: none; margin: 0; padding: 0; font-size: var(--fs-game); }
 .civ-res li { font-size: var(--fs-game); font-weight: 600; white-space: nowrap; }
+.civ-res .num { font-variant-numeric: tabular-nums; }
 .civ-topbar__tools { display: flex; align-items: center; gap: var(--space-2); flex: 0 0 auto; }
 .nick .glyph { flex: 0 0 auto; }
-.civ-tariff { gap: 5px; padding: 3px 9px; font-size: var(--fs-note); font-weight: 700; color: var(--text-2); border-color: var(--border-strong); cursor: help; }
-.civ-counter { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--fs-game); font-weight: 600; white-space: nowrap; cursor: default; }
+/* The status of the account and the counters of the currencies, as the design of the map draws them (task 00033):
+   the status is a small framed word, a counter is a pill with a line icon and a number in tabular digits. */
+.civ-tier { flex: 0 0 auto; padding: 2px 8px; border-radius: var(--r-sm); border: 1px solid var(--border-strong); color: var(--text-2); font-size: var(--fs-note); font-weight: 600; cursor: help; }
+.civ-counter { display: inline-flex; align-items: center; gap: var(--space-2); height: 36px; padding: 0 12px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--bg-2); font-size: var(--fs-game); font-weight: 600; white-space: nowrap; cursor: default; }
 .civ-counter--credits svg { color: var(--credits); }
-.civ-counter--trade svg { color: var(--trade); }
-.civ-counter--energy svg { color: var(--energy); fill: currentColor; stroke: none; }
-.civ-tariff.is-premium { color: var(--premium); border-color: color-mix(in srgb, var(--premium) 55%, transparent); background: color-mix(in srgb, var(--premium) 10%, transparent); }
+.civ-counter--trade svg { color: var(--text-soft); }
+.civ-counter--energy svg { color: var(--energy); }
+.civ-tier.is-premium { color: var(--premium); border-color: color-mix(in srgb, var(--premium) 55%, transparent); background: color-mix(in srgb, var(--premium) 10%, transparent); }
 .civ-counter.is-off { opacity: 1; color: var(--text-2); }
 .civ-alert {
   display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px;

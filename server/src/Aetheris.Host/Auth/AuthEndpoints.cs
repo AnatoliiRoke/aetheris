@@ -350,6 +350,7 @@ public static class AuthEndpoints
             email = user.Email,
             email_confirmed = user.EmailConfirmed,
             nickname_changed_at = profile?.NicknameChangedAt,
+            account_tier = AccountTiers.Of(),
             civilization = await world.GetCivilizationAsync(user.Id, cancellationToken),
         });
     }

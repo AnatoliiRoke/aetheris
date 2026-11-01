@@ -1,5 +1,6 @@
 using System.Net;
 using Aetheris.Core.Errors;
+using Aetheris.Host.Auth;
 using Aetheris.Host.Data;
 using Aetheris.Host.Security;
 using Aetheris.Tests.Infrastructure;
@@ -57,6 +58,7 @@ public sealed class SignInTests
         using System.Text.Json.JsonDocument me = await AccountTestSupport.MeAsync(client);
 
         Assert.False(me.RootElement.GetProperty("email_confirmed").GetBoolean());
+        Assert.Equal(AccountTiers.Standard, me.RootElement.GetProperty("account_tier").GetString());
         Assert.Equal(account.Nickname, me.RootElement.GetProperty("nickname").GetString());
         Assert.Equal(account.Email, me.RootElement.GetProperty("email").GetString());
         Assert.Equal(System.Text.Json.JsonValueKind.Null, me.RootElement.GetProperty("civilization").ValueKind);

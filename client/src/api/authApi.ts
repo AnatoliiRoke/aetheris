@@ -28,6 +28,8 @@ export interface Me {
   email: string;
   emailConfirmed: boolean;
   nicknameChangedAt: string | null;
+  /** The status of the account, a code the server names (`standard`, later `premium`). */
+  accountTier?: string;
   civilization: Civilization | null;
 }
 

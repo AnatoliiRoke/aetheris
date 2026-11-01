@@ -50,6 +50,9 @@ const paths = {
   shapeCoin: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v10 M9 9.5h4.5a1.5 1.5 0 0 1 0 3H10a1.5 1.5 0 0 0 0 3h5',
   shapeTrade: 'M12 3l8 9-8 9-8-9z M12 8l4 4-4 4-4-4z',
   shapeBolt: 'M13 2L4 14h7l-1 8 9-12h-7z',
+  // The line icons of the counters of the top bar (design of the map, task 00033): credits, exchange of the currencies.
+  coinCredits: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M15 9.5a3.5 3.5 0 1 0 0 5',
+  exchange: 'M4 8h15l-3-3 M20 16H5l3 3',
   shapePeople: 'M12 12a4 4 0 1 0 0-8a4 4 0 1 0 0 8z M4 21a8 8 0 0 1 16 0',
 
   mine: 'M14 4l6 6 M4 20l9-9 M12 3c3 0 6 1 9 4-3-1-6-1-9 0',

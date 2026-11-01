@@ -1004,6 +1004,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
     email: 'pilot@example.test',
     emailConfirmed: true,
     nicknameChangedAt: null,
+    accountTier: 'standard',
     civilization: { raceId: 1, raceNameKey: 'world.race.race_1.name', planetId: 10, planetName: 'Nova', systemId: 3, sectorId: 1 },
     ...overrides,
   };
