@@ -181,6 +181,7 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.world.seed.technology.bonus.description': 'Частка, на яку технологія з бонусом збільшує свій множник за кожен рівень.',
   'config.world.seed.technology.shortening.description': 'Частка, на яку технологія скорочує час будівництва чи виробництва за кожен рівень.',
   'config.world.seed.part.growth.description': 'Частка, на яку характеристики й вага деталі зростають за кожну попередню деталь її групи.',
+  'config.world.seed.capsule.inhabitants.description': 'Скільки мешканців одна кріокапсула додає до населення планети.',
   'config.world.seed.field.group_4_total_min.description': 'Найменша сумарна частка трьох кристалів у астероїдному полі.',
   'config.world.seed.field.group_4_total_max.description': 'Найбільша сумарна частка трьох кристалів у астероїдному полі.',
   'config.world.seed.cost.building_scale.description': 'Множник ціни будівель: будівля будується один раз, тому коштує третину бази.',

@@ -1,8 +1,8 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../api/http';
-import { fakeAuthApi, fakeProductionApi, renderPage, sampleProductionFactory, sampleProductionStock, signedInMe } from '../../../test/renderPage';
+import { fakeAuthApi, fakeProductionApi, renderPage, sampleProductionStock, signedInMe } from '../../../test/renderPage';
 
 /**
  * A signed-in player with a civilization and a confirmed address.
@@ -10,126 +10,30 @@ import { fakeAuthApi, fakeProductionApi, renderPage, sampleProductionFactory, sa
 const signedIn = () => fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe()) });
 
 describe('ProductionPanel', () => {
-  it('shows the recipes of the factory, the queue and the stock of the parts', async () => {
-    const production = fakeProductionApi();
-    renderPage('/planet', { auth: signedIn(), production });
+  it('shows the stock of the parts with the way to the production screen', async () => {
+    renderPage('/planet', { auth: signedIn() });
 
     const panel = await screen.findByRole('region', { name: 'Виробництво' });
+    const stock = (await within(panel).findByRole('heading', { name: 'Склад деталей' })).closest('div')!;
 
-    // The queue of the batches moved out of the panel into the standard queue of the page (task 00020, section 7.5).
-    const queue = await screen.findByRole('region', { name: 'Черга виробництва' });
-    expect(within(queue).getByText(/Зроблено 1 з 3/)).toBeInTheDocument();
-
-    const recipes = (await within(panel).findByRole('heading', { name: 'Рецепти' })).closest('div')!;
-    expect(within(recipes).getByText('Будматеріали')).toBeInTheDocument();
-    expect(within(recipes).getByText('Корпусний модуль')).toBeInTheDocument();
-    expect(within(recipes).getByText('На одиницю: Залізо 4')).toBeInTheDocument();
-
-    const stock = within(panel).getByRole('heading', { name: 'Склад деталей' }).closest('div')!;
+    expect(within(panel).getByRole('link', { name: 'Відкрити виробництво' })).toHaveAttribute('href', '/planet/production');
     expect(within(stock).getByText('Місткість кожного виду деталі: 100')).toBeInTheDocument();
     expect(within(stock).queryByText('Склад заповнений')).not.toBeInTheDocument();
     expect(within(stock).getByText('З бонусом раси')).toBeInTheDocument();
     expect(within(stock).getByText('Мк. II')).toBeInTheDocument();
     expect(within(stock).getByText('Корпус «Оса» Мк. II')).toBeInTheDocument();
+    // The recipes live on the production screen, not on the planet.
+    expect(within(panel).queryByRole('heading', { name: 'Рецепти' })).toBeNull();
   });
 
-  it('keeps a closed recipe inactive and says why', async () => {
-    renderPage('/planet', { auth: signedIn() });
-
-    const panel = await screen.findByRole('region', { name: 'Виробництво' });
-    const closed = (await within(panel).findByText('Закритий')).closest('li')!;
-
-    expect(within(closed).getByText('Потрібна технологія: Глибинний видобуток, рівень 1')).toBeInTheDocument();
-    expect(within(closed).queryByRole('button', { name: 'Виробляти' })).toBeNull();
-  });
-
-  it('puts a batch in the queue and cancels it', async () => {
-    const user = userEvent.setup();
-    const production = fakeProductionApi();
-    renderPage('/planet', { auth: signedIn(), production });
-
-    const panel = await screen.findByRole('region', { name: 'Виробництво' });
-
-    const open = (await within(panel).findByText('Доступний')).closest('li')!;
-    await user.click(within(open).getByRole('button', { name: 'Виробляти' }));
-
-    expect(production.enqueue).toHaveBeenCalledWith(10, 500, 1, 1);
-    expect(await screen.findByText('Партію поставлено в чергу заводу.')).toBeInTheDocument();
-
-    const queue = await screen.findByRole('region', { name: 'Черга виробництва' });
-    await user.click(within(queue).getByRole('button', { name: /Скасувати/ }));
-
-    expect(production.cancel).toHaveBeenCalledWith(10, 500, 700);
-  });
-
-  it('warns which kind of part has no room left', async () => {
-    const production = fakeProductionApi({
-      stock: vi.fn().mockResolvedValue({
-        planetId: 10,
-        stacks: [],
-        storage: { capacity: 10, kinds: [{ partTypeId: 3, quantity: 10, capacity: 10, isFull: true }] },
-        gameNow: '2026-10-26T12:00:00Z',
-      }),
-    });
+  it('says that the production could not be loaded', async () => {
+    const production = fakeProductionApi({ stock: vi.fn().mockRejectedValue(new Error('down')) });
 
     renderPage('/planet', { auth: signedIn(), production });
 
     const panel = await screen.findByRole('region', { name: 'Виробництво' });
 
-    await waitFor(() => expect(within(panel).getByText('Склад заповнений')).toBeInTheDocument());
-    expect(within(panel).getByText('Місця немає для: Деталь №3. Їх виробництво зупиниться, поки не звільниш склад.')).toBeInTheDocument();
-  });
-
-  it('says that the planet has no factory', async () => {
-    const production = fakeProductionApi({ factories: vi.fn().mockResolvedValue([]) });
-
-    renderPage('/planet', { auth: signedIn(), production });
-
-    const panel = await screen.findByRole('region', { name: 'Виробництво' });
-
-    expect(await within(panel).findByText('На планеті ще немає заводу: збудуй його, щоб виробляти.')).toBeInTheDocument();
-    expect(production.factory).not.toHaveBeenCalled();
-  });
-
-  it('reads the factory again when the next unit is due', async () => {
-    const production = fakeProductionApi({
-      factory: vi.fn().mockResolvedValue(
-        sampleProductionFactory({
-          gameNow: '2026-10-26T12:00:00Z',
-          queue: [
-            {
-              orderId: 700,
-              recipeId: 1,
-              quantity: 3,
-              producedQuantity: 1,
-              position: 1,
-              startsAt: '2026-10-26T11:59:00Z',
-              nextUnitAt: '2026-10-26T12:00:01Z',
-              finishesAt: '2026-10-26T12:02:00Z',
-              isBlocked: false,
-            },
-          ],
-        }),
-      ),
-    });
-
-    renderPage('/planet', { auth: signedIn(), production });
-
-    await screen.findByRole('region', { name: 'Виробництво' });
-    await waitFor(() => expect(production.factory).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(production.factory).toHaveBeenCalledTimes(2), { timeout: 4000 });
-  });
-
-  it('says that the factory has no recipes yet', async () => {
-    const production = fakeProductionApi({
-      factory: vi.fn().mockResolvedValue(sampleProductionFactory({ recipes: [] })),
-    });
-
-    renderPage('/planet', { auth: signedIn(), production });
-
-    const panel = await screen.findByRole('region', { name: 'Виробництво' });
-
-    expect(await within(panel).findByText('У цього заводу ще немає рецептів.')).toBeInTheDocument();
+    expect(await within(panel).findByText('Не вдалося завантажити виробництво.')).toBeInTheDocument();
   });
 
   it('uses a capsule of inhabitants from the stock and tells how many joined', async () => {

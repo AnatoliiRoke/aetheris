@@ -69,7 +69,7 @@ describe('the queues of the production and of the processes on /planet', () => {
     const factory = await screen.findByRole('region', { name: 'Виробництво' });
     const processes = await screen.findByRole('region', { name: 'Процеси' });
 
-    await within(factory).findByRole('heading', { name: 'Рецепти' });
+    await within(factory).findByRole('heading', { name: 'Склад деталей' });
     await within(processes).findByRole('heading', { name: 'Рецепти процесів' });
 
     for (const panel of [factory, processes]) {
@@ -78,7 +78,7 @@ describe('the queues of the production and of the processes on /planet', () => {
       expect(within(panel).queryByText(/Зроблено/)).not.toBeInTheDocument();
     }
 
-    expect(within(factory).getByRole('button', { name: 'Виробляти' })).toBeInTheDocument();
+    expect(within(factory).getByRole('link', { name: 'Відкрити виробництво' })).toHaveAttribute('href', '/planet/production');
     expect(within(factory).getByRole('heading', { name: 'Склад деталей' })).toBeInTheDocument();
     expect(within(processes).getAllByRole('button', { name: 'Почати' }).length).toBeGreaterThan(0);
   });
@@ -142,18 +142,18 @@ describe('the queues of the production and of the processes on /planet', () => {
     renderPage('/planet', { auth: signedIn(), production });
 
     const queue = await screen.findByRole('region', { name: 'Черга виробництва' });
-    await within(await screen.findByRole('region', { name: 'Виробництво' })).findByRole('heading', { name: 'Рецепти' });
+    await within(await screen.findByRole('region', { name: 'Виробництво' })).findByRole('heading', { name: 'Склад деталей' });
     await settle();
     const ordersBefore = vi.mocked(production.orders).mock.calls.length;
-    const factoriesBefore = vi.mocked(production.factories).mock.calls.length;
+    const stockBefore = vi.mocked(production.stock).mock.calls.length;
 
     await user.click(within(queue).getByRole('button', { name: /Скасувати: Корпусний модуль/ }));
 
     expect(production.cancel).toHaveBeenCalledWith(10, 501, 701);
     expect(await screen.findByText('Партію скасовано, ресурси повернено.')).toBeInTheDocument();
-    // The queue and the panel of the factory read the server again after the command.
+    // The queue and the stock read the server again after the command.
     await waitFor(() => expect(vi.mocked(production.orders).mock.calls.length).toBeGreaterThan(ordersBefore));
-    await waitFor(() => expect(vi.mocked(production.factories).mock.calls.length).toBeGreaterThan(factoriesBefore));
+    await waitFor(() => expect(vi.mocked(production.stock).mock.calls.length).toBeGreaterThan(stockBefore));
   });
 
   it('cancels an order of the processes and reads the processes again', async () => {

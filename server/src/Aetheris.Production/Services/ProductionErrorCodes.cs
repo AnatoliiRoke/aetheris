@@ -43,6 +43,11 @@ public static class ProductionErrorCodes
     public const string NotACapsule = "production_not_a_capsule";
 
     /// <summary>
+    /// The body has no factory of the type that makes the recipe: shown as the reason a recipe is closed.
+    /// </summary>
+    public const string FactoryNotBuilt = "production_factory_not_built";
+
+    /// <summary>
     /// The capsule holds inhabitants of another race than the race of the player.
     /// </summary>
     public const string CapsuleOtherRace = "production_capsule_other_race";

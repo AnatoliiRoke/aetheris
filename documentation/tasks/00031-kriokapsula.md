@@ -41,4 +41,5 @@
 
 - `dotnet build -c Release` без попереджень; `PopulationCapsuleTests` і `ChosenSeedTests` 7/7 зелені.
 - Клієнт: `oxlint` чисто, `vitest` 347/347, `npm run build` успішний.
-- Результат повного прогону сервера, `dotnet format` і CI: див. нижче та `00031-pytannia.md`.
+- Повний прогін сервера (виконуваний файл тестів, SDK 10.0.402 у пісочниці немає): 496 тестів, 495 зелених; падав `ConfigDescriptionTests` (немає українського опису коефіцієнта `world.seed.capsule.inhabitants`), опис додано в `configUk.ts`, тест зелений. Повторного повного прогону після цього виправлення не було.
+- `dotnet format` застосовано. CI на `main` агент не перевіряв (`00031-pytannia.md`).

@@ -176,7 +176,7 @@ describe('the menu, the tabs of the phone and the bottom bar of the design (task
     const labels = [...menu.querySelectorAll('.civ-nav__label')].map((label) => label.textContent);
     expect(labels).toEqual(menuOrder);
 
-    const withScreen = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Дослідження', 'Ринок', 'Налаштування'];
+    const withScreen = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Виробництво', 'Дослідження', 'Ринок', 'Налаштування'];
 
     for (const label of menuOrder) {
       if (withScreen.includes(label)) {

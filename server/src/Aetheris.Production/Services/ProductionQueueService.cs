@@ -421,6 +421,58 @@ public sealed class ProductionQueueService
     }
 
     /// <summary>
+    /// Reads every recipe that is offered, whichever factory makes it, with the factories of a
+    /// body, so one screen shows all that can be made (task 00032). A recipe whose factory the
+    /// body has not built is closed, and the reason names the factory. It only reads.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The recipes with their availability, the factories and the storage.</returns>
+    /// <exception cref="GameException">The body is not a colony of the player.</exception>
+    public async Task<ProductionRecipeListDto> ReadRecipesAsync(
+        string playerId,
+        long planetId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+
+        IReadOnlyList<ProductionFactorySummaryDto> factories = await ReadFactoriesAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        ProductionCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
+        ResourceCatalog resources = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
+        RequirementContext context = await RequirementContextAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        ProductionMultipliers multipliers = await _multipliers.GetMultipliersAsync(playerId, cancellationToken).ConfigureAwait(false);
+        HashSet<int> builtTypeIds = [.. factories.Where(factory => factory.Level > 0).Select(factory => factory.BuildingTypeId)];
+
+        List<ProductionRecipeDto> recipes = [];
+
+        foreach (RecipeInfo recipe in catalog.Recipes.Where(recipe => IsOffered(catalog, recipe, resources)).OrderBy(recipe => recipe.SortOrder))
+        {
+            ProductionRecipeDto dto = RecipeDto(catalog, resources, recipe, context, multipliers);
+
+            if (recipe.BuildingTypeId is { } buildingTypeId && !builtTypeIds.Contains(buildingTypeId))
+            {
+                dto = dto with
+                {
+                    IsAvailable = false,
+                    Reasons = [new ProductionReasonDto(ProductionErrorCodes.FactoryNotBuilt, buildingTypeId, 0, context.BuildingNameKeys.GetValueOrDefault(buildingTypeId)), .. dto.Reasons],
+                };
+            }
+
+            recipes.Add(dto);
+        }
+
+        return new ProductionRecipeListDto(
+            planetId,
+            recipes,
+            factories,
+            await StorageDtoAsync(planetId, cancellationToken).ConfigureAwait(false),
+            _clock.GameNow);
+    }
+
+    /// <summary>
     /// Reads every batch that is in the queues of the factories of a body, with the places of
     /// those queues (task 00020, section 7.5). It only reads: the batch is not changed, the
     /// units that are due are made first, as a read of one factory does.
@@ -662,6 +714,8 @@ public sealed class ProductionQueueService
         ProductionMultipliers multipliers)
     {
         List<ProductionReasonDto> reasons = UnmetReasons(catalog, recipe, context);
+        PartTypeInfo? product = recipe.PartTypeId is { } productId ? catalog.FindPart(productId) : null;
+        PartGroupInfo? groupOfProduct = product is null ? null : catalog.FindGroup(product.PartGroupId);
 
         if (!IsOffered(catalog, recipe, resources))
         {
@@ -691,7 +745,9 @@ public sealed class ProductionQueueService
                     ingredient.ResourceTypeId is { } resourceTypeId
                         ? resources.Resources.FirstOrDefault(resource => resource.Id == resourceTypeId)?.NameKey ?? string.Empty
                         : catalog.FindPart(ingredient.PartTypeId ?? 0)?.NameKey ?? string.Empty)),
-            ]);
+            ],
+            groupOfProduct?.Id,
+            groupOfProduct?.NameKey);
     }
 
     /// <summary>

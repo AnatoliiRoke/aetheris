@@ -52,6 +52,8 @@ public sealed record ProductionFactorySummaryDto(
 /// <param name="ImageKey">The key of the picture, or <see langword="null"/>.</param>
 /// <param name="UnitSeconds">The time of one unit for the player, with the multiplier of the technologies.</param>
 /// <param name="Ingredients">The ingredients of one unit.</param>
+/// <param name="PartGroupId">The group of the part the recipe makes, so a list of all the recipes can be filtered by it, or <see langword="null"/> for a resource.</param>
+/// <param name="PartGroupNameKey">The localisation key of the name of that group, or <see langword="null"/>.</param>
 public sealed record ProductionRecipeDto(
     int RecipeId,
     string Code,
@@ -66,7 +68,25 @@ public sealed record ProductionRecipeDto(
     IReadOnlyList<ProductionReasonDto> Reasons,
     string? ImageKey,
     long UnitSeconds,
-    IReadOnlyList<ProductionIngredientDto> Ingredients);
+    IReadOnlyList<ProductionIngredientDto> Ingredients,
+    int? PartGroupId = null,
+    string? PartGroupNameKey = null);
+
+/// <summary>
+/// Every recipe of every factory with the factories of a body, so one screen shows all that can
+/// be made and where (task 00032).
+/// </summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="Recipes">All the recipes that are offered; a recipe whose factory is not built on the body is closed with the reason that names the factory.</param>
+/// <param name="Factories">The factories the body has.</param>
+/// <param name="Storage">The storage of the parts of the body.</param>
+/// <param name="GameNow">The moment of game time.</param>
+public sealed record ProductionRecipeListDto(
+    long PlanetId,
+    IReadOnlyList<ProductionRecipeDto> Recipes,
+    IReadOnlyList<ProductionFactorySummaryDto> Factories,
+    ProductionStorageDto Storage,
+    DateTimeOffset GameNow);
 
 /// <summary>
 /// An ingredient of one unit of a recipe (task 00013, section 3.2).

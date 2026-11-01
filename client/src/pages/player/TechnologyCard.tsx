@@ -27,7 +27,6 @@ const percentFactor = 100;
  * @param branchName The name of the branch of the technology.
  * @param resourceName The name of a resource by its identifier.
  * @param resourceGroupCode The code of the group of a resource, for its icon.
- * @param unlockName The name of a subject the technology opens, by its localisation key.
  * @param timeMultiplier How many game seconds pass in a real second.
  * @param deadline The moment the research under way ends on the clock of the browser, or `null`.
  * @param busy Whether a command is running.
@@ -40,7 +39,6 @@ export const TechnologyCard = memo(function TechnologyCard({
   branchName,
   resourceName,
   resourceGroupCode,
-  unlockName,
   timeMultiplier,
   deadline,
   busy,
@@ -52,7 +50,6 @@ export const TechnologyCard = memo(function TechnologyCard({
   branchName: string;
   resourceName: (id: number) => string;
   resourceGroupCode: (id: number) => string | null;
-  unlockName: (key: string) => string;
   timeMultiplier: number;
   deadline: number | null;
   busy: boolean;
@@ -85,7 +82,6 @@ export const TechnologyCard = memo(function TechnologyCard({
   }
 
   const next = technology.levels.find((level) => level.level === technology.learnedLevel + 1);
-  const opens = (next?.effects ?? []).map((effect) => effect.unlockNameKey).filter((key): key is string => Boolean(key));
   const nowEffects = new Map(technology.currentEffects.filter((effect) => !effect.unlockNameKey).map((effect) => [effect.effectType, effect.value]));
   const gains = (next?.effects ?? []).filter((effect) => !effect.unlockNameKey);
   const shownEffects = gains.length > 0 ? gains : technology.currentEffects.filter((effect) => !effect.unlockNameKey);
@@ -143,7 +139,6 @@ export const TechnologyCard = memo(function TechnologyCard({
           </ul>
         </div>
       ) : null}
-      {opens.length > 0 ? <span className="meta">{t('research.opens', { names: opens.map(unlockName).join(', ') })}</span> : null}
       {isResearching && deadline !== null ? (
         <div className="building-card__next">
           <span className="meta">{t('planet.level', { level: next?.level ?? technology.learnedLevel + 1 })}</span>

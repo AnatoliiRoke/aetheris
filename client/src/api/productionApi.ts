@@ -45,6 +45,22 @@ export interface ProductionRecipe {
   imageKey: string | null;
   unitSeconds: number;
   ingredients: ProductionIngredient[];
+  /** The group of the part the recipe makes, or `null` for a resource (task 00032). */
+  partGroupId: number | null;
+  /** The localisation key of the name of that group, or `null`. */
+  partGroupNameKey: string | null;
+}
+
+/**
+ * Every recipe of every factory with the factories a body has (task 00032).
+ */
+export interface ProductionRecipeList {
+  planetId: number;
+  /** Every offered recipe; one whose factory the body lacks is closed with the reason that names the factory. */
+  recipes: ProductionRecipe[];
+  factories: ProductionFactorySummary[];
+  storage: ProductionStorage;
+  gameNow: string;
 }
 
 /**
@@ -227,6 +243,8 @@ export interface ProductionApi {
   factories(planetId: number): Promise<ProductionFactorySummary[]>;
   factory(planetId: number, planetBuildingId: number): Promise<ProductionFactory>;
   stock(planetId: number): Promise<ProductionStock>;
+  /** Every recipe of every factory with the factories of the body (task 00032). */
+  recipes(planetId: number): Promise<ProductionRecipeList>;
   /** Every batch of every factory of the body in one list (task 00020, section 7.5). */
   orders(planetId: number): Promise<ActiveOrders>;
   /** The characteristics of the parts with the groups that have them (task 00027). */
@@ -254,6 +272,9 @@ export function createProductionApi(http: HttpClient): ProductionApi {
     },
     async stock(planetId) {
       return camelize<ProductionStock>(await http.get<unknown>(`${prefix}/stock?planet_id=${planetId}`));
+    },
+    async recipes(planetId) {
+      return camelize<ProductionRecipeList>(await http.get<unknown>(`${prefix}/recipes?planet_id=${planetId}`));
     },
     async orders(planetId) {
       return camelize<ActiveOrders>(await http.get<unknown>(`${prefix}/orders?planet_id=${planetId}`));

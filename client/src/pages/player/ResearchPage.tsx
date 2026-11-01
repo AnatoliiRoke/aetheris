@@ -54,7 +54,6 @@ export function ResearchPage() {
     enqueueRef.current = enqueue;
   });
   const startResearch = useCallback((technology: Technology) => enqueueRef.current(technology, text(technology.nameKey) ?? technology.nameKey), [text]);
-  const unlockName = useCallback((key: string) => text(key) ?? key, [text]);
 
   const branches = useMemo(() => groupByBranch(tree), [tree]);
   // The end of the research under way, by technology, on the clock of the browser.
@@ -178,7 +177,6 @@ export function ResearchPage() {
                       resourceName={resourceName}
                       technology={technology}
                       timeMultiplier={tree.timeMultiplier}
-                      unlockName={unlockName}
                     />
                   ))}
                 </ul>

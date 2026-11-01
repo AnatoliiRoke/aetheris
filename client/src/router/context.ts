@@ -14,6 +14,7 @@ export const routes = {
   game: '/game',
   planet: '/planet',
   planetBuild: '/planet/build',
+  planetProduction: '/planet/production',
   planetResearch: '/planet/research',
   planetStorage: '/planet/storage',
   market: '/market',

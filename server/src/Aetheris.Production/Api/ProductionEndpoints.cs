@@ -75,6 +75,20 @@ public static class ProductionEndpoints
             return Results.Json(orders, ProductionJson.Options);
         });
 
+        // Every recipe of every factory with the factories of a body (task 00032).
+        production.MapGet("/recipes", async (
+            [FromQuery(Name = "planet_id")] long planetId,
+            ClaimsPrincipal user,
+            ProductionQueueService queue,
+            CancellationToken cancellationToken) =>
+        {
+            ProductionRecipeListDto recipes = await queue
+                .ReadRecipesAsync(PlayerId(user), planetId, cancellationToken)
+                .ConfigureAwait(false);
+
+            return Results.Json(recipes, ProductionJson.Options);
+        });
+
         // The storage of the parts of a body.
         production.MapGet("/stock", async (
             [FromQuery(Name = "planet_id")] long planetId,

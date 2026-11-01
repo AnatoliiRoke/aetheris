@@ -47,6 +47,7 @@ const CivilizationPage = lazy(() => import('./pages/player/CivilizationPage').th
 const GamePage = lazy(() => import('./pages/player/GamePage').then((module) => ({ default: module.GamePage })));
 const MarketPage = lazy(() => import('./pages/player/market/MarketPage').then((module) => ({ default: module.MarketPage })));
 const PlanetPage = lazy(() => import('./pages/player/PlanetPage').then((module) => ({ default: module.PlanetPage })));
+const ProductionPage = lazy(() => import('./pages/player/ProductionPage').then((module) => ({ default: module.ProductionPage })));
 const ResearchPage = lazy(() => import('./pages/player/ResearchPage').then((module) => ({ default: module.ResearchPage })));
 const StoragePage = lazy(() => import('./pages/player/StoragePage').then((module) => ({ default: module.StoragePage })));
 
@@ -67,6 +68,7 @@ const playerPages: Record<string, () => ReactNode> = {
   [routes.game]: () => <GamePage />,
   [routes.planet]: () => <PlanetPage />,
   [routes.planetBuild]: () => <BuildPage />,
+  [routes.planetProduction]: () => <ProductionPage />,
   [routes.planetResearch]: () => <ResearchPage />,
   [routes.planetStorage]: () => <StoragePage />,
   [routes.market]: () => <MarketPage />,
@@ -79,7 +81,7 @@ const playerPages: Record<string, () => ReactNode> = {
  * frame is one element above them, so it stays mounted when the player goes from one of them to
  * another: its data is not read again and its blocks are not drawn again.
  */
-const framedPaths: ReadonlySet<string> = new Set([routes.game, routes.planet, routes.planetBuild, routes.planetResearch, routes.planetStorage, routes.market]);
+const framedPaths: ReadonlySet<string> = new Set([routes.game, routes.planet, routes.planetBuild, routes.planetProduction, routes.planetResearch, routes.planetStorage, routes.market]);
 
 /**
  * Shows the page of the current address.

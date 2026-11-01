@@ -31,7 +31,7 @@ export const menuItems: readonly MenuItem[] = [
   { id: 'planet', icon: 'planet', label: 'civ.nav.planet', route: routes.planet },
   { id: 'build', icon: 'house', label: 'civ.nav.build', route: routes.planetBuild },
   { id: 'storage', icon: 'box', label: 'civ.nav.storage', route: routes.planetStorage },
-  { id: 'production', icon: 'production', label: 'civ.nav.production' },
+  { id: 'production', icon: 'production', label: 'civ.nav.production', route: routes.planetProduction },
   { id: 'shipyard', icon: 'shipyard', label: 'civ.nav.shipyard' },
   { id: 'fleets', icon: 'fleets', label: 'civ.nav.fleets' },
   { id: 'map', icon: 'map', label: 'civ.nav.map' },

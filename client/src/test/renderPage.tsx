@@ -12,7 +12,7 @@ import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
 import type { ActiveOrders } from '../api/activeOrders';
 import type { ProcessActiveOrder, ProcessBuilding, ProcessBuildingSummary, ProcessesApi, TerraformingState, TerraformingTarget } from '../api/processesApi';
-import type { Characteristic, PartCharacteristics, ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionStock } from '../api/productionApi';
+import type { Characteristic, PartCharacteristics, ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionRecipeList, ProductionStock } from '../api/productionApi';
 import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
 import type { OwnedPlanet, Reference, WorldApi, WorldReference } from '../api/worldApi';
@@ -95,6 +95,10 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'production.recipe.recipe_1.description': 'Плити й балки з сировини.',
     'production.recipe.recipe_2.name': 'Корпусний модуль',
     'production.recipe.recipe_2.description': 'Модуль корпусу корабля.',
+    'production.recipe.recipe_3.name': 'Реактор малий',
+    'production.recipe.recipe_3.description': 'Малий реактор для корабля.',
+    'production.part_group.part_group_3.name': 'Реактори',
+    'planets.building.building_14.name': 'Верф',
     'production.part_type.part_3.name': 'Корпус «Оса» Мк. II',
     'production.part_type.part_34.name': 'Пристрій тераформінгу Mk I',
     'production.characteristic.characteristic_1.name': 'Тяга',
@@ -531,6 +535,7 @@ export function fakeProductionApi(overrides: Partial<ProductionApi> = {}): Produ
     factories: vi.fn().mockResolvedValue(sampleProductionFactories()),
     factory: vi.fn().mockResolvedValue(sampleProductionFactory()),
     stock: vi.fn().mockResolvedValue(sampleProductionStock()),
+    recipes: vi.fn().mockResolvedValue(sampleProductionRecipes()),
     orders: vi.fn().mockResolvedValue(sampleProductionOrders()),
     characteristics: vi.fn().mockResolvedValue(sampleCharacteristics()),
     characteristicParts: vi.fn().mockResolvedValue(samplePartCharacteristics()),
@@ -565,6 +570,8 @@ export function sampleProductionFactory(overrides: Partial<ProductionFactory> = 
         imageKey: null,
         unitSeconds: 60,
         ingredients: [{ resourceTypeId: 1, partTypeId: null, amount: 4, nameKey: 'world.resource.resource_1.name' }],
+        partGroupId: null,
+        partGroupNameKey: null,
       },
       {
         recipeId: 2,
@@ -581,6 +588,8 @@ export function sampleProductionFactory(overrides: Partial<ProductionFactory> = 
         imageKey: null,
         unitSeconds: 120,
         ingredients: [{ resourceTypeId: 3, partTypeId: null, amount: 2, nameKey: 'world.resource.resource_3.name' }],
+        partGroupId: 2,
+        partGroupNameKey: 'production.part_group.part_group_2.name',
       },
     ],
     queue: [
@@ -598,6 +607,43 @@ export function sampleProductionFactory(overrides: Partial<ProductionFactory> = 
     ],
     storage: { capacity: 100, kinds: [{ partTypeId: 3, quantity: 5, capacity: 100, isFull: false }] },
     gameNow: '2026-10-26T12:00:00Z',
+    ...overrides,
+  };
+}
+
+/**
+ * Every recipe of every factory of a body for the tests (task 00032): the two recipes of the
+ * factory of `sampleProductionFactory` and a third one whose factory the body has not built.
+ */
+export function sampleProductionRecipes(overrides: Partial<ProductionRecipeList> = {}): ProductionRecipeList {
+  const factory = sampleProductionFactory();
+
+  return {
+    planetId: 10,
+    recipes: [
+      ...factory.recipes,
+      {
+        recipeId: 3,
+        code: 'recipe_3',
+        nameKey: 'production.recipe.recipe_3.name',
+        descriptionKey: 'production.recipe.recipe_3.description',
+        buildingTypeId: 14,
+        partTypeId: 4,
+        resourceTypeId: null,
+        outputQuantity: 1,
+        durationSeconds: 300,
+        isAvailable: false,
+        reasons: [{ code: 'production_factory_not_built', targetId: 14, targetLevel: 0, targetNameKey: 'planets.building.building_14.name' }],
+        imageKey: null,
+        unitSeconds: 300,
+        ingredients: [{ resourceTypeId: 2, partTypeId: null, amount: 7, nameKey: 'world.resource.resource_2.name' }],
+        partGroupId: 3,
+        partGroupNameKey: 'production.part_group.part_group_3.name',
+      },
+    ],
+    factories: sampleProductionFactories(),
+    storage: factory.storage,
+    gameNow: factory.gameNow,
     ...overrides,
   };
 }
