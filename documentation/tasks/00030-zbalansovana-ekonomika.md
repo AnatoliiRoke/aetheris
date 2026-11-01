@@ -61,7 +61,7 @@
 
 **Інструменти (усе повторюване, числа лише в даних)**
 - `tools/seed/repair_dependencies.py` виправляє файл залежностей автора (версія 5; правила в шапці скрипта й у `references/analiz-zalezhnostei.md`).
-- `tools/seed/build_first_seed.py` будує сід з файла залежностей і коефіцієнтів `seed-coefficients.json` (59 нових і змінених коефіцієнтів, усі з українськими описами в адмінці).
+- `tools/seed/build_first_seed.py` будує сід з файла залежностей і коефіцієнтів `seed-coefficients.json` (коефіцієнти моделі, усі з українськими описами в адмінці).
 - `tools/seed/audit_economy.py` рахує ціни, ліміт, попит ресурсів і грає перші дні.
 
 **1. Залежності.** Причини глухих кутів, знайдені грою дерева: (а) цикл Математика 4, Науковий центр 4, Адміністративний центр 4 (ліміт рівня); (б) Гелій-3 у ранніх рівнях Термоядерного синтезу, який потрібен Адміністративному центру 4-го рівня, а Гелій-3 лише з космосу; (в) Енергія й Населення в цінах усього: їх нічим поповнювати, тож будівництво зупинялось після першого запису. Виправлено в даних (розділ «Ремонт залежностей» у `analiz-zalezhnostei.md`). Тест `Every_level_of_every_building_and_technology_is_reachable_from_the_start` грає все дерево від початку з усіма воротами (ліміт Адміністративного центру, науки кожного рівня, центр кожного рівня технології) і доводить, що досягнуто максимум усіх 56 будівель і 20 технологій.
@@ -86,5 +86,5 @@
 
 **Тести й команди**
 - Сервер: `dotnet build -c Release` без попереджень; 488/488 тестів зелені (прогін виконуваного файла тестів, SDK 10.0.402 у пісочниці немає); `dotnet format --verify-no-changes --no-restore` чисто (через тимчасову зміну `global.json`, потім повернуту).
-- Нові тести: `BalancedEconomyTests` (11, без бази); змінені: `PlanetsTestData` (знімає зайві стартові будівлі й споживання енергії для старих випадків, є `FoundWithTheWholeStartAsync`), `ChosenSeedTests`, `NeutralCodeTests`, `BuildingsTests`, `StartCapitalTests`, `EconomyBonusTests`, `CreditIncomeTests`, `AdminObjectEditingTests`.
+- Нові тести: `BalancedEconomyTests` (12, без бази); змінені: `PlanetsTestData` (знімає зайві стартові будівлі й споживання енергії для старих випадків, є `FoundWithTheWholeStartAsync`), `ChosenSeedTests`, `NeutralCodeTests`, `BuildingsTests`, `StartCapitalTests`, `EconomyBonusTests`, `CreditIncomeTests`, `AdminObjectEditingTests`.
 - Клієнт: `oxlint` чисто, `vitest` 344/344, `npm run build` успішний.
