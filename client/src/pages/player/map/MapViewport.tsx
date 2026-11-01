@@ -88,8 +88,11 @@ export function MapViewportArea({
     view.current = next;
 
     if (worldRef.current) {
-      worldRef.current.style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.k})`;
+      // The marks and the labels are placed by the stylesheet from these three numbers and are never
+      // scaled, so their text and pictures stay sharp; only the vector shapes are scaled.
       worldRef.current.style.setProperty('--k', String(next.k));
+      worldRef.current.style.setProperty('--tx', `${next.x}px`);
+      worldRef.current.style.setProperty('--ty', `${next.y}px`);
     }
 
     const nextStep = Math.round(Math.log2(next.k / fit.current) * stepsPerDoubling);

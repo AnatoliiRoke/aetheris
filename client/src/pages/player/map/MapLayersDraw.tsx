@@ -6,6 +6,7 @@ import { useI18n } from '../../../i18n/useI18n';
 import { clusterPoints, orbitPlace, orbitRadius, systemWorldSize } from './mapGeometry';
 import { objectClasses, type MapLayers } from './mapLayers';
 import { MapMarker } from './MapMarker';
+import { worldStyle } from './mapStyle';
 import { useMapZoom } from './mapZoom';
 
 /** The size of a cell of the grouping of stars, in pixels of the screen: stars nearer than this merge into one bubble. */
@@ -56,7 +57,7 @@ export const GalaxyLayer = memo(function GalaxyLayer({ galaxy, context }: { gala
             className={`map-sector${context.selectedKey === key ? ' is-selected' : ''}${sector.ownPlanetCount > 0 ? ' is-mine' : ''}`}
             data-map-hit=""
             key={sector.id}
-            style={{ left: sector.x, top: sector.y, width: size, height: size }}
+            style={worldStyle(sector.x, sector.y, size, size)}
             type="button"
             onClick={() => context.onSelect(key)}
             onDoubleClick={() => context.onOpen(key)}
@@ -127,7 +128,7 @@ export const SectorLayer = memo(function SectorLayer({
       <Shapes nebulas={sector.nebulas} radars={sector.radars} showNebulas={layers.nebulae} size={sector.sectorSize} />
       {layers.nebulae
         ? sector.nebulas.map((nebula) => (
-            <span aria-hidden="true" className="map-nebula-label" key={`l${nebula.id}`} style={{ left: nebula.x, top: nebula.y + nebula.radius }}>
+            <span aria-hidden="true" className="map-nebula-label" key={`l${nebula.id}`} style={worldStyle(nebula.x, nebula.y + nebula.radius)}>
               <GameIcon name="mapCloud" size={14} />
               {t('map.nebulaLabel', { name: nebula.name })}
             </span>
@@ -257,9 +258,9 @@ export const SystemLayer = memo(function SystemLayer({
           <circle className="map-orbit" cx={middle} cy={middle} key={orbit} r={orbitRadius(orbit, view.orbitCount)} />
         ))}
       </svg>
-      <span aria-hidden="true" className="map-star" style={{ left: middle, top: middle }} />
+      <span aria-hidden="true" className="map-star" style={worldStyle(middle, middle)} />
       {orbits.map((orbit) => (
-        <span aria-hidden="true" className="map-orbit-number" key={`o${orbit}`} style={{ left: middle, top: middle - orbitRadius(orbit, view.orbitCount) }}>
+        <span aria-hidden="true" className="map-orbit-number" key={`o${orbit}`} style={worldStyle(middle, middle - orbitRadius(orbit, view.orbitCount))}>
           {orbit}
         </span>
       ))}

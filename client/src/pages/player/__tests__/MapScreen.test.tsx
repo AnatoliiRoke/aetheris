@@ -210,7 +210,7 @@ describe('the map screen (task 00034)', () => {
     await waitFor(() => expect(window.location.search).toContain('system=3'));
   });
 
-  it('draws the marks at one size whatever the zoom: the scale of the world is a property, not a re-draw', async () => {
+  it('places the marks by numbers of the stylesheet and does not scale them, so they stay sharp at any zoom', async () => {
     const user = userEvent.setup();
     renderPage('/map?sector=1', { auth: signedIn() });
 
@@ -221,6 +221,8 @@ describe('the map screen (task 00034)', () => {
     await user.click(screen.getByRole('button', { name: 'Збільшити' }));
 
     expect(Number(world.style.getPropertyValue('--k'))).toBeGreaterThan(Number(before));
-    expect(world.style.transform).toContain('scale(');
+    expect(world.style.getPropertyValue('--tx')).toMatch(/px$/);
+    // Nothing is scaled as a bitmap: the world has no transform, so the text and the pictures stay sharp.
+    expect(world.style.transform).toBe('');
   });
 });

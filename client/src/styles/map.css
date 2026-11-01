@@ -23,7 +23,12 @@
     radial-gradient(circle at 92% 12%, var(--text-2) 0 1px, transparent 1.5px);
   background-size: 260px 260px, 340px 340px, 420px 420px, 300px 300px, 380px 380px;
 }
-.map-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+.map-world { position: absolute; inset: 0; }
+/* A place of the world is a pair of numbers; the pixels come from the shift and the scale of the area. */
+.map-marker, .map-sector, .map-star, .map-orbit-number, .map-nebula-label, .map-route-label, .map-target {
+  left: round(calc(var(--tx, 0px) + var(--wx, 0) * var(--k, 1) * 1px), 1px);
+  top: round(calc(var(--ty, 0px) + var(--wy, 0) * var(--k, 1) * 1px), 1px);
+}
 .map-area__crosshair { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: var(--accent-hover); pointer-events: none; }
 .map-area__overlay { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
 .map-area__controls { position: absolute; right: var(--space-3); bottom: var(--space-3); z-index: 4; display: flex; flex-direction: column; gap: var(--space-2); }
@@ -74,18 +79,21 @@
 .map-mini__view { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: var(--accent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 
 /* ---------- the shapes of the world ---------- */
-.map-shapes { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.map-shapes {
+  position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; transform-origin: 0 0;
+  transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--k, 1));
+}
 .map-nebula { fill: color-mix(in srgb, var(--nebula-label) 12%, transparent); stroke: color-mix(in srgb, var(--nebula-label) 45%, transparent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 .map-radar { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 7 6; opacity: 0.7; vector-effect: non-scaling-stroke; }
 .map-orbit { fill: none; stroke: var(--border-strong); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .map-route { stroke: var(--accent-hover); stroke-width: 2; stroke-dasharray: 8 6; vector-effect: non-scaling-stroke; }
 .map-star {
-  position: absolute; width: 56px; height: 56px; border-radius: 50%; transform: translate(-50%, -50%);
+  position: absolute; width: 40px; height: 40px; border-radius: 50%; transform: translate(-50%, -50%);
   background: radial-gradient(circle, var(--energy) 0 38%, var(--group-flame) 62%, transparent 72%);
   box-shadow: 0 0 36px color-mix(in srgb, var(--group-flame) 60%, transparent); pointer-events: none;
 }
 .map-orbit-number, .map-nebula-label, .map-route-label {
-  position: absolute; transform: translate(-50%, -50%) scale(calc(1 / var(--k, 1))); pointer-events: none; white-space: nowrap;
+  position: absolute; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap;
   font-size: var(--fs-caption); color: var(--text-2); font-variant-numeric: tabular-nums;
 }
 .map-nebula-label { display: flex; align-items: center; gap: var(--space-1); font-size: var(--fs-note); color: var(--nebula-label); }
@@ -93,12 +101,12 @@
   display: flex; align-items: center; gap: var(--space-1); padding: 2px var(--space-2); border: 1px solid var(--border-strong); border-radius: var(--r-full);
   background: var(--bg-1); color: var(--text-1);
 }
-.map-target { position: absolute; transform: translate(-50%, -50%) scale(calc(1 / var(--k, 1))); color: var(--accent-hover); pointer-events: none; filter: drop-shadow(0 0 6px var(--accent)); }
+.map-target { position: absolute; transform: translate(-50%, -50%); color: var(--accent-hover); pointer-events: none; filter: drop-shadow(0 0 6px var(--accent)); }
 
 /* ---------- the marks ---------- */
 .map-marker {
   position: absolute; display: flex; flex-direction: column; align-items: center; padding: 0; border: 0; background: transparent; color: var(--text-1); cursor: pointer;
-  transform: translate(-50%, -50%) scale(calc(1 / var(--k, 1)));
+  transform: translate(-50%, -50%);
 }
 .map-marker__symbol {
   position: relative; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: var(--r-full);
@@ -130,14 +138,15 @@
 .map-sector {
   position: absolute; display: block; padding: 0; border: 0; border-radius: var(--r-xl); cursor: pointer; color: var(--text-1);
   background: color-mix(in srgb, var(--bg-2) 72%, transparent);
-  box-shadow: inset 0 0 0 calc(1.5px / var(--k, 1)) var(--border-strong);
+  width: calc(var(--ww, 0) * var(--k, 1) * 1px); height: calc(var(--wh, 0) * var(--k, 1) * 1px);
+  box-shadow: inset 0 0 0 1.5px var(--border-strong);
 }
-.map-sector.is-mine { box-shadow: inset 0 0 0 calc(2px / var(--k, 1)) color-mix(in srgb, var(--accent) 60%, transparent); }
+.map-sector.is-mine { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 60%, transparent); }
 .map-sector:hover { background: color-mix(in srgb, var(--bg-3) 72%, transparent); }
-.map-sector.is-selected { box-shadow: inset 0 0 0 calc(2.5px / var(--k, 1)) var(--accent-hover); }
+.map-sector.is-selected { box-shadow: inset 0 0 0 2.5px var(--accent-hover); }
 .map-sector:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .map-sector__label {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(calc(1 / var(--k, 1))); pointer-events: none;
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none;
   display: flex; flex-direction: column; align-items: center; gap: var(--space-1); white-space: nowrap;
 }
 .map-sector__name { font-size: var(--fs-name); font-weight: 700; }

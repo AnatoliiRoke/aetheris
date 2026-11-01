@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { worldStyle } from './mapStyle';
 
 /**
  * A mark of the map: a button at a place of the world that keeps its size whatever the zoom is
@@ -43,7 +44,7 @@ export function MapMarker({
       aria-pressed={selected}
       className={`map-marker map-marker--${tone}${selected ? ' is-selected' : ''}`}
       data-map-hit=""
-      style={{ left: x, top: y }}
+      style={worldStyle(x, y)}
       type="button"
       onClick={onSelect}
       onDoubleClick={onOpen}
