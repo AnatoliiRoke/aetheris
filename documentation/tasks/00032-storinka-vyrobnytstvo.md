@@ -37,5 +37,5 @@
 
 **Перевірки**
 
-- Клієнт: `oxlint` чисто, `tsc -b` чисто, `vitest` 352/352, `npm run build` успішний.
+- Клієнт: `oxlint` чисто, `tsc -b` чисто, `vitest` 347/347, `npm run build` успішний.
 - Сервер: `dotnet build -c Release` без попереджень; `ProductionRecipeListTests`, `PopulationCapsuleTests`, `ConfigDescriptionTests` зелені. Повний прогін сервера: див. нижче.
