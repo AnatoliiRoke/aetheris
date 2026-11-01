@@ -161,7 +161,7 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.world.seed.storage.part_base.description': 'Місткість сховища деталей на першому рівні складу, для кожного виду.',
   'config.world.seed.mine.base.description': 'Видобуток шахти руди за годину на першому рівні.',
   'config.world.seed.mine.growth.description': 'Частка, на яку видобуток шахти зростає з кожним наступним рівнем.',
-  'config.world.seed.mine.scale.group_2.description': 'Частка видобутку шахти руди, яку дає кар'єр мінералу.',
+  'config.world.seed.mine.scale.group_2.description': 'Частка видобутку шахти руди, яку дає кар’єр мінералу.',
   'config.world.seed.mine.scale.group_4.description': 'Частка видобутку шахти руди, яку дає копальня кристалу.',
   'config.world.seed.mine.scale.group_3.description': 'Частка видобутку шахти руди, яку дає станція пального.',
   'config.world.seed.power.solar.description': 'Енергія сонячної станції на першому рівні.',
