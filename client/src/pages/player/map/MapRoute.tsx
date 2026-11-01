@@ -6,20 +6,17 @@ import { worldStyle } from './mapStyle';
  * place the flight starts to the target, with the mark of the target at its end and the distance
  * and the time on the line. No fleet flies yet; this is the picture of the blank.
  *
- * @param size The size of the world the shapes are drawn in.
  * @param from The place the flight starts from, or `null` when it is not in this world.
  * @param to The target.
  * @param label The text on the line.
  * @param name What readers hear about the target.
  */
 export function MapRoute({
-  size,
   from,
   to,
   label,
   name,
 }: {
-  size: number;
   from: { x: number; y: number } | null;
   to: { x: number; y: number };
   label: string | null;
@@ -28,8 +25,10 @@ export function MapRoute({
   return (
     <>
       {from ? (
-        <svg aria-hidden="true" className="map-shapes" height={size} viewBox={`0 0 ${size} ${size}`} width={size}>
+        <svg aria-hidden="true" className="map-shapes">
+      <g className="map-shapes__world">
           <line className="map-route" x1={from.x} x2={to.x} y1={from.y} y2={to.y} />
+        </g>
         </svg>
       ) : null}
       <span aria-label={name} className="map-target" role="img" style={worldStyle(to.x, to.y)}>

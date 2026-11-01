@@ -6,7 +6,6 @@
 .civ__main--map { --map-h: max(420px, calc(100vh - 214px)); padding: 10px 20px 14px; }
 @supports (height: 100dvh) { .civ__main--map { --map-h: max(420px, calc(100dvh - 214px)); } }
 .civ__main--map .civ-main__in { gap: 10px; }
-.civ__main--map .player__title { font-size: 24px; }
 .civ__main--map .screen-head { align-items: center; }
 .civ__main--map .screen-head__text { gap: 2px; }
 
@@ -94,10 +93,9 @@
 .map-mini__view { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: var(--accent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 
 /* ---------- the shapes of the world ---------- */
-.map-shapes {
-  position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; transform-origin: 0 0;
-  transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--k, 1));
-}
+.map-shapes { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+/* The group, not the whole picture, is scaled: a line whose width is `non-scaling-stroke` then keeps its width (and its dashes) at any zoom. */
+.map-shapes__world { transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--k, 1)); }
 .map-nebula { fill: color-mix(in srgb, var(--nebula-label) 12%, transparent); stroke: color-mix(in srgb, var(--nebula-label) 45%, transparent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 .map-radar { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 7 6; opacity: 0.7; vector-effect: non-scaling-stroke; }
 .map-orbit { fill: none; stroke: var(--border-strong); stroke-width: 1; vector-effect: non-scaling-stroke; }

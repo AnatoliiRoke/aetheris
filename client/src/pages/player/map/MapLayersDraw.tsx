@@ -88,15 +88,17 @@ export const GalaxyLayer = memo(function GalaxyLayer({ galaxy, context }: { gala
 });
 
 /** The area of a nebula and the range of a radar as shapes of the world; the line keeps its width at any zoom. */
-function Shapes({ nebulas, radars, size, showNebulas }: { nebulas: MapNebula[]; radars: MapRadar[]; size: number; showNebulas: boolean }) {
+function Shapes({ nebulas, radars, showNebulas }: { nebulas: MapNebula[]; radars: MapRadar[]; showNebulas: boolean }) {
   return (
-    <svg aria-hidden="true" className="map-shapes" height={size} viewBox={`0 0 ${size} ${size}`} width={size}>
+    <svg aria-hidden="true" className="map-shapes">
+      <g className="map-shapes__world">
       {showNebulas
         ? nebulas.map((nebula) => <circle className="map-nebula" cx={nebula.x} cy={nebula.y} key={`n${nebula.id}`} r={nebula.radius} />)
         : null}
       {radars.map((radar) => (
         <circle className="map-radar" cx={radar.x} cy={radar.y} key={`r${radar.planetId}`} r={radar.radius} />
       ))}
+      </g>
     </svg>
   );
 }
@@ -125,7 +127,7 @@ export const SectorLayer = memo(function SectorLayer({
 
   return (
     <>
-      <Shapes nebulas={sector.nebulas} radars={sector.radars} showNebulas={layers.nebulae} size={sector.sectorSize} />
+      <Shapes nebulas={sector.nebulas} radars={sector.radars} showNebulas={layers.nebulae} />
       {layers.nebulae
         ? sector.nebulas.map((nebula) => (
             <span aria-hidden="true" className="map-nebula-label" key={`l${nebula.id}`} style={worldStyle(nebula.x, nebula.y + nebula.radius)}>
@@ -253,10 +255,12 @@ export const SystemLayer = memo(function SystemLayer({
 
   return (
     <>
-      <svg aria-hidden="true" className="map-shapes" height={systemWorldSize} viewBox={`0 0 ${systemWorldSize} ${systemWorldSize}`} width={systemWorldSize}>
+      <svg aria-hidden="true" className="map-shapes">
+      <g className="map-shapes__world">
         {orbits.map((orbit) => (
           <circle className="map-orbit" cx={middle} cy={middle} key={orbit} r={orbitRadius(orbit, view.orbitCount)} />
         ))}
+        </g>
       </svg>
       <span aria-hidden="true" className="map-star" style={worldStyle(middle, middle)} />
       {orbits.map((orbit) => (

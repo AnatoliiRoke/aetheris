@@ -14,11 +14,12 @@
   --fs-card: 17px;
   --fs-name: 18px;
   --fs-title: 32px;
-  --fs-title-planet: 34px;
-  --fs-title-screen: 40px;
+  /* One size of the heading on every screen of the game, as on the map (the author, 01.11.2026). */
+  --fs-title-planet: 24px;
+  --fs-title-screen: 24px;
   --fs-title-phone: 26px;
-  --fs-title-planet-phone: 28px;
-  --fs-title-screen-phone: 30px;
+  --fs-title-planet-phone: 22px;
+  --fs-title-screen-phone: 22px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;

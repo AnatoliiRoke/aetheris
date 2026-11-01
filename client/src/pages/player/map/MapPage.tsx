@@ -450,13 +450,13 @@ export function MapPage() {
             : { x: targetInfo.x, y: targetInfo.y, distance: pointRead.data?.distance ?? null, travelSeconds: pointRead.data?.travelSeconds ?? null };
 
       if (to) {
-        route = <MapRoute from={routeFrom} label={to.travelSeconds !== null && to.distance !== null ? `${distanceText(to.distance, false)} · ${formatDuration(language, to.travelSeconds)}` : null} name={t('map.targetMark')} size={sector.sectorSize} to={to} />;
+        route = <MapRoute from={routeFrom} label={to.travelSeconds !== null && to.distance !== null ? `${distanceText(to.distance, false)} · ${formatDuration(language, to.travelSeconds)}` : null} name={t('map.targetMark')} to={to} />;
       }
     } else if (level === 'system' && systemView && location.target?.kind === 'object') {
       const targetObject = systemView.objects.find((entry) => entry.id === (location.target as { objectId: number }).objectId);
 
       if (targetObject?.orbit) {
-        route = <MapRoute from={routeFrom} label={targetObject.travelSeconds !== null && targetObject.distance !== null ? `${distanceText(targetObject.distance, inSameSystem)} · ${formatDuration(language, targetObject.travelSeconds)}` : null} name={t('map.targetMark')} size={systemWorldSize} to={orbitPlace(targetObject.id, targetObject.orbit, systemView.orbitCount)} />;
+        route = <MapRoute from={routeFrom} label={targetObject.travelSeconds !== null && targetObject.distance !== null ? `${distanceText(targetObject.distance, inSameSystem)} · ${formatDuration(language, targetObject.travelSeconds)}` : null} name={t('map.targetMark')} to={orbitPlace(targetObject.id, targetObject.orbit, systemView.orbitCount)} />;
       }
     }
 
