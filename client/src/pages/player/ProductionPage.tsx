@@ -11,6 +11,7 @@ import { useTexts } from '../../texts/useTexts';
 import { ProductionQueue } from './ProductionQueue';
 import { RecipeCard } from './RecipeCard';
 import { ScreenHead } from './ScreenHead';
+import { Tabs } from './Tabs';
 import { galaxyPlace } from './planetText';
 import { allRecipes, availabilityFilters, factoryOf, filterRecipes, groupRecipes, resourcesGroupKey } from './productionRecipes';
 import { noticeFromError, type Notice } from './screenNotice';
@@ -85,14 +86,22 @@ export function ProductionPage() {
   const onProduce = useCallback((recipe: ProductionRecipe, quantity: number) => void produceRef.current(recipe, quantity), []);
 
   const recipes = list?.recipes;
+  const groups = useMemo(() => (recipes ? groupRecipes(recipes) : []), [recipes]);
+  const groupName = useCallback(
+    (entry: { key: string; nameKey: string | null }) => (entry.key === resourcesGroupKey ? t('production.groupResources') : (text(entry.nameKey ?? '') ?? entry.nameKey ?? entry.key)),
+    [t, text],
+  );
+  // The tabs of the groups, like the categories of the construction: "all", then every group the recipes have.
+  const groupTabs = useMemo(() => [{ id: allRecipes, label: t('production.allGroups') }, ...groups.map((entry) => ({ id: entry.key, label: groupName(entry) }))], [groups, groupName, t]);
+  // A tab that no longer exists shows everything.
+  const activeGroup = groups.some((entry) => entry.key === group) ? group : allRecipes;
   const visible = useMemo(
     () =>
       recipes
-        ? filterRecipes(recipes, { query, availability, factory, group }, (recipe) => text(recipe.nameKey) ?? recipe.nameKey)
+        ? filterRecipes(recipes, { query, availability, factory, group: activeGroup }, (recipe) => text(recipe.nameKey) ?? recipe.nameKey)
         : [],
-    [recipes, query, availability, factory, group, text],
+    [recipes, query, availability, factory, activeGroup, text],
   );
-  const groups = useMemo(() => (recipes ? groupRecipes(recipes) : []), [recipes]);
   const factoryTypes = useMemo(() => [...new Set((recipes ?? []).map((recipe) => recipe.buildingTypeId).filter((typeId): typeId is number => typeId !== null))], [recipes]);
   // The name of a factory comes from the factories of the body, and for a factory the body has not
   // built from the reason of a closed recipe, which names it.
@@ -181,6 +190,7 @@ export function ProductionPage() {
         </div>
       ) : (
         <section aria-label={t('production.recipes')} className="panel">
+          <Tabs active={activeGroup} label={t('production.groups')} onChange={setGroup} tabs={groupTabs} />
           <div className="tech-tools">
             <label className="field tech-search">
               <span className="visually-hidden">{t('production.search')}</span>
@@ -205,17 +215,6 @@ export function ProductionPage() {
                 ))}
               </select>
             </label>
-            <label className="field research-planet">
-              <span className="field__label">{t('production.group')}</span>
-              <select className="input" value={group} onChange={(event) => setGroup(event.target.value)}>
-                <option value={allRecipes}>{t('production.allGroups')}</option>
-                {groups.map((entry) => (
-                  <option key={entry.key} value={entry.key}>
-                    {entry.key === resourcesGroupKey ? t('production.groupResources') : (text(entry.nameKey ?? '') ?? entry.nameKey ?? entry.key)}
-                  </option>
-                ))}
-              </select>
-            </label>
           </div>
           {list.recipes.length === 0 ? (
             <div className="civ-empty">
@@ -228,8 +227,8 @@ export function ProductionPage() {
           ) : (
             groupRecipes(visible).map((entry) => (
               <section aria-labelledby={`production-${entry.key}`} className="build-category" key={entry.key}>
-                <h2 className="build-category__title" id={`production-${entry.key}`}>
-                  {entry.key === resourcesGroupKey ? t('production.groupResources') : (text(entry.nameKey ?? '') ?? entry.nameKey ?? entry.key)}
+                <h2 className={activeGroup === allRecipes ? 'build-category__title' : 'visually-hidden'} id={`production-${entry.key}`}>
+                  {groupName(entry)}
                 </h2>
                 <ul className="building-grid">
                   {entry.recipes.map((recipe) => (

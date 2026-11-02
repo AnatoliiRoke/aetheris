@@ -117,4 +117,21 @@ describe('HttpClient', () => {
     expect(init.method).toBe('PUT');
     expect((init.headers as Record<string, string>)[csrfHeader]).toBe('csrf-1');
   });
+
+  it('gives every request of the browser a time limit, so a request without an answer cannot hang the whole client', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } }));
+
+    vi.stubGlobal('fetch', fetchSpy);
+
+    try {
+      await new HttpClient('').get('/api/v1/ping');
+
+      const init = fetchSpy.mock.calls[0][1] as RequestInit;
+
+      expect(init.signal).toBeInstanceOf(AbortSignal);
+      expect((init.signal as AbortSignal).aborted).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });

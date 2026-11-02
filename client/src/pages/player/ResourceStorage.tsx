@@ -2,7 +2,7 @@ import type { Planet, PlanetResource } from '../../api/planetApi';
 import { Alert } from '../../components/Alert';
 import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
-import { fillPercent, formatAmount, formatCoefficient, storedTonnes, unitWeight, type namer } from './planetText';
+import { balanceResourceIds, fillPercent, formatAmount, formatCoefficient, storedTonnes, unitWeight, type namer } from './planetText';
 
 type Names = ReturnType<typeof namer>;
 
@@ -30,14 +30,19 @@ export function FullResourcesAlert({ planet, names }: { planet: Planet; names: N
  * The storage of a body by resource: under the name of every group a row for every resource of
  * the group with the amount against the capacity of the resource and a bar. Every resource has
  * the capacity of its own, which the server sends, so a full resource shows its badge while the
- * others of the group stay open.
+ * others of the group stay open. A balance (credits, trade, energy, population, premium) is not
+ * stock, so its row is left out and a group that holds only balances disappears.
  *
  * @param planet The body.
  * @param names The names of the resources and the groups.
  */
 export function ResourceStorage({ planet, names }: { planet: Planet; names: Names }) {
+  const balances = balanceResourceIds(planet);
   const groups = planet.resourceGroups
-    .map((group) => ({ group, resources: planet.resources.filter((resource) => resource.resourceGroupId === group.id) }))
+    .map((group) => ({
+      group,
+      resources: planet.resources.filter((resource) => resource.resourceGroupId === group.id && !balances.has(resource.resourceTypeId)),
+    }))
     .filter((entry) => entry.resources.length > 0);
 
   return (

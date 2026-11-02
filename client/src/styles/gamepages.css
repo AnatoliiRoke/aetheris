@@ -152,6 +152,7 @@
 .civ__main--planet .planet-table td { padding: 0; border: 0; }
 .civ__main--planet .planet-table tbody tr:hover { background: transparent; }
 .rate-plus { font-weight: 600; color: var(--success); }
+.rate-minus { font-weight: 600; color: var(--danger-text); }
 .rate-unit { margin-left: 4px; font-weight: 400; color: var(--text-2); text-transform: lowercase; }
 .rate-dash { font-weight: 600; color: var(--text-2); }
 .civ__main--planet .storage-resource__value { min-width: 150px; color: var(--text-1); }

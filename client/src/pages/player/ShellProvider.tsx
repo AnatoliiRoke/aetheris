@@ -19,6 +19,8 @@ export function ShellProvider({ children }: { children: ReactNode }) {
   const store = useMemo(() => createShellStore(api), [api, userId]);
 
   useEffect(() => onTabVisible(() => void store.actions.refreshAll()), [store]);
+  // The repeated reads of the old state stop when the state is replaced or the frame is gone.
+  useEffect(() => () => store.dispose(), [store]);
 
   return <ShellContext.Provider value={store}>{children}</ShellContext.Provider>;
 }

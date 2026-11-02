@@ -8,7 +8,7 @@ import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
 import { useTexts } from '../../texts/useTexts';
 import { StorageTable, type StorageRow } from './StorageTable';
-import { fillPercent, formatAmount, formatCoefficient, formatNumber, type namer } from './planetText';
+import { balanceResourceIds, fillPercent, formatAmount, formatCoefficient, formatNumber, type namer } from './planetText';
 import type { CharacteristicRow } from './useCharacteristics.helpers';
 import type { StockState } from './useStock';
 
@@ -99,7 +99,7 @@ function FillCell({ resource, label }: { resource: PlanetResource; label: string
 /**
  * The raw resources of a body as the design draws them: a table with the name, the amount against
  * the capacity, the rate per hour and the fill, grouped by the group of the resource. The
- * produced resources have a table of their own.
+ * produced resources have a table of their own. Balances are not stock, so they are left out.
  *
  * @param planet The body.
  * @param names The names of the resources and the groups.
@@ -107,7 +107,8 @@ function FillCell({ resource, label }: { resource: PlanetResource; label: string
  */
 export function ResourcesBlock({ planet, names, producedIds }: { planet: Planet; names: Names; producedIds: ReadonlySet<number> }) {
   const { t, language } = useI18n();
-  const raw = planet.resources.filter((resource) => !producedIds.has(resource.resourceTypeId));
+  const balances = balanceResourceIds(planet);
+  const raw = planet.resources.filter((resource) => !producedIds.has(resource.resourceTypeId) && !balances.has(resource.resourceTypeId));
   const rows: StorageRow[] = planet.resourceGroups.flatMap((group) => {
     const members = raw.filter((resource) => resource.resourceGroupId === group.id);
 

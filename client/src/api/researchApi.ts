@@ -1,5 +1,5 @@
 import type { HttpClient } from './http';
-import { camelize, type ResourceAmount } from './planetApi';
+import { camelize, type ResourceAmount, type UnmetRequirement } from './planetApi';
 
 /**
  * An effect of a level of a technology (task 00012).
@@ -23,6 +23,8 @@ export interface TechnologyLevel {
   unmetRequirementIds: number[];
   /** For the next level the player can research: what the selected body is short of, by how much; empty for other levels. */
   missingResources: ResourceAmount[];
+  /** The technologies and buildings the next level still waits for. Empty on the other levels. */
+  unmetRequirements?: UnmetRequirement[];
 }
 
 /**

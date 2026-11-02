@@ -3,7 +3,8 @@ import { technologyStatuses, type Technology } from '../../api/researchApi';
 import { CardArt } from '../../components/CardArt';
 import { GameIcon, ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
-import { formatAmount, formatDuration, formatSigned, lookup, reasonText } from './planetText';
+import type { EntityText } from '../../texts/context';
+import { formatAmount, formatDuration, formatSigned, lookup, reasonText, requirementText } from './planetText';
 import { ResearchProgress } from './QueueItem';
 import { reportRender } from './renderProbe';
 
@@ -30,6 +31,7 @@ const percentFactor = 100;
  * @param timeMultiplier How many game seconds pass in a real second.
  * @param deadline The moment the research under way ends on the clock of the browser, or `null`.
  * @param busy Whether a command is running.
+ * @param entityText The names of the technologies and the buildings the requirements point at.
  * @param onResearch What to do when the player starts the research; it must be the same function between the draws, so a card whose data did not change is not drawn again.
  */
 export const TechnologyCard = memo(function TechnologyCard({
@@ -41,6 +43,7 @@ export const TechnologyCard = memo(function TechnologyCard({
   timeMultiplier,
   deadline,
   busy,
+  entityText,
   onResearch,
 }: {
   technology: Technology;
@@ -51,12 +54,18 @@ export const TechnologyCard = memo(function TechnologyCard({
   timeMultiplier: number;
   deadline: number | null;
   busy: boolean;
+  entityText: EntityText;
   onResearch: (technology: Technology) => void;
 }) {
   reportRender('TechnologyCard');
 
   const { t, language } = useI18n();
   const status = technology.status;
+  const next = technology.levels.find((level) => level.level === technology.learnedLevel + 1);
+  const requirementLines = (next?.unmetRequirements ?? []).map((requirement) => ({
+    id: requirement.requirementId,
+    text: requirementText(language, requirement, entityText),
+  }));
 
   if (status === technologyStatuses.unknown) {
     return (
@@ -71,15 +80,22 @@ export const TechnologyCard = memo(function TechnologyCard({
           </div>
           <span className="chip tech-status tech-status--unknown">{t('research.status.unknown')}</span>
         </div>
-        <p className="meta">{t('research.unknownText')}</p>
-        <button className="btn btn--secondary" disabled title={t('research.unknownText')} type="button">
+        {requirementLines.length > 0 ? (
+          <ul className="reason-list">
+            {requirementLines.map((requirementLine) => (
+              <li key={requirementLine.id}>{requirementLine.text}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="meta">{t('research.unknownText')}</p>
+        )}
+        <button className="btn btn--secondary" disabled title={requirementLines.map((requirementLine) => requirementLine.text).join('. ') || t('research.unknownText')} type="button">
           {t('research.start')}
         </button>
       </li>
     );
   }
 
-  const next = technology.levels.find((level) => level.level === technology.learnedLevel + 1);
   const nowEffects = new Map(technology.currentEffects.filter((effect) => !effect.unlockNameKey).map((effect) => [effect.effectType, effect.value]));
   const gains = (next?.effects ?? []).filter((effect) => !effect.unlockNameKey);
   const shownEffects = gains.length > 0 ? gains : technology.currentEffects.filter((effect) => !effect.unlockNameKey);
@@ -89,7 +105,11 @@ export const TechnologyCard = memo(function TechnologyCard({
 
   if (status === technologyStatuses.unavailable && technology.reasonCode === 'research_center_level_unmet') {
     reasons.push(t('research.centerNeeded', { level: technology.researchCenterLevel }));
-  } else if (status === technologyStatuses.unavailable && technology.reasonCode) {
+  }
+
+  if (requirementLines.length > 0) {
+    reasons.push(...requirementLines.map((requirementLine) => requirementLine.text));
+  } else if (status === technologyStatuses.unavailable && technology.reasonCode && technology.reasonCode !== 'research_center_level_unmet') {
     reasons.push(reasonText(language, technology.reasonCode));
   }
 
@@ -172,7 +192,7 @@ export const TechnologyCard = memo(function TechnologyCard({
           ))}
         </ul>
       ) : null}
-      {status === technologyStatuses.available && !isShort ? (
+      {status === technologyStatuses.available && !isShort && requirementLines.length === 0 ? (
         <button className="btn btn--secondary" disabled={busy} type="button" onClick={() => onResearch(technology)}>
           {t('research.start')}
         </button>

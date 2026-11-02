@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { ResearchQueueItem, ResearchTree, Technology } from '../../api/researchApi';
 import { useApi } from '../../api/useApi';
 import { useI18n } from '../../i18n/useI18n';
-import { noticeFromError, type Notice } from './screenNotice';
+import { useTexts } from '../../texts/useTexts';
+import { researchRefusal, type Notice } from './screenNotice';
 import type { ResearchState } from './useResearch';
 import { useShellActions } from './useShell';
 
@@ -16,6 +17,7 @@ import { useShellActions } from './useShell';
  */
 export function useResearchCommands(state: ResearchState, fallbackPlanetId: number) {
   const { t, language } = useI18n();
+  const { text } = useTexts();
   const { research } = useApi();
   const { refreshAfterCommand } = useShellActions();
   const [busy, setBusy] = useState(false);
@@ -29,7 +31,7 @@ export function useResearchCommands(state: ResearchState, fallbackPlanetId: numb
       state.apply(await action());
       setNotice({ kind: 'success', text: success });
     } catch (error) {
-      setNotice(noticeFromError(error, language, t('error.generic.text')));
+      setNotice(researchRefusal(error, language, text, t('error.generic.text')));
       await state.reload();
     } finally {
       setBusy(false);

@@ -173,6 +173,7 @@ export function ResearchPage() {
                       name={text(technology.nameKey) ?? technology.nameKey}
                       onResearch={startResearch}
                       resourceGroupCode={resourceGroup}
+                      entityText={text}
                       resourceName={resourceName}
                       technology={technology}
                       timeMultiplier={tree.timeMultiplier}

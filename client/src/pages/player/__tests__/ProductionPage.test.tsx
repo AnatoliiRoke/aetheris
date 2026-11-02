@@ -59,12 +59,37 @@ describe('the production screen (task 00032)', () => {
     expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
     await user.selectOptions(within(recipes).getByLabelText('Завод'), 'Усі заводи');
 
-    await user.selectOptions(within(recipes).getByLabelText('Група'), 'Ресурси');
+    await user.click(within(recipes).getByRole('tab', { name: 'Ресурси' }));
     expect(within(recipes).getByText('Будматеріали')).toBeInTheDocument();
     expect(within(recipes).queryByText('Реактор малий')).toBeNull();
 
     await user.type(within(recipes).getByRole('searchbox'), 'немає такого');
     expect(await within(recipes).findByText('Жоден рецепт не підходить під фільтри.')).toBeInTheDocument();
+  });
+
+  it('switches the groups of the recipes with the tabs on top, like the categories of the construction', async () => {
+    const user = userEvent.setup();
+    renderPage('/planet/production', { auth: signedIn() });
+
+    const recipes = await screen.findByRole('region', { name: 'Рецепти' });
+    await within(recipes).findByText('Реактор малий');
+    const tablist = within(recipes).getByRole('tablist', { name: 'Групи рецептів' });
+    const labels = within(tablist).getAllByRole('tab').map((tab) => tab.textContent);
+
+    expect(labels[0]).toBe('Усі');
+    expect(labels).toContain('Ресурси');
+    expect(within(tablist).getByRole('tab', { name: 'Усі' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(recipes).queryByLabelText('Група')).toBeNull();
+
+    await user.click(within(tablist).getByRole('tab', { name: 'Ресурси' }));
+
+    expect(within(tablist).getByRole('tab', { name: 'Ресурси' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(recipes).getByText('Будматеріали')).toBeInTheDocument();
+    expect(within(recipes).queryByText('Реактор малий')).toBeNull();
+
+    await user.click(within(tablist).getByRole('tab', { name: 'Усі' }));
+
+    expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
   });
 
   it('puts the chosen number of units into the queue of the factory that makes the recipe', async () => {

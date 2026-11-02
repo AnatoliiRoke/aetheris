@@ -1,4 +1,4 @@
-import type { Planet } from '../../api/planetApi';
+import type { Planet, PlanetResource } from '../../api/planetApi';
 import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 import { formatNumber, formatSigned, namer } from './planetText';
@@ -6,12 +6,17 @@ import { FullResourcesAlert, ResourceStorage } from './ResourceStorage';
 
 type Names = ReturnType<typeof namer>;
 
+/** The catalog code of the population counter. It is not a mined stock. */
+const populationResourceCode = 'resource_30';
+
 /**
  * The growth of the body: what every resource brings per hour, or a dash for a resource that is
- * not mined here, with the alarm of the resources that are full.
+ * not mined here. Population shows the growth of the inhabitants, which can fall when the body
+ * is above its maximum. A full resource raises the alarm.
  */
 export function ResourcesPanel({ planet, names }: { planet: Planet; names: Names }) {
-  const { t, language } = useI18n();
+  const { t } = useI18n();
+  const populationResourceId = planet.resourceTypes.find((resource) => resource.code === populationResourceCode)?.id ?? null;
 
   return (
     <section className="panel" aria-labelledby="planet-resources">
@@ -40,17 +45,7 @@ export function ResourcesPanel({ planet, names }: { planet: Planet; names: Names
                   </span>
                 </td>
                 <td className="num">
-                  {resource.ratePerHour > 0 ? (
-                    <>
-                      <span className="rate-plus">+{formatNumber(resource.ratePerHour, language)}</span>
-                      <span className="rate-unit">{t('planet.rate')}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="rate-dash">—</span>
-                      <span>{t('planet.notMined')}</span>
-                    </>
-                  )}
+                  <ResourceRate planet={planet} populationResourceId={populationResourceId} resource={resource} />
                 </td>
               </tr>
             ))}
@@ -58,6 +53,49 @@ export function ResourcesPanel({ planet, names }: { planet: Planet; names: Names
         </table>
       </div>
     </section>
+  );
+}
+
+/**
+ * The hourly figure of one resource. A mined resource shows its production. Population shows the
+ * growth the server counted for the body. Anything else is not mined here.
+ */
+function ResourceRate({
+  planet,
+  populationResourceId,
+  resource,
+}: {
+  planet: Planet;
+  populationResourceId: number | null;
+  resource: PlanetResource;
+}) {
+  const { t, language } = useI18n();
+
+  if (populationResourceId !== null && resource.resourceTypeId === populationResourceId) {
+    const growth = planet.populationGrowthPerHour;
+
+    return (
+      <>
+        <span className={growth > 0 ? 'rate-plus' : growth < 0 ? 'rate-minus' : 'rate-dash'}>{formatSigned(growth, language)}</span>
+        <span className="rate-unit">{t('planet.rate')}</span>
+      </>
+    );
+  }
+
+  if (resource.ratePerHour > 0) {
+    return (
+      <>
+        <span className="rate-plus">+{formatNumber(resource.ratePerHour, language)}</span>
+        <span className="rate-unit">{t('planet.rate')}</span>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <span className="rate-dash">—</span>
+      <span>{t('planet.notMined')}</span>
+    </>
   );
 }
 

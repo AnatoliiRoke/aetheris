@@ -108,7 +108,7 @@ export const CivHeader = memo(function CivHeader() {
           label={t('civ.energy')}
           title={energy ? t('civ.energyHint', { output: number(energy.output), consumption: number(energy.consumption) }) : t('civ.energy')}
           tone="energy"
-          value={energy ? number(energy.balance) : null}
+          value={energy ? `${number(energy.balance)} / ${number(energy.output)}` : null}
         />
       </ul>
       <div aria-label={t('civ.alerts')} className="civ-topbar__tools" role="group">

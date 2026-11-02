@@ -1,13 +1,14 @@
+import { useState } from 'react';
 import { Alert } from '../../components/Alert';
 import { useDocumentTitle } from '../../components/useDocumentTitle';
 import { useI18n } from '../../i18n/useI18n';
 import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
-import { BuildingCard } from './BuildingCard';
+import { BuildCatalog } from './BuildCatalog';
 import { BuildingQueue } from './BuildingQueue';
 import { ScreenHead } from './ScreenHead';
-import { groupBuildings } from './buildingCategories';
-import { galaxyPlace, lookup } from './planetText';
+import { allBuildings } from './buildingCategories';
+import { galaxyPlace } from './planetText';
 import { usePlanetScreen } from './usePlanetScreen';
 
 /**
@@ -22,6 +23,8 @@ export function BuildPage() {
   useDocumentTitle(t('meta.build.title'));
 
   const { civilization, planet, receivedAt, failed, reload, names, busy, notice, onEnqueue, onCancel } = usePlanetScreen();
+  const [categoryKey, setCategoryKey] = useState(allBuildings);
+  const [stateFilter, setStateFilter] = useState(allBuildings);
 
   if (!civilization) {
     return null;
@@ -72,18 +75,17 @@ export function BuildPage() {
               <p>{t('build.empty')}</p>
             </div>
           ) : (
-            groupBuildings(planet).map(({ key, category, buildings }) => (
-              <section aria-labelledby={`build-${key}`} className="build-category" key={key}>
-                <h2 className="build-category__title" id={`build-${key}`}>
-                  {category ? lookup(language, category.nameKey, category.code, undefined, names.entities) : t('planet.category.other')}
-                </h2>
-                <ul className="building-grid">
-                  {buildings.map((building) => (
-                    <BuildingCard building={building} busy={busy} key={building.buildingTypeId} names={names} onEnqueue={onEnqueue} planet={planet} />
-                  ))}
-                </ul>
-              </section>
-            ))
+            <BuildCatalog
+              busy={busy}
+              categoryKey={categoryKey}
+              language={language}
+              names={names}
+              onCategory={setCategoryKey}
+              onEnqueue={onEnqueue}
+              onState={setStateFilter}
+              planet={planet}
+              stateFilter={stateFilter}
+            />
           )}
         </>
       )}

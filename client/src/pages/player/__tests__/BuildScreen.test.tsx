@@ -63,6 +63,75 @@ describe('BuildPage: the screen of the construction (task 00020)', () => {
     expect(screen.queryByRole('region', { name: 'Видобуток' })).not.toBeInTheDocument();
   });
 
+  it('switches the categories with the tabs on top, like the branches of the research screen', async () => {
+    const user = userEvent.setup();
+    renderPage('/planet/build', { auth: signedIn() });
+
+    const tablist = await screen.findByRole('tablist', { name: 'Категорії будівель' });
+    const labels = within(tablist).getAllByRole('tab').map((tab) => tab.textContent);
+
+    // The tab "all" comes first, then the categories of the data in their order; a category
+    // without a building makes no tab.
+    expect(labels[0]).toBe('Усі');
+    expect(labels).toEqual(expect.arrayContaining(['Видобуток', 'Дослідження', 'Населення']));
+    expect(labels).not.toContain('Торгівля');
+    expect(within(tablist).getByRole('tab', { name: 'Усі' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('heading', { name: 'Науковий центр' })).toBeInTheDocument();
+
+    await user.click(within(tablist).getByRole('tab', { name: 'Видобуток' }));
+
+    expect(within(tablist).getByRole('tab', { name: 'Видобуток' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(tablist).getByRole('tab', { name: 'Усі' })).toHaveAttribute('aria-selected', 'false');
+    expect(screen.queryByRole('heading', { name: 'Науковий центр' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Шахта заліза' })).toBeInTheDocument();
+
+    await user.click(within(tablist).getByRole('tab', { name: 'Усі' }));
+
+    expect(screen.getByRole('heading', { name: 'Науковий центр' })).toBeInTheDocument();
+  });
+
+  it('moves between the tabs of the categories with the arrow keys', async () => {
+    const user = userEvent.setup();
+    renderPage('/planet/build', { auth: signedIn() });
+
+    const tablist = await screen.findByRole('tablist', { name: 'Категорії будівель' });
+    const first = within(tablist).getAllByRole('tab')[0];
+
+    first.focus();
+    await user.keyboard('{ArrowRight}');
+
+    expect(first).toHaveAttribute('aria-selected', 'false');
+    expect(within(tablist).getAllByRole('tab')[1]).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('filters the buildings of the category by the state with the chips and says when none is left', async () => {
+    const user = userEvent.setup();
+    renderPage('/planet/build', { auth: signedIn() });
+
+    const chips = await screen.findByRole('group', { name: 'Стан' });
+
+    expect(within(chips).getByRole('button', { name: 'Усі' })).toHaveAttribute('aria-pressed', 'true');
+
+    await user.click(within(chips).getByRole('button', { name: 'Найвищий рівень' }));
+
+    expect(within(chips).getByRole('button', { name: 'Найвищий рівень' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('У цій категорії немає будівель за вибраним станом. Змініть категорію чи стан.')).toBeInTheDocument();
+
+    await user.click(within(chips).getByRole('button', { name: 'Усі' }));
+
+    expect(screen.getByRole('heading', { name: 'Науковий центр' })).toBeInTheDocument();
+  });
+
+  it('draws the tabs and the chips of the construction in English', async () => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'en');
+    renderPage('/planet/build', { auth: signedIn() });
+
+    const tablist = await screen.findByRole('tablist', { name: 'Building categories' });
+
+    expect(within(tablist).getByRole('tab', { name: 'All' })).toBeInTheDocument();
+    expect(within(await screen.findByRole('group', { name: 'State' })).getByRole('button', { name: 'Top level' })).toBeInTheDocument();
+  });
+
   it('keeps a closed building inactive and says why', async () => {
     renderPage('/planet/build', { auth: signedIn() });
 

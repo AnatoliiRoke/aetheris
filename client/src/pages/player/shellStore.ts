@@ -4,6 +4,7 @@ import type { Race } from '../../api/gameApi';
 import { ApiError } from '../../api/http';
 import type { Planet } from '../../api/planetApi';
 import type { OwnedPlanet, WorldReference } from '../../api/worldApi';
+import { serverConfig } from '../../config/server';
 
 /**
  * A body as the server last told it and the moment the answer came.
@@ -61,6 +62,8 @@ export interface ShellStore {
   getState: () => ShellState;
   subscribe: (listener: () => void) => () => void;
   actions: ShellActions;
+  /** Stops the repeated reads: the state is no longer in use. */
+  dispose: () => void;
 }
 
 const initialState: ShellState = {
@@ -95,6 +98,35 @@ export function createShellStore(api: Api): ShellStore {
   let state: ShellState = initialState;
   const listeners = new Set<() => void>();
   const inFlight = new Map<string, Promise<void>>();
+  // What failed to load is read again after a pause, so a page opened while the server was
+  // starting heals itself; the attempts end after the last pause.
+  const retries = new Map<string, { attempt: number; timer: ReturnType<typeof setTimeout> | null }>();
+  let disposed = false;
+
+  const clearRetry = (key: string) => {
+    const pending = retries.get(key);
+
+    if (pending?.timer) {
+      clearTimeout(pending.timer);
+    }
+
+    retries.delete(key);
+  };
+
+  const scheduleRetry = (key: string, run: () => Promise<void>) => {
+    const attempt = retries.get(key)?.attempt ?? 0;
+
+    if (disposed || attempt >= serverConfig.retryDelaysMs.length || retries.get(key)?.timer) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      retries.set(key, { attempt: attempt + 1, timer: null });
+      void run();
+    }, serverConfig.retryDelaysMs[attempt]);
+
+    retries.set(key, { attempt, timer });
+  };
 
   const set = (patch: Partial<ShellState>) => {
     state = { ...state, ...patch };
@@ -131,10 +163,13 @@ export function createShellStore(api: Api): ShellStore {
     return once(`planet:${planetId}`, async () => {
       try {
         setPlanet(planetId, await api.planets.planet(planetId));
+        clearRetry(`planet:${planetId}`);
       } catch {
         if (!state.failedPlanetIds.includes(planetId)) {
           set({ failedPlanetIds: [...state.failedPlanetIds, planetId] });
         }
+
+        scheduleRetry(`planet:${planetId}`, () => loadPlanet(planetId, true));
       }
     });
   };
@@ -149,8 +184,10 @@ export function createShellStore(api: Api): ShellStore {
         const answer = await api.economy.overview();
 
         set({ balances: keepIfSame(state.balances, answer.balances), economyLoaded: true, economyFailed: false });
+        clearRetry('economy');
       } catch {
         set({ economyFailed: true });
+        scheduleRetry('economy', () => loadEconomy(true));
       }
     });
   };
@@ -186,8 +223,10 @@ export function createShellStore(api: Api): ShellStore {
     return once('reference', async () => {
       try {
         set({ reference: await api.world.reference() });
+        clearRetry('reference');
       } catch {
         set({ bodiesFailed: true, bodiesLoaded: true });
+        scheduleRetry('reference', loadReference);
       }
     });
   };
@@ -200,8 +239,10 @@ export function createShellStore(api: Api): ShellStore {
     const bodies = once('bodies', async () => {
       try {
         set({ bodies: keepIfSame(state.bodies, await api.world.planets()), bodiesLoaded: true, bodiesFailed: false });
+        clearRetry('bodies');
       } catch {
         set({ bodiesFailed: true, bodiesLoaded: true });
+        scheduleRetry('bodies', () => loadBodies(true));
       }
     });
 
@@ -274,5 +315,9 @@ export function createShellStore(api: Api): ShellStore {
       return () => listeners.delete(listener);
     },
     actions,
+    dispose: () => {
+      disposed = true;
+      [...retries.keys()].forEach(clearRetry);
+    },
   };
 }

@@ -178,10 +178,13 @@ describe('the second tick belongs to the counter only (task 00020, section 7.8)'
     expect(withInterval).toEqual(['QueueItem.tsx']);
   });
 
-  it('reads the server on no timer in the frame and in the shared state', () => {
+  it('reads the server on no polling timer in the frame and in the shared state', () => {
     const frame = sources.filter((file) => /^(Civ|Shell|shell|useShell)/.test(file.name));
 
     expect(frame.length).toBeGreaterThan(8);
-    expect(frame.filter((file) => /setInterval|setTimeout/.test(file.text)).map((file) => file.name)).toEqual([]);
+    // The only timer is the pause before a repeated read of what failed to load (shellStore.ts):
+    // it is set after a failure and stops after the last attempt, so it polls nothing.
+    expect(frame.filter((file) => /setInterval/.test(file.text)).map((file) => file.name)).toEqual([]);
+    expect(frame.filter((file) => /setTimeout/.test(file.text)).map((file) => file.name)).toEqual(['shellStore.ts']);
   });
 });

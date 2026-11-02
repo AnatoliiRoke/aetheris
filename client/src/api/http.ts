@@ -63,7 +63,7 @@ export class HttpClient {
   private csrfToken: Promise<string> | null = null;
   private refreshing: Promise<boolean> | null = null;
 
-  constructor(baseUrl: string = serverConfig.apiBaseUrl, fetchFunction: FetchFunction = (...args) => fetch(...args)) {
+  constructor(baseUrl: string = serverConfig.apiBaseUrl, fetchFunction: FetchFunction = (input, init) => fetch(input, { ...init, signal: init?.signal ?? AbortSignal.timeout(serverConfig.requestTimeoutMs) })) {
     this.baseUrl = baseUrl;
     this.fetchFunction = fetchFunction;
   }
