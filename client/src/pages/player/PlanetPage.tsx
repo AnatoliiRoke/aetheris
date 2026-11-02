@@ -6,6 +6,7 @@ import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
 import { useTexts } from '../../texts/useTexts';
 import { BuildingQueue } from './BuildingQueue';
+import { FinancePanel } from './FinancePanel';
 import { EnergyPanel, ResourcesPanel, StoragePanel } from './PlanetPanels';
 import { PlanetCard } from './PlanetCard';
 import { PopulationPanel } from './PopulationPanel';
@@ -99,6 +100,7 @@ export function PlanetPage() {
               <StoragePanel names={names} planet={planet} />
               <div className="planet-grid">
                 <EnergyPanel planet={planet} />
+                <FinancePanel />
                 <PopulationPanel planetId={planetId} />
               </div>
               <ProductionPanel

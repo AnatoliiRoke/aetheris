@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { fakeAuthApi, fakePlanetApi, renderPage, samplePlanet, signedInMe } from '../../../test/renderPage';
+import { fakeAuthApi, fakeEconomyApi, fakePlanetApi, fakeWorldApi, renderPage, sampleBalance, samplePlanet, sampleWorldReference, signedInMe } from '../../../test/renderPage';
 
 /**
  * A signed-in player with a civilization and a confirmed address.
@@ -45,6 +45,41 @@ describe('PlanetPage', () => {
     renderPage('/planet', { auth: signedIn(), planets });
 
     expect(await screen.findByText('Склад заповнений, видобуток зупинено: Залізо')).toBeInTheDocument();
+  });
+
+  it('shows the finances of the civilization between the energy and the population', async () => {
+    const economy = fakeEconomyApi({
+      overview: vi.fn().mockResolvedValue({
+        populations: [],
+        balances: [sampleBalance({ resourceTypeId: 27, amount: 1200, incomePerHour: 45 })],
+        gameNow: '2026-10-26T12:00:00Z',
+      }),
+    });
+    const world = fakeWorldApi({
+      reference: vi.fn().mockResolvedValue(
+        sampleWorldReference({
+          resources: [
+            { id: 27, code: 'resource_27', nameKey: 'world.resource.resource_27.name', descriptionKey: '', groupCode: null, groupId: null, imageKey: null },
+          ],
+        }),
+      ),
+    });
+
+    renderPage('/planet', { auth: signedIn(), economy, planets: fakePlanetApi(), world });
+
+    const finance = await screen.findByRole('region', { name: 'Фінанси' });
+
+    expect(within(finance).getByText('Баланс')).toBeInTheDocument();
+    expect(within(finance).getByText('1 200')).toBeInTheDocument();
+    expect(within(finance).getByText('Споживання')).toBeInTheDocument();
+    expect(within(finance).getByText('0')).toBeInTheDocument();
+    expect(within(finance).getByText('Надходження в годину')).toBeInTheDocument();
+    expect(within(finance).getByText('+45')).toBeInTheDocument();
+
+    // The panel of the finances stands between the energy and the population.
+    const panels = Array.from(document.querySelectorAll('.planet-grid > .panel'));
+
+    expect(panels.map((panel) => panel.querySelector('.panel__title')?.textContent)).toEqual(['Енергія', 'Фінанси', 'Населення']);
   });
 });
 

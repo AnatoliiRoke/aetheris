@@ -122,8 +122,8 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.8,
         "step": 0,
         "significant": 2
       },
@@ -1943,8 +1943,8 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.8,
         "step": 0,
         "significant": 2
       },
@@ -2312,8 +2312,8 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.8,
         "step": 0,
         "significant": 2
       },
@@ -2680,8 +2680,8 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.8,
         "step": 0,
         "significant": 2
       },
@@ -3080,8 +3080,8 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.8,
         "step": 0,
         "significant": 2
       },
@@ -3482,8 +3482,8 @@
         "en": "Building of the Main and population group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 2.77,
         "step": 0,
         "significant": 2
       },
@@ -3796,8 +3796,8 @@
         "en": "Building of the Storages group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 25,
+        "growth": 1.78,
         "step": 0,
         "significant": 2
       },
@@ -4202,8 +4202,8 @@
         "en": "Building of the Storages group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 25,
+        "growth": 1.78,
         "step": 0,
         "significant": 2
       },
@@ -4510,8 +4510,8 @@
         "en": "Building of the Science group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 35,
+        "growth": 1.75,
         "step": 0,
         "significant": 2
       },
@@ -5264,8 +5264,8 @@
         "en": "Building of the Science group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 35,
+        "growth": 1.75,
         "step": 0,
         "significant": 2
       },
@@ -5762,8 +5762,8 @@
         "en": "Building of the Science group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 35,
+        "growth": 1.75,
         "step": 0,
         "significant": 2
       },
@@ -6160,8 +6160,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -6374,8 +6374,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -6644,8 +6644,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -6926,8 +6926,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -7190,8 +7190,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -7466,8 +7466,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -7742,8 +7742,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -7970,8 +7970,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -8240,8 +8240,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -8510,8 +8510,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -8780,8 +8780,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -9056,8 +9056,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -9332,8 +9332,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -9608,8 +9608,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -9884,8 +9884,8 @@
         "en": "Building of the Planetary extraction group."
       },
       "duration_seconds": {
-        "base": 200,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -10148,8 +10148,8 @@
         "en": "Building of the Power group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -10426,8 +10426,8 @@
         "en": "Building of the Power group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -10656,8 +10656,8 @@
         "en": "Building of the Power group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -10934,8 +10934,8 @@
         "en": "Building of the Power group."
       },
       "duration_seconds": {
-        "base": 250,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 2.67,
         "step": 0,
         "significant": 2
       },
@@ -11204,8 +11204,8 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.76,
         "step": 0,
         "significant": 2
       },
@@ -11602,8 +11602,8 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.76,
         "step": 0,
         "significant": 2
       },
@@ -11904,8 +11904,8 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.76,
         "step": 0,
         "significant": 2
       },
@@ -12298,8 +12298,8 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.76,
         "step": 0,
         "significant": 2
       },
@@ -12690,8 +12690,8 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.76,
         "step": 0,
         "significant": 2
       },
@@ -13084,8 +13084,8 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.76,
         "step": 0,
         "significant": 2
       },
@@ -13458,8 +13458,8 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.76,
         "step": 0,
         "significant": 2
       },
@@ -13858,8 +13858,8 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.76,
         "step": 0,
         "significant": 2
       },
@@ -14208,8 +14208,8 @@
         "en": "Building of the Resource production group."
       },
       "duration_seconds": {
-        "base": 300,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.76,
         "step": 0,
         "significant": 2
       },
@@ -14566,8 +14566,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -14984,8 +14984,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -15448,8 +15448,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -15872,8 +15872,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -16256,8 +16256,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -16628,8 +16628,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -17018,8 +17018,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -17310,8 +17310,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -17712,8 +17712,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -18114,8 +18114,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -18524,8 +18524,8 @@
         "en": "Building of the Module production group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -18868,8 +18868,8 @@
         "en": "Building of the Fleet and defence group."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -19330,8 +19330,8 @@
         "en": "Building of the Fleet and defence group."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 3.22,
         "step": 0,
         "significant": 2
       },
@@ -19570,8 +19570,8 @@
         "en": "Building of the Fleet and defence group."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -19984,8 +19984,8 @@
         "en": "Building of the Fleet and defence group."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.74,
         "step": 0,
         "significant": 2
       },
@@ -20398,8 +20398,8 @@
         "en": "Building of the Trade and logistics group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 35,
+        "growth": 2.63,
         "step": 0,
         "significant": 2
       },
@@ -20722,8 +20722,8 @@
         "en": "Building of the Trade and logistics group."
       },
       "duration_seconds": {
-        "base": 375,
-        "growth": 1.4,
+        "base": 35,
+        "growth": 2.63,
         "step": 0,
         "significant": 2
       },

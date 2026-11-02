@@ -66,8 +66,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.59,
         "step": 0,
         "significant": 2
       },
@@ -261,8 +261,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.59,
         "step": 0,
         "significant": 2
       },
@@ -748,8 +748,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.59,
         "step": 0,
         "significant": 2
       },
@@ -1321,8 +1321,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.59,
         "step": 0,
         "significant": 2
       },
@@ -1996,8 +1996,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.56,
         "step": 0,
         "significant": 2
       },
@@ -2088,7 +2088,7 @@
           "type": "metal_production",
           "growth": {
             "base": 1.08,
-            "growth": 1.08,
+            "growth": 1.0435,
             "step": 0
           }
         },
@@ -2531,8 +2531,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.59,
         "step": 0,
         "significant": 2
       },
@@ -3028,8 +3028,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.56,
         "step": 0,
         "significant": 2
       },
@@ -3090,7 +3090,7 @@
           "type": "energy_output",
           "growth": {
             "base": 1.08,
-            "growth": 1.08,
+            "growth": 1.0435,
             "step": 0
           }
         },
@@ -3563,8 +3563,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.56,
         "step": 0,
         "significant": 2
       },
@@ -3664,8 +3664,8 @@
         {
           "type": "construction_time",
           "growth": {
-            "base": 0.961538,
-            "growth": 0.961538,
+            "base": 0.95,
+            "growth": 0.93714,
             "step": 0
           }
         },
@@ -4312,8 +4312,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.59,
         "step": 0,
         "significant": 2
       },
@@ -4867,8 +4867,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.59,
         "step": 0,
         "significant": 2
       },
@@ -4958,8 +4958,8 @@
         {
           "type": "production_time",
           "growth": {
-            "base": 0.961538,
-            "growth": 0.961538,
+            "base": 0.95,
+            "growth": 0.93714,
             "step": 0
           }
         },
@@ -5468,8 +5468,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.56,
         "step": 0,
         "significant": 2
       },
@@ -5530,7 +5530,7 @@
           "type": "credit_income_bonus",
           "growth": {
             "base": 1.08,
-            "growth": 1.08,
+            "growth": 1.0435,
             "step": 0
           }
         },
@@ -5823,8 +5823,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.59,
         "step": 0,
         "significant": 2
       },
@@ -6236,8 +6236,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.56,
         "step": 0,
         "significant": 2
       },
@@ -6288,7 +6288,7 @@
           "type": "crystal_production",
           "growth": {
             "base": 1.08,
-            "growth": 1.08,
+            "growth": 1.0435,
             "step": 0
           }
         },
@@ -6761,8 +6761,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.56,
         "step": 0,
         "significant": 2
       },
@@ -7304,8 +7304,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.56,
         "step": 0,
         "significant": 2
       },
@@ -7366,7 +7366,7 @@
           "type": "storage_capacity",
           "growth": {
             "base": 1.08,
-            "growth": 1.08,
+            "growth": 1.0435,
             "step": 0
           }
         },
@@ -7773,8 +7773,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 30,
+        "growth": 1.56,
         "step": 0,
         "significant": 2
       },
@@ -7835,7 +7835,7 @@
           "type": "population_max",
           "growth": {
             "base": 1.08,
-            "growth": 1.08,
+            "growth": 1.0435,
             "step": 0
           }
         },
@@ -7843,7 +7843,7 @@
           "type": "population_growth_bonus",
           "growth": {
             "base": 1.08,
-            "growth": 1.08,
+            "growth": 1.0435,
             "step": 0
           }
         },
@@ -8172,8 +8172,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.55,
         "step": 0,
         "significant": 2
       },
@@ -8681,8 +8681,8 @@
         "en": "Conversion of one material into another."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 40,
+        "growth": 1.55,
         "step": 0,
         "significant": 2
       },
@@ -8723,8 +8723,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 35,
+        "growth": 1.55,
         "step": 0,
         "significant": 2
       },
@@ -9142,8 +9142,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 35,
+        "growth": 1.55,
         "step": 0,
         "significant": 2
       },
@@ -9859,8 +9859,8 @@
         "en": "Technology of its branch."
       },
       "duration_seconds": {
-        "base": 500,
-        "growth": 1.4,
+        "base": 20,
+        "growth": 1.59,
         "step": 0,
         "significant": 2
       },
@@ -9960,8 +9960,8 @@
         {
           "type": "research_time",
           "growth": {
-            "base": 0.961538,
-            "growth": 0.961538,
+            "base": 0.95,
+            "growth": 0.9646,
             "step": 0
           }
         }

@@ -149,24 +149,115 @@
     },
     {
       "key": "world.seed.duration.base_seconds",
-      "value": "250",
+      "value": "20",
       "minimum": "0",
       "maximum": "1000000000",
-      "description": "Duration of the first level of a seeded building, in seconds."
+      "description": "Duration of the first level of a seeded building, in seconds; the multiplier of its group is applied to it."
+    },
+    {
+      "key": "world.seed.duration.cap_seconds",
+      "value": "1500000",
+      "minimum": "1",
+      "maximum": "1000000000",
+      "description": "The longest a duration of a level may be, in seconds; the growth of every duration is computed so the last level fits under it."
+    },
+    {
+      "key": "world.seed.duration.group.main",
+      "value": "1",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a building of the main and population group."
+    },
+    {
+      "key": "world.seed.duration.group.storage",
+      "value": "1.25",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a building of the storage group."
+    },
+    {
+      "key": "world.seed.duration.group.science",
+      "value": "1.75",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a building of the science group."
+    },
+    {
+      "key": "world.seed.duration.group.extraction",
+      "value": "1.5",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a building of the extraction group."
+    },
+    {
+      "key": "world.seed.duration.group.power",
+      "value": "1.5",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a building of the power group."
+    },
+    {
+      "key": "world.seed.duration.group.resource_production",
+      "value": "1.5",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a building of the resource production group."
+    },
+    {
+      "key": "world.seed.duration.group.module_production",
+      "value": "2",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a building of the module production group."
+    },
+    {
+      "key": "world.seed.duration.group.fleet",
+      "value": "2",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a building of the fleet and defence group."
+    },
+    {
+      "key": "world.seed.duration.group.trade",
+      "value": "1.75",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a building of the trade and logistics group."
+    },
+    {
+      "key": "world.seed.duration.branch.branch_1",
+      "value": "1",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a technology of the first branch."
+    },
+    {
+      "key": "world.seed.duration.branch.branch_2",
+      "value": "1.5",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a technology of the second branch."
+    },
+    {
+      "key": "world.seed.duration.branch.branch_3",
+      "value": "1.75",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a technology of the third branch."
+    },
+    {
+      "key": "world.seed.duration.branch.branch_4",
+      "value": "2",
+      "minimum": "0",
+      "maximum": "1000",
+      "description": "Multiplier of the duration of a technology of the fourth branch."
     },
     {
       "key": "world.seed.duration.technology_seconds",
-      "value": "500",
+      "value": "20",
       "minimum": "0",
       "maximum": "1000000000",
-      "description": "Duration of the first level of a seeded technology, in seconds."
-    },
-    {
-      "key": "world.seed.duration.growth",
-      "value": "0.4",
-      "minimum": "0",
-      "maximum": "10",
-      "description": "Fraction added to a seeded duration on every later level."
+      "description": "Duration of the first level of a seeded technology, in seconds; the multiplier of its branch is applied to it."
     },
     {
       "key": "world.seed.duration.batch_seconds",
@@ -415,10 +506,10 @@
     },
     {
       "key": "world.seed.technology.shortening",
-      "value": "0.04",
+      "value": "0.069447",
       "minimum": "0",
       "maximum": "10",
-      "description": "Fraction a technology of time takes off the construction or production time on every level."
+      "description": "Fraction a technology of time takes off the construction or the production time on every level; at the last level of the technology the time is five times shorter."
     },
     {
       "key": "world.seed.part.growth",

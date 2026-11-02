@@ -47,7 +47,7 @@ public sealed class ChosenSeedTests
 
     private const int BuildingCount = 56;
 
-    private const int TechnologyCount = 20;
+    private const int TechnologyCount = 21;
 
     private const int PartCount = 110;
 
@@ -59,7 +59,7 @@ public sealed class ChosenSeedTests
 
     private const int PartGroupCount = 18;
 
-    private const int BranchCount = 2;
+    private const int BranchCount = 4;
 
     private const int StartResourceCount = 3;
 
@@ -81,7 +81,7 @@ public sealed class ChosenSeedTests
 
     private const string DurationBaseKey = "world.seed.duration.base_seconds";
 
-    private const string DurationGrowthKey = "world.seed.duration.growth";
+    private const string DurationCapKey = "world.seed.duration.cap_seconds";
 
     private const string Ukrainian = "uk";
 
@@ -156,21 +156,24 @@ public sealed class ChosenSeedTests
         Assert.NotNull(config.GetRaw(CostBaseKey));
         Assert.NotNull(config.GetRaw(CostGrowthKey));
         Assert.NotNull(config.GetRaw(DurationBaseKey));
-        Assert.NotNull(config.GetRaw(DurationGrowthKey));
+        Assert.NotNull(config.GetRaw(DurationCapKey));
 
         long costBase = config.GetInt64(CostBaseKey);
         double costGrowth = config.GetDouble(CostGrowthKey);
         long durationBase = config.GetInt64(DurationBaseKey);
-        double durationGrowth = config.GetDouble(DurationGrowthKey);
+        long durationCap = config.GetInt64(DurationCapKey);
 
         Assert.Equal(StartBuildingCount, buildingTypes.Count(type => type.IsStartBuilding));
         BuildingTypeEntity startBuilding = buildingTypes.Where(type => type.IsStartBuilding).OrderBy(type => type.Id).First();
         Assert.Contains(startBuilding.LevelIds, level => level.EffectIds.Any(effect => effect.EffectType == BuildingEffectTypes.LevelCap));
-        AssertGrowth(startBuilding, SecondLevel, costBase, costGrowth, durationBase, durationGrowth);
-        AssertGrowth(startBuilding, FourthLevel, costBase, costGrowth, durationBase, durationGrowth);
+        AssertGrowth(startBuilding, SecondLevel, costBase, costGrowth, durationBase, durationCap);
+        AssertGrowth(startBuilding, FourthLevel, costBase, costGrowth, durationBase, durationCap);
 
-        TechnologyEntity firstTechnology = Assert.Single(technologies, technology => technology.SortOrder == technologies.Min(entry => entry.SortOrder));
-        AssertGrowth(firstTechnology, SecondLevel, costBase, costGrowth, durationBase, durationGrowth);
+        // The first technology of every branch: the growth of its levels is the rule of the seed.
+        List<TechnologyEntity> firstTechnologies = [.. technologies.GroupBy(technology => technology.BranchId).Select(group => group.OrderBy(technology => technology.SortOrder).First())];
+
+        Assert.Equal(BranchCount, firstTechnologies.Count);
+        Assert.All(firstTechnologies, technology => AssertGrowth(technology, SecondLevel, costBase, costGrowth, durationBase, durationCap));
 
         Assert.All(buildingTypes.SelectMany(type => type.LevelIds).SelectMany(level => level.CostIds), cost => Assert.True(cost.Amount >= 0));
         Assert.All(buildingTypes.SelectMany(type => type.LevelIds), level => Assert.True(level.DurationSeconds >= 0));
@@ -343,13 +346,14 @@ public sealed class ChosenSeedTests
         long costBase,
         double costGrowth,
         long durationBase,
-        double durationGrowth)
+        long durationCap)
     {
         // The numbers are derived (task 00030): a level costs and takes more than the level before it.
         BuildingLevelEntity levelRow = Assert.Single(buildingType.LevelIds, entry => entry.Level == level);
         BuildingLevelEntity before = Assert.Single(buildingType.LevelIds, entry => entry.Level == level - 1);
         Assert.NotEmpty(levelRow.CostIds);
         Assert.True(levelRow.DurationSeconds > before.DurationSeconds);
+        Assert.All(buildingType.LevelIds, level => Assert.True(level.DurationSeconds <= durationCap));
         Assert.All(
             levelRow.CostIds.Where(cost => before.CostIds.Any(other => other.ResourceTypeId == cost.ResourceTypeId)),
             cost => Assert.True(cost.Amount > before.CostIds.Single(other => other.ResourceTypeId == cost.ResourceTypeId).Amount));
@@ -361,12 +365,13 @@ public sealed class ChosenSeedTests
         long costBase,
         double costGrowth,
         long durationBase,
-        double durationGrowth)
+        long durationCap)
     {
         TechnologyLevelEntity levelRow = Assert.Single(technology.LevelIds, entry => entry.Level == level);
         TechnologyLevelEntity before = Assert.Single(technology.LevelIds, entry => entry.Level == level - 1);
         Assert.NotEmpty(levelRow.CostIds);
         Assert.True(levelRow.DurationSeconds > before.DurationSeconds);
+        Assert.All(technology.LevelIds, level => Assert.True(level.DurationSeconds <= durationCap));
         Assert.All(
             levelRow.CostIds.Where(cost => before.CostIds.Any(other => other.ResourceTypeId == cost.ResourceTypeId)),
             cost => Assert.True(cost.Amount > before.CostIds.Single(other => other.ResourceTypeId == cost.ResourceTypeId).Amount));

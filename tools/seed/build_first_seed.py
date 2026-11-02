@@ -518,6 +518,29 @@ def growth(base: Decimal, factor: Decimal, step: Decimal = Decimal(0), digits: i
     return row
 
 
+def tech_duration_of(parameters: dict[str, Decimal], branch: str, base: Decimal, levels: int, cap: Decimal) -> dict:
+    """The duration of a technology of a branch, by the multiplier of its branch."""
+    multiplier = coefficient(parameters, f"world.seed.duration.branch.{branch}")
+    own_base = base * multiplier
+    return growth(own_base, duration_growth_for(own_base, levels, cap), digits=2)
+
+
+def duration_growth_for(base: Decimal, levels: int, cap: Decimal) -> Decimal:
+    """The growth of the duration of a building, by its base and its levels.
+
+    A type with fewer levels grows faster, so the last level of every type takes
+    about the same time: a mine with twelve levels is built as long as a
+    building with twenty. The growth is the largest one that keeps the last
+    level under the cap, rounded down to a hundredth.
+    """
+    if levels <= 1:
+        return ONE
+
+    exact = (cap / base) ** (Decimal(1) / Decimal(levels - 1))
+    steps = Decimal(100)
+    return (exact * steps).to_integral_value(rounding=ROUND_FLOOR) / steps
+
+
 def curve(base: Decimal, factor: Decimal, index: int) -> Decimal:
     return base * (factor ** index)
 
@@ -567,6 +590,11 @@ def resource_scale(parameters: dict[str, Decimal], name: str) -> Decimal:
 
 def group_multiplier(parameters: dict[str, Decimal], group: str) -> Decimal:
     return coefficient(parameters, f"world.seed.cost.group.{GROUP_MULTIPLIERS[group]}")
+
+
+def duration_group_multiplier(parameters: dict[str, Decimal], group: str) -> Decimal:
+    """The multiplier of the duration of a building of a group, its own number."""
+    return coefficient(parameters, f"world.seed.duration.group.{GROUP_MULTIPLIERS[group]}")
 
 
 def significant(parameters: dict[str, Decimal]) -> int:
@@ -1160,7 +1188,7 @@ def main() -> None:
     cost_base = coefficient(parameters, "world.seed.cost.base")
     cost_growth = coefficient(parameters, "world.seed.cost.growth")
     duration_base = coefficient(parameters, "world.seed.duration.base_seconds")
-    duration_growth = coefficient(parameters, "world.seed.duration.growth")
+    duration_cap = coefficient(parameters, "world.seed.duration.cap_seconds")
     digits = significant(parameters)
     race_bonus = coefficient(parameters, "world.seed.race.bonus")
     cap_base = coefficient(parameters, "world.seed.level_cap.base")
@@ -1170,7 +1198,6 @@ def main() -> None:
     lot_limit_step = coefficient(parameters, "world.seed.market.lot_limit.step")
     cost_factor = ONE + cost_growth
     technology_factor = ONE + coefficient(parameters, "world.seed.cost.technology_growth")
-    duration_factor = ONE + duration_growth
     part_factor = ONE + coefficient(parameters, "world.seed.part.growth")
     bonus_factor = ONE + coefficient(parameters, "world.seed.technology.bonus")
     shortening_factor = ONE + coefficient(parameters, "world.seed.technology.shortening")
@@ -1225,7 +1252,7 @@ def main() -> None:
     science_center = building_code["Науковий центр"]
     converter = building_code["Перетворювач матерії"]
     trade_levels = next(row["maxLevel"] for row in buildings if row["name"] == "Торговий центр")
-    tech_duration = growth(coefficient(parameters, "world.seed.duration.technology_seconds"), duration_factor, digits=digits)
+    tech_base = coefficient(parameters, "world.seed.duration.technology_seconds")
     shortening = growth(ONE / shortening_factor, ONE / shortening_factor)
     bonus = growth(bonus_factor, bonus_factor)
     no_effect = []
@@ -1349,7 +1376,7 @@ def main() -> None:
             "sort_order": len(planet_buildings) + 1,
             "name": text(row["name"], english(BUILDINGS_EN, row["name"], "building")),
             "description": text(f"Будівля групи «{row['group']}».", f"Building of the {dict(BUILDING_GROUPS)[row['group']]} group."),
-            "duration_seconds": growth(duration_base * group_multiplier(parameters, row["group"]), duration_factor, digits=digits),
+            "duration_seconds": growth(duration_base * duration_group_multiplier(parameters, row["group"]), duration_growth_for(duration_base * duration_group_multiplier(parameters, row["group"]), row["maxLevel"], duration_cap), digits=digits),
             "costs": planet_costs(row["tiers"], codes, parameters, row["group"], cost_factor),
             "effects": effects,
             "requirements": requirements,
@@ -1443,7 +1470,7 @@ def main() -> None:
             "research_center_level": row["centerLevels"][0],
             "name": text(row["name"], english(TECHS_EN, row["name"], "technology")),
             "description": text(f"Розвиток групи «{row['group']}».", "Technology of its branch."),
-            "duration_seconds": tech_duration,
+            "duration_seconds": tech_duration_of(parameters, f"branch_{branch}", tech_base, row["maxLevel"], duration_cap),
             "costs": technology_costs(row["tiers"], codes, parameters, technology_factor),
             "effects": effects,
             "requirements": requirements,
@@ -1465,7 +1492,7 @@ def main() -> None:
         "research_center_level": techs[0]["centerLevels"][0],
         "name": text("Перетворення матерії", english(TECHS_EN, "Перетворення матерії", "technology")),
         "description": text("Перетворення однієї речовини на іншу.", "Conversion of one material into another."),
-        "duration_seconds": tech_duration,
+        "duration_seconds": tech_duration_of(parameters, f"branch_{tech_place['Перетворення матерії'][0]}", tech_base, techs[0]["maxLevel"], duration_cap),
         "costs": matter_costs,
         "effects": unlocks[matter_code],
         "requirements": [],

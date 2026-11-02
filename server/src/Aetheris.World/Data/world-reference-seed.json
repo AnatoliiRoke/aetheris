@@ -732,9 +732,9 @@
     {
       "object_type": "object_type_5",
       "code": "rule_group_2",
-      "min_picks": 1,
-      "max_picks": 2,
-      "extra_pick_probability": 0.05,
+      "min_picks": 4,
+      "max_picks": 4,
+      "extra_pick_probability": 0,
       "rules": [
         {
           "resource": "resource_8",
@@ -768,7 +768,8 @@
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         }
-      ]
+      ],
+      "picks_all": true
     },
     {
       "object_type": "object_type_6",
@@ -839,9 +840,9 @@
     {
       "object_type": "object_type_6",
       "code": "rule_group_4",
-      "min_picks": 1,
-      "max_picks": 2,
-      "extra_pick_probability": 0.05,
+      "min_picks": 4,
+      "max_picks": 4,
+      "extra_pick_probability": 0,
       "rules": [
         {
           "resource": "resource_8",
@@ -875,7 +876,8 @@
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         }
-      ]
+      ],
+      "picks_all": true
     },
     {
       "object_type": "object_type_7",
@@ -946,9 +948,9 @@
     {
       "object_type": "object_type_7",
       "code": "rule_group_6",
-      "min_picks": 1,
-      "max_picks": 2,
-      "extra_pick_probability": 0.05,
+      "min_picks": 4,
+      "max_picks": 4,
+      "extra_pick_probability": 0,
       "rules": [
         {
           "resource": "resource_8",
@@ -982,7 +984,8 @@
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         }
-      ]
+      ],
+      "picks_all": true
     },
     {
       "object_type": "object_type_8",
@@ -1053,9 +1056,9 @@
     {
       "object_type": "object_type_8",
       "code": "rule_group_8",
-      "min_picks": 1,
-      "max_picks": 2,
-      "extra_pick_probability": 0.05,
+      "min_picks": 4,
+      "max_picks": 4,
+      "extra_pick_probability": 0,
       "rules": [
         {
           "resource": "resource_8",
@@ -1089,7 +1092,8 @@
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         }
-      ]
+      ],
+      "picks_all": true
     },
     {
       "object_type": "object_type_9",
@@ -1160,9 +1164,9 @@
     {
       "object_type": "object_type_9",
       "code": "rule_group_10",
-      "min_picks": 1,
-      "max_picks": 2,
-      "extra_pick_probability": 0.05,
+      "min_picks": 4,
+      "max_picks": 4,
+      "extra_pick_probability": 0,
       "rules": [
         {
           "resource": "resource_8",
@@ -1196,7 +1200,8 @@
           "rich_coefficient_min": 1.4,
           "rich_coefficient_max": 1.9
         }
-      ]
+      ],
+      "picks_all": true
     },
     {
       "object_type": "object_type_7",
