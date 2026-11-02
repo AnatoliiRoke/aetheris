@@ -16,19 +16,23 @@ public sealed class EconomyTechnologyBonuses : IEconomyTechnologyBonuses
 {
     private readonly ResearchDbContext _dbContext;
     private readonly TechnologyCatalogCache _catalogCache;
+    private readonly PlayerTechnologyLevelsReader _levelsReader;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EconomyTechnologyBonuses"/> class.
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="catalogCache">The cache of the catalog of the technologies.</param>
-    public EconomyTechnologyBonuses(ResearchDbContext dbContext, TechnologyCatalogCache catalogCache)
+    /// <param name="levelsReader">The levels of the technologies of a player, read once for a request.</param>
+    public EconomyTechnologyBonuses(ResearchDbContext dbContext, TechnologyCatalogCache catalogCache, PlayerTechnologyLevelsReader levelsReader)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(catalogCache);
+        ArgumentNullException.ThrowIfNull(levelsReader);
 
         _dbContext = dbContext;
         _catalogCache = catalogCache;
+        _levelsReader = levelsReader;
     }
 
     /// <inheritdoc />
@@ -39,10 +43,7 @@ public sealed class EconomyTechnologyBonuses : IEconomyTechnologyBonuses
             return new EconomyBonuses();
         }
 
-        Dictionary<int, int> levels = await _dbContext.PlayerTechnologies.AsNoTracking()
-            .Where(entry => entry.PlayerId == playerId)
-            .ToDictionaryAsync(entry => entry.TechnologyId, entry => entry.Level, cancellationToken)
-            .ConfigureAwait(false);
+        IReadOnlyDictionary<int, int> levels = await _levelsReader.GetAsync(playerId, cancellationToken).ConfigureAwait(false);
 
         if (levels.Count == 0)
         {

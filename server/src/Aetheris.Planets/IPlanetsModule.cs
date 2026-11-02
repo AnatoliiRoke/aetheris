@@ -38,6 +38,16 @@ public interface IPlanetsModule
     Task<PlanetOverviewDto?> GetPlanetAsync(string playerId, long planetId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the levels of the buildings of a body by type, from one read of the buildings and
+    /// without the rest of the answer about the body (task 00036, section 6.3). The caller has
+    /// checked the owner.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The largest level of a building by its type; a type the body has no building of is not listed.</returns>
+    Task<IReadOnlyDictionary<int, int>> GetPlanetBuildingLevelsAsync(long planetId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Checks the requirements of a closed subject on a body (task 00011, decision 3).
     /// </summary>
     /// <param name="subjectType">The subject type, one of <see cref="RequirementSubjectTypes"/>.</param>
@@ -104,6 +114,19 @@ public interface IPlanetsModule
     /// <returns>The bodies of the player in the order of their identifiers; the level is zero on a body without the building.</returns>
     Task<IReadOnlyList<PlanetBuildingLevel>> GetBuildingLevelsAsync(
         string buildingClass,
+        string playerId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets every body of a player with the level of its building of each of several classes, in
+    /// one read of the bodies and one read of the buildings.
+    /// </summary>
+    /// <param name="buildingClasses">The classes of the buildings, each one of <see cref="BuildingClasses"/>.</param>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bodies of the player in the order of their identifiers, by class; the level is zero on a body without the building.</returns>
+    Task<IReadOnlyDictionary<string, IReadOnlyList<PlanetBuildingLevel>>> GetBuildingLevelsAsync(
+        IReadOnlyCollection<string> buildingClasses,
         string playerId,
         CancellationToken cancellationToken = default);
 

@@ -56,6 +56,7 @@ public sealed class ResearchQueueService
     private readonly IGameConfig _config;
     private readonly IGameClock _clock;
     private readonly IReadOnlyList<ITechnologyUnlockTargets> _unlockTargets;
+    private readonly PlayerTechnologyLevelsReader _levelsReader;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResearchQueueService"/> class.
@@ -71,6 +72,7 @@ public sealed class ResearchQueueService
     /// <param name="config">The game configuration.</param>
     /// <param name="clock">The game clock.</param>
     /// <param name="unlockTargets">The subjects of the other modules a technology may open, for their names.</param>
+    /// <param name="levelsReader">The levels of the technologies of a player, read once for a request.</param>
     public ResearchQueueService(
         ResearchDbContext dbContext,
         ResearchUnitOfWork unitOfWork,
@@ -84,7 +86,8 @@ public sealed class ResearchQueueService
         IEventScheduler scheduler,
         IGameConfig config,
         IGameClock clock,
-        IEnumerable<ITechnologyUnlockTargets> unlockTargets)
+        IEnumerable<ITechnologyUnlockTargets> unlockTargets,
+        PlayerTechnologyLevelsReader levelsReader)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -99,6 +102,7 @@ public sealed class ResearchQueueService
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(unlockTargets);
+        ArgumentNullException.ThrowIfNull(levelsReader);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -113,6 +117,7 @@ public sealed class ResearchQueueService
         _config = config;
         _clock = clock;
         _unlockTargets = [.. unlockTargets];
+        _levelsReader = levelsReader;
     }
 
     /// <summary>
@@ -192,7 +197,7 @@ public sealed class ResearchQueueService
 
                 await StartNextAsync(queue, now, cancellationToken).ConfigureAwait(false);
 
-                return await SnapshotAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+                return await SnapshotAsync(playerId, planetId, null, cancellationToken).ConfigureAwait(false);
             },
             cancellationToken);
     }
@@ -277,7 +282,7 @@ public sealed class ResearchQueueService
                     await StartNextAsync(queue, _clock.GameNow, cancellationToken).ConfigureAwait(false);
                 }
 
-                return await SnapshotAsync(playerId, null, cancellationToken).ConfigureAwait(false);
+                return await SnapshotAsync(playerId, null, null, cancellationToken).ConfigureAwait(false);
             },
             cancellationToken);
     }
@@ -315,9 +320,20 @@ public sealed class ResearchQueueService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        await CompleteDueAsync(playerId, _clock.GameNow, cancellationToken).ConfigureAwait(false);
+        DateTimeOffset now = _clock.GameNow;
+        List<ResearchQueueItemEntity> queue = await LoadQueueAsync(playerId, cancellationToken).ConfigureAwait(false);
+        ResearchQueueItemEntity? head = queue.FirstOrDefault();
 
-        return await SnapshotAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        // The lock of the queue and the completion are taken only when the head of the queue has
+        // finished or has not started; a read of a queue that waits changes nothing, so it needs
+        // neither (task 00036, section 6.3).
+        if (head is not null && (head.FinishesAt is null || head.FinishesAt <= now))
+        {
+            await CompleteDueAsync(playerId, now, cancellationToken).ConfigureAwait(false);
+            queue = await LoadQueueAsync(playerId, cancellationToken).ConfigureAwait(false);
+        }
+
+        return await SnapshotAsync(playerId, planetId, queue, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<int> CompleteDueAsync(
@@ -552,14 +568,15 @@ public sealed class ResearchQueueService
         }
     }
 
-    private async Task<ResearchTreeSnapshot> SnapshotAsync(string playerId, long? planetId, CancellationToken cancellationToken)
+    private async Task<ResearchTreeSnapshot> SnapshotAsync(
+        string playerId,
+        long? planetId,
+        List<ResearchQueueItemEntity>? knownQueue,
+        CancellationToken cancellationToken)
     {
         TechnologyCatalog catalog = await _catalogCache.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
-        List<ResearchQueueItemEntity> queue = await LoadQueueAsync(playerId, cancellationToken).ConfigureAwait(false);
-        IReadOnlyDictionary<int, int> learned = await _dbContext.PlayerTechnologies.AsNoTracking()
-            .Where(entry => entry.PlayerId == playerId)
-            .ToDictionaryAsync(entry => entry.TechnologyId, entry => entry.Level, cancellationToken)
-            .ConfigureAwait(false);
+        List<ResearchQueueItemEntity> queue = knownQueue ?? await LoadQueueAsync(playerId, cancellationToken).ConfigureAwait(false);
+        IReadOnlyDictionary<int, int> learned = await _levelsReader.GetAsync(playerId, cancellationToken).ConfigureAwait(false);
 
         ResearchSettings settings = ResearchSettings.From(_config);
         ResearchQueueStateEntity? state = await _dbContext.ResearchQueueStates.AsNoTracking()

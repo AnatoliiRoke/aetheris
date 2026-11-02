@@ -18,19 +18,23 @@ public sealed class TechnologyLevelsService : ITechnologyLevels
 {
     private readonly ResearchDbContext _dbContext;
     private readonly TechnologyCatalogCache _catalogCache;
+    private readonly PlayerTechnologyLevelsReader _levelsReader;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TechnologyLevelsService"/> class.
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="catalogCache">The catalog of the technologies.</param>
-    public TechnologyLevelsService(ResearchDbContext dbContext, TechnologyCatalogCache catalogCache)
+    /// <param name="levelsReader">The levels of the technologies of a player, read once for a request.</param>
+    public TechnologyLevelsService(ResearchDbContext dbContext, TechnologyCatalogCache catalogCache, PlayerTechnologyLevelsReader levelsReader)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(catalogCache);
+        ArgumentNullException.ThrowIfNull(levelsReader);
 
         _dbContext = dbContext;
         _catalogCache = catalogCache;
+        _levelsReader = levelsReader;
     }
 
     /// <inheritdoc />
@@ -41,10 +45,7 @@ public sealed class TechnologyLevelsService : ITechnologyLevels
             return new Dictionary<int, int>();
         }
 
-        return await _dbContext.PlayerTechnologies.AsNoTracking()
-            .Where(entry => entry.PlayerId == playerId)
-            .ToDictionaryAsync(entry => entry.TechnologyId, entry => entry.Level, cancellationToken)
-            .ConfigureAwait(false);
+        return await _levelsReader.GetAsync(playerId, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

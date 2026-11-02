@@ -1,4 +1,5 @@
 import { serverConfig } from '../config/server';
+import { traceRequestFinished, traceRequestStarted, type RequestOutcome } from '../trace/requestTrace';
 
 /**
  * The error codes the client adds to the server's own codes (documentation/tech/04, section 8).
@@ -30,6 +31,13 @@ export class ApiError extends Error {
  */
 export const csrfHeader = 'X-XSRF-TOKEN';
 export const idempotencyHeader = 'Idempotency-Key';
+
+/**
+ * The trace headers (task 00036): the client names every request, the server writes the name into
+ * every line of its log and answers with its own times.
+ */
+export const requestIdHeader = 'X-Request-Id';
+export const serverTimingHeader = 'Server-Timing';
 
 const csrfPath = '/api/v1/auth/csrf';
 const csrfErrorCode = 'csrf_token_invalid';
@@ -128,7 +136,7 @@ export class HttpClient {
     let response: Response;
 
     try {
-      response = await this.fetchFunction(this.url(path), {
+      response = await this.fetchTraced(method, path, {
         method,
         headers,
         credentials: 'include',
@@ -178,6 +186,33 @@ export class HttpClient {
     return this.refreshing;
   }
 
+  /**
+   * Sends one request to the server with a new `X-Request-Id`. In development it also writes the
+   * one line of the request into the console; the production build drops that branch.
+   */
+  private async fetchTraced(method: string, path: string, init: RequestInit): Promise<Response> {
+    const requestId = crypto.randomUUID();
+    const request = { ...init, headers: { ...(init.headers as Record<string, string>), [requestIdHeader]: requestId } };
+
+    if (!import.meta.env.DEV) {
+      return this.fetchFunction(this.url(path), request);
+    }
+
+    const started = performance.now();
+    const owner = traceRequestStarted();
+    const record = { method, path, requestId };
+
+    try {
+      const response = await this.fetchFunction(this.url(path), request);
+      traceRequestFinished({ ...record, status: response.status, outcome: response.ok ? 'ok' : 'error', clientMs: performance.now() - started, serverTiming: response.headers.get(serverTimingHeader) }, owner);
+      return response;
+    } catch (error) {
+      const outcome: RequestOutcome = error instanceof DOMException && error.name === 'TimeoutError' ? 'timeout' : 'network';
+      traceRequestFinished({ ...record, status: null, outcome, clientMs: performance.now() - started, serverTiming: null }, owner);
+      throw error;
+    }
+  }
+
   private getCsrfToken(): Promise<string> {
     if (!this.csrfToken) {
       this.csrfToken = this.fetchCsrfToken().catch((error: unknown) => {
@@ -193,7 +228,7 @@ export class HttpClient {
     let response: Response;
 
     try {
-      response = await this.fetchFunction(this.url(csrfPath), { credentials: 'include', headers: { Accept: 'application/json' } });
+      response = await this.fetchTraced('GET', csrfPath, { credentials: 'include', headers: { Accept: 'application/json' } });
     } catch {
       throw new ApiError(0, clientErrorCodes.network);
     }

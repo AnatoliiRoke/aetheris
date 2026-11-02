@@ -595,6 +595,95 @@ cd client && npm run lint && npm test && npm run build
 Без `Sentry:Dsn` і без OTLP-колектора сервер запускається без помилок — це зручно для
 локальної розробки.
 
+### Як читати логи й трейси (задача 00036)
+
+**Що пишеться.** Кожен запит лишає один рядок у консолі сервера:
+
+```
+HTTP GET /api/v1/auth/me responded 200 in 4.6 ms | request 27d0c4be..., 118 B, db 1.9 ms in 5 commands
+```
+
+У ньому метод, шлях (без query), статус, повний час, розмір відповіді, `RequestId`, час бази й
+кількість SQL-команд. Запит повільніший за `observability.slow_request_ms` пишеться як
+попередження (`WRN`), помилка 5xx як помилка. Поверх рядка запиту сервер пише:
+
+| Що | Коли | Властивості в логу |
+|---|---|---|
+| Повільна SQL-команда (текст із назвами параметрів `@p0`, **без значень**) | команда довша за `observability.sql.slow_ms` | `SqlMs`, `SqlText`, `RequestId` |
+| Кожна SQL-команда з тривалістю | `observability.sql.verbose` = true | ті самі |
+| Повільна транзакція або збереження | довша за `observability.sql.slow_ms` | `TransactionMs`, `SaveMs`, `SavedRows` |
+| Тіла запиту й відповіді (JSON) | `observability.http_bodies.enabled` = true | `RequestBody`, `ResponseBody`, `RequestHeaders`, `ResponseHeaders` |
+| Етапи запуску (міграції кожного модуля, сид, `EnsureAsync` кожного модуля) | завжди | `StepName`, `StepMs` |
+| Кожна подія планувальника (час, час бази, кількість команд) і підсумок проходу | завжди | `EventId`, `EventType`, `EventMs`, `DbMs`, `DbCommands` |
+
+**Ключі.** Усі пороги й перемикачі лежать у базі, змінюються в адмінці параметрів без
+перезапуску (група `observability.*`):
+
+| Ключ | Типово | Що робить |
+|---|---|---|
+| `observability.http_trace.enabled` | `true` | Головний перемикач: `RequestId`, заголовки `X-Request-Id`, `X-Trace-Id`, `Server-Timing`, облік SQL. Вимкнено: сервер лише викликає наступний обробник |
+| `observability.http_trace.request_id_max_length` | `64` | Найбільша довжина `X-Request-Id` від клієнта; довший або з іншими символами, ніж літери, цифри й `-_.:`, замінюється згенерованим |
+| `observability.http_trace.allowed_headers` | `Content-Type, Content-Length, Accept, Origin, User-Agent, X-Request-Id, Idempotency-Key` | Заголовки, значення яких можна писати в лог; решта (`Cookie`, `Authorization`, `Set-Cookie`, ...) пишуться як `***` |
+| `observability.slow_request_ms` | `1000` | Поріг повільного запиту й події планувальника |
+| `observability.http_bodies.enabled` | `false`, у `Development` `true` | Писати JSON-тіла запитів і відповідей |
+| `observability.http_bodies.max_bytes` | `4096` | Найбільший розмір одного тіла в лозі; решта обрізається з позначкою `...[cut, N bytes]` |
+| `observability.http_bodies.masked_fields` | `password, token, refresh, csrf, email, login, cookie, authorization, secret, key, totp, authenticator` | Частини назв JSON-полів, значення яких маскуються |
+| `observability.http_bodies.excluded_paths` | `/health, /metrics, /hubs, /api/admin/auth` | Шляхи, для яких тіла не пишуться й потік не обгортається |
+| `observability.sql.slow_ms` | `200` | Поріг повільної SQL-команди, транзакції, збереження; `0` пише всі |
+| `observability.sql.verbose` | `false` | Писати кожну SQL-команду |
+| `observability.sql.max_text_length` | `1000` | Найбільша довжина тексту SQL-команди в лозі |
+
+**Як знайти повільний запит за `RequestId`.** Клієнт ставить `X-Request-Id` кожному запиту (у
+режимі розробки пише його в консоль браузера); якщо клієнт не дав, сервер генерує. Той самий
+ідентифікатор лежить у відповіді (`X-Request-Id`), у рядку запиту й у всіх рядках цього запиту
+(SQL, тіла). Шукайте його в консолі сервера (`./dev.sh` пише лог у консоль): рядок запиту покаже,
+скільки з часу склала база (`db ... ms in N commands`); якщо база займає мало, а час великий,
+вузьке місце в коді; якщо `N` велике для одного запиту, це N+1, увімкніть `observability.sql.verbose` і
+подивіться команди з цим `RequestId`. Подія планувальника має ідентифікатор `event-<номер>`.
+`X-Trace-Id` це ідентифікатор `Activity`: за ним запит знаходиться в OTLP-колекторі, якщо він
+підключений.
+
+**Як читати `Server-Timing`.** Заголовок відповіді видно у вкладці Network браузера (розділ
+Timing):
+
+```
+Server-Timing: total;dur=4.6, db;dur=1.9;desc="5 queries"
+```
+
+`total` це час сервера від початку запиту до першого байта відповіді, `db` це сума тривалостей
+SQL-команд цього запиту, `desc` кількість команд. Різниця `total - db` це час коду сервера;
+різниця між часом у браузері й `total` це мережа, черга й клієнт. Для запитів з іншого походження
+(клієнт на `:5173`, сервер на `:5080`) заголовки відкриті через CORS (`Access-Control-Expose-Headers`).
+
+**Рядки консолі браузера (лише `npm run dev`).** Клієнт пише в консоль браузера один рядок на
+кожен запит і одну мітку на кожен перехід на сторінку гри; у production-збірці цього коду немає:
+
+```
+[api] GET /api/v1/planets/1 | 200 | 45 ms | server 31 ms, db 12 ms in 5 queries | id 6805b674-e96a-4439-b8f0-983e690b7cea
+[api] SLOW GET /api/v1/planets/1 | 200 | 1240 ms | server 1198 ms, db 1100 ms in 41 queries | id ...
+[trace] page /planet/build ready in 340 ms (3 requests)
+```
+
+Звичайний запит іде в `console.debug` (у Chrome увімкніть рівень Verbose), а повільний
+(`serverConfig.slowRequestMs` у `client/src/config/server.ts`, типово 1000 мс), помилка, таймаут і
+втрата зв'язку йдуть у `console.warn` зі словом `SLOW`, `ERROR`, `TIMEOUT` або `NETWORK`. Після `id`
+стоїть `RequestId`: знайдіть його в консолі сервера (`RequestId=<значення>`), і побачите рядок
+запиту, SQL-команди та тіла цього ж запиту. `server` і `db` читаються з `Server-Timing`; різниця
+«час у браузері мінус `server`» це мережа й черга. Мітка `[trace] page` рахує від кліку на
+посилання до моменту, коли завершились усі запити, що стартували після переходу; запити, які
+почнуться пізніше, видно окремими рядками `[api]`. Тіла, паролі, токени, `Cookie` і query-рядок
+у консоль не пишуться.
+
+**Тіла лише в `Development` і чому.** Тіла запитів і відповідей можуть містити паролі, токени й
+email. Маскування (поля з ключа `masked_fields`, `SensitiveDataMaskingEnricher` для email і довгих
+токенів) знижує ризик, але не знімає його: значення в довільних полях і тексті відповіді
+маскувати нічим. Тому за замовчуванням тіла вимкнені скрізь, а `appsettings.Development.json`
+вмикає їх лише на машині розробника (`ConfigSeed:Overrides`, діє лише на порожню базу). Лише
+JSON; зображення, файли, SignalR, `/health`, `/metrics` і вхід адміністратора тіла не пишуть, лише
+розмір. Коли тіла вимкнені, потік запиту не обгортається й не буферизується, потік відповіді лише
+лічить байти. Значення SQL-параметрів не пишуться ніколи, у жодному режимі: з команди береться
+текст із назвами параметрів.
+
 
 ---
 

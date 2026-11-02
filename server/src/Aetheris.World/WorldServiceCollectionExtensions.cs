@@ -36,6 +36,7 @@ public static class WorldServiceCollectionExtensions
         services.AddDbContext<WorldDbContext>((serviceProvider, options) =>
             WorldDatabase.Configure(options, serviceProvider.GetRequiredService<IDatabaseSession>().Connection));
 
+        services.AddSingleton<ResourceCatalogCache>();
         services.AddScoped<WorldUnitOfWork>();
         services.AddScoped<WorldReferenceRepository>();
         services.AddScoped<WorldGenerationService>();

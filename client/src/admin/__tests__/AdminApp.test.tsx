@@ -8,6 +8,8 @@ import { renderAdmin } from '../../test/renderAdmin';
 import { adminEn } from '../i18n/en';
 import { adminUk } from '../i18n/uk';
 
+const adminConfigDescription = 'Тривалість, від якої запит пишеться в лог як попередження, у мілісекундах.';
+
 const allPermissions = [
   'admin.me',
   'admin.sign_out',
@@ -272,6 +274,34 @@ describe('AdminApp', () => {
     await user.type(screen.getByPlaceholderText('Чому змінюєте значення'), 'Back');
     await user.click(screen.getByRole('button', { name: 'Повернути «5»' }));
     expect(api.rollbackConfig).toHaveBeenCalledWith(parameter.key, 3, 'Back');
+  });
+
+  it('filters the parameters by the observability group and reads their descriptions', async () => {
+    const user = userEvent.setup();
+    const parameter = {
+      key: 'observability.slow_request_ms',
+      value: '1000',
+      type: 'integer',
+      minimum: '0',
+      maximum: '600000',
+      default_value: '1000',
+      description: 'Slow request limit.',
+      read_only: false,
+      version: 1,
+      updated_by: 'seed',
+      updated_at: '2026-11-02T10:00:00Z',
+    };
+    const table = vi.fn().mockResolvedValue(page<Row>([parameter]));
+    renderAdmin('/admin/config', fakeAdminApi({ table }));
+
+    expect(await screen.findByText(adminConfigDescription)).toBeInTheDocument();
+
+    const group = screen.getByRole('combobox', { name: 'Група' });
+    expect(within(group).getByRole('option', { name: 'Спостережуваність (логи й трейси)' })).toHaveValue('observability');
+
+    await user.selectOptions(group, 'observability');
+
+    await waitFor(() => expect(table).toHaveBeenLastCalledWith('config', expect.objectContaining({ filters: { group: 'observability' } })));
   });
 
   it('keeps a read-only parameter closed', async () => {

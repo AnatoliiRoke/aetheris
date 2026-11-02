@@ -31,6 +31,7 @@ import { useRouter } from './router/useRouter';
 import { SessionProvider } from './session/SessionProvider';
 import { TextsProvider } from './texts/TextsProvider';
 import { useSession } from './session/useSession';
+import { PageTrace } from './trace/PageTrace';
 
 /**
  * The admin panel (task 00007): a separate module, loaded only at `/admin`.
@@ -178,6 +179,7 @@ function PlayerPage({ path }: { path: string }) {
       }
     >
       {framedPaths.has(path) ? <CivShell>{page}</CivShell> : page}
+      {import.meta.env.DEV ? <PageTrace path={path} /> : null}
     </Suspense>
   );
 }

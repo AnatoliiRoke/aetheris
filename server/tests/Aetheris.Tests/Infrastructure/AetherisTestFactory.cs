@@ -5,9 +5,11 @@ using Aetheris.Economy.Data;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
+using Aetheris.Host.Observability;
 using Aetheris.Host.Security;
 using Aetheris.Planets;
 using Aetheris.World;
+using Aetheris.World.Configuration;
 using Aetheris.World.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -63,6 +65,15 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
         // raised as well; the tests of these limits lower them again for themselves.
         [SecurityKeys.LoginIpMaxFailedAttempts] = "100000",
         [SecurityKeys.RegistrationIpLimit] = "100000",
+
+        // The development seed switches the bodies on; the tests that read the bodies in the log
+        // switch them on for themselves, so every other test runs without the capture.
+        [ObservabilityKeys.HttpBodiesEnabled] = "false",
+
+        // The tests change the reference rows of the world directly in the tables, so the catalog of
+        // them is not kept in memory; the cost tests keep it for the default time, as a running
+        // server does.
+        [WorldConfigKeys.CatalogCacheSeconds] = "0",
     };
 
     /// <summary>

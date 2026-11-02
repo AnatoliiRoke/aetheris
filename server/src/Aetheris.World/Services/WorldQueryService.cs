@@ -20,6 +20,7 @@ public sealed class WorldQueryService
     private readonly WorldDbContext _dbContext;
     private readonly IWorldVisibility _visibility;
     private readonly WorldReferenceRepository _reference;
+    private readonly ResourceCatalogCache _resourceCatalog;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WorldQueryService"/> class.
@@ -27,15 +28,22 @@ public sealed class WorldQueryService
     /// <param name="dbContext">The world context.</param>
     /// <param name="visibility">The visibility of the map.</param>
     /// <param name="reference">The parameters.</param>
-    public WorldQueryService(WorldDbContext dbContext, IWorldVisibility visibility, WorldReferenceRepository reference)
+    /// <param name="resourceCatalog">The resource catalog kept in memory.</param>
+    public WorldQueryService(
+        WorldDbContext dbContext,
+        IWorldVisibility visibility,
+        WorldReferenceRepository reference,
+        ResourceCatalogCache resourceCatalog)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(visibility);
         ArgumentNullException.ThrowIfNull(reference);
+        ArgumentNullException.ThrowIfNull(resourceCatalog);
 
         _dbContext = dbContext;
         _visibility = visibility;
         _reference = reference;
+        _resourceCatalog = resourceCatalog;
     }
 
     /// <summary>
@@ -412,69 +420,60 @@ public sealed class WorldQueryService
     /// <returns>The facts, or <see langword="null"/> when the body does not exist.</returns>
     public async Task<PlanetFacts?> GetPlanetFactsAsync(long planetId, CancellationToken cancellationToken)
     {
-        PlanetEntity? planet = await _dbContext.Planets.AsNoTracking()
-            .Include(entry => entry.DepositIds)
-            .SingleOrDefaultAsync(entry => entry.Id == planetId, cancellationToken).ConfigureAwait(false);
+        // The type of the body and its place in the galaxy are facts of the object it is, so
+        // they come from the objects of the world and never from the code of the type
+        // (task 00020). Whether the body may be settled is a column of the table of the types,
+        // so a gas giant is told by its data and never by its code. The screen writes the names
+        // of the sector and the system; each name is a column of that row. One query reads the
+        // body, its object, its type, its names and its deposits (task 00036, section 6.3).
+        var row = await _dbContext.Planets.AsNoTracking()
+            .Where(entry => entry.Id == planetId)
+            .Select(entry => new
+            {
+                entry.Id,
+                entry.SectorId,
+                entry.OwnerPlayerId,
+                entry.Name,
+                entry.IsTerraformed,
+                entry.SystemId,
+                ObjectTypeId = entry.CelestialObject == null ? (int?)null : entry.CelestialObject.ObjectTypeId,
+                Orbit = entry.CelestialObject == null ? null : entry.CelestialObject.Orbit,
+                IsColonizable = _dbContext.ObjectTypes
+                    .Where(type => entry.CelestialObject != null && type.Id == entry.CelestialObject.ObjectTypeId)
+                    .Select(type => type.IsColonizable)
+                    .FirstOrDefault(),
+                SystemName = _dbContext.Systems
+                    .Where(system => system.Id == entry.SystemId)
+                    .Select(system => system.Name)
+                    .FirstOrDefault(),
+                SectorName = _dbContext.Sectors
+                    .Where(sector => sector.Id == entry.SectorId)
+                    .Select(sector => sector.Name)
+                    .FirstOrDefault(),
+                Deposits = entry.DepositIds
+                    .Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))
+                    .ToList(),
+            })
+            .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
-        if (planet is null)
+        if (row is null)
         {
             return null;
         }
 
-        // The type of the body and its place in the galaxy are facts of the object it is, so
-        // they come from the objects of the world and never from the code of the type
-        // (task 00020).
-        CelestialObjectEntity? celestial = await _dbContext.Objects.AsNoTracking()
-            .SingleOrDefaultAsync(entry => entry.Id == planet.CelestialObjectId, cancellationToken)
-            .ConfigureAwait(false);
-
-        // Whether the body may be settled is a fact of the type of the body, a column of the
-        // table of the types, so a gas giant is told by its data and never by its code.
-        bool isColonizable = celestial is null
-            ? false
-            : await _dbContext.ObjectTypes.AsNoTracking()
-                .Where(type => type.Id == celestial.ObjectTypeId)
-                .Select(type => type.IsColonizable)
-                .SingleOrDefaultAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-        // The screen writes the names of the sector and the system. Each name is a column of
-        // that row, never a name taken from a mock-up. A row without a name leaves the field
-        // empty and the client shows the identifier.
-        string? systemName = await _dbContext.Systems.AsNoTracking()
-            .Where(system => system.Id == planet.SystemId)
-            .Select(system => system.Name)
-            .SingleOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false);
-        string? sectorName = await _dbContext.Sectors.AsNoTracking()
-            .Where(sector => sector.Id == planet.SectorId)
-            .Select(sector => sector.Name)
-            .SingleOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        if (string.IsNullOrWhiteSpace(systemName))
-        {
-            systemName = null;
-        }
-
-        if (string.IsNullOrWhiteSpace(sectorName))
-        {
-            sectorName = null;
-        }
-
         return new PlanetFacts(
-            planet.Id,
-            planet.SectorId,
-            planet.OwnerPlayerId,
-            planet.Name,
-            [.. planet.DepositIds.Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))],
-            planet.IsTerraformed,
-            isColonizable,
-            celestial?.ObjectTypeId ?? 0,
-            planet.SystemId,
-            celestial?.Orbit,
-            systemName,
-            sectorName);
+            row.Id,
+            row.SectorId,
+            row.OwnerPlayerId,
+            row.Name,
+            row.Deposits,
+            row.IsTerraformed,
+            row.IsColonizable,
+            row.ObjectTypeId ?? 0,
+            row.SystemId,
+            row.Orbit,
+            string.IsNullOrWhiteSpace(row.SystemName) ? null : row.SystemName,
+            string.IsNullOrWhiteSpace(row.SectorName) ? null : row.SectorName);
     }
 
     /// <summary>
@@ -508,67 +507,53 @@ public sealed class WorldQueryService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        List<PlanetEntity> bodies = await _dbContext.Planets.AsNoTracking()
-            .Include(planet => planet.DepositIds)
+        // The type of a body is a column of the object it is, so the types come from the
+        // objects of the bodies and never from the code of the type. One query reads the
+        // bodies with their objects, their names and their deposits (task 00036, section 6.3).
+        var rows = await _dbContext.Planets.AsNoTracking()
             .Where(planet => planet.OwnerPlayerId == playerId)
             .OrderBy(planet => planet.Id)
+            .Select(planet => new
+            {
+                planet.Id,
+                planet.Name,
+                planet.CelestialObject!.ObjectTypeId,
+                planet.SectorId,
+                planet.SystemId,
+                planet.CelestialObject.Orbit,
+                planet.SizeClassId,
+                planet.Size,
+                planet.IsTerraformed,
+                SystemName = _dbContext.Systems
+                    .Where(system => system.Id == planet.SystemId)
+                    .Select(system => system.Name)
+                    .FirstOrDefault(),
+                SectorName = _dbContext.Sectors
+                    .Where(sector => sector.Id == planet.SectorId)
+                    .Select(sector => sector.Name)
+                    .FirstOrDefault(),
+                Deposits = planet.DepositIds
+                    .OrderBy(deposit => deposit.ResourceId)
+                    .Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))
+                    .ToList(),
+            })
             .ToListAsync(cancellationToken).ConfigureAwait(false);
-
-        if (bodies.Count == 0)
-        {
-            return [];
-        }
-
-        // The type of a body is a column of the object it is, so the types come from the
-        // objects of the bodies and never from the code of the type.
-        Dictionary<long, CelestialObjectEntity> objects = await _dbContext.Objects.AsNoTracking()
-            .Where(entry => bodies.Select(planet => planet.CelestialObjectId).Contains(entry.Id))
-            .ToDictionaryAsync(entry => entry.Id, cancellationToken)
-            .ConfigureAwait(false);
-
-        long[] systemIds = [.. bodies.Select(body => body.SystemId).Distinct()];
-        Dictionary<long, string> systemNames = await _dbContext.Systems.AsNoTracking()
-            .Where(system => systemIds.Contains(system.Id))
-            .ToDictionaryAsync(system => system.Id, system => system.Name, cancellationToken)
-            .ConfigureAwait(false);
-        int[] sectorIds = [.. bodies.Select(body => body.SectorId).Distinct()];
-        Dictionary<int, string> sectorNames = await _dbContext.Sectors.AsNoTracking()
-            .Where(sector => sectorIds.Contains(sector.Id))
-            .ToDictionaryAsync(sector => sector.Id, sector => sector.Name, cancellationToken)
-            .ConfigureAwait(false);
 
         return
         [
-            .. bodies.Select(body =>
-            {
-                CelestialObjectEntity celestial = objects[body.CelestialObjectId];
-                string? systemName = systemNames.GetValueOrDefault(body.SystemId);
-                string? sectorName = sectorNames.GetValueOrDefault(body.SectorId);
-
-                if (string.IsNullOrWhiteSpace(systemName))
-                {
-                    systemName = null;
-                }
-
-                if (string.IsNullOrWhiteSpace(sectorName))
-                {
-                    sectorName = null;
-                }
-
-                return new OwnedPlanetDto(
-                    body.Id,
-                    body.Name,
-                    celestial.ObjectTypeId,
-                    body.SectorId,
-                    body.SystemId,
-                    celestial.Orbit,
-                    body.SizeClassId,
-                    body.Size,
-                    body.IsTerraformed,
-                    [.. body.DepositIds.OrderBy(deposit => deposit.ResourceId).Select(deposit => new PlanetDepositFact(deposit.ResourceId, deposit.Coefficient))],
-                    systemName,
-                    sectorName);
-            })
+            .. rows.Select(row => new OwnedPlanetDto(
+                row.Id,
+                row.Name,
+                row.ObjectTypeId,
+                row.SectorId,
+                row.SystemId,
+                row.Orbit,
+                row.SizeClassId,
+                row.Size,
+                row.IsTerraformed,
+                row.Deposits,
+                string.IsNullOrWhiteSpace(row.SystemName) ? null : row.SystemName,
+                string.IsNullOrWhiteSpace(row.SectorName) ? null : row.SectorName))
         ];
     }
 
@@ -577,18 +562,6 @@ public sealed class WorldQueryService
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The catalog.</returns>
-    public async Task<ResourceCatalog> GetResourceCatalogAsync(CancellationToken cancellationToken)
-    {
-        List<ResourceGroupFact> groups = await _dbContext.ResourceGroups.AsNoTracking()
-            .OrderBy(group => group.Id)
-            .Select(group => new ResourceGroupFact(group.Id, group.Code, group.NameKey, group.IsArchived))
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-
-        List<ResourceTypeFact> resources = await _dbContext.ResourceTypes.AsNoTracking()
-            .OrderBy(resource => resource.Id)
-            .Select(resource => new ResourceTypeFact(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId, resource.IsArchived, resource.Scope, resource.EarnsPopulationIncome, resource.Weight, resource.AllowsDebt))
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-
-        return new ResourceCatalog(groups, resources);
-    }
+    public Task<ResourceCatalog> GetResourceCatalogAsync(CancellationToken cancellationToken) =>
+        _resourceCatalog.GetAsync(_dbContext, cancellationToken);
 }

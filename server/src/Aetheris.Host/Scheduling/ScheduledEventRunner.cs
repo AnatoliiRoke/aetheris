@@ -1,10 +1,13 @@
+using System.Diagnostics;
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Scheduling;
 using Aetheris.Core.Time;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
+using Aetheris.Host.Observability;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Serilog.Context;
 
 namespace Aetheris.Host.Scheduling;
 
@@ -23,6 +26,7 @@ public sealed class ScheduledEventRunner
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IGameClock _clock;
     private readonly IGameConfig _config;
+    private readonly ObservabilitySettings _observability;
     private readonly ILogger<ScheduledEventRunner> _logger;
 
     /// <summary>
@@ -31,21 +35,25 @@ public sealed class ScheduledEventRunner
     /// <param name="scopeFactory">Creates a scope for every event.</param>
     /// <param name="clock">The game clock.</param>
     /// <param name="config">The configuration with the batch size.</param>
+    /// <param name="observability">The parameters of the tracing, for the timing of the events.</param>
     /// <param name="logger">The logger.</param>
     public ScheduledEventRunner(
         IServiceScopeFactory scopeFactory,
         IGameClock clock,
         IGameConfig config,
+        ObservabilitySettings observability,
         ILogger<ScheduledEventRunner> logger)
     {
         ArgumentNullException.ThrowIfNull(scopeFactory);
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(config);
+        ArgumentNullException.ThrowIfNull(observability);
         ArgumentNullException.ThrowIfNull(logger);
 
         _scopeFactory = scopeFactory;
         _clock = clock;
         _config = config;
+        _observability = observability;
         _logger = logger;
     }
 
@@ -56,6 +64,7 @@ public sealed class ScheduledEventRunner
     /// <returns>The number of events that were applied.</returns>
     public async Task<int> RunDueEventsAsync(CancellationToken cancellationToken = default)
     {
+        long passTimestamp = Stopwatch.GetTimestamp();
         DateTimeOffset gameNow = _clock.GameNow;
         int batchSize = (int)Math.Max(1, _config.GetInt64(SchedulerKeys.BatchSize, 1));
 
@@ -87,10 +96,51 @@ public sealed class ScheduledEventRunner
             }
         }
 
+        // An empty pass is the common case and is not written, so the log is not filled every
+        // few seconds.
+        if (dueIds.Count > 0 && _observability.Current.TraceEnabled)
+        {
+            _logger.LogInformation(
+                "Scheduler pass: {DueEvents} due, {AppliedEvents} applied in {PassMs:0.0} ms.",
+                dueIds.Count,
+                applied,
+                Stopwatch.GetElapsedTime(passTimestamp).TotalMilliseconds);
+        }
+
         return applied;
     }
 
     private async Task<bool> RunOneAsync(long id, CancellationToken cancellationToken)
+    {
+        // Every event is a unit of work of its own: its identifier ties its log lines together
+        // and its SQL commands are counted like those of a request (task 00036).
+        ObservabilitySnapshot observability = _observability.Current;
+        RequestTrace? trace = observability.TraceEnabled ? new RequestTrace("event-" + id.ToString(System.Globalization.CultureInfo.InvariantCulture)) : null;
+        long eventTimestamp = Stopwatch.GetTimestamp();
+
+        using IDisposable? traceScope = trace?.Begin();
+        using IDisposable? logScope = trace is null ? null : LogContext.PushProperty("RequestId", trace.RequestId);
+
+        (bool handled, string? eventType) = await RunOneCoreAsync(id, cancellationToken).ConfigureAwait(false);
+
+        if (handled && trace is not null)
+        {
+            double eventMilliseconds = Stopwatch.GetElapsedTime(eventTimestamp).TotalMilliseconds;
+
+            _logger.Log(
+                eventMilliseconds >= observability.SlowRequestMilliseconds ? LogLevel.Warning : LogLevel.Information,
+                "Scheduled event {EventId} of type {EventType} handled in {EventMs:0.0} ms, db {DbMs:0.0} ms in {DbCommands} commands.",
+                id,
+                eventType,
+                eventMilliseconds,
+                trace.DatabaseMilliseconds,
+                trace.Commands);
+        }
+
+        return handled;
+    }
+
+    private async Task<(bool Handled, string? EventType)> RunOneCoreAsync(long id, CancellationToken cancellationToken)
     {
         await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
         IServiceProvider services = scope.ServiceProvider;
@@ -111,7 +161,7 @@ public sealed class ScheduledEventRunner
 
             if (scheduled is null)
             {
-                return false;
+                return (false, null);
             }
 
             IScheduledEventHandler? handler = services.GetServices<IScheduledEventHandler>()
@@ -132,7 +182,7 @@ public sealed class ScheduledEventRunner
                 await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
-                return true;
+                return (true, scheduled.Type);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -148,6 +198,6 @@ public sealed class ScheduledEventRunner
             .ExecuteUpdateAsync(setters => setters.SetProperty(entry => entry.Status, ScheduledEventStatus.Failed), cancellationToken)
             .ConfigureAwait(false);
 
-        return false;
+        return (false, null);
     }
 }

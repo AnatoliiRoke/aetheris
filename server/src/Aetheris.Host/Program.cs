@@ -212,6 +212,11 @@ builder.Services.AddEconomyModule();
 builder.Services.AddScoped<Aetheris.Core.Players.IPlayerDirectory, Aetheris.Host.Data.IdentityPlayerDirectory>();
 builder.Services.AddMarketModule();
 
+// The tracing of the requests and the measuring of the SQL commands of every database context
+// (task 00036). It comes after the modules, because it finds their contexts. The settings are
+// read from the configuration, so they change without a restart.
+builder.Services.AddAetherisObservability();
+
 WebApplication app = builder.Build();
 
 // ---------------------------------------------------------------------------------------------
@@ -232,49 +237,52 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 
     AetherisDbContext mainContext = scope.ServiceProvider.GetRequiredService<AetherisDbContext>();
 
-    if (migrationConnectionString is null)
+    await StartupTimer.RunAsync(startupLogger, "migrations:main", async () =>
     {
-        await mainContext.Database.MigrateAsync().ConfigureAwait(false);
-    }
-    else
-    {
-        DbContextOptionsBuilder<AetherisDbContext> migrationOptions = new();
-        AetherisDbContextSetup.Configure(migrationOptions, migrationConnectionString);
+        if (migrationConnectionString is null)
+        {
+            await mainContext.Database.MigrateAsync().ConfigureAwait(false);
+        }
+        else
+        {
+            DbContextOptionsBuilder<AetherisDbContext> migrationOptions = new();
+            AetherisDbContextSetup.Configure(migrationOptions, migrationConnectionString);
 
-        await using AetherisDbContext migrationContext = new(migrationOptions.Options);
-        await migrationContext.Database.MigrateAsync().ConfigureAwait(false);
-    }
+            await using AetherisDbContext migrationContext = new(migrationOptions.Options);
+            await migrationContext.Database.MigrateAsync().ConfigureAwait(false);
+        }
+    }).ConfigureAwait(false);
 
     // Every module with its own tables applies its migrations the same way.
-    await WorldDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
-    await PlanetsModule.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
-    await RequirementsDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
-    await ResearchDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
-    await ProductionDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
-    await ProcessesDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
-    await EconomyDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
-    await MarketDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(WorldDatabase), () => WorldDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(PlanetsModule), () => PlanetsModule.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(RequirementsDatabase), () => RequirementsDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(ResearchDatabase), () => ResearchDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(ProductionDatabase), () => ProductionDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(ProcessesDatabase), () => ProcessesDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(EconomyDatabase), () => EconomyDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(MarketDatabase), () => MarketDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
 
     // The configuration parameters are seeded after the migrations. The seed never overwrites an
     // existing value, so a database that was filled by hand keeps its settings.
     ConfigSeedService seedService = scope.ServiceProvider.GetRequiredService<ConfigSeedService>();
-    await seedService.SeedAsync().ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "seed:config", () => seedService.SeedAsync()).ConfigureAwait(false);
 
     // The protection limits are read from the configuration, so it is loaded before the
     // first request instead of waiting for the background reload.
-    await scope.ServiceProvider.GetRequiredService<ConfigReloader>().ReloadAsync().ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "config:reload", () => scope.ServiceProvider.GetRequiredService<ConfigReloader>().ReloadAsync()).ConfigureAwait(false);
 
     // A generation run of the admin panel that was running when the server stopped is marked
     // failed, so the next run is not blocked (task 00007, decision 3).
-    await scope.ServiceProvider.GetRequiredService<IWorldModule>().FailInterruptedGenerationRunsAsync().ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "fail_interrupted_runs:" + nameof(IWorldModule), () => scope.ServiceProvider.GetRequiredService<IWorldModule>().FailInterruptedGenerationRunsAsync()).ConfigureAwait(false);
 
     // The first start creates the galaxy and its initial sectors; a later start finds them
     // and changes nothing (task 00004, section 2.6).
     if (app.Configuration.GetValue(WorldStartup.GenerateOnStartupKey, true))
     {
-        WorldBootstrapResult world = await scope.ServiceProvider.GetRequiredService<IWorldModule>().EnsureWorldAsync().ConfigureAwait(false);
+        WorldBootstrapResult world = await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IWorldModule), () => scope.ServiceProvider.GetRequiredService<IWorldModule>().EnsureWorldAsync()).ConfigureAwait(false);
 
         startupLogger.LogInformation(
             "World ready: galaxy created {GalaxyCreated}, new sectors {Sectors}.",
@@ -283,28 +291,28 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 
         // The Planets module fills its tables once the world has its reference data, and adopts
         // the civilizations created before it (task 00011).
-        await scope.ServiceProvider.GetRequiredService<IPlanetsModule>().EnsureAsync().ConfigureAwait(false);
+        await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IPlanetsModule), () => scope.ServiceProvider.GetRequiredService<IPlanetsModule>().EnsureAsync()).ConfigureAwait(false);
 
         // The Research module fills its tables once the bodies module has its own reference
         // data, because a research starts on a body (task 00012).
-        await scope.ServiceProvider.GetRequiredService<IResearchModule>().EnsureAsync().ConfigureAwait(false);
+        await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IResearchModule), () => scope.ServiceProvider.GetRequiredService<IResearchModule>().EnsureAsync()).ConfigureAwait(false);
 
         // The Production module fills its tables once the bodies and the research modules have
         // their own reference data, because a factory stands on a body (task 00013).
-        await scope.ServiceProvider.GetRequiredService<IProductionModule>().EnsureAsync().ConfigureAwait(false);
+        await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IProductionModule), () => scope.ServiceProvider.GetRequiredService<IProductionModule>().EnsureAsync()).ConfigureAwait(false);
 
         // The Processes module fills its tables once the bodies, the research and the production
         // modules have their own reference data, because a process runs on a body and works with
         // the parts (task 00014).
-        await scope.ServiceProvider.GetRequiredService<IProcessesModule>().EnsureAsync().ConfigureAwait(false);
+        await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IProcessesModule), () => scope.ServiceProvider.GetRequiredService<IProcessesModule>().EnsureAsync()).ConfigureAwait(false);
 
         // The Economy module fills its tables once the bodies, the research and the world modules
         // have their own reference data, because the numbers of the game live in them (task 00015).
-        await scope.ServiceProvider.GetRequiredService<IEconomyModule>().EnsureAsync().ConfigureAwait(false);
+        await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IEconomyModule), () => scope.ServiceProvider.GetRequiredService<IEconomyModule>().EnsureAsync()).ConfigureAwait(false);
 
         // The Market module fills its levels of the market once the bodies, the production and the
         // economy modules have their own reference data, because a lot reads them (task 00024).
-        await scope.ServiceProvider.GetRequiredService<IMarketModule>().EnsureAsync().ConfigureAwait(false);
+        await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IMarketModule), () => scope.ServiceProvider.GetRequiredService<IMarketModule>().EnsureAsync()).ConfigureAwait(false);
     }
 }
 
@@ -313,7 +321,9 @@ if (AdminCommandLine.IsCommand(args))
     return await AdminCommandLine.RunAsync(app.Services, args).ConfigureAwait(false);
 }
 
-app.UseSerilogRequestLogging();
+// The tracing stands before the protection pipeline, so the rejected requests are traced too
+// (task 00036).
+app.UseAetherisRequestTrace();
 app.UseAetherisSecurity();
 
 // Prometheus scraping endpoint. The metrics are collected by OpenTelemetry, this only

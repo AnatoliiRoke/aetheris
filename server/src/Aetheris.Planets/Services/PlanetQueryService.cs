@@ -90,23 +90,22 @@ public sealed class PlanetQueryService
 
         DateTimeOffset now = _clock.GameNow;
 
-        bool due = await _dbContext.QueueItems.AsNoTracking()
-            .AnyAsync(item => item.PlanetId == planetId && item.FinishesAt != null && item.FinishesAt <= now, cancellationToken)
-            .ConfigureAwait(false);
+        // The queue is read with the body, so a construction that is due is told by the same rows
+        // and no separate question is asked (task 00036, section 6.3).
+        PlanetRead? read = await _construction.ReadWithPopulationAsync(planetId, now, facts, cancellationToken).ConfigureAwait(false);
 
-        if (due)
+        if (read is { HasDueConstruction: true })
         {
             await _construction.CompleteDueAsync(planetId, now, cancellationToken).ConfigureAwait(false);
+            read = await _construction.ReadWithPopulationAsync(planetId, now, facts, cancellationToken).ConfigureAwait(false);
         }
 
-        PlanetOverviewDto? overview = await _construction.ReadAsync(planetId, now, cancellationToken).ConfigureAwait(false);
-
-        if (overview is null)
+        if (read is null)
         {
             return null;
         }
 
-        return await EnrichAsync(playerId, planetId, facts, overview, cancellationToken).ConfigureAwait(false);
+        return Enrich(facts, read.Overview, read.Population);
     }
 
     /// <summary>
@@ -129,30 +128,26 @@ public sealed class PlanetQueryService
             return overview;
         }
 
-        return await EnrichAsync(ownerPlayerId, planetId, facts, overview, cancellationToken).ConfigureAwait(false);
+        // The population belongs to the economy module; a body without a population yet has
+        // none, and the client shows a placeholder instead of a made-up number.
+        PopulationFacts? population = await _economy.GetPopulationAsync(ownerPlayerId, planetId, cancellationToken).ConfigureAwait(false);
+
+        return Enrich(facts, overview, population);
     }
 
     /// <summary>
     /// Adds to the answer of a body the facts that the other modules own: the name and the
     /// place of the body from the world, the population from the economy (task 00020).
     /// </summary>
-    /// <param name="playerId">The player.</param>
-    /// <param name="planetId">The body.</param>
     /// <param name="facts">The facts of the body from the world.</param>
     /// <param name="overview">The answer of the bodies module.</param>
-    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <param name="population">The population of the body from the economy.</param>
     /// <returns>The answer with the facts of the other modules.</returns>
-    private async Task<PlanetOverviewDto> EnrichAsync(
-        string playerId,
-        long planetId,
+    private static PlanetOverviewDto Enrich(
         PlanetFacts facts,
         PlanetOverviewDto overview,
-        CancellationToken cancellationToken)
+        PopulationFacts? population)
     {
-        // The population belongs to the economy module; a body without a population yet has
-        // none, and the client shows a placeholder instead of a made-up number.
-        PopulationFacts? population = await _economy.GetPopulationAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
-
         return overview with
         {
             Name = facts.Name,
@@ -240,6 +235,25 @@ public sealed class PlanetQueryService
         IReadOnlyDictionary<int, string> technologyNameKeys = await _technologies.GetTechnologyNameKeysAsync(cancellationToken).ConfigureAwait(false);
 
         return new AvailabilityDto(unmet.Count == 0, PlanetOverviewBuilder.Requirements(catalog, unmet, technologyNameKeys: technologyNameKeys));
+    }
+
+    /// <summary>
+    /// Gets the levels of the buildings of a body by type.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The largest level of a building by its type.</returns>
+    public async Task<IReadOnlyDictionary<int, int>> GetPlanetBuildingLevelsAsync(long planetId, CancellationToken cancellationToken)
+    {
+        var rows = await _dbContext.PlanetBuildings.AsNoTracking()
+            .Where(building => building.PlanetId == planetId)
+            .Select(building => new { building.BuildingTypeId, building.Level })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return rows
+            .GroupBy(building => building.BuildingTypeId)
+            .ToDictionary(group => group.Key, group => group.Max(building => building.Level));
     }
 
     /// <summary>
@@ -334,10 +348,30 @@ public sealed class PlanetQueryService
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(buildingClass);
+
+        return (await GetBuildingLevelsAsync([buildingClass], playerId, cancellationToken).ConfigureAwait(false))[buildingClass];
+    }
+
+    /// <summary>
+    /// Gets every body of a player with the level of its building of each of several classes, from
+    /// one read of the bodies and one read of the buildings (task 00036, section 6.3).
+    /// </summary>
+    /// <param name="buildingClasses">The classes of the buildings, each one of <see cref="BuildingClasses"/>.</param>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bodies of the player in the order of their identifiers, by class.</returns>
+    public async Task<IReadOnlyDictionary<string, IReadOnlyList<PlanetBuildingLevel>>> GetBuildingLevelsAsync(
+        IReadOnlyCollection<string> buildingClasses,
+        string playerId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(buildingClasses);
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
         BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
-        int? buildingTypeId = catalog.FindByClass(buildingClass)?.Id;
+        Dictionary<string, int?> typeIdByClass = buildingClasses
+            .Distinct(StringComparer.Ordinal)
+            .ToDictionary(buildingClass => buildingClass, buildingClass => catalog.FindByClass(buildingClass)?.Id, StringComparer.Ordinal);
 
         // The bodies the state rows of the module list, confirmed by the owner the world names:
         // one query of the owned bodies of the world replaces the facts of every body.
@@ -347,20 +381,31 @@ public sealed class PlanetQueryService
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false)];
         IReadOnlyList<OwnedPlanet> owned = await _world.GetOwnedPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false);
-        List<long> planetIds = [.. owned.Where(planet => stateIds.Contains(planet.PlanetId)).Select(planet => planet.PlanetId)];
+        List<OwnedPlanet> colonies = [.. owned.Where(planet => stateIds.Contains(planet.PlanetId))];
+        List<long> planetIds = [.. colonies.Select(planet => planet.PlanetId)];
+        List<int> typeIds = [.. typeIdByClass.Values.Where(typeId => typeId is not null).Select(typeId => typeId!.Value).Distinct()];
 
-        Dictionary<long, int> levels = buildingTypeId is null || planetIds.Count == 0
+        var rows = typeIds.Count == 0 || planetIds.Count == 0
             ? []
             : await _dbContext.PlanetBuildings.AsNoTracking()
-                .Where(building => planetIds.Contains(building.PlanetId) && building.BuildingTypeId == buildingTypeId)
-                .ToDictionaryAsync(building => building.PlanetId, building => building.Level, cancellationToken)
+                .Where(building => planetIds.Contains(building.PlanetId) && typeIds.Contains(building.BuildingTypeId))
+                .Select(building => new { building.PlanetId, building.BuildingTypeId, building.Level })
+                .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-        List<PlanetBuildingLevel> planets = [.. owned
-            .Where(planet => stateIds.Contains(planet.PlanetId))
-            .Select(planet => new PlanetBuildingLevel(planet.PlanetId, planet.Name, levels.GetValueOrDefault(planet.PlanetId)))];
+        Dictionary<string, IReadOnlyList<PlanetBuildingLevel>> result = new(StringComparer.Ordinal);
 
-        return planets;
+        foreach ((string buildingClass, int? typeId) in typeIdByClass)
+        {
+            Dictionary<long, int> levels = rows
+                .Where(row => row.BuildingTypeId == typeId)
+                .GroupBy(row => row.PlanetId)
+                .ToDictionary(group => group.Key, group => group.Last().Level);
+
+            result[buildingClass] = [.. colonies.Select(planet => new PlanetBuildingLevel(planet.PlanetId, planet.Name, levels.GetValueOrDefault(planet.PlanetId)))];
+        }
+
+        return result;
     }
 
     /// <summary>

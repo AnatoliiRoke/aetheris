@@ -1,4 +1,5 @@
 using Aetheris.Core.Errors;
+using Aetheris.Economy.Api;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Data;
@@ -88,6 +89,11 @@ public sealed class PlanetSession
     /// Gets or sets the inhabitants of the body now. A building pays its population cost from them.
     /// </summary>
     public long Population { get; set; }
+
+    /// <summary>
+    /// Gets or sets the population of the body as the economy counted it, when the session read it.
+    /// </summary>
+    public PopulationFacts? PopulationFacts { get; set; }
 
     /// <summary>
     /// Gets or sets the resource that is paid from <see cref="Population"/>.

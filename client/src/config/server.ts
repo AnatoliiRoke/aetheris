@@ -26,4 +26,11 @@ export const serverConfig = {
    * last attempt the read waits for an event of the page or for the button "retry".
    */
   retryDelaysMs: [2_000, 5_000, 10_000, 20_000],
+
+  /**
+   * The time from which a request is written into the console of the browser as a warning and
+   * not as an ordinary line, in development only (task 00036). It is the client's own limit: the
+   * server has its own, `observability.slow_request_ms` in the parameters of the admin panel.
+   */
+  slowRequestMs: 1_000,
 } as const;

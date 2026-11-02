@@ -7,6 +7,11 @@ import type { AdminMessageKey } from '../i18n/uk';
 import { formatMoment, useAdminText, useConfigDescription } from '../i18n/useAdminText';
 
 /**
+ * The groups of the parameters: the first part of the key, which the server filters by.
+ */
+const configGroups = ['admin', 'security', 'scheduler', 'world', 'observability', 'test'] as const;
+
+/**
  * The configuration parameters (task 00007, decision 7): the table with the search, the
  * change in the row with a mandatory reason, the history and the rollback. The server checks
  * the type and the bounds; a change works at once, without a restart. The dangerous
@@ -34,7 +39,7 @@ export function ConfigScreen() {
     {
       name: 'group',
       label: 'admin.config.group',
-      options: ['admin', 'security', 'scheduler', 'world', 'test'].map((group) => ({ value: group, label: group })),
+      options: configGroups.map((group) => ({ value: group, label: t(`admin.config.group.${group}`) })),
     },
     {
       name: 'read_only',

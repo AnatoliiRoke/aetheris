@@ -166,6 +166,9 @@ public sealed record WorldSettings
     /// <summary>Gets how often the admin panel asks for the status of a running generation.</summary>
     public int StatusPollSeconds { get; init; }
 
+    /// <summary>Gets how long the resource catalog and the races stay in memory.</summary>
+    public TimeSpan CatalogCacheDuration { get; init; }
+
     /// <summary>Gets the name templates.</summary>
     public WorldNameTemplates Names { get; init; } = new(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
 
@@ -231,6 +234,7 @@ public sealed record WorldSettings
             MaxSectorsPerRun = ReadInt32(config, WorldConfigKeys.MaxSectorsPerRun),
             MaxSystemsPerRun = ReadInt32(config, WorldConfigKeys.MaxSystemsPerRun),
             StatusPollSeconds = ReadInt32(config, WorldConfigKeys.StatusPollSeconds),
+            CatalogCacheDuration = TimeSpan.FromSeconds(ReadInt64(config, WorldConfigKeys.CatalogCacheSeconds)),
             Names = new WorldNameTemplates(
                 ReadText(config, WorldConfigKeys.SectorNameTemplate),
                 ReadText(config, WorldConfigKeys.SystemNameTemplate),

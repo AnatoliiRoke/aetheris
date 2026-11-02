@@ -17,6 +17,12 @@ public sealed class SecurityHeadersMiddleware
     public const string ContentSecurityPolicy =
         "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
 
+    /// <summary>
+    /// The key in <see cref="HttpContext.Items"/> under which an endpoint names the cache policy of
+    /// its answer, instead of the <c>no-store</c> of the other answers of the API.
+    /// </summary>
+    public const string CachePolicyItem = "Aetheris.CachePolicy";
+
     private readonly RequestDelegate _next;
 
     /// <summary>
@@ -51,8 +57,18 @@ public sealed class SecurityHeadersMiddleware
             headers["Cross-Origin-Resource-Policy"] = "same-origin";
             headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
 
-            // API answers depend on the account; no shared cache may keep them.
-            if (httpContext.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+            // API answers depend on the account; no shared cache may keep them. An endpoint whose
+            // answer is the same for everyone (the pack of the texts) names its own policy, which
+            // lets the browser keep the answer and ask again with its tag; the cookie of the
+            // session adds "no-store", "Pragma" and "Expires" to every answer it renews, so the
+            // policy of the endpoint replaces them (task 00036, section 6.3).
+            if (httpContext.Items.TryGetValue(CachePolicyItem, out object? policy) && policy is string endpointPolicy)
+            {
+                headers.CacheControl = endpointPolicy;
+                headers.Remove("Pragma");
+                headers.Remove("Expires");
+            }
+            else if (httpContext.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
             {
                 headers.CacheControl = "no-store";
             }

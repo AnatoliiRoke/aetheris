@@ -169,6 +169,13 @@ public sealed class PlanetsModule : IPlanetsModule
         _queries.GetBuildingLevelsAsync(buildingClass, playerId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<IReadOnlyDictionary<string, IReadOnlyList<PlanetBuildingLevel>>> GetBuildingLevelsAsync(
+        IReadOnlyCollection<string> buildingClasses,
+        string playerId,
+        CancellationToken cancellationToken = default) =>
+        _queries.GetBuildingLevelsAsync(buildingClasses, playerId, cancellationToken);
+
+    /// <inheritdoc />
     public Task<IReadOnlyDictionary<int, string>> GetBuildingNameKeysAsync(CancellationToken cancellationToken = default) =>
         _queries.GetBuildingNameKeysAsync(cancellationToken);
 
@@ -202,6 +209,10 @@ public sealed class PlanetsModule : IPlanetsModule
         string effectType,
         CancellationToken cancellationToken = default) =>
         _queries.GetBuildingEffectTotalAsync(planetId, effectType, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<int, int>> GetPlanetBuildingLevelsAsync(long planetId, CancellationToken cancellationToken = default) =>
+        _queries.GetPlanetBuildingLevelsAsync(planetId, cancellationToken);
 
     /// <inheritdoc />
     public Task<IReadOnlyDictionary<long, long>> GetBuildingEffectTotalsAsync(

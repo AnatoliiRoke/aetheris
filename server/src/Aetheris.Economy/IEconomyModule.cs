@@ -34,6 +34,16 @@ public interface IEconomyModule
     Task<PopulationFacts?> GetPopulationAsync(string playerId, long planetId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the balances of the currencies of a civilization and the population of one body in one
+    /// pass, so a read of a body does not count the same rows twice.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The balances and the population of the body.</returns>
+    Task<PlanetEconomyFacts> GetPlanetEconomyAsync(string playerId, long planetId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the populations of the bodies of a player at a moment of game time.
     /// </summary>
     /// <param name="playerId">The player.</param>

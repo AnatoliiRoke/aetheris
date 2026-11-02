@@ -3,6 +3,7 @@ using Aetheris.Core.Security;
 using Aetheris.Economy.Configuration;
 using Aetheris.Host.Admin;
 using Aetheris.Host.Localization;
+using Aetheris.Host.Observability;
 using Aetheris.Host.Scheduling;
 using Aetheris.Host.Security;
 using Aetheris.Market.Configuration;
@@ -111,7 +112,7 @@ public static class ConfigSeed
     ];
 
     private static readonly ConfigParameterDefinition[] Definitions =
-        [.. CoreDefinitions, .. TextKeys.Definitions, .. ReferenceImageKeys.Definitions, .. WorldConfigKeys.Definitions, .. PlanetsModule.ConfigDefinitions, .. ResearchConfigKeys.Definitions, .. ProductionConfigKeys.Definitions, .. ProcessesConfigKeys.Definitions, .. EconomyConfigKeys.Definitions, .. MarketConfigKeys.Definitions];
+        [.. CoreDefinitions, .. TextKeys.Definitions, .. ReferenceImageKeys.Definitions, .. WorldConfigKeys.Definitions, .. PlanetsModule.ConfigDefinitions, .. ResearchConfigKeys.Definitions, .. ProductionConfigKeys.Definitions, .. ProcessesConfigKeys.Definitions, .. EconomyConfigKeys.Definitions, .. MarketConfigKeys.Definitions, .. ObservabilityKeys.Definitions];
 
     private static readonly Dictionary<string, ConfigParameterDefinition> DefinitionsByKey =
         Definitions.ToDictionary(definition => definition.Key, StringComparer.Ordinal);

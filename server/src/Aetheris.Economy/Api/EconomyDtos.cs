@@ -40,3 +40,11 @@ public sealed record EconomyOverviewDto(
     IReadOnlyList<PopulationFacts> Populations,
     IReadOnlyList<CurrencyBalanceFacts> Balances,
     DateTimeOffset GameNow);
+
+/// <summary>
+/// What the economy tells about one body of a player: the balances of the currencies of the
+/// civilization and the population of the body, counted from the same rows (task 00036, section 6.3).
+/// </summary>
+/// <param name="Balances">The amounts by currency.</param>
+/// <param name="Population">The population of the body, or <see langword="null"/> when the body is not a colony of the player.</param>
+public sealed record PlanetEconomyFacts(IReadOnlyDictionary<int, long> Balances, PopulationFacts? Population);

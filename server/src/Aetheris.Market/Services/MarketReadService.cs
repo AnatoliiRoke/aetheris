@@ -100,10 +100,13 @@ public sealed class MarketReadService
         IReadOnlyDictionary<int, MarketLevelEntity> levels = await _catalog.LevelsAsync(cancellationToken).ConfigureAwait(false);
 
         IReadOnlyList<OwnedPlanet> owned = await _world.GetOwnedPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false);
-        Dictionary<long, int> tradeCentres = (await _planets.GetBuildingLevelsAsync(BuildingClasses.TradeCenter, playerId, cancellationToken).ConfigureAwait(false))
-            .ToDictionary(row => row.PlanetId, row => row.Level);
-        Dictionary<long, int> portals = (await _planets.GetBuildingLevelsAsync(BuildingClasses.Portal, playerId, cancellationToken).ConfigureAwait(false))
-            .ToDictionary(row => row.PlanetId, row => row.Level);
+
+        // Both classes of buildings are read together, in one pass over the bodies of the player.
+        IReadOnlyDictionary<string, IReadOnlyList<PlanetBuildingLevel>> levelsByClass = await _planets
+            .GetBuildingLevelsAsync([BuildingClasses.TradeCenter, BuildingClasses.Portal], playerId, cancellationToken)
+            .ConfigureAwait(false);
+        Dictionary<long, int> tradeCentres = levelsByClass[BuildingClasses.TradeCenter].ToDictionary(row => row.PlanetId, row => row.Level);
+        Dictionary<long, int> portals = levelsByClass[BuildingClasses.Portal].ToDictionary(row => row.PlanetId, row => row.Level);
 
         return new MarketOverviewDto(
             [
@@ -116,7 +119,7 @@ public sealed class MarketReadService
             currencies.CreditsResourceTypeId,
             currencies.TradeResourceTypeId,
             await _catalog.EnergyResourceAsync(settings.EnergyResourceCode, cancellationToken).ConfigureAwait(false),
-            await _trade.LimitAsync(playerId, cancellationToken).ConfigureAwait(false),
+            await _trade.LimitAsync(playerId, owned, cancellationToken).ConfigureAwait(false),
             [
                 .. owned.OrderBy(planet => planet.PlanetId).Select(planet => new MarketPlanetDto(
                     planet.PlanetId,

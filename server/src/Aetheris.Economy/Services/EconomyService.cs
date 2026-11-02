@@ -188,9 +188,45 @@ public sealed class EconomyService
 
         DateTimeOffset now = EconomyTime.Normalize(_clock.GameNow);
 
-        // The read of a colony that has no row writes it: a new transaction when the call has
-        // none, the one of the request otherwise.
-        IReadOnlyList<OwnedPlanet> missing = await MissingColoniesAsync(playerId, cancellationToken).ConfigureAwait(false);
+        Snapshot snapshot = await ReadOverviewSnapshotAsync(playerId, now, cancellationToken).ConfigureAwait(false);
+
+        return new EconomyOverviewDto(
+            [.. snapshot.Views.Select(view => view.Facts)],
+            [.. snapshot.CurrencyIds.Select(currencyId => snapshot.Balance(playerId, currencyId))],
+            now);
+    }
+
+    /// <summary>
+    /// Gets what the economy tells about one body of a player in one pass: the balances of the
+    /// currencies of the civilization and the population of the body, counted from the same rows.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The balances and the population, or <see langword="null"/> population when the body is not a colony of the player.</returns>
+    public async Task<PlanetEconomyFacts> GetPlanetEconomyAsync(string playerId, long planetId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        DateTimeOffset now = EconomyTime.Normalize(_clock.GameNow);
+        Snapshot snapshot = await ReadOverviewSnapshotAsync(playerId, now, cancellationToken).ConfigureAwait(false);
+
+        return new PlanetEconomyFacts(
+            snapshot.CurrencyIds.ToDictionary(currencyId => currencyId, currencyId => snapshot.Balance(playerId, currencyId).Amount),
+            snapshot.Views.Select(view => view.Facts).FirstOrDefault(facts => facts.PlanetId == planetId));
+    }
+
+    /// <summary>
+    /// Reads the rows of a player for a read of the economy: the bodies it owns are compared with
+    /// the rows of the population, and a colony that has no row gets one (a new transaction when
+    /// the call has none, the one of the request otherwise).
+    /// </summary>
+    private async Task<Snapshot> ReadOverviewSnapshotAsync(string playerId, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        IReadOnlyList<OwnedPlanet> owned = await _world.GetOwnedPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false);
+        List<PlanetPopulationEntity> populations = await ReadPopulationsAsync(playerId, cancellationToken).ConfigureAwait(false);
+        HashSet<long> known = [.. populations.Select(row => row.PlanetId)];
+        IReadOnlyList<OwnedPlanet> missing = [.. owned.Where(planet => !known.Contains(planet.PlanetId))];
 
         if (missing.Count > 0)
         {
@@ -202,14 +238,11 @@ public sealed class EconomyService
                     return true;
                 },
                 cancellationToken).ConfigureAwait(false);
+
+            populations = await ReadPopulationsAsync(playerId, cancellationToken).ConfigureAwait(false);
         }
 
-        Snapshot snapshot = await SnapshotAsync(playerId, now, cancellationToken).ConfigureAwait(false);
-
-        return new EconomyOverviewDto(
-            [.. snapshot.Views.Select(view => view.Facts)],
-            [.. snapshot.CurrencyIds.Select(currencyId => snapshot.Balance(playerId, currencyId))],
-            now);
+        return await SnapshotAsync(playerId, now, populations, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -226,7 +259,7 @@ public sealed class EconomyService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        Snapshot snapshot = await SnapshotAsync(playerId, EconomyTime.Normalize(_clock.GameNow), cancellationToken).ConfigureAwait(false);
+        Snapshot snapshot = await SnapshotAsync(playerId, EconomyTime.Normalize(_clock.GameNow), null, cancellationToken).ConfigureAwait(false);
 
         if (!snapshot.CurrencyIds.Contains(resourceTypeId))
         {
@@ -247,7 +280,7 @@ public sealed class EconomyService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        Snapshot snapshot = await SnapshotAsync(playerId, EconomyTime.Normalize(_clock.GameNow), cancellationToken).ConfigureAwait(false);
+        Snapshot snapshot = await SnapshotAsync(playerId, EconomyTime.Normalize(_clock.GameNow), null, cancellationToken).ConfigureAwait(false);
 
         return snapshot.CurrencyIds.ToDictionary(currencyId => currencyId, currencyId => snapshot.Balance(playerId, currencyId).Amount);
     }
@@ -262,7 +295,7 @@ public sealed class EconomyService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
-        Snapshot snapshot = await SnapshotAsync(playerId, EconomyTime.Normalize(_clock.GameNow), cancellationToken).ConfigureAwait(false);
+        Snapshot snapshot = await SnapshotAsync(playerId, EconomyTime.Normalize(_clock.GameNow), null, cancellationToken).ConfigureAwait(false);
 
         return
         [
@@ -690,13 +723,14 @@ public sealed class EconomyService
     /// <summary>
     /// Reads the rows of a player and counts them to a moment, without locking or writing.
     /// </summary>
-    private async Task<Snapshot> SnapshotAsync(string playerId, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<Snapshot> SnapshotAsync(
+        string playerId,
+        DateTimeOffset now,
+        List<PlanetPopulationEntity>? knownPopulations,
+        CancellationToken cancellationToken)
     {
-        List<PlanetPopulationEntity> populations = await _dbContext.PlanetPopulations.AsNoTracking()
-            .Where(entry => entry.OwnerPlayerId == playerId)
-            .OrderBy(entry => entry.PlanetId)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        List<PlanetPopulationEntity> populations = knownPopulations
+            ?? await ReadPopulationsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
         List<CivilizationBalanceEntity> rows = await _dbContext.CivilizationBalances.AsNoTracking()
             .Where(entry => entry.PlayerId == playerId)
@@ -711,6 +745,12 @@ public sealed class EconomyService
         return new Snapshot([.. populations.Select(row => View(row, rates, now))], rows, currencyIds, incomeCurrencyIds);
     }
 
+    private Task<List<PlanetPopulationEntity>> ReadPopulationsAsync(string playerId, CancellationToken cancellationToken) =>
+        _dbContext.PlanetPopulations.AsNoTracking()
+            .Where(entry => entry.OwnerPlayerId == playerId)
+            .OrderBy(entry => entry.PlanetId)
+            .ToListAsync(cancellationToken);
+
     /// <summary>
     /// Reads what sets the speed of the population and of the income of a player, once for all its
     /// bodies: the parameters, the bonuses of the technologies and the effects of the buildings.
@@ -721,7 +761,7 @@ public sealed class EconomyService
         EconomyBonuses bonuses = await _technologyBonuses.GetBonusesAsync(playerId, cancellationToken).ConfigureAwait(false);
         IReadOnlyDictionary<long, PlanetEconomyEffects> effects = planetIds.Count == 0
             ? new Dictionary<long, PlanetEconomyEffects>()
-            : await _buildingEffects.GetAsync(planetIds, cancellationToken).ConfigureAwait(false);
+            : await _buildingEffects.GetAsync(planetIds, playerId, cancellationToken).ConfigureAwait(false);
 
         return new Rates(settings, bonuses, effects);
     }

@@ -64,9 +64,26 @@ public sealed class EconomyBuildingEffects : IEconomyBuildingEffects
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyDictionary<long, PlanetEconomyEffects>> GetAsync(
+    public Task<IReadOnlyDictionary<long, PlanetEconomyEffects>> GetAsync(
         IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken = default) =>
+        ComputeAsync(planetIds, null, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<long, PlanetEconomyEffects>> GetAsync(
+        IReadOnlyCollection<long> planetIds,
+        string ownerPlayerId,
         CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(ownerPlayerId);
+
+        return ComputeAsync(planetIds, ownerPlayerId, cancellationToken);
+    }
+
+    private async Task<IReadOnlyDictionary<long, PlanetEconomyEffects>> ComputeAsync(
+        IReadOnlyCollection<long> planetIds,
+        string? knownOwnerPlayerId,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(planetIds);
 
@@ -78,7 +95,8 @@ public sealed class EconomyBuildingEffects : IEconomyBuildingEffects
         BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
 
         // The buildings and the owners of all the bodies are read at once, and the bonuses of the
-        // technologies once for every owner.
+        // technologies once for every owner. A caller that knows the owner of the bodies says so,
+        // and the owners are not read at all.
         Dictionary<long, Dictionary<int, int>> levelsByPlanet = (await _dbContext.PlanetBuildings.AsNoTracking()
             .Where(building => planetIds.Contains(building.PlanetId))
             .Select(building => new { building.PlanetId, building.BuildingTypeId, building.Level })
@@ -87,21 +105,24 @@ public sealed class EconomyBuildingEffects : IEconomyBuildingEffects
             .GroupBy(building => building.PlanetId)
             .ToDictionary(group => group.Key, group => group.ToDictionary(building => building.BuildingTypeId, building => building.Level));
 
-        Dictionary<long, string?> owners = await _dbContext.PlanetStates.AsNoTracking()
-            .Where(state => planetIds.Contains(state.PlanetId))
-            .ToDictionaryAsync(state => state.PlanetId, state => state.OwnerPlayerId, cancellationToken)
-            .ConfigureAwait(false);
+        Dictionary<long, string?> owners = knownOwnerPlayerId is not null
+            ? []
+            : await _dbContext.PlanetStates.AsNoTracking()
+                .Where(state => planetIds.Contains(state.PlanetId))
+                .ToDictionaryAsync(state => state.PlanetId, state => state.OwnerPlayerId, cancellationToken)
+                .ConfigureAwait(false);
 
         Dictionary<string, PlanetBonuses> bonusesByOwner = [];
         Dictionary<long, PlanetEconomyEffects> effects = [];
 
         foreach (long planetId in planetIds)
         {
-            string ownerKey = owners.GetValueOrDefault(planetId) ?? string.Empty;
+            string? ownerPlayerId = knownOwnerPlayerId ?? owners.GetValueOrDefault(planetId);
+            string ownerKey = ownerPlayerId ?? string.Empty;
 
             if (!bonusesByOwner.TryGetValue(ownerKey, out PlanetBonuses? bonuses))
             {
-                bonuses = await _technologies.GetBonusesAsync(owners.GetValueOrDefault(planetId), cancellationToken).ConfigureAwait(false);
+                bonuses = await _technologies.GetBonusesAsync(ownerPlayerId, cancellationToken).ConfigureAwait(false);
                 bonusesByOwner[ownerKey] = bonuses;
             }
 

@@ -68,6 +68,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     private readonly IAdminReferenceImages _images;
     private readonly IReadOnlyList<IResourceUsage> _usages;
     private readonly IGameConfig _config;
+    private readonly ResourceCatalogCache _resourceCatalog;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WorldReferenceAdminService"/> class.
@@ -79,6 +80,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <param name="images">The pictures of the server.</param>
     /// <param name="usages">The modules that hold data of a resource, asked before its scope changes.</param>
     /// <param name="config">The game configuration, for the default weight of a resource.</param>
+    /// <param name="resourceCatalog">The resource catalog kept in memory, dropped when a resource changes.</param>
     public WorldReferenceAdminService(
         WorldDbContext dbContext,
         WorldUnitOfWork unitOfWork,
@@ -86,7 +88,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         ILocalizationTexts texts,
         IAdminReferenceImages images,
         IEnumerable<IResourceUsage> usages,
-        IGameConfig config)
+        IGameConfig config,
+        ResourceCatalogCache resourceCatalog)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -95,6 +98,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         ArgumentNullException.ThrowIfNull(images);
         ArgumentNullException.ThrowIfNull(usages);
         ArgumentNullException.ThrowIfNull(config);
+        ArgumentNullException.ThrowIfNull(resourceCatalog);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -103,6 +107,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         _images = images;
         _usages = [.. usages];
         _config = config;
+        _resourceCatalog = resourceCatalog;
     }
 
     /// <summary>
@@ -263,6 +268,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
         // The row and its texts are committed: the copy of the texts in memory is dropped.
         _texts.Invalidate();
+        _resourceCatalog.Invalidate();
 
         return change;
     }
@@ -281,16 +287,17 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         };
 
         _texts.Invalidate();
+        _resourceCatalog.Invalidate();
 
         return change;
     }
 
     /// <inheritdoc />
-    public Task<AdminReferenceChange> SetArchivedAsync(string kind, int id, bool isArchived, AdminReferenceInput input, CancellationToken cancellationToken)
+    public async Task<AdminReferenceChange> SetArchivedAsync(string kind, int id, bool isArchived, AdminReferenceInput input, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(input);
 
-        return _unitOfWork.RunAsync(
+        AdminReferenceChange change = await _unitOfWork.RunAsync(
             async () =>
             {
                 switch (kind)
@@ -315,7 +322,11 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                         throw UnknownKind(kind);
                 }
             },
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
+
+        _resourceCatalog.Invalidate();
+
+        return change;
     }
 
     /// <summary>

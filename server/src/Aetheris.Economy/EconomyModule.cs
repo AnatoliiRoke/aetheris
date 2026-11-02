@@ -39,6 +39,10 @@ public sealed class EconomyModule : IEconomyModule
         _service.GetPopulationAsync(playerId, planetId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<PlanetEconomyFacts> GetPlanetEconomyAsync(string playerId, long planetId, CancellationToken cancellationToken = default) =>
+        _service.GetPlanetEconomyAsync(playerId, planetId, cancellationToken);
+
+    /// <inheritdoc />
     public Task<IReadOnlyList<PopulationFacts>> GetPopulationsAsync(string playerId, CancellationToken cancellationToken = default) =>
         _service.GetPopulationsAsync(playerId, cancellationToken);
 

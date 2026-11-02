@@ -7,6 +7,7 @@ using Aetheris.Host.Admin;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Commands;
 using Aetheris.Host.Data;
+using Aetheris.Host.Observability;
 using Aetheris.Host.Realtime;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -166,7 +167,10 @@ public static class SecurityServiceCollectionExtensions
             .WithOrigins([.. origins.Origins])
             .AllowCredentials()
             .WithMethods(HttpMethods.Get, HttpMethods.Post, HttpMethods.Put, HttpMethods.Delete)
-            .WithHeaders("Content-Type", AuthCookies.CsrfHeader, AuthCookies.IdempotencyHeader));
+            .WithHeaders("Content-Type", AuthCookies.CsrfHeader, AuthCookies.IdempotencyHeader, RequestTraceMiddleware.RequestIdHeader)
+
+            // The client reads the identifiers and the timing of a response (task 00036).
+            .WithExposedHeaders(RequestTraceMiddleware.RequestIdHeader, RequestTraceMiddleware.TraceIdHeader, RequestTraceMiddleware.ServerTimingHeader));
 
         app.UseAuthentication();
         app.UseMiddleware<CsrfProtectionMiddleware>();

@@ -5,6 +5,7 @@ using Aetheris.Core.Errors;
 using Aetheris.Core.Scheduling;
 using Aetheris.Core.Time;
 using Aetheris.Economy;
+using Aetheris.Economy.Api;
 using Aetheris.Economy.Services;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Configuration;
@@ -450,6 +451,35 @@ public sealed class ConstructionService
     }
 
     /// <summary>
+    /// Gets the answer about a body inside the current change, with the population of the body
+    /// that the read counted anyway and whether a construction of the body is due, so the caller
+    /// asks neither the economy nor the queue again (task 00036, section 6.3).
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="now">The moment of game time.</param>
+    /// <param name="facts">The facts of the body the caller has read already, or <see langword="null"/> to read them.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The read, or <see langword="null"/> when the body has no state.</returns>
+    public async Task<PlanetRead?> ReadWithPopulationAsync(
+        long planetId,
+        DateTimeOffset now,
+        PlanetFacts? facts,
+        CancellationToken cancellationToken)
+    {
+        PlanetSession? session = await TryOpenAsync(planetId, cancellationToken, forUpdate: false, facts).ConfigureAwait(false);
+
+        if (session is null)
+        {
+            return null;
+        }
+
+        return new PlanetRead(
+            session.Overview(Normalize(now), _clock.Multiplier),
+            session.PopulationFacts,
+            session.Queue.Any(item => item.FinishesAt != null && item.FinishesAt <= now));
+    }
+
+    /// <summary>
     /// Cuts a moment to the microseconds the database keeps, so a moment read back equals the
     /// moment written and the answers of a change and of a later read agree.
     /// </summary>
@@ -469,7 +499,11 @@ public sealed class ConstructionService
         return session;
     }
 
-    private async Task<PlanetSession?> TryOpenAsync(long planetId, CancellationToken cancellationToken, bool forUpdate = true)
+    private async Task<PlanetSession?> TryOpenAsync(
+        long planetId,
+        CancellationToken cancellationToken,
+        bool forUpdate = true,
+        PlanetFacts? knownFacts = null)
     {
         PlanetStateEntity? state = forUpdate
             ? (await _dbContext.PlanetStates
@@ -493,7 +527,7 @@ public sealed class ConstructionService
             resources = resources.AsNoTracking();
         }
 
-        PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
+        PlanetFacts? facts = knownFacts ?? await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
 
         PlanetSession session = new(
             _dbContext,
@@ -516,8 +550,12 @@ public sealed class ConstructionService
         // population cost against the inhabitants of the body.
         if (state.OwnerPlayerId is { } ownerPlayerId)
         {
-            session.Currencies = await _economy.GetBalancesAsync(ownerPlayerId, cancellationToken).ConfigureAwait(false);
-            session.Population = (await _economy.GetPopulationAsync(ownerPlayerId, planetId, cancellationToken).ConfigureAwait(false))?.Amount ?? 0;
+            // The balances and the population come from one count of the rows of the economy.
+            PlanetEconomyFacts economy = await _economy.GetPlanetEconomyAsync(ownerPlayerId, planetId, cancellationToken).ConfigureAwait(false);
+
+            session.Currencies = economy.Balances;
+            session.PopulationFacts = economy.Population;
+            session.Population = economy.Population?.Amount ?? 0;
         }
 
         return session;
@@ -621,3 +659,12 @@ public sealed class ConstructionService
     /// <param name="QueueItemId">The queue record.</param>
     public sealed record CompletePayload(long PlanetId, long QueueItemId);
 }
+
+/// <summary>
+/// A read of a body: the answer of the bodies module, the population the economy counted for it
+/// and whether a construction of the body is due.
+/// </summary>
+/// <param name="Overview">The answer of the bodies module.</param>
+/// <param name="Population">The population of the body, or <see langword="null"/> when it has none.</param>
+/// <param name="HasDueConstruction">Whether a construction of the queue has finished and is not completed yet.</param>
+public sealed record PlanetRead(PlanetOverviewDto Overview, PopulationFacts? Population, bool HasDueConstruction);

@@ -39,6 +39,7 @@ public static class ResearchServiceCollectionExtensions
             ResearchDatabase.Configure(options, serviceProvider.GetRequiredService<IDatabaseSession>().Connection));
 
         services.AddSingleton<TechnologyCatalogCache>();
+        services.AddScoped<PlayerTechnologyLevelsReader>();
         services.AddScoped<ResearchUnitOfWork>();
         services.AddScoped<ResearchBootstrapService>();
         services.AddScoped<ResearchQueueService>();

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { ApiContext, type Api } from '../../api/context';
 import { mockContentApi } from '../../api/mockContentApi';
 import type { TextsApi } from '../../api/textsApi';
+import { serverConfig } from '../../config/server';
 import { I18nProvider } from '../../i18n/I18nProvider';
 import { fakeAuthApi, fakeEconomyApi, fakeGameApi, fakeMapApi, fakeMarketApi, fakePlanetApi, fakeProcessesApi, fakeProductionApi, fakeResearchApi, fakeWorldApi } from '../../test/renderPage';
 import { TextsProvider } from '../TextsProvider';
@@ -72,5 +73,28 @@ describe('TextsProvider (task 00022)', () => {
     });
 
     await waitFor(() => expect(screen.getByText('Ферум')).toBeInTheDocument());
+  });
+
+  it('asks for a pack again after a pause when the server was not there, and shows the names once it is', async () => {
+    vi.useFakeTimers();
+
+    try {
+      const pack = vi.fn().mockRejectedValueOnce(new Error('network')).mockResolvedValue({ language: 'en', version: 1, texts: { 'world.resource.resource_1.name': 'Iron' } });
+
+      renderTexts({ pack } as unknown as TextsApi, ['world.resource.resource_1.name']);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(screen.getByText('world.resource.resource_1.name')).toBeInTheDocument();
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(serverConfig.retryDelaysMs[0]);
+      });
+
+      expect(screen.getByText('Iron')).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

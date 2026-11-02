@@ -416,7 +416,7 @@ public sealed class ProductionQueueService
             factory.Level,
             recipes,
             orders,
-            await StorageDtoAsync(planetId, cancellationToken).ConfigureAwait(false),
+            await StorageDtoAsync(planetId, null, cancellationToken).ConfigureAwait(false),
             _clock.GameNow);
     }
 
@@ -468,7 +468,7 @@ public sealed class ProductionQueueService
             planetId,
             recipes,
             factories,
-            await StorageDtoAsync(planetId, cancellationToken).ConfigureAwait(false),
+            await StorageDtoAsync(planetId, null, cancellationToken).ConfigureAwait(false),
             _clock.GameNow);
     }
 
@@ -511,16 +511,25 @@ public sealed class ProductionQueueService
         IReadOnlyList<ProductionFactorySummaryDto> factories = await ReadFactoriesAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
         Dictionary<long, string> factoryNameKeys = factories.ToDictionary(factory => factory.PlanetBuildingId, factory => factory.NameKey);
         ProductionSettings settings = ProductionSettings.From(_config);
-        int slots = 0;
 
-        // The places of the queues add up: every factory of the body has its own queue.
-        foreach (long planetBuildingId in factoryNameKeys.Keys.Union(orders.Select(order => order.PlanetBuildingId)))
-        {
-            slots += await SlotsAsync(settings, planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
-        }
+        // The places of the queues add up: every factory of the body has its own queue. The paid
+        // places of all the queues are read in one query and not one for every factory.
+        long[] queueBuildingIds = [.. factoryNameKeys.Keys.Union(orders.Select(order => order.PlanetBuildingId))];
+        Dictionary<long, int> paidSlots = queueBuildingIds.Length == 0
+            ? []
+            : await _dbContext.ProductionQueueStates.AsNoTracking()
+                .Where(entry => entry.PlanetId == planetId && queueBuildingIds.Contains(entry.PlanetBuildingId))
+                .ToDictionaryAsync(entry => entry.PlanetBuildingId, entry => entry.ExtraQueueSlots, cancellationToken)
+                .ConfigureAwait(false);
+        int slots = queueBuildingIds.Sum(planetBuildingId =>
+            settings.QueueBaseSlots + Math.Clamp(paidSlots.GetValueOrDefault(planetBuildingId), 0, settings.QueueMaxExtraSlots));
 
         ProductionCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
-        ProductionMultipliers multipliers = await _multipliers.GetMultipliersAsync(playerId, cancellationToken).ConfigureAwait(false);
+
+        // The multipliers of the technologies are needed only to count the time of a batch.
+        ProductionMultipliers multipliers = orders.Count == 0
+            ? ProductionMultipliers.None
+            : await _multipliers.GetMultipliersAsync(playerId, cancellationToken).ConfigureAwait(false);
         List<ProductionActiveOrderDto> items = [];
 
         foreach (ProductionOrderEntity order in orders)
@@ -623,7 +632,7 @@ public sealed class ProductionQueueService
         return new ProductionStockDto(
             planetId,
             rows,
-            await StorageDtoAsync(planetId, cancellationToken).ConfigureAwait(false),
+            await StorageDtoAsync(planetId, stacks, cancellationToken).ConfigureAwait(false),
             _clock.GameNow,
             [.. catalog.Recipes.Where(recipe => recipe.ResourceTypeId is not null).Select(recipe => recipe.ResourceTypeId!.Value).Distinct().Order()]);
     }
@@ -821,11 +830,11 @@ public sealed class ProductionQueueService
     /// <returns>The levels, the technologies and the race of the player, with their names.</returns>
     private async Task<RequirementContext> RequirementContextAsync(string playerId, long planetId, CancellationToken cancellationToken)
     {
-        PlanetOverviewDto? planet = await _planets.GetPlanetAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        IReadOnlyDictionary<int, int> buildingLevels = await _planets.GetPlanetBuildingLevelsAsync(planetId, cancellationToken).ConfigureAwait(false);
         IReadOnlyList<RaceDto> races = await _world.GetRacesAsync(cancellationToken).ConfigureAwait(false);
 
         return new RequirementContext(
-            planet?.Buildings.ToDictionary(building => building.BuildingTypeId, building => building.Level) ?? [],
+            buildingLevels,
             await _technologies.GetLevelsAsync(playerId, cancellationToken).ConfigureAwait(false),
             await RaceOfAsync(playerId, cancellationToken).ConfigureAwait(false),
             await _planets.GetBuildingNameKeysAsync(cancellationToken).ConfigureAwait(false),
@@ -862,17 +871,28 @@ public sealed class ProductionQueueService
     /// body as they are now, so a new level of the storage shows at once. Every kind of part has
     /// the same room of its own, so the answer names how many parts every kind holds against it.
     /// </summary>
-    private async Task<ProductionStorageDto> StorageDtoAsync(long planetId, CancellationToken cancellationToken)
+    private async Task<ProductionStorageDto> StorageDtoAsync(
+        long planetId,
+        IReadOnlyList<PartStockEntity>? knownStacks,
+        CancellationToken cancellationToken)
     {
         long capacity = await _planets.GetBuildingEffectTotalAsync(planetId, BuildingEffectTypes.PartStorageCapacity, cancellationToken).ConfigureAwait(false);
 
-        var quantities = await _dbContext.PartStocks.AsNoTracking()
-            .Where(stack => stack.PlanetId == planetId)
-            .GroupBy(stack => stack.PartTypeId)
-            .Select(group => new { PartTypeId = group.Key, Quantity = group.Sum(stack => stack.Quantity) })
-            .OrderBy(kind => kind.PartTypeId)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        // A caller that has read the stacks of the body already gives them, and the sums are
+        // counted from them instead of a second read of the same rows.
+        var quantities = knownStacks is not null
+            ? knownStacks
+                .GroupBy(stack => stack.PartTypeId)
+                .Select(group => new { PartTypeId = group.Key, Quantity = group.Sum(stack => stack.Quantity) })
+                .OrderBy(kind => kind.PartTypeId)
+                .ToList()
+            : await _dbContext.PartStocks.AsNoTracking()
+                .Where(stack => stack.PlanetId == planetId)
+                .GroupBy(stack => stack.PartTypeId)
+                .Select(group => new { PartTypeId = group.Key, Quantity = group.Sum(stack => stack.Quantity) })
+                .OrderBy(kind => kind.PartTypeId)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
         List<ProductionPartKindDto> kinds =
         [

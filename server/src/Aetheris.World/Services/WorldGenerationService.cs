@@ -36,6 +36,7 @@ public sealed class WorldGenerationService
     private readonly ICodeSequence _codes;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<WorldGenerationService> _logger;
+    private readonly ResourceCatalogCache _resourceCatalog;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WorldGenerationService"/> class.
@@ -47,6 +48,7 @@ public sealed class WorldGenerationService
     /// <param name="codes">The counters of the neutral codes.</param>
     /// <param name="timeProvider">The clock.</param>
     /// <param name="logger">The logger.</param>
+    /// <param name="resourceCatalog">The resource catalog kept in memory, dropped when the reference data is seeded.</param>
     public WorldGenerationService(
         WorldDbContext dbContext,
         WorldUnitOfWork unitOfWork,
@@ -54,7 +56,8 @@ public sealed class WorldGenerationService
         ILocalizationTexts texts,
         ICodeSequence codes,
         TimeProvider timeProvider,
-        ILogger<WorldGenerationService> logger)
+        ILogger<WorldGenerationService> logger,
+        ResourceCatalogCache resourceCatalog)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -63,6 +66,7 @@ public sealed class WorldGenerationService
         ArgumentNullException.ThrowIfNull(codes);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(resourceCatalog);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -71,6 +75,7 @@ public sealed class WorldGenerationService
         _codes = codes;
         _timeProvider = timeProvider;
         _logger = logger;
+        _resourceCatalog = resourceCatalog;
     }
 
     /// <summary>
@@ -99,6 +104,7 @@ public sealed class WorldGenerationService
         if (referenceSeeded)
         {
             _texts.Invalidate();
+            _resourceCatalog.Invalidate();
         }
 
         (GalaxyEntity galaxy, bool galaxyCreated) = await EnsureGalaxyAsync(cancellationToken).ConfigureAwait(false);

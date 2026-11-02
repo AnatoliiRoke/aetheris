@@ -1,5 +1,6 @@
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Time;
+using Aetheris.Host.Observability;
 using Aetheris.Host.Scheduling;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -44,6 +45,7 @@ public sealed class ShiftedGameClock(IGameClock inner, TimeSpan shift) : IGameCl
             services.GetRequiredService<IServiceScopeFactory>(),
             new ShiftedGameClock(services.GetRequiredService<IGameClock>(), shift),
             services.GetRequiredService<IGameConfig>(),
+            services.GetRequiredService<ObservabilitySettings>(),
             services.GetRequiredService<ILogger<ScheduledEventRunner>>());
 
         int total = 0;

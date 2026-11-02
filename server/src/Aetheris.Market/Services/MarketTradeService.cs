@@ -458,10 +458,25 @@ public sealed class MarketTradeService
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
+        return await LimitAsync(playerId, await _world.GetOwnedPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Counts how many lots a player has open and how many the best of its bodies allows, for a
+    /// caller that has read the bodies of the player already.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="owned">The bodies the player owns.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The lots in use and the limit.</returns>
+    public async Task<LotLimitDto> LimitAsync(string playerId, IReadOnlyList<OwnedPlanet> owned, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+        ArgumentNullException.ThrowIfNull(owned);
+
         int used = await _db.MarketLots.AsNoTracking()
             .CountAsync(lot => lot.SellerPlayerId == playerId && lot.State == MarketLotStates.Open, cancellationToken)
             .ConfigureAwait(false);
-        IReadOnlyList<OwnedPlanet> owned = await _world.GetOwnedPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
         // The best of the bodies: the buildings of all the bodies are read at once.
         long limit = (await _planets

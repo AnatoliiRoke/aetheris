@@ -39,6 +39,11 @@ public static partial class TextEndpoints
     public const string PackRoute = "/api/v1/texts/{language}";
 
     /// <summary>
+    /// The cache policy of the pack: kept by the browser only, asked again every time with its tag.
+    /// </summary>
+    private const string PackCachePolicy = "private, no-cache";
+
+    /// <summary>
     /// The error code of a text that was changed by someone else since it was read.
     /// </summary>
     public const string VersionConflict = "text_version_conflict";
@@ -98,7 +103,12 @@ public static partial class TextEndpoints
         // The client asks again whenever it comes back to the page; an unchanged pack costs a
         // short answer only.
         httpContext.Response.Headers[HeaderNames.ETag] = etag;
-        httpContext.Response.Headers[HeaderNames.CacheControl] = "no-cache";
+
+        // The pack is the same for everyone, so the browser may keep it and ask again with the tag;
+        // "private" keeps it out of shared caches, because the answer may carry the cookie of the
+        // session. The security headers leave this policy in place instead of "no-store".
+        httpContext.Items[SecurityHeadersMiddleware.CachePolicyItem] = PackCachePolicy;
+        httpContext.Response.Headers[HeaderNames.CacheControl] = PackCachePolicy;
 
         if (httpContext.Request.Headers[HeaderNames.IfNoneMatch].Contains(etag))
         {

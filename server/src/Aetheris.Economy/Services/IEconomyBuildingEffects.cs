@@ -22,6 +22,19 @@ public interface IEconomyBuildingEffects
     Task<IReadOnlyDictionary<long, PlanetEconomyEffects>> GetAsync(
         IReadOnlyCollection<long> planetIds,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the effects of the buildings of the bodies of one owner, so the owners of the bodies are
+    /// not read again.
+    /// </summary>
+    /// <param name="planetIds">The bodies; every one of them belongs to the owner.</param>
+    /// <param name="ownerPlayerId">The owner of the bodies.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The effects by body.</returns>
+    Task<IReadOnlyDictionary<long, PlanetEconomyEffects>> GetAsync(
+        IReadOnlyCollection<long> planetIds,
+        string ownerPlayerId,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>

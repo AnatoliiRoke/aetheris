@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type AnchorHTMLAttributes, type MouseEvent, type ReactNode } from 'react';
+import { markNavigationStart } from '../trace/pageMark';
 import { RouterContext, type RouterValue } from './context';
 import { useRouter } from './useRouter';
 
@@ -19,12 +20,22 @@ export function RouterProvider({ children }: { children: ReactNode }) {
   const [location, setLocation] = useState<Location>(currentLocation);
 
   useEffect(() => {
-    const onPopState = () => setLocation(currentLocation());
+    const onPopState = () => {
+      if (import.meta.env.DEV) {
+        markNavigationStart();
+      }
+
+      setLocation(currentLocation());
+    };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
   const navigate = useCallback((to: string, options?: { replace?: boolean }) => {
+    if (import.meta.env.DEV) {
+      markNavigationStart();
+    }
+
     if (options?.replace) {
       window.history.replaceState(null, '', to);
     } else {

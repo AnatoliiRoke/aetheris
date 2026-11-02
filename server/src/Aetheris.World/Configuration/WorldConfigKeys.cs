@@ -190,6 +190,9 @@ public static class WorldConfigKeys
     /// <summary>How often the admin panel asks for the status of a running generation, in seconds.</summary>
     public const string StatusPollSeconds = "world.admin.status_poll_seconds";
 
+    /// <summary>How long the resource catalog and the races stay in the memory of the server, in seconds.</summary>
+    public const string CatalogCacheSeconds = "world.catalog.cache_seconds";
+
     /// <summary>
     /// Gets the definitions of the world parameters with their starting values and bounds.
     /// </summary>
@@ -252,6 +255,7 @@ public static class WorldConfigKeys
         new(MaxSectorsPerRun, "10", "1", "1000", "Largest number of sectors an administrator adds in one generation run."),
         new(MaxSystemsPerRun, "100", "1", "1000000", "Largest expected number of star systems of one generation run: sectors times the average of systems_min and systems_max."),
         new(StatusPollSeconds, "2", "1", "60", "How often the admin panel asks for the status of a running generation, in seconds."),
+        new(CatalogCacheSeconds, "30", "0", "86400", "How long the resource catalog and the races stay in memory before they are read again, in seconds."),
         ..SeedCoefficientKeys.Definitions,
     ];
 }

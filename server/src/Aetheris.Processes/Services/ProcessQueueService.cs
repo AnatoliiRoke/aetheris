@@ -508,6 +508,18 @@ public sealed class ProcessQueueService
 
         await EnsureOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
 
+        return await ReadOwnedBuildingsAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Reads the buildings of a body that run a process, once the caller has checked that the body
+    /// is a colony of the player, so the facts of the body are not read twice in one request.
+    /// </summary>
+    private async Task<IReadOnlyList<ProcessBuildingSummaryDto>> ReadOwnedBuildingsAsync(
+        string playerId,
+        long planetId,
+        CancellationToken cancellationToken)
+    {
         ProcessCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
 
         // The types of the buildings are the types the recipes of the catalog name, so a new
@@ -579,16 +591,21 @@ public sealed class ProcessQueueService
             orders = await LoadPlanetOrdersAsync(planetId, cancellationToken).ConfigureAwait(false);
         }
 
-        IReadOnlyList<ProcessBuildingSummaryDto> buildings = await ReadBuildingsAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<ProcessBuildingSummaryDto> buildings = await ReadOwnedBuildingsAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
         Dictionary<long, string> buildingNameKeys = buildings.ToDictionary(building => building.PlanetBuildingId, building => building.NameKey);
         ProcessesSettings settings = ProcessesSettings.From(_config);
-        int slots = 0;
 
-        // The places of the queues add up: every building of the body has its own queue.
-        foreach (long planetBuildingId in buildingNameKeys.Keys.Union(orders.Select(order => order.PlanetBuildingId)))
-        {
-            slots += await SlotsAsync(settings, planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
-        }
+        // The places of the queues add up: every building of the body has its own queue. The paid
+        // places of all the queues are read in one query and not one for every building.
+        long[] queueBuildingIds = [.. buildingNameKeys.Keys.Union(orders.Select(order => order.PlanetBuildingId))];
+        Dictionary<long, int> paidSlots = queueBuildingIds.Length == 0
+            ? []
+            : await _dbContext.ProcessQueueStates.AsNoTracking()
+                .Where(state => state.PlanetId == planetId && queueBuildingIds.Contains(state.PlanetBuildingId))
+                .ToDictionaryAsync(state => state.PlanetBuildingId, state => state.ExtraSlots, cancellationToken)
+                .ConfigureAwait(false);
+        int slots = queueBuildingIds.Sum(planetBuildingId =>
+            settings.QueueBaseSlots + Math.Clamp(paidSlots.GetValueOrDefault(planetBuildingId), 0, settings.QueueMaxExtraSlots));
 
         ProcessCatalog catalog = await _catalogCache.GetAsync(_dbContext, _requirements, cancellationToken).ConfigureAwait(false);
         List<ProcessActiveOrderDto> items = [];
@@ -1162,16 +1179,9 @@ public sealed class ProcessQueueService
         long planetId,
         CancellationToken cancellationToken)
     {
-        PlanetOverviewDto? planet = await _planets.GetPlanetAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        IReadOnlyDictionary<int, int> buildingLevels = await _planets.GetPlanetBuildingLevelsAsync(planetId, cancellationToken).ConfigureAwait(false);
         IReadOnlyList<RaceDto> races = await _world.GetRacesAsync(cancellationToken).ConfigureAwait(false);
         CivilizationSummary? civilization = await _world.GetCivilizationAsync(playerId, cancellationToken).ConfigureAwait(false);
-
-        Dictionary<int, int> buildingLevels = [];
-
-        foreach (BuildingDto building in planet?.Buildings ?? [])
-        {
-            buildingLevels[building.BuildingTypeId] = Math.Max(buildingLevels.GetValueOrDefault(building.BuildingTypeId), building.Level);
-        }
 
         return new ProcessRequirementContext(
             buildingLevels,
