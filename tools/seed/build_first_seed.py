@@ -1,7 +1,8 @@
 """Build the first seed from the chosen lists and the dependency file (task 00028).
 
 The balance numbers live in server/src/Aetheris.World/Data/seed-coefficients.json.
-This script does not invent a second curve and does not edit the dependency file.
+Stock costs use those coefficients. Population of a building uses its own whole-number
+curve. This script does not edit the dependency file.
 """
 
 from __future__ import annotations
@@ -670,12 +671,60 @@ def center_requirements(center_levels: list[int], science_center: str) -> list[d
     return rows
 
 
+# Energy is a balance, not a stock a building pays. Population is paid from the counter of the
+# planet, so it is not scaled like a stock: every building pays the same whole inhabitants at a level.
+NOT_STOCK = {"Енергія", "Населення"}
+POPULATION_CAP = 1500
+
+
+def population_rate(level: int) -> Decimal:
+    """The growth of the population cost of a building when this level is reached.
+
+    Levels 2 to 6 grow by about 60 to 75 percent. Levels 14 to 20 grow by about 12 to 14
+    percent. The levels between them step down from one band to the other.
+    """
+    if level <= 6:
+        local = Decimal(level - 2) / Decimal(4)
+        return Decimal("0.70") + (Decimal("0.62") - Decimal("0.70")) * local
+    if level >= 14:
+        local = Decimal(level - 14) / Decimal(6)
+        return Decimal("0.14") + (Decimal("0.12") - Decimal("0.14")) * local
+    local = Decimal(level - 6) / Decimal(8)
+    return Decimal("0.62") + (Decimal("0.14") - Decimal("0.62")) * local
+
+
+def population_amounts(max_level: int) -> list[int]:
+    """The inhabitants a building costs at each level, from 4, never above 1500."""
+    amounts = [4]
+    for level in range(2, max_level + 1):
+        raw = Decimal(amounts[-1]) * (ONE + population_rate(level))
+        amount = int(raw.quantize(ONE, rounding=ROUND_HALF_UP))
+        if amount > POPULATION_CAP:
+            amount = POPULATION_CAP
+        amounts.append(amount)
+    return amounts
+
+
+def population_cost(code: str, max_level: int) -> dict:
+    amounts = population_amounts(max_level)
+    return {
+        "resource": code,
+        "base": amounts[0],
+        "growth": 1,
+        "step": 0,
+        "from_level": 1,
+        "values": amounts,
+    }
+
+
 def planet_costs(tiers: list[list[str]], codes: dict[str, str], parameters: dict[str, Decimal], group: str, factor: Decimal) -> list[dict]:
     """The cost rows of a building: a resource is paid from the level it first appears, at the base of its class."""
     base = coefficient(parameters, "world.seed.cost.base") * group_multiplier(parameters, group) * coefficient(parameters, "world.seed.cost.building_scale")
     digits = significant(parameters)
     rows = []
     for name, level in first_seen(tiers).items():
+        if name in NOT_STOCK:
+            continue
         if name not in codes:
             fail(f"unknown resource in a cost: {name}")
         rows.append({
@@ -686,6 +735,7 @@ def planet_costs(tiers: list[list[str]], codes: dict[str, str], parameters: dict
             "from_level": level,
             "significant": digits,
         })
+    rows.append(population_cost(codes["Населення"], len(tiers)))
     return rows
 
 
@@ -695,6 +745,8 @@ def technology_costs(tiers: list[list[str]], codes: dict[str, str], parameters: 
     digits = significant(parameters)
     rows = []
     for name, level in first_seen(tiers).items():
+        if name in NOT_STOCK:
+            continue
         if name not in codes:
             fail(f"unknown resource in a research cost: {name}")
         rows.append({
@@ -1313,7 +1365,7 @@ def main() -> None:
             "is_start": row["name"] == "Адміністративний центр",
             "building_class": building_class,
             "requirements": requirements,
-            "tiers": [[codes[name] for name in tier] for tier in row["tiers"]],
+            "tiers": [[codes[name] for name in tier if name not in NOT_STOCK] for tier in row["tiers"]],
             "deposits": deposits_available,
             "always": always_available,
             "cosmic": cosmic_codes,
@@ -1321,7 +1373,7 @@ def main() -> None:
 
     notes.append("Buildings without a numeric effect, left without one: " + ", ".join(no_effect))
     notes.append("No effect type exists for a construction queue, a fleet limit, a bunker share, a colony cap, a market commission, a portal discount, or fuel production. Bank income stays the credits flag earns_population_income.")
-    notes.append("Ores and deuterium use metal_production. Minerals and crystals use crystal_production. Power plants have energy_output; every other building except the warehouse has energy_consumption (task 00030: energy and population are no longer costs, see tools/seed/repair_dependencies.py).")
+    notes.append("Ores and deuterium use metal_production. Minerals and crystals use crystal_production. Power plants have energy_output; every other building except the warehouse has energy_consumption. Energy is not a cost. Every building pays population: 4 at level 1, about 60-75 percent more through level 6, about 12-14 percent more from level 14, and never more than 1500.")
     notes.append("Deposit requirements were added on extraction buildings. The dependency file does not carry them; the game already refuses a mine without the deposit.")
     notes.append("Admin keeps level_cap and population_max. The list says the admin center only caps levels; the economy reads population_max from it.")
 
@@ -1337,8 +1389,31 @@ def main() -> None:
     # LevelCount stays the historical file width. A building with its own max_level uses that.
     planets_payload["level_count"] = next(row["max_level"] for row in planet_buildings if row["code"] == building_code["Адміністративний центр"])
 
-    fundamental = "branch_1"
-    economy = "branch_2"
+    # The research buttons. Electronics and matter conversion were not in the named lists;
+    # electronics stays with the fundamental sciences, matter conversion with the other group.
+    tech_place = {
+        "Математика": ("branch_1", 1),
+        "Фізика": ("branch_1", 2),
+        "Ядерна фізика": ("branch_1", 3),
+        "Термоядерний синтез": ("branch_1", 4),
+        "Кібернетика": ("branch_1", 5),
+        "Робототехніка": ("branch_1", 6),
+        "Археологія": ("branch_1", 7),
+        "Електроніка": ("branch_1", 8),
+        "Розвиток науки": ("branch_1", 9),
+        "Економіка": ("branch_2", 1),
+        "Геологія": ("branch_2", 2),
+        "Енергетика": ("branch_2", 3),
+        "Будівництво": ("branch_2", 4),
+        "Кристалографія": ("branch_2", 5),
+        "Газова інженерія": ("branch_2", 6),
+        "Логістика складів": ("branch_2", 7),
+        "Демографія": ("branch_2", 8),
+        "Торговельне право": ("branch_3", 1),
+        "Стабілізація порталу": ("branch_3", 2),
+        "Колоніальне управління": ("branch_4", 1),
+        "Перетворення матерії": ("branch_4", 2),
+    }
     tech_bonus = {
         "Геологія": ["metal_production"],
         "Кристалографія": ["crystal_production"],
@@ -1353,7 +1428,7 @@ def main() -> None:
     sim_techs = []
     for index, row in enumerate(techs, start=1):
         code = tech_code[row["name"]]
-        branch = fundamental if row["group"] == "Фундаментальні науки" else economy
+        branch, _sort_order = tech_place[row["name"]]
         effects = []
         for effect_type in tech_bonus.get(row["name"], []):
             formula = shortening if effect_type in {"construction_time", "production_time"} else bonus
@@ -1379,13 +1454,13 @@ def main() -> None:
             "max_level": row["maxLevel"],
             "research_center_level": row["centerLevels"][0],
             "requirements": requirements,
-            "tiers": [[codes[name] for name in tier] for tier in row["tiers"]],
+            "tiers": [[codes[name] for name in tier if name not in NOT_STOCK] for tier in row["tiers"]],
         })
     matter_costs = technology_costs([["Кредити"]], codes, parameters, technology_factor)
     technologies.append({
         "code": matter_code,
-        "branch": fundamental,
-        "sort_order": len(technologies) + 1,
+        "branch": tech_place["Перетворення матерії"][0],
+        "sort_order": tech_place["Перетворення матерії"][1],
         "max_level": techs[0]["maxLevel"],
         "research_center_level": techs[0]["centerLevels"][0],
         "name": text("Перетворення матерії", english(TECHS_EN, "Перетворення матерії", "technology")),
@@ -1394,6 +1469,26 @@ def main() -> None:
         "costs": matter_costs,
         "effects": unlocks[matter_code],
         "requirements": [],
+    })
+    # Science development shortens research the way Construction shortens building. Its price
+    # and its requirements are Construction's; it opens nothing.
+    construction = next(row for row in technologies if row["name"]["uk"] == "Будівництво")
+    used_codes = {row["code"] for row in technologies}
+    science_number = 1
+    while f"tech_{science_number}" in used_codes:
+        science_number += 1
+    technologies.append({
+        "code": f"tech_{science_number}",
+        "branch": tech_place["Розвиток науки"][0],
+        "sort_order": tech_place["Розвиток науки"][1],
+        "max_level": construction["max_level"],
+        "research_center_level": construction["research_center_level"],
+        "name": text("Розвиток науки", "Science development"),
+        "description": text("Розвиток групи «Фундаментальні науки».", "Technology of its branch."),
+        "duration_seconds": construction["duration_seconds"],
+        "costs": construction["costs"],
+        "effects": [{"type": "research_time", "growth": shortening}],
+        "requirements": construction["requirements"],
     })
     sim_techs.append({
         "code": matter_code,
@@ -1406,8 +1501,8 @@ def main() -> None:
     notes.append("Matter conversion has no center curve in the dependency file. Its single center field is the first center value of the other technologies, and it has no extra center rows.")
     notes.append("Module and hull unlocks are recipe requirements, not technology effects. A technology effect cannot point at a part before the production seed assigns its code.")
     technologies_sorted = sorted(technologies, key=lambda row: int(row["code"].rsplit("_", 1)[1]))
-    for index, row in enumerate(technologies_sorted, start=1):
-        row["sort_order"] = index
+    for row in technologies_sorted:
+        row["branch"], row["sort_order"] = tech_place[row["name"]["uk"]]
 
     old_production = load_json(PRODUCTION_SEED)
     mark_level = old_production["parts"][0]["mark_level"]
@@ -1641,16 +1736,28 @@ def main() -> None:
         "level_count": techs[0]["maxLevel"],
         "branches": [
             {
-                "code": fundamental,
+                "code": "branch_1",
                 "sort_order": 1,
                 "name": text("Фундаментальні науки", "Fundamental sciences"),
                 "description": text("Фундаментальні науки.", "The fundamental sciences."),
             },
             {
-                "code": economy,
+                "code": "branch_2",
                 "sort_order": 2,
                 "name": text("Економіка", "Economy"),
-                "description": text("Економічні розвитки.", "The economy developments."),
+                "description": text("Економіка планети.", "The economy of a planet."),
+            },
+            {
+                "code": "branch_3",
+                "sort_order": 3,
+                "name": text("Торгівля", "Trade"),
+                "description": text("Торгівля і портали.", "Trade and portals."),
+            },
+            {
+                "code": "branch_4",
+                "sort_order": 4,
+                "name": text("Інше", "Other"),
+                "description": text("Інші технології.", "The other technologies."),
             },
         ],
         "technologies": technologies_sorted,

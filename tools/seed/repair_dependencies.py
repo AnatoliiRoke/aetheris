@@ -4,11 +4,11 @@ The author allowed edits of documentation/references/zalezhnosti-rozklad.json (d
 The script applies fixed, documented rules to the file and is idempotent: running it twice
 gives the same file. The rules (each with the reason):
 
-1. Energy and population leave the costs of buildings and technologies. Neither is a stock the
-   game refills (energy is a balance, population is a counter of the economy module, and
-   documentation/game-design/02 says buildings need no population), so a cost in them would
-   stop every build after the first. Energy is spent by the buildings as consumption, which the
-   seed generator writes from the coefficients.
+1. Energy leaves the costs of buildings and technologies. Population leaves the costs of
+   technologies only. A building pays population from the counter of the planet: the people
+   are spent and grow back, so the next building waits until enough of them have returned.
+   Energy is a balance, spent as consumption, which the seed generator writes from the
+   coefficients. A technology, a module and a recipe do not take population.
 2. Helium-3, dark matter and ether leave the costs of buildings and technologies. Helium-3 is
    fuel, dark matter and ether belong to modules (decision of the author, 01.11.2026).
 3. Minerals, crystals, deuterium and enriched uranium may not lie on the cost of a building
@@ -140,9 +140,14 @@ ASKS_CRYSTAL_EVERY = 2
 def fix_tiers(item: dict) -> None:
     is_building = item["kind"] == "budivlia"
     threshold = BUILDING_FROM if is_building else TECHNOLOGY_FROM
+    # Population stays on a building. It leaves a technology, together with energy.
+    removed = set(COSMIC)
+    removed.add("Енергія")
+    if not is_building:
+        removed.add("Населення")
     tiers = []
     for level, tier in enumerate(item["tiers"], start=1):
-        kept = [name for name in tier if name not in BALANCES and name not in COSMIC]
+        kept = [name for name in tier if name not in removed]
         # Minerals and crystals are written again by assign_minerals, level by level, so that
         # their demand stays level; deuterium and enriched uranium wait for the threshold.
         kept = [name for name in kept if name not in MINERALS and name not in CRYSTALS]
@@ -177,7 +182,7 @@ def recover(item: dict, tiers: list[list[str]]) -> None:
         if item["group"] == EXTRACTION:
             tiers[index] = [name for name in tiers[index] if name != MATERIALS]
         elif item["name"] == SOLAR:
-            tiers[index] = ["Залізна руда", "Кредити"]
+            tiers[index] = ["Залізна руда", "Кредити", "Населення"]
 
 
 ORDER = [

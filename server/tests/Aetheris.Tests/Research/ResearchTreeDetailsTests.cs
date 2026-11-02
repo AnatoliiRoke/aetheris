@@ -41,12 +41,14 @@ public sealed class ResearchTreeDetailsTests
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
     /// <summary>
-    /// The next level of an open technology names every resource the selected body is short of
-    /// and by how much; a body that has enough shows nothing, and no other level shows anything.
+    /// The next level of an open technology names every resource the player is short of and by
+    /// how much; a cost in a currency is checked against the balance of the civilization and every
+    /// other cost against the balance of the body. A player who has enough shows nothing, and no
+    /// other level shows anything.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_next_level_names_what_the_selected_body_is_short_of()
+    public async Task The_next_level_names_what_the_player_is_short_of()
     {
         await ResetAsync();
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -60,7 +62,6 @@ public sealed class ResearchTreeDetailsTests
         IReadOnlyList<ResearchAmount> costs = technology.Levels.Single(level => level.Level == 1).Costs;
         ResearchAmount first = costs[0];
         ResearchAmount second = costs[1];
-        HashSet<int> currencyIds = await PlanetsTestData.CurrencyIdsAsync(services);
         DateTimeOffset moment = PlanetsTestData.GameNow(services);
 
         // The first resource is half there, the second is missing, the rest is enough.
@@ -75,22 +76,21 @@ public sealed class ResearchTreeDetailsTests
         Assert.Equal(
             costs.Where(cost => cost.ResourceTypeId == first.ResourceTypeId || cost.ResourceTypeId == second.ResourceTypeId).Select(cost => cost.ResourceTypeId).Order(),
             missing.Select(entry => entry.ResourceTypeId).Order());
-        // A currency is not on the body, so the tree reports its whole cost as missing.
-        long firstMissing = currencyIds.Contains(first.ResourceTypeId) ? first.Amount : first.Amount - (first.Amount / 2);
+        // A currency of a civilization is paid from the balance of the civilization and every
+        // other resource from the balance of the body (task 00015, decision 5), so both are
+        // short of the same half of the cost.
+        long firstMissing = first.Amount - (first.Amount / 2);
 
         Assert.Equal(firstMissing, missing.Single(entry => entry.ResourceTypeId == first.ResourceTypeId).Amount);
         Assert.Equal(second.Amount, missing.Single(entry => entry.ResourceTypeId == second.ResourceTypeId).Amount);
         Assert.All(shortOf.Levels.Where(level => level.Level != 1), level => Assert.Empty(level.MissingResources!));
 
-        // A rich body is short only of the currencies, which it does not hold.
+        // A rich body and a rich civilization are short of nothing.
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, await RichBalanceAsync(services), moment);
         TechnologyDto enough = (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token)).Technologies.Single(entry => entry.Id == technology.Id);
         IReadOnlyList<ResearchAmount> richMissing = enough.Levels.Single(level => level.Level == 1).MissingResources!;
 
-        Assert.Equal(
-            costs.Where(cost => currencyIds.Contains(cost.ResourceTypeId)).Select(cost => cost.ResourceTypeId).Order(),
-            richMissing.Select(entry => entry.ResourceTypeId).Order());
-        Assert.All(richMissing, entry => Assert.Equal(costs.Single(cost => cost.ResourceTypeId == entry.ResourceTypeId).Amount, entry.Amount));
+        Assert.Empty(richMissing);
     }
 
     /// <summary>
