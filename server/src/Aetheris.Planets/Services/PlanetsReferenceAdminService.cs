@@ -579,14 +579,18 @@ public sealed class PlanetsReferenceAdminService : IAdminReferenceService
                 }
             }
 
+            // The rule of the requirements is off: a building may have none, on any level. The
+            // code of the rule stays here, but it does not run, so nothing is refused because of
+            // a level without requirements.
+            //
             // The requirements apply from their level upwards, so a level has requirements when
             // any level up to it has one; only the first level of the start building may have none.
-            bool hasRequirements = levels.Where(lower => lower.Level <= level.Level).Any(lower => (lower.Requirements ?? []).Count > 0);
-
-            if (!hasRequirements && !(level.Level == 1 && values.IsStartBuilding))
-            {
-                AdminReferenceRules.Fail(failures, AdminReferenceRules.PathOf(LevelsField, index, RequirementsField), AdminReferenceErrors.RequirementsMissing);
-            }
+            // bool hasRequirements = levels.Where(lower => lower.Level <= level.Level).Any(lower => (lower.Requirements ?? []).Count > 0);
+            //
+            // if (!hasRequirements && !(level.Level == 1 && values.IsStartBuilding))
+            // {
+            //     AdminReferenceRules.Fail(failures, AdminReferenceRules.PathOf(LevelsField, index, RequirementsField), AdminReferenceErrors.RequirementsMissing);
+            // }
         }
 
         if (requirements.GroupBy(requirement => requirement).Any(group => group.Count() > 1))

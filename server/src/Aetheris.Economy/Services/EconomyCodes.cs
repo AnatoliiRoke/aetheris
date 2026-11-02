@@ -26,4 +26,10 @@ public static class EconomyCodes
     /// The effect of a technology that raises the income of the credits.
     /// </summary>
     public const string CreditIncomeBonusEffect = "credit_income_bonus";
+
+    /// <summary>
+    /// The resource of the world seed whose cost is paid from the population of a body.
+    /// A building pays it, and the stock of the body does not hold it.
+    /// </summary>
+    public const string PopulationResource = "resource_30";
 }

@@ -9,6 +9,7 @@
   "admin.reference.technology_effect.metal_production": { "uk": "Множник видобутку металів", "en": "Metal production multiplier" },
   "admin.reference.technology_effect.crystal_production": { "uk": "Множник видобутку кристалів", "en": "Crystal production multiplier" },
   "admin.reference.technology_effect.construction_time": { "uk": "Множник часу будівництва", "en": "Construction time multiplier" },
+  "admin.reference.technology_effect.research_time": { "uk": "Множник часу дослідження", "en": "Research time multiplier" },
   "admin.reference.technology_effect.storage_capacity": { "uk": "Множник місткості складів", "en": "Storage capacity multiplier" },
   "admin.reference.technology_effect.energy_output": { "uk": "Множник енергії", "en": "Energy output multiplier" },
   "admin.reference.technology_effect.population_max": { "uk": "Множник максимуму населення", "en": "Population limit multiplier" },

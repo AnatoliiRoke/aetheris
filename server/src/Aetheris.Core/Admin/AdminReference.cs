@@ -89,7 +89,7 @@ public static class AdminReferenceErrors
     /// <summary>The level has no cost.</summary>
     public const string CostMissing = "cost_missing";
 
-    /// <summary>The level has no requirement.</summary>
+    /// <summary>The level has no requirement. The rule that used this code is off.</summary>
     public const string RequirementsMissing = "requirements_missing";
 
     /// <summary>The row is already in the asked state.</summary>

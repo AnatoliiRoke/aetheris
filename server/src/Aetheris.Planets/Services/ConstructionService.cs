@@ -51,6 +51,8 @@ public sealed class ConstructionService
     private readonly IEventScheduler _scheduler;
     private readonly IGameConfig _config;
     private readonly IGameClock _clock;
+    private bool _populationResourceResolved;
+    private int? _populationResourceId;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstructionService"/> class.
@@ -137,9 +139,17 @@ public sealed class ConstructionService
                     });
                 }
 
-                // The costs of a civilization are paid from its balance and the rest from the
-                // balance of the body (task 00015).
-                SplitCosts split = await _costs.SplitAsync(check.Info!.Costs, cancellationToken).ConfigureAwait(false);
+                // The costs of a civilization are paid from its balance, the population from the
+                // inhabitants of the body, and the rest from the stock of the body (task 00015).
+                Dictionary<int, long> stockCosts = new(check.Info!.Costs);
+                long inhabitants = 0;
+
+                if (session.PopulationResourceId is int populationResourceId)
+                {
+                    stockCosts.Remove(populationResourceId, out inhabitants);
+                }
+
+                SplitCosts split = await _costs.SplitAsync(stockCosts, cancellationToken).ConfigureAwait(false);
 
                 foreach ((int resourceTypeId, long amount) in split.PlanetResources)
                 {
@@ -149,6 +159,12 @@ public sealed class ConstructionService
                 // The credits belong to the civilization of the owner of the body.
                 string ownerPlayerId = session.State.OwnerPlayerId
                     ?? throw new GameException(PlanetsErrorCodes.PlanetUnknown, "The body has no owner.");
+
+                if (inhabitants > 0
+                    && !await _economy.TryTakePopulationAsync(ownerPlayerId, planetId, inhabitants, cancellationToken).ConfigureAwait(false))
+                {
+                    throw new GameException(PlanetsErrorCodes.ResourcesShort, "The body has fewer inhabitants than the building costs.");
+                }
 
                 await _economy.TakeAsync(ownerPlayerId, split.Currencies, cancellationToken).ConfigureAwait(false);
 
@@ -225,12 +241,19 @@ public sealed class ConstructionService
                     throw new GameException(PlanetsErrorCodes.EnergyShort, "The record gives the energy the later records need.");
                 }
 
-                // The cost returns to the balances it was paid from: the resources of the body to
-                // the body and the currencies to the balance of the civilization (task 00015).
+                // The cost returns to where it was paid from: the stock to the body, the inhabitants
+                // to the population of the body, and the currencies to the civilization (task 00015).
                 Dictionary<int, long> refund = removed
                     .SelectMany(item => item.CostIds)
                     .GroupBy(cost => cost.ResourceTypeId)
                     .ToDictionary(group => group.Key, group => group.Sum(cost => cost.Amount));
+
+                long inhabitants = 0;
+
+                if (session.PopulationResourceId is int populationResourceId)
+                {
+                    refund.Remove(populationResourceId, out inhabitants);
+                }
 
                 foreach (ConstructionQueueItemEntity item in removed)
                 {
@@ -249,12 +272,20 @@ public sealed class ConstructionService
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 // The balance of the civilization is the last lock of the request, after the body.
-                if (split.Currencies.Count > 0)
+                if (inhabitants > 0 || split.Currencies.Count > 0)
                 {
                     string ownerPlayerId = session.State.OwnerPlayerId
                         ?? throw new GameException(PlanetsErrorCodes.PlanetUnknown, "The body has no owner.");
 
-                    await _economy.GiveAsync(ownerPlayerId, split.Currencies, cancellationToken).ConfigureAwait(false);
+                    if (inhabitants > 0)
+                    {
+                        await _economy.GivePopulationAsync(ownerPlayerId, planetId, inhabitants, cancellationToken).ConfigureAwait(false);
+                    }
+
+                    if (split.Currencies.Count > 0)
+                    {
+                        await _economy.GiveAsync(ownerPlayerId, split.Currencies, cancellationToken).ConfigureAwait(false);
+                    }
                 }
 
                 if (headRemoved && session.Queue.Count > 0)
@@ -479,10 +510,14 @@ public sealed class ConstructionService
             TechnologyNameKeys = await _technologies.GetTechnologyNameKeysAsync(cancellationToken).ConfigureAwait(false),
         };
 
-        // The costs in a currency are checked against the balance of the civilization.
+        session.PopulationResourceId = await PopulationResourceIdAsync(cancellationToken).ConfigureAwait(false);
+
+        // The costs in a currency are checked against the balance of the civilization, and the
+        // population cost against the inhabitants of the body.
         if (state.OwnerPlayerId is { } ownerPlayerId)
         {
             session.Currencies = await _economy.GetBalancesAsync(ownerPlayerId, cancellationToken).ConfigureAwait(false);
+            session.Population = (await _economy.GetPopulationAsync(ownerPlayerId, planetId, cancellationToken).ConfigureAwait(false))?.Amount ?? 0;
         }
 
         return session;
@@ -556,6 +591,28 @@ public sealed class ConstructionService
     }
 
     private static DateTimeOffset Max(DateTimeOffset first, DateTimeOffset second) => first > second ? first : second;
+
+    /// <summary>
+    /// Gets the resource that a building pays from the inhabitants of the body.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The resource, or <see langword="null"/> when the catalog has none.</returns>
+    private async Task<int?> PopulationResourceIdAsync(CancellationToken cancellationToken)
+    {
+        if (_populationResourceResolved)
+        {
+            return _populationResourceId;
+        }
+
+        ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
+
+        _populationResourceId = catalog.Resources
+            .FirstOrDefault(resource => resource.Code == EconomyCodes.PopulationResource)
+            ?.Id;
+        _populationResourceResolved = true;
+
+        return _populationResourceId;
+    }
 
     /// <summary>
     /// The payload of the end of a construction.

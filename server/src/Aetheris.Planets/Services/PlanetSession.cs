@@ -85,6 +85,16 @@ public sealed class PlanetSession
     public IReadOnlyDictionary<int, long> Currencies { get; set; } = new Dictionary<int, long>();
 
     /// <summary>
+    /// Gets or sets the inhabitants of the body now. A building pays its population cost from them.
+    /// </summary>
+    public long Population { get; set; }
+
+    /// <summary>
+    /// Gets or sets the resource that is paid from <see cref="Population"/>.
+    /// </summary>
+    public int? PopulationResourceId { get; set; }
+
+    /// <summary>
     /// Gets the levels of the buildings by type.
     /// </summary>
     /// <returns>The levels.</returns>
@@ -219,7 +229,9 @@ public sealed class PlanetSession
             _technologyLevels,
             _bonuses,
             now,
-            Currencies);
+            Currencies,
+            Population,
+            PopulationResourceId);
     }
 
     /// <summary>

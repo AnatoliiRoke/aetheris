@@ -414,8 +414,12 @@ public sealed class ResearchQueueService
             return false;
         }
 
+        IReadOnlyDictionary<int, int> learnedLevels = await _dbContext.PlayerTechnologies.AsNoTracking()
+            .Where(entry => entry.PlayerId == head.PlayerId)
+            .ToDictionaryAsync(entry => entry.TechnologyId, entry => entry.Level, cancellationToken)
+            .ConfigureAwait(false);
         head.StartsAt = now;
-        head.FinishesAt = now.AddSeconds(level.DurationSeconds);
+        head.FinishesAt = now.AddSeconds(ResearchTime.Scale(level.DurationSeconds, ResearchTime.Multiplier(catalog, learnedLevels)));
         await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         PlanetFacts? facts = await _world.GetPlanetFactsAsync(head.PlanetId, cancellationToken).ConfigureAwait(false);
@@ -594,6 +598,22 @@ public sealed class ResearchQueueService
         // about a shortage.
         Dictionary<int, long>? balance = selectedPlanet?.Resources.ToDictionary(resource => resource.ResourceTypeId, resource => resource.Amount);
 
+        // A currency of a civilization does not lie on a body, so the balance of the body says
+        // nothing about it. The currencies are paid from the balance of the civilization, and
+        // the tree must check the cost against the same balance (task 00015, decision 5). The
+        // balances are read only when the tree has a body to be short of, so a player without
+        // one costs nothing.
+        HashSet<int>? currencyResourceIds = null;
+        IReadOnlyDictionary<int, long>? currencyBalances = null;
+
+        if (balance is not null)
+        {
+            ResourceCatalog resourceCatalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
+            HashSet<int> currencies = [.. resourceCatalog.Resources.Where(resource => resource.IsCivilizationScope).Select(resource => resource.Id)];
+            currencyResourceIds = currencies;
+            currencyBalances = await _economy.GetBalancesAsync(playerId, cancellationToken).ConfigureAwait(false);
+        }
+
         return new ResearchTreeSnapshot(
             catalog,
             queue,
@@ -607,6 +627,11 @@ public sealed class ResearchQueueService
             _clock.GameNow,
             _clock.Multiplier,
             unlockNameKeys,
-            balance);
+            balance,
+            currencyBalances,
+            currencyResourceIds,
+            selectedPlanet?.Buildings.ToDictionary(building => building.BuildingTypeId, building => building.Level),
+            selectedPlanet?.DepositRichness?.Select(deposit => deposit.ResourceTypeId).ToHashSet(),
+            selectedPlanet?.ResourceTypes.ToDictionary(resource => resource.Id, resource => resource.NameKey));
     }
 }

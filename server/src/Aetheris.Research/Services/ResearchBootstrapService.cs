@@ -15,8 +15,9 @@ namespace Aetheris.Research.Services;
 /// Prepares the module: fills the technology tables of a fresh database (task 00012).
 /// </summary>
 /// <remarks>
-/// Every step changes nothing on a repeated start. The seed runs only while the technology
-/// table is empty, so it never overwrites a change.
+/// A repeated start adds nothing that is already there. The four research buttons and the
+/// branch of each starting technology are written again from the starting data, so an old
+/// database picks up a regrouping. Costs and names of the technologies stay.
 /// </remarks>
 public sealed class ResearchBootstrapService
 {
@@ -88,6 +89,7 @@ public sealed class ResearchBootstrapService
             cancellationToken).ConfigureAwait(false);
 
         _catalogCache.Invalidate();
+        _texts.Invalidate();
 
         // The seed writes the requirements of the buildings that the technologies open, so the
         // building catalog the bodies module keeps in memory is read again after the commit.

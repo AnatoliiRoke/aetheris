@@ -21,6 +21,11 @@ namespace Aetheris.Research.Services;
 /// <param name="TimeMultiplier">The game seconds per real second.</param>
 /// <param name="UnlockNameKeys">The localisation keys of the names of the subjects of the other modules a technology opens, by kind.</param>
 /// <param name="SelectedBalance">The balance of the selected body by resource, as of the moment of the answer; the tree shows what a level is short of.</param>
+/// <param name="CurrencyBalances">The balances of the currencies of the civilization, as of the moment of the answer; a cost in a currency is checked against them and not against the body (task 00015, decision 5).</param>
+/// <param name="CurrencyResourceIds">The resources that belong to the whole civilization, by resource; they are paid from the balance of the civilization and not from the balance of the body.</param>
+/// <param name="BuildingLevels">The built levels of the selected body by building type. A requirement on a building is checked against them.</param>
+/// <param name="DepositResourceIds">The resources that have a deposit on the selected body.</param>
+/// <param name="ResourceNameKeys">The localisation keys of the names of the resources, for a requirement on a deposit.</param>
 public sealed record ResearchTreeSnapshot(
     TechnologyCatalog Catalog,
     IReadOnlyList<ResearchQueueItemEntity> Queue,
@@ -34,4 +39,9 @@ public sealed record ResearchTreeSnapshot(
     DateTimeOffset GameNow,
     double TimeMultiplier,
     IReadOnlyDictionary<string, IReadOnlyDictionary<int, string>>? UnlockNameKeys = null,
-    IReadOnlyDictionary<int, long>? SelectedBalance = null);
+    IReadOnlyDictionary<int, long>? SelectedBalance = null,
+    IReadOnlyDictionary<int, long>? CurrencyBalances = null,
+    IReadOnlySet<int>? CurrencyResourceIds = null,
+    IReadOnlyDictionary<int, int>? BuildingLevels = null,
+    IReadOnlySet<int>? DepositResourceIds = null,
+    IReadOnlyDictionary<int, string>? ResourceNameKeys = null);

@@ -1,3 +1,4 @@
+using Aetheris.Planets.Services;
 using Aetheris.Requirements.Services;
 using Aetheris.Research.Api;
 using Aetheris.Research.Data.Entities;
@@ -29,9 +30,10 @@ public sealed class ResearchTreeBuilder
                 || snapshot.Queue.Any(item => item.TechnologyId == technology.Id)),
         ];
 
+        decimal researchTime = ResearchTime.Multiplier(snapshot.Catalog, snapshot.LearnedLevels);
         List<TechnologyDto> technologies =
         [
-            .. shown.Select(technology => BuildTechnology(snapshot, technology)),
+            .. shown.Select(technology => BuildTechnology(snapshot, technology, researchTime)),
         ];
 
         List<ResearchQueueItemDto> queue =
@@ -71,22 +73,22 @@ public sealed class ResearchTreeBuilder
             snapshot.TimeMultiplier);
     }
 
-    private static TechnologyDto BuildTechnology(ResearchTreeSnapshot snapshot, TechnologyInfo technology)
+    private static TechnologyDto BuildTechnology(ResearchTreeSnapshot snapshot, TechnologyInfo technology, decimal researchTime)
     {
         int learned = snapshot.LearnedLevels.GetValueOrDefault(technology.Id);
         int nextLevel = Math.Min(learned + 1, technology.MaxLevel);
         ResearchQueueItemEntity? queued = snapshot.Queue.FirstOrDefault(item => item.TechnologyId == technology.Id);
 
-        // The requirements on other technologies are checked here against the learned levels;
-        // the requirements on a body are checked by the command on the chosen body.
-        HashSet<int> unmet =
+        // The same check the command uses: a missing technology and a missing building both
+        // close the next level, and the card names each of them.
+        IReadOnlyList<UnmetRequirement> unmetRows = Unmet(snapshot, technology.Id);
+        HashSet<int> unmetTechnologyIds =
         [
-            .. snapshot.Requirements
-                .Where(requirement => requirement.SubjectId == technology.Id
-                    && requirement.Requirement.RequirementType == RequirementTypes.TechnologyLevel
-                    && snapshot.LearnedLevels.GetValueOrDefault(requirement.Requirement.TargetId) < requirement.Requirement.TargetLevel)
-                .Select(requirement => requirement.Requirement.Id),
+            .. unmetRows
+                .Where(requirement => requirement.RequirementType == RequirementTypes.TechnologyLevel)
+                .Select(requirement => requirement.RequirementId),
         ];
+        List<Aetheris.Planets.Api.RequirementDto> namedRequirements = Named(snapshot, unmetRows);
 
         string status;
         string? reason = null;
@@ -113,13 +115,12 @@ public sealed class ResearchTreeBuilder
             status = ResearchTechnologyStatuses.Unavailable;
             reason = ResearchErrorCodes.ResearchCenterLevel;
         }
-        else if (unmet.Count > 0)
+        else if (unmetRows.Count > 0)
         {
             // A technology whose missing technology is itself out of reach is beyond the edge
-            // of what the player can see: the tree keeps it as unknown, a dimmed card without
-            // details. One whose missing technology is open is the next step, so it is closed
-            // with its reason.
-            status = IsBeyondReach(snapshot, technology, unmet)
+            // of what the player can see: the tree keeps it as unknown. One whose missing
+            // technology is open, or that waits for a building, is closed with its reason.
+            status = unmetTechnologyIds.Count > 0 && IsBeyondReach(snapshot, technology, unmetTechnologyIds)
                 ? ResearchTechnologyStatuses.Unknown
                 : ResearchTechnologyStatuses.Unavailable;
             reason = status == ResearchTechnologyStatuses.Unknown ? null : ResearchErrorCodes.RequirementUnmet;
@@ -143,7 +144,14 @@ public sealed class ResearchTreeBuilder
             technology.ResearchCenterLevel,
             snapshot.AvailableCenterLevel,
             reason,
-            [.. technology.Levels.Keys.Order().Select(level => BuildLevel(snapshot, technology, level, level == nextLevel ? unmet : [], level == nextLevel && learned < technology.MaxLevel))],
+            [.. technology.Levels.Keys.Order().Select(level => BuildLevel(
+                snapshot,
+                technology,
+                level,
+                level == nextLevel ? unmetTechnologyIds : [],
+                level == nextLevel && learned < technology.MaxLevel,
+                researchTime,
+                level == nextLevel ? namedRequirements : []))],
             Effects(snapshot, technology.Levels.GetValueOrDefault(learned)),
             technology.ImageKey);
     }
@@ -175,29 +183,118 @@ public sealed class ResearchTreeBuilder
             UnlockNameKey(snapshot, effect),
             effect.Value))];
 
-    private static TechnologyLevelDto BuildLevel(ResearchTreeSnapshot snapshot, TechnologyInfo technology, int level, IReadOnlySet<int> unmet, bool isNext)
+    private static TechnologyLevelDto BuildLevel(
+        ResearchTreeSnapshot snapshot,
+        TechnologyInfo technology,
+        int level,
+        IReadOnlySet<int> unmet,
+        bool isNext,
+        decimal researchTime,
+        IReadOnlyList<Aetheris.Planets.Api.RequirementDto> unmetRequirements)
     {
         TechnologyLevelInfo? info = technology.Levels.GetValueOrDefault(level);
 
-        // What the selected body is short of for the level that would be researched next.
+        // What the player is short of for the level that would be researched next. A cost in a
+        // currency is paid from the balance of the civilization and every other cost from the
+        // balance of the body (task 00015, decision 5), so the two balances are read apart.
         IReadOnlyDictionary<int, long> balance = snapshot.SelectedBalance ?? new Dictionary<int, long>();
         List<ResourceAmountDto> missing =
         [
             .. isNext && snapshot.SelectedBalance is not null
-                ? (info?.Costs ?? new Dictionary<int, long>())
-                    .Where(cost => balance.GetValueOrDefault(cost.Key) < cost.Value)
-                    .OrderBy(cost => cost.Key)
-                    .Select(cost => new ResourceAmountDto(cost.Key, cost.Value - balance.GetValueOrDefault(cost.Key)))
+                ? Missing(snapshot, info?.Costs ?? new Dictionary<int, long>(), balance)
                 : [],
         ];
 
         return new TechnologyLevelDto(
             level,
-            info?.DurationSeconds ?? 0,
+            info is null ? 0 : ResearchTime.Scale(info.DurationSeconds, researchTime),
             [.. (info?.Costs ?? new Dictionary<int, long>()).OrderBy(cost => cost.Key).Select(cost => new ResourceAmountDto(cost.Key, cost.Value))],
             Effects(snapshot, info),
             [.. unmet.Order()],
-            missing);
+            missing,
+            unmetRequirements);
+    }
+
+    /// <summary>
+    /// The requirements of the next level of a technology that the player has not met.
+    /// </summary>
+    private static IReadOnlyList<UnmetRequirement> Unmet(ResearchTreeSnapshot snapshot, int technologyId)
+    {
+        List<RequirementInfo> requirements =
+        [
+            .. snapshot.Requirements
+                .Where(requirement => requirement.SubjectId == technologyId)
+                .Select(requirement => new RequirementInfo(
+                    requirement.Requirement.Id,
+                    RequirementSubjectTypes.Technology,
+                    requirement.SubjectId,
+                    requirement.SubjectLevel,
+                    requirement.Requirement.RequirementType,
+                    requirement.Requirement.TargetId,
+                    requirement.Requirement.TargetLevel)),
+        ];
+
+        return RequirementChecker.Check(
+            requirements,
+            new RequirementContext(
+                snapshot.BuildingLevels ?? new Dictionary<int, int>(),
+                snapshot.DepositResourceIds ?? new HashSet<int>(),
+                snapshot.LearnedLevels));
+    }
+
+    /// <summary>
+    /// Names every unmet requirement the way the building screen names one.
+    /// </summary>
+    private static List<Aetheris.Planets.Api.RequirementDto> Named(ResearchTreeSnapshot snapshot, IReadOnlyList<UnmetRequirement> unmet) =>
+    [
+        .. unmet.Select(requirement => new Aetheris.Planets.Api.RequirementDto(
+            requirement.RequirementId,
+            requirement.RequirementType,
+            requirement.TargetId,
+            requirement.TargetLevel,
+            requirement.ReasonCode,
+            RequirementNameKey(snapshot, requirement))),
+    ];
+
+    private static string? RequirementNameKey(ResearchTreeSnapshot snapshot, UnmetRequirement requirement) =>
+        requirement.RequirementType switch
+        {
+            RequirementTypes.TechnologyLevel => snapshot.Catalog.FindTechnology(requirement.TargetId)?.NameKey,
+            RequirementTypes.BuildingLevel => snapshot.BuildingNameKeys.GetValueOrDefault(requirement.TargetId),
+            RequirementTypes.Deposit => snapshot.ResourceNameKeys?.GetValueOrDefault(requirement.TargetId),
+            _ => null,
+        };
+
+    /// <summary>
+    /// The amounts the player is short of for a level, by resource.
+    /// </summary>
+    /// <param name="snapshot">The tree and the queue of the player.</param>
+    /// <param name="costs">The costs of the level, by resource.</param>
+    /// <param name="bodyBalance">The balance of the selected body, by resource.</param>
+    /// <returns>The shortages, by resource, in the order of the resource.</returns>
+    private static List<ResourceAmountDto> Missing(
+        ResearchTreeSnapshot snapshot,
+        IReadOnlyDictionary<int, long> costs,
+        IReadOnlyDictionary<int, long> bodyBalance)
+    {
+        List<ResourceAmountDto> missing = [];
+
+        foreach ((int resourceTypeId, long amount) in costs)
+        {
+            // A currency of the civilization is paid from the balance of the civilization and
+            // every other resource from the balance of the body (task 00015, decision 5).
+            long available = snapshot.CurrencyResourceIds is { } currencyIds && currencyIds.Contains(resourceTypeId)
+                ? snapshot.CurrencyBalances?.GetValueOrDefault(resourceTypeId) ?? 0
+                : bodyBalance.GetValueOrDefault(resourceTypeId);
+            long shortBy = amount - available;
+
+            if (shortBy > 0)
+            {
+                missing.Add(new ResourceAmountDto(resourceTypeId, shortBy));
+            }
+        }
+
+        return [.. missing.OrderBy(entry => entry.ResourceTypeId)];
     }
 
     private static string? UnlockNameKey(ResearchTreeSnapshot snapshot, TechnologyEffectInfo effect) =>

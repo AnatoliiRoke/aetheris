@@ -2,6 +2,7 @@ using System.Text.Json;
 using Aetheris.Core.Data;
 using Aetheris.Core.Numbers;
 using Aetheris.Core.Text;
+using Aetheris.Economy.Services;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
 using Aetheris.Requirements;
@@ -60,6 +61,15 @@ public static class PlanetsReferenceSeed
     public static long ValueAt(SeedGrowth formula, int level)
     {
         ArgumentNullException.ThrowIfNull(formula);
+
+        // A listed cost is already a whole number for every level. The growth formula cannot
+        // hold a step that shrinks from the low levels to the high ones.
+        if (formula is SeedCost { Values: { Count: > 0 } values })
+        {
+            int index = Math.Clamp(level, 1, values.Count) - 1;
+
+            return values[index];
+        }
 
         int steps = level - 1;
 
@@ -257,7 +267,88 @@ public static class PlanetsReferenceSeed
         await WorldReferenceSeed.RaiseAsync(codes, PlanetsTextKeys.CodeGroup, seed.BuildingTypes.Select(type => type.Code), cancellationToken).ConfigureAwait(false);
         await WorldReferenceSeed.RaiseAsync(codes, PlanetsTextKeys.CategoryCodeGroup, seed.Categories.Select(category => category.Code), cancellationToken).ConfigureAwait(false);
 
-        return missingTypes.Count > 0 || missingCategories.Count > 0;
+        bool populationAdded = await AddMissingPopulationCostsAsync(dbContext, seed, resources, typeIds, cancellationToken).ConfigureAwait(false);
+
+        return missingTypes.Count > 0 || missingCategories.Count > 0 || populationAdded;
+    }
+
+    /// <summary>
+    /// Adds the population cost of the starting data to a level that does not have it yet.
+    /// A cost that is already there is left as it is, so a later change of that amount stays.
+    /// </summary>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="seed">The starting data.</param>
+    /// <param name="resources">The resource catalog.</param>
+    /// <param name="typeIds">The identifiers of the building types by code.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when a cost was added.</returns>
+    private static async Task<bool> AddMissingPopulationCostsAsync(
+        PlanetsDbContext dbContext,
+        PlanetsSeedData seed,
+        ResourceCatalog resources,
+        Dictionary<string, int> typeIds,
+        CancellationToken cancellationToken)
+    {
+        int? populationResourceId = resources.Resources
+            .FirstOrDefault(resource => resource.Code == EconomyCodes.PopulationResource)
+            ?.Id;
+
+        if (populationResourceId is null)
+        {
+            return false;
+        }
+
+        List<int> typeIdList = [.. typeIds.Values];
+
+        List<BuildingLevelEntity> levels = await dbContext.BuildingLevels
+            .Include(level => level.CostIds)
+            .Where(level => typeIdList.Contains(level.BuildingTypeId))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        Dictionary<(int TypeId, int Level), BuildingLevelEntity> levelsByKey = levels.ToDictionary(
+            level => (level.BuildingTypeId, level.Level));
+
+        bool added = false;
+
+        foreach (SeedBuildingType type in seed.BuildingTypes)
+        {
+            SeedCost? populationCost = type.Costs.FirstOrDefault(cost => cost.Resource == EconomyCodes.PopulationResource);
+
+            if (populationCost is null || !typeIds.TryGetValue(type.Code, out int typeId))
+            {
+                continue;
+            }
+
+            int maxLevel = type.MaxLevel is > 0 ? type.MaxLevel.Value : seed.LevelCount;
+
+            for (int level = populationCost.FromLevel; level <= maxLevel; level++)
+            {
+                if (!levelsByKey.TryGetValue((typeId, level), out BuildingLevelEntity? levelRow) || levelRow is null)
+                {
+                    continue;
+                }
+
+                if (levelRow.CostIds.Any(cost => cost.ResourceTypeId == populationResourceId))
+                {
+                    continue;
+                }
+
+                levelRow.CostIds.Add(new BuildingLevelCostEntity
+                {
+                    ResourceTypeId = populationResourceId.Value,
+                    Amount = ValueAt(populationCost, level - populationCost.FromLevel + 1),
+                });
+                added = true;
+            }
+        }
+
+        if (added)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return added;
     }
 }
 
@@ -376,6 +467,12 @@ public sealed record SeedCost : SeedGrowth
 
     /// <summary>Gets the first level that pays this resource. Earlier levels omit the row, and the formula counts from this level: the cost at this level is the base (task 00030).</summary>
     public int FromLevel { get; init; } = 1;
+
+    /// <summary>
+    /// Gets the cost of every level, from the first level that pays it, when the cost does not
+    /// grow by one multiplier. When it is empty the cost comes from the growth formula.
+    /// </summary>
+    public IReadOnlyList<long>? Values { get; init; }
 }
 
 /// <summary>An effect of the starting data.</summary>

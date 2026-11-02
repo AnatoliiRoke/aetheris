@@ -21,8 +21,32 @@
         "en": "Economy"
       },
       "description": {
-        "uk": "Економічні розвитки.",
-        "en": "The economy developments."
+        "uk": "Економіка планети.",
+        "en": "The economy of a planet."
+      }
+    },
+    {
+      "code": "branch_3",
+      "sort_order": 3,
+      "name": {
+        "uk": "Торгівля",
+        "en": "Trade"
+      },
+      "description": {
+        "uk": "Торгівля і портали.",
+        "en": "Trade and portals."
+      }
+    },
+    {
+      "code": "branch_4",
+      "sort_order": 4,
+      "name": {
+        "uk": "Інше",
+        "en": "Other"
+      },
+      "description": {
+        "uk": "Інші технології.",
+        "en": "The other technologies."
       }
     }
   ],
@@ -1959,8 +1983,8 @@
     },
     {
       "code": "tech_5",
-      "branch": "branch_1",
-      "sort_order": 5,
+      "branch": "branch_2",
+      "sort_order": 2,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -2495,7 +2519,7 @@
     {
       "code": "tech_6",
       "branch": "branch_1",
-      "sort_order": 6,
+      "sort_order": 8,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -2991,8 +3015,8 @@
     },
     {
       "code": "tech_7",
-      "branch": "branch_1",
-      "sort_order": 7,
+      "branch": "branch_2",
+      "sort_order": 3,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -3526,8 +3550,8 @@
     },
     {
       "code": "tech_8",
-      "branch": "branch_1",
-      "sort_order": 8,
+      "branch": "branch_2",
+      "sort_order": 4,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -4276,7 +4300,7 @@
     {
       "code": "tech_9",
       "branch": "branch_1",
-      "sort_order": 9,
+      "sort_order": 5,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -4831,7 +4855,7 @@
     {
       "code": "tech_10",
       "branch": "branch_1",
-      "sort_order": 10,
+      "sort_order": 6,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -5431,8 +5455,8 @@
     },
     {
       "code": "tech_11",
-      "branch": "branch_1",
-      "sort_order": 11,
+      "branch": "branch_2",
+      "sort_order": 1,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -5787,7 +5811,7 @@
     {
       "code": "tech_12",
       "branch": "branch_1",
-      "sort_order": 12,
+      "sort_order": 7,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -6200,7 +6224,7 @@
     {
       "code": "tech_13",
       "branch": "branch_2",
-      "sort_order": 13,
+      "sort_order": 5,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -6725,7 +6749,7 @@
     {
       "code": "tech_14",
       "branch": "branch_2",
-      "sort_order": 14,
+      "sort_order": 6,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -7268,7 +7292,7 @@
     {
       "code": "tech_15",
       "branch": "branch_2",
-      "sort_order": 15,
+      "sort_order": 7,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -7737,7 +7761,7 @@
     {
       "code": "tech_16",
       "branch": "branch_2",
-      "sort_order": 16,
+      "sort_order": 8,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -8135,8 +8159,8 @@
     },
     {
       "code": "tech_17",
-      "branch": "branch_2",
-      "sort_order": 17,
+      "branch": "branch_4",
+      "sort_order": 1,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -8644,8 +8668,8 @@
     },
     {
       "code": "tech_18",
-      "branch": "branch_1",
-      "sort_order": 18,
+      "branch": "branch_4",
+      "sort_order": 2,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -8686,8 +8710,8 @@
     },
     {
       "code": "tech_19",
-      "branch": "branch_2",
-      "sort_order": 19,
+      "branch": "branch_3",
+      "sort_order": 1,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -9105,8 +9129,8 @@
     },
     {
       "code": "tech_20",
-      "branch": "branch_2",
-      "sort_order": 20,
+      "branch": "branch_3",
+      "sort_order": 2,
       "max_level": 25,
       "research_center_level": 1,
       "name": {
@@ -9732,6 +9756,515 @@
           "type": "technology_level",
           "target": "tech_13",
           "target_level": 25,
+          "subject_level": 25
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 2,
+          "subject_level": 2
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 3,
+          "subject_level": 4
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 4,
+          "subject_level": 6
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 5,
+          "subject_level": 7
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 6,
+          "subject_level": 9
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 7,
+          "subject_level": 11
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 8,
+          "subject_level": 12
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 9,
+          "subject_level": 14
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 10,
+          "subject_level": 16
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 11,
+          "subject_level": 17
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 12,
+          "subject_level": 19
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 13,
+          "subject_level": 21
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 14,
+          "subject_level": 22
+        },
+        {
+          "type": "building_level",
+          "target": "building_9",
+          "target_level": 15,
+          "subject_level": 24
+        }
+      ]
+    },
+    {
+      "code": "tech_21",
+      "branch": "branch_1",
+      "sort_order": 9,
+      "max_level": 25,
+      "research_center_level": 1,
+      "name": {
+        "uk": "Розвиток науки",
+        "en": "Science development"
+      },
+      "description": {
+        "uk": "Розвиток групи «Фундаментальні науки».",
+        "en": "Technology of its branch."
+      },
+      "duration_seconds": {
+        "base": 500,
+        "growth": 1.4,
+        "step": 0,
+        "significant": 2
+      },
+      "costs": [
+        {
+          "resource": "resource_20",
+          "growth": {
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 1
+        },
+        {
+          "resource": "resource_27",
+          "growth": {
+            "base": 50,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 1
+        },
+        {
+          "resource": "resource_1",
+          "growth": {
+            "base": 100,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 4
+        },
+        {
+          "resource": "resource_11",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 8
+        },
+        {
+          "resource": "resource_23",
+          "growth": {
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 12
+        },
+        {
+          "resource": "resource_8",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_19",
+          "growth": {
+            "base": 10,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 13
+        },
+        {
+          "resource": "resource_10",
+          "growth": {
+            "base": 20,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
+        },
+        {
+          "resource": "resource_22",
+          "growth": {
+            "base": 40,
+            "growth": 1.4,
+            "step": 0,
+            "significant": 2
+          },
+          "from_level": 18
+        }
+      ],
+      "effects": [
+        {
+          "type": "research_time",
+          "growth": {
+            "base": 0.961538,
+            "growth": 0.961538,
+            "step": 0
+          }
+        }
+      ],
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 1,
+          "subject_level": 2
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 2,
+          "subject_level": 3
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 1,
+          "subject_level": 3
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 3,
+          "subject_level": 4
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 2,
+          "subject_level": 4
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 4,
+          "subject_level": 6
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 3,
+          "subject_level": 6
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 1,
+          "subject_level": 6
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 5,
+          "subject_level": 7
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 4,
+          "subject_level": 7
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 2,
+          "subject_level": 7
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 6,
+          "subject_level": 8
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 7,
+          "subject_level": 9
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 5,
+          "subject_level": 9
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 3,
+          "subject_level": 9
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 8,
+          "subject_level": 10
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 6,
+          "subject_level": 10
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 4,
+          "subject_level": 10
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 9,
+          "subject_level": 12
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 7,
+          "subject_level": 12
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 5,
+          "subject_level": 12
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 10,
+          "subject_level": 13
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 8,
+          "subject_level": 13
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 6,
+          "subject_level": 13
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 11,
+          "subject_level": 14
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 12,
+          "subject_level": 15
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 9,
+          "subject_level": 15
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 7,
+          "subject_level": 15
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 13,
+          "subject_level": 16
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 10,
+          "subject_level": 16
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 8,
+          "subject_level": 16
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 11,
+          "subject_level": 17
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 9,
+          "subject_level": 17
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 14,
+          "subject_level": 18
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 15,
+          "subject_level": 19
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 12,
+          "subject_level": 19
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 10,
+          "subject_level": 19
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 16,
+          "subject_level": 20
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 13,
+          "subject_level": 20
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 11,
+          "subject_level": 20
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 17,
+          "subject_level": 21
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 18,
+          "subject_level": 22
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 14,
+          "subject_level": 22
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 12,
+          "subject_level": 22
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 15,
+          "subject_level": 23
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 13,
+          "subject_level": 23
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 19,
+          "subject_level": 24
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 20,
+          "subject_level": 25
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 16,
+          "subject_level": 25
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_5",
+          "target_level": 14,
           "subject_level": 25
         },
         {

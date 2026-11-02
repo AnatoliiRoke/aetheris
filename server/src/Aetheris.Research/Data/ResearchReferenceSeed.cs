@@ -26,9 +26,10 @@ namespace Aetheris.Research.Data;
 /// </para>
 /// <para>
 /// Every technology and every branch has a neutral code and its texts in every language
-/// (task 00022, task 00023). The seed writes the branches only while their table is empty and
-/// adds the technologies that are missing by their codes (task 00015), so it never overwrites a
-/// change of the admin panel and never changes a code.
+/// (task 00022, task 00023). The seed adds the technologies that are missing by their codes
+/// (task 00015) and does not rewrite their costs. It does put every starting technology into
+/// the branch and the order the starting data names, renames those four buttons, and archives
+/// the two old buttons the migration left behind (<c>branch_5</c>, <c>branch_6</c>).
 /// </para>
 /// </remarks>
 public static class ResearchReferenceSeed
@@ -251,7 +252,132 @@ public static class ResearchReferenceSeed
 
         await WorldReferenceSeed.RaiseAsync(codes, ResearchTextKeys.CodeGroup, seed.Technologies.Select(technology => technology.Code), cancellationToken).ConfigureAwait(false);
 
-        return missingTechnologies.Count > 0;
+        bool groupsAligned = await AlignGroupsAsync(dbContext, texts, seed, cancellationToken).ConfigureAwait(false);
+
+        return missingTechnologies.Count > 0 || groupsAligned;
+    }
+
+    /// <summary>
+    /// The old buttons the migration wrote and the research screen no longer shows:
+    /// colonisation and the previous trade button. Trade is <c>branch_3</c> now.
+    /// </summary>
+    private static readonly string[] RetiredBranchCodes = ["branch_5", "branch_6"];
+
+    /// <summary>
+    /// Moves the starting technologies into the branches and the order the starting data names,
+    /// writes the names of those buttons, and archives the two buttons that are no longer used.
+    /// A branch the starting data does not mention, other than those two, stays.
+    /// </summary>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="texts">The texts of the game data.</param>
+    /// <param name="seed">The starting data.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when a row or a button name changed.</returns>
+    private static async Task<bool> AlignGroupsAsync(
+        ResearchDbContext dbContext,
+        ILocalizationTexts texts,
+        ResearchSeedData seed,
+        CancellationToken cancellationToken)
+    {
+        bool changed = false;
+        List<TechnologyBranchEntity> branches = await dbContext.TechnologyBranches.ToListAsync(cancellationToken).ConfigureAwait(false);
+        Dictionary<string, TechnologyBranchEntity> branchesByCode = branches.ToDictionary(branch => branch.Code, StringComparer.Ordinal);
+
+        foreach (SeedBranch seedBranch in seed.Branches)
+        {
+            if (!branchesByCode.TryGetValue(seedBranch.Code, out TechnologyBranchEntity? branch))
+            {
+                branch = new TechnologyBranchEntity
+                {
+                    Code = seedBranch.Code,
+                    NameKey = ResearchBranchTextKeys.Name(seedBranch.Code),
+                    DescriptionKey = ResearchBranchTextKeys.Description(seedBranch.Code),
+                    SortOrder = seedBranch.SortOrder,
+                };
+                dbContext.TechnologyBranches.Add(branch);
+                branchesByCode[seedBranch.Code] = branch;
+                changed = true;
+                continue;
+            }
+
+            bool branchChanged = false;
+
+            if (branch.SortOrder != seedBranch.SortOrder)
+            {
+                branch.SortOrder = seedBranch.SortOrder;
+                branchChanged = true;
+            }
+
+            if (branch.IsArchived)
+            {
+                branch.IsArchived = false;
+                branchChanged = true;
+            }
+
+            if (branchChanged)
+            {
+                branch.Version++;
+                changed = true;
+            }
+        }
+
+        if (changed)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        HashSet<string> technologyCodes = [.. seed.Technologies.Select(technology => technology.Code)];
+        Dictionary<string, TechnologyEntity> technologies = await dbContext.Technologies
+            .Where(technology => technologyCodes.Contains(technology.Code))
+            .ToDictionaryAsync(technology => technology.Code, StringComparer.Ordinal, cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (SeedTechnology seedTechnology in seed.Technologies)
+        {
+            if (!technologies.TryGetValue(seedTechnology.Code, out TechnologyEntity? technology)
+                || !branchesByCode.TryGetValue(seedTechnology.Branch, out TechnologyBranchEntity? branch))
+            {
+                continue;
+            }
+
+            if (technology.BranchId == branch.Id && technology.SortOrder == seedTechnology.SortOrder)
+            {
+                continue;
+            }
+
+            technology.BranchId = branch.Id;
+            technology.SortOrder = seedTechnology.SortOrder;
+            technology.Version++;
+            changed = true;
+        }
+
+        foreach (string code in RetiredBranchCodes)
+        {
+            if (!branchesByCode.TryGetValue(code, out TechnologyBranchEntity? retired) || retired.IsArchived)
+            {
+                continue;
+            }
+
+            retired.IsArchived = true;
+            retired.Version++;
+            changed = true;
+        }
+
+        if (dbContext.ChangeTracker.HasChanges())
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        List<LocalizationTextEntry> buttonTexts =
+        [
+            .. seed.Branches.SelectMany(branch => SeedTexts.Entries(ResearchBranchTextKeys.Name(branch.Code), branch.Name)),
+            .. seed.Branches.SelectMany(branch => SeedTexts.Entries(ResearchBranchTextKeys.Description(branch.Code), branch.Description)),
+        ];
+        IReadOnlyDictionary<(string Key, string Language), string> previousTexts = await texts.SetAsync(buttonTexts, SeedTexts.Author, cancellationToken).ConfigureAwait(false);
+        bool textsChanged = buttonTexts.Any(entry =>
+            !previousTexts.TryGetValue((entry.Key, entry.Language), out string? previous) || !string.Equals(previous, entry.Text, StringComparison.Ordinal));
+
+        return changed || textsChanged;
     }
 
     /// <summary>
