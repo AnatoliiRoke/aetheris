@@ -54,6 +54,7 @@ public sealed record ProductionFactorySummaryDto(
 /// <param name="Ingredients">The ingredients of one unit.</param>
 /// <param name="PartGroupId">The group of the part the recipe makes, so a list of all the recipes can be filtered by it, or <see langword="null"/> for a resource.</param>
 /// <param name="PartGroupNameKey">The localisation key of the name of that group, or <see langword="null"/>.</param>
+/// <param name="PartGroupCode">The stable code of that group, so the client groups the recipes by it without knowing the identifiers, or <see langword="null"/> for a resource.</param>
 public sealed record ProductionRecipeDto(
     int RecipeId,
     string Code,
@@ -70,7 +71,8 @@ public sealed record ProductionRecipeDto(
     long UnitSeconds,
     IReadOnlyList<ProductionIngredientDto> Ingredients,
     int? PartGroupId = null,
-    string? PartGroupNameKey = null);
+    string? PartGroupNameKey = null,
+    string? PartGroupCode = null);
 
 /// <summary>
 /// Every recipe of every factory with the factories of a body, so one screen shows all that can

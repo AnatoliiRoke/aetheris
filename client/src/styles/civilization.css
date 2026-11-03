@@ -4,22 +4,22 @@
 
 .civ {
   --header-h: 64px;
-  --fs-body: 15px;
-  --fs-h3: 18px;
-  --fs-caption: 11px;
-  --fs-note: 12px;
-  --fs-ui: 14px;
-  --fs-game: 15px;
-  --fs-section: 16px;
-  --fs-card: 17px;
-  --fs-name: 18px;
-  --fs-title: 32px;
+  --fs-body: 14px;
+  --fs-h3: 17px;
+  --fs-caption: 10px;
+  --fs-note: 11px;
+  --fs-ui: 13px;
+  --fs-game: 14px;
+  --fs-section: 15px;
+  --fs-card: 16px;
+  --fs-name: 17px;
+  --fs-title: 31px;
   /* One size of the heading on every screen of the game, as on the map (the author, 01.11.2026). */
-  --fs-title-planet: 24px;
-  --fs-title-screen: 24px;
-  --fs-title-phone: 26px;
-  --fs-title-planet-phone: 22px;
-  --fs-title-screen-phone: 22px;
+  --fs-title-planet: 23px;
+  --fs-title-screen: 23px;
+  --fs-title-phone: 25px;
+  --fs-title-planet-phone: 21px;
+  --fs-title-screen-phone: 21px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -88,7 +88,7 @@
 }
 .civ-nav {
   display: flex; align-items: center; gap: var(--space-3);
-  min-height: 44px; padding-inline: var(--space-3); border-radius: var(--r-md);
+  min-height: 34px; padding-inline: var(--space-3); border-radius: var(--r-md);
   text-decoration: none; font-size: var(--fs-game); font-weight: 500; color: var(--text-soft);
 }
 .civ-nav:hover { background: color-mix(in srgb, var(--border) 40%, transparent); }

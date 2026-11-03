@@ -51,12 +51,12 @@
 
   /* Typography */
   --font: "Inter", Roboto, system-ui, Arial, sans-serif;
-  --fs-h1: clamp(34px, calc(2.2vw + 25px), 56px);
-  --fs-h2: clamp(26px, calc(0.95vw + 22.3px), 36px);
-  --fs-h3: clamp(20px, calc(0.19vw + 19.26px), 22px);
-  --fs-body: 16px;
-  --fs-small: 13px;
-  --fs-tiny: 12px;
+  --fs-h1: clamp(33px, calc(2.2vw + 25px), 55px);
+  --fs-h2: clamp(25px, calc(0.95vw + 22.3px), 35px);
+  --fs-h3: clamp(19px, calc(0.19vw + 19.26px), 21px);
+  --fs-body: 15px;
+  --fs-small: 12px;
+  --fs-tiny: 11px;
 
   /* Spacing */
   --space-1: 4px;

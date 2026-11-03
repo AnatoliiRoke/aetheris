@@ -1,17 +1,10 @@
 import type { ProductionFactorySummary, ProductionReason, ProductionRecipe } from '../../api/productionApi';
 import type { Language } from '../../i18n/context';
 import type { EntityText } from '../../texts/context';
+import { allRecipes, groupKeyOf, resourcesGroupKey } from './productionGroups';
 import { lookup } from './planetText';
 
-/**
- * The value of a filter that keeps everything.
- */
-export const allRecipes = 'all';
-
-/**
- * The value of the filter by group that keeps the recipes of the resources, which have no group of parts.
- */
-export const resourcesGroupKey = 'resources';
+export { allRecipes, resourcesGroupKey };
 
 /**
  * The chips of the filter by availability: the identifier of the chip and what it keeps.
@@ -33,16 +26,16 @@ export interface RecipeFilter {
   factory: string;
   /** The identifier of the group of the parts, {@link resourcesGroupKey} or {@link allRecipes}. */
   group: string;
+  /** The groups the active section shows; a recipe of another group is left out. */
+  sectionGroups: readonly string[];
 }
 
 /**
- * The key a recipe is grouped by: the group of its part, or {@link resourcesGroupKey}.
+ * The key a recipe is grouped by: the code of the group of its part, or {@link resourcesGroupKey}.
  *
  * @param recipe The recipe.
  */
-export function groupKeyOf(recipe: ProductionRecipe): string {
-  return recipe.partGroupId === null ? resourcesGroupKey : String(recipe.partGroupId);
-}
+export { groupKeyOf };
 
 /**
  * Keeps the recipes that fit every filter.
@@ -59,6 +52,7 @@ export function filterRecipes(recipes: ProductionRecipe[], filter: RecipeFilter,
     (recipe) =>
       (availability === null || recipe.isAvailable === availability.isAvailable) &&
       (filter.factory === allRecipes || String(recipe.buildingTypeId) === filter.factory) &&
+      (filter.sectionGroups.length === 0 || filter.sectionGroups.includes(groupKeyOf(recipe))) &&
       (filter.group === allRecipes || groupKeyOf(recipe) === filter.group) &&
       (needle === '' || textOf(recipe).toLocaleLowerCase().includes(needle)),
   );

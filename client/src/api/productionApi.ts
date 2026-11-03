@@ -49,6 +49,8 @@ export interface ProductionRecipe {
   partGroupId: number | null;
   /** The localisation key of the name of that group, or `null`. */
   partGroupNameKey: string | null;
+  /** The stable code of that group, so the client groups the recipes by it, or `null` for a resource. */
+  partGroupCode: string | null;
 }
 
 /**

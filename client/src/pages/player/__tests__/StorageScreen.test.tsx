@@ -117,7 +117,7 @@ describe('StoragePage: the screen of the storage (task 00020)', () => {
     const table = await screen.findByRole('table', { name: 'Модулі' });
     const row = within(table).getByText('Корпус «Оса» Мк. II').closest('tr')!;
 
-    expect(within(row).getByText('Корпусні модулі')).toBeInTheDocument();
+    expect(within(row).getByText('Реактори')).toBeInTheDocument();
     // The quantity with the unit, as the mockup draws it.
     expect(row.textContent).toContain('4 шт.');
     expect(production.stock).toHaveBeenCalledWith(10);

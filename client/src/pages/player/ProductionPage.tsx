@@ -14,6 +14,7 @@ import { ScreenHead } from './ScreenHead';
 import { Tabs } from './Tabs';
 import { galaxyPlace } from './planetText';
 import { allRecipes, availabilityFilters, factoryOf, filterRecipes, groupRecipes, resourcesGroupKey } from './productionRecipes';
+import { productionSections, weaponGroupCodes, type ProductionSectionKey } from './productionGroups';
 import { noticeFromError, type Notice } from './screenNotice';
 import { useProductionOrders } from './useActiveOrders';
 import { usePlanet } from './usePlanet';
@@ -50,6 +51,7 @@ export function ProductionPage() {
   const [query, setQuery] = useState('');
   const [availability, setAvailability] = useState(allRecipes);
   const [factory, setFactory] = useState(allRecipes);
+  const [section, setSection] = useState<ProductionSectionKey>('resources');
   const [group, setGroup] = useState(allRecipes);
 
   // The tiles are drawn again only when their own data changes: the callback given to them keeps
@@ -91,16 +93,57 @@ export function ProductionPage() {
     (entry: { key: string; nameKey: string | null }) => (entry.key === resourcesGroupKey ? t('production.groupResources') : (text(entry.nameKey ?? '') ?? entry.nameKey ?? entry.key)),
     [t, text],
   );
-  // The tabs of the groups, like the categories of the construction: "all", then every group the recipes have.
-  const groupTabs = useMemo(() => [{ id: allRecipes, label: t('production.allGroups') }, ...groups.map((entry) => ({ id: entry.key, label: groupName(entry) }))], [groups, groupName, t]);
+  // The sections of the screen: the resources, the modules of the ships, the hulls of the ships
+  // and the modules of the base. A section with no recipes is left out.
+  const sections = useMemo(() => productionSections.filter((entry) => groups.some((group) => entry.key === 'resources' ? group.key === resourcesGroupKey : entry.groups.includes(group.key))), [groups]);
+  const sectionTabs = useMemo(
+    () => sections.map((entry) => ({ id: entry.key, label: t(`production.section.${entry.key}` as never) })),
+    [sections, t],
+  );
+  // The tabs of the groups of the active section: every group it has, in the order of the section.
+  const activeSection = sections.find((entry) => entry.key === section) ?? sections[0] ?? null;
+  const groupTabs = useMemo(() => {
+    if (!activeSection) {
+      return [];
+    }
+
+    if (activeSection.key === 'resources') {
+      return [{ id: allRecipes, label: t('production.groupResources') }];
+    }
+
+    const tabs = [{ id: allRecipes, label: t('production.allGroups') }];
+
+    for (const key of activeSection.groups) {
+      const group = groups.find((entry) => entry.key === key);
+
+      if (group) {
+        tabs.push({ id: key, label: key === 'weapons' ? t('production.groupWeapons') : groupName(group) });
+      }
+    }
+
+    return tabs;
+  }, [activeSection, groups, groupName, t]);
   // A tab that no longer exists shows everything.
-  const activeGroup = groups.some((entry) => entry.key === group) ? group : allRecipes;
+  const activeGroup = groupTabs.some((entry) => entry.id === group) ? group : allRecipes;
+  // The groups the active section shows. The weapons are a tab of their own, so they keep their
+  // three kinds apart; the resources are a section of their own.
+  const sectionGroups = useMemo(() => {
+    if (!activeSection) {
+      return [];
+    }
+
+    if (activeSection.key === 'resources') {
+      return [resourcesGroupKey];
+    }
+
+    return activeSection.groups.flatMap((key) => (key === 'weapons' ? [...weaponGroupCodes] : [key]));
+  }, [activeSection]);
   const visible = useMemo(
     () =>
       recipes
-        ? filterRecipes(recipes, { query, availability, factory, group: activeGroup }, (recipe) => text(recipe.nameKey) ?? recipe.nameKey)
+        ? filterRecipes(recipes, { query, availability, factory, group: activeGroup, sectionGroups }, (recipe) => text(recipe.nameKey) ?? recipe.nameKey)
         : [],
-    [recipes, query, availability, factory, activeGroup, text],
+    [recipes, query, availability, factory, activeGroup, sectionGroups, text],
   );
   const factoryTypes = useMemo(() => [...new Set((recipes ?? []).map((recipe) => recipe.buildingTypeId).filter((typeId): typeId is number => typeId !== null))], [recipes]);
   // The name of a factory comes from the factories of the body, and for a factory the body has not
@@ -190,7 +233,10 @@ export function ProductionPage() {
         </div>
       ) : (
         <section aria-label={t('production.recipes')} className="panel">
-          <Tabs active={activeGroup} label={t('production.groups')} onChange={setGroup} tabs={groupTabs} />
+          <Tabs active={activeSection?.key ?? ''} label={t('production.sections')} onChange={(id) => { setSection(id as ProductionSectionKey); setGroup(allRecipes); }} tabs={sectionTabs} />
+          {groupTabs.length > 1 ? (
+            <Tabs active={activeGroup} label={t('production.groups')} onChange={setGroup} tabs={groupTabs} />
+          ) : null}
           <div className="tech-tools">
             <label className="field tech-search">
               <span className="visually-hidden">{t('production.search')}</span>

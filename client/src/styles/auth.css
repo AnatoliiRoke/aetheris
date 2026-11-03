@@ -7,10 +7,10 @@
 .auth__side::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, rgba(7, 11, 22, 0.95) 0%, rgba(7, 11, 22, 0.2) 55%, rgba(7, 11, 22, 0.6) 100%); }
 .auth__side-logo { position: absolute; left: 48px; top: 40px; }
 .auth__side-copy { position: absolute; left: 48px; right: 48px; bottom: 48px; display: flex; flex-direction: column; gap: 10px; }
-.auth__side-title { font-size: 36px; font-weight: 700; line-height: 1.2; }
+.auth__side-title { font-size: 35px; font-weight: 700; line-height: 1.2; }
 .auth__main { flex: 1 1 50%; min-width: 0; display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-6) var(--space-7); }
 .auth__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
-.back-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 4px; color: var(--text-2); font-weight: 500; font-size: 15px; }
+.back-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 4px; color: var(--text-2); font-weight: 500; font-size: 14px; }
 .back-link:hover { color: var(--text-1); }
 .back-link svg { width: 16px; height: 16px; }
 .auth__banner { display: none; }
@@ -19,7 +19,7 @@
 .auth__title { font-size: var(--fs-h2); font-weight: 700; line-height: 1.2; }
 .auth__legal { text-align: center; font-size: var(--fs-small); color: var(--text-2); }
 .auth__legal a { color: var(--text-2); text-decoration: underline; }
-.auth__switch { text-align: center; font-size: 15px; color: var(--text-2); }
+.auth__switch { text-align: center; font-size: 14px; color: var(--text-2); }
 
 @media (max-width: 767px) {
   .auth { flex-direction: column; }
@@ -43,7 +43,7 @@
 .field__control { position: relative; }
 .input {
   width: 100%; min-height: 52px; padding: 0 16px; border-radius: var(--r-lg);
-  border: 1px solid var(--border-strong); background: var(--bg-1); color: var(--text-1); font-size: 16px;
+  border: 1px solid var(--border-strong); background: var(--bg-1); color: var(--text-1); font-size: 15px;
   transition: border-color .18s ease, box-shadow .18s ease;
 }
 .input::placeholder { color: #6F7C9C; }
@@ -64,19 +64,19 @@
 .hint--error, .error-text { color: var(--danger-text); }
 .hint--error::before, .error-text::before { content: "⚠"; font-weight: 700; }
 .error-text { display: flex; align-items: flex-start; gap: 6px; font-size: var(--fs-small); }
-.check { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 4px 0; font-size: 15px; cursor: pointer; }
+.check { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 4px 0; font-size: 14px; cursor: pointer; }
 .check input { flex: 0 0 auto; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--accent); cursor: pointer; }
 .check a { font-weight: 600; text-decoration: underline; }
 .divider { display: flex; align-items: center; gap: 12px; font-size: var(--fs-small); color: var(--text-2); }
 .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 .provider-mark {
   width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--text-2);
-  display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
 }
 
 /* Alerts */
-.alert { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: var(--r-lg); border: 1px solid; font-size: 15px; }
-.alert__icon { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--on-accent); }
+.alert { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: var(--r-lg); border: 1px solid; font-size: 14px; }
+.alert__icon { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: var(--on-accent); }
 .alert__body { display: flex; flex-direction: column; gap: 2px; }
 .alert__body strong { font-weight: 600; }
 .alert__body span { font-size: var(--fs-small); color: var(--text-soft); }

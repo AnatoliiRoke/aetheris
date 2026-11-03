@@ -19,11 +19,14 @@ describe('the production screen (task 00032)', () => {
 
     // The resources and two groups of parts; the recipe of the factory the body lacks is among them, closed.
     expect(within(recipes).getByRole('heading', { name: 'Ресурси' })).toBeInTheDocument();
-    expect(within(recipes).getByRole('heading', { name: 'Корпусні модулі' })).toBeInTheDocument();
-    expect(within(recipes).getByRole('heading', { name: 'Реактори' })).toBeInTheDocument();
     expect(within(recipes).getByText('Будматеріали')).toBeInTheDocument();
-    expect(within(recipes).getByText('Корпусний модуль')).toBeInTheDocument();
-    expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
+    // The sections are the first level of the tabs: the resources, the modules of the ships, the
+    // hulls of the ships and the modules of the base.
+    const sections = within(recipes).getByRole('tablist', { name: 'Розділи виробництва' });
+
+    expect(within(sections).getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Ресурси', 'Модулі кораблів']);
+    expect(within(recipes).queryByText('Корпусний модуль')).toBeNull();
+    expect(within(recipes).queryByText('Реактор малий')).toBeNull();
     // The cost of a unit is a list of resources one by one, like on the other screens, and the time of a unit.
     const materials = within(within(recipes).getByText('Будматеріали').closest('li')!);
     const cost = materials.getByRole('list', { name: 'Потрібні ресурси' });
@@ -33,8 +36,29 @@ describe('the production screen (task 00032)', () => {
     expect(within(recipes).queryByText(/На одиницю/)).toBeNull();
     // The description of a recipe is not on the tile.
     expect(within(recipes).queryByText('Плити й балки з сировини.')).toBeNull();
+    // The recipe of the factory the body lacks is closed, and it is in the modules of the ships.
+    expect(within(recipes).queryByText('Спершу збудуй: Верф')).toBeNull();
+  });
+
+  it('shows the modules of the ships in the second section, with the groups of their parts', async () => {
+    const user = userEvent.setup();
+    renderPage('/planet/production', { auth: signedIn() });
+
+    const recipes = await screen.findByRole('region', { name: 'Рецепти' });
+    await within(recipes).findByText('Будматеріали');
+
+    await user.click(within(recipes).getByRole('tab', { name: 'Модулі кораблів' }));
+
+    expect(within(recipes).getByText('Корпусний модуль')).toBeInTheDocument();
+    expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
+    expect(within(recipes).queryByText('Будматеріали')).toBeNull();
+    // The recipe of the factory the body lacks is closed with the reason that names it.
     expect(within(recipes).getByText('Спершу збудуй: Верф')).toBeInTheDocument();
-    expect(within(recipes).getAllByRole('button', { name: 'Виробляти' })).toHaveLength(1);
+
+    // The groups of the section are the second level of the tabs.
+    const groups = within(recipes).getByRole('tablist', { name: 'Групи рецептів' });
+
+    expect(within(groups).getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Усі', 'Реактори', 'Інші корабельні']);
   });
 
   it('filters the recipes by the search, the availability, the factory and the group', async () => {
@@ -42,54 +66,60 @@ describe('the production screen (task 00032)', () => {
     renderPage('/planet/production', { auth: signedIn() });
 
     const recipes = await screen.findByRole('region', { name: 'Рецепти' });
+    await within(recipes).findByText('Будматеріали');
+
+    // The sections of the screen keep the recipes of the other sections out of the way.
+    await user.click(within(recipes).getByRole('tab', { name: 'Модулі кораблів' }));
     await within(recipes).findByText('Реактор малий');
 
     await user.type(within(recipes).getByRole('searchbox'), 'реактор');
-    expect(within(recipes).queryByText('Будматеріали')).toBeNull();
+    expect(within(recipes).queryByText('Корпусний модуль')).toBeNull();
     expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
     await user.clear(within(recipes).getByRole('searchbox'));
 
+    // Both recipes of the ships are closed, so the filter of the available ones leaves none.
     await user.click(within(recipes).getByRole('button', { name: 'Доступні' }));
-    expect(within(recipes).getByText('Будматеріали')).toBeInTheDocument();
+    expect(within(recipes).queryByText('Реактор малий')).toBeNull();
     expect(within(recipes).queryByText('Корпусний модуль')).toBeNull();
     await user.click(within(recipes).getByRole('button', { name: 'Усі' }));
 
     await user.selectOptions(within(recipes).getByLabelText('Завод'), 'Верф');
-    expect(within(recipes).queryByText('Будматеріали')).toBeNull();
+    expect(within(recipes).queryByText('Корпусний модуль')).toBeNull();
     expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
     await user.selectOptions(within(recipes).getByLabelText('Завод'), 'Усі заводи');
-
-    await user.click(within(recipes).getByRole('tab', { name: 'Ресурси' }));
-    expect(within(recipes).getByText('Будматеріали')).toBeInTheDocument();
-    expect(within(recipes).queryByText('Реактор малий')).toBeNull();
 
     await user.type(within(recipes).getByRole('searchbox'), 'немає такого');
     expect(await within(recipes).findByText('Жоден рецепт не підходить під фільтри.')).toBeInTheDocument();
   });
 
-  it('switches the groups of the recipes with the tabs on top, like the categories of the construction', async () => {
+  it('switches the sections and the groups of the recipes with the two levels of tabs', async () => {
     const user = userEvent.setup();
     renderPage('/planet/production', { auth: signedIn() });
 
     const recipes = await screen.findByRole('region', { name: 'Рецепти' });
-    await within(recipes).findByText('Реактор малий');
-    const tablist = within(recipes).getByRole('tablist', { name: 'Групи рецептів' });
-    const labels = within(tablist).getAllByRole('tab').map((tab) => tab.textContent);
+    await within(recipes).findByText('Будматеріали');
 
-    expect(labels[0]).toBe('Усі');
-    expect(labels).toContain('Ресурси');
-    expect(within(tablist).getByRole('tab', { name: 'Усі' })).toHaveAttribute('aria-selected', 'true');
+    const sections = within(recipes).getByRole('tablist', { name: 'Розділи виробництва' });
+
+    expect(within(sections).getByRole('tab', { name: 'Ресурси' })).toHaveAttribute('aria-selected', 'true');
     expect(within(recipes).queryByLabelText('Група')).toBeNull();
 
-    await user.click(within(tablist).getByRole('tab', { name: 'Ресурси' }));
+    await user.click(within(sections).getByRole('tab', { name: 'Модулі кораблів' }));
 
-    expect(within(tablist).getByRole('tab', { name: 'Ресурси' })).toHaveAttribute('aria-selected', 'true');
-    expect(within(recipes).getByText('Будматеріали')).toBeInTheDocument();
-    expect(within(recipes).queryByText('Реактор малий')).toBeNull();
-
-    await user.click(within(tablist).getByRole('tab', { name: 'Усі' }));
-
+    expect(within(sections).getByRole('tab', { name: 'Модулі кораблів' })).toHaveAttribute('aria-selected', 'true');
     expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
+    expect(within(recipes).queryByText('Будматеріали')).toBeNull();
+
+    // The second level of the tabs holds the groups of the active section.
+    const groups = within(recipes).getByRole('tablist', { name: 'Групи рецептів' });
+
+    expect(within(groups).getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Усі', 'Реактори', 'Інші корабельні']);
+
+    await user.click(within(groups).getByRole('tab', { name: 'Реактори' }));
+
+    expect(within(groups).getByRole('tab', { name: 'Реактори' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
+    expect(within(recipes).queryByText('Корпусний модуль')).toBeNull();
   });
 
   it('puts the chosen number of units into the queue of the factory that makes the recipe', async () => {

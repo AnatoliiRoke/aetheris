@@ -756,7 +756,8 @@ public sealed class ProductionQueueService
                         : catalog.FindPart(ingredient.PartTypeId ?? 0)?.NameKey ?? string.Empty)),
             ],
             groupOfProduct?.Id,
-            groupOfProduct?.NameKey);
+            groupOfProduct?.NameKey,
+            groupOfProduct?.Code);
     }
 
     /// <summary>
