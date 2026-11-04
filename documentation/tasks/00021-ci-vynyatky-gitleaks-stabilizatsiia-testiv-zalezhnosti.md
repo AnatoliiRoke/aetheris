@@ -2,7 +2,7 @@
 
 > **Статус:** п. 1–3 і 5 виконано агентом 28.10.2026 (затверджено автором 28.10.2026); п. 4 (злиття Dependabot-PR) чекає пушу автора. Не залежить від 00010–00020.
 > **Етап:** 1 (технічне)
-> **Документи:** [tech/05 Безпека](../tech/05-bezpeka.md), [tech/06 Тестування](../tech/06-testuvannia-ta-symuliatory.md), [tech/08 Правила коду](../tech/08-pravyla-kodu-dlia-ahentiv.md), `.github/workflows/ci.yml`, `.github/dependabot.yml`
+> **Документи:** [tech/05 Безпека](../tech/05-bezpeka-ta-antychit.md), [tech/06 Тестування](../tech/06-testuvannia-ta-symuliatory.md), [tech/08 Правила коду](../tech/08-pravyla-kodu-dlia-ahentiv.md), `.github/workflows/ci.yml`, `.github/dependabot.yml`
 
 ## 1. Мета
 Зробити CI чесним: щоб червоний колір означав реальну проблему. Зараз перевірка `Secret scan` червона на `main` і в усіх PR, а серед тестів є дві нестабільні перевірки. Також обробити сім PR від Dependabot.

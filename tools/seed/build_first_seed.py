@@ -195,6 +195,7 @@ MODULES_EN = {
     "Скорострільна гармата": "Autocannon",
     "Рейкова гармата": "Railgun",
     "РПУ-X1": "Launcher X1",
+    "РПУ-X1B": "Launcher X1B",
     "РПУ-X2": "Launcher X2",
     "РПУ-X3": "Launcher X3",
     "Сталева плита": "Steel plate",
@@ -1205,7 +1206,10 @@ def main() -> None:
     items = catalog["items"]
     buildings = [row for row in items if row["kind"] == "budivlia"]
     techs = [row for row in items if row["kind"] == "rozvytok"]
-    modules = [row for row in items if row["kind"] == "modul"]
+    # An upgraded module (the dependency file names its base in upgradeOf, task 00043) is kept out
+    # of the numbered modules, so the codes of the other parts and recipes do not shift.
+    modules = [row for row in items if row["kind"] == "modul" and not row.get("upgradeOf")]
+    upgrades = [row for row in items if row["kind"] == "modul" and row.get("upgradeOf")]
     hulls = [row for row in items if row["kind"] == "korpus"]
     if (len(buildings), len(techs), len(modules), len(hulls)) != (56, 19, 83, 27):
         fail("the dependency file does not have 56/19/83/27")
@@ -1215,7 +1219,7 @@ def main() -> None:
     for kind, rows, key in (
         ("resource", [{"name": name} for name, *_rest in RESOURCES], "resource"),
         ("tech", techs, "tech"),
-        ("module", modules, "module"),
+        ("module", modules + upgrades, "module"),
         ("hull", hulls, "hull"),
         ("building", buildings, "building"),
     ):
@@ -1616,6 +1620,7 @@ def main() -> None:
     parts = []
     recipes = []
     group_index = {name: 0 for name in module_group_names}
+    module_place = {}
     for module_number, row in enumerate(modules, start=1):
         index = group_index[row["group"]]
         group_index[row["group"]] = index + 1
@@ -1636,6 +1641,7 @@ def main() -> None:
         # Only the race of a capsule makes it.
         recipe["race"] = CAPSULE_RACES.get(row["name"])
         recipes.append(recipe)
+        module_place[row["name"]] = (index, module_number, parts[-1], recipe)
 
     hull_index = {name: 0 for name in hull_group_names}
     for hull_number, row in enumerate(hulls, start=1):
@@ -1678,6 +1684,41 @@ def main() -> None:
             "hull_group": None,
             "part_name": resource_name,
         })
+
+    # An upgraded module (task 00043) is its base with the next mark: the same recipe and
+    # requirements, the characteristics and the weight of the next place of the group. Its part
+    # and its recipe come after all the others, so no code of the file shifts.
+    for upgrade_number, row in enumerate(upgrades, start=1):
+        if row["upgradeOf"] not in module_place:
+            fail(f"the base module of {row['name']} is missing: {row['upgradeOf']}")
+        base_index, base_number, base_part, base_recipe = module_place[row["upgradeOf"]]
+        base_row = next(item for item in modules if item["name"] == row["upgradeOf"])
+        if (row["group"], row["sciences"], row["resources"]) != (base_row["group"], base_row["sciences"], base_row["resources"]):
+            fail(f"the upgraded module {row['name']} differs from its base in the group, the sciences or the resources")
+        stats, attributes = module_characteristics(row["upgradeOf"], row["group"], base_index + 1, cost_base, part_factor, trade_levels, coefficient(parameters, "world.seed.capsule.inhabitants"))
+        part_code = f"part_m_{len(modules) + upgrade_number}"
+        parts.append({
+            "code": part_code,
+            "group": base_part["group"],
+            "mark_level": base_part["mark_level"] + 1,
+            "sort_order": base_part["sort_order"],
+            "name": text(row["name"], english(MODULES_EN, row["name"], "module")),
+            "description": dict(base_part["description"]),
+            "attributes": attributes,
+            "weight": num(part_factor ** base_number),
+            "characteristics": stats,
+        })
+        recipe = {
+            **base_recipe,
+            "code": f"recipe_{len(recipes) + 1}",
+            "part": part_code,
+            "name": text(row["name"], part_english(row["name"])),
+            "description": text(f"Виробництво «{row['name']}».", base_recipe["description"]["en"]),
+            "ingredients": [dict(ingredient) for ingredient in base_recipe["ingredients"]],
+            "requirements": [dict(requirement) for requirement in base_recipe["requirements"]],
+            "part_name": row["name"],
+        }
+        recipes.append(recipe)
 
     race_groups = {
         "race_1": ["Двигуни"],

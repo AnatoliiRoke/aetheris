@@ -24,10 +24,8 @@ export interface RecipeFilter {
   availability: string;
   /** The type of the factory, or {@link allRecipes}. */
   factory: string;
-  /** The identifier of the group of the parts, {@link resourcesGroupKey} or {@link allRecipes}. */
-  group: string;
-  /** The groups the active section shows; a recipe of another group is left out. */
-  sectionGroups: readonly string[];
+  /** The codes of the groups the active tab shows, or {@link resourcesGroupKey}; a recipe of another group is left out. */
+  groups: readonly string[];
 }
 
 /**
@@ -52,8 +50,7 @@ export function filterRecipes(recipes: ProductionRecipe[], filter: RecipeFilter,
     (recipe) =>
       (availability === null || recipe.isAvailable === availability.isAvailable) &&
       (filter.factory === allRecipes || String(recipe.buildingTypeId) === filter.factory) &&
-      (filter.sectionGroups.length === 0 || filter.sectionGroups.includes(groupKeyOf(recipe))) &&
-      (filter.group === allRecipes || groupKeyOf(recipe) === filter.group) &&
+      filter.groups.includes(groupKeyOf(recipe)) &&
       (needle === '' || textOf(recipe).toLocaleLowerCase().includes(needle)),
   );
 }

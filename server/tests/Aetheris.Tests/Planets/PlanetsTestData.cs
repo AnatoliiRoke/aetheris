@@ -249,6 +249,19 @@ public static class PlanetsTestData
     }
 
     /// <summary>
+    /// Gets the resources a building pays with the inhabitants of the body: the counter of the
+    /// population is taken, the storage of the body is not (task 00030, rule 1).
+    /// </summary>
+    /// <param name="services">The scoped services.</param>
+    /// <returns>The identifiers of the resources.</returns>
+    public static async Task<HashSet<int>> PopulationPaidIdsAsync(IServiceProvider services)
+    {
+        ResourceCatalog catalog = await services.GetRequiredService<IWorldModule>().GetResourceCatalogAsync(Token);
+
+        return [.. catalog.Resources.Where(resource => resource.PaidByPopulation).Select(resource => resource.Id)];
+    }
+
+    /// <summary>
     /// Sets the level of a building on a body directly, as if it had been built.
     /// </summary>
     /// <param name="services">The scoped services.</param>

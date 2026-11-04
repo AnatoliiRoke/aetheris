@@ -209,6 +209,7 @@ public static class ResearchReferenceSeed
                 SortOrder = technology.SortOrder,
                 MaxLevel = technology.MaxLevel,
                 ResearchCenterLevel = technology.ResearchCenterLevel,
+                ImageKey = technology.ImageKey,
                 LevelIds =
                 [
                     .. Enumerable.Range(1, technology.MaxLevel).Select(level => new TechnologyLevelEntity
@@ -258,126 +259,54 @@ public static class ResearchReferenceSeed
     }
 
     /// <summary>
-    /// The old buttons the migration wrote and the research screen no longer shows:
-    /// colonisation and the previous trade button. Trade is <c>branch_3</c> now.
-    /// </summary>
-    private static readonly string[] RetiredBranchCodes = ["branch_5", "branch_6"];
-
-    /// <summary>
-    /// Moves the starting technologies into the branches and the order the starting data names,
-    /// writes the names of those buttons, and archives the two buttons that are no longer used.
-    /// A branch the starting data does not mention, other than those two, stays.
+    /// Adds the branches of the starting data that the database does not have yet, with their
+    /// texts. A branch, a technology or a text that exists is never changed: the seed never
+    /// overwrites what the administrator may have edited (documentation/tech/09, section 10a; code
+    /// audit of 04.11.2026). The one-time move of the technologies into the branches of
+    /// 02.11.2026 has run on every database started since then, and a fresh database gets the
+    /// branches and the technologies in their places from the seed itself.
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="texts">The texts of the game data.</param>
     /// <param name="seed">The starting data.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns><see langword="true"/> when a row or a button name changed.</returns>
+    /// <returns><see langword="true"/> when a branch was added.</returns>
     private static async Task<bool> AlignGroupsAsync(
         ResearchDbContext dbContext,
         ILocalizationTexts texts,
         ResearchSeedData seed,
         CancellationToken cancellationToken)
     {
-        bool changed = false;
-        List<TechnologyBranchEntity> branches = await dbContext.TechnologyBranches.ToListAsync(cancellationToken).ConfigureAwait(false);
-        Dictionary<string, TechnologyBranchEntity> branchesByCode = branches.ToDictionary(branch => branch.Code, StringComparer.Ordinal);
+        HashSet<string> known = [.. await dbContext.TechnologyBranches.AsNoTracking()
+            .Select(branch => branch.Code)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false)];
 
-        foreach (SeedBranch seedBranch in seed.Branches)
+        List<SeedBranch> missing = [.. seed.Branches.Where(branch => !known.Contains(branch.Code))];
+
+        if (missing.Count == 0)
         {
-            if (!branchesByCode.TryGetValue(seedBranch.Code, out TechnologyBranchEntity? branch))
-            {
-                branch = new TechnologyBranchEntity
-                {
-                    Code = seedBranch.Code,
-                    NameKey = ResearchBranchTextKeys.Name(seedBranch.Code),
-                    DescriptionKey = ResearchBranchTextKeys.Description(seedBranch.Code),
-                    SortOrder = seedBranch.SortOrder,
-                };
-                dbContext.TechnologyBranches.Add(branch);
-                branchesByCode[seedBranch.Code] = branch;
-                changed = true;
-                continue;
-            }
-
-            bool branchChanged = false;
-
-            if (branch.SortOrder != seedBranch.SortOrder)
-            {
-                branch.SortOrder = seedBranch.SortOrder;
-                branchChanged = true;
-            }
-
-            if (branch.IsArchived)
-            {
-                branch.IsArchived = false;
-                branchChanged = true;
-            }
-
-            if (branchChanged)
-            {
-                branch.Version++;
-                changed = true;
-            }
+            return false;
         }
 
-        if (changed)
+        dbContext.TechnologyBranches.AddRange(missing.Select(branch => new TechnologyBranchEntity
         {
-            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+            Code = branch.Code,
+            NameKey = ResearchBranchTextKeys.Name(branch.Code),
+            DescriptionKey = ResearchBranchTextKeys.Description(branch.Code),
+            SortOrder = branch.SortOrder,
+        }));
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        HashSet<string> technologyCodes = [.. seed.Technologies.Select(technology => technology.Code)];
-        Dictionary<string, TechnologyEntity> technologies = await dbContext.Technologies
-            .Where(technology => technologyCodes.Contains(technology.Code))
-            .ToDictionaryAsync(technology => technology.Code, StringComparer.Ordinal, cancellationToken)
-            .ConfigureAwait(false);
+        await texts.AddMissingAsync(
+            [
+                .. missing.SelectMany(branch => SeedTexts.Entries(ResearchBranchTextKeys.Name(branch.Code), branch.Name)),
+                .. missing.SelectMany(branch => SeedTexts.Entries(ResearchBranchTextKeys.Description(branch.Code), branch.Description)),
+            ],
+            SeedTexts.Author,
+            cancellationToken).ConfigureAwait(false);
 
-        foreach (SeedTechnology seedTechnology in seed.Technologies)
-        {
-            if (!technologies.TryGetValue(seedTechnology.Code, out TechnologyEntity? technology)
-                || !branchesByCode.TryGetValue(seedTechnology.Branch, out TechnologyBranchEntity? branch))
-            {
-                continue;
-            }
-
-            if (technology.BranchId == branch.Id && technology.SortOrder == seedTechnology.SortOrder)
-            {
-                continue;
-            }
-
-            technology.BranchId = branch.Id;
-            technology.SortOrder = seedTechnology.SortOrder;
-            technology.Version++;
-            changed = true;
-        }
-
-        foreach (string code in RetiredBranchCodes)
-        {
-            if (!branchesByCode.TryGetValue(code, out TechnologyBranchEntity? retired) || retired.IsArchived)
-            {
-                continue;
-            }
-
-            retired.IsArchived = true;
-            retired.Version++;
-            changed = true;
-        }
-
-        if (dbContext.ChangeTracker.HasChanges())
-        {
-            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        List<LocalizationTextEntry> buttonTexts =
-        [
-            .. seed.Branches.SelectMany(branch => SeedTexts.Entries(ResearchBranchTextKeys.Name(branch.Code), branch.Name)),
-            .. seed.Branches.SelectMany(branch => SeedTexts.Entries(ResearchBranchTextKeys.Description(branch.Code), branch.Description)),
-        ];
-        IReadOnlyDictionary<(string Key, string Language), string> previousTexts = await texts.SetAsync(buttonTexts, SeedTexts.Author, cancellationToken).ConfigureAwait(false);
-        bool textsChanged = buttonTexts.Any(entry =>
-            !previousTexts.TryGetValue((entry.Key, entry.Language), out string? previous) || !string.Equals(previous, entry.Text, StringComparison.Ordinal));
-
-        return changed || textsChanged;
+        return true;
     }
 
     /// <summary>
@@ -404,11 +333,11 @@ public static class ResearchReferenceSeed
                 continue;
             }
 
-            foreach (IGrouping<int, Aetheris.Planets.Data.SeedRequirement> group in seedTechnology.Requirements.GroupBy(requirement => requirement.SubjectLevel ?? 1))
+            foreach (IGrouping<int, Aetheris.Planets.SeedRequirement> group in seedTechnology.Requirements.GroupBy(requirement => requirement.SubjectLevel ?? 1))
             {
                 List<RequirementDefinition> definitions = [];
 
-                foreach (Aetheris.Planets.Data.SeedRequirement requirement in group)
+                foreach (Aetheris.Planets.SeedRequirement requirement in group)
                 {
                     int targetId = requirement.Type switch
                     {
@@ -432,11 +361,11 @@ public static class ResearchReferenceSeed
             }
         }
 
-        Aetheris.Planets.Data.PlanetsSeedData planetsSeed = Aetheris.Planets.Data.PlanetsReferenceSeed.Load();
+        Aetheris.Planets.PlanetsSeedData planetsSeed = Aetheris.Planets.PlanetsReferenceSeed.Load();
 
-        foreach (Aetheris.Planets.Data.SeedBuildingType building in planetsSeed.BuildingTypes)
+        foreach (Aetheris.Planets.SeedBuildingType building in planetsSeed.BuildingTypes)
         {
-            List<Aetheris.Planets.Data.SeedRequirement> technologyRequirements =
+            List<Aetheris.Planets.SeedRequirement> technologyRequirements =
             [
                 .. building.Requirements.Where(requirement => requirement.Type == RequirementTypes.TechnologyLevel && insertedCodes.Contains(requirement.Target)),
             ];
@@ -449,7 +378,7 @@ public static class ResearchReferenceSeed
             int buildingTypeId = await planets.FindBuildingTypeIdAsync(building.Code, cancellationToken).ConfigureAwait(false)
                 ?? throw new InvalidOperationException($"The starting data requires a technology for the building '{building.Code}', which the bodies module does not have.");
 
-            foreach (IGrouping<int, Aetheris.Planets.Data.SeedRequirement> group in technologyRequirements.GroupBy(requirement => requirement.SubjectLevel ?? 1))
+            foreach (IGrouping<int, Aetheris.Planets.SeedRequirement> group in technologyRequirements.GroupBy(requirement => requirement.SubjectLevel ?? 1))
             {
                 await requirements.AddAsync(
                     RequirementSubjectTypes.BuildingType,
@@ -525,6 +454,7 @@ public sealed record SeedBranch(
 /// <param name="DurationSeconds">The growth of the time of the research.</param>
 /// <param name="Costs">The growth of the costs.</param>
 /// <param name="Effects">The growth of the effects.</param>
+/// <param name="ImageKey">The key of the picture of the technology, or <see langword="null"/> for the placeholder.</param>
 public sealed record SeedTechnology(
     string Code,
     string Branch,
@@ -536,7 +466,8 @@ public sealed record SeedTechnology(
     SeedGrowth DurationSeconds,
     IReadOnlyList<SeedTechnologyCost> Costs,
     IReadOnlyList<SeedTechnologyEffect> Effects,
-    IReadOnlyList<Aetheris.Planets.Data.SeedRequirement>? Requirements = null);
+    IReadOnlyList<Aetheris.Planets.SeedRequirement>? Requirements = null,
+    string? ImageKey = null);
 
 /// <summary>The cost of a level of a technology of the starting data.</summary>
 /// <param name="Resource">The neutral code of the resource.</param>

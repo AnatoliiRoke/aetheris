@@ -1,4 +1,5 @@
 using Aetheris.Core.Time;
+using Aetheris.Planets;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
@@ -53,6 +54,28 @@ internal static class ProcessesTestData
         await EnsureProcessBuildingAsync(services, "building_9002", BuildingClasses.ModuleRepair);
         await services.GetRequiredService<IProcessesModule>().EnsureAsync(Token);
         services.GetRequiredService<ProcessCatalogCache>().Invalidate();
+    }
+
+    /// <summary>
+    /// Reads the value of an effect at a level of the building of a class from the data, so a test
+    /// counts from the data and not from a number of its own (task 00028, update of 04.11.2026).
+    /// </summary>
+    /// <param name="services">The services of the request.</param>
+    /// <param name="buildingClass">The class of the building, one of <see cref="BuildingClasses"/>.</param>
+    /// <param name="level">The level of the building.</param>
+    /// <param name="effectType">The kind of the effect.</param>
+    /// <returns>The value of the effect.</returns>
+    internal static async Task<decimal> BuildingCoefficientAsync(IServiceProvider services, string buildingClass, int level, string effectType)
+    {
+        PlanetsDbContext dbContext = services.GetRequiredService<PlanetsDbContext>();
+        BuildingTypeEntity type = await dbContext.BuildingTypes.AsNoTracking()
+            .Include(entry => entry.LevelIds)
+            .ThenInclude(entry => entry.EffectIds)
+            .FirstAsync(entry => entry.BuildingClass == buildingClass, Token);
+
+        return type.LevelIds.Single(entry => entry.Level == level)
+            .EffectIds.Single(effect => string.Equals(effect.EffectType, effectType, StringComparison.Ordinal))
+            .Value;
     }
 
     /// <summary>
@@ -325,11 +348,11 @@ internal static class ProcessesTestData
             .SingleAsync(Token);
 
         PlayerTechnologyEntity? learned = await research.PlayerTechnologies
-            .SingleOrDefaultAsync(entry => entry.PlayerId == player.Account.UserId && entry.TechnologyId == technologyId, Token);
+            .SingleOrDefaultAsync(entry => entry.PlayerId == player.Account.UserId && entry.PlanetId == player.PlanetId && entry.TechnologyId == technologyId, Token);
 
         if (learned is null)
         {
-            research.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = player.Account.UserId, TechnologyId = technologyId, Level = level });
+            research.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = player.Account.UserId, PlanetId = player.PlanetId, TechnologyId = technologyId, Level = level });
         }
         else
         {

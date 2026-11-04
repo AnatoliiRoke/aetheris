@@ -178,12 +178,13 @@ public sealed class ResearchTests
     }
 
     /// <summary>
-    /// The research belongs to the player and not to a body, so the technology learned on one
-    /// body gives its bonus to every body of the civilization.
+    /// A technology belongs to the body it was researched from (task 00028, update of
+    /// 04.11.2026): the level of the civilization counts it, the body that researched it gets its
+    /// bonus, and another body gets none.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task A_learned_technology_gives_its_bonus_to_every_body()
+    public async Task A_learned_technology_gives_its_bonus_to_the_body_that_researched_it()
     {
         await ResetAsync();
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -208,9 +209,14 @@ public sealed class ResearchTests
 
         Assert.Equal(1, learned[first.Id]);
 
-        PlanetBonuses bonuses = await levels.GetBonusesAsync(player.Account.UserId, Token);
+        PlanetBonuses bonuses = await levels.GetBonusesAsync(player.Account.UserId, player.PlanetId, Token);
         Assert.True(bonuses.MetalProductionMultiplier > decimal.One);
         Assert.Equal(decimal.One, bonuses.CrystalProductionMultiplier);
+
+        // A body that did not research the technology has no level of it and no bonus.
+        long otherPlanetId = player.PlanetId + 1;
+        Assert.Empty(await levels.GetLevelsAsync(player.Account.UserId, otherPlanetId, Token));
+        Assert.Equal(decimal.One, (await levels.GetBonusesAsync(player.Account.UserId, otherPlanetId, Token)).MetalProductionMultiplier);
     }
 
     /// <summary>

@@ -48,7 +48,8 @@ public sealed class SectorGeneratorTests
 
     /// <summary>
     /// For any seed: every system has a star, the bodies are within the range and on distinct
-    /// inner orbits, a body has one kind of crystals (two only rarely) and no ether, gas
+    /// inner orbits, a planet has every ore and every mineral (decision of the author of
+    /// 04.11.2026) and no ether, gas
     /// giants are not colonizable, the number of systems is within the range, the systems
     /// keep their distance, the sector has enough fields and the map is flat.
     /// </summary>
@@ -89,14 +90,12 @@ public sealed class SectorGeneratorTests
                     foreach (BodyPlan body in system.BodyIds)
                     {
                         ReferenceObjectType type = reference.FindType(body.ObjectTypeId)!;
-                        int crystalKinds = body.DepositIds.Count(share => crystals.Contains(share.ResourceId));
-
                         Check(problems, WorldTestData.BodyClasses.Contains(type.ObjectClass), "body class");
                         Check(problems, !body.DepositIds.Any(share => share.ResourceId == etherId || share.ResourceId == darkMatterId), "no ether or dark matter on a body");
 
                         if (type.ObjectClass == WorldObjectClasses.Planet)
                         {
-                            Check(problems, crystalKinds is 1 or 2, "one kind of crystals");
+                            Check(problems, crystals.IsSubsetOf(body.DepositIds.Select(share => share.ResourceId)), "every mineral on a planet");
                             Check(problems, !body.DepositIds.Any(share => share.ResourceId == heliumId), "no helium-3 on a planet");
                             Check(problems, ores.IsSubsetOf(body.DepositIds.Select(share => share.ResourceId)), "every ore on a planet");
                         }
@@ -136,14 +135,14 @@ public sealed class SectorGeneratorTests
 
     /// <summary>
     /// On more than a thousand bodies the shares of the types and the sizes follow the
-    /// weights of the reference data, and two kinds of crystals stay rare.
+    /// weights of the reference data. Every planet has every mineral since 04.11.2026, so there is
+    /// no share of the kinds of minerals to check.
     /// </summary>
     [Fact]
     public void The_types_and_sizes_follow_the_configured_weights()
     {
         WorldGenerationConfig config = WorldTestData.Config();
         WorldReferenceData reference = config.Reference;
-        HashSet<int> crystals = WorldTestData.ResourcesOfGroup(reference, SeedCodes.MineralGroup);
 
         List<BodyPlan> planets = [];
         List<BodyPlan> bodies = [];
@@ -182,11 +181,6 @@ public sealed class SectorGeneratorTests
             Assert.True(Math.Abs(expected - actual) <= ShareTolerance, $"{size.Code}: expected {expected:F3}, got {actual:F3}.");
             Assert.All(bodies.Where(body => body.SizeClassId == size.Id), body => Assert.InRange(body.Size, size.SizeMin, size.SizeMax));
         }
-
-        double twoCrystals = planets.Count(body => body.DepositIds.Count(share => crystals.Contains(share.ResourceId)) == 2) / (double)planets.Count;
-        double configured = reference.RuleGroups.First(group => WorldTestData.GroupOfRules(reference, group) == reference.Groups.Single(entry => entry.Code == SeedCodes.MineralGroup).Id).ExtraPickProbability;
-
-        Assert.True(Math.Abs(twoCrystals - configured) <= ShareTolerance, $"two kinds of crystals: expected {configured:F3}, got {twoCrystals:F3}.");
     }
 
     /// <summary>

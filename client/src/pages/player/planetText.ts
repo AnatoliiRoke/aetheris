@@ -75,17 +75,16 @@ export function namer(planet: Planet, language: Language, entities: EntityText) 
   };
 }
 
-/** Credits, trade currency, energy, population and premium. None of them is a pile in the warehouse. */
-const balanceResourceCodes = new Set(['resource_27', 'resource_28', 'resource_29', 'resource_30', 'resource_31']);
-
 /**
- * The resources that are a balance, not stock. A storage building may still name their group.
+ * The resources that are a balance, not stock: credits, trade currency, energy, population and the
+ * like. The server marks their group, so the client knows none of them by its code. A storage
+ * building may still name their group.
  *
- * @param planet The body, for the catalog codes.
+ * @param planet The body, for the reference rows of its resources.
  * @returns The identifiers of those resources.
  */
 export function balanceResourceIds(planet: Planet): Set<number> {
-  return new Set(planet.resourceTypes.filter((resource) => balanceResourceCodes.has(resource.code)).map((resource) => resource.id));
+  return new Set(planet.resourceTypes.filter((resource) => resource.isBalance === true).map((resource) => resource.id));
 }
 
 /**

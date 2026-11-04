@@ -3,6 +3,9 @@
     {
       "code": "resource_group_1",
       "allowed_on_planet": true,
+      "is_balance": false,
+      "icon_shape": "square",
+      "icon_tone": "metal",
       "name": {
         "uk": "Руди",
         "en": "Ores"
@@ -15,6 +18,9 @@
     {
       "code": "resource_group_2",
       "allowed_on_planet": true,
+      "is_balance": false,
+      "icon_shape": "gem",
+      "icon_tone": "gem",
       "name": {
         "uk": "Мінерали",
         "en": "Minerals"
@@ -27,6 +33,9 @@
     {
       "code": "resource_group_3",
       "allowed_on_planet": true,
+      "is_balance": false,
+      "icon_shape": "drop",
+      "icon_tone": "flame",
       "name": {
         "uk": "Пальне",
         "en": "Fuel"
@@ -39,6 +48,9 @@
     {
       "code": "resource_group_4",
       "allowed_on_planet": true,
+      "is_balance": false,
+      "icon_shape": "spark",
+      "icon_tone": "gem",
       "name": {
         "uk": "Кристали",
         "en": "Crystals"
@@ -51,6 +63,9 @@
     {
       "code": "resource_group_5",
       "allowed_on_planet": false,
+      "is_balance": false,
+      "icon_shape": "diamond",
+      "icon_tone": "made",
       "name": {
         "uk": "Вироблені ресурси",
         "en": "Manufactured"
@@ -63,6 +78,9 @@
     {
       "code": "resource_group_6",
       "allowed_on_planet": false,
+      "is_balance": true,
+      "icon_shape": "hexagon",
+      "icon_tone": "credits",
       "name": {
         "uk": "Баланси цивілізації",
         "en": "Balances"
@@ -85,6 +103,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_1.webp",
       "scope": "planet"
     },
     {
@@ -98,6 +117,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_2.webp",
       "scope": "planet"
     },
     {
@@ -111,6 +131,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_3.webp",
       "scope": "planet"
     },
     {
@@ -124,6 +145,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_4.webp",
       "scope": "planet"
     },
     {
@@ -137,6 +159,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_5.webp",
       "scope": "planet"
     },
     {
@@ -150,6 +173,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_6.webp",
       "scope": "planet"
     },
     {
@@ -163,6 +187,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_7.webp",
       "scope": "planet"
     },
     {
@@ -176,6 +201,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_8.webp",
       "scope": "planet"
     },
     {
@@ -189,6 +215,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_9.webp",
       "scope": "planet"
     },
     {
@@ -202,6 +229,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_10.webp",
       "scope": "planet"
     },
     {
@@ -215,6 +243,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_11.webp",
       "scope": "planet"
     },
     {
@@ -228,6 +257,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_12.webp",
       "scope": "planet"
     },
     {
@@ -241,6 +271,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_13.webp",
       "scope": "planet"
     },
     {
@@ -254,6 +285,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_14.webp",
       "scope": "planet"
     },
     {
@@ -267,6 +299,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_15.webp",
       "scope": "planet"
     },
     {
@@ -280,6 +313,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_16.webp",
       "scope": "planet"
     },
     {
@@ -293,6 +327,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_17.webp",
       "scope": "planet"
     },
     {
@@ -306,6 +341,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_18.webp",
       "scope": "planet"
     },
     {
@@ -319,6 +355,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_19.webp",
       "scope": "planet"
     },
     {
@@ -332,6 +369,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_20.webp",
       "scope": "planet"
     },
     {
@@ -345,6 +383,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_21.webp",
       "scope": "planet"
     },
     {
@@ -358,6 +397,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_22.webp",
       "scope": "planet"
     },
     {
@@ -371,6 +411,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_23.webp",
       "scope": "planet"
     },
     {
@@ -384,7 +425,9 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
-      "scope": "planet"
+      "image_key": "resource_24.webp",
+      "scope": "planet",
+      "pays_portal_delivery": true
     },
     {
       "code": "resource_25",
@@ -397,6 +440,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_25.webp",
       "scope": "planet"
     },
     {
@@ -410,6 +454,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_26.webp",
       "scope": "planet"
     },
     {
@@ -423,6 +468,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_27.webp",
       "scope": "civilization",
       "earns_population_income": true,
       "allows_debt": false
@@ -438,6 +484,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_28.webp",
       "scope": "civilization",
       "allows_debt": true
     },
@@ -452,6 +499,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_29.webp",
       "scope": "planet"
     },
     {
@@ -465,7 +513,9 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
-      "scope": "planet"
+      "image_key": "resource_30.webp",
+      "scope": "planet",
+      "paid_by_population": true
     },
     {
       "code": "resource_31",
@@ -478,6 +528,7 @@
         "uk": "Ресурс групи.",
         "en": "Resource of its group."
       },
+      "image_key": "resource_31.webp",
       "scope": "civilization"
     }
   ],

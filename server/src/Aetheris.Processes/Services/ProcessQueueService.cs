@@ -8,7 +8,6 @@ using Aetheris.Economy;
 using Aetheris.Economy.Services;
 using Aetheris.Planets;
 using Aetheris.Planets.Api;
-using Aetheris.Planets.Services;
 using Aetheris.Processes.Api;
 using Aetheris.Processes.Configuration;
 using Aetheris.Processes.Data;
@@ -231,7 +230,8 @@ public sealed class ProcessQueueService
                     requirementContext,
                     request,
                     await ResourceGroupsAsync(request, cancellationToken).ConfigureAwait(false),
-                    catalog);
+                    catalog,
+                    await _planets.GetBuildingEffectsAsync(planetId, planetBuildingId, playerId, cancellationToken).ConfigureAwait(false));
 
                 IReadOnlyList<ProcessReason> reasons = await handler.CheckAsync(checkContext, cancellationToken).ConfigureAwait(false);
 
@@ -737,7 +737,8 @@ public sealed class ProcessQueueService
                     head.TargetResourceTypeId,
                     head.PartTypeId,
                     head.PartConditionPercent),
-                TakenParts(head));
+                TakenParts(head),
+                await _planets.GetBuildingEffectsAsync(planetId, planetBuildingId, playerId, cancellationToken).ConfigureAwait(false));
 
             ProcessResult result = await handler.ComputeAsync(context, cancellationToken).ConfigureAwait(false);
             await handler.ApplyAsync(context, result, cancellationToken).ConfigureAwait(false);

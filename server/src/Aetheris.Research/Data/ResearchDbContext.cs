@@ -135,7 +135,8 @@ public sealed class ResearchDbContext : DbContext
         {
             entity.ToTable("player_technology");
             entity.Property(e => e.PlayerId).HasMaxLength(PlayerIdLength);
-            entity.HasIndex(e => new { e.PlayerId, e.TechnologyId }).IsUnique();
+            entity.HasIndex(e => new { e.PlayerId, e.PlanetId, e.TechnologyId }).IsUnique();
+            entity.HasIndex(e => new { e.PlayerId, e.TechnologyId });
             entity.HasOne<TechnologyEntity>().WithMany().HasForeignKey(e => e.TechnologyId).OnDelete(DeleteBehavior.Restrict);
             entity.ToTable(table => table.HasCheckConstraint("ck_player_technology_level", "level >= 0"));
         });

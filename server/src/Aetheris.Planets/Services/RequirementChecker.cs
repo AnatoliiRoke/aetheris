@@ -1,6 +1,7 @@
+using Aetheris.Planets.Services;
 using Aetheris.Requirements.Services;
 
-namespace Aetheris.Planets.Services;
+namespace Aetheris.Planets;
 
 /// <summary>
 /// What a requirement is checked against: the buildings and deposits of the body and the
@@ -101,7 +102,8 @@ public static class RequirementChecker
 public interface ITechnologyLevels
 {
     /// <summary>
-    /// Gets the levels of the technologies of a player.
+    /// Gets the levels of the technologies of a player: the level of the civilization, which is
+    /// the largest level of its bodies.
     /// </summary>
     /// <param name="playerId">The player, or <see langword="null"/> for a body without an owner.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -109,12 +111,35 @@ public interface ITechnologyLevels
     Task<IReadOnlyDictionary<int, int>> GetLevelsAsync(string? playerId, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gets the bonuses the technologies of a player give the bodies.
+    /// Gets the levels of the technologies of one body of a player: the levels its own research
+    /// gave it.
     /// </summary>
     /// <param name="playerId">The player, or <see langword="null"/> for a body without an owner.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The levels by technology.</returns>
+    Task<IReadOnlyDictionary<int, int>> GetLevelsAsync(string? playerId, long planetId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the bonuses the technologies of a player give one body.
+    /// </summary>
+    /// <param name="playerId">The player, or <see langword="null"/> for a body without an owner.</param>
+    /// <param name="planetId">The body.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The bonuses.</returns>
-    Task<PlanetBonuses> GetBonusesAsync(string? playerId, CancellationToken cancellationToken);
+    Task<PlanetBonuses> GetBonusesAsync(string? playerId, long planetId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the bonuses the technologies of a player give several bodies, in one read of the levels.
+    /// </summary>
+    /// <param name="playerId">The player, or <see langword="null"/> for bodies without an owner.</param>
+    /// <param name="planetIds">The bodies.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bonuses by body; a body without technologies is not in the answer.</returns>
+    Task<IReadOnlyDictionary<long, PlanetBonuses>> GetBonusesAsync(
+        string? playerId,
+        IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets the technologies that exist, for the check of a requirement of a building in the
@@ -185,8 +210,19 @@ public sealed class NoTechnologyLevels : ITechnologyLevels
         Task.FromResult(Empty);
 
     /// <inheritdoc />
-    public Task<PlanetBonuses> GetBonusesAsync(string? playerId, CancellationToken cancellationToken) =>
+    public Task<IReadOnlyDictionary<int, int>> GetLevelsAsync(string? playerId, long planetId, CancellationToken cancellationToken) =>
+        Task.FromResult(Empty);
+
+    /// <inheritdoc />
+    public Task<PlanetBonuses> GetBonusesAsync(string? playerId, long planetId, CancellationToken cancellationToken) =>
         Task.FromResult(PlanetBonuses.None);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<long, PlanetBonuses>> GetBonusesAsync(
+        string? playerId,
+        IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyDictionary<long, PlanetBonuses>>(new Dictionary<long, PlanetBonuses>());
 
     /// <inheritdoc />
     public Task<IReadOnlySet<int>> GetTechnologyIdsAsync(CancellationToken cancellationToken) =>

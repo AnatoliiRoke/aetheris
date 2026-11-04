@@ -1,4 +1,4 @@
-using Aetheris.Planets.Services;
+using Aetheris.Planets;
 using Aetheris.Research.Data;
 using Aetheris.Research.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -10,9 +10,11 @@ namespace Aetheris.Research.Services;
 /// (task 00012, decision 5).
 /// </summary>
 /// <remarks>
-/// The knowledge belongs to the player, so the bonuses apply to every body of the
-/// civilization. The bonuses of the technologies of a branch are multiplied, so a level of a
-/// technology that raises a parameter by five percent raises it by five percent more.
+/// A technology is researched from a body, so every body has its own level of it and the bonuses
+/// of the technologies apply to the body that researched them: the metal of a body is mined with
+/// the bonuses of the technologies that body has learned. The bonuses of the technologies of a
+/// branch are multiplied, so a level of a technology that raises a parameter by five percent
+/// raises it by five percent more.
 /// </remarks>
 public sealed class TechnologyLevelsService : ITechnologyLevels
 {
@@ -49,14 +51,25 @@ public sealed class TechnologyLevelsService : ITechnologyLevels
     }
 
     /// <inheritdoc />
-    public async Task<PlanetBonuses> GetBonusesAsync(string? playerId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyDictionary<int, int>> GetLevelsAsync(string? playerId, long planetId, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(playerId))
+        {
+            return new Dictionary<int, int>();
+        }
+
+        return await _levelsReader.GetAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task<PlanetBonuses> GetBonusesAsync(string? playerId, long planetId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(playerId))
         {
             return PlanetBonuses.None;
         }
 
-        IReadOnlyDictionary<int, int> levels = await GetLevelsAsync(playerId, cancellationToken).ConfigureAwait(false);
+        IReadOnlyDictionary<int, int> levels = await GetLevelsAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
 
         if (levels.Count == 0)
         {
@@ -65,6 +78,43 @@ public sealed class TechnologyLevelsService : ITechnologyLevels
 
         TechnologyCatalog catalog = await _catalogCache.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
 
+        return Bonuses(catalog, levels);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<long, PlanetBonuses>> GetBonusesAsync(
+        string? playerId,
+        IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(planetIds);
+
+        if (string.IsNullOrEmpty(playerId) || planetIds.Count == 0)
+        {
+            return new Dictionary<long, PlanetBonuses>();
+        }
+
+        IReadOnlyDictionary<long, IReadOnlyDictionary<int, int>> levels =
+            await _levelsReader.GetAsync(playerId, planetIds, cancellationToken).ConfigureAwait(false);
+
+        if (levels.Count == 0)
+        {
+            return new Dictionary<long, PlanetBonuses>();
+        }
+
+        TechnologyCatalog catalog = await _catalogCache.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
+
+        return levels.ToDictionary(entry => entry.Key, entry => Bonuses(catalog, entry.Value));
+    }
+
+    /// <summary>
+    /// Counts the bonuses of the levels of the technologies of one body.
+    /// </summary>
+    /// <param name="catalog">The catalog of the technologies.</param>
+    /// <param name="levels">The levels of the technologies of the body.</param>
+    /// <returns>The bonuses.</returns>
+    private static PlanetBonuses Bonuses(TechnologyCatalog catalog, IReadOnlyDictionary<int, int> levels)
+    {
         decimal metalProduction = decimal.One;
         decimal crystalProduction = decimal.One;
         decimal constructionTime = decimal.One;

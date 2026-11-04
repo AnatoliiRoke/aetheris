@@ -189,7 +189,13 @@ public sealed partial class ReferenceImageStore : IAdminReferenceImages
     private static string Default(string key) =>
         ReferenceImageKeys.Definitions.Single(definition => definition.Key == key).DefaultValue;
 
-    [GeneratedRegex("^[0-9a-f]{32}\\.(png|webp)$")]
+    /// <summary>
+    /// The pattern of a key of a picture: either the random key of an upload (32 hex digits) or a
+    /// readable key of the code of the row with its extension, for the pictures that come with the
+    /// starting data. Only lowercase letters, digits and an underscore are allowed, so a key never
+    /// names a path outside the folder of the pictures.
+    /// </summary>
+    [GeneratedRegex("^([0-9a-f]{32}|[a-z0-9]+(_[a-z0-9]+)*)\\.(png|webp)$")]
     private static partial Regex KeyPattern();
 }
 

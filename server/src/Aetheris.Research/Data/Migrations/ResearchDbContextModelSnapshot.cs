@@ -35,6 +35,10 @@ namespace Aetheris.Research.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("level");
 
+                    b.Property<long>("PlanetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("planet_id");
+
                     b.Property<string>("PlayerId")
                         .IsRequired()
                         .HasMaxLength(450)
@@ -52,8 +56,11 @@ namespace Aetheris.Research.Data.Migrations
                         .HasDatabaseName("ix_player_technology_technology_id");
 
                     b.HasIndex("PlayerId", "TechnologyId")
-                        .IsUnique()
                         .HasDatabaseName("ix_player_technology_player_id_technology_id");
+
+                    b.HasIndex("PlayerId", "PlanetId", "TechnologyId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_player_technology_player_id_planet_id_technology_id");
 
                     b.ToTable("player_technology", null, t =>
                         {

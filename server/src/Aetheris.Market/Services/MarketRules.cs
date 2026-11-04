@@ -59,32 +59,43 @@ public static class MarketRules
 
     /// <summary>
     /// Gets the delivery fee in energy rods: it depends on the mass of the goods and on the
-    /// distance, and a portal has no levels and no speed (task 00024, answer of the author).
+    /// portal that sends them, and the distance between the bodies does not matter.
     /// </summary>
     /// <param name="mass">The mass of the whole lot in tonnes.</param>
-    /// <param name="distance">The distance between the two bodies.</param>
-    /// <param name="settings">The settings of the market.</param>
-    /// <returns>The fee; zero only when the distance or the coefficient is zero.</returns>
-    public static long DeliveryEnergy(decimal mass, double distance, MarketSettings settings)
+    /// <param name="massPerEnergyRod">The mass of the goods the portal sends for one energy rod, in tonnes.</param>
+    /// <returns>The fee; zero only when the mass or the coefficient is zero.</returns>
+    /// <remarks>
+    /// The fee is rounded up, so a lot that weighs less than one rod still costs one rod.
+    /// </remarks>
+    public static long DeliveryEnergy(decimal mass, decimal massPerEnergyRod)
     {
-        ArgumentNullException.ThrowIfNull(settings);
+        if (mass <= 0 || massPerEnergyRod <= 0)
+        {
+            return 0;
+        }
 
-        decimal fee = mass * (decimal)distance * settings.EnergyPerTonneDistance;
-
-        return fee <= 0 ? 0 : Math.Max(1, (long)decimal.Ceiling(fee));
+        return Math.Max(1, (long)decimal.Ceiling(mass / massPerEnergyRod));
     }
 
     /// <summary>
-    /// Gets the time of a delivery in seconds: the same for every civilization.
+    /// Gets the time of the preparation of a delivery in seconds: the portal prepares the goods
+    /// before it sends them, and the time depends on the mass of the lot and on the portal.
     /// </summary>
-    /// <param name="distance">The distance between the two bodies.</param>
-    /// <param name="settings">The settings of the market.</param>
-    /// <returns>The seconds, at least one.</returns>
-    public static long DeliverySeconds(double distance, MarketSettings settings)
+    /// <param name="mass">The mass of the whole lot in tonnes.</param>
+    /// <param name="massPerHour">The mass of the goods the portal prepares in one hour, in tonnes.</param>
+    /// <returns>The seconds of the preparation.</returns>
+    /// <remarks>
+    /// The sending itself takes no time, so the time of the delivery is the time of the
+    /// preparation. A portal without the coefficient prepares nothing, so the goods go at once.
+    /// </remarks>
+    public static long DeliverySeconds(decimal mass, decimal massPerHour)
     {
-        ArgumentNullException.ThrowIfNull(settings);
+        if (mass <= 0 || massPerHour <= 0)
+        {
+            return 0;
+        }
 
-        decimal seconds = settings.DeliveryBaseSeconds + ((decimal)distance * settings.DeliverySecondsPerDistance);
+        decimal seconds = mass / massPerHour * (decimal)TimeSpan.SecondsPerHour;
 
         return Math.Max(1, (long)decimal.Ceiling(seconds));
     }

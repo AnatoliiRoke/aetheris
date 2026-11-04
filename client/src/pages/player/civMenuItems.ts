@@ -30,19 +30,18 @@ export const menuItems: readonly MenuItem[] = [
   { id: 'overview', icon: 'overview', label: 'civ.nav.overview', route: routes.game },
   { id: 'planet', icon: 'planet', label: 'civ.nav.planet', route: routes.planet },
   { id: 'build', icon: 'house', label: 'civ.nav.build', route: routes.planetBuild },
-  { id: 'storage', icon: 'box', label: 'civ.nav.storage', route: routes.planetStorage },
+  { id: 'research', icon: 'research', label: 'civ.nav.research', route: routes.planetResearch },
   { id: 'production', icon: 'production', label: 'civ.nav.production', route: routes.planetProduction },
+  { id: 'storage', icon: 'box', label: 'civ.nav.storage', route: routes.planetStorage },
   { id: 'shipyard', icon: 'shipyard', label: 'civ.nav.shipyard' },
   { id: 'fleets', icon: 'fleets', label: 'civ.nav.fleets' },
   { id: 'map', icon: 'map', label: 'civ.nav.map', route: routes.map },
-  { id: 'research', icon: 'research', label: 'civ.nav.research', route: routes.planetResearch },
   { id: 'market', icon: 'market', label: 'civ.nav.market', route: routes.market },
   { id: 'ranking', icon: 'ranking', label: 'civ.nav.ranking' },
   { id: 'battle', icon: 'battle', label: 'civ.nav.battle' },
   { id: 'clan', icon: 'clan', label: 'civ.nav.clan' },
   { id: 'mail', icon: 'mail', label: 'civ.nav.mail', separated: true },
   { id: 'help', icon: 'help', label: 'civ.nav.help' },
-  { id: 'settings', icon: 'settings', label: 'civ.nav.settings', route: routes.account },
 ];
 
 /**

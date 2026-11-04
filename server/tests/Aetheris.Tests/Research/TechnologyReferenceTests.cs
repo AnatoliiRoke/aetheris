@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Aetheris.Core.Admin;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Security;
+using Aetheris.Planets;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
@@ -80,7 +81,7 @@ public sealed partial class TechnologyReferenceTests
         Assert.Equal(ResearchTechnologyStatuses.Available, before.Technologies.Single(technology => technology.Id == first).Status);
 
         ResearchDbContext dbContext = services.GetRequiredService<ResearchDbContext>();
-        dbContext.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = player.Account.UserId, TechnologyId = first, Level = 1 });
+        dbContext.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = player.Account.UserId, PlanetId = player.PlanetId, TechnologyId = first, Level = 1 });
         await dbContext.SaveChangesAsync(Token);
 
         ResearchTreeDto after = await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token);
@@ -176,7 +177,7 @@ public sealed partial class TechnologyReferenceTests
         await PlanetsTestData.SetBalanceAsync(services, owner.PlanetId, new Dictionary<int, long> { [ids.Iron] = 100_000 }, PlanetsTestData.GameNow(services));
 
         ResearchDbContext dbContext = services.GetRequiredService<ResearchDbContext>();
-        dbContext.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = owner.Account.UserId, TechnologyId = id, Level = 1 });
+        dbContext.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = owner.Account.UserId, PlanetId = owner.PlanetId, TechnologyId = id, Level = 1 });
         await dbContext.SaveChangesAsync(Token);
         ResearchTreeDto queued = await research.EnqueueAsync(owner.Account.UserId, owner.PlanetId, id, 2, Token);
         Assert.Contains(queued.Queue, item => item.TechnologyId == id && item.TargetLevel == 2);

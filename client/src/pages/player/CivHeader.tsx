@@ -7,14 +7,14 @@ import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
 import { useSession } from '../../session/useSession';
 import { useTexts } from '../../texts/useTexts';
-import { AlertPill, Counter, HeaderTools } from './CivHeaderParts';
-import { formatNumber, lookup } from './planetText';
+import { Counter, HeaderTools } from './CivHeaderParts';
+import { formatNumber } from './planetText';
 import { reportRender } from './renderProbe';
 import type { ShellState } from './shellStore';
 import { sameJson, useCurrentPlanetId, useShellSelector } from './useShell';
 
-/** The code of the paid status of an account: the server names the status, the client only colours this one. */
-const premiumTier = 'premium';
+/** The code of the usual status of an account: nothing is shown for it, the block of the nickname keeps its look. */
+const standardTier = 'standard';
 
 /**
  * What the top bar shows from the shared state: the balances of the currencies with the keys of
@@ -34,7 +34,6 @@ function headerFacts(state: ShellState, planetId: number | null) {
       nameKey: nameKeys.get(balance.resourceTypeId) ?? null,
     })),
     energy: entry ? { output: entry.planet.energy.output, consumption: entry.planet.energy.consumption, balance: entry.planet.energy.balance } : null,
-    storageFull: entry ? entry.planet.resources.some((resource) => resource.isFull) : false,
   };
 }
 
@@ -60,10 +59,13 @@ export const CivHeader = memo(function CivHeader() {
   const civilization = session.status === 'signed-in' ? session.me.civilization : null;
   const raceId = civilization?.raceId ?? null;
   const colorKey = useShellSelector((state) => (raceId === null ? null : state.races?.find((race) => race.id === raceId)?.colorKey ?? null));
-  const { balances, energy, storageFull } = useShellSelector((state) => headerFacts(state, planetId), sameJson);
+  const { balances, energy } = useShellSelector((state) => headerFacts(state, planetId), sameJson);
 
   const nickname = session.status === 'signed-in' ? session.me.nickname : '';
   const tier = session.status === 'signed-in' ? session.me.accountTier ?? null : null;
+  // The usual status is shown by nothing: the block of the nickname keeps its look. Any other
+  // status colours the block of the nickname with it.
+  const nickClass = tier === null || tier === standardTier ? 'nick' : `nick is-${tier}`;
   const raceName = civilization ? text(civilization.raceNameKey) ?? civilization.raceNameKey : '';
   const number = (value: number) => formatNumber(value, language);
   const credits = balances[0] ?? null;
@@ -76,16 +78,11 @@ export const CivHeader = memo(function CivHeader() {
           <img alt="" height={28} src={images.logoMark} width={28} />
           <b>AETHERIS</b>
         </Link>
-        <span className="nick">
+        <span className={nickClass}>
           <Glyph colorKey={colorKey} small />
           {nickname}
           {raceName ? <span className="visually-hidden">{t('civ.raceOf', { race: raceName })}</span> : null}
         </span>
-        {tier ? (
-          <span className={tier === premiumTier ? 'civ-tier is-premium' : 'civ-tier'} title={t('civ.tierHint')}>
-            {lookup(language, `civ.tier.${tier}`, tier)}
-          </span>
-        ) : null}
       </div>
       <ul aria-label={t('civ.resources')} className="civ-res">
         {balances.length === 0 ? (
@@ -112,13 +109,15 @@ export const CivHeader = memo(function CivHeader() {
         />
       </ul>
       <div aria-label={t('civ.alerts')} className="civ-topbar__tools" role="group">
-        <AlertPill icon="danger" label={t('civ.alert.attack')} title={t('civ.alert.attackSoon')} tone="danger" />
+        {/* The alerts of the attack, the battle and the full storage break the top bar below 1300 px,
+            so they are hidden until the bar has room for them again. */}
+        {/* <AlertPill icon="danger" label={t('civ.alert.attack')} title={t('civ.alert.attackSoon')} tone="danger" />
         <AlertPill icon="battle" label={t('civ.alert.battle')} title={t('civ.alert.battleSoon')} tone="danger" />
         {storageFull ? (
           <AlertPill icon="storage" label={t('civ.alert.storageFull')} title={t('civ.alert.storageFullHint')} to={routes.planetStorage} tone="warning" />
         ) : (
           <AlertPill icon="storage" label={t('civ.alert.storageFull')} title={t('civ.alert.storageOk')} tone="warning" />
-        )}
+        )} */}
         <HeaderTools />
         <LangSwitch />
       </div>

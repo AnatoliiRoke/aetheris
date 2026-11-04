@@ -14,13 +14,9 @@
   </PropertyGroup>
 
   <!--
-    The magic-number rule AETHERIS001 points at the places to look, but it does not
-    break the build while the existing code is being cleaned up. The rule is raised to
-    an error once the balance code is complete.
+    The magic-number rule AETHERIS001 is an error (code audit of 04.11.2026): the code has no
+    finding left, so a new number of the rules of the game breaks the build and the CI.
   -->
-  <PropertyGroup>
-    <WarningsNotAsErrors>$(WarningsNotAsErrors);AETHERIS001</WarningsNotAsErrors>
-  </PropertyGroup>
 
   <!--
     The test project uses Microsoft.Testing.Platform (xunit v3). The .NET 10 SDK runs it

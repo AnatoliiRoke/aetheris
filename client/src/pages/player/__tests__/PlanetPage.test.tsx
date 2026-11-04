@@ -59,7 +59,7 @@ describe('PlanetPage', () => {
       reference: vi.fn().mockResolvedValue(
         sampleWorldReference({
           resources: [
-            { id: 27, code: 'resource_27', nameKey: 'world.resource.resource_27.name', descriptionKey: '', groupCode: null, groupId: null, imageKey: null },
+            { id: 27, code: 'resource_27', nameKey: 'world.resource.resource_27.name', descriptionKey: '', groupCode: null, groupId: null, imageKey: null, earnsPopulationIncome: true },
           ],
         }),
       ),

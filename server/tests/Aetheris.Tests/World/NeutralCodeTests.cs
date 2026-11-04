@@ -8,6 +8,7 @@ using Aetheris.Core.Text;
 using Aetheris.Host.Admin;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
+using Aetheris.Planets;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Tests.Infrastructure;

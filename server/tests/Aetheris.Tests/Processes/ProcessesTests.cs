@@ -5,6 +5,7 @@ using Aetheris.Core.Scheduling;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Scheduling;
+using Aetheris.Planets;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Services;
 using Aetheris.Processes;
@@ -108,12 +109,13 @@ public sealed partial class ProcessesTests
 
     /// <summary>
     /// The conversion takes the source of the whole batch at once and gives the source times the
-    /// percentage of the level of the technology; a higher level gives more (task 00014,
-    /// criterion 4).
+    /// coefficient of the level of the converter; the technology only gives the right to convert,
+    /// and a higher level of the converter gives more (task 00014, criterion 4; task 00028,
+    /// update of 04.11.2026).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_conversion_gives_the_percentage_of_the_level_of_the_technology()
+    public async Task The_conversion_gives_the_coefficient_of_the_level_of_the_converter()
     {
         await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -140,18 +142,23 @@ public sealed partial class ProcessesTests
 
         Assert.Equal(10, await ProcessesTestData.CompleteAsync(player, services, buildingId));
 
-        // The first level keeps 30 per cent of the source.
-        Assert.Equal(targetBefore + 3, await ProcessesTestData.BalanceAsync(player, services, targetId));
+        // The first level of the converter keeps its coefficient of the source.
+        long firstOutput = (long)decimal.Floor(10 * await ProcessesTestData.BuildingCoefficientAsync(services, BuildingClasses.Converter, 1, BuildingEffectTypes.ConversionCoefficient));
+        Assert.True(firstOutput > 0);
+        Assert.Equal(targetBefore + firstOutput, await ProcessesTestData.BalanceAsync(player, services, targetId));
 
+        // A higher level of the technology changes nothing: it is the right to convert only.
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 10);
         await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(10, sourceId, targetId), Token);
         await ProcessesTestData.CompleteAsync(player, services, buildingId);
 
-        // The highest level keeps 80 per cent of the source.
-        Assert.Equal(targetBefore + 3 + 8, await ProcessesTestData.BalanceAsync(player, services, targetId));
+        Assert.Equal(targetBefore + firstOutput + firstOutput, await ProcessesTestData.BalanceAsync(player, services, targetId));
         Assert.Equal(sourceBefore - 20, await ProcessesTestData.BalanceAsync(player, services, sourceId));
 
-        // The level of the converter only makes a unit quicker, by the multiplier of its level.
+        // A higher level of the converter makes a unit quicker, by the multiplier of its level, and
+        // keeps more of the source, by the coefficient of its level.
+        long topOutput = (long)decimal.Floor(10 * await ProcessesTestData.BuildingCoefficientAsync(services, BuildingClasses.Converter, 10, BuildingEffectTypes.ConversionCoefficient));
+        Assert.True(topOutput > firstOutput);
         ProcessParamInfo factor = (await ProcessesTestData.CatalogAsync(services)).ParamAt(recipe.ProcessTypeId, ProcessParamKinds.DurationFactor, ProcessLevelSources.Building, null, 10)!;
         await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter, 10);
         ProcessBuildingDto quick = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(10, sourceId, targetId), Token);
@@ -160,7 +167,7 @@ public sealed partial class ProcessesTests
         Assert.True(factor.Value < 1m);
         Assert.Equal((long)decimal.Ceiling(recipe.DurationSeconds * factor.Value), (long)(order.NextUnitAt!.Value - order.StartsAt!.Value).TotalSeconds);
         await ProcessesTestData.CompleteAsync(player, services, buildingId);
-        Assert.Equal(targetBefore + 3 + 8 + 8, await ProcessesTestData.BalanceAsync(player, services, targetId));
+        Assert.Equal(targetBefore + firstOutput + firstOutput + topOutput, await ProcessesTestData.BalanceAsync(player, services, targetId));
     }
 
     /// <summary>
@@ -262,6 +269,8 @@ public sealed partial class ProcessesTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
+        decimal levelOneShare = await ProcessesTestData.BuildingCoefficientAsync(services, BuildingClasses.Recycling, 1, BuildingEffectTypes.RecyclingCoefficient);
+        decimal levelTenShare = await ProcessesTestData.BuildingCoefficientAsync(services, BuildingClasses.Recycling, 10, BuildingEffectTypes.RecyclingCoefficient);
 
         long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling);
         await ProcessesTestData.GiveEveryResourceAsync(player, services);
@@ -274,29 +283,29 @@ public sealed partial class ProcessesTests
         ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Recycling);
         Dictionary<int, long> before = await BalancesAsync(player, services, hull.ResourceCost.Keys);
 
-        // Two new hulls at the first level of the factory give 40 per cent of their recipe.
+        // Two new hulls at the first level of the factory give the coefficient of that level of their recipe.
         await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(2, PartTypeId: hull.PartTypeId), Token);
         Assert.Equal(2, await ProcessesTestData.PartsAsync(player, services, hull.PartTypeId, PartCondition.Full));
         await ProcessesTestData.CompleteAsync(player, services, buildingId);
 
         Dictionary<int, long> afterNew = await BalancesAsync(player, services, hull.ResourceCost.Keys);
-        Assert.All(hull.ResourceCost, cost => Assert.Equal(before[cost.Key] + (long)decimal.Floor(2 * cost.Value * 0.40m), afterNew[cost.Key]));
+        Assert.All(hull.ResourceCost, cost => Assert.Equal(before[cost.Key] + (long)decimal.Floor(2 * cost.Value * levelOneShare), afterNew[cost.Key]));
 
         // Two hulls of half a condition give a half of it.
         await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(2, PartTypeId: hull.PartTypeId, PartConditionPercent: PartCondition.Full / 2), Token);
         await ProcessesTestData.CompleteAsync(player, services, buildingId);
 
         Dictionary<int, long> afterDamaged = await BalancesAsync(player, services, hull.ResourceCost.Keys);
-        Assert.All(hull.ResourceCost, cost => Assert.Equal(afterNew[cost.Key] + (long)decimal.Floor(2 * cost.Value * 0.40m * 0.5m), afterDamaged[cost.Key]));
+        Assert.All(hull.ResourceCost, cost => Assert.Equal(afterNew[cost.Key] + (long)decimal.Floor(2 * cost.Value * levelOneShare * 0.5m), afterDamaged[cost.Key]));
         Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, hull.PartTypeId, PartCondition.Full / 2));
 
-        // The tenth level of the factory gives 50 per cent.
+        // The tenth level of the factory gives the coefficient of the tenth level.
         await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling, 10);
         await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, new ProcessOrderRequest(2, PartTypeId: hull.PartTypeId), Token);
         await ProcessesTestData.CompleteAsync(player, services, buildingId);
 
         Dictionary<int, long> afterLevel = await BalancesAsync(player, services, hull.ResourceCost.Keys);
-        Assert.All(hull.ResourceCost, cost => Assert.Equal(afterDamaged[cost.Key] + (long)decimal.Floor(2 * cost.Value * 0.50m), afterLevel[cost.Key]));
+        Assert.All(hull.ResourceCost, cost => Assert.Equal(afterDamaged[cost.Key] + (long)decimal.Floor(2 * cost.Value * levelTenShare), afterLevel[cost.Key]));
         Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, hull.PartTypeId, PartCondition.Full));
 
         // A part the storage does not hold is refused and nothing is spent.
@@ -319,6 +328,7 @@ public sealed partial class ProcessesTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
+        decimal levelOneShare = await ProcessesTestData.BuildingCoefficientAsync(services, BuildingClasses.Recycling, 1, BuildingEffectTypes.RecyclingCoefficient);
 
         long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling);
         await ProcessesTestData.GiveEveryResourceAsync(player, services);
@@ -345,7 +355,7 @@ public sealed partial class ProcessesTests
         // The resources come back by the share of the recipe and nothing else comes back: the
         // module keeps no table of a returned crew any more.
         Dictionary<int, long> after = await BalancesAsync(player, services, lifeSupport.ResourceCost.Keys);
-        Assert.All(lifeSupport.ResourceCost, cost => Assert.Equal(before[cost.Key] + (long)decimal.Floor(quantity * cost.Value * 0.40m), after[cost.Key]));
+        Assert.All(lifeSupport.ResourceCost, cost => Assert.Equal(before[cost.Key] + (long)decimal.Floor(quantity * cost.Value * levelOneShare), after[cost.Key]));
         Assert.DoesNotContain(
             services.GetRequiredService<ProcessesDbContext>().Model.GetEntityTypes(),
             entityType => entityType.GetTableName()?.Contains("population", StringComparison.Ordinal) == true);
@@ -365,6 +375,7 @@ public sealed partial class ProcessesTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
+        decimal levelOneShare = await ProcessesTestData.BuildingCoefficientAsync(services, BuildingClasses.Recycling, 1, BuildingEffectTypes.RecyclingCoefficient);
 
         long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling);
         await ProcessesTestData.GiveEveryResourceAsync(player, services);
@@ -394,18 +405,19 @@ public sealed partial class ProcessesTests
         Assert.Equal(0, await ProcessesTestData.PartsAsync(player, services, engine.PartTypeId, PartCondition.Full));
         Assert.Equal(3, await ProcessesTestData.PartsAsync(player, services, hull.PartTypeId, PartCondition.Full));
         Assert.Single(await production.PartStocks.AsNoTracking().Where(stack => stack.PlanetId == player.PlanetId && stack.PartTypeId == hull.PartTypeId).ToListAsync(Token));
-        Assert.All(engine.ResourceCost, cost => Assert.Equal(before[cost.Key] + (long)decimal.Floor(cost.Value * 0.40m), after[cost.Key]));
+        Assert.All(engine.ResourceCost, cost => Assert.Equal(before[cost.Key] + (long)decimal.Floor(cost.Value * levelOneShare), after[cost.Key]));
         Assert.All(hull.ResourceCost.Keys.Except(engine.ResourceCost.Keys), resourceId => Assert.Equal(before[resourceId], after[resourceId]));
     }
 
     /// <summary>
-    /// An archived parameter stops working at once for the new orders, while an order that is
-    /// already in the queue is finished with the values it was made with (task 00014, section
-    /// 11); the catalog lives in memory for an hour, yet the archive reaches the next order.
+    /// The step of the technology of the converter is only the right to convert since the
+    /// coefficient moved to the building (task 00028, update of 04.11.2026): archiving the step
+    /// stops nothing, the next order is taken and both orders give the coefficient of the
+    /// converter (decision of the author of 04.11.2026: such steps are not archived).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task An_archived_parameter_changes_no_order_in_the_queue_and_stops_the_new_ones()
+    public async Task An_archived_step_of_the_technology_does_not_stop_the_conversion()
     {
         await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -426,23 +438,24 @@ public sealed partial class ProcessesTests
             ProcessOrderRequest request = new(10, sourceId, targetId);
             long targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
 
-            // The order is made while the first step of the technology holds: 30 per cent.
+            // The order is made while the first step of the technology holds.
             ProcessCatalog catalog = await ProcessesTestData.CatalogAsync(services);
             ProcessParamInfo step = catalog.ParamAt(recipe.ProcessTypeId, ProcessParamKinds.ValueByLevel, ProcessLevelSources.Technology, technologyId, 1)!;
             await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
 
-            // The step is archived at once: the next order of the same kind is refused.
+            // The step is archived: the next order of the same kind is still taken.
             ProcessReferenceAdminService admin = services.GetRequiredService<ProcessReferenceAdminService>();
             ProcessParamEntity stored = await services.GetRequiredService<ProcessesDbContext>().ProcessParams.AsNoTracking().SingleAsync(entry => entry.Id == step.Id, Token);
             await admin.SetArchivedAsync(ProcessReferenceAdminService.ProcessParamKind, step.Id, true, new Aetheris.Core.Admin.AdminReferenceInput(stored.Version, "test", EmptyValues()), Token);
 
-            Assert.Equal(ProcessErrorCodes.RequirementTechnology, await RefusedAsync(processes, player, buildingId, recipe.Id, request));
-            Assert.Single(await ProcessesTestData.OrdersAsync(player, services, buildingId));
+            await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
+            Assert.Equal(2, (await ProcessesTestData.OrdersAsync(player, services, buildingId)).Count);
 
-            // The order in the queue is finished with the values it was made with: 30 per cent
-            // of the ten units of the source, though the step is archived now.
-            Assert.Equal(10, await ProcessesTestData.CompleteAsync(player, services, buildingId));
-            Assert.Equal(targetBefore + 3, await ProcessesTestData.BalanceAsync(player, services, targetId));
+            // Both orders give the coefficient of the first level of the converter.
+            long output = (long)decimal.Floor(10 * await ProcessesTestData.BuildingCoefficientAsync(services, BuildingClasses.Converter, 1, BuildingEffectTypes.ConversionCoefficient));
+            await ProcessesTestData.CompleteAsync(player, services, buildingId);
+            await ProcessesTestData.CompleteAsync(player, services, buildingId);
+            Assert.Equal(targetBefore + output + output, await ProcessesTestData.BalanceAsync(player, services, targetId));
             Assert.Empty(await ProcessesTestData.OrdersAsync(player, services, buildingId));
         }
         finally
@@ -452,9 +465,10 @@ public sealed partial class ProcessesTests
     }
 
     /// <summary>
-    /// An order goes by the real levels it was made at: a level of the technology or of the
-    /// building that is reached while the order waits in the queue does not change what it gives
-    /// (task 00014, section 11).
+    /// An order goes by the real level of the technology it was made at, while the coefficient of
+    /// the building is the one of its level when the order runs: a factory raised while the order
+    /// waits gives the share of its new level (task 00014, section 11; decision of the author of
+    /// 04.11.2026 after the coefficients moved to the buildings).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
@@ -464,6 +478,7 @@ public sealed partial class ProcessesTests
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
+        decimal levelTenShare = await ProcessesTestData.BuildingCoefficientAsync(services, BuildingClasses.Recycling, 10, BuildingEffectTypes.RecyclingCoefficient);
 
         long converterId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
         long recyclerId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling);
@@ -485,22 +500,24 @@ public sealed partial class ProcessesTests
         await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(10, sourceId, targetId), Token);
         await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, recyclerId, recycling.Id, new ProcessOrderRequest(2, PartTypeId: hull.PartTypeId), Token);
 
-        // The levels rise while the orders wait; the orders keep the levels they were made at.
+        // The levels rise while the orders wait: the conversion keeps the level of the technology it
+        // was made at, and the factory gives the share of the level it has when the order runs.
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 10);
         await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Recycling, 10);
 
         await ProcessesTestData.CompleteAsync(player, services, converterId);
         await ProcessesTestData.CompleteAsync(player, services, recyclerId);
 
-        Assert.Equal(targetBefore + 3, await ProcessesTestData.BalanceAsync(player, services, targetId));
+        long conversionOutput = (long)decimal.Floor(10 * await ProcessesTestData.BuildingCoefficientAsync(services, BuildingClasses.Converter, 1, BuildingEffectTypes.ConversionCoefficient));
+        Assert.Equal(targetBefore + conversionOutput, await ProcessesTestData.BalanceAsync(player, services, targetId));
         Dictionary<int, long> hullAfter = await BalancesAsync(player, services, hull.ResourceCost.Keys);
 
-        // The conversion spends ten of the source and gives three of the target. A resource of
-        // the hull that is one of those two carries both changes.
+        // The conversion spends ten of the source and gives its output of the target. A resource
+        // of the hull that is one of those two carries both changes.
         Assert.All(hull.ResourceCost, cost =>
         {
-            long returned = (long)decimal.Floor(2 * cost.Value * 0.40m);
-            long conversion = cost.Key == sourceId ? 10 : cost.Key == targetId ? -3 : 0;
+            long returned = (long)decimal.Floor(2 * cost.Value * levelTenShare);
+            long conversion = cost.Key == sourceId ? 10 : cost.Key == targetId ? -conversionOutput : 0;
             Assert.Equal(hullBefore[cost.Key] + returned - conversion, hullAfter[cost.Key]);
         });
     }

@@ -13,10 +13,12 @@ namespace Aetheris.World.Visibility;
 /// <remarks>
 /// <para>
 /// The range of a radar is its level times <see cref="WorldConfigKeys.RadarRangePerLevel"/>, and
-/// a nebula weakens a radar that stands inside it by <see cref="WorldConfigKeys.NebulaRadarMultiplier"/>.
-/// What lies inside the range is open: the star systems, their objects and the free objects of
-/// the space. The distances are three-dimensional and measured between the absolute positions
-/// (the origin of the sector plus the place inside it).
+/// the share the radar adds to its range is taken off that range: the range is multiplied by one
+/// plus that share. A nebula weakens a radar that stands inside it by
+/// <see cref="WorldConfigKeys.NebulaRadarMultiplier"/>. What lies inside the range is open: the
+/// star systems, their objects and the free objects of the space. The distances are
+/// three-dimensional and measured between the absolute positions (the origin of the sector plus
+/// the place inside it).
 /// </para>
 /// <para>
 /// The level of a radar comes from <see cref="IRadarLevels"/>, filled by the module of the
@@ -91,10 +93,14 @@ public sealed class RadarVisibility : IWorldVisibility
         }
 
         IReadOnlyDictionary<long, int> levels = await LevelsAsync(playerId, [.. observers.Select(observer => observer.Id)], settings, cancellationToken).ConfigureAwait(false);
+        IReadOnlyDictionary<long, decimal> bonuses = await RangeBonusesAsync(playerId, [.. observers.Select(observer => observer.Id)], settings, cancellationToken).ConfigureAwait(false);
 
         foreach (var observer in observers)
         {
-            double radius = levels.GetValueOrDefault(observer.Id) * settings.RadarRangePerLevel * (observer.InNebula ? settings.NebulaRadarMultiplier : 1);
+            double radius = levels.GetValueOrDefault(observer.Id)
+                * settings.RadarRangePerLevel
+                * (1d + (double)bonuses.GetValueOrDefault(observer.Id))
+                * (observer.InNebula ? settings.NebulaRadarMultiplier : 1);
 
             if (radius <= 0)
             {
@@ -156,5 +162,32 @@ public sealed class RadarVisibility : IWorldVisibility
         return levels is null
             ? new Dictionary<long, int>()
             : await levels.GetLevelsAsync(playerId, planetIds, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Gets the shares that the radars of the bodies add to their range. While the test stub is
+    /// on, the stub replaces the whole radar, so the shares change nothing.
+    /// </summary>
+    /// <param name="playerId">The owner of the bodies.</param>
+    /// <param name="planetIds">The bodies.</param>
+    /// <param name="settings">The settings of the world.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The share by body.</returns>
+    private async Task<IReadOnlyDictionary<long, decimal>> RangeBonusesAsync(
+        string playerId,
+        long[] planetIds,
+        WorldSettings settings,
+        CancellationToken cancellationToken)
+    {
+        if (settings.RadarStubEnabled)
+        {
+            return new Dictionary<long, decimal>();
+        }
+
+        IRadarLevels? levels = _services.GetService(typeof(IRadarLevels)) as IRadarLevels;
+
+        return levels is null
+            ? new Dictionary<long, decimal>()
+            : await levels.GetRangeBonusesAsync(playerId, planetIds, cancellationToken).ConfigureAwait(false);
     }
 }

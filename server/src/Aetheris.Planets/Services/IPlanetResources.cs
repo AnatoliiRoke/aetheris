@@ -1,4 +1,4 @@
-namespace Aetheris.Planets.Services;
+namespace Aetheris.Planets;
 
 /// <summary>
 /// The balance of a body, for the modules that pay for something on a body (task 00012).

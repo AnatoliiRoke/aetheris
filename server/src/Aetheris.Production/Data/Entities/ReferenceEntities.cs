@@ -28,6 +28,14 @@ public sealed class PartGroupEntity
     /// <summary>Gets or sets the order of the group in the lists.</summary>
     public int SortOrder { get; set; }
 
+    /// <summary>
+    /// Gets or sets the group this group lies in, or <see langword="null"/> for a group of the top
+    /// level (task 00043). The groups of the top level are the sections of the production screen,
+    /// and a group inside a group, such as the energy and the kinetic weapons inside the weapons,
+    /// is a tab inside the tab of its parent.
+    /// </summary>
+    public int? ParentGroupId { get; set; }
+
     /// <summary>Gets or sets whether the group is archived (task 00023, decision 5).</summary>
     public bool IsArchived { get; set; }
 

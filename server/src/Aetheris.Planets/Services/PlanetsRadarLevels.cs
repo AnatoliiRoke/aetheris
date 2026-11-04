@@ -34,4 +34,19 @@ public sealed class PlanetsRadarLevels : IRadarLevels
             .Where(entry => planetIds.Contains(entry.PlanetId) && entry.Level > 0)
             .ToDictionary(entry => entry.PlanetId, entry => entry.Level);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<long, decimal>> GetRangeBonusesAsync(string playerId, IReadOnlyCollection<long> planetIds, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+        ArgumentNullException.ThrowIfNull(planetIds);
+
+        IReadOnlyDictionary<long, decimal> bonuses = await _queries
+            .GetBuildingEffectValuesAsync(BuildingClasses.Sensor, BuildingEffectTypes.RadarRangeBonus, playerId, cancellationToken)
+            .ConfigureAwait(false);
+
+        return bonuses
+            .Where(entry => planetIds.Contains(entry.Key))
+            .ToDictionary(entry => entry.Key, entry => entry.Value);
+    }
 }

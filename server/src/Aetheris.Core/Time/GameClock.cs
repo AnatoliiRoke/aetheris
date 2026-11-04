@@ -91,6 +91,40 @@ public sealed class GameClock : IGameClock
         }
     }
 
+    /// <summary>
+    /// Puts the clock on a stored anchor, so the game time goes on from where it was before the
+    /// server stopped instead of jumping back to the real time.
+    /// </summary>
+    /// <param name="realAnchor">The real time of the anchor.</param>
+    /// <param name="gameAnchor">The game time at the real time of the anchor.</param>
+    /// <param name="multiplier">The multiplier. Must be greater than zero.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="multiplier"/> is not positive.</exception>
+    public void Restore(DateTimeOffset realAnchor, DateTimeOffset gameAnchor, double multiplier)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(multiplier, 0d);
+
+        lock (_anchorLock)
+        {
+            _realAnchor = realAnchor;
+            _gameAnchor = gameAnchor;
+            _multiplier = multiplier;
+        }
+    }
+
+    /// <summary>
+    /// Gets the anchor the clock would have after a change of the multiplier at a moment, so it
+    /// can be stored before the change is applied.
+    /// </summary>
+    /// <param name="now">The real time to anchor at.</param>
+    /// <returns>The real time and the game time of the anchor.</returns>
+    public (DateTimeOffset RealAnchor, DateTimeOffset GameAnchor) AnchorAt(DateTimeOffset now)
+    {
+        lock (_anchorLock)
+        {
+            return (now, ToGameTimeUnlocked(now));
+        }
+    }
+
     private DateTimeOffset ToGameTimeUnlocked(DateTimeOffset realTime)
     {
         double elapsedRealSeconds = (realTime - _realAnchor).TotalSeconds;

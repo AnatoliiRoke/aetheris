@@ -13,7 +13,7 @@ import type { Planet, PlanetApi } from '../api/planetApi';
 import type { ActiveOrders } from '../api/activeOrders';
 import type { ProcessActiveOrder, ProcessBuilding, ProcessBuildingSummary, ProcessesApi, TerraformingState, TerraformingTarget } from '../api/processesApi';
 import type { MapApi, MapGalaxy, MapOwner, MapResourceShare, MapSectorView, MapSystemView } from '../api/mapApi';
-import type { Characteristic, PartCharacteristics, ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionRecipeList, ProductionStock } from '../api/productionApi';
+import type { Characteristic, PartCharacteristics, ProductionApi, ProductionFactory, ProductionFactorySummary, ProductionPartGroup, ProductionRecipe, ProductionRecipeList, ProductionStock } from '../api/productionApi';
 import type { ResearchApi, ResearchTree } from '../api/researchApi';
 import type { TextsApi } from '../api/textsApi';
 import type { OwnedPlanet, Reference, WorldApi, WorldReference } from '../api/worldApi';
@@ -99,7 +99,17 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'production.recipe.recipe_2.description': 'Модуль корпусу корабля.',
     'production.recipe.recipe_3.name': 'Реактор малий',
     'production.recipe.recipe_3.description': 'Малий реактор для корабля.',
-    'production.part_group.part_group_3.name': 'Реактори',
+    'production.part_group.part_group_3.name': 'Енергетична зброя',
+    'production.part_group.part_group_4.name': 'Кінетична зброя',
+    'production.part_group.part_group_7.name': 'Боєприпаси',
+    'production.recipe.recipe_7.name': 'Снаряди',
+    'production.part_group.part_group_12.name': 'Легкі',
+    'production.part_group.part_group_19.name': 'Модулі кораблів',
+    'production.part_group.part_group_20.name': 'Корпуси кораблів',
+    'production.part_group.part_group_22.name': 'Зброя',
+    'production.recipe.recipe_4.name': 'Легкий лазер',
+    'production.recipe.recipe_5.name': 'РПУ-X1',
+    'production.recipe.recipe_6.name': 'Корпус «Шершень»',
     'planets.building.building_14.name': 'Верф',
     'production.part_type.part_3.name': 'Корпус «Оса» Мк. II',
     'production.part_type.part_34.name': 'Пристрій тераформінгу Mk I',
@@ -650,7 +660,53 @@ export function sampleProductionRecipes(overrides: Partial<ProductionRecipeList>
     factories: sampleProductionFactories(),
     storage: factory.storage,
     gameNow: factory.gameNow,
+    groups: sampleProductionGroups(),
     ...overrides,
+  };
+}
+
+/**
+ * The tree of the groups of the parts for the tests (task 00043): the sections of the ship
+ * modules and the ship hulls, and the weapons inside the ship modules with the energy weapons,
+ * the kinetic weapons and the ammunition inside them.
+ */
+export function sampleProductionGroups(): ProductionPartGroup[] {
+  const group = (partGroupId: number, parentGroupId: number | null, sortOrder: number): ProductionPartGroup => ({
+    partGroupId,
+    code: `part_group_${partGroupId}`,
+    nameKey: `production.part_group.part_group_${partGroupId}.name`,
+    parentGroupId,
+    sortOrder,
+  });
+
+  return [group(19, null, 1), group(20, null, 2), group(2, 19, 3), group(22, 19, 4), group(3, 22, 1), group(4, 22, 2), group(7, 22, 3), group(10, 19, 8), group(12, 20, 2)];
+}
+
+/**
+ * A recipe of a part for the tests (task 00043).
+ *
+ * @param recipeId The recipe; its name is the text of `production.recipe.recipe_<id>.name`.
+ * @param partGroupId The group of the part it makes.
+ */
+export function sampleProductionPartRecipe(recipeId: number, partGroupId: number): ProductionRecipe {
+  return {
+    recipeId,
+    code: `recipe_${recipeId}`,
+    nameKey: `production.recipe.recipe_${recipeId}.name`,
+    descriptionKey: `production.recipe.recipe_${recipeId}.description`,
+    buildingTypeId: 13,
+    partTypeId: recipeId,
+    resourceTypeId: null,
+    outputQuantity: 1,
+    durationSeconds: 60,
+    isAvailable: true,
+    reasons: [],
+    imageKey: null,
+    unitSeconds: 60,
+    ingredients: [{ resourceTypeId: 1, partTypeId: null, amount: 2, nameKey: 'world.resource.resource_1.name' }],
+    partGroupId,
+    partGroupNameKey: `production.part_group.part_group_${partGroupId}.name`,
+    partGroupCode: `part_group_${partGroupId}`,
   };
 }
 

@@ -287,6 +287,10 @@ namespace Aetheris.Production.Data.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("name_key");
 
+                    b.Property<int?>("ParentGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("parent_group_id");
+
                     b.Property<int>("SortOrder")
                         .HasColumnType("integer")
                         .HasColumnName("sort_order");
@@ -301,6 +305,9 @@ namespace Aetheris.Production.Data.Migrations
                     b.HasIndex("Code")
                         .IsUnique()
                         .HasDatabaseName("ix_part_group_code");
+
+                    b.HasIndex("ParentGroupId", "SortOrder")
+                        .HasDatabaseName("ix_part_group_parent_group_id_sort_order");
 
                     b.ToTable("part_group", (string)null);
                 });
@@ -849,6 +856,15 @@ namespace Aetheris.Production.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_part_group_characteristic_part_group_part_group_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartGroupEntity", b =>
+                {
+                    b.HasOne("Aetheris.Production.Data.Entities.PartGroupEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ParentGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_part_group_part_group_parent_group_id");
                 });
 
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartTypeEntity", b =>

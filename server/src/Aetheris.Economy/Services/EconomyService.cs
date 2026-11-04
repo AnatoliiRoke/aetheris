@@ -758,7 +758,9 @@ public sealed class EconomyService
     private async Task<Rates> RatesAsync(string playerId, IReadOnlyCollection<long> planetIds, CancellationToken cancellationToken)
     {
         EconomySettings settings = EconomySettings.From(_config);
-        EconomyBonuses bonuses = await _technologyBonuses.GetBonusesAsync(playerId, cancellationToken).ConfigureAwait(false);
+        IReadOnlyDictionary<long, EconomyBonuses> bonuses = planetIds.Count == 0
+            ? new Dictionary<long, EconomyBonuses>()
+            : await _technologyBonuses.GetBonusesAsync(playerId, planetIds, cancellationToken).ConfigureAwait(false);
         IReadOnlyDictionary<long, PlanetEconomyEffects> effects = planetIds.Count == 0
             ? new Dictionary<long, PlanetEconomyEffects>()
             : await _buildingEffects.GetAsync(planetIds, playerId, cancellationToken).ConfigureAwait(false);
@@ -798,15 +800,17 @@ public sealed class EconomyService
     private static PopulationView View(PlanetPopulationEntity row, Rates rates, DateTimeOffset moment)
     {
         PlanetEconomyEffects effects = rates.Effects.GetValueOrDefault(row.PlanetId) ?? new PlanetEconomyEffects(0, 0);
+        EconomyBonuses bonuses = rates.Bonuses.GetValueOrDefault(row.PlanetId) ?? new EconomyBonuses();
         long maximum = effects.PopulationMax;
 
         // The buildings of the body may raise the speed the population grows with, so the effect
-        // of the buildings and the bonus of the technologies are multiplied (task 00015).
+        // of the buildings and the bonus of the technologies are multiplied (task 00015). The
+        // technologies are researched from a body, so the bonus is the one of that body.
         decimal buildingMultiplier = effects.PopulationGrowthEffect > 0 ? effects.PopulationGrowthEffect : 1m;
         decimal growth = PopulationRules.GrowthPerHour(
             maximum,
             rates.Settings.PopulationGrowthPercent,
-            rates.Bonuses.PopulationGrowthMultiplier * buildingMultiplier);
+            bonuses.PopulationGrowthMultiplier * buildingMultiplier);
         decimal decline = PopulationRules.DeclinePerHour(rates.Settings.PopulationDeclinePerHour);
 
         // The population grows until the largest population and dies down above it, so the
@@ -817,7 +821,11 @@ public sealed class EconomyService
 
         decimal exact = PopulationRules.AccumulateExact(start, maximum, speedAtStart, row.UpdatedAt, to);
         (long amount, decimal fraction) = PopulationRules.Settle(exact, speedAtStart < 0m);
-        decimal earned = CreditRules.Earned(start, maximum, speedAtStart, rates.CreditsPerInhabitant, row.UpdatedAt, to);
+
+        // The income of the credits is the income of the body: the technologies it has learned
+        // and the bank it has, and the bank of one body adds nothing to the others.
+        decimal creditsPerInhabitant = rates.CreditsPerInhabitant(row.PlanetId);
+        decimal earned = CreditRules.Earned(start, maximum, speedAtStart, creditsPerInhabitant, row.UpdatedAt, to);
 
         // The speed and the warning are the ones of the moment, and not of the last count, so a
         // population that died down under the limit grows again.
@@ -829,7 +837,7 @@ public sealed class EconomyService
             fraction,
             earned,
             new PopulationFacts(row.PlanetId, amount, maximum, speed, overLimit, PopulationRules.TimeToMaximum(amount, maximum, speed)),
-            CreditRules.IncomePerHour(amount, rates.CreditsPerInhabitant));
+            CreditRules.IncomePerHour(amount, creditsPerInhabitant));
     }
 
     /// <summary>
@@ -837,11 +845,28 @@ public sealed class EconomyService
     /// </summary>
     private sealed record Rates(
         EconomySettings Settings,
-        EconomyBonuses Bonuses,
+        IReadOnlyDictionary<long, EconomyBonuses> Bonuses,
         IReadOnlyDictionary<long, PlanetEconomyEffects> Effects)
     {
-        /// <summary>Gets how many credits an inhabitant brings in an hour: the parameter with the bonus of the technologies.</summary>
-        public decimal CreditsPerInhabitant => Settings.CreditsPerInhabitant * Bonuses.CreditIncomeMultiplier;
+        /// <summary>
+        /// Gets how many credits an inhabitant of a body brings in an hour: the parameter with
+        /// the bonus of the technologies of the body and the bonus of its bank.
+        /// </summary>
+        /// <param name="planetId">The body.</param>
+        /// <returns>The credits an inhabitant brings in an hour.</returns>
+        /// <remarks>
+        /// The income of the credits is the income of the body: the technologies it has learned
+        /// and the bank it has. The bank of one body adds nothing to the income of the others.
+        /// The share of the data is a share of the income: ten per cent of the data is a tenth
+        /// more of the income.
+        /// </remarks>
+        public decimal CreditsPerInhabitant(long planetId)
+        {
+            EconomyBonuses bonuses = Bonuses.GetValueOrDefault(planetId) ?? new EconomyBonuses();
+            decimal share = Effects.GetValueOrDefault(planetId)?.CreditIncomeBonus ?? 0m;
+
+            return Settings.CreditsPerInhabitant * bonuses.CreditIncomeMultiplier * (1m + share);
+        }
     }
 
     /// <summary>

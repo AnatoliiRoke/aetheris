@@ -2,7 +2,7 @@
 
 > **Статус:** ◐ ВИКОНАНО 01.11.2026, чекає приймання автором (ручна перевірка в Chrome і CI: [00032-pytannia.md](00032-pytannia.md)).
 > **Етап:** 1 (production/01)
-> **Документи:** [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md), [задача 00020](00020-vyrivniuvannia-ekraniv-za-dyzainom.md), [задача 00013](00013-vyrobnytstvo-detalei.md).
+> **Документи:** [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md), [задача 00020](00020-perenesty-chotyry-novi-storinky-hry.md), [задача 00013](00013-vyrobnytstvo-retsepty-zavody-sklad-detalei.md).
 
 ## 1. Мета
 1. **Глобальний дизайн.** Плашки в будівництві, у виробництві й у дослідженнях: при ширині екрана менше 1430 px у рядку 2 плашки замість 3, а менше 1000 px одна.

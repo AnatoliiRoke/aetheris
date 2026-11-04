@@ -1,3 +1,4 @@
+using Aetheris.Planets;
 using Aetheris.Processes.Services;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
@@ -12,9 +13,9 @@ namespace Aetheris.Processes.Handlers;
 /// <para>
 /// The order takes the parts it names from the storage when it enters the queue. A unit
 /// returns the share of the cost of a part by the recipe that makes it, the produced
-/// materials included; the share comes from the parameters of the kind by the level of the
-/// factory and is multiplied by the condition of the part (task 00014, decision 7). There are
-/// no bonuses of the artifacts.
+/// materials included; the share is the coefficient of the level of the recycling factory the
+/// order runs in, and it is multiplied by the condition of the part (task 00014, decision 7).
+/// There are no bonuses of the artifacts.
 /// </para>
 /// <para>
 /// A part or a module has no crew, so taking it apart returns none: the crew comes aboard only
@@ -61,7 +62,9 @@ public sealed class RecyclingHandler : IProcessHandler
             return [new ProcessReason(ProcessErrorCodes.PartMissing)];
         }
 
-        if (ProcessHandlerRules.BuildingShare(context.Catalog, context.ProcessType.Id, context.BuildingLevel) is null)
+        // A factory whose level has no coefficient would take the parts and return nothing, so
+        // the order is refused before anything is spent.
+        if (Coefficient(context.BuildingEffects) <= decimal.Zero)
         {
             return [new ProcessReason(ProcessErrorCodes.ParamMissing)];
         }
@@ -94,7 +97,7 @@ public sealed class RecyclingHandler : IProcessHandler
             return ProcessResult.Empty;
         }
 
-        decimal share = ProcessHandlerRules.BuildingShare(context.Catalog, context.ProcessType.Id, context.BuildingLevel) ?? decimal.Zero;
+        decimal share = Coefficient(context.BuildingEffects);
         List<PartStackTaken> stacks = [.. ProcessHandlerRules.NamedStacks(context, Condition(context.Request))];
 
         // The return of the whole batch is counted first and split into its units, so the
@@ -124,6 +127,22 @@ public sealed class RecyclingHandler : IProcessHandler
         // The parts were taken from the storage when the order entered the queue, so the
         // handler changes nothing else when a unit is ready.
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Gets the share of the cost of a part the recycling factory returns: the coefficient of the
+    /// level of the factory the order runs in.
+    /// </summary>
+    /// <param name="buildingEffects">The values of the effects of the building the order runs in.</param>
+    /// <returns>The share, a number between zero and one.</returns>
+    private static decimal Coefficient(IReadOnlyDictionary<string, decimal> buildingEffects)
+    {
+        ArgumentNullException.ThrowIfNull(buildingEffects);
+
+        return Math.Clamp(
+            buildingEffects.GetValueOrDefault(BuildingEffectTypes.RecyclingCoefficient),
+            decimal.Zero,
+            decimal.One);
     }
 
     /// <summary>

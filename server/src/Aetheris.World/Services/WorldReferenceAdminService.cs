@@ -47,6 +47,16 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
     private const string AllowsDebtField = "allows_debt";
 
+    private const string PaysPortalDeliveryField = "pays_portal_delivery";
+
+    private const string PaidByPopulationField = "paid_by_population";
+
+    private const string IsBalanceField = "is_balance";
+
+    private const string IconShapeField = "icon_shape";
+
+    private const string IconToneField = "icon_tone";
+
     private const string WeightField = "weight";
 
     private const string LabelPrefix = "admin.reference.";
@@ -141,6 +151,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 Options: [.. ResourceScopes.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "scope." + value))]),
             new(EarnsPopulationIncomeField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.earns_population_income", InList: true),
             new(AllowsDebtField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.allows_debt", InList: true),
+            new(PaysPortalDeliveryField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.pays_portal_delivery", InList: true),
+            new(PaidByPopulationField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.paid_by_population", InList: true),
             new(WeightField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.weight", IsRequired: true, InList: true, Minimum: 0, IsDecimal: true),
         ]);
 
@@ -166,6 +178,19 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             new(AdminReferenceRules.NameField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.name", IsRequired: true, HasLanguages: true, InList: true),
             new(AdminReferenceRules.DescriptionField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.description", IsRequired: true, HasLanguages: true),
             new(AllowedOnPlanetField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.allowed_on_planet", InList: true),
+            new(IsBalanceField, AdminReferenceFieldTypes.Flag, LabelPrefix + "field.is_balance", InList: true),
+            new(
+                IconShapeField,
+                AdminReferenceFieldTypes.Select,
+                LabelPrefix + "field.icon_shape",
+                InList: true,
+                Options: [.. ResourceGroupIcons.Shapes.Select(value => new AdminReferenceOption(value, LabelPrefix + "icon_shape." + value))]),
+            new(
+                IconToneField,
+                AdminReferenceFieldTypes.Select,
+                LabelPrefix + "field.icon_tone",
+                InList: true,
+                Options: [.. ResourceGroupIcons.Tones.Select(value => new AdminReferenceOption(value, LabelPrefix + "icon_tone." + value))]),
         ]);
 
     /// <inheritdoc />
@@ -196,6 +221,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                         [ScopeField] = resource.Scope,
                         [EarnsPopulationIncomeField] = resource.EarnsPopulationIncome,
                         [AllowsDebtField] = resource.AllowsDebt,
+                        [PaysPortalDeliveryField] = resource.PaysPortalDelivery,
+                        [PaidByPopulationField] = resource.PaidByPopulation,
                         [WeightField] = resource.Weight,
                     }))],
             ResourceGroupKind => [.. (await _dbContext.ResourceGroups.AsNoTracking().OrderBy(group => group.Id).ToListAsync(cancellationToken).ConfigureAwait(false))
@@ -206,7 +233,13 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     group.ImageKey,
                     group.IsArchived,
                     group.Version,
-                    new Dictionary<string, object?> { [AllowedOnPlanetField] = group.AllowedOnPlanet }))],
+                    new Dictionary<string, object?>
+                    {
+                        [AllowedOnPlanetField] = group.AllowedOnPlanet,
+                        [IsBalanceField] = group.IsBalance,
+                        [IconShapeField] = group.IconShape,
+                        [IconToneField] = group.IconTone,
+                    }))],
             _ => throw UnknownKind(kind),
         };
 
@@ -376,6 +409,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     Scope = values.Scope,
                     EarnsPopulationIncome = values.EarnsPopulationIncome,
                     AllowsDebt = values.AllowsDebt,
+                    PaysPortalDelivery = values.PaysPortalDelivery,
+                    PaidByPopulation = values.PaidByPopulation,
                     Weight = values.Weight ?? DefaultWeight(),
                 };
 
@@ -411,6 +446,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 resource.Scope = values.Scope;
                 resource.EarnsPopulationIncome = values.EarnsPopulationIncome;
                 resource.AllowsDebt = values.AllowsDebt;
+                resource.PaysPortalDelivery = values.PaysPortalDelivery;
+                resource.PaidByPopulation = values.PaidByPopulation;
                 resource.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
                 resource.Weight = values.Weight ?? DefaultWeight();
                 resource.Version++;
@@ -436,6 +473,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 Dictionary<string, List<string>> failures = [];
                 AdminReferenceRules.CheckTexts(failures, _texts, values.Name, values.Description);
                 await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), null, cancellationToken).ConfigureAwait(false);
+                CheckGroupIcon(failures, values);
                 AdminReferenceRules.ThrowIfInvalid(failures);
 
                 string code = await _codes.NextAsync(WorldCodeGroups.ResourceGroup, cancellationToken).ConfigureAwait(false);
@@ -446,6 +484,9 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     DescriptionKey = WorldTextKeys.Description(WorldTextKeys.ResourceGroup, code),
                     AllowedOnPlanet = values.AllowedOnPlanet,
                     ImageKey = AdminReferenceRules.ImageKey(values.ImageKey),
+                    IsBalance = values.IsBalance,
+                    IconShape = Blank(values.IconShape),
+                    IconTone = Blank(values.IconTone),
                 };
 
                 _dbContext.ResourceGroups.Add(group);
@@ -475,6 +516,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 Dictionary<string, List<string>> failures = [];
                 AdminReferenceRules.CheckTexts(failures, _texts, values.Name, values.Description);
                 await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), group.ImageKey, cancellationToken).ConfigureAwait(false);
+                CheckGroupIcon(failures, values);
                 AdminReferenceRules.ThrowIfInvalid(failures);
 
                 IReadOnlyList<LocalizationPack> packs = await AdminReferenceRules.PacksAsync(_texts, cancellationToken).ConfigureAwait(false);
@@ -482,6 +524,9 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
                 group.AllowedOnPlanet = values.AllowedOnPlanet;
                 group.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
+                group.IsBalance = values.IsBalance;
+                group.IconShape = Blank(values.IconShape);
+                group.IconTone = Blank(values.IconTone);
                 group.Version++;
 
                 await _texts.SetAsync(
@@ -606,6 +651,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <param name="EarnsPopulationIncome">Whether the population of a civilization brings this currency.</param>
     /// <param name="Weight">The weight of one unit of the resource in tonnes (task 00027).</param>
     /// <param name="AllowsDebt">Whether the balance of this currency may go below zero (task 00024).</param>
+    /// <param name="PaysPortalDelivery">Whether the buyer pays the delivery of a lot through a portal with this resource.</param>
+    /// <param name="PaidByPopulation">Whether a cost in this resource is paid by the inhabitants of the body.</param>
     private sealed record ResourceValues(
         Dictionary<string, string>? Name,
         Dictionary<string, string>? Description,
@@ -614,13 +661,15 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         string Scope,
         bool EarnsPopulationIncome = false,
         decimal? Weight = null,
-        bool AllowsDebt = false)
+        bool AllowsDebt = false,
+        bool PaysPortalDelivery = false,
+        bool PaidByPopulation = false)
     {
         public static ResourceValues Of(ResourceTypeEntity resource, IReadOnlyList<LocalizationPack> packs) =>
-            new(AdminReferenceRules.TextsOf(packs, resource.NameKey), AdminReferenceRules.TextsOf(packs, resource.DescriptionKey), resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome, resource.Weight, resource.AllowsDebt);
+            new(AdminReferenceRules.TextsOf(packs, resource.NameKey), AdminReferenceRules.TextsOf(packs, resource.DescriptionKey), resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome, resource.Weight, resource.AllowsDebt, resource.PaysPortalDelivery, resource.PaidByPopulation);
 
         public static ResourceValues Of(ResourceTypeEntity resource, (Dictionary<string, string> Name, Dictionary<string, string> Description) texts) =>
-            new(texts.Name, texts.Description, resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome, resource.Weight, resource.AllowsDebt);
+            new(texts.Name, texts.Description, resource.ResourceGroupId, resource.ImageKey, resource.Scope, resource.EarnsPopulationIncome, resource.Weight, resource.AllowsDebt, resource.PaysPortalDelivery, resource.PaidByPopulation);
 
         public (Dictionary<string, string> Name, Dictionary<string, string> Description) Trimmed(ILocalizationTexts texts) =>
             (Trim(texts, Name), Trim(texts, Description));
@@ -634,6 +683,8 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             [ScopeField] = Scope,
             [EarnsPopulationIncomeField] = EarnsPopulationIncome,
             [AllowsDebtField] = AllowsDebt,
+            [PaysPortalDeliveryField] = PaysPortalDelivery,
+            [PaidByPopulationField] = PaidByPopulation,
             [WeightField] = Weight,
         };
     }
@@ -645,17 +696,23 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <param name="Description">The description by language.</param>
     /// <param name="AllowedOnPlanet">Whether a resource of the group may lie on a body.</param>
     /// <param name="ImageKey">The key of the picture.</param>
+    /// <param name="IsBalance">Whether the resources of the group are balances and not a stock of the storage.</param>
+    /// <param name="IconShape">The shape of the icon of the group.</param>
+    /// <param name="IconTone">The tone of the icon of the group.</param>
     private sealed record ResourceGroupValues(
         Dictionary<string, string>? Name,
         Dictionary<string, string>? Description,
         bool AllowedOnPlanet,
-        string? ImageKey = null)
+        string? ImageKey = null,
+        bool IsBalance = false,
+        string? IconShape = null,
+        string? IconTone = null)
     {
         public static ResourceGroupValues Of(ResourceGroupEntity group, IReadOnlyList<LocalizationPack> packs) =>
-            new(AdminReferenceRules.TextsOf(packs, group.NameKey), AdminReferenceRules.TextsOf(packs, group.DescriptionKey), group.AllowedOnPlanet, group.ImageKey);
+            new(AdminReferenceRules.TextsOf(packs, group.NameKey), AdminReferenceRules.TextsOf(packs, group.DescriptionKey), group.AllowedOnPlanet, group.ImageKey, group.IsBalance, group.IconShape, group.IconTone);
 
         public static ResourceGroupValues Of(ResourceGroupEntity group, (Dictionary<string, string> Name, Dictionary<string, string> Description) texts) =>
-            new(texts.Name, texts.Description, group.AllowedOnPlanet, group.ImageKey);
+            new(texts.Name, texts.Description, group.AllowedOnPlanet, group.ImageKey, group.IsBalance, group.IconShape, group.IconTone);
 
         public (Dictionary<string, string> Name, Dictionary<string, string> Description) Trimmed(ILocalizationTexts texts) =>
             (Trim(texts, Name), Trim(texts, Description));
@@ -666,8 +723,34 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             [AdminReferenceRules.NameField] = Name,
             [AdminReferenceRules.DescriptionField] = Description,
             [AllowedOnPlanetField] = AllowedOnPlanet,
+            [IsBalanceField] = IsBalance,
+            [IconShapeField] = IconShape,
+            [IconToneField] = IconTone,
         };
     }
+
+    /// <summary>
+    /// Checks the shape and the tone of the icon of a group: each is empty or one of the known
+    /// values of the design.
+    /// </summary>
+    private static void CheckGroupIcon(Dictionary<string, List<string>> failures, ResourceGroupValues values)
+    {
+        if (!ResourceGroupIcons.IsKnownShape(Blank(values.IconShape)))
+        {
+            AdminReferenceRules.Fail(failures, IconShapeField, AdminReferenceErrors.Unknown);
+        }
+
+        if (!ResourceGroupIcons.IsKnownTone(Blank(values.IconTone)))
+        {
+            AdminReferenceRules.Fail(failures, IconToneField, AdminReferenceErrors.Unknown);
+        }
+    }
+
+    /// <summary>
+    /// Turns an empty choice of a select into no value.
+    /// </summary>
+    private static string? Blank(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static Dictionary<string, string> Trim(ILocalizationTexts texts, Dictionary<string, string>? values) =>
         texts.Languages.ToDictionary(language => language, language => values?.GetValueOrDefault(language)?.Trim() ?? string.Empty, StringComparer.Ordinal);

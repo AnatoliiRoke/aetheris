@@ -112,18 +112,27 @@ public sealed class EconomyBuildingEffects : IEconomyBuildingEffects
                 .ToDictionaryAsync(state => state.PlanetId, state => state.OwnerPlayerId, cancellationToken)
                 .ConfigureAwait(false);
 
-        Dictionary<string, PlanetBonuses> bonusesByOwner = [];
+        Dictionary<(string OwnerPlayerId, long PlanetId), PlanetBonuses> bonusesByBody = [];
         Dictionary<long, PlanetEconomyEffects> effects = [];
+
+        // The technologies are researched from a body, so the bonuses of the technologies are the
+        // ones of that body, and every body of a player has its own. The levels of all the bodies
+        // are read at once.
+        IReadOnlyDictionary<long, PlanetBonuses> bonusesByPlanet = knownOwnerPlayerId is null
+            ? new Dictionary<long, PlanetBonuses>()
+            : await _technologies.GetBonusesAsync(knownOwnerPlayerId, planetIds, cancellationToken).ConfigureAwait(false);
 
         foreach (long planetId in planetIds)
         {
             string? ownerPlayerId = knownOwnerPlayerId ?? owners.GetValueOrDefault(planetId);
             string ownerKey = ownerPlayerId ?? string.Empty;
 
-            if (!bonusesByOwner.TryGetValue(ownerKey, out PlanetBonuses? bonuses))
+            if (!bonusesByBody.TryGetValue((ownerKey, planetId), out PlanetBonuses? bonuses))
             {
-                bonuses = await _technologies.GetBonusesAsync(ownerPlayerId, cancellationToken).ConfigureAwait(false);
-                bonusesByOwner[ownerKey] = bonuses;
+                bonuses = knownOwnerPlayerId is null
+                    ? await _technologies.GetBonusesAsync(ownerPlayerId, planetId, cancellationToken).ConfigureAwait(false)
+                    : bonusesByPlanet.GetValueOrDefault(planetId) ?? PlanetBonuses.None;
+                bonusesByBody[(ownerKey, planetId)] = bonuses;
             }
 
             Dictionary<int, int> levels = levelsByPlanet.GetValueOrDefault(planetId) ?? [];
@@ -132,6 +141,9 @@ public sealed class EconomyBuildingEffects : IEconomyBuildingEffects
                 PlanetEconomy.PopulationMax(catalog, levels, bonuses),
                 PlanetEconomy.Effects(catalog, levels)
                     .Where(entry => string.Equals(entry.Effect.EffectType, BuildingEffectTypes.PopulationGrowthBonus, StringComparison.Ordinal))
+                    .Sum(entry => entry.Effect.Value),
+                PlanetEconomy.Effects(catalog, levels)
+                    .Where(entry => string.Equals(entry.Effect.EffectType, BuildingEffectTypes.CreditIncomeBonus, StringComparison.Ordinal))
                     .Sum(entry => entry.Effect.Value));
         }
 

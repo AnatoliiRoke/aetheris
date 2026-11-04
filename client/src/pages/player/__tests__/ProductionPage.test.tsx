@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { fakeAuthApi, fakeProductionApi, renderPage, sampleProductionRecipes, signedInMe } from '../../../test/renderPage';
+import { fakeAuthApi, fakeProductionApi, renderPage, sampleProductionPartRecipe, sampleProductionRecipes, signedInMe } from '../../../test/renderPage';
 
 /**
  * A signed-in player with a civilization and a confirmed address.
@@ -120,6 +120,92 @@ describe('the production screen (task 00032)', () => {
     expect(within(groups).getByRole('tab', { name: 'Реактори' })).toHaveAttribute('aria-selected', 'true');
     expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
     expect(within(recipes).queryByText('Корпусний модуль')).toBeNull();
+  });
+
+  it('builds the sections and the tabs from the tree of the groups, with the weapons split into the energy, the kinetic and the ammunition (task 00043)', async () => {
+    const user = userEvent.setup();
+    const base = sampleProductionRecipes();
+    const production = fakeProductionApi({
+      recipes: vi.fn().mockResolvedValue({
+        ...base,
+        recipes: [...base.recipes, sampleProductionPartRecipe(4, 3), sampleProductionPartRecipe(5, 4), sampleProductionPartRecipe(7, 7), sampleProductionPartRecipe(6, 12)],
+      }),
+    });
+    renderPage('/planet/production', { auth: signedIn(), production });
+
+    const recipes = await screen.findByRole('region', { name: 'Рецепти' });
+    await within(recipes).findByText('Будматеріали');
+
+    // The sections are the groups of the top level that hold recipes.
+    const sections = within(recipes).getByRole('tablist', { name: 'Розділи виробництва' });
+
+    expect(within(sections).getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Ресурси', 'Модулі кораблів', 'Корпуси кораблів']);
+
+    await user.click(within(sections).getByRole('tab', { name: 'Модулі кораблів' }));
+
+    // The weapons are a tab of the modules, and the row of the weapons is shown only inside it.
+    const groups = within(recipes).getByRole('tablist', { name: 'Групи рецептів' });
+
+    expect(within(groups).getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Усі', 'Реактори', 'Зброя', 'Інші корабельні']);
+    expect(within(recipes).queryByRole('tablist', { name: 'Підгрупи рецептів' })).toBeNull();
+    expect(within(recipes).getByText('Легкий лазер')).toBeInTheDocument();
+    expect(within(recipes).getByText('РПУ-X1')).toBeInTheDocument();
+    expect(within(recipes).queryByText('Корпус «Шершень»')).toBeNull();
+
+    await user.click(within(groups).getByRole('tab', { name: 'Зброя' }));
+
+    const kinds = within(recipes).getByRole('tablist', { name: 'Підгрупи рецептів' });
+
+    expect(within(kinds).getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Усі', 'Енергетична зброя', 'Кінетична зброя', 'Боєприпаси']);
+    expect(within(recipes).getByText('Легкий лазер')).toBeInTheDocument();
+    expect(within(recipes).getByText('РПУ-X1')).toBeInTheDocument();
+    expect(within(recipes).queryByText('Реактор малий')).toBeNull();
+
+    await user.click(within(kinds).getByRole('tab', { name: 'Кінетична зброя' }));
+
+    expect(within(kinds).getByRole('tab', { name: 'Кінетична зброя' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(recipes).getByText('РПУ-X1')).toBeInTheDocument();
+    expect(within(recipes).queryByText('Легкий лазер')).toBeNull();
+    expect(within(recipes).queryByText('Снаряди')).toBeNull();
+
+    await user.click(within(kinds).getByRole('tab', { name: 'Боєприпаси' }));
+
+    expect(within(recipes).getByText('Снаряди')).toBeInTheDocument();
+    expect(within(recipes).queryByText('РПУ-X1')).toBeNull();
+
+    await user.click(within(kinds).getByRole('tab', { name: 'Енергетична зброя' }));
+
+    expect(within(recipes).getByText('Легкий лазер')).toBeInTheDocument();
+    expect(within(recipes).queryByText('РПУ-X1')).toBeNull();
+
+    // Another tab of the modules takes the row of the weapons away.
+    await user.click(within(groups).getByRole('tab', { name: 'Реактори' }));
+
+    expect(within(recipes).queryByRole('tablist', { name: 'Підгрупи рецептів' })).toBeNull();
+    expect(within(recipes).getByText('Реактор малий')).toBeInTheDocument();
+
+    await user.click(within(sections).getByRole('tab', { name: 'Корпуси кораблів' }));
+
+    expect(within(recipes).getByText('Корпус «Шершень»')).toBeInTheDocument();
+    expect(within(recipes).queryByText('РПУ-X1')).toBeNull();
+    // The tabs switch on the data already read: the recipes are not read again.
+    expect(vi.mocked(production.recipes).mock.calls.length).toBe(1);
+  });
+
+  it('keeps the recipes of the resources in their section with their names, and no empty section (task 00043)', async () => {
+    const base = sampleProductionRecipes();
+    const production = fakeProductionApi({
+      recipes: vi.fn().mockResolvedValue({ ...base, recipes: base.recipes.map((recipe) => (recipe.partGroupCode === null ? { ...recipe, partGroupCode: undefined as unknown as null } : recipe)) }),
+    });
+    renderPage('/planet/production', { auth: signedIn(), production });
+
+    const recipes = await screen.findByRole('region', { name: 'Рецепти' });
+    await within(recipes).findByText('Будматеріали');
+
+    const sections = within(recipes).getByRole('tablist', { name: 'Розділи виробництва' });
+
+    expect(within(sections).getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Ресурси', 'Модулі кораблів']);
+    expect(within(recipes).queryByText(/undefined/)).toBeNull();
   });
 
   it('puts the chosen number of units into the queue of the factory that makes the recipe', async () => {

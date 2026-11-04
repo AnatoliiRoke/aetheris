@@ -8,7 +8,7 @@
  * carrier of the meaning (ui-art/05, section 7).
  */
 
-import { resourceIconClass, resourceIconName } from './resourceIcon';
+import { useResourceIcons } from './resourceIcon';
 
 /**
  * The contours of the icons, by their name. The codes are the keys of the data, not the
@@ -154,7 +154,7 @@ export function GameIcon({ name, size = 20, className }: { name: GameIconName; s
  * @param size The size of the icon in pixels.
  */
 export function ResourceIcon({ groupCode, size = 14 }: { groupCode: string | null | undefined; size?: number }) {
-  const name = resourceIconName(groupCode);
+  const look = useResourceIcons().byCode(groupCode);
 
-  return <GameIcon name={name} size={size} className={resourceIconClass(groupCode)} />;
+  return <GameIcon name={look.name} size={size} className={look.className} />;
 }

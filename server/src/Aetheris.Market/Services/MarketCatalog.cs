@@ -77,16 +77,31 @@ public sealed class MarketCatalog
     }
 
     /// <summary>
-    /// Finds the resource of the delivery fee by its code in the configuration.
+    /// Finds the resource of the delivery fee: the resource the reference data marks as the one
+    /// the delivery through a portal is paid with.
     /// </summary>
-    /// <param name="code">The code of the resource.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The resource, or <see langword="null"/> when the data has none with the code.</returns>
-    public async Task<int?> EnergyResourceAsync(string code, CancellationToken cancellationToken)
+    /// <returns>The resource, or <see langword="null"/> when no resource has the flag.</returns>
+    public async Task<int?> EnergyResourceAsync(CancellationToken cancellationToken)
     {
         ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
 
-        return catalog.Resources.FirstOrDefault(resource => string.Equals(resource.Code, code, StringComparison.Ordinal))?.Id;
+        return FeeResource(catalog)?.Id;
+    }
+
+    /// <summary>
+    /// Finds the resource of the delivery fee in a catalog that is read already.
+    /// </summary>
+    /// <param name="catalog">The resource catalog.</param>
+    /// <returns>The resource with the flag and the smallest identifier, or <see langword="null"/>.</returns>
+    public static ResourceTypeFact? FeeResource(ResourceCatalog catalog)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+
+        return catalog.Resources
+            .Where(resource => resource.PaysPortalDelivery)
+            .OrderBy(resource => resource.Id)
+            .FirstOrDefault();
     }
 
     /// <summary>

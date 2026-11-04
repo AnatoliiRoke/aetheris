@@ -33,13 +33,13 @@ public sealed class BuildingTypeEntity
 
     /// <summary>
     /// Gets or sets the class of the type: what the building is for, one of
-    /// <see cref="Services.BuildingClasses"/> (task 00012, decision 1).
+    /// <see cref="BuildingClasses"/> (task 00012, decision 1).
     /// </summary>
     /// <remarks>
     /// The class is a logical code, not the neutral code of the row: the research task asks
     /// for the class <c>research_center</c> and gets the building whatever its code is.
     /// </remarks>
-    public string BuildingClass { get; set; } = Services.BuildingClasses.None;
+    public string BuildingClass { get; set; } = BuildingClasses.None;
 
     /// <summary>Gets or sets the key of the picture, or <see langword="null"/> for the neutral placeholder.</summary>
     public string? ImageKey { get; set; }
@@ -155,7 +155,7 @@ public sealed class BuildingLevelEffectEntity
     /// <summary>Gets or sets the level.</summary>
     public int BuildingLevelId { get; set; }
 
-    /// <summary>Gets or sets the effect type, one of <see cref="Services.BuildingEffectTypes"/>.</summary>
+    /// <summary>Gets or sets the effect type, one of <see cref="BuildingEffectTypes"/>.</summary>
     public string EffectType { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the resource of a production effect.</summary>

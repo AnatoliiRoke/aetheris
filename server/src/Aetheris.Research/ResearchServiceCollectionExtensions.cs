@@ -3,7 +3,7 @@ using Aetheris.Core.Commands;
 using Aetheris.Core.Data;
 using Aetheris.Core.Scheduling;
 using Aetheris.Economy.Services;
-using Aetheris.Planets.Services;
+using Aetheris.Planets;
 using Aetheris.Research.Api;
 using Aetheris.Research.Data;
 using Aetheris.Research.Events;

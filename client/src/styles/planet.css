@@ -2,15 +2,15 @@
    and buildings. Only the tokens of tokens.css and the components of ui-art/05. */
 .panel__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
 .num { font-variant-numeric: tabular-nums; }
-.planet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
-.planet-column { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.planet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-3); }
+.planet-column { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
 /* The planet screen as the design lays it out: the card, the resources, the storage, the energy
    and the population in the wide column, the queues in the narrow column beside it; on a narrow
    screen the narrow column goes below, in the same order. */
-.planet-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; align-items: start; }
-.planet-layout__main, .planet-layout__aside { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.planet-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-3); align-items: start; }
+.planet-layout__main, .planet-layout__aside { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
 .storage-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
-@media (max-width: 1023px) {
+@media (max-width: 1139px) {
   .planet-layout { grid-template-columns: minmax(0, 1fr); }
 }
 .planet-subtitle { font-size: var(--fs-body); font-weight: 600; }
@@ -29,13 +29,21 @@
 
 /* The storage by resource (task 00020, decision of 31.10.2026): under the name of a group a row for
    every resource with the amount against the capacity of the resource, the bar and the badge. */
-.storage-groups { display: flex; flex-direction: column; gap: 8px; }
+.storage-groups { display: flex; flex-direction: column; gap: var(--space-2); }
 .storage-group { display: flex; flex-direction: column; gap: 2px; }
 .storage-group__title { margin: 0; font-size: var(--fs-caption); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); }
 .storage-resources { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; list-style: none; margin: 0; padding: 0; }
-.storage-resource { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto; align-items: center; gap: 0 12px; padding: 3px 0; font-size: var(--fs-ui); }
+.storage-resource { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto; align-items: center; gap: 0 var(--space-3); padding: 3px 0; font-size: var(--fs-ui); }
 .storage-resource__name { color: var(--text-1); overflow-wrap: anywhere; }
 .storage-resource__value { display: inline-flex; align-items: center; justify-content: flex-end; gap: var(--space-2); font-weight: 600; white-space: nowrap; }
+/* Between 1140 px and 1240 px the bar of a resource is hidden: the column it takes is too narrow
+   for it. Below 1140 px it has its own column again, as on a wide screen. */
+@media (max-width: 1239px) {
+  .storage-resource .track { display: none; }
+}
+@media (max-width: 1139px) {
+  .storage-resource .track { display: block; }
+}
 
 .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: var(--r-full); border: 1px solid var(--border-strong); font-size: var(--fs-note); font-weight: 600; color: var(--text-1); white-space: nowrap; }
 .storage-resource .badge { padding: 0 7px; font-size: var(--fs-caption); font-weight: 700; }
@@ -44,7 +52,7 @@
 .queue-list { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
 .queue-item {
   display: flex; flex-direction: column; align-items: stretch; gap: 6px;
-  padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card-in);
+  padding: 10px var(--space-3); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-card-in);
 }
 .queue-item--active { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 .queue-item strong { font-size: var(--fs-game); font-weight: 600; }
@@ -82,7 +90,7 @@
 .building-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
 .building-card__name { font-size: var(--fs-card); font-weight: 600; }
 .building-card__text { color: var(--text-soft); font-size: var(--fs-ui); }
-.building-card__next { display: flex; flex-direction: column; gap: 10px; padding: 12px; padding-top: 12px; border-top: 1px solid var(--border); margin-top: auto; }
+.building-card__next { display: flex; flex-direction: column; gap: 10px; padding: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--border); margin-top: auto; }
 .civ__main--build .building-card__next { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-3); }
 .building-card__next > .meta { font-size: var(--fs-caption); font-weight: 600; letter-spacing: 0.06em; }
 .building-card .btn { align-self: stretch; }
@@ -128,6 +136,4 @@
 @media (max-width: 480px) {
   .storage-row { grid-template-columns: 1fr max-content; }
   .storage-row__meter { grid-column: 1 / -1; }
-  .storage-resource { grid-template-columns: 1fr max-content; }
-  .storage-resource .track { grid-column: 1 / -1; order: 3; }
 }

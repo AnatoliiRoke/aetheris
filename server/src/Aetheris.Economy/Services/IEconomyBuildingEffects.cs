@@ -42,4 +42,5 @@ public interface IEconomyBuildingEffects
 /// </summary>
 /// <param name="PopulationMax">The largest population of the body, with the bonus of the technologies of its owner: the one count the bodies module shows too.</param>
 /// <param name="PopulationGrowthEffect">The sum of the growth effects of the buildings of the body: the multiplier of the speed the population grows with, as the data gives it for the level (it has a fraction); a body without such a building has zero.</param>
-public sealed record PlanetEconomyEffects(long PopulationMax, decimal PopulationGrowthEffect);
+/// <param name="CreditIncomeBonus">The sum of the credit income effects of the buildings of the body: the share of the income the buildings of the body add.</param>
+public sealed record PlanetEconomyEffects(long PopulationMax, decimal PopulationGrowthEffect, decimal CreditIncomeBonus = 0m);

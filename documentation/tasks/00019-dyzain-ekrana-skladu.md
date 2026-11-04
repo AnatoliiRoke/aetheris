@@ -38,7 +38,7 @@ IMPORTANT: this screen shares its frame with an existing design. Reuse the same 
 CONTEXT OF THE GAME
 AETHERIS is a free-to-play online 2D space strategy game in real time, with one shared universe for all players. The player develops planets, mines resources, builds spaceships, trades and fights in turn-based tactical battles of 5-10 minutes. Every planet has a limited storage. When a group of resources fills up, the mines of that group stop producing and the player is told about it. So the player comes here to answer one question at a glance: how much of each resource do I have, and how much more will I have in an hour.
 
-Four playable races: Terran (gray metal and blue, reliable, military), Kvarr (amber and terracotta, crystals and armor), Skolar (red and black, sharp aggressive raiders), Nexar (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
+Four playable races: Terran (gray metal and blue, reliable, military), Litari (amber and terracotta, crystals and armor), Drakkuri (red and black, sharp aggressive raiders), Veirani (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
 
 THE SHELL (reproduce exactly, do not redesign)
 TOP BAR, 64 px tall, sticky, background rgba(7,11,22,0.92) with a 1 px bottom border of rgba(160,190,255,0.16). From left to right: a small square brand mark plus the word "AETHERIS" in Inter Bold 18 px with +4% letter spacing; the player nickname in a rounded pill with a small race-colored glyph; a chip reading "Standard" (or "Premium") in a muted border; a centered row of resource counters, each a small distinct icon plus a number in tabular-nums: Credits, Trade Currency, Energy; then on the right three alert pills (incoming attack in danger red, battle in progress in danger red, storage full in warning yellow), a 44×44 mail icon button with a small accent badge showing the unread count, a 44×44 settings icon button, and a 44×44 sign-out icon button. A 1 px vertical separator before the icon buttons.
@@ -108,7 +108,7 @@ Output a design-tokens table (colors, fonts, spacing, radii, shadows) and a list
   рядок «Mining has stopped — build more storage».
 - ✅ **Один кристал на планеті** (game-design/02, розділ 2.2) — одна позиція кристалів,
   рідко дві.
-- ✅ **Етеру на планеті немає** (game-design/02, розділ 2.4; `allowed_on_planet: false`).
+- ✅ **Ефіру на планеті немає** (game-design/02, розділ 2.4; `allowed_on_planet: false`).
 - ✅ **Стиль таблиці вже є** у клієнті: `planet-table` (`client/src/styles/planet.css`) —
   заголовок `text-2` 13 px, рядки з розділювачем `border`, числа `tabular-nums` праворуч.
 

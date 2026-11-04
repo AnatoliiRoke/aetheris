@@ -79,6 +79,9 @@ public static class WorldReferenceSeed
                 NameKey = WorldTextKeys.Name(WorldTextKeys.ResourceGroup, group.Code),
                 DescriptionKey = WorldTextKeys.Description(WorldTextKeys.ResourceGroup, group.Code),
                 AllowedOnPlanet = group.AllowedOnPlanet,
+                IsBalance = group.IsBalance,
+                IconShape = group.IconShape,
+                IconTone = group.IconTone,
             },
             StringComparer.Ordinal);
 
@@ -98,6 +101,8 @@ public static class WorldReferenceSeed
                 EarnsPopulationIncome = resource.EarnsPopulationIncome,
                 Weight = resource.Weight ?? 1m,
                 AllowsDebt = resource.AllowsDebt,
+                PaysPortalDelivery = resource.PaysPortalDelivery,
+                PaidByPopulation = resource.PaidByPopulation,
             },
             StringComparer.Ordinal);
 
@@ -232,6 +237,8 @@ public static class WorldReferenceSeed
             EarnsPopulationIncome = resource.EarnsPopulationIncome,
             Weight = resource.Weight ?? 1m,
             AllowsDebt = resource.AllowsDebt,
+            PaysPortalDelivery = resource.PaysPortalDelivery,
+            PaidByPopulation = resource.PaidByPopulation,
         }));
 
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -433,11 +440,17 @@ public sealed record SeedRaceResource(string Resource, long Amount);
 /// <param name="AllowedOnPlanet">Whether the group may lie on a body.</param>
 /// <param name="Name">The name by language.</param>
 /// <param name="Description">The description by language, if any.</param>
+/// <param name="IsBalance">Whether the resources of the group are balances and not a stock of the storage.</param>
+/// <param name="IconShape">The shape of the icon of the group, if any.</param>
+/// <param name="IconTone">The tone of the icon of the group, if any.</param>
 public sealed record SeedResourceGroup(
     string Code,
     bool AllowedOnPlanet,
     IReadOnlyDictionary<string, string> Name,
-    IReadOnlyDictionary<string, string>? Description = null);
+    IReadOnlyDictionary<string, string>? Description = null,
+    bool IsBalance = false,
+    string? IconShape = null,
+    string? IconTone = null);
 
 /// <summary>A resource type of the starting data.</summary>
 /// <param name="Code">The neutral code.</param>
@@ -449,6 +462,8 @@ public sealed record SeedResourceGroup(
 /// <param name="EarnsPopulationIncome">Whether the population of a civilization brings this currency (task 00015).</param>
 /// <param name="Weight">The weight of one unit of the resource in tonnes (task 00027).</param>
 /// <param name="AllowsDebt">Whether the balance of this currency may go below zero (task 00024).</param>
+/// <param name="PaysPortalDelivery">Whether the buyer pays the delivery of a lot through a portal with this resource.</param>
+/// <param name="PaidByPopulation">Whether a cost in this resource is paid by the inhabitants of the body.</param>
 public sealed record SeedResource(
     string Code,
     string? Group,
@@ -458,7 +473,9 @@ public sealed record SeedResource(
     string Scope = ResourceScopes.Planet,
     bool EarnsPopulationIncome = false,
     decimal? Weight = null,
-    bool AllowsDebt = false);
+    bool AllowsDebt = false,
+    bool PaysPortalDelivery = false,
+    bool PaidByPopulation = false);
 
 /// <summary>An object type of the starting data.</summary>
 /// <param name="Code">The neutral code.</param>

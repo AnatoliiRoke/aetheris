@@ -8,7 +8,6 @@ using Aetheris.Economy;
 using Aetheris.Economy.Services;
 using Aetheris.Planets;
 using Aetheris.Planets.Api;
-using Aetheris.Planets.Services;
 using Aetheris.Requirements;
 using Aetheris.Requirements.Services;
 using Aetheris.Research.Api;
@@ -163,7 +162,7 @@ public sealed class ResearchQueueService
 
                 ResearchSettings settings = ResearchSettings.From(_config);
 
-                if (queue.Count >= Slots(settings, state))
+                if (queue.Count >= await SlotsAsync(settings, state, playerId, cancellationToken).ConfigureAwait(false))
                 {
                     throw new GameException(ResearchErrorCodes.QueueFull, "The queue of the researches has no free place.");
                 }
@@ -430,12 +429,19 @@ public sealed class ResearchQueueService
             return false;
         }
 
-        IReadOnlyDictionary<int, int> learnedLevels = await _dbContext.PlayerTechnologies.AsNoTracking()
-            .Where(entry => entry.PlayerId == head.PlayerId)
-            .ToDictionaryAsync(entry => entry.TechnologyId, entry => entry.Level, cancellationToken)
-            .ConfigureAwait(false);
+        // The queue of the researches is one for the whole civilization, so the speed of the
+        // research is the one of the civilization: the largest level of its bodies.
+        IReadOnlyDictionary<int, int> learnedLevels = await _levelsReader.GetAsync(head.PlayerId, cancellationToken).ConfigureAwait(false);
         head.StartsAt = now;
-        head.FinishesAt = now.AddSeconds(ResearchTime.Scale(level.DurationSeconds, ResearchTime.Multiplier(catalog, learnedLevels)));
+
+        // The science centres of the owner speed the research up on every body of the owner, so
+        // their share divides the time of the research.
+        Aetheris.Planets.OwnerBuildingBonus ownerBonus =
+            await _planets.GetOwnerBuildingBonusAsync(head.PlayerId, cancellationToken).ConfigureAwait(false);
+
+        decimal researchTime = ResearchTime.Multiplier(catalog, learnedLevels) / (1m + ownerBonus.ResearchSpeedBonus);
+
+        head.FinishesAt = now.AddSeconds(ResearchTime.Scale(level.DurationSeconds, researchTime));
         await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         PlanetFacts? facts = await _world.GetPlanetFactsAsync(head.PlanetId, cancellationToken).ConfigureAwait(false);
@@ -456,8 +462,12 @@ public sealed class ResearchQueueService
 
     private async Task LearnAsync(string playerId, ResearchQueueItemEntity item, CancellationToken cancellationToken)
     {
+        // A technology is researched from a body, so the level belongs to that body: every body
+        // has its own level of a technology and starts from nothing.
         PlayerTechnologyEntity? learned = await _dbContext.PlayerTechnologies
-            .SingleOrDefaultAsync(entry => entry.PlayerId == playerId && entry.TechnologyId == item.TechnologyId, cancellationToken)
+            .SingleOrDefaultAsync(
+                entry => entry.PlayerId == playerId && entry.PlanetId == item.PlanetId && entry.TechnologyId == item.TechnologyId,
+                cancellationToken)
             .ConfigureAwait(false);
 
         if (learned is null)
@@ -465,6 +475,7 @@ public sealed class ResearchQueueService
             _dbContext.PlayerTechnologies.Add(new PlayerTechnologyEntity
             {
                 PlayerId = playerId,
+                PlanetId = item.PlanetId,
                 TechnologyId = item.TechnologyId,
                 Level = item.TargetLevel,
             });
@@ -483,8 +494,10 @@ public sealed class ResearchQueueService
         IReadOnlyList<ResearchQueueItemEntity> queue,
         CancellationToken cancellationToken)
     {
+        // The levels of a technology belong to the body that researched it, so the level of the
+        // body is the one the next level of the body follows.
         int learned = await _dbContext.PlayerTechnologies.AsNoTracking()
-            .Where(entry => entry.PlayerId == playerId && entry.TechnologyId == technology.Id)
+            .Where(entry => entry.PlayerId == playerId && entry.PlanetId == planetId && entry.TechnologyId == technology.Id)
             .Select(entry => entry.Level)
             .SingleOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -494,7 +507,13 @@ public sealed class ResearchQueueService
             throw new GameException(ResearchErrorCodes.AlreadyLearned, "The player has already learned the level of the technology.");
         }
 
-        int queued = queue.Where(entry => entry.TechnologyId == technology.Id).Select(entry => entry.TargetLevel).DefaultIfEmpty(0).Max();
+        // The queue of the researches is one for the whole civilization, but the levels of a
+        // technology follow the body they belong to, so only the records of that body block it.
+        int queued = queue
+            .Where(entry => entry.TechnologyId == technology.Id && entry.PlanetId == planetId)
+            .Select(entry => entry.TargetLevel)
+            .DefaultIfEmpty(0)
+            .Max();
 
         if (targetLevel <= queued)
         {
@@ -554,6 +573,27 @@ public sealed class ResearchQueueService
         settings.QueueBaseSlots + Math.Clamp(state?.ExtraQueueSlots ?? 0, 0, settings.QueueMaxExtraSlots);
 
     /// <summary>
+    /// Gets the places of the queue of the researches of a player: the base places, the paid ones
+    /// up to their limit and the places the science centres of the player add.
+    /// </summary>
+    /// <param name="settings">The parameters.</param>
+    /// <param name="state">The state row of the queue.</param>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The places.</returns>
+    private async Task<int> SlotsAsync(
+        ResearchSettings settings,
+        ResearchQueueStateEntity? state,
+        string playerId,
+        CancellationToken cancellationToken)
+    {
+        Aetheris.Planets.OwnerBuildingBonus bonus =
+            await _planets.GetOwnerBuildingBonusAsync(playerId, cancellationToken).ConfigureAwait(false);
+
+        return Slots(settings, state) + (int)decimal.Floor(bonus.ResearchQueueSlots);
+    }
+
+    /// <summary>
     /// The payload of the end of a research.
     /// </summary>
     /// <param name="PlayerId">The player.</param>
@@ -576,7 +616,6 @@ public sealed class ResearchQueueService
     {
         TechnologyCatalog catalog = await _catalogCache.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
         List<ResearchQueueItemEntity> queue = knownQueue ?? await LoadQueueAsync(playerId, cancellationToken).ConfigureAwait(false);
-        IReadOnlyDictionary<int, int> learned = await _levelsReader.GetAsync(playerId, cancellationToken).ConfigureAwait(false);
 
         ResearchSettings settings = ResearchSettings.From(_config);
         ResearchQueueStateEntity? state = await _dbContext.ResearchQueueStates.AsNoTracking()
@@ -592,6 +631,17 @@ public sealed class ResearchQueueService
         PlanetBuildingLevel? selected = planetId is null
             ? planets.OrderByDescending(planet => planet.Level).ThenBy(planet => planet.PlanetId).FirstOrDefault()
             : planets.FirstOrDefault(planet => planet.PlanetId == planetId);
+
+        // A technology is researched from a body, so the tree shows the levels of the chosen
+        // body: every body has its own level of a technology and starts from nothing.
+        IReadOnlyDictionary<int, int> learned = selected is null
+            ? new Dictionary<int, int>()
+            : await _levelsReader.GetAsync(playerId, selected.PlanetId, cancellationToken).ConfigureAwait(false);
+
+        // The level of the civilization is the largest level of its bodies, so the subjects a
+        // technology opens are open for the whole civilization and the queue of the researches,
+        // which is one for the civilization, goes at the speed of the civilization.
+        IReadOnlyDictionary<int, int> civilizationLevels = await _levelsReader.GetAsync(playerId, cancellationToken).ConfigureAwait(false);
 
         // The requirements of the next level of every technology are read in one query.
         IReadOnlyList<SubjectRequirement> requirements = await _requirements.GetManyAsync(
@@ -631,11 +681,21 @@ public sealed class ResearchQueueService
             currencyBalances = await _economy.GetBalancesAsync(playerId, cancellationToken).ConfigureAwait(false);
         }
 
+        // The science centres of the owner add their places to the queue and take their share off
+        // the time of the research of every body of the owner.
+        // The levels of the science centres of every body are read above, so the bonus comes from
+        // the cached catalog without another read.
+        Aetheris.Planets.OwnerBuildingBonus ownerBonus = await _planets
+            .GetResearchCenterBonusAsync(planets.Select(planet => planet.Level).DefaultIfEmpty(0).Max(), cancellationToken)
+            .ConfigureAwait(false);
+
+        decimal researchTime = ResearchTime.Multiplier(catalog, civilizationLevels) / (1m + ownerBonus.ResearchSpeedBonus);
+
         return new ResearchTreeSnapshot(
             catalog,
             queue,
             learned,
-            Slots(settings, state),
+            Slots(settings, state) + (int)decimal.Floor(ownerBonus.ResearchQueueSlots),
             selected?.PlanetId,
             selected?.Level ?? 0,
             planets,
@@ -649,6 +709,7 @@ public sealed class ResearchQueueService
             currencyResourceIds,
             selectedPlanet?.Buildings.ToDictionary(building => building.BuildingTypeId, building => building.Level),
             selectedPlanet?.DepositRichness?.Select(deposit => deposit.ResourceTypeId).ToHashSet(),
-            selectedPlanet?.ResourceTypes.ToDictionary(resource => resource.Id, resource => resource.NameKey));
+            selectedPlanet?.ResourceTypes.ToDictionary(resource => resource.Id, resource => resource.NameKey),
+            researchTime);
     }
 }

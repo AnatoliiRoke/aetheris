@@ -39,13 +39,13 @@ Design the CIVILIZATION MANAGEMENT SCREEN of an online browser game called "AETH
 CONTEXT OF THE GAME
 AETHERIS is a free-to-play online 2D space strategy game in real time, with one shared universe for all players. The player develops planets, mines resources, builds spaceships from components and modules, trades with other players on a market, and fights turn-based tactical battles in cycles of 5-10 minutes. The management screen is the calm part of the game: the player drops in for 5-10 minutes, checks what has finished, queues new construction and research, and leaves. Timers run while they are offline. Nothing is ever destroyed by neglect — only time is spent.
 
-Four playable races: Terran (gray metal and blue, reliable, military), Kvarr (amber and terracotta, crystals and armor), Skolar (red and black, sharp aggressive raiders), Nexar (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
+Four playable races: Terran (gray metal and blue, reliable, military), Litari (amber and terracotta, crystals and armor), Drakkuri (red and black, sharp aggressive raiders), Veirani (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
 
 VISUAL STYLE
 Painted 2D, beautiful and atmospheric, dark UI only. Semi-transparent dark panels with thin light borders, soft glow, layered stars, subtle depth. Painted planets and ships, not flat vector, not pixel art. No heavy video; motion is implied by soft glow and parallax.
 
 COLOR TOKENS (use exactly these)
-bg-0 #070B16 (deepest page background), bg-1 #0B1020 (section background), bg-2 #141B33 (cards and panels), bg-3 #1C2544 (raised state, input fields), border rgba(160,190,255,0.16), border-strong rgba(160,190,255,0.28), text-1 #E8EEFF (primary text), text-2 #9AA7C7 (secondary text), text-soft #C3CCE4, accent #2EC4C4 (main accent, primary buttons, hover #4FDADA), on-accent #070B16 (text on accent), danger #FF6B3D (combat accent, errors), danger-text #FF8A66, success #4CD08A (allies, done), warning #F2C14E (neutral, warnings). Race colors: Terran #6C8DB8, Kvarr #D08A4E, Skolar #D2443C, Nexar #7FE0EE.
+bg-0 #070B16 (deepest page background), bg-1 #0B1020 (section background), bg-2 #141B33 (cards and panels), bg-3 #1C2544 (raised state, input fields), border rgba(160,190,255,0.16), border-strong rgba(160,190,255,0.28), text-1 #E8EEFF (primary text), text-2 #9AA7C7 (secondary text), text-soft #C3CCE4, accent #2EC4C4 (main accent, primary buttons, hover #4FDADA), on-accent #070B16 (text on accent), danger #FF6B3D (combat accent, errors), danger-text #FF8A66, success #4CD08A (allies, done), warning #F2C14E (neutral, warnings). Race colors: Terran #6C8DB8, Litari #D08A4E, Drakkuri #D2443C, Veirani #7FE0EE.
 
 RESOURCE GROUPS AND THEIR COLORS (each resource group has its own color, and never rely on color alone — always pair it with a distinct icon shape and a text label)
 Metals: gray — Iron, Titanium, Copper, Iridium. Crystals: blue — Quartz, Ruby, Sapphire, Obsidian. Fuel: orange — Deuterium, Plasma, Antimatter. Ether: gold. Credits: teal-green. Energy: yellow.
@@ -120,7 +120,7 @@ Output a design-tokens table (colors, fonts, spacing, radii, shadows) and a list
 
 ## 5. Ключові рішення, які треба врахувати в макеті
 
-- ✅ **Етер на планеті бути не може** (game-design/02, розділ 2.4) — на картці планети його не показуємо.
+- ✅ **Ефір на планеті бути не може** (game-design/02, розділ 2.4) — на картці планети його не показуємо.
 - ✅ **На планеті рівно один вид кристалів** (game-design/03, розділ 1) — показуємо один, рідко два.
 - ✅ **Газовий гігант не колонізується** (game-design/03, розділ 2) — на його картці немає населення і будівель, лише станція й видобуток палива.
 - ✅ **Населення відновлюється автоматично** (game-design/02, розділ 3.1) — показуємо «поточне / максимум» зі смужкою.

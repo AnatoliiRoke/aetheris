@@ -1,3 +1,4 @@
+using Aetheris.Planets;
 using Aetheris.Processes.Services;
 
 namespace Aetheris.Processes.Handlers;
@@ -10,8 +11,8 @@ namespace Aetheris.Processes.Handlers;
 /// The groups and the exceptions are in the data, so the author decides which resources may
 /// be converted: the ether and the produced goods are not in a group a recipe converts. The
 /// order takes the source for the whole batch, and the output is the source times the
-/// percentage of the level of the technology the parameters of the kind name; the level of
-/// the building only makes the process faster.
+/// coefficient of the level of the converter the order runs in; the level of the technology
+/// gives the right to convert, and the level of the building also makes the process faster.
 /// </remarks>
 public sealed class MatterConversionHandler : IProcessHandler
 {
@@ -56,7 +57,7 @@ public sealed class MatterConversionHandler : IProcessHandler
 
         // Every unit is one unit of the source; the units together give the source of the
         // batch times the percentage, so the rounding of one unit is never lost.
-        decimal percentage = Percentage(context.Catalog, context.ProcessType.Id, context.TechnologyLevels);
+        decimal percentage = Percentage(context.BuildingEffects);
         long amount = ProcessUnits.Portion(context.Quantity * percentage, context.Quantity, context.UnitIndex);
 
         return Task.FromResult(amount > 0
@@ -110,53 +111,50 @@ public sealed class MatterConversionHandler : IProcessHandler
             return [new ProcessReason(ProcessErrorCodes.TargetGroupMismatch)];
         }
 
-        // Without the technology the conversion would only burn the source, so the order is
-        // refused and says which technology it waits for.
-        if (Percentage(context.Catalog, context.ProcessType.Id, context.RequirementContext.TechnologyLevels) <= decimal.Zero)
+        // Without the technology the conversion may not be done, so the order is refused and
+        // says which technology it waits for. The technology gives the right to convert, and
+        // the coefficient of the output comes from the level of the converter.
+        if (context.Catalog.TargetOf(context.ProcessType.Id, ProcessParamKinds.ValueByLevel, ProcessLevelSources.Technology) is not { } technologyId)
         {
-            int? technologyId = context.Catalog.TargetOf(context.ProcessType.Id, ProcessParamKinds.ValueByLevel, ProcessLevelSources.Technology);
+            return [new ProcessReason(ProcessErrorCodes.ParamMissing)];
+        }
 
-            if (technologyId is null)
-            {
-                return [new ProcessReason(ProcessErrorCodes.ParamMissing)];
-            }
-
+        if (context.RequirementContext.TechnologyLevels.GetValueOrDefault(technologyId) <= 0)
+        {
             return
             [
                 new ProcessReason(
                     ProcessErrorCodes.RequirementTechnology,
-                    technologyId.Value,
-                    FirstLevel(context.Catalog, context.ProcessType.Id, technologyId.Value),
-                    context.RequirementContext.TechnologyNameKeys.GetValueOrDefault(technologyId.Value)),
+                    technologyId,
+                    FirstLevel(context.Catalog, context.ProcessType.Id, technologyId),
+                    context.RequirementContext.TechnologyNameKeys.GetValueOrDefault(technologyId)),
             ];
+        }
+
+        // A converter whose level has no coefficient would burn the source and give nothing, so
+        // the order is refused before anything is spent.
+        if (Percentage(context.BuildingEffects) <= decimal.Zero)
+        {
+            return [new ProcessReason(ProcessErrorCodes.ParamMissing)];
         }
 
         return [];
     }
 
     /// <summary>
-    /// The percentage of the raw material that is left after the conversion, by the level of
-    /// the technology the parameters of the kind name.
+    /// Gets the share of the raw material that is left after the conversion: the coefficient of
+    /// the level of the converter the order runs in.
     /// </summary>
-    /// <param name="catalog">The catalog of the processes.</param>
-    /// <param name="processTypeId">The kind of the process.</param>
-    /// <param name="technologyLevels">The levels of the technologies of the player.</param>
-    /// <returns>The percentage, a number between zero and one.</returns>
-    private static decimal Percentage(ProcessCatalog catalog, int processTypeId, IReadOnlyDictionary<int, int> technologyLevels)
+    /// <param name="buildingEffects">The values of the effects of the building the order runs in.</param>
+    /// <returns>The share, a number between zero and one.</returns>
+    private static decimal Percentage(IReadOnlyDictionary<string, decimal> buildingEffects)
     {
-        if (catalog.TargetOf(processTypeId, ProcessParamKinds.ValueByLevel, ProcessLevelSources.Technology) is not { } technologyId)
-        {
-            return decimal.Zero;
-        }
+        ArgumentNullException.ThrowIfNull(buildingEffects);
 
-        ProcessParamInfo? step = catalog.ParamAt(
-            processTypeId,
-            ProcessParamKinds.ValueByLevel,
-            ProcessLevelSources.Technology,
-            technologyId,
-            technologyLevels.GetValueOrDefault(technologyId));
-
-        return step is null ? decimal.Zero : Math.Clamp(step.Value, decimal.Zero, decimal.One);
+        return Math.Clamp(
+            buildingEffects.GetValueOrDefault(BuildingEffectTypes.ConversionCoefficient),
+            decimal.Zero,
+            decimal.One);
     }
 
     /// <summary>

@@ -2,6 +2,7 @@ using Aetheris.Core.Time;
 using Aetheris.Economy.Data;
 using Aetheris.Economy.Data.Entities;
 using Aetheris.Economy.Services;
+using Aetheris.Planets;
 using Aetheris.Planets.Services;
 using Aetheris.Research;
 using Aetheris.Research.Configuration;
@@ -273,7 +274,10 @@ internal static class EconomyTestData
         research.Technologies.Add(technology);
         await research.SaveChangesAsync(Token).ConfigureAwait(false);
 
-        research.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = playerId, TechnologyId = technology.Id, Level = 1 });
+        // A technology belongs to the body it was researched on, so the test gives it to every
+        // body of the player.
+        IReadOnlyList<OwnedPlanet> owned = await services.GetRequiredService<Aetheris.World.IWorldModule>().GetOwnedPlanetsAsync(playerId, Token).ConfigureAwait(false);
+        research.PlayerTechnologies.AddRange(owned.Select(planet => new PlayerTechnologyEntity { PlayerId = playerId, PlanetId = planet.PlanetId, TechnologyId = technology.Id, Level = 1 }));
         await research.SaveChangesAsync(Token).ConfigureAwait(false);
     }
 

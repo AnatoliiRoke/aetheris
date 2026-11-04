@@ -1,7 +1,6 @@
 using Aetheris.Core.Data;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
-using Aetheris.Planets.Services;
 using Aetheris.Processes.Data;
 using Aetheris.Production.Services;
 using Aetheris.Requirements;

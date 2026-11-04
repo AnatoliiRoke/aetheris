@@ -99,12 +99,12 @@ public sealed class ResourceCatalogCache
     {
         List<ResourceGroupFact> groups = await dbContext.ResourceGroups.AsNoTracking()
             .OrderBy(group => group.Id)
-            .Select(group => new ResourceGroupFact(group.Id, group.Code, group.NameKey, group.IsArchived))
+            .Select(group => new ResourceGroupFact(group.Id, group.Code, group.NameKey, group.IsArchived, group.IsBalance))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         List<ResourceTypeFact> resources = await dbContext.ResourceTypes.AsNoTracking()
             .OrderBy(resource => resource.Id)
-            .Select(resource => new ResourceTypeFact(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId, resource.IsArchived, resource.Scope, resource.EarnsPopulationIncome, resource.Weight, resource.AllowsDebt))
+            .Select(resource => new ResourceTypeFact(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId, resource.IsArchived, resource.Scope, resource.EarnsPopulationIncome, resource.Weight, resource.AllowsDebt, resource.ImageKey, resource.PaysPortalDelivery, resource.PaidByPopulation))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return new ResourceCatalog(groups, resources);

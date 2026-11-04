@@ -49,15 +49,15 @@ public sealed class ChosenSeedTests
 
     private const int TechnologyCount = 21;
 
-    private const int PartCount = 110;
+    private const int PartCount = 111;
 
-    private const int ModuleCount = 83;
+    private const int ModuleCount = 84;
 
     private const int HullCount = 27;
 
-    private const int RecipeCount = 118;
+    private const int RecipeCount = 119;
 
-    private const int PartGroupCount = 18;
+    private const int PartGroupCount = 22;
 
     private const int BranchCount = 4;
 

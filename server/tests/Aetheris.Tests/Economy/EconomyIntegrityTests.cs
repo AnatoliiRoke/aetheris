@@ -13,6 +13,7 @@ using Aetheris.Economy.Services;
 using Aetheris.Host.Admin;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
+using Aetheris.Planets;
 using Aetheris.Planets.Services;
 using Aetheris.Tests.Admin;
 using Aetheris.Tests.Infrastructure;

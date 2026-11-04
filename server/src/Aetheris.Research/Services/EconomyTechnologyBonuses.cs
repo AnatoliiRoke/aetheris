@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Aetheris.Research.Services;
 
 /// <summary>
-/// The bonuses the technologies of a player give the economy (task 00015).
+/// The bonuses the technologies of a player give the economy (task 00015, decision 2).
 /// </summary>
 /// <remarks>
 /// The economy declares the contract and the research module implements it, so the research
@@ -36,14 +36,16 @@ public sealed class EconomyTechnologyBonuses : IEconomyTechnologyBonuses
     }
 
     /// <inheritdoc />
-    public async Task<EconomyBonuses> GetBonusesAsync(string? playerId, CancellationToken cancellationToken = default)
+    public async Task<EconomyBonuses> GetBonusesAsync(string? playerId, long planetId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(playerId))
         {
             return new EconomyBonuses();
         }
 
-        IReadOnlyDictionary<int, int> levels = await _levelsReader.GetAsync(playerId, cancellationToken).ConfigureAwait(false);
+        // The technologies are researched from a body, so the bonuses are the ones of the body:
+        // the income of a body is the income of the technologies that body has learned.
+        IReadOnlyDictionary<int, int> levels = await _levelsReader.GetAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
 
         if (levels.Count == 0)
         {
@@ -52,6 +54,43 @@ public sealed class EconomyTechnologyBonuses : IEconomyTechnologyBonuses
 
         TechnologyCatalog catalog = await _catalogCache.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
 
+        return Bonuses(catalog, levels);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<long, EconomyBonuses>> GetBonusesAsync(
+        string? playerId,
+        IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(planetIds);
+
+        if (string.IsNullOrEmpty(playerId) || planetIds.Count == 0)
+        {
+            return new Dictionary<long, EconomyBonuses>();
+        }
+
+        IReadOnlyDictionary<long, IReadOnlyDictionary<int, int>> levels =
+            await _levelsReader.GetAsync(playerId, planetIds, cancellationToken).ConfigureAwait(false);
+
+        if (levels.Count == 0)
+        {
+            return new Dictionary<long, EconomyBonuses>();
+        }
+
+        TechnologyCatalog catalog = await _catalogCache.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
+
+        return levels.ToDictionary(entry => entry.Key, entry => Bonuses(catalog, entry.Value));
+    }
+
+    /// <summary>
+    /// Counts the bonuses of the levels of the technologies of one body.
+    /// </summary>
+    /// <param name="catalog">The catalog of the technologies.</param>
+    /// <param name="levels">The levels of the technologies of the body.</param>
+    /// <returns>The bonuses.</returns>
+    private static EconomyBonuses Bonuses(TechnologyCatalog catalog, IReadOnlyDictionary<int, int> levels)
+    {
         decimal populationGrowth = decimal.One;
         decimal creditIncome = decimal.One;
 

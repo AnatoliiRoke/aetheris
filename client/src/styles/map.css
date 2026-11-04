@@ -166,7 +166,7 @@
 .map-sector__count { font-size: var(--fs-note); color: var(--text-2); font-variant-numeric: tabular-nums; }
 .map-sector__badges { display: flex; gap: var(--space-1); }
 .map-badge {
-  display: inline-flex; align-items: center; gap: 4px; padding: 1px var(--space-2); border: 1px solid var(--border-strong); border-radius: var(--r-full);
+  display: inline-flex; align-items: center; gap: var(--space-1); padding: 1px var(--space-2); border: 1px solid var(--border-strong); border-radius: var(--r-full);
   font-size: var(--fs-caption); font-weight: 600; color: var(--text-soft);
 }
 .map-badge--mine { border-color: var(--accent); color: var(--accent-hover); }
@@ -254,7 +254,7 @@
   .map-layout { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 767px) {
-  .civ__main--map { --map-h: max(420px, calc(100dvh - 300px)); padding: 8px 12px 12px; }
+  .civ__main--map { --map-h: max(420px, calc(100dvh - 300px)); padding: var(--space-2) var(--space-3) var(--space-3); }
   .map-search { width: 100%; }
   .map-layers { left: var(--space-2); right: var(--space-2); top: var(--space-2); width: auto; }
   .map-layers__list { flex-direction: row; overflow-x: auto; padding-bottom: var(--space-2); }

@@ -276,11 +276,6 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.market.price.average_min_percent.description': 'Найнижча ціна лота у відсотках від середньої ціни угод.',
   'config.market.price.average_max_percent.description': 'Найвища ціна лота у відсотках від середньої ціни угод.',
   'config.market.price.average_window_days.description': 'За скільки днів рахується середня ціна угод.',
-  'config.market.delivery.base_seconds.description': 'Час доставки без відстані, у секундах.',
-  'config.market.delivery.seconds_per_distance.description': 'Скільки секунд доставки додає кожна одиниця відстані між планетами.',
-  'config.market.delivery.energy_resource_code.description': 'Код ресурсу, яким покупець платить за доставку (енергострижні).',
-  'config.market.delivery.energy_per_tonne_distance.description':
-    'Скільки енергострижнів коштує доставка однієї тонни товару на одну одиницю відстані.',
   'config.market.list.page_size.description': 'Найбільше рядків, які повертає одне читання ринку.',
   'config.market.exchange.base_rate.description': 'Курс обміну за рівного потоку: скільки кредитів коштує одна одиниця торгової валюти.',
   'config.market.exchange.min_rate.description': 'Найнижчий курс обміну.',

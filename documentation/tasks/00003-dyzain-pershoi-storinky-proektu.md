@@ -14,7 +14,7 @@
 | **Шапка** | Лого «AETHERIS», меню (Про гру, Раси, Рейтинг, Новини, Довідка), перемикач мови, кнопки «Увійти» і «Грати» |
 | **Головний екран (hero)** | Мальована космічна сцена (планета, флот), заголовок і короткий опис гри, головна кнопка «Грати безкоштовно», під нею «Увійти» |
 | **Про гру** | 3–4 картки: розвиток планет і видобуток; конструктор кораблів із компонентів і модулів; ринок між гравцями; тактичні бої по циклах (5–10 хв, етап 2). Коротко, мова легка |
-| **Раси** | 4 раси: Террани, Кварр, Сколар, Нексар; кожна з кольором, настроєм і силуетом корабля (ui-art/01 розділ 4) |
+| **Раси** | 4 раси: Террани, Літаріони, Драккури, Вейрани; кожна з кольором, настроєм і силуетом корабля (ui-art/01 розділ 4) |
 | **Скріншоти** | Галерея з 3–4 кадрів гри (поки заглушки: огляд імперії, карта, конструктор) |
 | **Рейтинг** | Топ-10 гравців (місце, ім'я, раса, очки), перемикач «за розвитком»; на етапі 1 лише розвиток (production/01); кнопка «Весь рейтинг» |
 | **Новини** | 3 останні новини: дата, заголовок, початок тексту, «Читати далі» |
@@ -69,7 +69,7 @@
 | `danger` | #FF6B3D | Бойовий акцент, помилки |
 | `success` | #4CD08A | Успіх, союзники |
 | `warning` | #F2C14E | Нейтральне, попередження |
-| Раси | Террани #6C8DB8, Кварр #D08A4E, Сколар #D2443C, Нексар #7FE0EE | Картки рас |
+| Раси | Террани #6C8DB8, Літаріони #D08A4E, Драккури #D2443C, Вейрани #7FE0EE | Картки рас |
 
 Правила: фон завжди темний; світлі плями лише для акценту й світіння; контраст тексту не нижчий за WCAG AA.
 
@@ -112,19 +112,19 @@ Two small fleets exchanging laser fire in space, shield bubbles flashing, orange
 Terran warship: gray metal hull with blue accents, angular naval silhouette, bridge and hull numbers, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
 ```
 
-**ART-08**: Раса Кварр, 400×500
+**ART-08**: Раса Літаріони, 400×500
 ```
-Kvarr warship: crystalline faceted hull, hexagonal armor plates, amber and terracotta colors, fortress-like, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
-```
-
-**ART-09**: Раса Сколар, 400×500
-```
-Skolar warship: sharp predatory asymmetric blades, red and black, aggressive raider, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+Litari warship: crystalline faceted hull, hexagonal armor plates, amber and terracotta colors, fortress-like, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
 ```
 
-**ART-10**: Раса Нексар, 400×500
+**ART-09**: Раса Драккури, 400×500
 ```
-Nexar warship: smooth geometric hull, glowing cyan lines and rings, white and cyan, high-tech, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+Drakkuri warship: sharp predatory asymmetric blades, red and black, aggressive raider, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
+```
+
+**ART-10**: Раса Вейрани, 400×500
+```
+Veirani warship: smooth geometric hull, glowing cyan lines and rings, white and cyan, high-tech, side view. painted 2D digital illustration, dark space palette, deep navy background (#0B1020), soft glow, clean readable silhouette, no text, no watermark.
 ```
 
 **ART-12a**: Планета: земного типу, 256×256, прозорий фон
@@ -209,9 +209,9 @@ Screenshot mockup of a space strategy game, market screen: table of resource lot
 ```
 Design the FIRST PUBLIC PAGE of an online browser game called "AETHERIS" (landing page + sign-in/sign-up). This is NOT an in-game screen; it is what a person sees before they start playing.
 
-About the game: a free-to-play online 2D space strategy in real time, one shared universe. Players develop planets, mine resources, build spaceships from components and modules, trade with other players on a market, and fight turn-based tactical battles in cycles of 5-10 minutes. Four playable races: Terrans (gray metal and blue, reliable, military), Kvarr (amber and terracotta, crystals and armor), Skolar (red and black, sharp aggressive raiders), Nexar (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
+About the game: a free-to-play online 2D space strategy in real time, one shared universe. Players develop planets, mine resources, build spaceships from components and modules, trade with other players on a market, and fight turn-based tactical battles in cycles of 5-10 minutes. Four playable races: Terrans (gray metal and blue, reliable, military), Litari (amber and terracotta, crystals and armor), Drakkuri (red and black, sharp aggressive raiders), Veirani (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
 
-Visual style: painted 2D, beautiful and atmospheric. Dark UI only. Use these color tokens: bg-0 #070B16, bg-1 #0B1020, bg-2 #141B33, bg-3 #1C2544, border rgba(160,190,255,0.16), text-1 #E8EEFF, text-2 #9AA7C7, accent #2EC4C4 (hover #4FDADA), danger #FF6B3D, success #4CD08A, warning #F2C14E. Race colors: Terran #6C8DB8, Kvarr #D08A4E, Skolar #D2443C, Nexar #7FE0EE. Fonts: simple and plain only, no decorative fonts: Inter for everything (headings Inter SemiBold/Bold, body Inter Regular/Medium, numbers with tabular-nums; fallbacks Roboto, system-ui, Arial). Type scale desktop/mobile: H1 56/34, H2 36/26, H3 22/20, body 16/16, small 13/13. Logo: text "AETHERIS" in Inter Bold with +4% letter spacing.
+Visual style: painted 2D, beautiful and atmospheric. Dark UI only. Use these color tokens: bg-0 #070B16, bg-1 #0B1020, bg-2 #141B33, bg-3 #1C2544, border rgba(160,190,255,0.16), text-1 #E8EEFF, text-2 #9AA7C7, accent #2EC4C4 (hover #4FDADA), danger #FF6B3D, success #4CD08A, warning #F2C14E. Race colors: Terran #6C8DB8, Litari #D08A4E, Drakkuri #D2443C, Veirani #7FE0EE. Fonts: simple and plain only, no decorative fonts: Inter for everything (headings Inter SemiBold/Bold, body Inter Regular/Medium, numbers with tabular-nums; fallbacks Roboto, system-ui, Arial). Type scale desktop/mobile: H1 56/34, H2 36/26, H3 22/20, body 16/16, small 13/13. Logo: text "AETHERIS" in Inter Bold with +4% letter spacing.
 
 Page structure, top to bottom: (1) header: logo, menu (About, Races, Ranking, News, Help), language switch UA/EN, buttons "Sign in" and "Play"; (2) hero: big space scene, headline, 1-2 sentences, primary button "Play for free", secondary "Sign in"; (3) "About the game": 4 cards with illustrations (planet development, ship constructor, market, tactical battles); (4) "Races": 4 cards with ship illustration, race color and mood; (5) "Screenshots": gallery of 4 frames; (6) "Ranking": top-10 players table (place, name, race, score) and a "Full ranking" button; (7) "News": 3 cards (date, title, excerpt, "Read more"); (8) FAQ accordion with 5-6 questions; (9) footer: language, terms, privacy policy, contacts, social links, version.
 Also design the auth screens: sign in (email, password, "Forgot password?", "Continue with Google"), sign up (email, password, display name, terms checkbox), an error state, and a "Check your email" screen.

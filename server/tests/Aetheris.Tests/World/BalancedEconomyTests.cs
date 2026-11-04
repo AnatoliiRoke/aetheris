@@ -1,3 +1,4 @@
+using Aetheris.Planets;
 using Aetheris.Planets.Data;
 using Aetheris.Production.Data;
 using Aetheris.Research.Data;
@@ -60,6 +61,13 @@ public sealed class BalancedEconomyTests
     private static readonly ProductionSeedData Production = ProductionReferenceSeed.Load();
 
     private static readonly Dictionary<string, string> NameOf = World.Resources.ToDictionary(resource => resource.Code, resource => resource.Name["uk"]);
+
+    /// <summary>
+    /// The resources a building pays with the inhabitants of the body (an update of the seed after
+    /// task 00030): the people are spent and grow back, so they are no price of the storage and
+    /// follow a whole-number curve of their own.
+    /// </summary>
+    private static readonly HashSet<string> PaidByPopulation = [.. World.Resources.Where(resource => resource.PaidByPopulation).Select(resource => resource.Code)];
 
     private static readonly Dictionary<string, string> GroupOf = World.Resources.ToDictionary(resource => resource.Code, resource => resource.Group ?? string.Empty);
 
@@ -435,7 +443,7 @@ public sealed class BalancedEconomyTests
     public void Balances_and_cosmic_resources_are_not_in_the_prices_of_buildings_and_technologies()
     {
         HashSet<string> kept = [.. World.Resources.Where(resource => NameOf[resource.Code] is "Енергія" or "Населення" or "Гелій-3" or "Темна матерія" or "Ефір").Select(resource => resource.Code)];
-        IEnumerable<string> paid = Planets.BuildingTypes.SelectMany(type => type.Costs.Select(cost => cost.Resource))
+        IEnumerable<string> paid = Planets.BuildingTypes.SelectMany(type => type.Costs.Select(cost => cost.Resource).Where(resource => !PaidByPopulation.Contains(resource)))
             .Concat(Research.Technologies.SelectMany(technology => technology.Costs.Select(cost => cost.Resource)));
 
         Assert.Empty(paid.Where(kept.Contains).Distinct());
@@ -497,12 +505,12 @@ public sealed class BalancedEconomyTests
     }
 
     private static bool Satisfied(
-        IReadOnlyList<Aetheris.Planets.Data.SeedRequirement> requirements,
+        IReadOnlyList<Aetheris.Planets.SeedRequirement> requirements,
         int level,
         IReadOnlyDictionary<string, int> buildings,
         IReadOnlyDictionary<string, int> technologies)
     {
-        foreach (Aetheris.Planets.Data.SeedRequirement requirement in requirements.Where(requirement => (requirement.SubjectLevel ?? 1) <= level))
+        foreach (Aetheris.Planets.SeedRequirement requirement in requirements.Where(requirement => (requirement.SubjectLevel ?? 1) <= level))
         {
             if (requirement.Type == TechnologyRequirement && technologies[requirement.Target] < (requirement.TargetLevel ?? 0))
             {
@@ -520,7 +528,7 @@ public sealed class BalancedEconomyTests
 
     private static Dictionary<string, long> BuildingPrices(SeedBuildingType type, int level) =>
         type.Costs
-            .Where(cost => level >= cost.FromLevel)
+            .Where(cost => level >= cost.FromLevel && !PaidByPopulation.Contains(cost.Resource))
             .ToDictionary(cost => cost.Resource, cost => PlanetsReferenceSeed.ValueAt(cost, level - cost.FromLevel + 1));
 
     private static Dictionary<string, long> TechnologyPrices(SeedTechnology technology, int level) =>

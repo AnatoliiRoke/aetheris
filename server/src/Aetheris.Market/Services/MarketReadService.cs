@@ -8,7 +8,6 @@ using Aetheris.Market.Configuration;
 using Aetheris.Market.Data;
 using Aetheris.Market.Data.Entities;
 using Aetheris.Planets;
-using Aetheris.Planets.Services;
 using Aetheris.World;
 using Aetheris.World.Api;
 using Microsoft.EntityFrameworkCore;
@@ -118,7 +117,7 @@ public sealed class MarketReadService
             ],
             currencies.CreditsResourceTypeId,
             currencies.TradeResourceTypeId,
-            await _catalog.EnergyResourceAsync(settings.EnergyResourceCode, cancellationToken).ConfigureAwait(false),
+            await _catalog.EnergyResourceAsync(cancellationToken).ConfigureAwait(false),
             await _trade.LimitAsync(playerId, owned, cancellationToken).ConfigureAwait(false),
             [
                 .. owned.OrderBy(planet => planet.PlanetId).Select(planet => new MarketPlanetDto(
@@ -296,22 +295,35 @@ public sealed class MarketReadService
 
         bool hasPortal = await _planets.GetBuildingLevelAsync(BuildingClasses.Portal, planetId, playerId, cancellationToken).ConfigureAwait(false) > 0;
         MarketCurrencies currencies = await _catalog.CurrenciesAsync(cancellationToken).ConfigureAwait(false);
-        int? energyId = await _catalog.EnergyResourceAsync(settings.EnergyResourceCode, cancellationToken).ConfigureAwait(false);
+        int? energyId = await _catalog.EnergyResourceAsync(cancellationToken).ConfigureAwait(false);
         IReadOnlyDictionary<int, long> stock = await _resources.GetBalanceAsync(planetId, playerId, cancellationToken).ConfigureAwait(false);
         long energyHave = energyId is { } energyResourceId ? stock.GetValueOrDefault(energyResourceId) : 0;
         long tradeHave = (await _economy.GetBalanceAsync(playerId, currencies.TradeResourceTypeId, cancellationToken).ConfigureAwait(false)).Amount;
         MarketWeights weights = await _catalog.WeightsAsync(cancellationToken).ConfigureAwait(false);
-        distances = await _world
-            .GetPlanetDistancesAsync(planetId, [.. lots.Select(lot => lot.SellerPlanetId).Distinct()], cancellationToken)
-            .ConfigureAwait(false);
+
+        // The portal of the body the goods would arrive at gives the fee and the time of the
+        // preparation, so its level is read once for every lot of the list.
+        decimal massPerEnergyRod = await _planets.GetBuildingEffectValueAsync(
+            BuildingClasses.Portal,
+            BuildingEffectTypes.PortalMassPerEnergyRod,
+            planetId,
+            playerId,
+            cancellationToken).ConfigureAwait(false);
+
+        decimal massPerHour = await _planets.GetBuildingEffectValueAsync(
+            BuildingClasses.Portal,
+            BuildingEffectTypes.PortalMassPerHour,
+            planetId,
+            playerId,
+            cancellationToken).ConfigureAwait(false);
 
         List<LotListItemDto> items = [];
 
         foreach (MarketLotEntity lot in lots)
         {
-            double distance = distances.GetValueOrDefault(lot.SellerPlanetId);
-            long seconds = MarketRules.DeliverySeconds(distance, settings);
-            long energy = MarketRules.DeliveryEnergy(weights.UnitWeight(lot.ResourceTypeId, lot.PartTypeId) * lot.Quantity, distance, settings);
+            decimal mass = weights.UnitWeight(lot.ResourceTypeId, lot.PartTypeId) * lot.Quantity;
+            long seconds = MarketRules.DeliverySeconds(mass, massPerHour);
+            long energy = MarketRules.DeliveryEnergy(mass, massPerEnergyRod);
             string? reason = null;
 
             if (string.Equals(lot.SellerPlayerId, playerId, StringComparison.Ordinal))

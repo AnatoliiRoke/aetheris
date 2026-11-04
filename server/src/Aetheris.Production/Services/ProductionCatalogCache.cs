@@ -202,7 +202,8 @@ public sealed class ProductionCatalogCache
                     group.ImageKey,
                     group.SortOrder,
                     group.IsArchived,
-                    groupCharacteristicInfos.GetValueOrDefault(group.Id, []))),
+                    groupCharacteristicInfos.GetValueOrDefault(group.Id, []),
+                    group.ParentGroupId)),
             ],
             [
                 .. parts.Select(part => new PartTypeInfo(

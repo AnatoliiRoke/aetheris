@@ -10,6 +10,9 @@ import { formatCoefficient, formatNumber, galaxyPlace } from './planetText';
  * the population, the energy and the richness of its deposits. Every number comes from the
  * answer of the server; a fact the server did not send is a dash, never a made-up number.
  *
+ * The block of the richness shows only the resources the body has a deposit of: a resource
+ * without a coefficient has no richness to show.
+ *
  * @param planet The body.
  * @param typeName The name of the type of the body.
  * @param typeImageKey The key of the picture of the type.
@@ -31,11 +34,9 @@ export function PlanetCard({
 }) {
   const { t, language } = useI18n();
   const { coordinates, energy } = planet;
-  const coefficients = new Map(planet.depositRichness.map((deposit) => [deposit.resourceTypeId, deposit.coefficient]));
-  const resourceIds = [
-    ...planet.resources.map((resource) => resource.resourceTypeId),
-    ...planet.depositRichness.map((deposit) => deposit.resourceTypeId).filter((id) => !planet.resources.some((resource) => resource.resourceTypeId === id)),
-  ];
+  // Only the resources the body has a deposit of: a resource without a coefficient has no
+  // richness to show, so it is left out of the block.
+  const deposits = planet.depositRichness;
 
   return (
     <section aria-label={t('planet.card')} className="panel planet-card">
@@ -51,24 +52,18 @@ export function PlanetCard({
           <dt>{t('planet.population')}</dt>
           <dd className="num">{`${formatNumber(planet.population, language)} / ${formatNumber(planet.populationMax, language)}`}</dd>
           <dt>{t('planet.energy')}</dt>
-          <dd className="num">{`${formatNumber(energy.output, language)} / ${formatNumber(energy.consumption, language)}`}</dd>
+          <dd className="num">{`${formatNumber(energy.consumption, language)} / ${formatNumber(energy.output, language)}`}</dd>
         </dl>
         <div className="planet-card__deposits">
           <span className="civ-label">{t('planet.richness')}</span>
           <ul className="deposit-rows">
-            {resourceIds.map((id) => {
-              const coefficient = coefficients.get(id);
-
-              return (
-                <li key={id}>
-                  <ResourceIcon groupCode={resourceGroup(id)} />
-                  <span>{resourceName(id)}</span>
-                  <span className={coefficient === undefined ? 'deposit-rows__empty' : 'num'}>
-                    {coefficient === undefined ? '—' : `${formatCoefficient(coefficient, language)}×`}
-                  </span>
-                </li>
-              );
-            })}
+            {deposits.map((deposit) => (
+              <li key={deposit.resourceTypeId}>
+                <ResourceIcon groupCode={resourceGroup(deposit.resourceTypeId)} />
+                <span>{resourceName(deposit.resourceTypeId)}</span>
+                <span className="num">{`${formatCoefficient(deposit.coefficient, language)}×`}</span>
+              </li>
+            ))}
           </ul>
         </div>
       </div>

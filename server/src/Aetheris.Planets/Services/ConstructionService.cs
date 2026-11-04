@@ -64,6 +64,7 @@ public sealed class ConstructionService
     /// <param name="world">The world, for the deposits.</param>
     /// <param name="technologies">The technologies of the players.</param>
     /// <param name="requirements">The common requirements module.</param>
+    /// <param name="ownerEffects">What the buildings of every body of the owner give the whole civilization.</param>
     /// <param name="scheduler">The event scheduler.</param>
     /// <param name="config">The game configuration.</param>
     /// <param name="clock">The game clock.</param>
@@ -539,7 +540,7 @@ public sealed class ConstructionService
             await resources.ToListAsync(cancellationToken).ConfigureAwait(false),
             (facts?.Deposits ?? []).ToDictionary(deposit => deposit.ResourceTypeId, deposit => deposit.Coefficient),
             await _technologies.GetLevelsAsync(state.OwnerPlayerId, cancellationToken).ConfigureAwait(false),
-            await _technologies.GetBonusesAsync(state.OwnerPlayerId, cancellationToken).ConfigureAwait(false))
+            await _technologies.GetBonusesAsync(state.OwnerPlayerId, planetId, cancellationToken).ConfigureAwait(false))
         {
             TechnologyNameKeys = await _technologies.GetTechnologyNameKeysAsync(cancellationToken).ConfigureAwait(false),
         };
@@ -557,6 +558,14 @@ public sealed class ConstructionService
             session.PopulationFacts = economy.Population;
             session.Population = economy.Population?.Amount ?? 0;
         }
+
+        // The building plant of the body adds its places to the queue of the body and takes its
+        // share off the time of its construction, so the effects are read from the catalog at the
+        // level of the plant the body has.
+        session.BuildingQueueSlots = (int)decimal.Floor(
+            PlanetEconomy.EffectMax(session.Catalog, session.Levels(), BuildingEffectTypes.ConstructionQueueSlots));
+        session.BuildingSpeedBonus =
+            PlanetEconomy.EffectMax(session.Catalog, session.Levels(), BuildingEffectTypes.ConstructionSpeedBonus);
 
         return session;
     }
@@ -645,7 +654,9 @@ public sealed class ConstructionService
         ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
 
         _populationResourceId = catalog.Resources
-            .FirstOrDefault(resource => resource.Code == EconomyCodes.PopulationResource)
+            .Where(resource => resource.PaidByPopulation)
+            .OrderBy(resource => resource.Id)
+            .FirstOrDefault()
             ?.Id;
         _populationResourceResolved = true;
 

@@ -35,7 +35,7 @@ IMPORTANT: this screen shares its frame with an existing design. Reuse the same 
 CONTEXT OF THE GAME
 AETHERIS is a free-to-play online 2D space strategy game in real time, with one shared universe for all players. The player develops planets, mines resources, builds spaceships, trades and fights in turn-based tactical battles of 5-10 minutes. Technologies are the long-term progression: they unlock new buildings, new ship modules, new production recipes, and they give permanent percentage bonuses. Research belongs to the player, not to a planet — once learned, it applies to every colony. Research happens in the Science Center on the planet; the level of that building decides which technologies are reachable. There is no paid speed-up and the queue is strictly sequential.
 
-Four playable races: Terran (gray metal and blue, reliable, military), Kvarr (amber and terracotta, crystals and armor), Skolar (red and black, sharp aggressive raiders), Nexar (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
+Four playable races: Terran (gray metal and blue, reliable, military), Litari (amber and terracotta, crystals and armor), Drakkuri (red and black, sharp aggressive raiders), Veirani (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
 
 THE SHELL (reproduce exactly, do not redesign)
 TOP BAR, 64 px tall, sticky, background rgba(7,11,22,0.92) with a 1 px bottom border of rgba(160,190,255,0.16). From left to right: a small square brand mark plus the word "AETHERIS" in Inter Bold 18 px with +4% letter spacing; the player nickname in a rounded pill with a small race-colored glyph; a chip reading "Standard" (or "Premium") in a muted border; a centered row of resource counters, each a small distinct icon plus a number in tabular-nums: Credits, Trade Currency, Energy; then on the right three alert pills (incoming attack in danger red, battle in progress in danger red, storage full in warning yellow), a 44×44 mail icon button with a small accent badge showing the unread count, a 44×44 settings icon button, and a 44×44 sign-out icon button. A 1 px vertical separator before the icon buttons.
@@ -113,7 +113,7 @@ Output a design-tokens table (colors, fonts, spacing, radii, shadows) and a list
 - ✅ **Рівневі технології — до 10 рівнів**, ключові — 1 рівень (00012, п. 2). Тому показуємо
   «Next level N» і «Learned · level N».
 - ✅ **Платити можна кристалами, кредитами, а на вищих рівнях мікропроцесорами, оптоволокном
-  та етером** (game-design/04, розділ 2) — тому в кшталті вартості є різні ресурси.
+  та Ефіром** (game-design/04, розділ 2) — тому в кшталті вартості є різні ресурси.
 - ✅ **Причина недоступності обов'язкова** (ui-art/05 §8) — кнопка неактивна, причини видно.
 - ✅ **Гілки** (game-design/04, розділ 3): Економіка, Флот, Двигуни й логістика, Оборона,
   Колонізація й космос, Торгівля. У промті шість вкладок — відповідає.

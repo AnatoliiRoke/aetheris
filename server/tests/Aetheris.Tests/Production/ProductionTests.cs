@@ -1,4 +1,5 @@
 using Aetheris.Core.Errors;
+using Aetheris.Planets;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
@@ -52,7 +53,7 @@ public sealed class ProductionTests
         using IServiceScope scope = _factory.Services.CreateScope();
         ProductionDbContext dbContext = scope.ServiceProvider.GetRequiredService<ProductionDbContext>();
 
-        Assert.Equal(18, await dbContext.PartGroups.CountAsync(Token));
+        Assert.Equal(22, await dbContext.PartGroups.CountAsync(Token));
         Assert.True(await dbContext.PartTypes.CountAsync(Token) >= 33);
         Assert.True(await dbContext.Recipes.CountAsync(Token) >= 38);
 
@@ -644,7 +645,7 @@ public sealed class ProductionTests
         };
         research.Technologies.Add(technology);
         await research.SaveChangesAsync(Token);
-        research.PlayerTechnologies.Add(new Aetheris.Research.Data.Entities.PlayerTechnologyEntity { PlayerId = player.Account.UserId, TechnologyId = technology.Id, Level = 1 });
+        research.PlayerTechnologies.Add(new Aetheris.Research.Data.Entities.PlayerTechnologyEntity { PlayerId = player.Account.UserId, PlanetId = player.PlanetId, TechnologyId = technology.Id, Level = 1 });
         await research.SaveChangesAsync(Token);
 
         async Task<long> UnitSecondsAsync() =>

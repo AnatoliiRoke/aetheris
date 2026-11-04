@@ -35,7 +35,7 @@ dotnet_style_qualification_for_event = false:suggestion
 #
 # The rule stays a warning and does not break the build, so that the existing code can be
 # cleaned up gradually. The severity is raised to error once the balance code is complete.
-dotnet_diagnostic.AETHERIS001.severity = warning
+dotnet_diagnostic.AETHERIS001.severity = error
 dotnet_diagnostic.AETHERIS001.is_incremental = true
 
 # The parameterized SQL rule (task 00002, section 2.4)

@@ -26,12 +26,13 @@ public sealed record ProductionMultipliers(decimal ProductionTimeMultiplier)
 public interface IProductionMultipliers
 {
     /// <summary>
-    /// Gets the multipliers the technologies of a player give the production.
+    /// Gets the multipliers the technologies of one body of a player give the production.
     /// </summary>
     /// <param name="playerId">The player, or <see langword="null"/> for a body without an owner.</param>
+    /// <param name="planetId">The body.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The multipliers.</returns>
-    Task<ProductionMultipliers> GetMultipliersAsync(string? playerId, CancellationToken cancellationToken);
+    Task<ProductionMultipliers> GetMultipliersAsync(string? playerId, long planetId, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -62,14 +63,16 @@ public sealed class ProductionMultipliersService : IProductionMultipliers
     }
 
     /// <inheritdoc />
-    public async Task<ProductionMultipliers> GetMultipliersAsync(string? playerId, CancellationToken cancellationToken)
+    public async Task<ProductionMultipliers> GetMultipliersAsync(string? playerId, long planetId, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(playerId))
         {
             return ProductionMultipliers.None;
         }
 
-        IReadOnlyDictionary<int, int> levels = await _levelsReader.GetAsync(playerId, cancellationToken).ConfigureAwait(false);
+        // The technologies are researched from a body, so the speed of the production is the one
+        // of the body that researched them.
+        IReadOnlyDictionary<int, int> levels = await _levelsReader.GetAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
 
         if (levels.Count == 0)
         {

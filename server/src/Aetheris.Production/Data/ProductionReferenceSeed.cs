@@ -154,6 +154,8 @@ public static class ProductionReferenceSeed
                 cancellationToken).ConfigureAwait(false);
         }
 
+        Dictionary<string, PartGroupEntity> partGroups = [];
+
         foreach (SeedPartGroup group in data.PartGroups)
         {
             string code = await codes.NextAsync(ProductionTextKeys.PartGroupCodeGroup, cancellationToken).ConfigureAwait(false);
@@ -169,6 +171,7 @@ public static class ProductionReferenceSeed
             dbContext.PartGroups.Add(entity);
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             partGroupIds[group.Code] = entity.Id;
+            partGroups[group.Code] = entity;
 
             await texts.AddMissingAsync(
                 [
@@ -177,6 +180,22 @@ public static class ProductionReferenceSeed
                 ],
                 ProductionSeedActor,
                 cancellationToken).ConfigureAwait(false);
+        }
+
+        // The parents are bound after every group exists, so a group may name a parent that
+        // comes later in the file (task 00043).
+        List<SeedPartGroup> children = [.. data.PartGroups.Where(group => group.Parent is not null)];
+
+        foreach (SeedPartGroup group in children)
+        {
+            partGroups[group.Code].ParentGroupId = partGroupIds.TryGetValue(group.Parent!, out int parentId)
+                ? parentId
+                : throw new InvalidOperationException($"The parent '{group.Parent}' of the group of the parts '{group.Code}' does not exist.");
+        }
+
+        if (children.Count > 0)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         // The characteristics of every group are bound after the groups exist, so the link
@@ -212,6 +231,7 @@ public static class ProductionReferenceSeed
                 MarkLevel = part.MarkLevel,
                 SortOrder = part.SortOrder,
                 Weight = part.Weight ?? 1m,
+                ImageKey = part.ImageKey,
             };
 
             foreach (KeyValuePair<string, SeedAttributeValue> attribute in part.Attributes)
@@ -435,11 +455,13 @@ public sealed record SeedGroupCharacteristic(
 /// <param name="SortOrder">The order in the lists.</param>
 /// <param name="Name">The name of the group.</param>
 /// <param name="Description">The description of the group.</param>
+/// <param name="Parent">The neutral code of the group this group lies in, or <see langword="null"/> for a group of the top level (task 00043).</param>
 public sealed record SeedPartGroup(
     string Code,
     int SortOrder,
     IReadOnlyDictionary<string, string> Name,
-    IReadOnlyDictionary<string, string> Description);
+    IReadOnlyDictionary<string, string> Description,
+    string? Parent = null);
 
 /// <summary>A part of the starting data.</summary>
 /// <param name="Code">The neutral code of the part.</param>
@@ -451,6 +473,7 @@ public sealed record SeedPartGroup(
 /// <param name="Attributes">The attributes of the part.</param>
 /// <param name="Weight">The weight of one part in tonnes (task 00027).</param>
 /// <param name="Characteristics">The values of the characteristics of the part (task 00027).</param>
+/// <param name="ImageKey">The key of the picture of the part, or <see langword="null"/> for the placeholder.</param>
 public sealed record SeedPart(
     string Code,
     string Group,
@@ -460,7 +483,8 @@ public sealed record SeedPart(
     IReadOnlyDictionary<string, string> Description,
     IReadOnlyDictionary<string, SeedAttributeValue> Attributes,
     decimal? Weight = null,
-    IReadOnlyDictionary<string, SeedCharacteristicValue>? Characteristics = null);
+    IReadOnlyDictionary<string, SeedCharacteristicValue>? Characteristics = null,
+    string? ImageKey = null);
 
 /// <summary>The value of a characteristic of a part of the starting data.</summary>
 /// <param name="Number">The value of the characteristic.</param>

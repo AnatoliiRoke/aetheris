@@ -532,6 +532,34 @@ namespace Aetheris.Host.Data.Migrations
                     b.ToTable("config_version", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.Host.Data.Entities.GameClockStateEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("GameAnchor")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("game_anchor");
+
+                    b.Property<double>("Multiplier")
+                        .HasColumnType("double precision")
+                        .HasColumnName("multiplier");
+
+                    b.Property<DateTimeOffset>("RealAnchor")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("real_anchor");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_clock_states");
+
+                    b.ToTable("game_clock_state", (string)null);
+                });
+
             modelBuilder.Entity("Aetheris.Host.Data.Entities.LocalizationTextEntity", b =>
                 {
                     b.Property<long>("Id")

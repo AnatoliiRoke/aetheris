@@ -1,4 +1,4 @@
-using Aetheris.Planets.Services;
+using Aetheris.Planets;
 using Aetheris.Requirements.Services;
 using Aetheris.Research.Api;
 using Aetheris.Research.Data.Entities;
@@ -30,7 +30,7 @@ public sealed class ResearchTreeBuilder
                 || snapshot.Queue.Any(item => item.TechnologyId == technology.Id)),
         ];
 
-        decimal researchTime = ResearchTime.Multiplier(snapshot.Catalog, snapshot.LearnedLevels);
+        decimal researchTime = snapshot.ResearchTimeMultiplier;
         List<TechnologyDto> technologies =
         [
             .. shown.Select(technology => BuildTechnology(snapshot, technology, researchTime)),

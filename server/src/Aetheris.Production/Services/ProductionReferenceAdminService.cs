@@ -5,7 +5,6 @@ using Aetheris.Core.Data;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
-using Aetheris.Planets.Services;
 using Aetheris.Production.Configuration;
 using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
@@ -51,6 +50,9 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     private const string LabelPrefix = "admin.reference.";
 
     private const string GroupField = "part_group_id";
+
+    /// <summary>The field of the group a group lies in (task 00043).</summary>
+    private const string ParentGroupField = "parent_group_id";
 
     private const string MarkLevelField = "mark_level";
 
@@ -198,6 +200,12 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             new(AdminReferenceRules.ImageField, AdminReferenceFieldTypes.Image, LabelPrefix + "field.image"),
             new(AdminReferenceRules.NameField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.name", IsRequired: true, HasLanguages: true, InList: true),
             new(AdminReferenceRules.DescriptionField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.description", IsRequired: true, HasLanguages: true),
+            new(
+                ParentGroupField,
+                AdminReferenceFieldTypes.Reference,
+                LabelPrefix + "field.parent_group",
+                InList: true,
+                ReferenceKind: PartGroupKind),
             new(SortOrderField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.sort_order", IsRequired: true, InList: true, Minimum: 0),
         ]);
 
@@ -348,7 +356,11 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             group.ImageKey,
                             group.IsArchived,
                             group.Version,
-                            new Dictionary<string, object?> { [SortOrderField] = group.SortOrder })),
+                            new Dictionary<string, object?>
+                            {
+                                [ParentGroupField] = group.ParentGroupId,
+                                [SortOrderField] = group.SortOrder,
+                            })),
                 ],
                 query,
                 packs),
@@ -434,6 +446,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             [AdminReferenceRules.ImageField] = group.ImageKey,
                             [AdminReferenceRules.NameField] = AdminReferenceRules.TextsOf(packs, group.NameKey),
                             [AdminReferenceRules.DescriptionField] = AdminReferenceRules.TextsOf(packs, group.DescriptionKey),
+                            [ParentGroupField] = group.ParentGroupId,
                             [SortOrderField] = group.SortOrder,
                         });
                 }
@@ -656,6 +669,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                                 [AdminReferenceRules.NameField] = AdminReferenceRules.TextsOf(packs, group.NameKey),
                                 [AdminReferenceRules.DescriptionField] = AdminReferenceRules.TextsOf(packs, group.DescriptionKey),
                                 [AdminReferenceRules.ImageField] = group.ImageKey,
+                                [ParentGroupField] = group.ParentGroupId,
                                 [SortOrderField] = group.SortOrder,
                             };
 
@@ -872,10 +886,58 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             AdminReferenceRules.Fail(failures, SortOrderField, values.SortOrder is null ? AdminReferenceErrors.Required : AdminReferenceErrors.OutOfBounds);
         }
 
+        if (values.ParentGroupId is { } parentId)
+        {
+            await CheckParentAsync(failures, parentId, stored, cancellationToken).ConfigureAwait(false);
+        }
+
         await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), stored?.ImageKey, cancellationToken)
             .ConfigureAwait(false);
 
         AdminReferenceRules.ThrowIfInvalid(failures);
+    }
+
+    /// <summary>
+    /// Checks the parent of a group (task 00043): it exists, a new choice of it is not archived,
+    /// and it is neither the group itself nor a group inside it, so the groups never make a loop.
+    /// </summary>
+    private async Task CheckParentAsync(Dictionary<string, List<string>> failures, int parentId, PartGroupEntity? stored, CancellationToken cancellationToken)
+    {
+        // The groups are a short list, so the parents of all of them are read in one query and
+        // the chain of the parents is walked in memory.
+        Dictionary<int, GroupLink> groups = await _dbContext.PartGroups.AsNoTracking()
+            .ToDictionaryAsync(group => group.Id, group => new GroupLink(group.ParentGroupId, group.IsArchived), cancellationToken).ConfigureAwait(false);
+
+        if (!groups.TryGetValue(parentId, out GroupLink? parent))
+        {
+            AdminReferenceRules.Fail(failures, ParentGroupField, AdminReferenceErrors.Unknown);
+
+            return;
+        }
+
+        if (parent.IsArchived && stored?.ParentGroupId != parentId)
+        {
+            AdminReferenceRules.Fail(failures, ParentGroupField, AdminReferenceErrors.Archived);
+
+            return;
+        }
+
+        if (stored is null)
+        {
+            return;
+        }
+
+        HashSet<int> visited = [];
+
+        for (int? current = parentId; current is { } currentId && visited.Add(currentId); current = groups.GetValueOrDefault(currentId)?.ParentGroupId)
+        {
+            if (currentId == stored.Id)
+            {
+                AdminReferenceRules.Fail(failures, ParentGroupField, AdminReferenceErrors.NotApplicable);
+
+                return;
+            }
+        }
     }
 
     private async Task CheckPartAsync(PartValues values, PartTypeEntity? stored, CancellationToken cancellationToken)
@@ -1131,6 +1193,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
 
     private static void Apply(PartGroupEntity group, GroupValues values)
     {
+        group.ParentGroupId = values.ParentGroupId;
         group.SortOrder = values.SortOrder ?? 0;
         group.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
     }
@@ -1296,7 +1359,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         Dictionary<string, string>? Name,
         Dictionary<string, string>? Description,
         int? SortOrder,
-        string? ImageKey)
+        string? ImageKey,
+        int? ParentGroupId = null)
     {
         public GroupValues Trimmed(ILocalizationTexts texts) => this with
         {
@@ -1309,9 +1373,12 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             [AdminReferenceRules.ImageField] = ImageKey,
             [AdminReferenceRules.NameField] = Name,
             [AdminReferenceRules.DescriptionField] = Description,
+            [ParentGroupField] = ParentGroupId,
             [SortOrderField] = SortOrder,
         };
     }
+
+    private sealed record GroupLink(int? ParentGroupId, bool IsArchived);
 
     private sealed record PartValues(
         Dictionary<string, string>? Name,

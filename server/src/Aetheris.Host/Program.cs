@@ -20,6 +20,7 @@ using Aetheris.Host.Observability;
 using Aetheris.Host.Realtime;
 using Aetheris.Host.Scheduling;
 using Aetheris.Host.Security;
+using Aetheris.Host.Time;
 using Aetheris.Market;
 using Aetheris.Market.Data;
 using Aetheris.Planets;
@@ -269,6 +270,10 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     // existing value, so a database that was filled by hand keeps its settings.
     ConfigSeedService seedService = scope.ServiceProvider.GetRequiredService<ConfigSeedService>();
     await StartupTimer.RunAsync(startupLogger, "seed:config", () => seedService.SeedAsync()).ConfigureAwait(false);
+
+    // The game time goes on from the stored anchor, so a restart never moves it back (code audit
+    // of 04.11.2026); the scheduler and the requests start after it.
+    await StartupTimer.RunAsync(startupLogger, "clock:restore", () => GameClockStore.RestoreAsync(mainContext, scope.ServiceProvider.GetRequiredService<GameClock>())).ConfigureAwait(false);
 
     // The protection limits are read from the configuration, so it is loaded before the
     // first request instead of waiting for the background reload.

@@ -13,6 +13,7 @@ using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Localization;
 using Aetheris.Host.Security;
+using Aetheris.Host.Time;
 using Aetheris.Market;
 using Aetheris.Planets;
 using Aetheris.Processes;
@@ -223,7 +224,7 @@ public static class AdminEndpoints
         secured.MapGet("/clock", ReadClock)
             .WithName("admin.clock_read");
 
-        secured.MapPut("/clock/multiplier", ChangeClock)
+        secured.MapPut("/clock/multiplier", ChangeClockAsync)
             .WithName("admin.clock_changed");
 
         secured.MapGet("/audit", ReadAuditAsync)
@@ -526,11 +527,13 @@ public static class AdminEndpoints
             read_only = true,
         });
 
-    private static IResult ChangeClock(
+    private static async Task<IResult> ChangeClockAsync(
         ClockChangeRequest request,
         GameClock clock,
         SecuritySettings settings,
-        AdminAuditScope audit)
+        AdminAuditScope audit,
+        AetherisDbContext dbContext,
+        CancellationToken cancellationToken)
     {
         if (request.Multiplier <= 0 || request.Multiplier > settings.AdminMaxClockMultiplier)
         {
@@ -543,10 +546,15 @@ public static class AdminEndpoints
         string oldValue = clock.Multiplier.ToString(CultureInfo.InvariantCulture);
         string newValue = request.Multiplier.ToString(CultureInfo.InvariantCulture);
 
+        // The new anchor is stored in the transaction of the audit record, and the clock takes the
+        // same anchor after the commit, so a restart goes on from it (code audit of 04.11.2026).
+        DateTimeOffset now = clock.UtcNow;
+        await GameClockStore.StageAsync(dbContext, clock, request.Multiplier, now, cancellationToken).ConfigureAwait(false);
+
         audit.Record("clock.multiplier", oldValue, newValue);
         audit.OnCommitted(() =>
         {
-            clock.SetMultiplier(request.Multiplier);
+            clock.SetMultiplier(request.Multiplier, now);
             return Task.CompletedTask;
         });
 

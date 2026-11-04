@@ -1,5 +1,6 @@
 using System.Net;
 using Aetheris.Core.Errors;
+using Aetheris.Planets;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Data;
@@ -71,8 +72,12 @@ public sealed class ConstructionTests
         Assert.Equal(start.AddSeconds(plantLevel.DurationSeconds), underWay.FinishesAt);
         Assert.Null(waiting.StartedAt);
         HashSet<int> currencyIds = await PlanetsTestData.CurrencyIdsAsync(services);
+        HashSet<int> populationIds = await PlanetsTestData.PopulationPaidIdsAsync(services);
+
+        // The population is paid by the inhabitants and not from the storage, so its row of the
+        // storage does not change.
         Assert.All(
-            plantLevel.CostIds.Where(cost => !currencyIds.Contains(cost.ResourceTypeId)),
+            plantLevel.CostIds.Where(cost => !currencyIds.Contains(cost.ResourceTypeId) && !populationIds.Contains(cost.ResourceTypeId)),
             cost => Assert.Equal(balance[cost.ResourceTypeId] - cost.Amount, Amount(first, cost.ResourceTypeId)));
 
         foreach (BuildingLevelCostEntity currencyCost in plantLevel.CostIds.Where(cost => currencyIds.Contains(cost.ResourceTypeId)))
@@ -155,9 +160,11 @@ public sealed class ConstructionTests
 
         Assert.Equal(0, PlanetsTestData.Building(after, SeedCodes.PowerPlant).Level);
 
-        // Every resource is back except the cost of the housing.
+        // Every resource is back except the cost of the housing; the population is paid by the
+        // inhabitants and not from the storage.
         BuildingLevelEntity housingLevel = housing.LevelIds.Single(level => level.Level == 1);
-        Assert.All(initial.Resources, resource => Assert.Equal(
+        HashSet<int> populationIds = await PlanetsTestData.PopulationPaidIdsAsync(services);
+        Assert.All(initial.Resources.Where(resource => !populationIds.Contains(resource.ResourceTypeId)), resource => Assert.Equal(
             resource.Amount - housingLevel.CostIds.Where(cost => cost.ResourceTypeId == resource.ResourceTypeId).Sum(cost => cost.Amount),
             Amount(after, resource.ResourceTypeId)));
     }
@@ -379,9 +386,10 @@ public sealed class ConstructionTests
 
         Dictionary<int, long> left = await PlanetsTestData.StoredBalanceAsync(services, player.PlanetId);
         HashSet<int> spentCurrencyIds = await PlanetsTestData.CurrencyIdsAsync(services);
+        HashSet<int> populationIds = await PlanetsTestData.PopulationPaidIdsAsync(services);
         Assert.All(left.Values, amount => Assert.True(amount >= 0));
         Assert.All(
-            balance.Keys.Where(resourceTypeId => !spentCurrencyIds.Contains(resourceTypeId)),
+            balance.Keys.Where(resourceTypeId => !spentCurrencyIds.Contains(resourceTypeId) && !populationIds.Contains(resourceTypeId)),
             resourceTypeId => Assert.Equal(0, left[resourceTypeId]));
 
         foreach (int resourceTypeId in balance.Keys.Where(spentCurrencyIds.Contains))

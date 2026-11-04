@@ -111,9 +111,10 @@ public sealed class BuildingReferenceTests
     }
 
     /// <summary>
-    /// A building without levels, with a gap in the levels, with a level without a cost or with a
-    /// level without requirements is refused by the rules of the levels; only the first level of
-    /// the start building may have no requirement (acceptance criterion 2, decision 6).
+    /// A building without levels, with a gap in the levels or with a level without a cost is
+    /// refused by the rules of the levels (acceptance criterion 2, decision 6). The rule of the
+    /// requirements is off since 02.11.2026: a level may have none, so a building without them is
+    /// accepted.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
@@ -141,25 +142,8 @@ public sealed class BuildingReferenceTests
             "levels.0.costs",
             AdminReferenceErrors.CostMissing);
 
-        await ReferenceAdmin.AssertFieldAsync(
-            await ReferenceAdmin.CreateAsync(admin, Buildings, Building(ids, "Вільна", "Open", levels: 1, requirement: false)),
-            HttpStatusCode.UnprocessableEntity,
-            "levels.0.requirements",
-            AdminReferenceErrors.RequirementsMissing);
-
-        // The start building may open without a requirement, its second level may not.
-        using (IServiceScope scope = _factory.Services.CreateScope())
-        {
-            await scope.ServiceProvider.GetRequiredService<PlanetsDbContext>().BuildingTypes
-                .ExecuteUpdateAsync(setters => setters.SetProperty(type => type.IsStartBuilding, false), Token);
-        }
-
-        await ReferenceAdmin.AssertFieldAsync(
-            await ReferenceAdmin.CreateAsync(admin, Buildings, Building(ids, "Ратуша", "Town hall", levels: 2, requirement: false, start: true)),
-            HttpStatusCode.UnprocessableEntity,
-            "levels.1.requirements",
-            AdminReferenceErrors.RequirementsMissing);
-        await ReferenceAdmin.ChangedAsync(await ReferenceAdmin.CreateAsync(admin, Buildings, Building(ids, "Ратуша", "Town hall", levels: 1, requirement: false, start: true)));
+        // A level without requirements is accepted, on any building and any level.
+        await ReferenceAdmin.ChangedAsync(await ReferenceAdmin.CreateAsync(admin, Buildings, Building(ids, "Вільна", "Open", levels: 2, requirement: false)));
 
         // A wrong value that breaks no rule of the levels is refused with 400, like every other
         // change of the admin panel.

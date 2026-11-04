@@ -40,7 +40,7 @@ IMPORTANT: this screen shares its frame with an existing design. Reuse the same 
 CONTEXT OF THE GAME
 AETHERIS is a free-to-play online 2D space strategy game in real time, with one shared universe for all players. The player develops planets, mines resources, builds spaceships, trades and fights in turn-based tactical battles of 5-10 minutes. The planet screen is the place the player visits to check the state of one world: what is stored, how fast it fills, whether the energy balance is healthy, and what is currently being built. Timers run while the player is offline. Nothing is lost by neglect — only time is spent.
 
-Four playable races: Terran (gray metal and blue, reliable, military), Kvarr (amber and terracotta, crystals and armor), Skolar (red and black, sharp aggressive raiders), Nexar (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
+Four playable races: Terran (gray metal and blue, reliable, military), Litari (amber and terracotta, crystals and armor), Drakkuri (red and black, sharp aggressive raiders), Veirani (white and cyan, smooth shapes, glowing lines, technology). Tone: light, with a military flavor.
 
 THE SHELL (reproduce exactly, do not redesign)
 TOP BAR, 64 px tall, sticky, background rgba(7,11,22,0.92) with a 1 px bottom border of rgba(160,190,255,0.16). From left to right: a small square brand mark plus the word "AETHERIS" in Inter Bold 18 px with +4% letter spacing; then the player nickname in a rounded pill with a small race-colored glyph; a chip that reads "Standard" (or "Premium") in a muted border; then a centered row of resource counters, each a small distinct icon plus a number in tabular-nums: Credits, Trade Currency, Energy; then on the right three alert pills (incoming attack in danger red, battle in progress in danger red, storage full in warning yellow), a 44×44 mail icon button with a small accent badge showing the unread count, a 44×44 settings icon button, and a 44×44 sign-out icon button. A 1 px vertical separator before the icon buttons.
@@ -101,7 +101,7 @@ Output a design-tokens table (colors, fonts, spacing, radii, shadows) and a list
 - ✅ **Черга послідовна**, базово 2 місця; ресурси списуються при постановці, скасування
   повертає 100% — тому в черзі показуємо **вже сплачену** вартість.
 - ✅ **Газовий гігант не колонізується** (game-design/03, розділ 2) — без населення.
-- ✅ **Етеру на планеті немає** (game-design/02, розділ 2.4).
+- ✅ **Ефіру на планеті немає** (game-design/02, розділ 2.4).
 - ✅ **Кольори груп ресурсів** уже є в `aetheris-civ/src/icons.js`: метали `#A7B1C2`,
   кристали `#6FA8FF`, паливо `#FF9F43`, ефір `#E9C46A`, кредити `#3DD6A6`.
 - ✅ **Кожен ресурс має власну форму іконки** — колір не єдиний носій.

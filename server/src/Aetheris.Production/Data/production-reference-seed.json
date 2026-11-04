@@ -2,7 +2,7 @@
   "part_groups": [
     {
       "code": "pg_1",
-      "sort_order": 1,
+      "sort_order": 2,
       "name": {
         "uk": "Двигуни",
         "en": "Engines"
@@ -10,11 +10,12 @@
       "description": {
         "uk": "Група «Двигуни».",
         "en": "Group Engines."
-      }
+      },
+      "parent": "pg_19"
     },
     {
       "code": "pg_2",
-      "sort_order": 2,
+      "sort_order": 3,
       "name": {
         "uk": "Реактори",
         "en": "Reactors"
@@ -22,11 +23,12 @@
       "description": {
         "uk": "Група «Реактори».",
         "en": "Group Reactors."
-      }
+      },
+      "parent": "pg_19"
     },
     {
       "code": "pg_3",
-      "sort_order": 3,
+      "sort_order": 1,
       "name": {
         "uk": "Енергетична зброя",
         "en": "Energy weapons"
@@ -34,11 +36,12 @@
       "description": {
         "uk": "Група «Енергетична зброя».",
         "en": "Group Energy weapons."
-      }
+      },
+      "parent": "pg_22"
     },
     {
       "code": "pg_4",
-      "sort_order": 4,
+      "sort_order": 2,
       "name": {
         "uk": "Кінетична зброя",
         "en": "Kinetic weapons"
@@ -46,7 +49,8 @@
       "description": {
         "uk": "Група «Кінетична зброя».",
         "en": "Group Kinetic weapons."
-      }
+      },
+      "parent": "pg_22"
     },
     {
       "code": "pg_5",
@@ -58,7 +62,8 @@
       "description": {
         "uk": "Група «Броня».",
         "en": "Group Armor."
-      }
+      },
+      "parent": "pg_19"
     },
     {
       "code": "pg_6",
@@ -70,11 +75,12 @@
       "description": {
         "uk": "Група «Щити».",
         "en": "Group Shields."
-      }
+      },
+      "parent": "pg_19"
     },
     {
       "code": "pg_7",
-      "sort_order": 7,
+      "sort_order": 3,
       "name": {
         "uk": "Боєприпаси",
         "en": "Ammunition"
@@ -82,11 +88,12 @@
       "description": {
         "uk": "Група «Боєприпаси».",
         "en": "Group Ammunition."
-      }
+      },
+      "parent": "pg_22"
     },
     {
       "code": "pg_8",
-      "sort_order": 8,
+      "sort_order": 1,
       "name": {
         "uk": "Видобуток",
         "en": "Extraction"
@@ -94,11 +101,12 @@
       "description": {
         "uk": "Група «Видобуток».",
         "en": "Group Extraction."
-      }
+      },
+      "parent": "pg_19"
     },
     {
       "code": "pg_9",
-      "sort_order": 9,
+      "sort_order": 7,
       "name": {
         "uk": "Розвідка й маскування",
         "en": "Recon and camouflage"
@@ -106,23 +114,153 @@
       "description": {
         "uk": "Група «Розвідка й маскування».",
         "en": "Group Recon and camouflage."
-      }
+      },
+      "parent": "pg_19"
     },
     {
       "code": "pg_10",
-      "sort_order": 10,
+      "sort_order": 8,
       "name": {
-        "uk": "Інші корабельні",
-        "en": "Other ship modules"
+        "uk": "Інші модулі",
+        "en": "Other modules"
       },
       "description": {
-        "uk": "Група «Інші корабельні».",
-        "en": "Group Other ship modules."
-      }
+        "uk": "Група «Інші модулі».",
+        "en": "Group Other modules."
+      },
+      "parent": "pg_19"
     },
     {
       "code": "pg_11",
-      "sort_order": 11,
+      "sort_order": 1,
+      "name": {
+        "uk": "Модулі бази",
+        "en": "Base modules"
+      },
+      "description": {
+        "uk": "Група «Модулі бази».",
+        "en": "Group Base modules."
+      },
+      "parent": "pg_21"
+    },
+    {
+      "code": "pg_12",
+      "sort_order": 2,
+      "name": {
+        "uk": "Легкі",
+        "en": "Light"
+      },
+      "description": {
+        "uk": "Група «Легкі».",
+        "en": "Group Light."
+      },
+      "parent": "pg_20"
+    },
+    {
+      "code": "pg_13",
+      "sort_order": 6,
+      "name": {
+        "uk": "Дрони",
+        "en": "Drones"
+      },
+      "description": {
+        "uk": "Група «Дрони».",
+        "en": "Group Drones."
+      },
+      "parent": "pg_20"
+    },
+    {
+      "code": "pg_14",
+      "sort_order": 3,
+      "name": {
+        "uk": "Середні",
+        "en": "Medium"
+      },
+      "description": {
+        "uk": "Група «Середні».",
+        "en": "Group Medium."
+      },
+      "parent": "pg_20"
+    },
+    {
+      "code": "pg_15",
+      "sort_order": 4,
+      "name": {
+        "uk": "Важкі",
+        "en": "Heavy"
+      },
+      "description": {
+        "uk": "Група «Важкі».",
+        "en": "Group Heavy."
+      },
+      "parent": "pg_20"
+    },
+    {
+      "code": "pg_16",
+      "sort_order": 5,
+      "name": {
+        "uk": "Надважкі",
+        "en": "Super-heavy"
+      },
+      "description": {
+        "uk": "Група «Надважкі».",
+        "en": "Group Super-heavy."
+      },
+      "parent": "pg_20"
+    },
+    {
+      "code": "pg_17",
+      "sort_order": 1,
+      "name": {
+        "uk": "Цивільні",
+        "en": "Civilian"
+      },
+      "description": {
+        "uk": "Група «Цивільні».",
+        "en": "Group Civilian."
+      },
+      "parent": "pg_20"
+    },
+    {
+      "code": "pg_18",
+      "sort_order": 2,
+      "name": {
+        "uk": "Корпуси споруд",
+        "en": "Structure hulls"
+      },
+      "description": {
+        "uk": "Група «Корпуси споруд».",
+        "en": "Group Structure hulls."
+      },
+      "parent": "pg_21"
+    },
+    {
+      "code": "pg_19",
+      "sort_order": 1,
+      "name": {
+        "uk": "Модулі кораблів",
+        "en": "Ship modules"
+      },
+      "description": {
+        "uk": "Група «Модулі кораблів».",
+        "en": "Group Ship modules."
+      }
+    },
+    {
+      "code": "pg_20",
+      "sort_order": 2,
+      "name": {
+        "uk": "Корпуси кораблів",
+        "en": "Ship hulls"
+      },
+      "description": {
+        "uk": "Група «Корпуси кораблів».",
+        "en": "Group Ship hulls."
+      }
+    },
+    {
+      "code": "pg_21",
+      "sort_order": 3,
       "name": {
         "uk": "Модулі бази",
         "en": "Base modules"
@@ -133,88 +271,17 @@
       }
     },
     {
-      "code": "pg_12",
-      "sort_order": 12,
+      "code": "pg_22",
+      "sort_order": 4,
       "name": {
-        "uk": "Легкі",
-        "en": "Light"
+        "uk": "Зброя",
+        "en": "Weapons"
       },
       "description": {
-        "uk": "Група «Легкі».",
-        "en": "Group Light."
-      }
-    },
-    {
-      "code": "pg_13",
-      "sort_order": 13,
-      "name": {
-        "uk": "Дрони",
-        "en": "Drones"
+        "uk": "Група «Зброя».",
+        "en": "Group Weapons."
       },
-      "description": {
-        "uk": "Група «Дрони».",
-        "en": "Group Drones."
-      }
-    },
-    {
-      "code": "pg_14",
-      "sort_order": 14,
-      "name": {
-        "uk": "Середні",
-        "en": "Medium"
-      },
-      "description": {
-        "uk": "Група «Середні».",
-        "en": "Group Medium."
-      }
-    },
-    {
-      "code": "pg_15",
-      "sort_order": 15,
-      "name": {
-        "uk": "Важкі",
-        "en": "Heavy"
-      },
-      "description": {
-        "uk": "Група «Важкі».",
-        "en": "Group Heavy."
-      }
-    },
-    {
-      "code": "pg_16",
-      "sort_order": 16,
-      "name": {
-        "uk": "Надважкі",
-        "en": "Super-heavy"
-      },
-      "description": {
-        "uk": "Група «Надважкі».",
-        "en": "Group Super-heavy."
-      }
-    },
-    {
-      "code": "pg_17",
-      "sort_order": 17,
-      "name": {
-        "uk": "Цивільні",
-        "en": "Civilian"
-      },
-      "description": {
-        "uk": "Група «Цивільні».",
-        "en": "Group Civilian."
-      }
-    },
-    {
-      "code": "pg_18",
-      "sort_order": 18,
-      "name": {
-        "uk": "Корпуси споруд",
-        "en": "Structure hulls"
-      },
-      "description": {
-        "uk": "Група «Корпуси споруд».",
-        "en": "Group Structure hulls."
-      }
+      "parent": "pg_19"
     }
   ],
   "parts": [
@@ -231,6 +298,7 @@
         "uk": "Модуль групи «Двигуни».",
         "en": "Module of the Engines group."
       },
+      "image_key": "part_1.webp",
       "attributes": {},
       "weight": 1,
       "characteristics": {
@@ -258,6 +326,7 @@
         "uk": "Модуль групи «Двигуни».",
         "en": "Module of the Engines group."
       },
+      "image_key": "part_2.webp",
       "attributes": {},
       "weight": 1.1,
       "characteristics": {
@@ -285,6 +354,7 @@
         "uk": "Модуль групи «Двигуни».",
         "en": "Module of the Engines group."
       },
+      "image_key": "part_3.webp",
       "attributes": {},
       "weight": 1.21,
       "characteristics": {
@@ -312,6 +382,7 @@
         "uk": "Модуль групи «Двигуни».",
         "en": "Module of the Engines group."
       },
+      "image_key": "part_4.webp",
       "attributes": {},
       "weight": 1.331,
       "characteristics": {
@@ -339,6 +410,7 @@
         "uk": "Модуль групи «Двигуни».",
         "en": "Module of the Engines group."
       },
+      "image_key": "part_5.webp",
       "attributes": {},
       "weight": 1.4641,
       "characteristics": {
@@ -366,6 +438,7 @@
         "uk": "Модуль групи «Двигуни».",
         "en": "Module of the Engines group."
       },
+      "image_key": "part_6.webp",
       "attributes": {},
       "weight": 1.61051,
       "characteristics": {
@@ -393,6 +466,7 @@
         "uk": "Модуль групи «Реактори».",
         "en": "Module of the Reactors group."
       },
+      "image_key": "part_7.webp",
       "attributes": {},
       "weight": 1.771561,
       "characteristics": {
@@ -414,6 +488,7 @@
         "uk": "Модуль групи «Реактори».",
         "en": "Module of the Reactors group."
       },
+      "image_key": "part_8.webp",
       "attributes": {},
       "weight": 1.948717,
       "characteristics": {
@@ -435,6 +510,7 @@
         "uk": "Модуль групи «Реактори».",
         "en": "Module of the Reactors group."
       },
+      "image_key": "part_9.webp",
       "attributes": {},
       "weight": 2.143589,
       "characteristics": {
@@ -456,6 +532,7 @@
         "uk": "Модуль групи «Реактори».",
         "en": "Module of the Reactors group."
       },
+      "image_key": "part_10.webp",
       "attributes": {},
       "weight": 2.357948,
       "characteristics": {
@@ -477,6 +554,7 @@
         "uk": "Модуль групи «Реактори».",
         "en": "Module of the Reactors group."
       },
+      "image_key": "part_11.webp",
       "attributes": {},
       "weight": 2.593742,
       "characteristics": {
@@ -498,6 +576,7 @@
         "uk": "Модуль групи «Реактори».",
         "en": "Module of the Reactors group."
       },
+      "image_key": "part_12.webp",
       "attributes": {},
       "weight": 2.853117,
       "characteristics": {
@@ -519,6 +598,7 @@
         "uk": "Модуль групи «Енергетична зброя».",
         "en": "Module of the Energy weapons group."
       },
+      "image_key": "part_13.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -553,6 +633,7 @@
         "uk": "Модуль групи «Енергетична зброя».",
         "en": "Module of the Energy weapons group."
       },
+      "image_key": "part_14.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -587,6 +668,7 @@
         "uk": "Модуль групи «Енергетична зброя».",
         "en": "Module of the Energy weapons group."
       },
+      "image_key": "part_15.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -621,6 +703,7 @@
         "uk": "Модуль групи «Енергетична зброя».",
         "en": "Module of the Energy weapons group."
       },
+      "image_key": "part_16.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -655,6 +738,7 @@
         "uk": "Модуль групи «Енергетична зброя».",
         "en": "Module of the Energy weapons group."
       },
+      "image_key": "part_17.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -689,6 +773,7 @@
         "uk": "Модуль групи «Енергетична зброя».",
         "en": "Module of the Energy weapons group."
       },
+      "image_key": "part_18.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -723,6 +808,7 @@
         "uk": "Модуль групи «Енергетична зброя».",
         "en": "Module of the Energy weapons group."
       },
+      "image_key": "part_19.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -757,6 +843,7 @@
         "uk": "Модуль групи «Енергетична зброя».",
         "en": "Module of the Energy weapons group."
       },
+      "image_key": "part_20.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -791,6 +878,7 @@
         "uk": "Модуль групи «Кінетична зброя».",
         "en": "Module of the Kinetic weapons group."
       },
+      "image_key": "part_21.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -828,6 +916,7 @@
         "uk": "Модуль групи «Кінетична зброя».",
         "en": "Module of the Kinetic weapons group."
       },
+      "image_key": "part_22.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -865,6 +954,7 @@
         "uk": "Модуль групи «Кінетична зброя».",
         "en": "Module of the Kinetic weapons group."
       },
+      "image_key": "part_23.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -902,6 +992,7 @@
         "uk": "Модуль групи «Кінетична зброя».",
         "en": "Module of the Kinetic weapons group."
       },
+      "image_key": "part_24.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -939,6 +1030,7 @@
         "uk": "Модуль групи «Кінетична зброя».",
         "en": "Module of the Kinetic weapons group."
       },
+      "image_key": "part_25.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -976,6 +1068,7 @@
         "uk": "Модуль групи «Кінетична зброя».",
         "en": "Module of the Kinetic weapons group."
       },
+      "image_key": "part_26.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -1013,6 +1106,7 @@
         "uk": "Модуль групи «Броня».",
         "en": "Module of the Armor group."
       },
+      "image_key": "part_27.webp",
       "attributes": {},
       "weight": 11.918177,
       "characteristics": {
@@ -1034,6 +1128,7 @@
         "uk": "Модуль групи «Броня».",
         "en": "Module of the Armor group."
       },
+      "image_key": "part_28.webp",
       "attributes": {},
       "weight": 13.109994,
       "characteristics": {
@@ -1055,6 +1150,7 @@
         "uk": "Модуль групи «Броня».",
         "en": "Module of the Armor group."
       },
+      "image_key": "part_29.webp",
       "attributes": {},
       "weight": 14.420994,
       "characteristics": {
@@ -1076,6 +1172,7 @@
         "uk": "Модуль групи «Броня».",
         "en": "Module of the Armor group."
       },
+      "image_key": "part_30.webp",
       "attributes": {},
       "weight": 15.863093,
       "characteristics": {
@@ -1097,6 +1194,7 @@
         "uk": "Модуль групи «Броня».",
         "en": "Module of the Armor group."
       },
+      "image_key": "part_31.webp",
       "attributes": {},
       "weight": 17.449402,
       "characteristics": {
@@ -1118,6 +1216,7 @@
         "uk": "Модуль групи «Броня».",
         "en": "Module of the Armor group."
       },
+      "image_key": "part_32.webp",
       "attributes": {},
       "weight": 19.194342,
       "characteristics": {
@@ -1139,6 +1238,7 @@
         "uk": "Модуль групи «Броня».",
         "en": "Module of the Armor group."
       },
+      "image_key": "part_33.webp",
       "attributes": {},
       "weight": 21.113777,
       "characteristics": {
@@ -1160,6 +1260,7 @@
         "uk": "Модуль групи «Броня».",
         "en": "Module of the Armor group."
       },
+      "image_key": "part_34.webp",
       "attributes": {},
       "weight": 23.225154,
       "characteristics": {
@@ -1181,6 +1282,7 @@
         "uk": "Модуль групи «Щити».",
         "en": "Module of the Shields group."
       },
+      "image_key": "part_35.webp",
       "attributes": {},
       "weight": 25.54767,
       "characteristics": {
@@ -1214,6 +1316,7 @@
         "uk": "Модуль групи «Щити».",
         "en": "Module of the Shields group."
       },
+      "image_key": "part_36.webp",
       "attributes": {},
       "weight": 28.102437,
       "characteristics": {
@@ -1247,6 +1350,7 @@
         "uk": "Модуль групи «Щити».",
         "en": "Module of the Shields group."
       },
+      "image_key": "part_37.webp",
       "attributes": {},
       "weight": 30.912681,
       "characteristics": {
@@ -1280,6 +1384,7 @@
         "uk": "Модуль групи «Щити».",
         "en": "Module of the Shields group."
       },
+      "image_key": "part_38.webp",
       "attributes": {},
       "weight": 34.003949,
       "characteristics": {
@@ -1313,6 +1418,7 @@
         "uk": "Модуль групи «Щити».",
         "en": "Module of the Shields group."
       },
+      "image_key": "part_39.webp",
       "attributes": {},
       "weight": 37.404343,
       "characteristics": {
@@ -1346,6 +1452,7 @@
         "uk": "Модуль групи «Щити».",
         "en": "Module of the Shields group."
       },
+      "image_key": "part_40.webp",
       "attributes": {},
       "weight": 41.144778,
       "characteristics": {
@@ -1379,6 +1486,7 @@
         "uk": "Модуль групи «Щити».",
         "en": "Module of the Shields group."
       },
+      "image_key": "part_41.webp",
       "attributes": {},
       "weight": 45.259256,
       "characteristics": {
@@ -1412,6 +1520,7 @@
         "uk": "Модуль групи «Щити».",
         "en": "Module of the Shields group."
       },
+      "image_key": "part_42.webp",
       "attributes": {},
       "weight": 49.785181,
       "characteristics": {
@@ -1445,6 +1554,7 @@
         "uk": "Модуль групи «Боєприпаси».",
         "en": "Module of the Ammunition group."
       },
+      "image_key": "part_43.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -1473,6 +1583,7 @@
         "uk": "Модуль групи «Боєприпаси».",
         "en": "Module of the Ammunition group."
       },
+      "image_key": "part_44.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -1501,6 +1612,7 @@
         "uk": "Модуль групи «Боєприпаси».",
         "en": "Module of the Ammunition group."
       },
+      "image_key": "part_45.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -1529,6 +1641,7 @@
         "uk": "Модуль групи «Боєприпаси».",
         "en": "Module of the Ammunition group."
       },
+      "image_key": "part_46.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -1563,6 +1676,7 @@
         "uk": "Модуль групи «Боєприпаси».",
         "en": "Module of the Ammunition group."
       },
+      "image_key": "part_47.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -1597,6 +1711,7 @@
         "uk": "Модуль групи «Боєприпаси».",
         "en": "Module of the Ammunition group."
       },
+      "image_key": "part_48.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -1631,6 +1746,7 @@
         "uk": "Модуль групи «Боєприпаси».",
         "en": "Module of the Ammunition group."
       },
+      "image_key": "part_49.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -1665,6 +1781,7 @@
         "uk": "Модуль групи «Боєприпаси».",
         "en": "Module of the Ammunition group."
       },
+      "image_key": "part_50.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -1696,6 +1813,7 @@
         "uk": "Модуль групи «Боєприпаси».",
         "en": "Module of the Ammunition group."
       },
+      "image_key": "part_51.webp",
       "attributes": {
         "damage_type": {
           "code": "energy"
@@ -1727,6 +1845,7 @@
         "uk": "Модуль групи «Боєприпаси».",
         "en": "Module of the Ammunition group."
       },
+      "image_key": "part_52.webp",
       "attributes": {
         "damage_type": {
           "code": "kinetic"
@@ -1758,6 +1877,7 @@
         "uk": "Модуль групи «Видобуток».",
         "en": "Module of the Extraction group."
       },
+      "image_key": "part_53.webp",
       "attributes": {},
       "weight": 142.042932,
       "characteristics": {
@@ -1788,6 +1908,7 @@
         "uk": "Модуль групи «Видобуток».",
         "en": "Module of the Extraction group."
       },
+      "image_key": "part_54.webp",
       "attributes": {},
       "weight": 156.247225,
       "characteristics": {
@@ -1812,6 +1933,7 @@
         "uk": "Модуль групи «Видобуток».",
         "en": "Module of the Extraction group."
       },
+      "image_key": "part_55.webp",
       "attributes": {},
       "weight": 171.871948,
       "characteristics": {
@@ -1836,6 +1958,7 @@
         "uk": "Модуль групи «Видобуток».",
         "en": "Module of the Extraction group."
       },
+      "image_key": "part_56.webp",
       "attributes": {},
       "weight": 189.059142,
       "characteristics": {
@@ -1860,6 +1983,7 @@
         "uk": "Модуль групи «Видобуток».",
         "en": "Module of the Extraction group."
       },
+      "image_key": "part_57.webp",
       "attributes": {},
       "weight": 207.965057,
       "characteristics": {
@@ -1884,6 +2008,7 @@
         "uk": "Модуль групи «Розвідка й маскування».",
         "en": "Module of the Recon and camouflage group."
       },
+      "image_key": "part_58.webp",
       "attributes": {},
       "weight": 228.761562,
       "characteristics": {
@@ -1908,6 +2033,7 @@
         "uk": "Модуль групи «Розвідка й маскування».",
         "en": "Module of the Recon and camouflage group."
       },
+      "image_key": "part_59.webp",
       "attributes": {},
       "weight": 251.637719,
       "characteristics": {
@@ -1932,6 +2058,7 @@
         "uk": "Модуль групи «Розвідка й маскування».",
         "en": "Module of the Recon and camouflage group."
       },
+      "image_key": "part_60.webp",
       "attributes": {},
       "weight": 276.80149,
       "characteristics": {
@@ -1956,6 +2083,7 @@
         "uk": "Модуль групи «Розвідка й маскування».",
         "en": "Module of the Recon and camouflage group."
       },
+      "image_key": "part_61.webp",
       "attributes": {},
       "weight": 304.48164,
       "characteristics": {
@@ -1977,6 +2105,7 @@
         "uk": "Модуль групи «Розвідка й маскування».",
         "en": "Module of the Recon and camouflage group."
       },
+      "image_key": "part_62.webp",
       "attributes": {},
       "weight": 334.929803,
       "characteristics": {
@@ -1998,6 +2127,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_63.webp",
       "attributes": {},
       "weight": 368.422784,
       "characteristics": {
@@ -2022,6 +2152,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_64.webp",
       "attributes": {},
       "weight": 405.265062,
       "characteristics": {
@@ -2052,6 +2183,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_65.webp",
       "attributes": {},
       "weight": 445.791568,
       "characteristics": {
@@ -2076,6 +2208,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_66.webp",
       "attributes": {},
       "weight": 490.370725,
       "characteristics": {
@@ -2100,6 +2233,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_67.webp",
       "attributes": {},
       "weight": 539.407798,
       "characteristics": {
@@ -2124,6 +2258,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_68.webp",
       "attributes": {},
       "weight": 593.348578,
       "characteristics": {
@@ -2151,6 +2286,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_69.webp",
       "attributes": {},
       "weight": 652.683435,
       "characteristics": {
@@ -2178,6 +2314,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_70.webp",
       "attributes": {},
       "weight": 717.951779,
       "characteristics": {
@@ -2205,6 +2342,7 @@
         "uk": "Модуль групи «Модулі бази».",
         "en": "Module of the Base modules group."
       },
+      "image_key": "part_71.webp",
       "attributes": {},
       "weight": 789.746957,
       "characteristics": {
@@ -2229,6 +2367,7 @@
         "uk": "Модуль групи «Модулі бази».",
         "en": "Module of the Base modules group."
       },
+      "image_key": "part_72.webp",
       "attributes": {},
       "weight": 868.721652,
       "characteristics": {
@@ -2253,6 +2392,7 @@
         "uk": "Модуль групи «Модулі бази».",
         "en": "Module of the Base modules group."
       },
+      "image_key": "part_73.webp",
       "attributes": {},
       "weight": 955.593818,
       "characteristics": {
@@ -2277,6 +2417,7 @@
         "uk": "Модуль групи «Модулі бази».",
         "en": "Module of the Base modules group."
       },
+      "image_key": "part_74.webp",
       "attributes": {},
       "weight": 1051.1532,
       "characteristics": {
@@ -2301,6 +2442,7 @@
         "uk": "Модуль групи «Модулі бази».",
         "en": "Module of the Base modules group."
       },
+      "image_key": "part_75.webp",
       "attributes": {},
       "weight": 1156.268519,
       "characteristics": {
@@ -2339,6 +2481,7 @@
         "uk": "Модуль групи «Модулі бази».",
         "en": "Module of the Base modules group."
       },
+      "image_key": "part_76.webp",
       "attributes": {},
       "weight": 1271.895371,
       "characteristics": {
@@ -2360,6 +2503,7 @@
         "uk": "Модуль групи «Модулі бази».",
         "en": "Module of the Base modules group."
       },
+      "image_key": "part_77.webp",
       "attributes": {},
       "weight": 1399.084909,
       "characteristics": {
@@ -2384,6 +2528,7 @@
         "uk": "Модуль групи «Модулі бази».",
         "en": "Module of the Base modules group."
       },
+      "image_key": "part_78.webp",
       "attributes": {},
       "weight": 1538.993399,
       "characteristics": {
@@ -2408,6 +2553,7 @@
         "uk": "Модуль групи «Модулі бази».",
         "en": "Module of the Base modules group."
       },
+      "image_key": "part_79.webp",
       "attributes": {},
       "weight": 1692.892739,
       "characteristics": {
@@ -2432,6 +2578,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_80.webp",
       "attributes": {
         "population_capsule": {
           "number": 100
@@ -2460,6 +2607,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_81.webp",
       "attributes": {
         "population_capsule": {
           "number": 100
@@ -2488,6 +2636,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_82.webp",
       "attributes": {
         "population_capsule": {
           "number": 100
@@ -2516,6 +2665,7 @@
         "uk": "Модуль групи «Інші корабельні».",
         "en": "Module of the Other ship modules group."
       },
+      "image_key": "part_83.webp",
       "attributes": {
         "population_capsule": {
           "number": 100
@@ -2544,6 +2694,7 @@
         "uk": "Корпус групи «Легкі».",
         "en": "Hull of the Light group."
       },
+      "image_key": "part_84.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2570,6 +2721,7 @@
         "uk": "Корпус групи «Легкі».",
         "en": "Hull of the Light group."
       },
+      "image_key": "part_85.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2596,6 +2748,7 @@
         "uk": "Корпус групи «Легкі».",
         "en": "Hull of the Light group."
       },
+      "image_key": "part_86.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2622,6 +2775,7 @@
         "uk": "Корпус групи «Легкі».",
         "en": "Hull of the Light group."
       },
+      "image_key": "part_87.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2648,6 +2802,7 @@
         "uk": "Корпус групи «Дрони».",
         "en": "Hull of the Drones group."
       },
+      "image_key": "part_88.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2674,6 +2829,7 @@
         "uk": "Корпус групи «Дрони».",
         "en": "Hull of the Drones group."
       },
+      "image_key": "part_89.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2700,6 +2856,7 @@
         "uk": "Корпус групи «Дрони».",
         "en": "Hull of the Drones group."
       },
+      "image_key": "part_90.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2726,6 +2883,7 @@
         "uk": "Корпус групи «Середні».",
         "en": "Hull of the Medium group."
       },
+      "image_key": "part_91.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2752,6 +2910,7 @@
         "uk": "Корпус групи «Середні».",
         "en": "Hull of the Medium group."
       },
+      "image_key": "part_92.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2778,6 +2937,7 @@
         "uk": "Корпус групи «Середні».",
         "en": "Hull of the Medium group."
       },
+      "image_key": "part_93.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2804,6 +2964,7 @@
         "uk": "Корпус групи «Середні».",
         "en": "Hull of the Medium group."
       },
+      "image_key": "part_94.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2830,6 +2991,7 @@
         "uk": "Корпус групи «Середні».",
         "en": "Hull of the Medium group."
       },
+      "image_key": "part_95.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2856,6 +3018,7 @@
         "uk": "Корпус групи «Середні».",
         "en": "Hull of the Medium group."
       },
+      "image_key": "part_96.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2882,6 +3045,7 @@
         "uk": "Корпус групи «Важкі».",
         "en": "Hull of the Heavy group."
       },
+      "image_key": "part_97.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2908,6 +3072,7 @@
         "uk": "Корпус групи «Важкі».",
         "en": "Hull of the Heavy group."
       },
+      "image_key": "part_98.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2934,6 +3099,7 @@
         "uk": "Корпус групи «Важкі».",
         "en": "Hull of the Heavy group."
       },
+      "image_key": "part_99.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2960,6 +3126,7 @@
         "uk": "Корпус групи «Важкі».",
         "en": "Hull of the Heavy group."
       },
+      "image_key": "part_100.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -2986,6 +3153,7 @@
         "uk": "Корпус групи «Надважкі».",
         "en": "Hull of the Super-heavy group."
       },
+      "image_key": "part_101.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -3012,6 +3180,7 @@
         "uk": "Корпус групи «Надважкі».",
         "en": "Hull of the Super-heavy group."
       },
+      "image_key": "part_102.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -3038,6 +3207,7 @@
         "uk": "Корпус групи «Надважкі».",
         "en": "Hull of the Super-heavy group."
       },
+      "image_key": "part_103.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -3064,6 +3234,7 @@
         "uk": "Корпус групи «Цивільні».",
         "en": "Hull of the Civilian group."
       },
+      "image_key": "part_104.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -3090,6 +3261,7 @@
         "uk": "Корпус групи «Цивільні».",
         "en": "Hull of the Civilian group."
       },
+      "image_key": "part_105.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -3116,6 +3288,7 @@
         "uk": "Корпус групи «Цивільні».",
         "en": "Hull of the Civilian group."
       },
+      "image_key": "part_106.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -3142,6 +3315,7 @@
         "uk": "Корпус групи «Цивільні».",
         "en": "Hull of the Civilian group."
       },
+      "image_key": "part_107.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -3168,6 +3342,7 @@
         "uk": "Корпус групи «Корпуси споруд».",
         "en": "Hull of the Structure hulls group."
       },
+      "image_key": "part_108.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -3194,6 +3369,7 @@
         "uk": "Корпус групи «Корпуси споруд».",
         "en": "Hull of the Structure hulls group."
       },
+      "image_key": "part_109.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -3220,6 +3396,7 @@
         "uk": "Корпус групи «Корпуси споруд».",
         "en": "Hull of the Structure hulls group."
       },
+      "image_key": "part_110.webp",
       "attributes": {},
       "characteristics": {
         "char_hull_size": {
@@ -3230,6 +3407,44 @@
         },
         "char_integrity": {
           "number": 121
+        }
+      }
+    },
+    {
+      "code": "part_m_84",
+      "group": "pg_4",
+      "mark_level": 2,
+      "sort_order": 24,
+      "name": {
+        "uk": "РПУ-X1B",
+        "en": "Launcher X1B"
+      },
+      "description": {
+        "uk": "Модуль групи «Кінетична зброя».",
+        "en": "Module of the Kinetic weapons group."
+      },
+      "image_key": "part_111.webp",
+      "attributes": {
+        "damage_type": {
+          "code": "kinetic"
+        }
+      },
+      "weight": 9.849733,
+      "characteristics": {
+        "char_damage": {
+          "number": 146.41
+        },
+        "char_rate": {
+          "number": 146.41
+        },
+        "char_range": {
+          "number": 146.41
+        },
+        "char_energy_use": {
+          "number": 146.41
+        },
+        "char_magazine": {
+          "number": 146.41
         }
       }
     }
@@ -9251,7 +9466,7 @@
       "resource": "resource_20",
       "factory": "building_31",
       "output_quantity": 100,
-      "duration_seconds": 600,
+      "duration_seconds": 110,
       "sort_order": 111,
       "name": {
         "uk": "Будматеріали",
@@ -9282,7 +9497,7 @@
       "resource": "resource_21",
       "factory": "building_32",
       "output_quantity": 100,
-      "duration_seconds": 600,
+      "duration_seconds": 120,
       "sort_order": 112,
       "name": {
         "uk": "Оптоволокно",
@@ -9318,7 +9533,7 @@
       "resource": "resource_22",
       "factory": "building_33",
       "output_quantity": 100,
-      "duration_seconds": 600,
+      "duration_seconds": 130,
       "sort_order": 113,
       "name": {
         "uk": "Мікропроцесори",
@@ -9354,7 +9569,7 @@
       "resource": "resource_23",
       "factory": "building_34",
       "output_quantity": 100,
-      "duration_seconds": 600,
+      "duration_seconds": 130,
       "sort_order": 114,
       "name": {
         "uk": "Композити",
@@ -9390,7 +9605,7 @@
       "resource": "resource_24",
       "factory": "building_35",
       "output_quantity": 100,
-      "duration_seconds": 600,
+      "duration_seconds": 300,
       "sort_order": 115,
       "name": {
         "uk": "Енергострижні",
@@ -9426,7 +9641,7 @@
       "resource": "resource_25",
       "factory": "building_36",
       "output_quantity": 100,
-      "duration_seconds": 600,
+      "duration_seconds": 140,
       "sort_order": 116,
       "name": {
         "uk": "Нановолокно",
@@ -9462,7 +9677,7 @@
       "resource": "resource_26",
       "factory": "building_37",
       "output_quantity": 100,
-      "duration_seconds": 600,
+      "duration_seconds": 120,
       "sort_order": 117,
       "name": {
         "uk": "Титановий сплав",
@@ -9498,7 +9713,7 @@
       "resource": "resource_16",
       "factory": "building_38",
       "output_quantity": 100,
-      "duration_seconds": 600,
+      "duration_seconds": 110,
       "sort_order": 118,
       "name": {
         "uk": "Збагачений Уран",
@@ -9521,6 +9736,58 @@
         }
       ],
       "requirements": [],
+      "race": null
+    },
+    {
+      "code": "recipe_119",
+      "part": "part_m_84",
+      "resource": null,
+      "factory": "building_43",
+      "output_quantity": 1,
+      "duration_seconds": 520,
+      "sort_order": 24,
+      "name": {
+        "uk": "РПУ-X1B",
+        "en": "Launcher X1B"
+      },
+      "description": {
+        "uk": "Виробництво «РПУ-X1B».",
+        "en": "Production of the part."
+      },
+      "ingredients": [
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 350
+        },
+        {
+          "resource": "resource_6",
+          "part": null,
+          "amount": 350
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 140
+        },
+        {
+          "resource": "resource_27",
+          "part": null,
+          "amount": 170
+        }
+      ],
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 14
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_6",
+          "target_level": 10
+        }
+      ],
       "race": null
     }
   ],

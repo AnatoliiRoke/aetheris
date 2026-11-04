@@ -201,7 +201,7 @@ describe('/planet/build: the elements of the design', () => {
     const card = (await screen.findByRole('heading', { name: 'Адміністративний центр' })).closest('li')!;
 
     expect(within(card).getByText('Енергія після завершення')).toBeInTheDocument();
-    expect(within(card).getByText('40 / 32')).toBeInTheDocument();
+    expect(within(card).getByText('32 / 40')).toBeInTheDocument();
   });
 });
 

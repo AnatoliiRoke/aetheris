@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Aetheris.Planets;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
@@ -255,8 +256,10 @@ public sealed class StorageCapacityTests
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, capacities.ToDictionary(entry => entry.Key, entry => entry.Value), start);
         PlanetOverviewDto cancelled = await construction.CancelAsync(player.PlanetId, queued.Queue.Items[0].Id, start, Token);
 
-        // A cost in a currency is not a resource of the body, so only the rows of the body are checked.
-        List<KeyValuePair<int, long>> bodyCosts = [.. costs.Where(cost => cancelled.Resources.Any(resource => resource.ResourceTypeId == cost.Key))];
+        // A cost in a currency is not a resource of the body, and the population is paid by the
+        // inhabitants and not from the storage, so only the stored rows of the body are checked.
+        HashSet<int> populationIds = await PlanetsTestData.PopulationPaidIdsAsync(services);
+        List<KeyValuePair<int, long>> bodyCosts = [.. costs.Where(cost => !populationIds.Contains(cost.Key) && cancelled.Resources.Any(resource => resource.ResourceTypeId == cost.Key))];
 
         Assert.NotEmpty(bodyCosts);
         Assert.All(bodyCosts, cost =>

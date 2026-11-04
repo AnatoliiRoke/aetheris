@@ -3,11 +3,11 @@
 
 /* ---------- the head of the content of a screen ---------- */
 .screen-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-3); }
-.civ .screen-head { gap: 6px 24px; }
+.civ .screen-head { gap: 6px var(--space-5); }
 .screen-head__text { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
 .civ .screen-head__text { gap: 6px; }
-.civ__main--planet .screen-head__text { gap: 4px; }
-.screen-head__title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.civ__main--planet .screen-head__text { gap: var(--space-1); }
+.screen-head__title { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) 14px; }
 .screen-head__note { color: var(--text-2); font-weight: 600; }
 .screen-head__badge {
   display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--r-full);
@@ -15,13 +15,13 @@
   font-size: var(--fs-small); font-weight: 600; color: var(--text-soft); white-space: nowrap;
 }
 .civ .screen-head .meta { font-size: var(--fs-ui); color: var(--text-2); }
-.screen-head__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+.screen-head__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-5); }
 .research-center {
-  display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 8px;
-  border-radius: 12px; background: var(--bg-2); border: 1px solid var(--border);
+  display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 14px var(--space-2) var(--space-2);
+  border-radius: var(--r-lg); background: var(--bg-2); border: 1px solid var(--border);
 }
 .research-center__mark {
-  flex: 0 0 auto; width: 40px; height: 40px; border-radius: 10px;
+  flex: 0 0 auto; width: 40px; height: 40px; border-radius: var(--r-md);
   display: inline-flex; align-items: center; justify-content: center;
   background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-hover);
 }
@@ -105,7 +105,7 @@
   width: min(100%, 190px); height: auto; aspect-ratio: 1;
 }
 .planet-card__facts { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
-.civ__main--planet .planet-card__facts { justify-content: center; gap: 8px; padding: 12px 20px; }
+.civ__main--planet .planet-card__facts { justify-content: center; gap: var(--space-2); padding: var(--space-3) 20px; }
 .planet-card__deposits { display: flex; flex-direction: column; gap: var(--space-2); }
 .deposit-rows { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 20px; list-style: none; margin: 0; padding: 0; }
 .deposit-rows li {
@@ -114,7 +114,6 @@
 }
 .deposit-rows li span:nth-of-type(1) { min-width: 0; color: var(--text-soft); }
 .deposit-rows .num { font-weight: 600; color: var(--text-1); white-space: nowrap; }
-.deposit-rows__empty { font-weight: 600; color: var(--text-2); }
 
 /* ---------- the standard queue ---------- */
 .queue-item--free { justify-content: center; padding: 10px; border: 1px dashed var(--border-strong); border-radius: var(--r-md); color: var(--text-2); }
@@ -124,7 +123,7 @@
 .civ__main--build .queue-item,
 .civ__main--research .queue-item {
   display: grid; grid-template-columns: minmax(220px, 320px) minmax(0, 1fr) 96px auto;
-  align-items: center; gap: 16px; padding: 12px 14px;
+  align-items: center; gap: var(--space-4); padding: var(--space-3) 14px;
 }
 .civ__main--build .queue-item__details,
 .civ__main--research .queue-item__details { grid-column: 1 / -1; }
@@ -134,17 +133,30 @@
 .civ__main--build .queue-item__time { white-space: nowrap; text-align: right; }
 .civ__main--build .queue-item > .btn { grid-column: 3; grid-row: 2; justify-self: end; }
 .civ__main--build .queue-item__details { grid-column: 1 / 3; grid-row: 2; }
-.civ__main--planet .planet-card .facts { grid-template-columns: minmax(120px, 34%) minmax(0, 1fr); gap: 0 16px; }
+.civ__main--planet .planet-card .facts { grid-template-columns: minmax(120px, 34%) minmax(0, 1fr); gap: 0 var(--space-4); }
 .civ__main--planet .facts dt,
 .civ__main--planet .facts dd { padding: 1px 0; border-bottom: 1px solid var(--border-soft); }
 .civ__main--planet .facts dd { font-size: var(--fs-game); font-weight: 600; color: var(--text-1); }
-.civ__main--planet .planet-table-wrap { overflow: visible; border: 0; border-radius: 0; }
+/* Below 1410 px the values of the facts move away from their names, and below 1190 px they stand
+   under them again, so the names have the whole width of the column. */
+@media (max-width: 1409px) {
+  .deposit-rows { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .civ__main--planet .facts dd { margin-inline-start: 20px; }
+}
+@media (max-width: 1189px) {
+  .civ__main--planet .facts dd { margin-inline-start: 0; }
+}
+.civ__main--planet .planet-table-wrap { display: flex; flex-direction: column; gap: var(--space-2); overflow: visible; border: 0; border-radius: 0; }
 .civ__main--planet .planet-table { display: block; }
 .civ__main--planet .planet-table thead {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
 }
-.civ__main--planet .planet-table tbody { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+.civ__main--planet .planet-table tbody { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 28px; }
+/* The resources in blocks by their group: the heading of the block names the group, the rows of the
+   block are its resources. */
+.planet-resources__group { display: flex; flex-direction: column; gap: var(--space-1); }
+.planet-resources__title { margin: 0; font-size: var(--fs-caption); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); }
 .civ__main--planet .planet-table tr {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px;
   padding: 2px 0; border-bottom: 1px solid var(--border-soft); font-size: var(--fs-small); background: transparent;
@@ -153,15 +165,15 @@
 .civ__main--planet .planet-table tbody tr:hover { background: transparent; }
 .rate-plus { font-weight: 600; color: var(--success); }
 .rate-minus { font-weight: 600; color: var(--danger-text); }
-.rate-unit { margin-left: 4px; font-weight: 400; color: var(--text-2); text-transform: lowercase; }
+.rate-unit { margin-left: var(--space-1); font-weight: 400; color: var(--text-2); text-transform: lowercase; }
 .rate-dash { font-weight: 600; color: var(--text-2); }
-.civ__main--planet .storage-resource__value { min-width: 150px; color: var(--text-1); }
+.civ__main--planet .storage-resource__value { color: var(--text-1); }
 .civ__main--planet .storage-resource__value .meta { display: none; }
 
 /* ---------- the tabs ---------- */
 .tabs { display: flex; flex-wrap: wrap; gap: var(--space-1); border-bottom: 1px solid var(--border); }
 .tabs__tab {
-  min-height: 34px; padding: 0 16px; border: 0; border-bottom: 2px solid transparent;
+  min-height: 34px; padding: 0 var(--space-4); border: 0; border-bottom: 2px solid transparent;
   background: transparent; color: var(--text-2); font: inherit; font-size: var(--fs-game); font-weight: 500; cursor: pointer;
 }
 .tabs__tab:hover { color: var(--text-1); }
@@ -170,11 +182,11 @@
 
 /* ---------- the technologies ---------- */
 .tech-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-3); }
-.tech-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--bg-2); box-shadow: var(--shadow-card); }
+.tech-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--bg-2); box-shadow: var(--shadow-card); }
 .tech-card--unknown { background: var(--bg-card-in); border-style: dashed; box-shadow: none; opacity: 0.7; color: var(--text-2); }
-.tech-card__head { display: flex; align-items: flex-start; gap: 12px; }
+.tech-card__head { display: flex; align-items: flex-start; gap: var(--space-3); }
 .tech-card__mark {
-  flex: 0 0 auto; width: 40px; height: 40px; border-radius: 10px;
+  flex: 0 0 auto; width: 40px; height: 40px; border-radius: var(--r-md);
   display: inline-flex; align-items: center; justify-content: center;
   background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-hover);
 }
@@ -196,19 +208,19 @@
 .tech-status--unknown,
 .tech-status--unavailable { background: var(--bg-3); border-color: var(--border-strong); color: var(--text-2); }
 .tech-card .btn { align-self: stretch; min-height: 44px; margin-top: auto; border-radius: var(--r-md); font-size: var(--fs-game); font-weight: 700; }
-.tech-card__time { display: flex; justify-content: space-between; gap: 8px; font-size: var(--fs-ui); }
+.tech-card__time { display: flex; justify-content: space-between; gap: var(--space-2); font-size: var(--fs-ui); }
 .tech-card__time > span:first-child { color: var(--text-2); }
 .tech-card__time .num { font-weight: 700; }
 .tech-card__track { width: 100%; height: 8px; }
 .civ__main--research .building-card__next,
-.civ__main--production .building-card__next { gap: 8px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-3); }
+.civ__main--production .building-card__next { gap: var(--space-2); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-3); }
 .civ__main--research .building-card__next > .meta,
 .civ__main--production .building-card__next > .meta { text-transform: uppercase; color: var(--text-2); }
 .civ__main--research .effect-list,
 .civ__main--production .effect-list { margin: 0; padding: 0; list-style: none; }
 .civ__main--research .effect-row,
 .civ__main--production .effect-row {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-2);
   flex-wrap: nowrap; font-size: var(--fs-ui); white-space: nowrap;
 }
 .civ__main--research .effect-row .num,
@@ -216,7 +228,7 @@
 .civ__main--research .cost-list__row,
 .civ__main--production .cost-list__row {
   display: grid; grid-template-columns: 16px minmax(0, 1fr) auto auto; align-items: center;
-  gap: 4px 8px; flex-wrap: nowrap; font-size: var(--fs-ui);
+  gap: var(--space-1) var(--space-2); flex-wrap: nowrap; font-size: var(--fs-ui);
 }
 .civ__main--research .cost-list__name,
 .civ__main--production .cost-list__name,
@@ -228,7 +240,7 @@
 .civ__main--production .cost-list__row--short .num { color: var(--text-soft); }
 .civ__main--research .cost-list__missing,
 .civ__main--production .cost-list__missing { color: var(--danger-text); font-size: var(--fs-small); font-weight: 700; }
-.civ__main--research .tabs { gap: 4px; }
+.civ__main--research .tabs { gap: var(--space-1); }
 .civ__main--research .tabs__tab {
   border-bottom: 0; border-radius: 10px 10px 0 0; color: var(--text-soft); font-weight: 500;
 }
@@ -238,7 +250,7 @@
   color: var(--accent-hover); font-weight: 700; box-shadow: inset 0 -3px 0 var(--accent);
 }
 .civ__main--research .tech-tools,
-.civ__main--production .tech-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.civ__main--production .tech-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px var(--space-4); }
 .civ__main--research .tech-search,
 .civ__main--production .tech-search { position: relative; flex: 0 1 320px; max-width: 100%; }
 .civ__main--research .tech-search__icon,
@@ -262,20 +274,20 @@
   color: var(--accent-hover); font-weight: 700; box-shadow: inset 0 -3px 0 var(--accent);
 }
 .civ__main--research .research-planet,
-.civ__main--production .research-planet { flex-direction: row; align-items: center; gap: 12px; max-width: 520px; }
+.civ__main--production .research-planet { flex-direction: row; align-items: center; gap: var(--space-3); max-width: 520px; }
 .civ__main--research .research-planet .input,
 .civ__main--production .research-planet .input { min-height: 44px; flex: 1 1 auto; }
 .queue-item__mark {
-  grid-row: 1 / span 2; width: 40px; height: 40px; border-radius: 10px;
+  grid-row: 1 / span 2; width: 40px; height: 40px; border-radius: var(--r-md);
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--bg-3); color: var(--accent-hover);
 }
 .civ__main--research .queue-item__identity:has(.queue-item__mark) {
-  display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 12px; row-gap: 2px; align-items: center;
+  display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: var(--space-3); row-gap: 2px; align-items: center;
 }
 .civ__main--research .queue-item__details { display: none; }
 .civ__main--research .queue-item__time.num { font-size: var(--fs-name); font-weight: 700; color: var(--text-1); }
-.civ__main--research .queue-list { gap: 8px; }
+.civ__main--research .queue-list { gap: var(--space-2); }
 .civ__main--research .queue-panel__slots { font-weight: 600; color: var(--text-1); white-space: nowrap; }
 
 /* ---------- the placeholder of a block without data ---------- */
@@ -295,13 +307,13 @@
 .civ__main--research .panel__title,
 .civ__main--production .panel__title,
 .civ__main--storage .panel__title { font-size: var(--fs-name); }
-.civ .facts { gap: 4px 12px; font-size: var(--fs-ui); }
-.civ__main--planet .panel { gap: 8px; padding: 12px 16px; }
+.civ .facts { gap: var(--space-1) var(--space-3); font-size: var(--fs-ui); }
+.civ__main--planet .panel { gap: var(--space-2); padding: var(--space-3) var(--space-4); }
 .civ__main--planet .planet-card { gap: 0; padding: 0; }
-.civ__main--storage .panel { gap: 8px; padding: 14px 18px; }
+.civ__main--storage .panel { gap: var(--space-2); padding: 14px 18px; }
 .civ__main--storage .storage-grid__wide { grid-column: 1 / -1; }
 .civ__main--storage .placeholder-block { border-style: solid; border-color: var(--border); }
-.civ__main--storage .tabs { gap: 8px; border-bottom: 0; }
+.civ__main--storage .tabs { gap: var(--space-2); border-bottom: 0; }
 .civ__main--storage .tabs__tab {
   min-height: 38px; padding: 0 14px; border: 1px solid var(--border-strong); border-radius: var(--r-md);
   color: var(--text-soft); font-size: var(--fs-ui); font-weight: 500;
@@ -320,34 +332,43 @@
   height: auto; padding: 10px 10px 6px; background: transparent; color: var(--text-soft);
   letter-spacing: 0.04em; text-transform: none; border-bottom: 1px solid var(--border-soft);
 }
-.civ__main--storage .storage-group { display: inline-flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 8px; white-space: nowrap; }
+.civ__main--storage .storage-group { display: inline-flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: var(--space-2); white-space: nowrap; }
 .civ__main--storage .storage-dot { flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
-.civ__main--storage .storage-qty { font-size: var(--fs-name); font-weight: 700; color: var(--text-1); }
+.civ__main--storage .storage-qty { font-weight: 700; color: var(--accent-hover); }
 .civ__main--storage .storage-cap { font-size: var(--fs-note); font-weight: 500; color: var(--text-2); }
 .civ__main--storage .storage-rate { font-weight: 600; color: var(--accent-hover); }
 .civ__main--storage .storage-rate--none { color: var(--text-2); }
 .civ__main--build .queue-panel { gap: 14px; padding: 18px 20px; }
 .civ__main--research .queue-panel,
-.civ__main--production .queue-panel { gap: 12px; padding: 14px 18px; }
+.civ__main--production .queue-panel { gap: var(--space-3); padding: 14px 18px; }
 .civ__main--storage .planet-table { font-size: var(--fs-ui); }
 .civ__main--storage .planet-table th { padding: 10px 10px 6px; font-size: var(--fs-small); font-weight: 600; letter-spacing: 0.04em; }
-.civ__main--storage .planet-table td { padding: 0 10px; height: 46px; }
+.civ__main--storage .planet-table td { padding: 0 10px; height: 26px; }
 .civ-main__in .panel:has(.building-grid) { padding: 0; border: 0; background: transparent; box-shadow: none; }
 .civ-main__in .panel:has(.building-grid) .production-block:not(:has(.building-grid)),
 .civ-main__in .panel:has(.building-grid) .processes-block:not(:has(.building-grid)) {
-  gap: 8px; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--r-xl);
+  gap: var(--space-2); padding: var(--space-3) var(--space-4); border: 1px solid var(--border); border-radius: var(--r-xl);
   background: var(--bg-2); box-shadow: var(--shadow-card);
+}
+
+/* Four columns of the resources on a wide screen, three below 1900 px, two below 1380 px, one on a
+   phone. */
+@media (max-width: 1899px) {
+  .civ__main--planet .planet-table tbody { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 1379px) {
+  .civ__main--planet .planet-table tbody { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ---------- the phone ---------- */
 @media (max-width: 767px) {
-  .civ__main--planet .panel { padding: 12px 14px; }
+  .civ__main--planet .panel { padding: var(--space-3) 14px; }
   .civ__main--planet .planet-card { grid-template-columns: minmax(0, 1fr); padding: 0; }
   .civ__main--planet .planet-card .body-art { min-height: 180px; border-right: 0; border-bottom: 1px solid var(--border-soft); }
   .civ__main--planet .planet-card .body-art__image,
   .civ__main--planet .planet-card .body-art__placeholder { width: min(100%, 170px); }
   .civ__main--storage .panel { padding: 14px; }
-  .civ__main--build .queue-panel { padding: 16px; }
+  .civ__main--build .queue-panel { padding: var(--space-4); }
   .civ__main--research .queue-panel,
   .civ__main--production .queue-panel { padding: 14px; }
   .planet-card { grid-template-columns: minmax(0, 1fr); }

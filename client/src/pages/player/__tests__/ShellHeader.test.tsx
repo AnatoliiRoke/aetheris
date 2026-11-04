@@ -40,8 +40,9 @@ describe('the header of the game has every element of the design (task 00020, se
     expect(nick).toHaveTextContent(', раса Терани');
     expect(nick.querySelector('.glyph--race-1')).not.toBeNull();
 
-    // The status of the account comes from the server: every account is Standard until a paid status exists.
-    expect(header.querySelector('.civ-tier')).toHaveTextContent('Standard');
+    // The usual status of the account is shown by nothing: the block of the nickname keeps its look.
+    expect(header.querySelector('.civ-tier')).toBeNull();
+    expect(header.querySelector('.nick')?.className).toBe('nick');
 
     // The counters: the credits are real, the trade currency is a dash, the energy is the balance of the body.
     const counters = within(within(header).getByRole('list', { name: 'Ресурси' }));
@@ -51,10 +52,11 @@ describe('the header of the game has every element of the design (task 00020, se
     expect(header.querySelector('.civ-counter--energy')).toHaveTextContent('Енергія:5');
     expect(header.querySelector('.civ-counter--energy')).toHaveAttribute('title', 'Виробіток 10 / споживання 5');
 
-    // The three alerts.
-    expect(within(header).getByRole('button', { name: 'Атака' })).toBeDisabled();
-    expect(within(header).getByRole('button', { name: 'Бій' })).toBeDisabled();
-    expect(within(header).getByRole('button', { name: 'Склад повний' })).toBeDisabled();
+    // The alerts of the attack, the battle and the full storage are hidden: they break the top
+    // bar below 1300 px.
+    expect(within(header).queryByRole('button', { name: 'Атака' })).toBeNull();
+    expect(within(header).queryByRole('button', { name: 'Бій' })).toBeNull();
+    expect(within(header).queryByRole('button', { name: 'Склад повний' })).toBeNull();
 
     // The mail, the settings and the sign-out.
     expect(within(header).getByRole('button', { name: 'Пошта' })).toBeDisabled();
@@ -68,8 +70,6 @@ describe('the header of the game has every element of the design (task 00020, se
 
     const placeholders = [
       header.querySelector<HTMLElement>('.civ-counter--trade')!,
-      within(header).getByRole('button', { name: 'Атака' }),
-      within(header).getByRole('button', { name: 'Бій' }),
       within(header).getByRole('button', { name: 'Пошта' }),
     ];
 
@@ -86,19 +86,21 @@ describe('the header of the game has every element of the design (task 00020, se
     expect(within(container.querySelector<HTMLElement>('.civ-bottombar')!).getByRole('button', { name: 'Надіслати' })).toBeDisabled();
   });
 
-  it('shows the status of the account the server names, and the paid one in its own colour', async () => {
+  it('shows the status of the account the server names, and the paid one in the colour of the nickname', async () => {
     const premium = renderPage('/planet', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe({ accountTier: 'premium' })) }) });
     const header = await loadedHeader(premium.container);
 
-    expect(header.querySelector('.civ-tier')).toHaveTextContent('Premium');
-    expect(header.querySelector('.civ-tier.is-premium')).not.toBeNull();
+    // The paid status colours the block of the nickname, not a word of its own.
+    expect(header.querySelector('.civ-tier')).toBeNull();
+    expect(header.querySelector('.nick')?.className).toBe('nick is-premium');
     premium.unmount();
 
-    // An answer without a status draws no status at all, never a made-up one.
+    // An answer without a status leaves the block of the nickname as it is, never a made-up one.
     const none = renderPage('/planet', { auth: fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe({ accountTier: undefined })) }) });
     const bare = await loadedHeader(none.container);
 
     expect(bare.querySelector('.civ-tier')).toBeNull();
+    expect(bare.querySelector('.nick')?.className).toBe('nick');
   });
 
   it('draws the sign of the race from the data of the race, not from the number of the race', async () => {
@@ -135,22 +137,6 @@ describe('the header of the game has every element of the design (task 00020, se
     await waitFor(() => expect(neutral.container.querySelector('.civ-topbar .nick .glyph--neutral')).not.toBeNull());
   });
 
-  it('lights the alert of the full storage from the data of the body and leads to the storage', async () => {
-    const planets = fakePlanetApi({
-      planet: vi.fn().mockResolvedValue(
-        samplePlanet({
-          resources: [{ resourceTypeId: 1, resourceGroupId: 1, amount: 10000, ratePerHour: 60, capacity: 10000, isFull: true, fullAt: null }],
-        }),
-      ),
-    });
-    const { container } = renderPage('/planet', { auth: signedIn(), planets });
-    const header = await loadedHeader(container);
-
-    const alert = await within(header).findByRole('link', { name: 'Склад повний' });
-
-    expect(alert).toHaveAttribute('href', '/planet/storage');
-  });
-
   it('signs the player out with the sign-out of the session', async () => {
     const user = userEvent.setup();
     const auth = signedIn();
@@ -175,7 +161,7 @@ describe('the header of the game has every element of the design (task 00020, se
 });
 
 describe('the menu, the tabs of the phone and the bottom bar of the design (task 00020, section 7.8)', () => {
-  const menuOrder = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Виробництво', 'Верф', 'Флоти', 'Карта', 'Дослідження', 'Ринок', 'Рейтинг', 'Бій', 'Клан', 'Пошта', 'Допомога', 'Налаштування'];
+  const menuOrder = ['Огляд', 'Планета', 'Будівництво', 'Дослідження', 'Виробництво', 'Склад', 'Верф', 'Флоти', 'Карта', 'Ринок', 'Рейтинг', 'Бій', 'Клан', 'Пошта', 'Допомога'];
 
   it('lists the sections in the order of the design; a section without a screen is inactive with the reason', async () => {
     const { container } = renderPage('/planet', { auth: signedIn() });
@@ -190,7 +176,7 @@ describe('the menu, the tabs of the phone and the bottom bar of the design (task
     const labels = [...menu.querySelectorAll('.civ-nav__label')].map((label) => label.textContent);
     expect(labels).toEqual(menuOrder);
 
-    const withScreen = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Виробництво', 'Карта', 'Дослідження', 'Ринок', 'Налаштування'];
+    const withScreen = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Виробництво', 'Карта', 'Дослідження', 'Ринок'];
 
     for (const label of menuOrder) {
       if (withScreen.includes(label)) {

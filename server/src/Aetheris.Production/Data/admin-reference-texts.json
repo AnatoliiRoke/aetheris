@@ -6,6 +6,7 @@
   "admin.reference.part_group_characteristic.title": { "uk": "Характеристики груп деталей", "en": "Characteristics of the part groups" },
   "admin.reference.part_characteristic.title": { "uk": "Значення характеристик деталей", "en": "Values of the characteristics of the parts" },
   "admin.reference.field.part_group": { "uk": "Група деталей", "en": "Part group" },
+  "admin.reference.field.parent_group": { "uk": "Батьківська група (порожньо для розділу)", "en": "Parent group (empty for a section)" },
   "admin.reference.field.characteristic": { "uk": "Характеристика", "en": "Characteristic" },
   "admin.reference.field.unit": { "uk": "Одиниця виміру", "en": "Unit of measure" },
   "admin.reference.field.weight": { "uk": "Вага однієї деталі (тонн)", "en": "Weight of one part (tonnes)" },

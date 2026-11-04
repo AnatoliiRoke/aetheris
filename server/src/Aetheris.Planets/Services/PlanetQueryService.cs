@@ -88,6 +88,28 @@ public sealed class PlanetQueryService
             return null;
         }
 
+        return await ReadOwnedAsync(planetId, facts, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Tells whether a body belongs to a player: one read of the facts of the body, without the
+    /// overview, for a check of the owner only (code audit of 04.11.2026).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when the player owns the body.</returns>
+    public async Task<bool> IsOwnedAsync(string playerId, long planetId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
+
+        return facts is not null && string.Equals(facts.OwnerPlayerId, playerId, StringComparison.Ordinal);
+    }
+
+    private async Task<PlanetOverviewDto?> ReadOwnedAsync(long planetId, PlanetFacts facts, CancellationToken cancellationToken)
+    {
         DateTimeOffset now = _clock.GameNow;
 
         // The queue is read with the body, so a construction that is due is told by the same rows
@@ -298,6 +320,113 @@ public sealed class PlanetQueryService
     }
 
     /// <summary>
+    /// Gets the value of one effect of the building of a class on a body, at the level the body
+    /// has built.
+    /// </summary>
+    /// <param name="buildingClass">The class of the building, one of <see cref="BuildingClasses"/>.</param>
+    /// <param name="effectType">The effect type, one of <see cref="BuildingEffectTypes"/>.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="playerId">The player, or <see langword="null"/> when the level of any body is wanted.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The value of the effect; zero when the body has no such building or the building has no such effect.</returns>
+    /// <remarks>
+    /// The value is read from the catalog at the level of the body, so the number is the one the
+    /// admin panel shows for that level. The bodies without the building and the buildings without
+    /// the effect give zero, and a body is not read twice for one value.
+    /// </remarks>
+    public async Task<decimal> GetBuildingEffectValueAsync(
+        string buildingClass,
+        string effectType,
+        long planetId,
+        string? playerId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(buildingClass);
+        ArgumentException.ThrowIfNullOrEmpty(effectType);
+
+        BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
+
+        if (catalog.FindByClass(buildingClass) is not { } type)
+        {
+            return 0m;
+        }
+
+        IQueryable<int> levels = _dbContext.PlanetBuildings.AsNoTracking()
+            .Where(building => building.PlanetId == planetId && building.BuildingTypeId == type.Id)
+            .Select(building => building.Level);
+
+        if (playerId is not null)
+        {
+            levels = levels.Where(level => _dbContext.PlanetStates
+                .Any(state => state.PlanetId == planetId && state.OwnerPlayerId == playerId));
+        }
+
+        int level = await levels.SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+        if (level <= 0 || type.Levels.GetValueOrDefault(level) is not { } info)
+        {
+            return 0m;
+        }
+
+        return info.Effects
+            .Where(effect => string.Equals(effect.EffectType, effectType, StringComparison.Ordinal))
+            .Select(effect => effect.Value)
+            .DefaultIfEmpty(0m)
+            .Max();
+    }
+
+    /// <summary>
+    /// Gets the values of the effects of one building of a body, at the level it has built.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="planetBuildingId">The building.</param>
+    /// <param name="playerId">The player, or <see langword="null"/> when the level of any body is wanted.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The values of the effects by their type; a building without effects gives nothing.</returns>
+    /// <remarks>
+    /// The values come from the catalog at the level of the building, so the numbers are the ones
+    /// the admin panel shows for that level. The building and the catalog are read once, so the
+    /// answer costs the same however many effects the building has.
+    /// </remarks>
+    public async Task<IReadOnlyDictionary<string, decimal>> GetBuildingEffectsAsync(
+        long planetId,
+        long planetBuildingId,
+        string? playerId,
+        CancellationToken cancellationToken)
+    {
+        BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
+
+        IQueryable<PlanetBuildingEntity> buildings = _dbContext.PlanetBuildings.AsNoTracking()
+            .Where(building => building.PlanetId == planetId && building.Id == planetBuildingId);
+
+        if (playerId is not null)
+        {
+            buildings = buildings.Where(building => _dbContext.PlanetStates
+                .Any(state => state.PlanetId == building.PlanetId && state.OwnerPlayerId == playerId));
+        }
+
+        var row = await buildings
+            .Select(building => new { building.BuildingTypeId, building.Level })
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (row is null
+            || catalog.FindType(row.BuildingTypeId)?.Levels.GetValueOrDefault(row.Level) is not { } info)
+        {
+            return new Dictionary<string, decimal>(StringComparer.Ordinal);
+        }
+
+        Dictionary<string, decimal> effects = new(StringComparer.Ordinal);
+
+        foreach (BuildingEffectInfo effect in info.Effects)
+        {
+            effects[effect.EffectType] = effects.GetValueOrDefault(effect.EffectType) + effect.Value;
+        }
+
+        return effects;
+    }
+
+    /// <summary>
     /// Finds the identifier of a building type by its neutral code (task 00012).
     /// </summary>
     /// <param name="code">The neutral code of the building type.</param>
@@ -418,6 +547,66 @@ public sealed class PlanetQueryService
         BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
 
         return catalog.Types.ToDictionary(type => type.Id, type => type.NameKey);
+    }
+
+    /// <summary>
+    /// Gets the values of one effect of the buildings of a class on the bodies of a player, in
+    /// one read of the bodies and one read of their buildings.
+    /// </summary>
+    /// <param name="buildingClass">The class of the building, one of <see cref="BuildingClasses"/>.</param>
+    /// <param name="effectType">The effect type, one of <see cref="BuildingEffectTypes"/>.</param>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The value of the effect by body; a body without the building is not in the answer.</returns>
+    /// <remarks>
+    /// The values come from the catalog at the level of the body, so the numbers are the ones the
+    /// admin panel shows for that level. The answer costs the same however many bodies the player
+    /// has, so the caller never reads the bodies one by one.
+    /// </remarks>
+    public async Task<IReadOnlyDictionary<long, decimal>> GetBuildingEffectValuesAsync(
+        string buildingClass,
+        string effectType,
+        string playerId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(buildingClass);
+        ArgumentException.ThrowIfNullOrEmpty(effectType);
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
+
+        if (catalog.FindByClass(buildingClass) is not { } type)
+        {
+            return new Dictionary<long, decimal>();
+        }
+
+        var rows = await (
+                from state in _dbContext.PlanetStates.AsNoTracking()
+                join building in _dbContext.PlanetBuildings.AsNoTracking() on state.PlanetId equals building.PlanetId
+                where state.OwnerPlayerId == playerId && building.BuildingTypeId == type.Id
+                select new { building.PlanetId, building.Level })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        Dictionary<long, decimal> values = [];
+
+        foreach (var row in rows)
+        {
+            if (type.Levels.GetValueOrDefault(row.Level) is not { } info)
+            {
+                continue;
+            }
+
+            decimal value = info.Effects
+                .Where(effect => string.Equals(effect.EffectType, effectType, StringComparison.Ordinal))
+                .Select(effect => effect.Value)
+                .DefaultIfEmpty(0m)
+                .Max();
+
+            values[row.PlanetId] = values.GetValueOrDefault(row.PlanetId) + value;
+        }
+
+        return values;
     }
 
     /// <summary>
@@ -595,10 +784,3 @@ public sealed class PlanetQueryService
     public void InvalidateCatalog() => _catalogCache.Invalidate();
 }
 
-/// <summary>
-/// A body of a player with the level of its building of a class (task 00012, decision 5).
-/// </summary>
-/// <param name="PlanetId">The body.</param>
-/// <param name="Name">The name of the body.</param>
-/// <param name="Level">The level of the building, or zero when the body has none.</param>
-public sealed record PlanetBuildingLevel(long PlanetId, string? Name, int Level);

@@ -10,7 +10,6 @@ using Aetheris.Market.Configuration;
 using Aetheris.Market.Data;
 using Aetheris.Market.Data.Entities;
 using Aetheris.Planets;
-using Aetheris.Planets.Services;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
 using Aetheris.World;
@@ -265,8 +264,7 @@ public sealed class MarketTradeService
                 await RequireBuildingAsync(BuildingClasses.Portal, lot.SellerPlanetId, lot.SellerPlayerId, MarketErrorCodes.SellerPortalMissing, cancellationToken).ConfigureAwait(false);
 
                 (long sum, long commission) = Money(lot, level);
-                double distance = await DistanceAsync(lot, destination, cancellationToken).ConfigureAwait(false);
-                (int energyResourceTypeId, long energy) = await DeliveryFeeAsync(lot, distance, settings, cancellationToken).ConfigureAwait(false);
+                (decimal mass, int energyResourceTypeId, long energy, long seconds) = await DeliveryTermsAsync(lot, destinationPlanetId, cancellationToken).ConfigureAwait(false);
 
                 if (energy > 0)
                 {
@@ -295,7 +293,6 @@ public sealed class MarketTradeService
                     }
                 }
 
-                long seconds = MarketRules.DeliverySeconds(distance, settings);
                 DateTimeOffset now = _clock.GameNow;
 
                 lot.State = MarketLotStates.Sold;
@@ -501,14 +498,12 @@ public sealed class MarketTradeService
         ArgumentNullException.ThrowIfNull(lot);
         ArgumentNullException.ThrowIfNull(destination);
 
-        MarketSettings settings = MarketSettings.From(_config);
         MarketLevelEntity level = await _catalog.FindLevelAsync(lot.MarketLevelId, cancellationToken).ConfigureAwait(false)
             ?? throw new GameException(MarketErrorCodes.LevelUnknown, "The level of the market does not exist.");
         (long sum, long commission) = Money(lot, level);
-        double distance = await DistanceAsync(lot, destination, cancellationToken).ConfigureAwait(false);
-        (int energyResourceTypeId, long energy) = await DeliveryFeeAsync(lot, distance, settings, cancellationToken).ConfigureAwait(false);
+        (decimal mass, int energyResourceTypeId, long energy, long seconds) = await DeliveryTermsAsync(lot, destination.PlanetId, cancellationToken).ConfigureAwait(false);
 
-        return new QuoteDto(sum, commission, energyResourceTypeId, energy, MarketRules.DeliverySeconds(distance, settings));
+        return new QuoteDto(sum, commission, energyResourceTypeId, energy, seconds);
     }
 
     private static long Checked(long quantity, long price)
@@ -635,10 +630,20 @@ public sealed class MarketTradeService
         return new PriceLimitDto(min, max);
     }
 
-    private async Task<(int ResourceTypeId, long Amount)> DeliveryFeeAsync(MarketLotEntity lot, double distance, MarketSettings settings, CancellationToken cancellationToken)
+    /// <summary>
+    /// Counts what a delivery of a lot costs and how long the portal prepares it.
+    /// </summary>
+    /// <param name="lot">The lot.</param>
+    /// <param name="destinationPlanetId">The body the goods arrive at; its portal prepares them.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The mass of the lot in tonnes, the resource of the fee, the fee and the time of the preparation.</returns>
+    private async Task<(decimal Mass, int ResourceTypeId, long Energy, long Seconds)> DeliveryTermsAsync(
+        MarketLotEntity lot,
+        long destinationPlanetId,
+        CancellationToken cancellationToken)
     {
         ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
-        ResourceTypeFact energy = catalog.Resources.FirstOrDefault(resource => string.Equals(resource.Code, settings.EnergyResourceCode, StringComparison.Ordinal))
+        ResourceTypeFact energy = MarketCatalog.FeeResource(catalog)
             ?? throw new GameException(MarketErrorCodes.EnergyResourceMissing, "The resource of the delivery fee is not in the data.");
 
         // The mass of the lot is the weight of one unit times the quantity, for a resource and
@@ -655,17 +660,25 @@ public sealed class MarketTradeService
             unitWeight = parts[lot.PartTypeId!.Value].Weight;
         }
 
-        return (energy.Id, MarketRules.DeliveryEnergy(unitWeight * lot.Quantity, distance, settings));
-    }
+        decimal mass = unitWeight * lot.Quantity;
 
-    private async Task<double> DistanceAsync(MarketLotEntity lot, PlanetFacts destination, CancellationToken cancellationToken)
-    {
-        PlanetFacts source = await _world.GetPlanetFactsAsync(lot.SellerPlanetId, cancellationToken).ConfigureAwait(false)
-            ?? throw new GameException(MarketErrorCodes.PlanetUnknown, "The body of the seller is gone.");
+        // The portal of the body that receives the goods prepares them and sends them, so its
+        // level gives the mass it sends for one energy rod and the mass it prepares in an hour.
+        decimal massPerEnergyRod = await _planets.GetBuildingEffectValueAsync(
+            BuildingClasses.Portal,
+            BuildingEffectTypes.PortalMassPerEnergyRod,
+            destinationPlanetId,
+            null,
+            cancellationToken).ConfigureAwait(false);
 
-        return source.SystemId == destination.SystemId
-            ? 0
-            : await _world.GetSystemDistanceAsync(source.SystemId, destination.SystemId, cancellationToken).ConfigureAwait(false) ?? 0;
+        decimal massPerHour = await _planets.GetBuildingEffectValueAsync(
+            BuildingClasses.Portal,
+            BuildingEffectTypes.PortalMassPerHour,
+            destinationPlanetId,
+            null,
+            cancellationToken).ConfigureAwait(false);
+
+        return (mass, energy.Id, MarketRules.DeliveryEnergy(mass, massPerEnergyRod), MarketRules.DeliverySeconds(mass, massPerHour));
     }
 
     private async Task GiveGoodsAsync(MarketLotEntity lot, long planetId, string playerId, CancellationToken cancellationToken)

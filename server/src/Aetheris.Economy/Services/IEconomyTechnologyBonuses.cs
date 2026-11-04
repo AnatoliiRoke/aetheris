@@ -10,12 +10,27 @@ namespace Aetheris.Economy.Services;
 public interface IEconomyTechnologyBonuses
 {
     /// <summary>
-    /// Gets the bonuses the technologies of a player give the population and the credits.
+    /// Gets the bonuses the technologies of one body of a player give the population and the
+    /// credits.
     /// </summary>
     /// <param name="playerId">The player, or <see langword="null"/> for a body without an owner.</param>
+    /// <param name="planetId">The body.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The bonuses.</returns>
-    Task<EconomyBonuses> GetBonusesAsync(string? playerId, CancellationToken cancellationToken = default);
+    Task<EconomyBonuses> GetBonusesAsync(string? playerId, long planetId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the bonuses the technologies of several bodies of a player give the population and
+    /// the credits, in one read of the levels.
+    /// </summary>
+    /// <param name="playerId">The player, or <see langword="null"/> for bodies without an owner.</param>
+    /// <param name="planetIds">The bodies.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bonuses by body; a body without technologies is not in the answer.</returns>
+    Task<IReadOnlyDictionary<long, EconomyBonuses>> GetBonusesAsync(
+        string? playerId,
+        IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>

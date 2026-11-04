@@ -86,6 +86,18 @@ public sealed class PlanetSession
     public IReadOnlyDictionary<int, long> Currencies { get; set; } = new Dictionary<int, long>();
 
     /// <summary>
+    /// Gets or sets the places the building plant of the body adds to the queue of the
+    /// construction of the body.
+    /// </summary>
+    public int BuildingQueueSlots { get; set; }
+
+    /// <summary>
+    /// Gets or sets the share the building plant of the body takes off the time of the
+    /// construction of the body.
+    /// </summary>
+    public decimal BuildingSpeedBonus { get; set; }
+
+    /// <summary>
     /// Gets or sets the inhabitants of the body now. A building pays its population cost from them.
     /// </summary>
     public long Population { get; set; }
@@ -237,7 +249,9 @@ public sealed class PlanetSession
             now,
             Currencies,
             Population,
-            PopulationResourceId);
+            PopulationResourceId,
+            BuildingQueueSlots,
+            BuildingSpeedBonus);
     }
 
     /// <summary>

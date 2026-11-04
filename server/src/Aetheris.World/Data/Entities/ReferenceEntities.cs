@@ -25,6 +25,25 @@ public sealed class ResourceGroupEntity
     public string? ImageKey { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the resources of the group are balances of the
+    /// civilization or of a body (currencies, energy, population) and not a stock of the storage
+    /// (code audit of 04.11.2026).
+    /// </summary>
+    public bool IsBalance { get; set; }
+
+    /// <summary>
+    /// Gets or sets the shape of the icon of the group, one of <see cref="ResourceGroupIcons.Shapes"/>,
+    /// or <see langword="null"/> for the neutral icon.
+    /// </summary>
+    public string? IconShape { get; set; }
+
+    /// <summary>
+    /// Gets or sets the tone of the icon of the group, one of <see cref="ResourceGroupIcons.Tones"/>,
+    /// or <see langword="null"/> for the neutral colour.
+    /// </summary>
+    public string? IconTone { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether the group is archived: it stays with its resources,
     /// but no new resource gets it (task 00023, decision 5).
     /// </summary>
@@ -70,6 +89,20 @@ public sealed class ResourceTypeEntity
     /// the flag accepts it (task 00024, decision 8).
     /// </summary>
     public bool AllowsDebt { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the buyer pays the delivery of a lot through a
+    /// portal with this resource: the market looks the fee up by the flag, never by a code
+    /// (code audit of 04.11.2026).
+    /// </summary>
+    public bool PaysPortalDelivery { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether a cost in this resource is paid by the inhabitants
+    /// of the body and not from its storage: the construction finds the population by the flag,
+    /// never by a code (code audit of 04.11.2026).
+    /// </summary>
+    public bool PaidByPopulation { get; set; }
 
     /// <summary>Gets or sets the localisation key of the name.</summary>
     public string NameKey { get; set; } = string.Empty;

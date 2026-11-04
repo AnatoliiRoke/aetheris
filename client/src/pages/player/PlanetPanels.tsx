@@ -6,17 +6,29 @@ import { FullResourcesAlert, ResourceStorage } from './ResourceStorage';
 
 type Names = ReturnType<typeof namer>;
 
-/** The catalog code of the population counter. It is not a mined stock. */
-const populationResourceCode = 'resource_30';
-
 /**
  * The growth of the body: what every resource brings per hour, or a dash for a resource that is
- * not mined here. Population shows the growth of the inhabitants, which can fall when the body
- * is above its maximum. A full resource raises the alarm.
+ * not mined here. The resources are in blocks by their group, so the player sees the kinds of the
+ * resources apart. A full resource raises the alarm.
  */
 export function ResourcesPanel({ planet, names }: { planet: Planet; names: Names }) {
   const { t } = useI18n();
-  const populationResourceId = planet.resourceTypes.find((resource) => resource.code === populationResourceCode)?.id ?? null;
+  // The balances (energy, population and the like) have their own blocks on the screen; the server
+  // marks them, so the client knows none of them by its code.
+  const notMinedIds = new Set(planet.resourceTypes.filter((resource) => resource.isBalance === true).map((resource) => resource.id));
+  const mined = planet.resources.filter((resource) => !notMinedIds.has(resource.resourceTypeId));
+  const groupIds = new Set(planet.resourceGroups.map((group) => group.id));
+  // The resources in blocks by their group: the name of the group is the heading of the block. A
+  // resource without a known group goes to the last block, so no resource of the body is lost.
+  const others = mined.filter((resource) => resource.resourceGroupId === null || !groupIds.has(resource.resourceGroupId));
+  const groups = [
+    ...planet.resourceGroups.map((group) => ({
+      key: String(group.id),
+      title: names.group(group.id),
+      resources: mined.filter((resource) => resource.resourceGroupId === group.id),
+    })),
+    { key: 'other', title: t('planet.resourcesOther'), resources: others },
+  ].filter((entry) => entry.resources.length > 0);
 
   return (
     <section className="panel" aria-labelledby="planet-resources">
@@ -28,59 +40,45 @@ export function ResourcesPanel({ planet, names }: { planet: Planet; names: Names
       </div>
       <FullResourcesAlert names={names} planet={planet} />
       <div className="planet-table-wrap">
-        <table className="planet-table">
-          <thead>
-            <tr role="row">
-              <th scope="col">{t('planet.resource')}</th>
-              <th scope="col">{t('planet.rate')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {planet.resources.map((resource) => (
-              <tr key={resource.resourceTypeId} role="row">
-                <td>
-                  <span className="resource-name">
-                    <ResourceIcon groupCode={names.resourceGroupCode(resource.resourceTypeId)} />
-                    <span>{names.resource(resource.resourceTypeId)}</span>
-                  </span>
-                </td>
-                <td className="num">
-                  <ResourceRate planet={planet} populationResourceId={populationResourceId} resource={resource} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {groups.map(({ key, title, resources }) => (
+          <div className="planet-resources__group" key={key}>
+            <h3 className="planet-resources__title">{title}</h3>
+            <table className="planet-table">
+              <thead>
+                <tr role="row">
+                  <th scope="col">{t('planet.resource')}</th>
+                  <th scope="col">{t('planet.rate')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {resources.map((resource) => (
+                  <tr key={resource.resourceTypeId} role="row">
+                    <td>
+                      <span className="resource-name">
+                        <ResourceIcon groupCode={names.resourceGroupCode(resource.resourceTypeId)} />
+                        <span>{names.resource(resource.resourceTypeId)}</span>
+                      </span>
+                    </td>
+                    <td className="num">
+                      <ResourceRate resource={resource} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
       </div>
     </section>
   );
 }
 
 /**
- * The hourly figure of one resource. A mined resource shows its production. Population shows the
- * growth the server counted for the body. Anything else is not mined here.
+ * The hourly figure of one mined resource: its production, or a dash for a resource that is not
+ * mined here.
  */
-function ResourceRate({
-  planet,
-  populationResourceId,
-  resource,
-}: {
-  planet: Planet;
-  populationResourceId: number | null;
-  resource: PlanetResource;
-}) {
+function ResourceRate({ resource }: { resource: PlanetResource }) {
   const { t, language } = useI18n();
-
-  if (populationResourceId !== null && resource.resourceTypeId === populationResourceId) {
-    const growth = planet.populationGrowthPerHour;
-
-    return (
-      <>
-        <span className={growth > 0 ? 'rate-plus' : growth < 0 ? 'rate-minus' : 'rate-dash'}>{formatSigned(growth, language)}</span>
-        <span className="rate-unit">{t('planet.rate')}</span>
-      </>
-    );
-  }
 
   if (resource.ratePerHour > 0) {
     return (

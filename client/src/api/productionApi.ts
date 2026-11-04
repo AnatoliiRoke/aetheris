@@ -63,6 +63,22 @@ export interface ProductionRecipeList {
   factories: ProductionFactorySummary[];
   storage: ProductionStorage;
   gameNow: string;
+  /** The groups of the parts with their parents, so the sections and the tabs of the screen come from the data (task 00043). */
+  groups: ProductionPartGroup[];
+}
+
+/**
+ * A group of the parts in the tree of the groups (task 00043): a group of the top level is a
+ * section of the production screen, and a group inside it is a tab of that section.
+ */
+export interface ProductionPartGroup {
+  partGroupId: number;
+  code: string;
+  nameKey: string;
+  /** The group this group lies in; the server leaves it out (or sends `null`) for a group of the top level. */
+  parentGroupId?: number | null;
+  /** The order among the groups of the same parent. */
+  sortOrder: number;
 }
 
 /**

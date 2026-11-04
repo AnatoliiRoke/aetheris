@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Aetheris.Core.Security;
 using Aetheris.Host.Observability;
 using Aetheris.Market;
+using Aetheris.Planets;
 using Aetheris.Planets.Configuration;
 using Aetheris.Planets.Services;
 using Aetheris.Processes.Configuration;

@@ -27,19 +27,26 @@ public sealed class PlanetsModule : IPlanetsModule
 {
     private readonly PlanetsBootstrapService _bootstrap;
     private readonly PlanetQueryService _queries;
+    private readonly Services.OwnerBuildingEffects _ownerEffects;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PlanetsModule"/> class.
     /// </summary>
     /// <param name="bootstrap">The start of the module.</param>
     /// <param name="queries">The reads of a body.</param>
-    public PlanetsModule(PlanetsBootstrapService bootstrap, PlanetQueryService queries)
+    /// <param name="ownerEffects">What the buildings of every body of the owner give the whole civilization.</param>
+    public PlanetsModule(
+        PlanetsBootstrapService bootstrap,
+        PlanetQueryService queries,
+        Services.OwnerBuildingEffects ownerEffects)
     {
         ArgumentNullException.ThrowIfNull(bootstrap);
         ArgumentNullException.ThrowIfNull(queries);
+        ArgumentNullException.ThrowIfNull(ownerEffects);
 
         _bootstrap = bootstrap;
         _queries = queries;
+        _ownerEffects = ownerEffects;
     }
 
     /// <summary>
@@ -67,6 +74,7 @@ public sealed class PlanetsModule : IPlanetsModule
         services.AddScoped<PlanetsUnitOfWork>();
         services.AddScoped<ConstructionService>();
         services.AddScoped<PlanetQueryService>();
+        services.AddScoped<OwnerBuildingEffects>();
         services.AddScoped<PlanetResourcesService>();
         services.AddScoped<IPlanetResources, PlanetResourcesService>();
         services.AddScoped<PlanetsBootstrapService>();
@@ -176,6 +184,18 @@ public sealed class PlanetsModule : IPlanetsModule
         _queries.GetBuildingLevelsAsync(buildingClasses, playerId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<OwnerBuildingBonus> GetResearchCenterBonusAsync(
+        int researchCenterLevel,
+        CancellationToken cancellationToken = default) =>
+        _ownerEffects.ResearchCenterAsync(researchCenterLevel, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<OwnerBuildingBonus> GetOwnerBuildingBonusAsync(
+        string playerId,
+        CancellationToken cancellationToken = default) =>
+        _ownerEffects.GetAsync(playerId, cancellationToken);
+
+    /// <inheritdoc />
     public Task<IReadOnlyDictionary<int, string>> GetBuildingNameKeysAsync(CancellationToken cancellationToken = default) =>
         _queries.GetBuildingNameKeysAsync(cancellationToken);
 
@@ -186,6 +206,23 @@ public sealed class PlanetsModule : IPlanetsModule
         string? playerId,
         CancellationToken cancellationToken = default) =>
         await _queries.GetBuildingLevelByTypeAsync(buildingTypeId, planetId, playerId, cancellationToken).ConfigureAwait(false);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<string, decimal>> GetBuildingEffectsAsync(
+        long planetId,
+        long planetBuildingId,
+        string? playerId,
+        CancellationToken cancellationToken = default) =>
+        await _queries.GetBuildingEffectsAsync(planetId, planetBuildingId, playerId, cancellationToken).ConfigureAwait(false);
+
+    /// <inheritdoc />
+    public async Task<decimal> GetBuildingEffectValueAsync(
+        string buildingClass,
+        string effectType,
+        long planetId,
+        string? playerId,
+        CancellationToken cancellationToken = default) =>
+        await _queries.GetBuildingEffectValueAsync(buildingClass, effectType, planetId, playerId, cancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc />
     public async Task<PlanetBuildingLevelById> GetBuildingLevelByIdAsync(

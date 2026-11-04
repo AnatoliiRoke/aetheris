@@ -1,7 +1,6 @@
 using Aetheris.Core.Data;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
-using Aetheris.Planets.Services;
 using Aetheris.Production.Data;
 using Aetheris.Requirements;
 using Aetheris.World;
@@ -88,9 +87,15 @@ public sealed class ProductionBootstrapService
             () => ProductionReferenceSeed.SeedAsync(_dbContext, resources, races, _planets, _texts, _codes, _requirements, technologyIds, cancellationToken),
             cancellationToken).ConfigureAwait(false);
 
+        // A filled database still gets the parts and the recipes that joined the starting data
+        // later (task 00043); the step adds only the missing rows.
+        bool added = !seeded && await _unitOfWork.RunAsync(
+            () => ProductionSeedAdditions.SeedMissingAsync(_dbContext, resources, races, _planets, _texts, _codes, _requirements, technologyIds, cancellationToken),
+            cancellationToken).ConfigureAwait(false);
+
         _catalogCache.Invalidate();
 
-        return new ProductionBootstrapResult(seeded);
+        return new ProductionBootstrapResult(seeded || added);
     }
 }
 

@@ -52,7 +52,8 @@ public static class PlanetsEndpoints
         {
             string playerId = PlayerId(user);
 
-            if (await queries.GetAsync(playerId, planetId, cancellationToken).ConfigureAwait(false) is null)
+            // Only the owner is checked here, so the overview of the body is not built.
+            if (!await queries.IsOwnedAsync(playerId, planetId, cancellationToken).ConfigureAwait(false))
             {
                 return NotFound();
             }

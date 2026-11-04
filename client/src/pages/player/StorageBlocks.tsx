@@ -1,7 +1,7 @@
 import type { Planet, PlanetResource } from '../../api/planetApi';
 import { Alert } from '../../components/Alert';
 import { ResourceIcon } from '../../components/GameIcon';
-import { resourceIconClass } from '../../components/resourceIcon';
+import { useResourceIcons } from '../../components/resourceIcon';
 import type { Language } from '../../i18n/context';
 import { useI18n } from '../../i18n/useI18n';
 import { routes } from '../../router/context';
@@ -107,6 +107,7 @@ function FillCell({ resource, label }: { resource: PlanetResource; label: string
  */
 export function ResourcesBlock({ planet, names, producedIds }: { planet: Planet; names: Names; producedIds: ReadonlySet<number> }) {
   const { t, language } = useI18n();
+  const icons = useResourceIcons();
   const balances = balanceResourceIds(planet);
   const raw = planet.resources.filter((resource) => !producedIds.has(resource.resourceTypeId) && !balances.has(resource.resourceTypeId));
   const rows: StorageRow[] = planet.resourceGroups.flatMap((group) => {
@@ -119,7 +120,7 @@ export function ResourcesBlock({ planet, names, producedIds }: { planet: Planet;
             key: `group-${group.id}`,
             heading: (
               <span className="storage-group">
-                <span className={`storage-dot ${resourceIconClass(group.code)}`} />
+                <span className={`storage-dot ${icons.byCode(group.code).className}`} />
                 {names.group(group.id)}
               </span>
             ),

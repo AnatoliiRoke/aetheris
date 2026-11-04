@@ -192,6 +192,10 @@ public sealed record FreePlanetDto(
 /// <param name="GroupCode">The class code of an object type, if the table has one.</param>
 /// <param name="GroupId">The resource group of a resource type, if the table has one.</param>
 /// <param name="ImageKey">The key of the picture, or <see langword="null"/> for the neutral placeholder.</param>
+/// <param name="IconShape">The shape of the icon of a resource group, or <see langword="null"/> for the neutral icon.</param>
+/// <param name="IconTone">The tone of the icon of a resource group, or <see langword="null"/> for the neutral colour.</param>
+/// <param name="IsBalance">Whether a resource group holds balances and not a stock of the storage.</param>
+/// <param name="EarnsPopulationIncome">Whether a resource is the currency the population of a civilization brings.</param>
 public sealed record ReferenceDto(
     int Id,
     string Code,
@@ -199,7 +203,11 @@ public sealed record ReferenceDto(
     string DescriptionKey,
     string? GroupCode,
     int? GroupId,
-    string? ImageKey);
+    string? ImageKey,
+    string? IconShape = null,
+    string? IconTone = null,
+    bool IsBalance = false,
+    bool EarnsPopulationIncome = false);
 
 /// <summary>The reference tables of the world.</summary>
 /// <param name="ResourceGroups">The resource groups.</param>
@@ -295,7 +303,8 @@ public sealed record ResourceCatalog(IReadOnlyList<ResourceGroupFact> Groups, IR
 /// <param name="Code">The stable code.</param>
 /// <param name="NameKey">The localisation key of the name.</param>
 /// <param name="IsArchived">Whether the group is archived: it is not offered for new rows (task 00023).</param>
-public sealed record ResourceGroupFact(int Id, string Code, string NameKey, bool IsArchived = false);
+/// <param name="IsBalance">Whether the resources of the group are balances and not a stock of the storage.</param>
+public sealed record ResourceGroupFact(int Id, string Code, string NameKey, bool IsArchived = false, bool IsBalance = false);
 
 /// <summary>A resource type.</summary>
 /// <param name="Id">The resource.</param>
@@ -307,7 +316,10 @@ public sealed record ResourceGroupFact(int Id, string Code, string NameKey, bool
 /// <param name="EarnsPopulationIncome">Whether the population of a civilization brings this currency (task 00015).</param>
 /// <param name="Weight">The weight of one unit of the resource in tonnes (task 00027).</param>
 /// <param name="AllowsDebt">Whether the balance of this currency may go below zero after an administrative fine (task 00024).</param>
-public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int? ResourceGroupId, bool IsArchived = false, string Scope = Aetheris.World.Data.Entities.ResourceScopes.Planet, bool EarnsPopulationIncome = false, decimal Weight = 1m, bool AllowsDebt = false)
+/// <param name="ImageKey">The key of the picture of the resource, or <see langword="null"/> for the placeholder.</param>
+/// <param name="PaysPortalDelivery">Whether the buyer pays the delivery of a lot through a portal with this resource.</param>
+/// <param name="PaidByPopulation">Whether a cost in this resource is paid by the inhabitants of the body.</param>
+public sealed record ResourceTypeFact(int Id, string Code, string NameKey, int? ResourceGroupId, bool IsArchived = false, string Scope = Aetheris.World.Data.Entities.ResourceScopes.Planet, bool EarnsPopulationIncome = false, decimal Weight = 1m, bool AllowsDebt = false, string? ImageKey = null, bool PaysPortalDelivery = false, bool PaidByPopulation = false)
 {
     /// <summary>
     /// Gets whether the resource belongs to the whole civilization (a currency) and does not lie on a

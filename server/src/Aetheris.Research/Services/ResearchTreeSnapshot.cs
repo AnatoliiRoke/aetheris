@@ -1,4 +1,4 @@
-using Aetheris.Planets.Services;
+using Aetheris.Planets;
 using Aetheris.Requirements.Services;
 using Aetheris.Research.Data.Entities;
 
@@ -44,4 +44,5 @@ public sealed record ResearchTreeSnapshot(
     IReadOnlySet<int>? CurrencyResourceIds = null,
     IReadOnlyDictionary<int, int>? BuildingLevels = null,
     IReadOnlySet<int>? DepositResourceIds = null,
-    IReadOnlyDictionary<int, string>? ResourceNameKeys = null);
+    IReadOnlyDictionary<int, string>? ResourceNameKeys = null,
+    decimal ResearchTimeMultiplier = 1m);

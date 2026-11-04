@@ -22,6 +22,15 @@ namespace Aetheris.Tests.World;
 [Collection(DatabaseCollection.Name)]
 public sealed class WorldMapTests
 {
+    private static async Task<double> RadarShareAsync(IServiceProvider services, int level)
+    {
+        Aetheris.Planets.Data.Entities.BuildingTypeEntity radar = await PlanetsTestData.TypeAsync(services, RadarCode);
+
+        return (double)(radar.LevelIds.Single(entry => entry.Level == level)
+            .EffectIds.FirstOrDefault(effect => string.Equals(effect.EffectType, Aetheris.Planets.BuildingEffectTypes.RadarRangeBonus, StringComparison.Ordinal))
+            ?.Value ?? 0m);
+    }
+
     private const string RadarCode = "building_52";
 
     private readonly AetherisTestFactory _factory;
@@ -126,8 +135,10 @@ public sealed class WorldMapTests
         await PlanetsTestData.SetLevelAsync(scope.ServiceProvider, player.PlanetId, RadarCode, 10);
         MapSectorViewDto tenth = await map.GetSectorAsync(player.Account.UserId, sectorId, null, Token);
 
-        Assert.Equal(settings.RadarRangePerLevel, Assert.Single(first.Radars).Radius, 6);
-        Assert.Equal(10 * settings.RadarRangePerLevel, Assert.Single(tenth.Radars).Radius, 6);
+        // The radius is the level times the range of a level, raised by the share of the radar at
+        // that level (task 00028, update of 04.11.2026); the share comes from the data.
+        Assert.Equal(settings.RadarRangePerLevel * (1 + await RadarShareAsync(scope.ServiceProvider, 1)), Assert.Single(first.Radars).Radius, 6);
+        Assert.Equal(10 * settings.RadarRangePerLevel * (1 + await RadarShareAsync(scope.ServiceProvider, 10)), Assert.Single(tenth.Radars).Radius, 6);
         Assert.True(opened(first) >= none);
         Assert.True(opened(tenth) >= opened(first));
         Assert.True(opened(tenth) > none);

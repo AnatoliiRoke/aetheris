@@ -3,6 +3,7 @@ using Aetheris.Economy;
 using Aetheris.Economy.Api;
 using Aetheris.Economy.Configuration;
 using Aetheris.Economy.Services;
+using Aetheris.Planets;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.Planets;

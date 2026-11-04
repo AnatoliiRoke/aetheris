@@ -83,12 +83,30 @@ public sealed record ProductionRecipeDto(
 /// <param name="Factories">The factories the body has.</param>
 /// <param name="Storage">The storage of the parts of the body.</param>
 /// <param name="GameNow">The moment of game time.</param>
+/// <param name="Groups">The groups of the parts with their parents, so the client builds the sections and the tabs of the screen from the data (task 00043).</param>
 public sealed record ProductionRecipeListDto(
     long PlanetId,
     IReadOnlyList<ProductionRecipeDto> Recipes,
     IReadOnlyList<ProductionFactorySummaryDto> Factories,
     ProductionStorageDto Storage,
-    DateTimeOffset GameNow);
+    DateTimeOffset GameNow,
+    IReadOnlyList<ProductionPartGroupDto> Groups);
+
+/// <summary>
+/// A group of the parts in the tree of the groups (task 00043): a group of the top level is a
+/// section of the production screen, and a group inside it is a tab of that section.
+/// </summary>
+/// <param name="PartGroupId">The group.</param>
+/// <param name="Code">The stable code of the group.</param>
+/// <param name="NameKey">The localisation key of the name of the group.</param>
+/// <param name="ParentGroupId">The group this group lies in, or <see langword="null"/> for a group of the top level.</param>
+/// <param name="SortOrder">The order of the group among the groups of its parent.</param>
+public sealed record ProductionPartGroupDto(
+    int PartGroupId,
+    string Code,
+    string NameKey,
+    int? ParentGroupId,
+    int SortOrder);
 
 /// <summary>
 /// An ingredient of one unit of a recipe (task 00013, section 3.2).

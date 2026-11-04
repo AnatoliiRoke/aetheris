@@ -536,7 +536,7 @@ public sealed class TerraformingTests
         Assert.DoesNotContain(catalog.Recipes.SelectMany(recipe => recipe.IngredientIds), ingredient => ingredient.PartTypeId is { } partTypeId && devices.ContainsKey(partTypeId));
 
         // Every building of the body that runs a process offers no recipe with a device.
-        long factoryId = await ProcessesTestData.BuildAsync(player, services, Aetheris.Planets.Services.BuildingClasses.Production);
+        long factoryId = await ProcessesTestData.BuildAsync(player, services, Aetheris.Planets.BuildingClasses.Production);
         await ProcessesTestData.PutPartsAsync(player, services, devices.Keys.First(), PartCondition.Full, 1);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
 

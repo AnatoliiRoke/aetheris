@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import type { GameIconName } from '../../../components/GameIcon';
-import { resourceIconClass, resourceIconName } from '../../../components/resourceIcon';
+import { useResourceIcons } from '../../../components/resourceIcon';
 import { useApi } from '../../../api/useApi';
 import { useTexts } from '../../../texts/useTexts';
 import { useWorldReference } from '../useWorldReference';
@@ -46,6 +46,7 @@ export function useMarketItems(): MarketItems {
   const { production } = useApi();
   const { text } = useTexts();
   const reference = useWorldReference();
+  const icons = useResourceIcons();
   const loadParts = useCallback(() => production.characteristicParts(), [production]);
   const parts = useRead(loadParts);
 
@@ -59,8 +60,8 @@ export function useMarketItems(): MarketItems {
 
         return {
           name: resource ? text(resource.nameKey) ?? resource.nameKey : String(resourceTypeId),
-          iconName: resourceIconName(resource?.groupCode),
-          iconClass: resourceIconClass(resource?.groupCode),
+          iconName: icons.byId(resource?.groupId).name,
+          iconClass: icons.byId(resource?.groupId).className,
         };
       }
 
@@ -68,7 +69,7 @@ export function useMarketItems(): MarketItems {
 
       return { name: key ? text(key) ?? key : String(partTypeId), iconName: 'shapeShard', iconClass: 'game-icon game-icon--made' };
     },
-    [resources, partNames, text],
+    [resources, partNames, text, icons],
   );
 
   const catalog = useMemo<CatalogItem[]>(

@@ -87,6 +87,7 @@ public sealed record DepositRichnessDto(int ResourceTypeId, decimal Coefficient)
 /// <param name="FullAt">The moment of game time the resource is or will be full.</param>
 /// <param name="Weight">The weight of one unit of the resource in tonnes (task 00027).</param>
 /// <param name="StoredTonnes">How much the resource weighs on the body now, in tonnes.</param>
+/// <param name="ProtectedCapacity">How much of the resource the bunkers of the body hold, in tonnes: the part of the stock the raid does not reach.</param>
 public sealed record PlanetResourceDto(
     int ResourceTypeId,
     int ResourceGroupId,
@@ -96,7 +97,8 @@ public sealed record PlanetResourceDto(
     bool IsFull = false,
     DateTimeOffset? FullAt = null,
     decimal Weight = 1m,
-    decimal StoredTonnes = 0);
+    decimal StoredTonnes = 0,
+    long ProtectedCapacity = 0);
 
 /// <summary>The energy of a body.</summary>
 /// <param name="Output">The energy produced.</param>
@@ -206,7 +208,8 @@ public sealed record RequirementDto(int RequirementId, string RequirementType, i
 /// <param name="Code">The stable code.</param>
 /// <param name="NameKey">The localisation key of the name.</param>
 /// <param name="ResourceGroupId">The group, for a resource.</param>
-public sealed record NamedItemDto(int Id, string Code, string NameKey, int? ResourceGroupId);
+/// <param name="IsBalance">Whether the row is a balance (or a group of balances) and not a stock of the storage.</param>
+public sealed record NamedItemDto(int Id, string Code, string NameKey, int? ResourceGroupId, bool IsBalance = false);
 
 /// <summary>The answer of the requirement check of a subject (task 00011, decision 3).</summary>
 /// <param name="IsAvailable">Whether every requirement is met.</param>

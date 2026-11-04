@@ -14,6 +14,14 @@ export interface Reference {
   groupCode: string | null;
   groupId: number | null;
   imageKey: string | null;
+  /** The shape of the icon of a resource group; absent or `null` for the neutral icon. */
+  iconShape?: string | null;
+  /** The tone of the icon of a resource group; absent or `null` for the neutral colour. */
+  iconTone?: string | null;
+  /** Whether a resource group holds balances (currencies, energy, population) and not a stock. */
+  isBalance?: boolean;
+  /** Whether a resource is the currency the population of a civilization brings. */
+  earnsPopulationIncome?: boolean;
 }
 
 /**

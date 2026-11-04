@@ -40,6 +40,11 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
     public DbSet<ConfigVersionEntity> ConfigVersions => Set<ConfigVersionEntity>();
 
     /// <summary>
+    /// Gets the anchor of the game clock: one row (code audit of 04.11.2026).
+    /// </summary>
+    public DbSet<GameClockStateEntity> GameClockStates => Set<GameClockStateEntity>();
+
+    /// <summary>
     /// Gets the scheduled events table.
     /// </summary>
     public DbSet<ScheduledEventEntity> ScheduledEvents => Set<ScheduledEventEntity>();
@@ -179,6 +184,13 @@ public sealed class AetherisDbContext : IdentityDbContext<IdentityUser>
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.AppliedBy).HasMaxLength(256);
             entity.HasIndex(e => e.Version);
+        });
+
+        builder.Entity<GameClockStateEntity>(entity =>
+        {
+            entity.ToTable("game_clock_state");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedNever();
         });
 
         builder.Entity<ScheduledEventEntity>(entity =>

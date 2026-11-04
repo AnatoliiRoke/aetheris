@@ -109,6 +109,8 @@ public sealed class ProductionDbContext : DbContext
             entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
             entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
+            entity.HasIndex(e => new { e.ParentGroupId, e.SortOrder });
+            entity.HasOne<PartGroupEntity>().WithMany().HasForeignKey(e => e.ParentGroupId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<PartTypeEntity>(entity =>

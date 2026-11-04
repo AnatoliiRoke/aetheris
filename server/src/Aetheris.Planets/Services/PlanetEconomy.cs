@@ -115,6 +115,21 @@ public static class PlanetEconomy
     }
 
     /// <summary>
+    /// Gets the capacity of the storage of the body that the raid does not reach: the bunkers
+    /// hold this much of every resource of the body, in tonnes.
+    /// </summary>
+    /// <param name="catalog">The building catalog.</param>
+    /// <param name="levels">The levels by building type.</param>
+    /// <returns>The capacity in tonnes; zero when the body has no bunker.</returns>
+    public static long ProtectedCapacity(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(levels);
+
+        return (long)decimal.Floor(EffectSum(catalog, levels, BuildingEffectTypes.ProtectedStorageCapacity));
+    }
+
+    /// <summary>
     /// Gets the weight of one unit of every resource, in tonnes (task 00027).
     /// </summary>
     /// <param name="catalog">The building catalog, for the resources.</param>
@@ -208,6 +223,44 @@ public static class PlanetEconomy
             .Where(entry => entry.Effect.EffectType == BuildingEffectTypes.LevelCap && entry.BuildingTypeId != buildingType.Id)
             .Select(entry => (long)decimal.Floor(entry.Effect.Value))
             .DefaultIfEmpty(0)
+            .Max();
+    }
+
+    /// <summary>
+    /// Gets the sum of the values of one effect of the buildings of the body.
+    /// </summary>
+    /// <param name="catalog">The building catalog.</param>
+    /// <param name="levels">The levels by building type.</param>
+    /// <param name="effectType">The type of the effect.</param>
+    /// <returns>The sum; zero when no building of the body has the effect.</returns>
+    public static decimal EffectSum(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels, string effectType)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(levels);
+        ArgumentException.ThrowIfNullOrEmpty(effectType);
+
+        return Effects(catalog, levels)
+            .Where(entry => string.Equals(entry.Effect.EffectType, effectType, StringComparison.Ordinal))
+            .Sum(entry => entry.Effect.Value);
+    }
+
+    /// <summary>
+    /// Gets the largest value of one effect of the buildings of the body.
+    /// </summary>
+    /// <param name="catalog">The building catalog.</param>
+    /// <param name="levels">The levels by building type.</param>
+    /// <param name="effectType">The type of the effect.</param>
+    /// <returns>The largest value; zero when no building of the body has the effect.</returns>
+    public static decimal EffectMax(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels, string effectType)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(levels);
+        ArgumentException.ThrowIfNullOrEmpty(effectType);
+
+        return Effects(catalog, levels)
+            .Where(entry => string.Equals(entry.Effect.EffectType, effectType, StringComparison.Ordinal))
+            .Select(entry => entry.Effect.Value)
+            .DefaultIfEmpty(0m)
             .Max();
     }
 

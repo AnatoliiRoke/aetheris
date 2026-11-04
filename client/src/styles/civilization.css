@@ -44,7 +44,7 @@
 .brand b { font-size: var(--fs-name); font-weight: 700; letter-spacing: 0.04em; }
 .nick {
   display: inline-flex; align-items: center; gap: var(--space-2);
-  padding: 5px 10px 5px 8px; border-radius: var(--r-full);
+  padding: 5px 10px 5px var(--space-2); border-radius: var(--r-full);
   border: 1px solid var(--border); background: var(--bg-2);
   font-size: var(--fs-ui); font-weight: 600;
 }
@@ -53,17 +53,17 @@
 .civ-res .num { font-variant-numeric: tabular-nums; }
 .civ-topbar__tools { display: flex; align-items: center; gap: var(--space-2); flex: 0 0 auto; }
 .nick .glyph { flex: 0 0 auto; }
-/* The status of the account and the counters of the currencies, as the design of the map draws them (task 00033):
-   the status is a small framed word, a counter is a pill with a line icon and a number in tabular digits. */
-.civ-tier { flex: 0 0 auto; padding: 2px 8px; border-radius: var(--r-sm); border: 1px solid var(--border-strong); color: var(--text-2); font-size: var(--fs-note); font-weight: 600; cursor: help; }
-.civ-counter { display: inline-flex; align-items: center; gap: var(--space-2); height: 36px; padding: 0 12px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--bg-2); font-size: var(--fs-game); font-weight: 600; white-space: nowrap; cursor: default; }
+/* The counters of the currencies, as the design of the map draws them (task 00033): a counter is a
+   pill with a line icon and a number in tabular digits. The status of a paid account colours the
+   block of the nickname instead of a word of its own. */
+.civ-counter { display: inline-flex; align-items: center; gap: var(--space-2); height: 36px; padding: 0 var(--space-3); border-radius: var(--r-md); border: 1px solid var(--border); background: var(--bg-2); font-size: var(--fs-game); font-weight: 600; white-space: nowrap; cursor: default; }
 .civ-counter--credits svg { color: var(--credits); }
 .civ-counter--trade svg { color: var(--text-soft); }
 .civ-counter--energy svg { color: var(--energy); }
-.civ-tier.is-premium { color: var(--premium); border-color: color-mix(in srgb, var(--premium) 55%, transparent); background: color-mix(in srgb, var(--premium) 10%, transparent); }
+.nick.is-premium { color: var(--premium); border-color: color-mix(in srgb, var(--premium) 55%, transparent); background: color-mix(in srgb, var(--premium) 10%, transparent); }
 .civ-counter.is-off { opacity: 1; color: var(--text-2); }
 .civ-alert {
-  display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px;
+  display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 var(--space-3);
   border-radius: var(--r-full); border: 1px solid var(--border-strong); background: transparent;
   font: inherit; font-size: var(--fs-small); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums;
   color: var(--text-2); text-decoration: none; cursor: pointer;
@@ -71,7 +71,7 @@
 .civ-alert--danger { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger-text); }
 .civ-alert--warning { border-color: var(--warning); background: color-mix(in srgb, var(--warning) 10%, transparent); color: var(--warning); }
 .civ-sep { width: 1px; height: 28px; margin-inline: var(--space-1); background: var(--border); }
-.civ .lang-switch button { min-width: 40px; min-height: 34px; padding: 0 8px; font-size: var(--fs-small); }
+.civ .lang-switch button { min-width: 40px; min-height: 34px; padding: 0 var(--space-2); font-size: var(--fs-small); }
 .civ-ibtn {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 44px; height: 44px;
   border-radius: var(--r-md); border: 1px solid var(--border); background: transparent; color: var(--text-soft); cursor: pointer;
@@ -83,7 +83,7 @@
   position: sticky; top: var(--header-h); align-self: flex-start;
   flex: 0 0 220px; width: 220px; min-height: calc(100vh - 2 * var(--header-h));
   display: flex; flex-direction: column; gap: 2px;
-  padding: 16px 12px; border-right: 1px solid var(--border);
+  padding: var(--space-4) var(--space-3); border-right: 1px solid var(--border);
   background: color-mix(in srgb, var(--bg-1) 60%, transparent);
 }
 .civ-nav {
@@ -99,12 +99,12 @@
 .civ-nav-hr { display: block; height: 1px; margin: var(--space-2) var(--space-3); background: var(--border); }
 
 /* ---------- main ---------- */
-.civ__main { position: relative; flex: 1 1 auto; min-width: 0; padding: 20px 24px; }
-.civ__main--planet { padding: 16px 24px 24px; }
-.civ__main--build { padding: 24px 28px 40px; }
+.civ__main { position: relative; flex: 1 1 auto; min-width: 0; padding: 20px var(--space-5); }
+.civ__main--planet { padding: var(--space-4) var(--space-5) var(--space-5); }
+.civ__main--build { padding: var(--space-5) 28px 40px; }
 .civ__main--research, .civ__main--production, .civ__main--storage, .civ__main--market, .civ__main--map { padding: 20px 28px 40px; }
 .civ__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.22; pointer-events: none; z-index: 0; }
-.civ-main__in { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 16px; }
+.civ-main__in { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--space-4); }
 .civ__main--game .civ-main__in { gap: 14px; }
 .civ__main--build .civ-main__in { gap: 20px; }
 .civ-main__head h1 { font-size: var(--fs-title); font-weight: 700; line-height: 1.2; }
@@ -128,15 +128,15 @@
 }
 .civ-body.is-current { border: 2px solid var(--accent); box-shadow: var(--shadow-selected); }
 .civ-body__id { display: flex; flex-direction: column; gap: 0; padding: 0; background: var(--bg-id); border-right: 1px solid var(--border-soft); }
-.civ-body__col { display: flex; flex-direction: column; gap: var(--space-2); padding: 14px 16px; min-width: 0; }
-.civ__main--game .civ-body .panel { gap: 6px; padding: 8px 10px; }
-.civ__main--game .civ-body .queue-list { gap: 4px; }
-.civ__main--game .civ-body .queue-item { gap: 4px; padding: 6px 8px; }
+.civ-body__col { display: flex; flex-direction: column; gap: var(--space-2); padding: 14px var(--space-4); min-width: 0; }
+.civ__main--game .civ-body .panel { gap: 6px; padding: var(--space-2) 10px; }
+.civ__main--game .civ-body .queue-list { gap: var(--space-1); }
+.civ__main--game .civ-body .queue-item { gap: var(--space-1); padding: 6px var(--space-2); }
 .civ__main--game .civ-body .production-block,
 .civ__main--game .civ-body .processes-block { gap: 6px; margin-top: 0; }
-.civ__main--game .civ-body .building-grid { gap: 8px; }
-.civ__main--game .civ-body .building-card { gap: 6px; padding: 8px 10px; }
-.civ__main--game .civ-body .storage-list { gap: 4px; }
+.civ__main--game .civ-body .building-grid { gap: var(--space-2); }
+.civ__main--game .civ-body .building-card { gap: 6px; padding: var(--space-2) 10px; }
+.civ__main--game .civ-body .storage-list { gap: var(--space-1); }
 .civ-body__col + .civ-body__col, .civ-body__id + .civ-body__col { border-left: 1px solid var(--border-soft); }
 .civ-label { font-size: var(--fs-caption); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); }
 
@@ -167,17 +167,17 @@
 }
 .body-sel {
   position: absolute; top: var(--space-2); right: var(--space-2);
-  padding: 2px 8px; border-radius: var(--r-full);
+  padding: 2px var(--space-2); border-radius: var(--r-full);
   background: var(--accent); color: var(--on-accent); font-size: var(--fs-caption); font-weight: 700;
 }
 .body-badge {
   position: absolute; top: var(--space-2); left: var(--space-2); display: inline-flex; align-items: center; gap: 5px;
-  padding: 2px 8px; border-radius: var(--r-full); border: 1px solid var(--warning);
+  padding: 2px var(--space-2); border-radius: var(--r-full); border: 1px solid var(--warning);
   background: color-mix(in srgb, var(--bg-0) 80%, transparent); color: var(--warning); font-size: var(--fs-caption); font-weight: 700;
 }
 .body-badge--danger { border-color: var(--danger); color: var(--danger-text); }
 .civ-aside { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
-.body-meta { display: flex; flex-direction: column; gap: var(--space-1); padding: 10px 12px 12px; }
+.body-meta { display: flex; flex-direction: column; gap: var(--space-1); padding: 10px var(--space-3) var(--space-3); }
 .body-meta h3 { font-size: var(--fs-name); font-weight: 600; line-height: 1.2; }
 .body-meta h3 button { padding: 0; border: 0; background: transparent; color: var(--text-1); font: inherit; text-align: left; cursor: pointer; }
 .chip-type {
@@ -220,7 +220,7 @@
 .civ-queue { display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 0; }
 .civ-queue__item {
   display: flex; align-items: center; justify-content: space-between; gap: 6px;
-  padding: 8px 10px; border-radius: var(--r-md);
+  padding: var(--space-2) 10px; border-radius: var(--r-md);
   border: 1px solid var(--border); background: var(--bg-card-in);
 }
 .civ-queue__name { font-weight: 600; font-size: var(--fs-small); }
@@ -232,7 +232,7 @@
 .civ-bottombar {
   position: sticky; bottom: 0; z-index: 10;
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-5);
-  min-height: var(--header-h); padding: 8px 20px;
+  min-height: var(--header-h); padding: var(--space-2) 20px;
   border-top: 1px solid var(--border); background: color-mix(in srgb, var(--bg-0) 94%, transparent);
 }
 .civ-bottombar__switch { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
@@ -264,19 +264,19 @@
 /* ---------- the phone ---------- */
 @media (max-width: 767px) {
   .civ-side { display: none; }
-  .civ-topbar { flex-wrap: wrap; gap: var(--space-2); padding: 10px 16px; }
+  .civ-topbar { flex-wrap: wrap; gap: var(--space-2); padding: 10px var(--space-4); }
   .brand b { font-size: var(--fs-game); }
   .nick { font-size: var(--fs-small); }
-  .civ-res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 10px; justify-content: stretch; font-size: var(--fs-ui); }
+  .civ-res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-1) 10px; justify-content: stretch; font-size: var(--fs-ui); }
   .civ-res li, .civ-counter { font-size: var(--fs-ui); }
-  .civ__main, .civ__main--game { padding: 12px 12px 20px; }
-  .civ__main--planet { padding: 12px 14px 20px; }
-  .civ__main--build, .civ__main--research, .civ__main--production, .civ__main--storage, .civ__main--market, .civ__main--map { padding: 16px 16px 24px; }
+  .civ__main, .civ__main--game { padding: var(--space-3) var(--space-3) 20px; }
+  .civ__main--planet { padding: var(--space-3) 14px 20px; }
+  .civ__main--build, .civ__main--research, .civ__main--production, .civ__main--storage, .civ__main--market, .civ__main--map { padding: var(--space-4) var(--space-4) var(--space-5); }
   .civ-main__head h1 { font-size: var(--fs-title-phone); }
   .civ .player__title { font-size: var(--fs-title-screen-phone); }
   .civ__main--planet .player__title { font-size: var(--fs-title-planet-phone); }
   .civ-body { grid-template-columns: minmax(0, 1fr); }
-  .civ-body__col { padding: 12px 14px; }
+  .civ-body__col { padding: var(--space-3) 14px; }
   .body-art { height: 128px; }
   .body-art__image, .body-art__placeholder { width: 112px; height: 112px; }
   .civ-body__id { border-right: 0; border-bottom: 1px solid var(--border-soft); }

@@ -16,6 +16,7 @@ namespace Aetheris.Processes.Services;
 /// <param name="Request">What the player asked for.</param>
 /// <param name="ResourceGroups">The group of every resource the player named, so a handler that works on a resource can check its group.</param>
 /// <param name="Catalog">The catalog of the processes.</param>
+/// <param name="BuildingEffects">The values of the effects of the building the process runs in, by their type.</param>
 public sealed record ProcessCheckContext(
     string PlayerId,
     long PlanetId,
@@ -27,7 +28,8 @@ public sealed record ProcessCheckContext(
     ProcessRequirementContext RequirementContext,
     ProcessOrderRequest Request,
     IReadOnlyDictionary<int, int> ResourceGroups,
-    ProcessCatalog Catalog);
+    ProcessCatalog Catalog,
+    IReadOnlyDictionary<string, decimal> BuildingEffects);
 
 /// <summary>
 /// What the result of a unit of an order looks at (task 00014, decision 6).
@@ -44,6 +46,7 @@ public sealed record ProcessCheckContext(
 /// <param name="Catalog">The catalog of the processes.</param>
 /// <param name="Request">What the player asked for.</param>
 /// <param name="TakenParts">The parts the whole order took from the storage, as they were.</param>
+/// <param name="BuildingEffects">The values of the effects of the building the process runs in, by their type.</param>
 public sealed record ProcessApplyContext(
     string PlayerId,
     long PlanetId,
@@ -56,7 +59,8 @@ public sealed record ProcessApplyContext(
     IReadOnlyDictionary<int, int> TechnologyLevels,
     ProcessCatalog Catalog,
     ProcessOrderRequest Request,
-    IReadOnlyList<PartStackTaken> TakenParts);
+    IReadOnlyList<PartStackTaken> TakenParts,
+    IReadOnlyDictionary<string, decimal> BuildingEffects);
 
 /// <summary>
 /// What the player asked for: the numbers of the order that are not in the recipe (task

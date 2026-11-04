@@ -65,6 +65,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_1.webp",
       "duration_seconds": {
         "base": 20,
         "growth": 1.59,
@@ -260,6 +261,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_2.webp",
       "duration_seconds": {
         "base": 20,
         "growth": 1.59,
@@ -747,6 +749,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_3.webp",
       "duration_seconds": {
         "base": 20,
         "growth": 1.59,
@@ -1320,6 +1323,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_4.webp",
       "duration_seconds": {
         "base": 20,
         "growth": 1.59,
@@ -1995,6 +1999,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_5.webp",
       "duration_seconds": {
         "base": 30,
         "growth": 1.56,
@@ -2530,6 +2535,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_6.webp",
       "duration_seconds": {
         "base": 20,
         "growth": 1.59,
@@ -3027,6 +3033,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_7.webp",
       "duration_seconds": {
         "base": 30,
         "growth": 1.56,
@@ -3562,6 +3569,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_8.webp",
       "duration_seconds": {
         "base": 30,
         "growth": 1.56,
@@ -4311,6 +4319,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_9.webp",
       "duration_seconds": {
         "base": 20,
         "growth": 1.59,
@@ -4866,6 +4875,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_10.webp",
       "duration_seconds": {
         "base": 20,
         "growth": 1.59,
@@ -5467,6 +5477,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_11.webp",
       "duration_seconds": {
         "base": 30,
         "growth": 1.56,
@@ -5822,6 +5833,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_12.webp",
       "duration_seconds": {
         "base": 20,
         "growth": 1.59,
@@ -6235,6 +6247,7 @@
         "uk": "Розвиток групи «Економіка».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_13.webp",
       "duration_seconds": {
         "base": 30,
         "growth": 1.56,
@@ -6760,6 +6773,7 @@
         "uk": "Розвиток групи «Економіка».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_14.webp",
       "duration_seconds": {
         "base": 30,
         "growth": 1.56,
@@ -7303,6 +7317,7 @@
         "uk": "Розвиток групи «Економіка».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_15.webp",
       "duration_seconds": {
         "base": 30,
         "growth": 1.56,
@@ -7772,6 +7787,7 @@
         "uk": "Розвиток групи «Економіка».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_16.webp",
       "duration_seconds": {
         "base": 30,
         "growth": 1.56,
@@ -8171,6 +8187,7 @@
         "uk": "Розвиток групи «Економіка».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_17.webp",
       "duration_seconds": {
         "base": 40,
         "growth": 1.55,
@@ -8680,6 +8697,7 @@
         "uk": "Перетворення однієї речовини на іншу.",
         "en": "Conversion of one material into another."
       },
+      "image_key": "tech_18.webp",
       "duration_seconds": {
         "base": 40,
         "growth": 1.55,
@@ -8722,6 +8740,7 @@
         "uk": "Розвиток групи «Економіка».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_19.webp",
       "duration_seconds": {
         "base": 35,
         "growth": 1.55,
@@ -9141,6 +9160,7 @@
         "uk": "Розвиток групи «Економіка».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_20.webp",
       "duration_seconds": {
         "base": 35,
         "growth": 1.55,
@@ -9858,6 +9878,7 @@
         "uk": "Розвиток групи «Фундаментальні науки».",
         "en": "Technology of its branch."
       },
+      "image_key": "tech_21.webp",
       "duration_seconds": {
         "base": 20,
         "growth": 1.59,
@@ -9896,7 +9917,7 @@
           "from_level": 4
         },
         {
-          "resource": "resource_11",
+          "resource": "resource_8",
           "growth": {
             "base": 20,
             "growth": 1.4,
@@ -9916,7 +9937,7 @@
           "from_level": 12
         },
         {
-          "resource": "resource_8",
+          "resource": "resource_11",
           "growth": {
             "base": 20,
             "growth": 1.4,

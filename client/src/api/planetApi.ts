@@ -115,6 +115,11 @@ export interface PlanetResource {
   weight?: number;
   /** How much of the resource lies on the body, in tonnes (task 00027). */
   storedTonnes?: number;
+  /**
+   * How much of the resource the bunkers of the body hold, in tonnes: the part of the stock a
+   * raid does not reach. Absent answers mean the body has no bunker.
+   */
+  protectedCapacity?: number;
 }
 
 /**
@@ -125,6 +130,8 @@ export interface NamedItem {
   code: string;
   nameKey: string;
   resourceGroupId: number | null;
+  /** Whether the row is a balance (or a group of balances) and not a stock of the storage. */
+  isBalance?: boolean;
 }
 
 /**

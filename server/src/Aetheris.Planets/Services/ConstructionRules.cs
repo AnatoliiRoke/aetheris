@@ -9,6 +9,7 @@ namespace Aetheris.Planets.Services;
 /// </summary>
 /// <param name="PlanetId">The body.</param>
 /// <param name="ExtraQueueSlots">The paid places of the queue.</param>
+/// <param name="BuildingQueueSlots">The places the building plants of the owner add to the queue of every body of the owner.</param>
 /// <param name="Levels">The levels of the buildings by type.</param>
 /// <param name="Queue">The construction queue in its order.</param>
 /// <param name="Amounts">The amounts at <paramref name="Now"/>.</param>
@@ -33,7 +34,9 @@ public sealed record PlanetFigures(
     DateTimeOffset Now,
     IReadOnlyDictionary<int, long>? CurrencyAmounts = null,
     long Population = 0,
-    int? PopulationResourceId = null)
+    int? PopulationResourceId = null,
+    int BuildingQueueSlots = 0,
+    decimal BuildingSpeedBonus = 0m)
 {
     /// <summary>
     /// Gets the levels once every queued building is done.
@@ -104,16 +107,20 @@ public sealed record NextLevelCheck(
 public static class ConstructionRules
 {
     /// <summary>
-    /// Gets the places of the queue of a body: the base places and the paid ones up to their limit.
+    /// Gets the places of the queue of a body: the base places, the paid ones up to their limit
+    /// and the places the building plants of the owner add.
     /// </summary>
     /// <param name="settings">The parameters.</param>
     /// <param name="extraSlots">The paid places of the body.</param>
+    /// <param name="buildingSlots">The places the building plants of the owner add.</param>
     /// <returns>The places.</returns>
-    public static int SlotCount(PlanetsSettings settings, int extraSlots)
+    public static int SlotCount(PlanetsSettings settings, int extraSlots, int buildingSlots = 0)
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        return settings.QueueBaseSlots + Math.Clamp(extraSlots, 0, settings.QueueMaxExtraSlots);
+        return settings.QueueBaseSlots
+            + Math.Clamp(extraSlots, 0, settings.QueueMaxExtraSlots)
+            + Math.Max(0, buildingSlots);
     }
 
     /// <summary>
@@ -171,7 +178,7 @@ public static class ConstructionRules
             reasons.Add(PlanetsErrorCodes.LevelCapped);
         }
 
-        if (figures.Queue.Count >= SlotCount(settings, figures.ExtraQueueSlots))
+        if (figures.Queue.Count >= SlotCount(settings, figures.ExtraQueueSlots, figures.BuildingQueueSlots))
         {
             reasons.Add(PlanetsErrorCodes.QueueFull);
         }
@@ -210,7 +217,10 @@ public static class ConstructionRules
             reasons.Add(PlanetsErrorCodes.ResourcesShort);
         }
 
-        long duration = info is null ? 0 : (long)decimal.Ceiling(info.DurationSeconds * figures.Bonuses.ConstructionTimeMultiplier);
+        // The building plants of the owner speed the construction up on every body of the owner,
+        // so the share of the owner divides the time of the construction.
+        decimal timeMultiplier = figures.Bonuses.ConstructionTimeMultiplier / (1m + figures.BuildingSpeedBonus);
+        long duration = info is null ? 0 : (long)decimal.Ceiling(info.DurationSeconds * timeMultiplier);
 
         return new NextLevelCheck(level, info, duration, reasons, unmet, missing, energyAfter);
     }
@@ -243,6 +253,7 @@ public static class PlanetOverviewBuilder
 
         Dictionary<int, decimal> rates = PlanetEconomy.ProductionRates(catalog, figures.Levels, figures.Deposits, figures.Bonuses);
         Dictionary<int, long> capacities = PlanetEconomy.Capacities(catalog, figures.Levels, figures.Bonuses);
+        long protectedCapacity = PlanetEconomy.ProtectedCapacity(catalog, figures.Levels);
         Dictionary<int, int> queuedLevels = figures.QueuedLevels();
         EnergyBalance energy = PlanetEconomy.Energy(catalog, figures.Levels, figures.Bonuses);
 
@@ -281,7 +292,8 @@ public static class PlanetOverviewBuilder
                     isFull,
                     fullAt,
                     weight,
-                    amount * weight));
+                    amount * weight,
+                    protectedCapacity));
             }
         }
 
@@ -330,7 +342,7 @@ public static class PlanetOverviewBuilder
             resources,
             new EnergyDto(energy.Output, energy.Consumption, energy.Balance, PlanetEconomy.Energy(catalog, queuedLevels, figures.Bonuses).Balance),
             new ConstructionQueueDto(
-                ConstructionRules.SlotCount(settings, figures.ExtraQueueSlots),
+                ConstructionRules.SlotCount(settings, figures.ExtraQueueSlots, figures.BuildingQueueSlots),
                 [
                     .. figures.Queue.Select(item => new QueueItemDto(
                         item.Id,
@@ -344,8 +356,13 @@ public static class PlanetOverviewBuilder
                 ]),
             buildings,
             PlanetEconomy.PopulationMax(catalog, figures.Levels, figures.Bonuses),
-            [.. catalog.Resources.Select(resource => new NamedItemDto(resource.Id, resource.Code, resource.NameKey, resource.ResourceGroupId))],
-            [.. catalog.Groups.Select(group => new NamedItemDto(group.Id, group.Code, group.NameKey, null))],
+            [.. catalog.Resources.Select(resource => new NamedItemDto(
+                resource.Id,
+                resource.Code,
+                resource.NameKey,
+                resource.ResourceGroupId,
+                catalog.Groups.Any(group => group.Id == resource.ResourceGroupId && group.IsBalance)))],
+            [.. catalog.Groups.Select(group => new NamedItemDto(group.Id, group.Code, group.NameKey, null, group.IsBalance))],
             BuildingCategories: [.. catalog.Categories.Select(category => new BuildingCategoryDto(category.Id, category.Code, category.NameKey, category.SortOrder, category.ImageKey))]);
     }
 

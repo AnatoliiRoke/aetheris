@@ -11,10 +11,6 @@ namespace Aetheris.Market.Configuration;
 /// <param name="AverageMinPercent">The lowest price in per cent of the average.</param>
 /// <param name="AverageMaxPercent">The highest price in per cent of the average.</param>
 /// <param name="AverageWindowDays">The window of the average, in days.</param>
-/// <param name="DeliveryBaseSeconds">The time of a delivery with no distance, in seconds.</param>
-/// <param name="DeliverySecondsPerDistance">The seconds a unit of the distance adds.</param>
-/// <param name="EnergyResourceCode">The code of the resource of the delivery fee.</param>
-/// <param name="EnergyPerTonneDistance">The fee of a tonne carried over a unit of the distance.</param>
 /// <param name="DeliveryRecentHours">How long an arrived delivery stays in the list, in hours.</param>
 /// <param name="PageSize">The largest number of rows of a read.</param>
 /// <param name="ExchangeBaseRate">The rate with an even flow.</param>
@@ -30,10 +26,6 @@ public sealed record MarketSettings(
     decimal AverageMinPercent,
     decimal AverageMaxPercent,
     int AverageWindowDays,
-    decimal DeliveryBaseSeconds,
-    decimal DeliverySecondsPerDistance,
-    string EnergyResourceCode,
-    decimal EnergyPerTonneDistance,
     int DeliveryRecentHours,
     int PageSize,
     decimal ExchangeBaseRate,
@@ -59,10 +51,6 @@ public sealed record MarketSettings(
             Number(config, MarketConfigKeys.AverageMinPercent),
             Number(config, MarketConfigKeys.AverageMaxPercent),
             (int)Number(config, MarketConfigKeys.AverageWindowDays),
-            Number(config, MarketConfigKeys.DeliveryBaseSeconds),
-            Number(config, MarketConfigKeys.DeliverySecondsPerDistance),
-            config.GetRaw(MarketConfigKeys.EnergyResourceCode) ?? Default(MarketConfigKeys.EnergyResourceCode),
-            Number(config, MarketConfigKeys.EnergyPerTonneDistance),
             (int)Number(config, MarketConfigKeys.DeliveryRecentHours),
             (int)Number(config, MarketConfigKeys.PageSize),
             Number(config, MarketConfigKeys.ExchangeBaseRate),

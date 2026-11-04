@@ -11,10 +11,10 @@ import { useTexts } from '../../texts/useTexts';
 import { ProductionQueue } from './ProductionQueue';
 import { RecipeCard } from './RecipeCard';
 import { ScreenHead } from './ScreenHead';
-import { Tabs } from './Tabs';
+import { Tabs, type TabItem } from './Tabs';
 import { galaxyPlace } from './planetText';
 import { allRecipes, availabilityFilters, factoryOf, filterRecipes, groupRecipes, resourcesGroupKey } from './productionRecipes';
-import { productionSections, weaponGroupCodes, type ProductionSectionKey } from './productionGroups';
+import { buildGroupTree, groupKeyOf, type ProductionGroupNode } from './productionGroups';
 import { noticeFromError, type Notice } from './screenNotice';
 import { useProductionOrders } from './useActiveOrders';
 import { usePlanet } from './usePlanet';
@@ -51,8 +51,9 @@ export function ProductionPage() {
   const [query, setQuery] = useState('');
   const [availability, setAvailability] = useState(allRecipes);
   const [factory, setFactory] = useState(allRecipes);
-  const [section, setSection] = useState<ProductionSectionKey>('resources');
+  const [section, setSection] = useState(resourcesGroupKey);
   const [group, setGroup] = useState(allRecipes);
+  const [subgroup, setSubgroup] = useState(allRecipes);
 
   // The tiles are drawn again only when their own data changes: the callback given to them keeps
   // the same identity between the draws.
@@ -88,62 +89,44 @@ export function ProductionPage() {
   const onProduce = useCallback((recipe: ProductionRecipe, quantity: number) => void produceRef.current(recipe, quantity), []);
 
   const recipes = list?.recipes;
-  const groups = useMemo(() => (recipes ? groupRecipes(recipes) : []), [recipes]);
+  const partGroups = list?.groups;
+  // The sections and the tabs come from the tree of the groups of the parts the server gives: a
+  // group of the top level is a section, a group inside it is a tab, and a group inside a tab is
+  // a tab of the next row (task 00043). A group with no recipes is left out.
+  const tree = useMemo(() => (recipes ? buildGroupTree(partGroups ?? [], recipes) : []), [partGroups, recipes]);
+  const hasResources = useMemo(() => (recipes ?? []).some((recipe) => groupKeyOf(recipe) === resourcesGroupKey), [recipes]);
   const groupName = useCallback(
     (entry: { key: string; nameKey: string | null }) => (entry.key === resourcesGroupKey ? t('production.groupResources') : (text(entry.nameKey ?? '') ?? entry.nameKey ?? entry.key)),
     [t, text],
   );
-  // The sections of the screen: the resources, the modules of the ships, the hulls of the ships
-  // and the modules of the base. A section with no recipes is left out.
-  const sections = useMemo(() => productionSections.filter((entry) => groups.some((group) => entry.key === 'resources' ? group.key === resourcesGroupKey : entry.groups.includes(group.key))), [groups]);
+  const nodeName = useCallback((node: ProductionGroupNode) => groupName({ key: node.code, nameKey: node.nameKey }), [groupName]);
   const sectionTabs = useMemo(
-    () => sections.map((entry) => ({ id: entry.key, label: t(`production.section.${entry.key}` as never) })),
-    [sections, t],
+    () => [...(hasResources ? [{ id: resourcesGroupKey, label: t('production.section.resources') }] : []), ...tree.map((node) => ({ id: node.code, label: nodeName(node) }))],
+    [hasResources, tree, nodeName, t],
   );
-  // The tabs of the groups of the active section: every group it has, in the order of the section.
-  const activeSection = sections.find((entry) => entry.key === section) ?? sections[0] ?? null;
-  const groupTabs = useMemo(() => {
-    if (!activeSection) {
-      return [];
-    }
-
-    if (activeSection.key === 'resources') {
-      return [{ id: allRecipes, label: t('production.groupResources') }];
-    }
-
-    const tabs = [{ id: allRecipes, label: t('production.allGroups') }];
-
-    for (const key of activeSection.groups) {
-      const group = groups.find((entry) => entry.key === key);
-
-      if (group) {
-        tabs.push({ id: key, label: key === 'weapons' ? t('production.groupWeapons') : groupName(group) });
-      }
-    }
-
-    return tabs;
-  }, [activeSection, groups, groupName, t]);
-  // A tab that no longer exists shows everything.
-  const activeGroup = groupTabs.some((entry) => entry.id === group) ? group : allRecipes;
-  // The groups the active section shows. The weapons are a tab of their own, so they keep their
-  // three kinds apart; the resources are a section of their own.
-  const sectionGroups = useMemo(() => {
-    if (!activeSection) {
-      return [];
-    }
-
-    if (activeSection.key === 'resources') {
-      return [resourcesGroupKey];
-    }
-
-    return activeSection.groups.flatMap((key) => (key === 'weapons' ? [...weaponGroupCodes] : [key]));
-  }, [activeSection]);
+  // A tab that no longer exists gives way to the first one, or to everything of its parent.
+  const activeSectionId = sectionTabs.some((entry) => entry.id === section) ? section : (sectionTabs[0]?.id ?? '');
+  const activeSection = tree.find((node) => node.code === activeSectionId) ?? null;
+  const activeGroupNode = activeSection?.children.find((node) => node.code === group) ?? null;
+  const activeSubgroupNode = activeGroupNode?.children.find((node) => node.code === subgroup) ?? null;
+  const tabsOf = useCallback(
+    (node: ProductionGroupNode | null): TabItem[] =>
+      node && node.children.length > 0 ? [{ id: allRecipes, label: t('production.allGroups') }, ...node.children.map((child) => ({ id: child.code, label: nodeName(child) }))] : [],
+    [nodeName, t],
+  );
+  const groupTabs = useMemo(() => tabsOf(activeSection), [tabsOf, activeSection]);
+  const subgroupTabs = useMemo(() => tabsOf(activeGroupNode), [tabsOf, activeGroupNode]);
+  // The deepest chosen group: the recipes of it and of every group inside it are shown.
+  const shownNode = activeSubgroupNode ?? activeGroupNode ?? activeSection;
+  const shownGroups = useMemo(() => (activeSectionId === resourcesGroupKey ? [resourcesGroupKey] : (shownNode?.codes ?? [])), [activeSectionId, shownNode]);
+  // The titles of the groups are shown while the tab holds more than one group.
+  const showGroupTitles = shownNode === null || shownNode.children.length > 0;
   const visible = useMemo(
     () =>
       recipes
-        ? filterRecipes(recipes, { query, availability, factory, group: activeGroup, sectionGroups }, (recipe) => text(recipe.nameKey) ?? recipe.nameKey)
+        ? filterRecipes(recipes, { query, availability, factory, groups: shownGroups }, (recipe) => text(recipe.nameKey) ?? recipe.nameKey)
         : [],
-    [recipes, query, availability, factory, activeGroup, sectionGroups, text],
+    [recipes, query, availability, factory, shownGroups, text],
   );
   const factoryTypes = useMemo(() => [...new Set((recipes ?? []).map((recipe) => recipe.buildingTypeId).filter((typeId): typeId is number => typeId !== null))], [recipes]);
   // The name of a factory comes from the factories of the body, and for a factory the body has not
@@ -233,9 +216,12 @@ export function ProductionPage() {
         </div>
       ) : (
         <section aria-label={t('production.recipes')} className="panel">
-          <Tabs active={activeSection?.key ?? ''} label={t('production.sections')} onChange={(id) => { setSection(id as ProductionSectionKey); setGroup(allRecipes); }} tabs={sectionTabs} />
+          <Tabs active={activeSectionId} label={t('production.sections')} onChange={(id) => { setSection(id); setGroup(allRecipes); setSubgroup(allRecipes); }} tabs={sectionTabs} />
           {groupTabs.length > 1 ? (
-            <Tabs active={activeGroup} label={t('production.groups')} onChange={setGroup} tabs={groupTabs} />
+            <Tabs active={activeGroupNode?.code ?? allRecipes} label={t('production.groups')} onChange={(id) => { setGroup(id); setSubgroup(allRecipes); }} tabs={groupTabs} />
+          ) : null}
+          {subgroupTabs.length > 1 ? (
+            <Tabs active={activeSubgroupNode?.code ?? allRecipes} label={t('production.subgroups')} onChange={setSubgroup} tabs={subgroupTabs} />
           ) : null}
           <div className="tech-tools">
             <label className="field tech-search">
@@ -273,7 +259,7 @@ export function ProductionPage() {
           ) : (
             groupRecipes(visible).map((entry) => (
               <section aria-labelledby={`production-${entry.key}`} className="build-category" key={entry.key}>
-                <h2 className={activeGroup === allRecipes ? 'build-category__title' : 'visually-hidden'} id={`production-${entry.key}`}>
+                <h2 className={showGroupTitles ? 'build-category__title' : 'visually-hidden'} id={`production-${entry.key}`}>
                   {groupName(entry)}
                 </h2>
                 <ul className="building-grid">

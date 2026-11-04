@@ -1005,6 +1005,14 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("description_key");
 
+                    b.Property<string>("IconShape")
+                        .HasColumnType("text")
+                        .HasColumnName("icon_shape");
+
+                    b.Property<string>("IconTone")
+                        .HasColumnType("text")
+                        .HasColumnName("icon_tone");
+
                     b.Property<string>("ImageKey")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
@@ -1013,6 +1021,10 @@ namespace Aetheris.World.Data.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("boolean")
                         .HasColumnName("is_archived");
+
+                    b.Property<bool>("IsBalance")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_balance");
 
                     b.Property<string>("NameKey")
                         .IsRequired()
@@ -1077,6 +1089,14 @@ namespace Aetheris.World.Data.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("name_key");
+
+                    b.Property<bool>("PaidByPopulation")
+                        .HasColumnType("boolean")
+                        .HasColumnName("paid_by_population");
+
+                    b.Property<bool>("PaysPortalDelivery")
+                        .HasColumnType("boolean")
+                        .HasColumnName("pays_portal_delivery");
 
                     b.Property<int?>("ResourceGroupId")
                         .HasColumnType("integer")

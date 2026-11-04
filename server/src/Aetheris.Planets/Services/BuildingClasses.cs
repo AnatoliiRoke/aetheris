@@ -1,4 +1,4 @@
-namespace Aetheris.Planets.Services;
+namespace Aetheris.Planets;
 
 /// <summary>
 /// The classes of the building types: what a building is for (task 00012, decision 1).
@@ -56,6 +56,21 @@ public static class BuildingClasses
 
     /// <summary>A building that repairs the ships on the orbit of the body (task 00014).</summary>
     public const string OrbitalWorkshop = "orbital_workshop";
+
+    /// <summary>A building that raises the income of the credits of the civilization.</summary>
+    public const string Bank = "bank";
+
+    /// <summary>A building that adds places to the queues of the construction and speeds it up.</summary>
+    public const string ConstructionPlant = "construction_plant";
+
+    /// <summary>A building that designs the ships of the owner.</summary>
+    public const string DesignBureau = "design_bureau";
+
+    /// <summary>A building that keeps a part of the storage of the body from the raid.</summary>
+    public const string Bunker = "bunker";
+
+    /// <summary>A building that holds the ships of the civilization and opens the orbital base.</summary>
+    public const string Spaceport = "spaceport";
 }
 
 /// <summary>The classes a building type may have.</summary>
@@ -80,6 +95,11 @@ public static class BuildingClassValues
         BuildingClasses.Converter,
         BuildingClasses.ModuleRepair,
         BuildingClasses.OrbitalWorkshop,
+        BuildingClasses.Bank,
+        BuildingClasses.ConstructionPlant,
+        BuildingClasses.DesignBureau,
+        BuildingClasses.Bunker,
+        BuildingClasses.Spaceport,
     ];
 
     /// <summary>

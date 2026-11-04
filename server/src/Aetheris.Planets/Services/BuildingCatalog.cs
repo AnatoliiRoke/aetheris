@@ -129,22 +129,6 @@ public sealed record BuildingLevelInfo(
 /// <param name="Value">The value at the level.</param>
 public sealed record BuildingEffectInfo(string EffectType, int? ResourceTypeId, int? ResourceGroupId, decimal Value);
 
-/// <summary>A requirement of a subject.</summary>
-/// <param name="Id">The requirement.</param>
-/// <param name="SubjectType">The subject type.</param>
-/// <param name="SubjectId">The subject.</param>
-/// <param name="SubjectLevel">The first level of the subject it applies to.</param>
-/// <param name="RequirementType">The requirement type.</param>
-/// <param name="TargetId">What is required.</param>
-/// <param name="TargetLevel">The required level of the target.</param>
-public sealed record RequirementInfo(
-    int Id,
-    string SubjectType,
-    int SubjectId,
-    int SubjectLevel,
-    string RequirementType,
-    int TargetId,
-    int TargetLevel);
 
 /// <summary>
 /// Keeps the building catalog in the memory of the server and reads it again when it is older

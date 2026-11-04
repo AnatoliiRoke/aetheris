@@ -304,7 +304,7 @@ public sealed class WorldQueryService
             .OrderBy(size => size.Id).ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return new WorldReferenceDto(
-            [.. groups.Select(group => new ReferenceDto(group.Id, group.Code, group.NameKey, group.DescriptionKey, null, null, null))],
+            [.. groups.Select(group => new ReferenceDto(group.Id, group.Code, group.NameKey, group.DescriptionKey, null, null, null, group.IconShape, group.IconTone, group.IsBalance))],
             [.. resources.Select(resource => new ReferenceDto(
                 resource.Id,
                 resource.Code,
@@ -312,7 +312,8 @@ public sealed class WorldQueryService
                 resource.DescriptionKey,
                 null,
                 resource.ResourceGroupId,
-                resource.ImageKey))],
+                resource.ImageKey,
+                EarnsPopulationIncome: resource.EarnsPopulationIncome))],
             [.. types.Select(type => new ReferenceDto(type.Id, type.Code, type.NameKey, type.DescriptionKey, type.ObjectClass, null, type.ImageKey))],
             [.. sizes.Select(size => new ReferenceDto(size.Id, size.Code, size.NameKey, size.DescriptionKey, null, null, null))]);
     }

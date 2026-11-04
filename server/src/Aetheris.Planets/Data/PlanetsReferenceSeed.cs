@@ -3,6 +3,7 @@ using Aetheris.Core.Data;
 using Aetheris.Core.Numbers;
 using Aetheris.Core.Text;
 using Aetheris.Economy.Services;
+using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Planets.Services;
 using Aetheris.Requirements;
@@ -11,7 +12,7 @@ using Aetheris.World.Api;
 using Aetheris.World.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Aetheris.Planets.Data;
+namespace Aetheris.Planets;
 
 /// <summary>
 /// Fills the building tables of a fresh database with the starting data (task 00011, open
@@ -185,6 +186,7 @@ public static class PlanetsReferenceSeed
                 SortOrder = type.SortOrder,
                 IsStartBuilding = type.IsStartBuilding,
                 BuildingClass = type.BuildingClass,
+                ImageKey = type.ImageKey,
                 CategoryId = categoryIds.TryGetValue(type.Category, out int categoryId)
                     ? categoryId
                     : throw new InvalidOperationException($"The starting data gives the building '{type.Code}' the unknown category '{type.Category}'."),
@@ -289,14 +291,18 @@ public static class PlanetsReferenceSeed
         Dictionary<string, int> typeIds,
         CancellationToken cancellationToken)
     {
-        int? populationResourceId = resources.Resources
-            .FirstOrDefault(resource => resource.Code == EconomyCodes.PopulationResource)
-            ?.Id;
+        // The resource paid by the inhabitants is the one the reference data marks, never a code.
+        ResourceTypeFact? populationResource = resources.Resources
+            .Where(resource => resource.PaidByPopulation)
+            .OrderBy(resource => resource.Id)
+            .FirstOrDefault();
 
-        if (populationResourceId is null)
+        if (populationResource is null)
         {
             return false;
         }
+
+        int populationResourceId = populationResource.Id;
 
         List<int> typeIdList = [.. typeIds.Values];
 
@@ -313,7 +319,7 @@ public static class PlanetsReferenceSeed
 
         foreach (SeedBuildingType type in seed.BuildingTypes)
         {
-            SeedCost? populationCost = type.Costs.FirstOrDefault(cost => cost.Resource == EconomyCodes.PopulationResource);
+            SeedCost? populationCost = type.Costs.FirstOrDefault(cost => cost.Resource == populationResource.Code);
 
             if (populationCost is null || !typeIds.TryGetValue(type.Code, out int typeId))
             {
@@ -336,7 +342,7 @@ public static class PlanetsReferenceSeed
 
                 levelRow.CostIds.Add(new BuildingLevelCostEntity
                 {
-                    ResourceTypeId = populationResourceId.Value,
+                    ResourceTypeId = populationResourceId,
                     Amount = ValueAt(populationCost, level - populationCost.FromLevel + 1),
                 });
                 added = true;
@@ -428,6 +434,7 @@ public sealed record SeedBuildingCategory(
 /// <param name="IsStartBuilding">Whether a race without a start building gets this type.</param>
 /// <param name="BuildingClass">The class of the type: what the building is for (task 00012).</param>
 /// <param name="Category">The code of the category of the type (task 00020).</param>
+/// <param name="ImageKey">The key of the picture of the type, or <see langword="null"/> for the placeholder.</param>
 public sealed record SeedBuildingType(
     string Code,
     int SortOrder,
@@ -438,9 +445,10 @@ public sealed record SeedBuildingType(
     IReadOnlyList<SeedEffect> Effects,
     IReadOnlyList<SeedRequirement> Requirements,
     bool IsStartBuilding = false,
-    string BuildingClass = Services.BuildingClasses.None,
+    string BuildingClass = BuildingClasses.None,
     string Category = "",
-    int? MaxLevel = null);
+    int? MaxLevel = null,
+    string? ImageKey = null);
 
 /// <summary>The growth of a value with the level.</summary>
 /// <remarks>The value at a level is <c>base × growth^(level − 1) + step × (level − 1)</c>.</remarks>

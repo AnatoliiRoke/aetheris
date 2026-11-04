@@ -81,6 +81,38 @@ public interface IPlanetsModule
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the value of one effect of the building of a class on a body, at the level the body
+    /// has built: the coefficient of the converter of the body, for example.
+    /// </summary>
+    /// <param name="buildingClass">The class of the building, one of <see cref="BuildingClasses"/>.</param>
+    /// <param name="effectType">The effect type, one of <see cref="BuildingEffectTypes"/>.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="playerId">The player, or <see langword="null"/> when the level of any body is wanted.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The value of the effect; zero when the body has no such building or the building has no such effect.</returns>
+    Task<decimal> GetBuildingEffectValueAsync(
+        string buildingClass,
+        string effectType,
+        long planetId,
+        string? playerId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the values of the effects of one building of a body, at the level it has built: the
+    /// coefficient of the converter of the body, for example.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="planetBuildingId">The building.</param>
+    /// <param name="playerId">The player, or <see langword="null"/> when the level of any body is wanted.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The values of the effects by their type; a building without effects gives nothing.</returns>
+    Task<IReadOnlyDictionary<string, decimal>> GetBuildingEffectsAsync(
+        long planetId,
+        long planetBuildingId,
+        string? playerId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Finds the identifier of a building type by its neutral code.
     /// </summary>
     /// <param name="code">The neutral code of the building type.</param>
@@ -95,7 +127,7 @@ public interface IPlanetsModule
     /// <summary>
     /// Finds the identifier of a building type by its class.
     /// </summary>
-    /// <param name="buildingClass">The class of the building type, one of <see cref="Services.BuildingClasses"/>.</param>
+    /// <param name="buildingClass">The class of the building type, one of <see cref="BuildingClasses"/>.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The identifier, or <see langword="null"/> when no building has the class.</returns>
     /// <remarks>
@@ -127,6 +159,30 @@ public interface IPlanetsModule
     /// <returns>The bodies of the player in the order of their identifiers, by class; the level is zero on a body without the building.</returns>
     Task<IReadOnlyDictionary<string, IReadOnlyList<PlanetBuildingLevel>>> GetBuildingLevelsAsync(
         IReadOnlyCollection<string> buildingClasses,
+        string playerId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets what the science centre of the civilization gives at the largest level the caller has
+    /// read already: the places and the speed of the research. Only the cached catalog is read, so
+    /// a caller that knows the levels asks the database nothing (code audit of 04.11.2026).
+    /// </summary>
+    /// <param name="researchCenterLevel">The largest level of the science centres of the player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bonus; only its fields of the research are filled.</returns>
+    Task<OwnerBuildingBonus> GetResearchCenterBonusAsync(
+        int researchCenterLevel,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets what the buildings of every body of a player give the whole civilization (task
+    /// 00035): the places and the speed the building plants, the science centres and the design
+    /// bureaus give.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The bonus of the owner; nothing changes for a player without such buildings.</returns>
+    Task<OwnerBuildingBonus> GetOwnerBuildingBonusAsync(
         string playerId,
         CancellationToken cancellationToken = default);
 
@@ -180,7 +236,7 @@ public interface IPlanetsModule
     /// storage of the parts the production module keeps, for example (task 00013, decision 9).
     /// </summary>
     /// <param name="planetId">The body.</param>
-    /// <param name="effectType">The effect type, one of <see cref="Services.BuildingEffectTypes"/>.</param>
+    /// <param name="effectType">The effect type, one of <see cref="BuildingEffectTypes"/>.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The sum of the values of the effect, or zero when no building has it.</returns>
     Task<long> GetBuildingEffectTotalAsync(
@@ -193,7 +249,7 @@ public interface IPlanetsModule
     /// module that needs it for every body of a player does not read the buildings body by body.
     /// </summary>
     /// <param name="planetIds">The bodies.</param>
-    /// <param name="effectType">The effect type, one of <see cref="Services.BuildingEffectTypes"/>.</param>
+    /// <param name="effectType">The effect type, one of <see cref="BuildingEffectTypes"/>.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The sum by body; a body without the effect has zero.</returns>
     Task<IReadOnlyDictionary<long, long>> GetBuildingEffectTotalsAsync(

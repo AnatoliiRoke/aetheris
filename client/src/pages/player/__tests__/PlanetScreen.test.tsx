@@ -20,8 +20,10 @@ describe('PlanetPage: the screen of the planet', () => {
     expect(within(card).getByText('Сектор 1 · Система 3 · Орбіта 2')).toBeInTheDocument();
     expect(within(card).getByText('310 / 600')).toBeInTheDocument();
     expect(within(card).getByText('1,5×')).toBeInTheDocument();
-    // A resource the body has no deposit of shows a dash, never a made-up coefficient.
-    expect(within(card).getByText('—')).toBeInTheDocument();
+    // Only the resources the body has a deposit of are in the block of the richness; a resource
+    // without a coefficient is left out, not shown with a dash.
+    expect(within(card).queryByText('—')).toBeNull();
+    expect(within(card).getAllByRole('listitem')).toHaveLength(1);
   });
 
   it('shows the growth of the resources in one block and the storage in another', async () => {

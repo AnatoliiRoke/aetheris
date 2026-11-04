@@ -78,6 +78,7 @@ public sealed record ProductionCatalog(
 /// <param name="SortOrder">The order in the lists.</param>
 /// <param name="IsArchived">Whether the group is archived.</param>
 /// <param name="Characteristics">The characteristics the parts of the group have, in the order of the form.</param>
+/// <param name="ParentGroupId">The group this group lies in, or <see langword="null"/> for a group of the top level (task 00043).</param>
 public sealed record PartGroupInfo(
     int Id,
     string Code,
@@ -86,7 +87,8 @@ public sealed record PartGroupInfo(
     string? ImageKey,
     int SortOrder,
     bool IsArchived,
-    IReadOnlyList<PartGroupCharacteristicInfo> Characteristics);
+    IReadOnlyList<PartGroupCharacteristicInfo> Characteristics,
+    int? ParentGroupId = null);
 
 /// <summary>A characteristic of a group of the parts.</summary>
 /// <param name="CharacteristicId">The characteristic.</param>

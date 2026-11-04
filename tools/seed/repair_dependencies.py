@@ -469,7 +469,8 @@ def assign_minerals(catalog: dict) -> None:
     position: dict[str, int] = {}
     totals = {name: 0.0 for name in MINERALS}
     for item in catalog["items"]:
-        if item["kind"] != "modul":
+        # An upgraded module (task 00043) takes the resources of its base after the hand-out.
+        if item["kind"] != "modul" or item.get("upgradeOf"):
             continue
         index = position.get(item["group"], 0)
         position[item["group"]] = index + 1
@@ -496,6 +497,10 @@ def assign_minerals(catalog: dict) -> None:
     balance(module_slots, totals)
     for slot in module_slots:
         slot["item"]["resources"].append(slot["pick"])
+    modules = {item["name"]: item for item in catalog["items"] if item["kind"] == "modul"}
+    for item in catalog["items"]:
+        if item["kind"] == "modul" and item.get("upgradeOf"):
+            item["resources"] = list(modules[item["upgradeOf"]]["resources"])
     for item in catalog["items"]:
         if item["kind"] == "modul":
             item["resources"].sort(key=order_key)

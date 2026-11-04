@@ -1,4 +1,4 @@
-namespace Aetheris.Planets.Services;
+namespace Aetheris.Planets;
 
 /// <summary>
 /// The kinds of effects a building level has (task 00011, decision 10).
@@ -45,6 +45,90 @@ public static class BuildingEffectTypes
     public const string MarketLotLimit = "market_lot_limit";
 
     /// <summary>
+    /// Raises the income of the credits of the civilization: the value is the share of the income
+    /// the building adds, and it is added to the share of the technologies.
+    /// </summary>
+    public const string CreditIncomeBonus = "credit_income_bonus";
+
+    /// <summary>
+    /// Adds places to the queue of the construction of the body: the building adds this many
+    /// places to every queue of every body of the owner.
+    /// </summary>
+    public const string ConstructionQueueSlots = "construction_queue_slots";
+
+    /// <summary>
+    /// Speeds the construction of the body up: the value is the share of the time the building
+    /// takes off, and the time is divided by one plus that share.
+    /// </summary>
+    public const string ConstructionSpeedBonus = "construction_speed_bonus";
+
+    /// <summary>
+    /// Adds places to the queue of the research of the owner: the building adds this many places
+    /// to every queue of the owner.
+    /// </summary>
+    public const string ResearchQueueSlots = "research_queue_slots";
+
+    /// <summary>
+    /// Speeds the research of the owner up: the value is the share of the time the building takes
+    /// off, and the time is divided by one plus that share.
+    /// </summary>
+    public const string ResearchSpeedBonus = "research_speed_bonus";
+
+    /// <summary>
+    /// Adds ships to the limit of the fleet of the body: the level of the spaceport of the body
+    /// gives the number.
+    /// </summary>
+    public const string FleetLimit = "fleet_limit";
+
+    /// <summary>
+    /// Adds capacity to the storage that the raid does not reach: the value is the capacity in
+    /// tonnes of every kind of resource of the body.
+    /// </summary>
+    public const string ProtectedStorageCapacity = "protected_storage_capacity";
+
+    /// <summary>
+    /// Raises the share of the goods that the conversion of the resources keeps: the value is the
+    /// share the building gives on top of the share of the starting data.
+    /// </summary>
+    public const string ConversionCoefficient = "conversion_coefficient";
+
+    /// <summary>
+    /// Raises the share of the goods that the recycling of the parts keeps: the value is the share
+    /// the building gives on top of the share of the starting data.
+    /// </summary>
+    public const string RecyclingCoefficient = "recycling_coefficient";
+
+    /// <summary>
+    /// Raises the range of the radar of the body: the value is the share of the range the building
+    /// gives on top of the range of the level.
+    /// </summary>
+    public const string RadarRangeBonus = "radar_range_bonus";
+
+    /// <summary>
+    /// Raises the mass of the goods the portal sends for one energy rod: the value is the mass in
+    /// tonnes.
+    /// </summary>
+    public const string PortalMassPerEnergyRod = "portal_mass_per_energy_rod";
+
+    /// <summary>
+    /// Raises the mass of the goods the portal prepares in one hour: the value is the mass in
+    /// tonnes.
+    /// </summary>
+    public const string PortalMassPerHour = "portal_mass_per_hour";
+
+    /// <summary>
+    /// Opens the hulls of the ships: the level of the design bureau gives the number of the
+    /// classes of the hulls the owner may build.
+    /// </summary>
+    public const string HullClassLimit = "hull_class_limit";
+
+    /// <summary>
+    /// Adds places to the queue of the designs of the ships of the owner: the building adds this
+    /// many places to every queue of the owner.
+    /// </summary>
+    public const string DesignQueueSlots = "design_queue_slots";
+
+    /// <summary>
     /// Gets every effect type, in the order of the form of the admin panel (task 00023).
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -59,6 +143,20 @@ public static class BuildingEffectTypes
         LevelCap,
         PartStorageCapacity,
         MarketLotLimit,
+        CreditIncomeBonus,
+        ConstructionQueueSlots,
+        ConstructionSpeedBonus,
+        ResearchQueueSlots,
+        ResearchSpeedBonus,
+        FleetLimit,
+        ProtectedStorageCapacity,
+        ConversionCoefficient,
+        RecyclingCoefficient,
+        RadarRangeBonus,
+        PortalMassPerEnergyRod,
+        PortalMassPerHour,
+        HullClassLimit,
+        DesignQueueSlots,
     ];
 
     /// <summary>

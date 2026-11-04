@@ -1,3 +1,4 @@
+using Aetheris.Planets;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Data;
 using Aetheris.Requirements;
@@ -136,7 +137,7 @@ public sealed class ResearchTreeDetailsTests
         Assert.Empty(before.CurrentEffects!);
 
         ResearchDbContext dbContext = services.GetRequiredService<ResearchDbContext>();
-        dbContext.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = player.Account.UserId, TechnologyId = before.Id, Level = 2 });
+        dbContext.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = player.Account.UserId, PlanetId = player.PlanetId, TechnologyId = before.Id, Level = 2 });
         await dbContext.SaveChangesAsync(Token);
 
         TechnologyDto after = (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token)).Technologies.Single(entry => entry.Id == before.Id);

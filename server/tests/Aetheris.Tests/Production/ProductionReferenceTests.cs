@@ -7,6 +7,7 @@ using Aetheris.Core.Security;
 using Aetheris.Host.Admin;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
+using Aetheris.Planets;
 using Aetheris.Planets.Data;
 using Aetheris.Planets.Data.Entities;
 using Aetheris.Production;
@@ -433,7 +434,7 @@ public sealed class ProductionReferenceTests
         Assert.False(string.IsNullOrEmpty(reason.TargetNameKey));
 
         ResearchDbContext research = services.GetRequiredService<ResearchDbContext>();
-        research.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = player.Account.UserId, TechnologyId = technologyId, Level = 1 });
+        research.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = player.Account.UserId, PlanetId = player.PlanetId, TechnologyId = technologyId, Level = 1 });
         await research.SaveChangesAsync(Token);
 
         ProductionRecipeDto opened = (await production.GetFactoryAsync(player.Account.UserId, player.PlanetId, factoryId, Token)).Recipes.Single(recipe => recipe.RecipeId == recipeId);
@@ -610,7 +611,8 @@ public sealed class ProductionReferenceTests
                 .GetFactoryAsync(player.Account.UserId, player.PlanetId, factoryId, Token);
 
             Assert.Equal(imageKey, factory.Recipes.Single(recipe => recipe.RecipeId == recipeId).ImageKey);
-            Assert.Null(factory.Recipes.Single(recipe => recipe.RecipeId == plainId).ImageKey);
+            // A recipe without a picture of its own shows the picture of the part it makes.
+            Assert.Equal(imageKey, factory.Recipes.Single(recipe => recipe.RecipeId == plainId).ImageKey);
         }
         finally
         {
