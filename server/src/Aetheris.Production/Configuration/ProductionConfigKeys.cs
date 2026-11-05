@@ -28,6 +28,16 @@ public static class ProductionConfigKeys
     public const string DefaultPartWeight = "production.part.default_weight";
 
     /// <summary>
+    /// The number of slots of a hull that has no number of slots of its own yet (task 00038).
+    /// </summary>
+    /// <remarks>
+    /// The number of slots of a hull is data: the characteristics of the hull hold it. Until the
+    /// modelling of the ships gives every hull its own number, this value is the fallback, so a
+    /// new hull has a number of slots without a change of the code.
+    /// </remarks>
+    public const string DefaultHullSlots = "production.hull.default_slots";
+
+    /// <summary>
     /// Gets the definitions of the parameters with their starting values and bounds.
     /// </summary>
     public static IReadOnlyList<ConfigParameterDefinition> Definitions { get; } =
@@ -36,5 +46,6 @@ public static class ProductionConfigKeys
         new(QueueMaxExtraSlots, "2", "0", "100", "Найбільша кількість платних місць, доданих до черги заводу."),
         new(CatalogCacheSeconds, "30", "0", "86400", "Скільки секунд таблиці виробництва залишаються в пам'яті сервера перед повторним читанням."),
         new(DefaultPartWeight, "1", "0", "1000000000", "Вага однієї деталі в тоннах, для деталей, у яких ще немає власної ваги."),
+        new(DefaultHullSlots, "8", "1", "1000", "Кількість слотів корпусу, для корпусів, у яких ще немає власної кількості слотів."),
     ];
 }

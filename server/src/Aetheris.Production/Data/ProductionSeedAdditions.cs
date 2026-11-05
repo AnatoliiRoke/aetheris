@@ -78,11 +78,15 @@ public static class ProductionSeedAdditions
 
         List<SeedPart> missingParts = [.. data.Parts.Where(part => !partIds.ContainsKey(part.Code))];
         List<SeedRecipe> missingRecipes = [.. data.Recipes.Where(recipe => !recipeIds.ContainsKey(recipe.Code))];
+        Dictionary<string, int> raceIds = races.ToDictionary(race => race.Code, race => race.Id);
 
-        if (missingParts.Count == 0 && missingRecipes.Count == 0)
-        {
-            return false;
-        }
+        // The characteristics of the starting data may be missing as well: the number of the
+        // slots of a hull and the extra slot of the race joined the data later (task 00038).
+        bool added = await AddMissingCharacteristicsAsync(dbContext, data, texts, codes, cancellationToken).ConfigureAwait(false);
+
+        // The links of the parts to the hulls and to the races may be missing even when every
+        // part and every recipe is already there (task 00042), so the step looks for them too.
+        bool missingLinks = await HasMissingCompatibilityLinksAsync(dbContext, data, partIds, raceIds, cancellationToken).ConfigureAwait(false);
 
         Dictionary<string, int> groupIds = await IdsAsync(
             dbContext.PartGroups.Select(group => new CodeId { Code = group.Code, Id = group.Id }),
@@ -93,7 +97,16 @@ public static class ProductionSeedAdditions
             DatabaseCodes((data.Characteristics ?? []).Select(characteristic => characteristic.Code), ProductionTextKeys.CharacteristicCodeGroup),
             cancellationToken).ConfigureAwait(false);
 
-        bool added = false;
+        // The attributes and the values of the characteristics of the parts may be missing as
+        // well: the role of a hull and of a module and the kind of the component joined the
+        // data later (task 00038).
+        added |= await AddMissingPartDetailsAsync(dbContext, data, partIds, characteristicIds, cancellationToken).ConfigureAwait(false);
+
+        if (missingParts.Count == 0 && missingRecipes.Count == 0 && !missingLinks)
+        {
+            return added;
+        }
+
         List<SeedPart> addableParts = [.. missingParts.Where(part => groupIds.ContainsKey(part.Group))];
         List<PartTypeEntity> newParts = [];
 
@@ -175,7 +188,11 @@ public static class ProductionSeedAdditions
         }
 
         Dictionary<string, int> resourceIds = resources.Resources.ToDictionary(resource => resource.Code, resource => resource.Id);
-        Dictionary<string, int> raceIds = races.ToDictionary(race => race.Code, race => race.Id);
+
+        // The links of the parts to the hulls and to the races join the starting data later
+        // (task 00042), so the step adds the ones that are missing and leaves the others as the
+        // admin panel has them.
+        added |= await AddCompatibilityLinksAsync(dbContext, data, partIds, raceIds, cancellationToken).ConfigureAwait(false);
 
         // A recipe is added when its product, its ingredients and the technologies of its gates
         // are all in the database; a recipe without its gate would be free, so it waits instead.
@@ -290,6 +307,350 @@ public static class ProductionSeedAdditions
         }
 
         await RaiseAsync(codes, ProductionTextKeys.RecipeCodeGroup, newRecipes.Select(recipe => recipe.Code), cancellationToken).ConfigureAwait(false);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Tells whether the starting data names a link of a part to a hull or to a race that the
+    /// database does not have yet.
+    /// </summary>
+    /// <summary>
+    /// Adds the attributes and the values of the characteristics of the parts of the starting
+    /// data that are missing.
+    /// </summary>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="data">The starting data.</param>
+    /// <param name="partIds">The identifiers of the parts of the database, by the codes of the file.</param>
+    /// <param name="characteristicIds">The identifiers of the characteristics of the database, by the codes of the file.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when a row was added.</returns>
+    /// <remarks>
+    /// The step only adds: an attribute or a value that the admin panel has already changed
+    /// stays as it is, so the rules of the game survive the update of the starting data.
+    /// </remarks>
+    private static async Task<bool> AddMissingPartDetailsAsync(
+        ProductionDbContext dbContext,
+        ProductionSeedData data,
+        IReadOnlyDictionary<string, int> partIds,
+        IReadOnlyDictionary<string, int> characteristicIds,
+        CancellationToken cancellationToken)
+    {
+        List<int> ids = [.. partIds.Values];
+
+        if (ids.Count == 0)
+        {
+            return false;
+        }
+
+        Dictionary<int, HashSet<string>> attributeKeys = await dbContext.PartAttributes.AsNoTracking()
+            .Where(attribute => ids.Contains(attribute.PartTypeId))
+            .GroupBy(attribute => attribute.PartTypeId)
+            .ToDictionaryAsync(
+                group => group.Key,
+                group => (HashSet<string>)group.Select(attribute => attribute.AttributeKey).ToHashSet(StringComparer.Ordinal),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        Dictionary<int, HashSet<int>> characteristicKeys = await dbContext.PartCharacteristicValues.AsNoTracking()
+            .Where(value => ids.Contains(value.PartTypeId))
+            .GroupBy(value => value.PartTypeId)
+            .ToDictionaryAsync(
+                group => group.Key,
+                group => (HashSet<int>)group.Select(value => value.CharacteristicId).ToHashSet(),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        bool added = false;
+
+        foreach (SeedPart part in data.Parts)
+        {
+            if (!partIds.TryGetValue(part.Code, out int partId))
+            {
+                continue;
+            }
+
+            HashSet<string> keys = attributeKeys.GetValueOrDefault(partId) ?? [];
+
+            foreach (KeyValuePair<string, SeedAttributeValue> attribute in part.Attributes)
+            {
+                if (!keys.Add(attribute.Key))
+                {
+                    continue;
+                }
+
+                dbContext.PartAttributes.Add(new PartAttributeEntity
+                {
+                    PartTypeId = partId,
+                    AttributeKey = attribute.Key,
+                    NumberValue = attribute.Value.Number,
+                    CodeValue = attribute.Value.Code,
+                    TextValue = attribute.Value.Text,
+                });
+
+                added = true;
+            }
+
+            HashSet<int> known = characteristicKeys.GetValueOrDefault(partId) ?? [];
+
+            foreach (KeyValuePair<string, SeedCharacteristicValue> value in part.Characteristics ?? new Dictionary<string, SeedCharacteristicValue>())
+            {
+                if (!characteristicIds.TryGetValue(value.Key, out int characteristicId) || !known.Add(characteristicId))
+                {
+                    continue;
+                }
+
+                PartCharacteristicValueEntity characteristicValue = new()
+                {
+                    PartTypeId = partId,
+                    CharacteristicId = characteristicId,
+                    NumberValue = value.Value.Number,
+                };
+
+                foreach (KeyValuePair<int, decimal> level in value.Value.Levels ?? new Dictionary<int, decimal>())
+                {
+                    characteristicValue.Levels.Add(new PartCharacteristicLevelValueEntity
+                    {
+                        Level = level.Key,
+                        NumberValue = level.Value,
+                    });
+                }
+
+                dbContext.PartCharacteristicValues.Add(characteristicValue);
+                added = true;
+            }
+        }
+
+        if (added)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return added;
+    }
+
+    /// <summary>
+    /// Adds the characteristics of the starting data whose rows are missing.
+    /// </summary>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="data">The starting data.</param>
+    /// <param name="texts">The texts of the game data.</param>
+    /// <param name="codes">The counters of the neutral codes.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when a row was added.</returns>
+    /// <remarks>
+    /// A characteristic that joins the starting data later takes the next code of the counter
+    /// of the server, like the parts and the recipes do. The step only adds: a characteristic
+    /// whose row is already there keeps the kind and the texts the admin panel has given it.
+    /// </remarks>
+    private static async Task<bool> AddMissingCharacteristicsAsync(
+        ProductionDbContext dbContext,
+        ProductionSeedData data,
+        ILocalizationTexts texts,
+        ICodeSequence codes,
+        CancellationToken cancellationToken)
+    {
+        Dictionary<string, string> databaseCodes = DatabaseCodes(
+            (data.Characteristics ?? []).Select(characteristic => characteristic.Code),
+            ProductionTextKeys.CharacteristicCodeGroup);
+
+        HashSet<string> existing = await dbContext.Characteristics.AsNoTracking()
+            .Select(characteristic => characteristic.Code)
+            .ToHashSetAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        List<SeedCharacteristic> missing = [.. (data.Characteristics ?? [])
+            .Where(characteristic => !existing.Contains(databaseCodes[characteristic.Code]))];
+
+        if (missing.Count == 0)
+        {
+            return false;
+        }
+
+        List<CharacteristicEntity> entities = [];
+
+        foreach (SeedCharacteristic characteristic in missing)
+        {
+            string code = await codes.NextAsync(ProductionTextKeys.CharacteristicCodeGroup, cancellationToken).ConfigureAwait(false);
+
+            CharacteristicEntity entity = new()
+            {
+                Code = code,
+                NameKey = ProductionTextKeys.CharacteristicName(code),
+                DescriptionKey = ProductionTextKeys.CharacteristicDescription(code),
+                UnitKey = characteristic.Unit is null ? null : ProductionTextKeys.CharacteristicUnit(code),
+                Kind = characteristic.Kind,
+                SortOrder = characteristic.SortOrder,
+            };
+
+            dbContext.Characteristics.Add(entity);
+            entities.Add(entity);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        await texts.AddMissingAsync(
+            [
+                .. missing.Zip(entities).SelectMany(pair => (IEnumerable<LocalizationTextEntry>)
+                [
+                    .. ProductionSeedTexts.Entries(pair.Second.NameKey, pair.First.Name),
+                    .. ProductionSeedTexts.Entries(pair.Second.DescriptionKey, pair.First.Description),
+                    .. ProductionSeedTexts.Entries(pair.Second.UnitKey, pair.First.Unit),
+                ]),
+            ],
+            ProductionReferenceSeed.ProductionSeedActor,
+            cancellationToken).ConfigureAwait(false);
+
+        return true;
+    }
+
+    private static async Task<bool> HasMissingCompatibilityLinksAsync(
+        ProductionDbContext dbContext,
+        ProductionSeedData data,
+        IReadOnlyDictionary<string, int> partIds,
+        IReadOnlyDictionary<string, int> raceIds,
+        CancellationToken cancellationToken)
+    {
+        HashSet<(int PartTypeId, int HullPartTypeId)> existingHulls =
+        [
+            .. (await dbContext.PartHullCompatibilities
+                .AsNoTracking()
+                .Select(link => new { link.PartTypeId, link.HullPartTypeId })
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false))
+                .Select(link => (link.PartTypeId, link.HullPartTypeId)),
+        ];
+
+        HashSet<(int PartTypeId, int RaceId)> existingRaces =
+        [
+            .. (await dbContext.PartRaceCompatibilities
+                .AsNoTracking()
+                .Select(link => new { link.PartTypeId, link.RaceId })
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false))
+                .Select(link => (link.PartTypeId, link.RaceId)),
+        ];
+
+        foreach (SeedPartHull link in data.PartHulls ?? [])
+        {
+            if (!partIds.TryGetValue(link.Part, out int partId))
+            {
+                continue;
+            }
+
+            foreach (string hull in link.Hulls)
+            {
+                if (partIds.TryGetValue(hull, out int hullId) && !existingHulls.Contains((partId, hullId)))
+                {
+                    return true;
+                }
+            }
+        }
+
+        foreach (SeedPartRace link in data.PartRaces ?? [])
+        {
+            if (!partIds.TryGetValue(link.Part, out int partId))
+            {
+                continue;
+            }
+
+            foreach (string race in link.Races)
+            {
+                if (raceIds.TryGetValue(race, out int raceId) && !existingRaces.Contains((partId, raceId)))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Adds the links of the parts to the hulls and to the races that are missing.
+    /// </summary>
+    /// <remarks>
+    /// The step only adds: a link that is already there is not touched, so a change of the
+    /// admin panel stays. A link whose part, hull or race is not in the database waits for a
+    /// later start, and it is written with both sides of the link as real rows.
+    /// </remarks>
+    private static async Task<bool> AddCompatibilityLinksAsync(
+        ProductionDbContext dbContext,
+        ProductionSeedData data,
+        IReadOnlyDictionary<string, int> partIds,
+        IReadOnlyDictionary<string, int> raceIds,
+        CancellationToken cancellationToken)
+    {
+        List<PartHullCompatibilityEntity> hulls = [];
+        List<PartRaceCompatibilityEntity> races = [];
+
+        foreach (SeedPartHull link in data.PartHulls ?? [])
+        {
+            if (!partIds.TryGetValue(link.Part, out int partId))
+            {
+                continue;
+            }
+
+            foreach (string hull in link.Hulls)
+            {
+                if (partIds.TryGetValue(hull, out int hullId))
+                {
+                    hulls.Add(new PartHullCompatibilityEntity
+                    {
+                        PartTypeId = partId,
+                        HullPartTypeId = hullId,
+                    });
+                }
+            }
+        }
+
+        foreach (SeedPartRace link in data.PartRaces ?? [])
+        {
+            if (!partIds.TryGetValue(link.Part, out int partId))
+            {
+                continue;
+            }
+
+            foreach (string race in link.Races)
+            {
+                if (raceIds.TryGetValue(race, out int raceId))
+                {
+                    races.Add(new PartRaceCompatibilityEntity
+                    {
+                        PartTypeId = partId,
+                        RaceId = raceId,
+                    });
+                }
+            }
+        }
+
+        if (hulls.Count == 0 && races.Count == 0)
+        {
+            return false;
+        }
+
+        // The links that are already there are left as the admin panel has them, so only the
+        // missing ones are written. The reading is in one query, so the table is not walked
+        // row by row.
+        List<PartHullCompatibilityEntity> existingHullRows = await dbContext.PartHullCompatibilities
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        List<PartRaceCompatibilityEntity> existingRaceRows = await dbContext.PartRaceCompatibilities
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        HashSet<(int PartTypeId, int HullPartTypeId)> existingHulls =
+            [.. existingHullRows.Select(link => (link.PartTypeId, link.HullPartTypeId))];
+        HashSet<(int PartTypeId, int RaceId)> existingRaces =
+            [.. existingRaceRows.Select(link => (link.PartTypeId, link.RaceId))];
+
+        dbContext.PartHullCompatibilities.AddRange([.. hulls.Where(link => !existingHulls.Contains((link.PartTypeId, link.HullPartTypeId)))]);
+        dbContext.PartRaceCompatibilities.AddRange([.. races.Where(link => !existingRaces.Contains((link.PartTypeId, link.RaceId)))]);
+
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return true;
     }

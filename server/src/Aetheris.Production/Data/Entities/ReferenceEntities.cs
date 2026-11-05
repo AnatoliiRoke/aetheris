@@ -29,6 +29,16 @@ public sealed class PartGroupEntity
     public int SortOrder { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the parts of the group are hulls: a hull is a part a ship is built of,
+    /// and the parts of the other groups are fitted to a hull (task 00042).
+    /// </summary>
+    /// <remarks>
+    /// The flag is data, so a new group of the hulls arrives as a row with the flag and not as a
+    /// change of the code.
+    /// </remarks>
+    public bool IsHullGroup { get; set; }
+
+    /// <summary>
     /// Gets or sets the group this group lies in, or <see langword="null"/> for a group of the top
     /// level (task 00043). The groups of the top level are the sections of the production screen,
     /// and a group inside a group, such as the energy and the kinetic weapons inside the weapons,
@@ -93,6 +103,12 @@ public sealed class PartTypeEntity
 
     /// <summary>Gets or sets the attributes of the part.</summary>
     public List<PartAttributeEntity> AttributeIds { get; set; } = [];
+
+    /// <summary>Gets or sets the hulls the part fits (task 00042).</summary>
+    public List<PartHullCompatibilityEntity> HullCompatibilityIds { get; set; } = [];
+
+    /// <summary>Gets or sets the races the part belongs to (task 00042).</summary>
+    public List<PartRaceCompatibilityEntity> RaceCompatibilityIds { get; set; } = [];
 }
 
 /// <summary>

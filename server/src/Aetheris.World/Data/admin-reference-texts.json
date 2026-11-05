@@ -1,33 +1,146 @@
 {
-  "admin.reference.resource.title": { "uk": "Ресурси", "en": "Resources" },
-  "admin.reference.resource_group.title": { "uk": "Групи ресурсів", "en": "Resource groups" },
-  "admin.reference.field.image": { "uk": "Зображення", "en": "Picture" },
-  "admin.reference.field.name": { "uk": "Назва", "en": "Name" },
-  "admin.reference.field.description": { "uk": "Опис", "en": "Description" },
-  "admin.reference.field.sort_order": { "uk": "Порядок у списках", "en": "Order in the lists" },
-  "admin.reference.field.resource_group": { "uk": "Група ресурсів", "en": "Resource group" },
-  "admin.reference.field.allowed_on_planet": { "uk": "Може лежати на планеті", "en": "May lie on a planet" },
-  "admin.reference.field.scope": { "uk": "Область дії", "en": "Scope" },
-  "admin.reference.field.earns_population_income": { "uk": "Дохід від населення", "en": "Income from the population" },
-  "admin.reference.field.allows_debt": { "uk": "Баланс може опуститися нижче нуля (адміністративний штраф)", "en": "The balance may go below zero (administrative fine)" },
-  "admin.reference.field.pays_portal_delivery": { "uk": "Цим ресурсом платять за доставку порталом", "en": "The delivery through a portal is paid with this resource" },
-  "admin.reference.field.paid_by_population": { "uk": "Цим ресурсом платять мешканці планети", "en": "The inhabitants of the body pay this resource" },
-  "admin.reference.field.is_balance": { "uk": "Баланси, а не запас складу", "en": "Balances, not a stock of the storage" },
-  "admin.reference.field.icon_shape": { "uk": "Форма іконки", "en": "Shape of the icon" },
-  "admin.reference.field.icon_tone": { "uk": "Колір іконки", "en": "Colour of the icon" },
-  "admin.reference.icon_shape.square": { "uk": "Квадрат", "en": "Square" },
-  "admin.reference.icon_shape.gem": { "uk": "Самоцвіт", "en": "Gem" },
-  "admin.reference.icon_shape.drop": { "uk": "Крапля", "en": "Drop" },
-  "admin.reference.icon_shape.spark": { "uk": "Іскра", "en": "Spark" },
-  "admin.reference.icon_shape.diamond": { "uk": "Ромб", "en": "Diamond" },
-  "admin.reference.icon_shape.hexagon": { "uk": "Шестикутник", "en": "Hexagon" },
-  "admin.reference.icon_shape.coin": { "uk": "Монета", "en": "Coin" },
-  "admin.reference.icon_tone.metal": { "uk": "Метал", "en": "Metal" },
-  "admin.reference.icon_tone.gem": { "uk": "Самоцвіт", "en": "Gem" },
-  "admin.reference.icon_tone.flame": { "uk": "Полум'я", "en": "Flame" },
-  "admin.reference.icon_tone.made": { "uk": "Вироблене", "en": "Manufactured" },
-  "admin.reference.icon_tone.credits": { "uk": "Кредити", "en": "Credits" },
-  "admin.reference.field.weight": { "uk": "Вага однієї одиниці (тонн)", "en": "Weight of one unit (tonnes)" },
-  "admin.reference.scope.planet": { "uk": "Планета", "en": "Planet" },
-  "admin.reference.scope.civilization": { "uk": "Цивілізація", "en": "Civilization" }
+  "admin.reference.resource.title": {
+    "uk": "Ресурси",
+    "en": "Resources"
+  },
+  "admin.reference.resource_group.title": {
+    "uk": "Групи ресурсів",
+    "en": "Resource groups"
+  },
+  "admin.reference.field.image": {
+    "uk": "Зображення",
+    "en": "Picture"
+  },
+  "admin.reference.field.name": {
+    "uk": "Назва",
+    "en": "Name"
+  },
+  "admin.reference.field.description": {
+    "uk": "Опис",
+    "en": "Description"
+  },
+  "admin.reference.field.sort_order": {
+    "uk": "Порядок у списках",
+    "en": "Order in the lists"
+  },
+  "admin.reference.field.resource_group": {
+    "uk": "Група ресурсів",
+    "en": "Resource group"
+  },
+  "admin.reference.field.allowed_on_planet": {
+    "uk": "Може лежати на планеті",
+    "en": "May lie on a planet"
+  },
+  "admin.reference.field.scope": {
+    "uk": "Область дії",
+    "en": "Scope"
+  },
+  "admin.reference.field.earns_population_income": {
+    "uk": "Дохід від населення",
+    "en": "Income from the population"
+  },
+  "admin.reference.field.allows_debt": {
+    "uk": "Баланс може опуститися нижче нуля (адміністративний штраф)",
+    "en": "The balance may go below zero (administrative fine)"
+  },
+  "admin.reference.field.pays_portal_delivery": {
+    "uk": "Цим ресурсом платять за доставку порталом",
+    "en": "The delivery through a portal is paid with this resource"
+  },
+  "admin.reference.field.paid_by_population": {
+    "uk": "Цим ресурсом платять мешканці планети",
+    "en": "The inhabitants of the body pay this resource"
+  },
+  "admin.reference.field.is_balance": {
+    "uk": "Баланси, а не запас складу",
+    "en": "Balances, not a stock of the storage"
+  },
+  "admin.reference.field.icon_shape": {
+    "uk": "Форма іконки",
+    "en": "Shape of the icon"
+  },
+  "admin.reference.field.icon_tone": {
+    "uk": "Колір іконки",
+    "en": "Colour of the icon"
+  },
+  "admin.reference.icon_shape.square": {
+    "uk": "Квадрат",
+    "en": "Square"
+  },
+  "admin.reference.icon_shape.gem": {
+    "uk": "Самоцвіт",
+    "en": "Gem"
+  },
+  "admin.reference.icon_shape.drop": {
+    "uk": "Крапля",
+    "en": "Drop"
+  },
+  "admin.reference.icon_shape.spark": {
+    "uk": "Іскра",
+    "en": "Spark"
+  },
+  "admin.reference.icon_shape.diamond": {
+    "uk": "Ромб",
+    "en": "Diamond"
+  },
+  "admin.reference.icon_shape.hexagon": {
+    "uk": "Шестикутник",
+    "en": "Hexagon"
+  },
+  "admin.reference.icon_shape.coin": {
+    "uk": "Монета",
+    "en": "Coin"
+  },
+  "admin.reference.icon_tone.metal": {
+    "uk": "Метал",
+    "en": "Metal"
+  },
+  "admin.reference.icon_tone.gem": {
+    "uk": "Самоцвіт",
+    "en": "Gem"
+  },
+  "admin.reference.icon_tone.flame": {
+    "uk": "Полум'я",
+    "en": "Flame"
+  },
+  "admin.reference.icon_tone.made": {
+    "uk": "Вироблене",
+    "en": "Manufactured"
+  },
+  "admin.reference.icon_tone.credits": {
+    "uk": "Кредити",
+    "en": "Credits"
+  },
+  "admin.reference.field.weight": {
+    "uk": "Вага однієї одиниці (тонн)",
+    "en": "Weight of one unit (tonnes)"
+  },
+  "admin.reference.scope.planet": {
+    "uk": "Планета",
+    "en": "Planet"
+  },
+  "admin.reference.scope.civilization": {
+    "uk": "Цивілізація",
+    "en": "Civilization"
+  },
+  "admin.reference.race.title": {
+    "uk": "Раси",
+    "en": "Races"
+  },
+  "admin.reference.field.mood": {
+    "uk": "Характер",
+    "en": "Mood"
+  },
+  "admin.reference.field.traits": {
+    "uk": "Особливості",
+    "en": "Traits"
+  },
+  "admin.reference.field.trait": {
+    "uk": "Особливість",
+    "en": "Trait"
+  },
+  "admin.reference.field.color_key": {
+    "uk": "Ключ кольору",
+    "en": "Colour key"
+  }
 }

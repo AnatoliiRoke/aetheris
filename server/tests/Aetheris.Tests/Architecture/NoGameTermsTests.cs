@@ -37,7 +37,7 @@ public sealed partial class NoGameTermsTests
     /// The prefixes that a seeded parameter key may have: the neutral test parameters, the
     /// parameters of the core mechanisms and those of the modules with their own definitions.
     /// </summary>
-    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world.", "admin.", "planets.", "research.", "production.", "processes.", "economy.", "market.", "observability."];
+    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world.", "admin.", "planets.", "research.", "production.", "processes.", "economy.", "market.", "fleet.", "observability."];
 
     /// <summary>
     /// The folders, relative to the server root, where the words of the game domain are
@@ -61,6 +61,8 @@ public sealed partial class NoGameTermsTests
         Path.Combine("tests", "Aetheris.Tests", "Economy") + Path.DirectorySeparatorChar,
         Path.Combine("src", "Aetheris.Market") + Path.DirectorySeparatorChar,
         Path.Combine("tests", "Aetheris.Tests", "Market") + Path.DirectorySeparatorChar,
+        Path.Combine("src", "Aetheris.Fleet") + Path.DirectorySeparatorChar,
+        Path.Combine("tests", "Aetheris.Tests", "Fleet") + Path.DirectorySeparatorChar,
     ];
 
     /// <summary>
@@ -219,11 +221,12 @@ public sealed partial class NoGameTermsTests
 
     /// <summary>
     /// The names that are allowed although they contain a game word: the module stubs of
-    /// task 00001, section 2.1, and framework names that are not ours: the OpenTelemetry
-    /// API that describes the service, MSBuild embedded files, a standard HTTP header and the
-    /// reflection API that reads embedded files.
+    /// task 00001, section 2.1, the types of the fleet module that the host registers, and
+    /// framework names that are not ours: the OpenTelemetry API that describes the service,
+    /// MSBuild embedded files, a standard HTTP header and the reflection API that reads
+    /// embedded files.
     /// </summary>
-    [GeneratedRegex(@"\bI?(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research)Module\b|Aetheris\.(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research)\b|""(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research)""|\b(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research) module\b|OpenTelemetry\.Resources|ConfigureResource|EmbeddedResource|Cross-Origin-Resource-Policy|GetManifestResource(Names|Stream)")]
+    [GeneratedRegex(@"\bI?(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research)Module\b|Aetheris\.(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research)\b|""(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research)""|\b(Economy|Planets|Fleet|Market|Rating|Chat|Admin|Requirements|Research) module\b|\bFleet(Database|ServiceCollectionExtensions|ConfigKeys)\b|AddFleetModule\b|OpenTelemetry\.Resources|ConfigureResource|EmbeddedResource|Cross-Origin-Resource-Policy|GetManifestResource(Names|Stream)")]
     private static partial Regex AllowedNames();
 
     [GeneratedRegex("[^A-Za-z]+")]

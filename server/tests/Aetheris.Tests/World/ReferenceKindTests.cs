@@ -28,6 +28,8 @@ public sealed class ReferenceKindTests
 
     private const string Groups = "/world/resource-groups";
 
+    private const string Races = "/world/races";
+
     private readonly AetherisTestFactory _factory;
 
     /// <summary>
@@ -300,7 +302,7 @@ public sealed class ReferenceKindTests
         Dictionary<string, int> permissionIds = await main.AdminPermissions.AsNoTracking().ToDictionaryAsync(permission => permission.Code, permission => permission.Id, Token);
 
         Assert.Equal(
-            ["resource", "resource_group", "building", "building_category", "technology", "technology_branch", "part_group", "part", "recipe",
+            ["resource", "resource_group", "race", "building", "building_category", "technology", "technology_branch", "part_group", "part", "recipe",
              "characteristic", "part_group_characteristic", "part_characteristic", "market_level", "market_reference_price",
              "process_type", "process_recipe", "process_param"],
             descriptors.OrderBy(descriptor => descriptor.SortOrder).Select(descriptor => descriptor.Kind));
@@ -345,6 +347,80 @@ public sealed class ReferenceKindTests
         Assert.All(
             descriptors.Where(descriptor => withoutPicture.Contains(descriptor.Kind)),
             descriptor => Assert.DoesNotContain(descriptor.Fields, field => field.Type == AdminReferenceFieldTypes.Image));
+    }
+
+    /// <summary>
+    /// A race is created, changed and archived from the admin panel: the code comes from the
+    /// server, the texts of the name, of the description, of the mood and of the traits are
+    /// written, and the parts of the race are bound to it in the admin panel of the parts
+    /// (task 00042).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_race_is_changed_and_archived_from_the_admin_panel()
+    {
+        await WorldTestData.ResetWorldAsync(_factory);
+        using HttpClient admin = await OwnerAsync();
+
+        (int id, int version) = await ReferenceAdmin.ChangedAsync(await ReferenceAdmin.CreateAsync(
+            admin,
+            Races,
+            new
+            {
+                name = ReferenceAdmin.Texts("Колани", "Kolan"),
+                description = ReferenceAdmin.Texts("Раса для тесту", "A race for the test"),
+                mood = ReferenceAdmin.Texts("Спокійні", "Calm"),
+                traits = new[]
+                {
+                    new { trait = ReferenceAdmin.Texts("Щит", "Shield") },
+                    new { trait = ReferenceAdmin.Texts("Радар", "Radar") },
+                },
+                color_key = "race-9",
+                sort_order = 9,
+            }));
+
+        JsonElement record = await ReferenceAdmin.ReadAsync(admin, Races, id);
+        string code = record.GetProperty("code").GetString()!;
+
+        Assert.Matches("^race_[0-9]+$", code);
+        Assert.Equal(version, record.GetProperty("version").GetInt32());
+        Assert.Equal("Колани", record.GetProperty("values").GetProperty("name").GetProperty("uk").GetString());
+        Assert.Equal("Спокійні", record.GetProperty("values").GetProperty("mood").GetProperty("uk").GetString());
+        Assert.Equal(2, record.GetProperty("values").GetProperty("traits").GetArrayLength());
+
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            WorldDbContext world = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
+            RaceEntity race = await world.Races.AsNoTracking().SingleAsync(entry => entry.Id == id, Token);
+            LocalizationPack english = await scope.ServiceProvider.GetRequiredService<ILocalizationTexts>().GetPackAsync("en", Token);
+
+            Assert.Equal("race-9", race.ColorKey);
+            Assert.Equal(9, race.SortOrder);
+            Assert.Equal(2, race.TraitKeys.Count);
+            Assert.Equal("Calm", english.Texts[race.MoodKey]);
+            Assert.Equal("Shield", english.Texts[race.TraitKeys[0]]);
+        }
+
+        (_, int changed) = await ReferenceAdmin.ChangedAsync(await ReferenceAdmin.UpdateAsync(
+            admin,
+            Races,
+            id,
+            version,
+            new
+            {
+                name = ReferenceAdmin.Texts("Колани Нові", "New Kolan"),
+                description = ReferenceAdmin.Texts("Раса для тесту", "A race for the test"),
+                mood = ReferenceAdmin.Texts("Спокійні", "Calm"),
+                traits = new[] { new { trait = ReferenceAdmin.Texts("Щит", "Shield") } },
+                color_key = "race-9",
+                sort_order = 9,
+            }));
+
+        Assert.Equal(version + 1, changed);
+
+        (_, int archived) = await ReferenceAdmin.ChangedAsync(await ReferenceAdmin.ArchiveAsync(admin, Races, id, changed));
+        Assert.DoesNotContain(code, await ReferenceAdmin.ListCodesAsync(admin, Races));
+        Assert.Contains(code, await ReferenceAdmin.ListCodesAsync(admin, Races, "archived=true"));
     }
 
     private static object Resource(int groupId, string ukrainian, string english, string? imageKey = null) => new

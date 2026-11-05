@@ -39,6 +39,18 @@ public interface IProductionModule
     Task<IReadOnlyList<ProductionPartSummaryDto>> GetPartsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the catalog of the ships: the hulls with their number of slots, their hold and their
+    /// role, and the modules with the hulls they fit (task 00038, section 3.2).
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The catalog of the ships.</returns>
+    /// <remarks>
+    /// The constructor of the ships reads the hulls and the modules through this contract and
+    /// never through the tables of the production.
+    /// </remarks>
+    Task<ShipCatalogDto> GetShipCatalogAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the factories of a body.
     /// </summary>
     /// <param name="playerId">The player.</param>

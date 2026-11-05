@@ -39,6 +39,7 @@ public static class ProductionServiceCollectionExtensions
         services.AddScoped<ProductionUnitOfWork>();
         services.AddScoped<ProductionBootstrapService>();
         services.AddScoped<ProductionQueueService>();
+        services.AddScoped<ShipCatalogService>();
         services.AddScoped<CharacteristicQueryService>();
         services.AddScoped<PartStockService>();
         services.AddScoped<PopulationCapsuleService>();

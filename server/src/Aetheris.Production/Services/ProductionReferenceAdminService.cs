@@ -5,6 +5,7 @@ using Aetheris.Core.Data;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
+using Aetheris.Production.Api;
 using Aetheris.Production.Configuration;
 using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
@@ -61,6 +62,14 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     private const string SortOrderField = "sort_order";
 
     private const string AttributesField = "attributes";
+
+    private const string CompatibleHullsField = "compatible_hulls";
+
+    private const string CompatibleHullField = "hull_part_type_id";
+
+    private const string RacesField = "races";
+
+    private const string RaceField = "race_id";
 
     private const string FactoryField = "building_type_id";
 
@@ -268,8 +277,37 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                         [
                             .. PartDamageKinds.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "damage_kind." + value)),
                             .. PartSlotSizes.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "slot_size." + value)),
+                            .. PartRoles.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "role." + value)),
+                            new AdminReferenceOption(HullRoles.Drone, LabelPrefix + "role." + HullRoles.Drone),
+                            .. PartComponents.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "component." + value)),
                         ]),
                     new("text_value", AdminReferenceFieldTypes.Text, LabelPrefix + "field.attribute_text"),
+                ]),
+            new(
+                CompatibleHullsField,
+                AdminReferenceFieldTypes.Effects,
+                LabelPrefix + "field.compatible_hulls",
+                Fields:
+                [
+                    new(
+                        CompatibleHullField,
+                        AdminReferenceFieldTypes.Reference,
+                        LabelPrefix + "field.compatible_hull",
+                        IsRequired: true,
+                        ReferenceKind: PartKind),
+                ]),
+            new(
+                RacesField,
+                AdminReferenceFieldTypes.Effects,
+                LabelPrefix + "field.races",
+                Fields:
+                [
+                    new(
+                        RaceField,
+                        AdminReferenceFieldTypes.Reference,
+                        LabelPrefix + "field.race",
+                        IsRequired: true,
+                        ReferenceKind: RaceReferenceKind),
                 ]),
         ]);
 
@@ -455,6 +493,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                 {
                     PartTypeEntity? part = await _dbContext.PartTypes.AsNoTracking()
                         .Include(entry => entry.AttributeIds)
+                        .Include(entry => entry.HullCompatibilityIds)
+                        .Include(entry => entry.RaceCompatibilityIds)
                         .SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false);
 
                     if (part is null)
@@ -480,6 +520,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             [SortOrderField] = part.SortOrder,
                             [WeightField] = part.Weight,
                             [AttributesField] = AttributesOf(part),
+                            [CompatibleHullsField] = HullsOf(part),
+                            [RacesField] = RacesOf(part),
                         });
                 }
 
@@ -1003,9 +1045,78 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             index++;
         }
 
+        await CheckCompatibilityAsync(failures, values, cancellationToken).ConfigureAwait(false);
+
         AdminReferenceRules.ThrowIfInvalid(failures);
     }
 
+    /// <summary>
+    /// Checks the hulls a part fits and the races it belongs to: a hull is a part of a group of
+    /// the hulls, a race is a race of the world, and a link is never sent twice (task 00042).
+    /// </summary>
+    private async Task CheckCompatibilityAsync(
+        Dictionary<string, List<string>> failures,
+        PartValues values,
+        CancellationToken cancellationToken)
+    {
+        // The groups of the hulls carry the flag, so a part of such a group is a hull. The flag is
+        // data, so the groups are read and not named in the code (task 00042).
+        HashSet<int> hullIds = await (from part in _dbContext.PartTypes.AsNoTracking()
+                                      join partGroup in _dbContext.PartGroups.AsNoTracking() on part.PartGroupId equals partGroup.Id
+                                      where partGroup.IsHullGroup
+                                      select part.Id)
+            .ToHashSetAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        HashSet<int> seenHulls = [];
+        int index = 0;
+
+        foreach (HullValues hull in values.CompatibleHulls ?? [])
+        {
+            string path = AdminReferenceRules.PathOf(CompatibleHullsField, index, CompatibleHullField);
+
+            if (hull.HullPartTypeId is not { } hullId)
+            {
+                AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Required);
+            }
+            else if (!hullIds.Contains(hullId))
+            {
+                // Only a hull may be chosen: a part of another group is not a hull.
+                AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Unknown);
+            }
+            else if (!seenHulls.Add(hullId))
+            {
+                AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Duplicate);
+            }
+
+            index++;
+        }
+
+        HashSet<int> raceIds = [.. (await _world.GetRacesAsync(cancellationToken).ConfigureAwait(false)).Select(race => race.Id)];
+
+        HashSet<int> seenRaces = [];
+        index = 0;
+
+        foreach (RaceValues race in values.Races ?? [])
+        {
+            string path = AdminReferenceRules.PathOf(RacesField, index, RaceField);
+
+            if (race.RaceId is not { } raceId)
+            {
+                AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Required);
+            }
+            else if (!raceIds.Contains(raceId))
+            {
+                AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Unknown);
+            }
+            else if (!seenRaces.Add(raceId))
+            {
+                AdminReferenceRules.Fail(failures, path, AdminReferenceErrors.Duplicate);
+            }
+
+            index++;
+        }
+    }
     private async Task<List<SubjectRequirement>> CheckRecipeAsync(RecipeValues values, RecipeEntity? stored, CancellationToken cancellationToken)
     {
         Dictionary<string, List<string>> failures = [];
@@ -1228,6 +1339,49 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                 kept.TextValue = sent.TextValue;
             }
         }
+
+        // The hulls the part fits and the races it belongs to are links of their own (task 00042),
+        // so they are written the same way as the attributes: a link that is not sent is gone,
+        // a link that is sent and is already there keeps its row.
+        part.HullCompatibilityIds.RemoveAll(link => !(values.CompatibleHulls ?? []).Any(sent => sent.HullPartTypeId == link.HullPartTypeId));
+
+        foreach (HullValues sent in values.CompatibleHulls ?? [])
+        {
+            if (sent.HullPartTypeId is not { } hullId)
+            {
+                continue;
+            }
+
+            PartHullCompatibilityEntity? kept = part.HullCompatibilityIds.Find(link => link.HullPartTypeId == hullId);
+
+            if (kept is null)
+            {
+                part.HullCompatibilityIds.Add(new PartHullCompatibilityEntity
+                {
+                    HullPartTypeId = hullId,
+                });
+            }
+        }
+
+        part.RaceCompatibilityIds.RemoveAll(link => !(values.Races ?? []).Any(sent => sent.RaceId == link.RaceId));
+
+        foreach (RaceValues sent in values.Races ?? [])
+        {
+            if (sent.RaceId is not { } raceId)
+            {
+                continue;
+            }
+
+            PartRaceCompatibilityEntity? kept = part.RaceCompatibilityIds.Find(link => link.RaceId == raceId);
+
+            if (kept is null)
+            {
+                part.RaceCompatibilityIds.Add(new PartRaceCompatibilityEntity
+                {
+                    RaceId = raceId,
+                });
+            }
+        }
     }
 
     private static void Apply(RecipeEntity recipe, RecipeValues values)
@@ -1282,7 +1436,11 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             .ExecuteSqlAsync($"SELECT 1 FROM part_type WHERE id = {id} FOR UPDATE", cancellationToken)
             .ConfigureAwait(false);
 
-        return await _dbContext.PartTypes.Include(entry => entry.AttributeIds).SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false)
+        return await _dbContext.PartTypes
+            .Include(entry => entry.AttributeIds)
+            .Include(entry => entry.HullCompatibilityIds)
+            .Include(entry => entry.RaceCompatibilityIds)
+            .SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false)
             ?? throw new AdminReferenceException(GameErrorCodes.NotFound);
     }
 
@@ -1318,6 +1476,26 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                 ["number_value"] = attribute.NumberValue,
                 ["code_value"] = attribute.CodeValue,
                 ["text_value"] = attribute.TextValue,
+            }),
+    ];
+
+    private static List<object?> HullsOf(PartTypeEntity part) =>
+    [
+        .. part.HullCompatibilityIds
+            .OrderBy(link => link.HullPartTypeId)
+            .Select(link => (object?)new Dictionary<string, object?>
+            {
+                [CompatibleHullField] = link.HullPartTypeId,
+            }),
+    ];
+
+    private static List<object?> RacesOf(PartTypeEntity part) =>
+    [
+        .. part.RaceCompatibilityIds
+            .OrderBy(link => link.RaceId)
+            .Select(link => (object?)new Dictionary<string, object?>
+            {
+                [RaceField] = link.RaceId,
             }),
     ];
 
@@ -1388,6 +1566,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         int? SortOrder,
         string? ImageKey,
         List<AttributeValues>? Attributes,
+        List<HullValues>? CompatibleHulls = null,
+        List<RaceValues>? Races = null,
         decimal? Weight = null)
     {
         public PartValues Trimmed(ILocalizationTexts texts) => this with
@@ -1406,8 +1586,22 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             [SortOrderField] = SortOrder,
             [WeightField] = Weight,
             [AttributesField] = Attributes,
+            [CompatibleHullsField] = CompatibleHulls,
+            [RacesField] = Races,
         };
     }
+
+    /// <summary>
+    /// A hull a part fits: the hull of the list of the form.
+    /// </summary>
+    /// <param name="HullPartTypeId">The hull.</param>
+    private sealed record HullValues(int? HullPartTypeId);
+
+    /// <summary>
+    /// A race a part belongs to: the race of the list of the form.
+    /// </summary>
+    /// <param name="RaceId">The race.</param>
+    private sealed record RaceValues(int? RaceId);
 
     private sealed record RecipeValues(
         Dictionary<string, string>? Name,

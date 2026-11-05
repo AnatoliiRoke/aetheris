@@ -173,6 +173,25 @@ public static class PartAttributeKeys
     public const string CapsuleRace = "capsule_race";
 
     /// <summary>
+    /// The role of the part: what it may be put on, one of <see cref="PartRoles"/>.
+    /// </summary>
+    public const string Role = "role";
+
+    /// <summary>
+    /// The role of the hull of the part: what the part is a hull of, one of
+    /// <see cref="HullRoles"/>. It is set on a hull, so every hull of a group carries the same
+    /// role (task 00038, section 3.1).
+    /// </summary>
+    public const string HullRole = "hull_role";
+
+    /// <summary>
+    /// The kind of the component the part is: the drive, the reactor or the life support, one
+    /// of <see cref="PartComponents"/>. The constructor of the ships reads it to know which
+    /// parts a ship must have (task 00038, decision 9).
+    /// </summary>
+    public const string Component = "component";
+
+    /// <summary>
     /// Gets every key of an attribute, in the order of the form of the admin panel.
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -187,7 +206,105 @@ public static class PartAttributeKeys
         TerraformingDevice,
         PopulationCapsule,
         CapsuleRace,
+        Role,
+        HullRole,
+        Component,
     ];
+}
+
+/// <summary>
+/// The kinds of the component a part is (task 00038, decision 9).
+/// </summary>
+/// <remarks>
+/// The kinds are logical codes of the program, so the constructor of the ships reads the same
+/// codes whatever the part is.
+/// </remarks>
+public static class PartComponents
+{
+    /// <summary>
+    /// The drive of the ship: it gives the ship its movement. A ship without a drive does not
+    /// fly.
+    /// </summary>
+    public const string Drive = "drive";
+
+    /// <summary>
+    /// The reactor of the ship: it gives the energy the modules take. A ship without a reactor
+    /// has no energy.
+    /// </summary>
+    public const string Reactor = "reactor";
+
+    /// <summary>
+    /// The life support of the ship: it gives the ship its crew. A ship without it has no
+    /// crew.
+    /// </summary>
+    public const string LifeSupport = "life_support";
+
+    /// <summary>
+    /// Gets every kind, in the order of the form of the admin panel.
+    /// </summary>
+    public static IReadOnlyList<string> All { get; } = [Drive, Reactor, LifeSupport];
+
+    /// <summary>
+    /// Tells whether the kind is known to the program.
+    /// </summary>
+    /// <param name="component">The kind.</param>
+    /// <returns><see langword="true"/> when the kind is known.</returns>
+    public static bool IsKnown(string? component) =>
+        component is not null && All.Contains(component, StringComparer.Ordinal);
+}
+
+/// <summary>
+/// The kinds of the characteristics the program reads (task 00038).
+/// </summary>
+/// <remarks>
+/// The kinds are logical codes of the program, so the constructor of the ships reads the same
+/// kinds whatever the characteristic is. A characteristic without a kind is one the program
+/// does not read by its kind.
+/// </remarks>
+public static class CharacteristicKinds
+{
+    /// <summary>The number of the slots of a hull.</summary>
+    public const string HullSlots = "hull_slots";
+
+    /// <summary>The extra slots the race of the player gives a hull.</summary>
+    public const string HullRaceSlot = "hull_race_slot";
+
+    /// <summary>The capacity of the hold of a hull.</summary>
+    public const string HullCapacity = "hull_capacity";
+
+    /// <summary>The strength of a hull.</summary>
+    public const string Integrity = "integrity";
+
+    /// <summary>The energy a module takes.</summary>
+    public const string EnergyUse = "energy_use";
+
+    /// <summary>The power a reactor gives.</summary>
+    public const string Power = "power";
+
+    /// <summary>The crew a module needs.</summary>
+    public const string Crew = "crew";
+
+    /// <summary>
+    /// Gets every kind, in the order of the form of the admin panel.
+    /// </summary>
+    public static IReadOnlyList<string> All { get; } =
+    [
+        HullSlots,
+        HullRaceSlot,
+        HullCapacity,
+        Integrity,
+        EnergyUse,
+        Power,
+        Crew,
+    ];
+
+    /// <summary>
+    /// Tells whether the kind is known to the program.
+    /// </summary>
+    /// <param name="kind">The kind.</param>
+    /// <returns><see langword="true"/> when the kind is known.</returns>
+    public static bool IsKnown(string? kind) =>
+        kind is not null && All.Contains(kind, StringComparer.Ordinal);
 }
 
 /// <summary>

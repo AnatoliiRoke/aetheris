@@ -355,6 +355,12 @@ public sealed class RaceEntity
     /// <summary>Gets or sets the level of the start building.</summary>
     public int StartBuildingLevel { get; set; }
 
+    /// <summary>Gets or sets whether the race is archived (task 00023, decision 5).</summary>
+    public bool IsArchived { get; set; }
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
+
     /// <summary>Gets or sets the start resources of the race.</summary>
     public List<RaceStartResourceEntity> StartResourceIds { get; set; } = [];
 }

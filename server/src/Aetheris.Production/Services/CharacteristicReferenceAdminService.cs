@@ -53,6 +53,12 @@ public sealed class CharacteristicReferenceAdminService : IAdminReferenceService
     /// <summary>The name of the field of the characteristic.</summary>
     private const string CharacteristicField = "characteristic_id";
 
+    /// <summary>
+    /// The field of the kind of the characteristic: the logical code of the program that says
+    /// what the characteristic is (task 00038).
+    /// </summary>
+    private const string KindField = "kind";
+
     /// <summary>The name of the field of the part.</summary>
     private const string PartField = "part_type_id";
 
@@ -136,6 +142,16 @@ public sealed class CharacteristicReferenceAdminService : IAdminReferenceService
             new(AdminReferenceRules.NameField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.name", IsRequired: true, HasLanguages: true, InList: true),
             new(AdminReferenceRules.DescriptionField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.description", IsRequired: true, HasLanguages: true),
             new(UnitField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.unit", HasLanguages: true),
+            new(
+                KindField,
+                AdminReferenceFieldTypes.Select,
+                LabelPrefix + "field.kind",
+                InList: true,
+                Options:
+                [
+                    new AdminReferenceOption(string.Empty, LabelPrefix + "kind.none"),
+                    .. CharacteristicKinds.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "kind." + value)),
+                ]),
             new(SortOrderField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.sort_order", IsRequired: true, InList: true, Minimum: 0),
         ]);
 
@@ -237,7 +253,11 @@ public sealed class CharacteristicReferenceAdminService : IAdminReferenceService
                     characteristic.ImageKey,
                     characteristic.IsArchived,
                     characteristic.Version,
-                    new Dictionary<string, object?> { [SortOrderField] = characteristic.SortOrder }))],
+                    new Dictionary<string, object?>
+                    {
+                        [KindField] = characteristic.Kind ?? string.Empty,
+                        [SortOrderField] = characteristic.SortOrder,
+                    }))],
             PartGroupCharacteristicKind => await GroupCharacteristicRowsAsync(cancellationToken).ConfigureAwait(false),
             PartCharacteristicKind => await PartCharacteristicRowsAsync(cancellationToken).ConfigureAwait(false),
             _ => throw UnknownKind(kind),
@@ -277,6 +297,7 @@ public sealed class CharacteristicReferenceAdminService : IAdminReferenceService
                             [AdminReferenceRules.NameField] = AdminReferenceRules.TextsOf(packs, characteristic.NameKey),
                             [AdminReferenceRules.DescriptionField] = AdminReferenceRules.TextsOf(packs, characteristic.DescriptionKey),
                             [UnitField] = UnitTextsOf(packs, characteristic.UnitKey),
+                            [KindField] = characteristic.Kind ?? string.Empty,
                             [SortOrderField] = characteristic.SortOrder,
                         });
                 }
@@ -517,6 +538,7 @@ public sealed class CharacteristicReferenceAdminService : IAdminReferenceService
                     NameKey = ProductionTextKeys.CharacteristicName(code),
                     DescriptionKey = ProductionTextKeys.CharacteristicDescription(code),
                     UnitKey = UnitKeyOf(code, values.Unit),
+                    Kind = KindOf(values.Kind),
                     SortOrder = values.SortOrder ?? 0,
                     ImageKey = AdminReferenceRules.ImageKey(values.ImageKey),
                 };
@@ -1003,6 +1025,28 @@ public sealed class CharacteristicReferenceAdminService : IAdminReferenceService
     /// Gets the key of the unit of measure of a characteristic; a characteristic without a unit
     /// has none.
     /// </summary>
+    /// <summary>
+    /// Reads the kind of the characteristic from the form: the logical code of the program, or
+    /// nothing when the characteristic has no kind.
+    /// </summary>
+    /// <param name="kind">The kind of the form.</param>
+    /// <returns>The kind of the characteristic.</returns>
+    /// <exception cref="GameException">The kind is not one the program knows.</exception>
+    private static string? KindOf(string? kind)
+    {
+        if (string.IsNullOrEmpty(kind))
+        {
+            return null;
+        }
+
+        if (!CharacteristicKinds.IsKnown(kind))
+        {
+            throw new GameException(AdminReferenceErrors.Invalid, "The kind of the characteristic is not one the program knows.");
+        }
+
+        return kind;
+    }
+
     private static string? UnitKeyOf(string code, Dictionary<string, string>? unit) =>
         unit is not null && unit.Values.Any(value => !string.IsNullOrWhiteSpace(value))
             ? ProductionTextKeys.CharacteristicUnit(code)
@@ -1049,7 +1093,8 @@ public sealed class CharacteristicReferenceAdminService : IAdminReferenceService
         Dictionary<string, string>? Description,
         Dictionary<string, string>? Unit,
         int? SortOrder,
-        string? ImageKey)
+        string? ImageKey,
+        string? Kind = null)
     {
         public CharacteristicValues Trimmed(ILocalizationTexts texts) => this with
         {

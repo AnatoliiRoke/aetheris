@@ -16,6 +16,7 @@ public sealed class ProductionModule : IProductionModule
     private readonly ProductionCatalogCache _catalog;
     private readonly ProductionDbContext _dbContext;
     private readonly IRequirementsModule _requirements;
+    private readonly ShipCatalogService _shipCatalog;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProductionModule"/> class.
@@ -25,24 +26,28 @@ public sealed class ProductionModule : IProductionModule
     /// <param name="catalog">The catalog of the production.</param>
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="requirements">The common requirements module.</param>
+    /// <param name="shipCatalog">The catalog of the ships (task 00038).</param>
     public ProductionModule(
         ProductionBootstrapService bootstrap,
         ProductionQueueService queue,
         ProductionCatalogCache catalog,
         ProductionDbContext dbContext,
-        IRequirementsModule requirements)
+        IRequirementsModule requirements,
+        ShipCatalogService shipCatalog)
     {
         ArgumentNullException.ThrowIfNull(bootstrap);
         ArgumentNullException.ThrowIfNull(queue);
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(requirements);
+        ArgumentNullException.ThrowIfNull(shipCatalog);
 
         _bootstrap = bootstrap;
         _queue = queue;
         _catalog = catalog;
         _dbContext = dbContext;
         _requirements = requirements;
+        _shipCatalog = shipCatalog;
     }
 
     /// <inheritdoc />
@@ -69,6 +74,10 @@ public sealed class ProductionModule : IProductionModule
                 part.IsArchived)),
         ];
     }
+
+    /// <inheritdoc />
+    public Task<ShipCatalogDto> GetShipCatalogAsync(CancellationToken cancellationToken = default) =>
+        _shipCatalog.GetAsync(cancellationToken);
 
     /// <inheritdoc />
     public Task<IReadOnlyList<ProductionFactorySummaryDto>> GetFactoriesAsync(

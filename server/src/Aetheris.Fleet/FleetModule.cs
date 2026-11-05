@@ -1,10 +1,11 @@
 namespace Aetheris.Fleet;
 
 /// <summary>
-/// Stub implementation of the Fleet module.
+/// The implementation of <see cref="IFleetModule"/>.
 /// </summary>
 /// <remarks>
-/// Task 00001 creates the module skeleton only; the game logic arrives with later tasks.
+/// The module keeps the projects of the ships in its own tables, so it works on the context of
+/// the request (task 00038).
 /// </remarks>
 public sealed class FleetModule : IFleetModule
 {

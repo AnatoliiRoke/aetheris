@@ -53,6 +53,7 @@ public sealed class ModuleIsolationTests
         ["Aetheris.Production"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research", "Aetheris.Economy"],
         ["Aetheris.Processes"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research", "Aetheris.Production", "Aetheris.Economy"],
         ["Aetheris.Market"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Production", "Aetheris.Requirements", "Aetheris.Economy"],
+        ["Aetheris.Fleet"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Production"],
     };
 
     private readonly AetherisTestFactory _factory;
@@ -206,10 +207,32 @@ public sealed class ModuleIsolationTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
 
-        Aetheris.Fleet.IFleetModule first = services.GetRequiredService<Aetheris.Fleet.IFleetModule>();
-        Aetheris.Fleet.IFleetModule second = services.GetRequiredService<Aetheris.Fleet.IFleetModule>();
+        Aetheris.Rating.IRatingModule first = services.GetRequiredService<Aetheris.Rating.IRatingModule>();
+        Aetheris.Rating.IRatingModule second = services.GetRequiredService<Aetheris.Rating.IRatingModule>();
 
         Assert.Same(first, second);
+    }
+
+    /// <summary>
+    /// The modules that keep tables of their own are scoped: every scope gets its own
+    /// instance, because the instance works on the context of the request.
+    /// </summary>
+    /// <remarks>
+    /// The module of task 00038 keeps tables of its own, so it is scoped like the market and
+    /// the production modules.
+    /// </remarks>
+    [Fact]
+    public void The_modules_with_tables_are_registered_as_scoped()
+    {
+        using IServiceScope firstScope = _factory.Services.CreateScope();
+        using IServiceScope secondScope = _factory.Services.CreateScope();
+
+        Aetheris.Fleet.IFleetModule first = firstScope.ServiceProvider.GetRequiredService<Aetheris.Fleet.IFleetModule>();
+        Aetheris.Fleet.IFleetModule second = secondScope.ServiceProvider.GetRequiredService<Aetheris.Fleet.IFleetModule>();
+        Aetheris.Fleet.IFleetModule sameScope = firstScope.ServiceProvider.GetRequiredService<Aetheris.Fleet.IFleetModule>();
+
+        Assert.NotSame(first, second);
+        Assert.Same(first, sameScope);
     }
 
     private static Assembly GetModuleAssembly(string moduleName)

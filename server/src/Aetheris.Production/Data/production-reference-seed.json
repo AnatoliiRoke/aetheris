@@ -154,7 +154,8 @@
         "uk": "Група «Легкі».",
         "en": "Group Light."
       },
-      "parent": "pg_20"
+      "parent": "pg_20",
+      "is_hull_group": true
     },
     {
       "code": "pg_13",
@@ -167,7 +168,8 @@
         "uk": "Група «Дрони».",
         "en": "Group Drones."
       },
-      "parent": "pg_20"
+      "parent": "pg_20",
+      "is_hull_group": true
     },
     {
       "code": "pg_14",
@@ -180,7 +182,8 @@
         "uk": "Група «Середні».",
         "en": "Group Medium."
       },
-      "parent": "pg_20"
+      "parent": "pg_20",
+      "is_hull_group": true
     },
     {
       "code": "pg_15",
@@ -193,7 +196,8 @@
         "uk": "Група «Важкі».",
         "en": "Group Heavy."
       },
-      "parent": "pg_20"
+      "parent": "pg_20",
+      "is_hull_group": true
     },
     {
       "code": "pg_16",
@@ -206,7 +210,8 @@
         "uk": "Група «Надважкі».",
         "en": "Group Super-heavy."
       },
-      "parent": "pg_20"
+      "parent": "pg_20",
+      "is_hull_group": true
     },
     {
       "code": "pg_17",
@@ -219,7 +224,8 @@
         "uk": "Група «Цивільні».",
         "en": "Group Civilian."
       },
-      "parent": "pg_20"
+      "parent": "pg_20",
+      "is_hull_group": true
     },
     {
       "code": "pg_18",
@@ -232,7 +238,8 @@
         "uk": "Група «Корпуси споруд».",
         "en": "Group Structure hulls."
       },
-      "parent": "pg_21"
+      "parent": "pg_21",
+      "is_hull_group": true
     },
     {
       "code": "pg_19",
@@ -299,7 +306,14 @@
         "en": "Module of the Engines group."
       },
       "image_key": "part_1.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "drive"
+        }
+      },
       "weight": 1,
       "characteristics": {
         "char_thrust": {
@@ -309,7 +323,7 @@
           "number": 100
         },
         "char_energy_use": {
-          "number": 100
+          "number": 0
         }
       }
     },
@@ -327,7 +341,14 @@
         "en": "Module of the Engines group."
       },
       "image_key": "part_2.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "drive"
+        }
+      },
       "weight": 1.1,
       "characteristics": {
         "char_thrust": {
@@ -337,7 +358,7 @@
           "number": 110
         },
         "char_energy_use": {
-          "number": 110
+          "number": 0
         }
       }
     },
@@ -355,7 +376,14 @@
         "en": "Module of the Engines group."
       },
       "image_key": "part_3.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "drive"
+        }
+      },
       "weight": 1.21,
       "characteristics": {
         "char_thrust": {
@@ -365,7 +393,7 @@
           "number": 121
         },
         "char_energy_use": {
-          "number": 121
+          "number": 0
         }
       }
     },
@@ -383,7 +411,14 @@
         "en": "Module of the Engines group."
       },
       "image_key": "part_4.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "drive"
+        }
+      },
       "weight": 1.331,
       "characteristics": {
         "char_thrust": {
@@ -393,7 +428,7 @@
           "number": 133.1
         },
         "char_energy_use": {
-          "number": 133.1
+          "number": 0
         }
       }
     },
@@ -411,7 +446,14 @@
         "en": "Module of the Engines group."
       },
       "image_key": "part_5.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "drive"
+        }
+      },
       "weight": 1.4641,
       "characteristics": {
         "char_thrust": {
@@ -421,7 +463,7 @@
           "number": 146.41
         },
         "char_energy_use": {
-          "number": 146.41
+          "number": 0
         }
       }
     },
@@ -439,7 +481,14 @@
         "en": "Module of the Engines group."
       },
       "image_key": "part_6.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "drive"
+        }
+      },
       "weight": 1.61051,
       "characteristics": {
         "char_thrust": {
@@ -449,7 +498,7 @@
           "number": 161.051
         },
         "char_energy_use": {
-          "number": 161.051
+          "number": 0
         }
       }
     },
@@ -467,7 +516,14 @@
         "en": "Module of the Reactors group."
       },
       "image_key": "part_7.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "reactor"
+        }
+      },
       "weight": 1.771561,
       "characteristics": {
         "char_power": {
@@ -489,7 +545,14 @@
         "en": "Module of the Reactors group."
       },
       "image_key": "part_8.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "reactor"
+        }
+      },
       "weight": 1.948717,
       "characteristics": {
         "char_power": {
@@ -511,7 +574,14 @@
         "en": "Module of the Reactors group."
       },
       "image_key": "part_9.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "reactor"
+        }
+      },
       "weight": 2.143589,
       "characteristics": {
         "char_power": {
@@ -533,7 +603,14 @@
         "en": "Module of the Reactors group."
       },
       "image_key": "part_10.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "reactor"
+        }
+      },
       "weight": 2.357948,
       "characteristics": {
         "char_power": {
@@ -555,7 +632,14 @@
         "en": "Module of the Reactors group."
       },
       "image_key": "part_11.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "reactor"
+        }
+      },
       "weight": 2.593742,
       "characteristics": {
         "char_power": {
@@ -577,7 +661,14 @@
         "en": "Module of the Reactors group."
       },
       "image_key": "part_12.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "reactor"
+        }
+      },
       "weight": 2.853117,
       "characteristics": {
         "char_power": {
@@ -602,6 +693,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 3.138428,
@@ -637,6 +731,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 3.452271,
@@ -672,6 +769,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 3.797498,
@@ -707,6 +807,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 4.177248,
@@ -742,6 +845,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 4.594973,
@@ -777,6 +883,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 5.05447,
@@ -812,6 +921,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 5.559917,
@@ -847,6 +959,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 6.115909,
@@ -882,6 +997,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 6.7275,
@@ -920,6 +1038,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 7.40025,
@@ -958,6 +1079,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 8.140275,
@@ -996,6 +1120,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 8.954302,
@@ -1034,6 +1161,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 9.849733,
@@ -1072,6 +1202,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 10.834706,
@@ -1107,7 +1240,11 @@
         "en": "Module of the Armor group."
       },
       "image_key": "part_27.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 11.918177,
       "characteristics": {
         "char_integrity": {
@@ -1129,7 +1266,11 @@
         "en": "Module of the Armor group."
       },
       "image_key": "part_28.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 13.109994,
       "characteristics": {
         "char_integrity": {
@@ -1151,7 +1292,11 @@
         "en": "Module of the Armor group."
       },
       "image_key": "part_29.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 14.420994,
       "characteristics": {
         "char_integrity": {
@@ -1173,7 +1318,11 @@
         "en": "Module of the Armor group."
       },
       "image_key": "part_30.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 15.863093,
       "characteristics": {
         "char_integrity": {
@@ -1195,7 +1344,11 @@
         "en": "Module of the Armor group."
       },
       "image_key": "part_31.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 17.449402,
       "characteristics": {
         "char_integrity": {
@@ -1217,7 +1370,11 @@
         "en": "Module of the Armor group."
       },
       "image_key": "part_32.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 19.194342,
       "characteristics": {
         "char_integrity": {
@@ -1239,7 +1396,11 @@
         "en": "Module of the Armor group."
       },
       "image_key": "part_33.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 21.113777,
       "characteristics": {
         "char_integrity": {
@@ -1261,7 +1422,11 @@
         "en": "Module of the Armor group."
       },
       "image_key": "part_34.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 23.225154,
       "characteristics": {
         "char_integrity": {
@@ -1283,7 +1448,11 @@
         "en": "Module of the Shields group."
       },
       "image_key": "part_35.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 25.54767,
       "characteristics": {
         "char_shield_capacity": {
@@ -1317,7 +1486,11 @@
         "en": "Module of the Shields group."
       },
       "image_key": "part_36.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 28.102437,
       "characteristics": {
         "char_shield_capacity": {
@@ -1351,7 +1524,11 @@
         "en": "Module of the Shields group."
       },
       "image_key": "part_37.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 30.912681,
       "characteristics": {
         "char_shield_capacity": {
@@ -1385,7 +1562,11 @@
         "en": "Module of the Shields group."
       },
       "image_key": "part_38.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 34.003949,
       "characteristics": {
         "char_shield_capacity": {
@@ -1419,7 +1600,11 @@
         "en": "Module of the Shields group."
       },
       "image_key": "part_39.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 37.404343,
       "characteristics": {
         "char_shield_capacity": {
@@ -1453,7 +1638,11 @@
         "en": "Module of the Shields group."
       },
       "image_key": "part_40.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 41.144778,
       "characteristics": {
         "char_shield_capacity": {
@@ -1487,7 +1676,11 @@
         "en": "Module of the Shields group."
       },
       "image_key": "part_41.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 45.259256,
       "characteristics": {
         "char_shield_capacity": {
@@ -1521,7 +1714,11 @@
         "en": "Module of the Shields group."
       },
       "image_key": "part_42.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 49.785181,
       "characteristics": {
         "char_shield_capacity": {
@@ -1558,6 +1755,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 54.763699,
@@ -1587,6 +1787,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 60.240069,
@@ -1616,6 +1819,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 66.264076,
@@ -1645,6 +1851,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 72.890484,
@@ -1680,6 +1889,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 80.179532,
@@ -1715,6 +1927,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 88.197485,
@@ -1750,6 +1965,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 97.017234,
@@ -1785,6 +2003,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 106.718957,
@@ -1817,6 +2038,9 @@
       "attributes": {
         "damage_type": {
           "code": "energy"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 117.390853,
@@ -1849,6 +2073,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 129.129938,
@@ -1878,7 +2105,11 @@
         "en": "Module of the Extraction group."
       },
       "image_key": "part_53.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 142.042932,
       "characteristics": {
         "char_yield": {
@@ -1909,7 +2140,11 @@
         "en": "Module of the Extraction group."
       },
       "image_key": "part_54.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 156.247225,
       "characteristics": {
         "char_yield": {
@@ -1934,7 +2169,11 @@
         "en": "Module of the Extraction group."
       },
       "image_key": "part_55.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 171.871948,
       "characteristics": {
         "char_yield": {
@@ -1959,7 +2198,11 @@
         "en": "Module of the Extraction group."
       },
       "image_key": "part_56.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 189.059142,
       "characteristics": {
         "char_yield": {
@@ -1984,7 +2227,11 @@
         "en": "Module of the Extraction group."
       },
       "image_key": "part_57.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 207.965057,
       "characteristics": {
         "char_yield": {
@@ -2009,7 +2256,11 @@
         "en": "Module of the Recon and camouflage group."
       },
       "image_key": "part_58.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        }
+      },
       "weight": 228.761562,
       "characteristics": {
         "char_energy_use": {
@@ -2034,7 +2285,11 @@
         "en": "Module of the Recon and camouflage group."
       },
       "image_key": "part_59.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        }
+      },
       "weight": 251.637719,
       "characteristics": {
         "char_energy_use": {
@@ -2059,7 +2314,11 @@
         "en": "Module of the Recon and camouflage group."
       },
       "image_key": "part_60.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        }
+      },
       "weight": 276.80149,
       "characteristics": {
         "char_energy_use": {
@@ -2084,7 +2343,11 @@
         "en": "Module of the Recon and camouflage group."
       },
       "image_key": "part_61.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        }
+      },
       "weight": 304.48164,
       "characteristics": {
         "char_energy_use": {
@@ -2106,7 +2369,11 @@
         "en": "Module of the Recon and camouflage group."
       },
       "image_key": "part_62.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        }
+      },
       "weight": 334.929803,
       "characteristics": {
         "char_energy_use": {
@@ -2128,7 +2395,11 @@
         "en": "Module of the Other ship modules group."
       },
       "image_key": "part_63.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 368.422784,
       "characteristics": {
         "char_shield_restore": {
@@ -2153,7 +2424,14 @@
         "en": "Module of the Other ship modules group."
       },
       "image_key": "part_64.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        },
+        "component": {
+          "code": "life_support"
+        }
+      },
       "weight": 405.265062,
       "characteristics": {
         "char_fuel_use": {
@@ -2166,7 +2444,7 @@
           "number": 110
         },
         "char_energy_use": {
-          "number": 110
+          "number": 0
         }
       }
     },
@@ -2184,7 +2462,11 @@
         "en": "Module of the Other ship modules group."
       },
       "image_key": "part_65.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "universal"
+        }
+      },
       "weight": 445.791568,
       "characteristics": {
         "char_collect_speed": {
@@ -2209,7 +2491,11 @@
         "en": "Module of the Other ship modules group."
       },
       "image_key": "part_66.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "transport"
+        }
+      },
       "weight": 490.370725,
       "characteristics": {
         "char_cargo": {
@@ -2234,7 +2520,11 @@
         "en": "Module of the Other ship modules group."
       },
       "image_key": "part_67.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "transport"
+        }
+      },
       "weight": 539.407798,
       "characteristics": {
         "char_cargo": {
@@ -2259,7 +2549,11 @@
         "en": "Module of the Other ship modules group."
       },
       "image_key": "part_68.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "combat"
+        }
+      },
       "weight": 593.348578,
       "characteristics": {
         "char_missiles": {
@@ -2287,7 +2581,11 @@
         "en": "Module of the Other ship modules group."
       },
       "image_key": "part_69.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "transport"
+        }
+      },
       "weight": 652.683435,
       "characteristics": {
         "char_transfer_speed": {
@@ -2315,7 +2613,11 @@
         "en": "Module of the Other ship modules group."
       },
       "image_key": "part_70.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "transport"
+        }
+      },
       "weight": 717.951779,
       "characteristics": {
         "char_deploy_time": {
@@ -2343,7 +2645,11 @@
         "en": "Module of the Base modules group."
       },
       "image_key": "part_71.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 789.746957,
       "characteristics": {
         "char_population": {
@@ -2368,7 +2674,11 @@
         "en": "Module of the Base modules group."
       },
       "image_key": "part_72.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 868.721652,
       "characteristics": {
         "char_storage": {
@@ -2393,7 +2703,11 @@
         "en": "Module of the Base modules group."
       },
       "image_key": "part_73.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 955.593818,
       "characteristics": {
         "char_repair_speed": {
@@ -2418,7 +2732,11 @@
         "en": "Module of the Base modules group."
       },
       "image_key": "part_74.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 1051.1532,
       "characteristics": {
         "char_training_speed": {
@@ -2443,7 +2761,11 @@
         "en": "Module of the Base modules group."
       },
       "image_key": "part_75.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 1156.268519,
       "characteristics": {
         "char_trade_lots": {
@@ -2482,7 +2804,11 @@
         "en": "Module of the Base modules group."
       },
       "image_key": "part_76.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 1271.895371,
       "characteristics": {
         "char_power": {
@@ -2504,7 +2830,11 @@
         "en": "Module of the Base modules group."
       },
       "image_key": "part_77.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 1399.084909,
       "characteristics": {
         "char_yield": {
@@ -2529,7 +2859,11 @@
         "en": "Module of the Base modules group."
       },
       "image_key": "part_78.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 1538.993399,
       "characteristics": {
         "char_yield": {
@@ -2554,7 +2888,11 @@
         "en": "Module of the Base modules group."
       },
       "image_key": "part_79.webp",
-      "attributes": {},
+      "attributes": {
+        "role": {
+          "code": "civil"
+        }
+      },
       "weight": 1692.892739,
       "characteristics": {
         "char_jump_prep": {
@@ -2585,6 +2923,9 @@
         },
         "capsule_race": {
           "code": "race_1"
+        },
+        "role": {
+          "code": "universal"
         }
       },
       "weight": 1862.182013,
@@ -2614,6 +2955,9 @@
         },
         "capsule_race": {
           "code": "race_2"
+        },
+        "role": {
+          "code": "universal"
         }
       },
       "weight": 2048.400215,
@@ -2643,6 +2987,9 @@
         },
         "capsule_race": {
           "code": "race_3"
+        },
+        "role": {
+          "code": "universal"
         }
       },
       "weight": 2253.240236,
@@ -2672,6 +3019,9 @@
         },
         "capsule_race": {
           "code": "race_4"
+        },
+        "role": {
+          "code": "universal"
         }
       },
       "weight": 2478.56426,
@@ -2695,7 +3045,11 @@
         "en": "Hull of the Light group."
       },
       "image_key": "part_84.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 100
@@ -2722,7 +3076,11 @@
         "en": "Hull of the Light group."
       },
       "image_key": "part_85.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 110
@@ -2749,7 +3107,11 @@
         "en": "Hull of the Light group."
       },
       "image_key": "part_86.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 121
@@ -2776,7 +3138,11 @@
         "en": "Hull of the Light group."
       },
       "image_key": "part_87.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 133.1
@@ -2803,7 +3169,11 @@
         "en": "Hull of the Drones group."
       },
       "image_key": "part_88.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "drone"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 100
@@ -2830,7 +3200,11 @@
         "en": "Hull of the Drones group."
       },
       "image_key": "part_89.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "drone"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 110
@@ -2857,7 +3231,11 @@
         "en": "Hull of the Drones group."
       },
       "image_key": "part_90.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "drone"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 121
@@ -2884,7 +3262,11 @@
         "en": "Hull of the Medium group."
       },
       "image_key": "part_91.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 100
@@ -2911,7 +3293,11 @@
         "en": "Hull of the Medium group."
       },
       "image_key": "part_92.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 110
@@ -2938,7 +3324,11 @@
         "en": "Hull of the Medium group."
       },
       "image_key": "part_93.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 121
@@ -2965,7 +3355,11 @@
         "en": "Hull of the Medium group."
       },
       "image_key": "part_94.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 133.1
@@ -2992,7 +3386,11 @@
         "en": "Hull of the Medium group."
       },
       "image_key": "part_95.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 146.41
@@ -3019,7 +3417,11 @@
         "en": "Hull of the Medium group."
       },
       "image_key": "part_96.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 161.051
@@ -3046,7 +3448,11 @@
         "en": "Hull of the Heavy group."
       },
       "image_key": "part_97.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 100
@@ -3056,6 +3462,9 @@
         },
         "char_integrity": {
           "number": 100
+        },
+        "char_hull_race_slot": {
+          "number": 1
         }
       }
     },
@@ -3073,7 +3482,11 @@
         "en": "Hull of the Heavy group."
       },
       "image_key": "part_98.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 110
@@ -3083,6 +3496,9 @@
         },
         "char_integrity": {
           "number": 110
+        },
+        "char_hull_race_slot": {
+          "number": 1
         }
       }
     },
@@ -3100,7 +3516,11 @@
         "en": "Hull of the Heavy group."
       },
       "image_key": "part_99.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 121
@@ -3110,6 +3530,9 @@
         },
         "char_integrity": {
           "number": 121
+        },
+        "char_hull_race_slot": {
+          "number": 1
         }
       }
     },
@@ -3127,7 +3550,11 @@
         "en": "Hull of the Heavy group."
       },
       "image_key": "part_100.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 133.1
@@ -3137,6 +3564,9 @@
         },
         "char_integrity": {
           "number": 133.1
+        },
+        "char_hull_race_slot": {
+          "number": 1
         }
       }
     },
@@ -3154,7 +3584,11 @@
         "en": "Hull of the Super-heavy group."
       },
       "image_key": "part_101.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 100
@@ -3164,6 +3598,9 @@
         },
         "char_integrity": {
           "number": 100
+        },
+        "char_hull_race_slot": {
+          "number": 1
         }
       }
     },
@@ -3181,7 +3618,11 @@
         "en": "Hull of the Super-heavy group."
       },
       "image_key": "part_102.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 110
@@ -3191,6 +3632,9 @@
         },
         "char_integrity": {
           "number": 110
+        },
+        "char_hull_race_slot": {
+          "number": 1
         }
       }
     },
@@ -3208,7 +3652,11 @@
         "en": "Hull of the Super-heavy group."
       },
       "image_key": "part_103.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "combat"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 121
@@ -3218,6 +3666,9 @@
         },
         "char_integrity": {
           "number": 121
+        },
+        "char_hull_race_slot": {
+          "number": 1
         }
       }
     },
@@ -3235,7 +3686,11 @@
         "en": "Hull of the Civilian group."
       },
       "image_key": "part_104.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "transport"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 100
@@ -3262,7 +3717,11 @@
         "en": "Hull of the Civilian group."
       },
       "image_key": "part_105.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "transport"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 110
@@ -3289,7 +3748,11 @@
         "en": "Hull of the Civilian group."
       },
       "image_key": "part_106.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "transport"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 121
@@ -3316,7 +3779,11 @@
         "en": "Hull of the Civilian group."
       },
       "image_key": "part_107.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "transport"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 133.1
@@ -3343,7 +3810,11 @@
         "en": "Hull of the Structure hulls group."
       },
       "image_key": "part_108.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "civil"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 100
@@ -3370,7 +3841,11 @@
         "en": "Hull of the Structure hulls group."
       },
       "image_key": "part_109.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "civil"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 110
@@ -3397,7 +3872,11 @@
         "en": "Hull of the Structure hulls group."
       },
       "image_key": "part_110.webp",
-      "attributes": {},
+      "attributes": {
+        "hull_role": {
+          "code": "civil"
+        }
+      },
       "characteristics": {
         "char_hull_size": {
           "number": 121
@@ -3427,6 +3906,9 @@
       "attributes": {
         "damage_type": {
           "code": "kinetic"
+        },
+        "role": {
+          "code": "combat"
         }
       },
       "weight": 9.849733,
@@ -9850,6 +10332,7 @@
     },
     {
       "code": "char_energy_use",
+      "kind": "energy_use",
       "sort_order": 3,
       "name": {
         "uk": "Споживання енергії",
@@ -9862,6 +10345,7 @@
     },
     {
       "code": "char_power",
+      "kind": "power",
       "sort_order": 4,
       "name": {
         "uk": "Вироблена потужність",
@@ -9922,6 +10406,7 @@
     },
     {
       "code": "char_integrity",
+      "kind": "integrity",
       "sort_order": 9,
       "name": {
         "uk": "Міцність",
@@ -10090,6 +10575,7 @@
     },
     {
       "code": "char_crew",
+      "kind": "crew",
       "sort_order": 23,
       "name": {
         "uk": "Екіпаж",
@@ -10298,6 +10784,7 @@
     },
     {
       "code": "char_hull_capacity",
+      "kind": "hull_capacity",
       "sort_order": 39,
       "name": {
         "uk": "Вмістимість",
@@ -10306,6 +10793,32 @@
       "description": {
         "uk": "Скільки модуль місць має корпус.",
         "en": "How much the hull holds."
+      }
+    },
+    {
+      "code": "char_hull_slots",
+      "kind": "hull_slots",
+      "sort_order": 40,
+      "name": {
+        "uk": "Кількість слотів",
+        "en": "Number of slots"
+      },
+      "description": {
+        "uk": "Скільки модулів можна поставити на корпус.",
+        "en": "How many modules fit the hull."
+      }
+    },
+    {
+      "code": "char_hull_race_slot",
+      "kind": "hull_race_slot",
+      "sort_order": 41,
+      "name": {
+        "uk": "Додатковий слот раси",
+        "en": "Race extra slot"
+      },
+      "description": {
+        "uk": "Скільки додаткових слотів дає рас кораблю.",
+        "en": "How many extra slots the race gives the ship."
       }
     }
   ],
@@ -10753,6 +11266,1568 @@
       "characteristic": "char_integrity",
       "sort_order": 3,
       "is_required": true
+    },
+    {
+      "group": "pg_12",
+      "characteristic": "char_hull_slots",
+      "sort_order": 4,
+      "is_required": false
+    },
+    {
+      "group": "pg_13",
+      "characteristic": "char_hull_slots",
+      "sort_order": 4,
+      "is_required": false
+    },
+    {
+      "group": "pg_14",
+      "characteristic": "char_hull_slots",
+      "sort_order": 4,
+      "is_required": false
+    },
+    {
+      "group": "pg_15",
+      "characteristic": "char_hull_slots",
+      "sort_order": 4,
+      "is_required": false
+    },
+    {
+      "group": "pg_16",
+      "characteristic": "char_hull_slots",
+      "sort_order": 4,
+      "is_required": false
+    },
+    {
+      "group": "pg_17",
+      "characteristic": "char_hull_slots",
+      "sort_order": 4,
+      "is_required": false
+    },
+    {
+      "group": "pg_18",
+      "characteristic": "char_hull_slots",
+      "sort_order": 4,
+      "is_required": false
+    },
+    {
+      "group": "pg_15",
+      "characteristic": "char_hull_race_slot",
+      "sort_order": 5,
+      "is_required": false
+    },
+    {
+      "group": "pg_16",
+      "characteristic": "char_hull_race_slot",
+      "sort_order": 5,
+      "is_required": false
+    }
+  ],
+  "part_hulls": [
+    {
+      "part": "part_m_1",
+      "hulls": [
+        "part_h_1",
+        "part_h_2",
+        "part_h_3",
+        "part_h_4",
+        "part_h_21"
+      ]
+    },
+    {
+      "part": "part_m_2",
+      "hulls": [
+        "part_h_1",
+        "part_h_2",
+        "part_h_3",
+        "part_h_4",
+        "part_h_8",
+        "part_h_9",
+        "part_h_21",
+        "part_h_22"
+      ]
+    },
+    {
+      "part": "part_m_3",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_22",
+        "part_h_23"
+      ]
+    },
+    {
+      "part": "part_m_4",
+      "hulls": [
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20",
+        "part_h_23",
+        "part_h_24"
+      ]
+    },
+    {
+      "part": "part_m_5",
+      "hulls": [
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20",
+        "part_h_24"
+      ]
+    },
+    {
+      "part": "part_m_6",
+      "hulls": [
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_7",
+      "hulls": [
+        "part_h_1",
+        "part_h_2",
+        "part_h_3",
+        "part_h_4",
+        "part_h_8",
+        "part_h_21",
+        "part_h_22"
+      ]
+    },
+    {
+      "part": "part_m_8",
+      "hulls": [
+        "part_h_2",
+        "part_h_3",
+        "part_h_4",
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_22",
+        "part_h_23"
+      ]
+    },
+    {
+      "part": "part_m_9",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_23",
+        "part_h_24"
+      ]
+    },
+    {
+      "part": "part_m_10",
+      "hulls": [
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_23"
+      ]
+    },
+    {
+      "part": "part_m_11",
+      "hulls": [
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20",
+        "part_h_23",
+        "part_h_24"
+      ]
+    },
+    {
+      "part": "part_m_12",
+      "hulls": [
+        "part_h_18",
+        "part_h_19",
+        "part_h_20",
+        "part_h_24"
+      ]
+    },
+    {
+      "part": "part_m_13",
+      "hulls": [
+        "part_h_1",
+        "part_h_2"
+      ]
+    },
+    {
+      "part": "part_m_14",
+      "hulls": [
+        "part_h_2"
+      ]
+    },
+    {
+      "part": "part_m_15",
+      "hulls": [
+        "part_h_2"
+      ]
+    },
+    {
+      "part": "part_m_16",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13"
+      ]
+    },
+    {
+      "part": "part_m_17",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11"
+      ]
+    },
+    {
+      "part": "part_m_18",
+      "hulls": [
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16"
+      ]
+    },
+    {
+      "part": "part_m_19",
+      "hulls": [
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_20",
+      "hulls": [
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_21",
+      "hulls": [
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_22",
+      "hulls": [
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_23",
+      "hulls": [
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_24",
+      "hulls": [
+        "part_h_3",
+        "part_h_4"
+      ]
+    },
+    {
+      "part": "part_m_25",
+      "hulls": [
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_26",
+      "hulls": [
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_84",
+      "hulls": [
+        "part_h_4"
+      ]
+    },
+    {
+      "part": "part_m_27",
+      "hulls": [
+        "part_h_1",
+        "part_h_2"
+      ]
+    },
+    {
+      "part": "part_m_28",
+      "hulls": [
+        "part_h_2",
+        "part_h_3"
+      ]
+    },
+    {
+      "part": "part_m_29",
+      "hulls": [
+        "part_h_3",
+        "part_h_4",
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11"
+      ]
+    },
+    {
+      "part": "part_m_30",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13"
+      ]
+    },
+    {
+      "part": "part_m_31",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14"
+      ]
+    },
+    {
+      "part": "part_m_32",
+      "hulls": [
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16"
+      ]
+    },
+    {
+      "part": "part_m_33",
+      "hulls": [
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_34",
+      "hulls": [
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_35",
+      "hulls": [
+        "part_h_1",
+        "part_h_2",
+        "part_h_3",
+        "part_h_4"
+      ]
+    },
+    {
+      "part": "part_m_36",
+      "hulls": [
+        "part_h_3",
+        "part_h_4"
+      ]
+    },
+    {
+      "part": "part_m_37",
+      "hulls": [
+        "part_h_4",
+        "part_h_8",
+        "part_h_9",
+        "part_h_10"
+      ]
+    },
+    {
+      "part": "part_m_38",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12"
+      ]
+    },
+    {
+      "part": "part_m_39",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13"
+      ]
+    },
+    {
+      "part": "part_m_40",
+      "hulls": [
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17"
+      ]
+    },
+    {
+      "part": "part_m_41",
+      "hulls": [
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_42",
+      "hulls": [
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_53",
+      "hulls": [
+        "part_h_21",
+        "part_h_22"
+      ]
+    },
+    {
+      "part": "part_m_54",
+      "hulls": [
+        "part_h_21",
+        "part_h_22"
+      ]
+    },
+    {
+      "part": "part_m_55",
+      "hulls": [
+        "part_h_21",
+        "part_h_22"
+      ]
+    },
+    {
+      "part": "part_m_56",
+      "hulls": [
+        "part_h_22",
+        "part_h_23"
+      ]
+    },
+    {
+      "part": "part_m_57",
+      "hulls": [
+        "part_h_23",
+        "part_h_24"
+      ]
+    },
+    {
+      "part": "part_m_58",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_59",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_60",
+      "hulls": [
+        "part_h_21",
+        "part_h_22"
+      ]
+    },
+    {
+      "part": "part_m_61",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_62",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_63",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_64",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20",
+        "part_h_1",
+        "part_h_2",
+        "part_h_3",
+        "part_h_4",
+        "part_h_21",
+        "part_h_22",
+        "part_h_23",
+        "part_h_24"
+      ]
+    },
+    {
+      "part": "part_m_65",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_66",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20",
+        "part_h_21",
+        "part_h_22",
+        "part_h_23",
+        "part_h_24"
+      ]
+    },
+    {
+      "part": "part_m_67",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_68",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_69",
+      "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
+        "part_h_13",
+        "part_h_14",
+        "part_h_15",
+        "part_h_16",
+        "part_h_17",
+        "part_h_18",
+        "part_h_19",
+        "part_h_20"
+      ]
+    },
+    {
+      "part": "part_m_70",
+      "hulls": [
+        "part_h_24"
+      ]
+    },
+    {
+      "part": "part_m_71",
+      "hulls": [
+        "part_h_25",
+        "part_h_26"
+      ]
+    },
+    {
+      "part": "part_m_72",
+      "hulls": [
+        "part_h_25",
+        "part_h_26",
+        "part_h_27"
+      ]
+    },
+    {
+      "part": "part_m_73",
+      "hulls": [
+        "part_h_25",
+        "part_h_26"
+      ]
+    },
+    {
+      "part": "part_m_74",
+      "hulls": [
+        "part_h_25",
+        "part_h_26"
+      ]
+    },
+    {
+      "part": "part_m_75",
+      "hulls": [
+        "part_h_25",
+        "part_h_26"
+      ]
+    },
+    {
+      "part": "part_m_76",
+      "hulls": [
+        "part_h_25",
+        "part_h_26",
+        "part_h_27"
+      ]
+    },
+    {
+      "part": "part_m_77",
+      "hulls": [
+        "part_h_25",
+        "part_h_26",
+        "part_h_27"
+      ]
+    },
+    {
+      "part": "part_m_78",
+      "hulls": [
+        "part_h_25",
+        "part_h_26",
+        "part_h_27"
+      ]
+    },
+    {
+      "part": "part_m_79",
+      "hulls": [
+        "part_h_25",
+        "part_h_26",
+        "part_h_27"
+      ]
+    }
+  ],
+  "part_races": [
+    {
+      "part": "part_m_1",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_10",
+      "races": [
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_11",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_12",
+      "races": [
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_13",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_14",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_15",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_16",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_17",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_18",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_19",
+      "races": [
+        "race_1"
+      ]
+    },
+    {
+      "part": "part_m_2",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_20",
+      "races": [
+        "race_1"
+      ]
+    },
+    {
+      "part": "part_m_21",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_22",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_23",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_24",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_25",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_26",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_27",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_28",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_29",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_3",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_30",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_31",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_32",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_33",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_34",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_35",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_36",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_37",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_38",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_39",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_4",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_40",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_41",
+      "races": [
+        "race_3"
+      ]
+    },
+    {
+      "part": "part_m_42",
+      "races": [
+        "race_3"
+      ]
+    },
+    {
+      "part": "part_m_43",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_44",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_45",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_46",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_47",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_48",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_49",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_5",
+      "races": [
+        "race_2"
+      ]
+    },
+    {
+      "part": "part_m_50",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_51",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_52",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_53",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_54",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_55",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_56",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_57",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_58",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_59",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_6",
+      "races": [
+        "race_2"
+      ]
+    },
+    {
+      "part": "part_m_60",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_61",
+      "races": [
+        "race_1"
+      ]
+    },
+    {
+      "part": "part_m_62",
+      "races": [
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_63",
+      "races": [
+        "race_3"
+      ]
+    },
+    {
+      "part": "part_m_64",
+      "races": [
+        "race_2"
+      ]
+    },
+    {
+      "part": "part_m_65",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_66",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_67",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_68",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_69",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_7",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_70",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_71",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_72",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_73",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_74",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_75",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_76",
+      "races": [
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_77",
+      "races": [
+        "race_3"
+      ]
+    },
+    {
+      "part": "part_m_78",
+      "races": [
+        "race_1"
+      ]
+    },
+    {
+      "part": "part_m_79",
+      "races": [
+        "race_2"
+      ]
+    },
+    {
+      "part": "part_m_8",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_80",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_81",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_82",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_83",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_84",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
+    },
+    {
+      "part": "part_m_9",
+      "races": [
+        "race_1",
+        "race_2",
+        "race_3",
+        "race_4"
+      ]
     }
   ]
 }

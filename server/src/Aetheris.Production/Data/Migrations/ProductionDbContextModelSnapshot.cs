@@ -52,6 +52,11 @@ namespace Aetheris.Production.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_archived");
 
+                    b.Property<string>("Kind")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("kind");
+
                     b.Property<string>("NameKey")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -281,6 +286,10 @@ namespace Aetheris.Production.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_archived");
 
+                    b.Property<bool>("IsHullGroup")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_hull_group");
+
                     b.Property<string>("NameKey")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -309,7 +318,86 @@ namespace Aetheris.Production.Data.Migrations
                     b.HasIndex("ParentGroupId", "SortOrder")
                         .HasDatabaseName("ix_part_group_parent_group_id_sort_order");
 
-                    b.ToTable("part_group", (string)null);
+                    b.ToTable("part_group", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_part_group_is_hull_group", "is_hull_group IN (true, false)");
+                        });
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartHullCompatibilityEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("HullPartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("hull_part_type_id");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
+                    b.Property<int>("PartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_type_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_part_hull_compatibility");
+
+                    b.HasIndex("HullPartTypeId")
+                        .HasDatabaseName("ix_part_hull_compatibility_hull_part_type_id");
+
+                    b.HasIndex("PartTypeId", "HullPartTypeId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_part_hull_compatibility_part_type_id_hull_part_type_id");
+
+                    b.ToTable("part_hull_compatibility", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartRaceCompatibilityEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
+                    b.Property<int>("PartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_type_id");
+
+                    b.Property<int>("RaceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("race_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_part_race_compatibility");
+
+                    b.HasIndex("RaceId")
+                        .HasDatabaseName("ix_part_race_compatibility_race_id");
+
+                    b.HasIndex("PartTypeId", "RaceId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_part_race_compatibility_part_type_id_race_id");
+
+                    b.ToTable("part_race_compatibility", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartStockEntity", b =>
@@ -867,6 +955,33 @@ namespace Aetheris.Production.Data.Migrations
                         .HasConstraintName("fk_part_group_part_group_parent_group_id");
                 });
 
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartHullCompatibilityEntity", b =>
+                {
+                    b.HasOne("Aetheris.Production.Data.Entities.PartTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("HullPartTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_hull_compatibility_part_type_hull_part_type_id");
+
+                    b.HasOne("Aetheris.Production.Data.Entities.PartTypeEntity", null)
+                        .WithMany("HullCompatibilityIds")
+                        .HasForeignKey("PartTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_hull_compatibility_part_type_part_type_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartRaceCompatibilityEntity", b =>
+                {
+                    b.HasOne("Aetheris.Production.Data.Entities.PartTypeEntity", null)
+                        .WithMany("RaceCompatibilityIds")
+                        .HasForeignKey("PartTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_race_compatibility_part_type_part_type_id");
+                });
+
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartTypeEntity", b =>
                 {
                     b.HasOne("Aetheris.Production.Data.Entities.PartGroupEntity", null)
@@ -915,6 +1030,10 @@ namespace Aetheris.Production.Data.Migrations
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartTypeEntity", b =>
                 {
                     b.Navigation("AttributeIds");
+
+                    b.Navigation("HullCompatibilityIds");
+
+                    b.Navigation("RaceCompatibilityIds");
                 });
 
             modelBuilder.Entity("Aetheris.Production.Data.Entities.ProductionOrderEntity", b =>

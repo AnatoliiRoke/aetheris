@@ -133,6 +133,20 @@ public sealed class ProductionCatalogCache
             .ThenBy(value => value.CharacteristicId)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
+        // The hulls a part fits and the races it belongs to are read in one query each, so the
+        // catalog never walks the links row by row (task 00042).
+        List<PartHullCompatibilityEntity> hullLinks = await dbContext.PartHullCompatibilities.AsNoTracking()
+            .Where(link => !link.IsArchived)
+            .OrderBy(link => link.PartTypeId)
+            .ThenBy(link => link.HullPartTypeId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        List<PartRaceCompatibilityEntity> raceLinks = await dbContext.PartRaceCompatibilities.AsNoTracking()
+            .Where(link => !link.IsArchived)
+            .OrderBy(link => link.PartTypeId)
+            .ThenBy(link => link.RaceId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
         List<RecipeEntity> recipes = await dbContext.Recipes.AsNoTracking()
             .Include(recipe => recipe.IngredientIds)
             .OrderBy(recipe => recipe.SortOrder)
@@ -192,6 +206,20 @@ public sealed class ProductionCatalogCache
                             value.NumberValue,
                             value.Levels.ToDictionary(level => level.Level, level => level.NumberValue))));
 
+        Dictionary<int, IReadOnlyList<int>> compatibleHullIds =
+            hullLinks
+                .GroupBy(link => link.PartTypeId)
+                .ToDictionary(
+                    part => part.Key,
+                    part => (IReadOnlyList<int>)[.. part.Select(link => link.HullPartTypeId)]);
+
+        Dictionary<int, IReadOnlyList<int>> raceIds =
+            raceLinks
+                .GroupBy(link => link.PartTypeId)
+                .ToDictionary(
+                    part => part.Key,
+                    part => (IReadOnlyList<int>)[.. part.Select(link => link.RaceId)]);
+
         return new ProductionCatalog(
             [
                 .. groups.Select(group => new PartGroupInfo(
@@ -203,7 +231,8 @@ public sealed class ProductionCatalogCache
                     group.SortOrder,
                     group.IsArchived,
                     groupCharacteristicInfos.GetValueOrDefault(group.Id, []),
-                    group.ParentGroupId)),
+                    group.ParentGroupId,
+                    group.IsHullGroup)),
             ],
             [
                 .. parts.Select(part => new PartTypeInfo(
@@ -224,7 +253,9 @@ public sealed class ProductionCatalogCache
                             attribute.CodeValue,
                             attribute.TextValue)),
                     part.Weight,
-                    partCharacteristicInfos.GetValueOrDefault(part.Id, new Dictionary<int, PartCharacteristicInfo>()))),
+                    partCharacteristicInfos.GetValueOrDefault(part.Id, new Dictionary<int, PartCharacteristicInfo>()),
+                    compatibleHullIds.GetValueOrDefault(part.Id, []),
+                    raceIds.GetValueOrDefault(part.Id, []))),
             ],
             [
                 .. recipes.Select(recipe => new RecipeInfo(
@@ -257,7 +288,8 @@ public sealed class ProductionCatalogCache
                     characteristic.UnitKey,
                     characteristic.ImageKey,
                     characteristic.SortOrder,
-                    characteristic.IsArchived)),
+                    characteristic.IsArchived,
+                    characteristic.Kind)),
             ]);
     }
 

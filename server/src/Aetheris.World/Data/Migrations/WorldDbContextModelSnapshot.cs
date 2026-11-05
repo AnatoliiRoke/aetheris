@@ -900,6 +900,10 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("image_key");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
                     b.Property<string>("MoodKey")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -932,6 +936,10 @@ namespace Aetheris.World.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text[]")
                         .HasColumnName("trait_keys");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
 
                     b.HasKey("Id")
                         .HasName("pk_race");

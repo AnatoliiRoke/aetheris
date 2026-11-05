@@ -65,6 +65,12 @@ public sealed class ProductionDbContext : DbContext
     /// <summary>Gets the values of the characteristics of the parts by their level.</summary>
     public DbSet<PartCharacteristicLevelValueEntity> PartCharacteristicLevelValues => Set<PartCharacteristicLevelValueEntity>();
 
+    /// <summary>Gets the links of the parts to the hulls they fit (task 00042).</summary>
+    public DbSet<PartHullCompatibilityEntity> PartHullCompatibilities => Set<PartHullCompatibilityEntity>();
+
+    /// <summary>Gets the links of the parts to the races they belong to (task 00042).</summary>
+    public DbSet<PartRaceCompatibilityEntity> PartRaceCompatibilities => Set<PartRaceCompatibilityEntity>();
+
     /// <summary>Gets the recipes.</summary>
     public DbSet<RecipeEntity> Recipes => Set<RecipeEntity>();
 
@@ -111,6 +117,7 @@ public sealed class ProductionDbContext : DbContext
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasIndex(e => new { e.ParentGroupId, e.SortOrder });
             entity.HasOne<PartGroupEntity>().WithMany().HasForeignKey(e => e.ParentGroupId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(table => table.HasCheckConstraint("ck_part_group_is_hull_group", "is_hull_group IN (true, false)"));
         });
 
         modelBuilder.Entity<PartTypeEntity>(entity =>
@@ -144,6 +151,7 @@ public sealed class ProductionDbContext : DbContext
             entity.Property(e => e.DescriptionKey).HasMaxLength(NameLength);
             entity.Property(e => e.UnitKey).HasMaxLength(NameLength);
             entity.Property(e => e.ImageKey).HasMaxLength(CodeLength);
+            entity.Property(e => e.Kind).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.Code).IsUnique();
         });
 
@@ -170,6 +178,27 @@ public sealed class ProductionDbContext : DbContext
             entity.HasIndex(e => new { e.PartCharacteristicValueId, e.Level }).IsUnique();
             entity.HasOne<PartCharacteristicValueEntity>().WithMany(e => e.Levels).HasForeignKey(e => e.PartCharacteristicValueId).OnDelete(DeleteBehavior.Cascade);
             entity.ToTable(table => table.HasCheckConstraint("ck_part_characteristic_level_value_level", "level >= 1"));
+        });
+
+        modelBuilder.Entity<PartHullCompatibilityEntity>(entity =>
+        {
+            entity.ToTable("part_hull_compatibility");
+            entity.HasIndex(e => new { e.PartTypeId, e.HullPartTypeId }).IsUnique();
+            entity.HasIndex(e => e.HullPartTypeId);
+            entity.HasOne<PartTypeEntity>().WithMany(part => part.HullCompatibilityIds).HasForeignKey(e => e.PartTypeId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<PartTypeEntity>().WithMany().HasForeignKey(e => e.HullPartTypeId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PartRaceCompatibilityEntity>(entity =>
+        {
+            entity.ToTable("part_race_compatibility");
+            entity.HasIndex(e => new { e.PartTypeId, e.RaceId }).IsUnique();
+            entity.HasIndex(e => e.RaceId);
+            entity.HasOne<PartTypeEntity>().WithMany(part => part.RaceCompatibilityIds).HasForeignKey(e => e.PartTypeId).OnDelete(DeleteBehavior.Cascade);
+
+            // The races live in the world module, so this module keeps their identifiers and
+            // reads them through its contract, and the table carries no foreign key into the
+            // tables of the other modules (the remark of the class).
         });
 
         modelBuilder.Entity<RecipeEntity>(entity =>

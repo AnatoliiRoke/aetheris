@@ -33,6 +33,18 @@ public sealed class CharacteristicEntity
     /// <summary>Gets or sets the localisation key of the unit of measure, or <see langword="null"/> when it has none.</summary>
     public string? UnitKey { get; set; }
 
+    /// <summary>
+    /// Gets or sets the kind of the characteristic: the logical code of the program that says
+    /// what the characteristic is, one of <see cref="CharacteristicKinds"/>. It is
+    /// <see langword="null"/> for the characteristics the program does not read by its kind.
+    /// </summary>
+    /// <remarks>
+    /// The neutral code of a characteristic is given by the server, so it changes from one
+    /// database to another. The kind is the code the program reads, so a characteristic the
+    /// game rules need is found by it and not by the number of its row.
+    /// </remarks>
+    public string? Kind { get; set; }
+
     /// <summary>Gets or sets the key of the picture of the characteristic, or <see langword="null"/>.</summary>
     public string? ImageKey { get; set; }
 

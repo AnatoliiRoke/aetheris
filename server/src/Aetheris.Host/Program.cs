@@ -9,6 +9,7 @@ using Aetheris.Core.Time;
 using Aetheris.Economy;
 using Aetheris.Economy.Data;
 using Aetheris.Fleet;
+using Aetheris.Fleet.Data;
 using Aetheris.Host.Admin;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Commands;
@@ -185,7 +186,6 @@ builder.Services.AddHealthChecks()
 // ---------------------------------------------------------------------------------------------
 // Modules
 // ---------------------------------------------------------------------------------------------
-builder.Services.AddSingleton<IFleetModule, FleetModule>();
 builder.Services.AddSingleton<IRatingModule, RatingModule>();
 builder.Services.AddSingleton<IChatModule, ChatModule>();
 builder.Services.AddSingleton<IAdminModule, AdminModule>();
@@ -212,6 +212,9 @@ builder.Services.AddEconomyModule();
 // The Market module reads the world, the production and the economy, so it comes after them.
 builder.Services.AddScoped<Aetheris.Core.Players.IPlayerDirectory, Aetheris.Host.Data.IdentityPlayerDirectory>();
 builder.Services.AddMarketModule();
+
+// The Fleet module reads the world, the bodies and the production, so it comes after them.
+builder.Services.AddFleetModule();
 
 // The tracing of the requests and the measuring of the SQL commands of every database context
 // (task 00036). It comes after the modules, because it finds their contexts. The settings are
@@ -263,6 +266,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(ProcessesDatabase), () => ProcessesDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
     await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(EconomyDatabase), () => EconomyDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
     await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(MarketDatabase), () => MarketDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(FleetDatabase), () => FleetDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
 
@@ -356,6 +360,7 @@ ProductionServiceCollectionExtensions.MapEndpoints(app);
 ProcessesServiceCollectionExtensions.MapEndpoints(app);
 EconomyServiceCollectionExtensions.MapEndpoints(app);
 MarketServiceCollectionExtensions.MapEndpoints(app);
+FleetServiceCollectionExtensions.MapEndpoints(app);
 app.MapCommands();
 
 await app.RunAsync().ConfigureAwait(false);

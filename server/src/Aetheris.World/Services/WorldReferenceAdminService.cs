@@ -34,6 +34,9 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
     /// <summary>The kind of the resource groups.</summary>
     public const string ResourceGroupKind = "resource_group";
 
+    /// <summary>The kind of the races (task 00042).</summary>
+    public const string RaceKind = "race";
+
     /// <summary>The name of the embedded texts of the labels.</summary>
     public const string LabelTextsResource = "Aetheris.World.admin-reference-texts.json";
 
@@ -59,6 +62,14 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
     private const string WeightField = "weight";
 
+    private const string SortOrderField = "sort_order";
+
+    private const string ColorKeyField = "color_key";
+
+    private const string MoodField = "mood";
+
+    private const string TraitsField = "traits";
+
     private const string LabelPrefix = "admin.reference.";
 
     /// <summary>The place of the resources in the menu of the reference kinds.</summary>
@@ -66,6 +77,15 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
 
     /// <summary>The place of the resource groups in the menu of the reference kinds.</summary>
     private const int ResourceGroupSortOrder = 20;
+
+    /// <summary>The place of the races in the menu of the reference kinds.</summary>
+    private const int RaceSortOrder = 25;
+
+    /// <summary>
+    /// The level of the start building of a race that the admin panel creates. The building
+    /// itself is given by the bodies module at the start of the world.
+    /// </summary>
+    private const int RaceStartBuildingLevel = 1;
 
     /// <summary>The texts of the labels, read once from the embedded file.</summary>
     private static readonly IReadOnlyList<LocalizationTextEntry> Labels =
@@ -193,8 +213,51 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                 Options: [.. ResourceGroupIcons.Tones.Select(value => new AdminReferenceOption(value, LabelPrefix + "icon_tone." + value))]),
         ]);
 
+    /// <summary>
+    /// Gets the kind of the races.
+    /// </summary>
+    /// <remarks>
+    /// The race is a row of the catalog: a new race is a new row, and the parts of the race are
+    /// bound to it in the admin panel of the parts (task 00042).
+    /// </remarks>
+    public static AdminReferenceDescriptor RaceDescriptor { get; } = new(
+        RaceKind,
+        WorldCodeGroups.Race,
+        WorldTextKeys.Race,
+        LabelPrefix + RaceKind + ".title",
+        RaceSortOrder,
+        "/world/races",
+        new AdminReferencePermissions(
+            "admin.world_races_read",
+            "admin.world_race_read",
+            "admin.world_race_added",
+            "admin.world_race_updated",
+            "admin.world_race_archived",
+            "admin.world_race_restored"),
+        [
+            new(AdminReferenceRules.ImageField, AdminReferenceFieldTypes.Image, LabelPrefix + "field.image"),
+            new(AdminReferenceRules.NameField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.name", IsRequired: true, HasLanguages: true, InList: true),
+            new(AdminReferenceRules.DescriptionField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.description", IsRequired: true, HasLanguages: true),
+            new(
+                MoodField,
+                AdminReferenceFieldTypes.Text,
+                LabelPrefix + "field.mood",
+                IsRequired: true,
+                HasLanguages: true),
+            new(
+                TraitsField,
+                AdminReferenceFieldTypes.Effects,
+                LabelPrefix + "field.traits",
+                Fields:
+                [
+                    new("trait", AdminReferenceFieldTypes.Text, LabelPrefix + "field.trait", IsRequired: true, HasLanguages: true),
+                ]),
+            new(ColorKeyField, AdminReferenceFieldTypes.Text, LabelPrefix + "field.color_key", InList: true),
+            new(SortOrderField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.sort_order", IsRequired: true, InList: true, Minimum: 0),
+        ]);
+
     /// <inheritdoc />
-    public IReadOnlyList<AdminReferenceDescriptor> Descriptors { get; } = [ResourceDescriptor, ResourceGroupDescriptor];
+    public IReadOnlyList<AdminReferenceDescriptor> Descriptors { get; } = [ResourceDescriptor, ResourceGroupDescriptor, RaceDescriptor];
 
     /// <inheritdoc />
     public IReadOnlyList<LocalizationTextEntry> LabelTexts => Labels;
@@ -240,6 +303,19 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                         [IconShapeField] = group.IconShape,
                         [IconToneField] = group.IconTone,
                     }))],
+            RaceKind => [.. (await _dbContext.Races.AsNoTracking().OrderBy(race => race.Id).ToListAsync(cancellationToken).ConfigureAwait(false))
+                .Select(race => new AdminReferenceRow(
+                    race.Id,
+                    race.Code,
+                    race.NameKey,
+                    race.ImageKey,
+                    race.IsArchived,
+                    race.Version,
+                    new Dictionary<string, object?>
+                    {
+                        [ColorKeyField] = race.ColorKey,
+                        [SortOrderField] = race.SortOrder,
+                    }))],
             _ => throw UnknownKind(kind),
         };
 
@@ -281,6 +357,20 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                     group.Version,
                     ResourceGroupValues.Of(group, packs).ToDictionary());
 
+            case RaceKind:
+                RaceEntity? race = await _dbContext.Races.AsNoTracking()
+                    .SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false);
+
+                return race is null ? null : new AdminReferenceRecord(
+                    race.Id,
+                    race.Code,
+                    race.NameKey,
+                    race.DescriptionKey,
+                    race.ImageKey,
+                    race.IsArchived,
+                    race.Version,
+                    RaceValues.Of(race, packs).ToDictionary());
+
             default:
                 throw UnknownKind(kind);
         }
@@ -296,6 +386,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         {
             ResourceKind => await CreateResourceAsync(AdminReferenceJson.Read<ResourceValues>(input.Values), adminId, cancellationToken).ConfigureAwait(false),
             ResourceGroupKind => await CreateGroupAsync(AdminReferenceJson.Read<ResourceGroupValues>(input.Values), adminId, cancellationToken).ConfigureAwait(false),
+            RaceKind => await CreateRaceAsync(AdminReferenceJson.Read<RaceValues>(input.Values), adminId, cancellationToken).ConfigureAwait(false),
             _ => throw UnknownKind(kind),
         };
 
@@ -316,6 +407,7 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
         {
             ResourceKind => await UpdateResourceAsync(id, input.Version, AdminReferenceJson.Read<ResourceValues>(input.Values), adminId, cancellationToken).ConfigureAwait(false),
             ResourceGroupKind => await UpdateGroupAsync(id, input.Version, AdminReferenceJson.Read<ResourceGroupValues>(input.Values), adminId, cancellationToken).ConfigureAwait(false),
+            RaceKind => await UpdateRaceAsync(id, input.Version, AdminReferenceJson.Read<RaceValues>(input.Values), adminId, cancellationToken).ConfigureAwait(false),
             _ => throw UnknownKind(kind),
         };
 
@@ -350,6 +442,14 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
                         group.Version++;
 
                         return Archived(kind, group.Id, group.Version, isArchived);
+
+                    case RaceKind:
+                        RaceEntity race = await LockRaceAsync(id, cancellationToken).ConfigureAwait(false);
+                        CheckState(race.Version, race.IsArchived, input.Version, isArchived);
+                        race.IsArchived = isArchived;
+                        race.Version++;
+
+                        return Archived(kind, race.Id, race.Version, isArchived);
 
                     default:
                         throw UnknownKind(kind);
@@ -543,6 +643,103 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             },
             cancellationToken);
 
+    private Task<AdminReferenceChange> CreateRaceAsync(RaceValues values, string adminId, CancellationToken cancellationToken) =>
+        _unitOfWork.RunAsync(
+            async () =>
+            {
+                Dictionary<string, List<string>> failures = [];
+                AdminReferenceRules.CheckTexts(failures, _texts, values.Name, values.Description);
+                AdminReferenceRules.CheckTexts(failures, _texts, values.Mood, values.Mood);
+                CheckRaceTraits(failures, values);
+                await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), null, cancellationToken).ConfigureAwait(false);
+                AdminReferenceRules.ThrowIfInvalid(failures);
+
+                string code = await _codes.NextAsync(WorldCodeGroups.Race, cancellationToken).ConfigureAwait(false);
+                RaceEntity race = new()
+                {
+                    Code = code,
+                    NameKey = WorldTextKeys.Name(WorldTextKeys.Race, code),
+                    DescriptionKey = WorldTextKeys.Description(WorldTextKeys.Race, code),
+                    MoodKey = WorldTextKeys.Of(WorldTextKeys.Race, code, WorldTextKeys.MoodPart),
+                    TraitKeys = [.. (values.Traits ?? []).Select((_, index) => TraitKey(code, index))],
+                    ImageKey = AdminReferenceRules.ImageKey(values.ImageKey),
+                    ColorKey = Blank(values.ColorKey),
+                    SortOrder = values.SortOrder,
+                    StartBuildingLevel = RaceStartBuildingLevel,
+                };
+
+                _dbContext.Races.Add(race);
+                await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _texts.AddMissingAsync(
+                    RaceValues.Entries(_texts, race, values),
+                    adminId,
+                    cancellationToken).ConfigureAwait(false);
+
+                return AdminReferenceRules.Change(
+                    AdminReferenceEndpoints.Target(RaceKind, race.Id),
+                    null,
+                    new { code, values = RaceValues.Of(race, values.Trimmed(_texts)) },
+                    race.Id,
+                    race.Version);
+            },
+            cancellationToken);
+
+    private Task<AdminReferenceChange> UpdateRaceAsync(int id, int version, RaceValues values, string adminId, CancellationToken cancellationToken) =>
+        _unitOfWork.RunAsync(
+            async () =>
+            {
+                RaceEntity race = await LockRaceAsync(id, cancellationToken).ConfigureAwait(false);
+                AdminReferenceRules.CheckVersion(race.Version, version);
+
+                Dictionary<string, List<string>> failures = [];
+                AdminReferenceRules.CheckTexts(failures, _texts, values.Name, values.Description);
+                AdminReferenceRules.CheckTexts(failures, _texts, values.Mood, values.Mood);
+                CheckRaceTraits(failures, values);
+                await AdminReferenceRules.CheckImageAsync(failures, _images, AdminReferenceRules.ImageKey(values.ImageKey), race.ImageKey, cancellationToken).ConfigureAwait(false);
+                AdminReferenceRules.ThrowIfInvalid(failures);
+
+                IReadOnlyList<LocalizationPack> packs = await AdminReferenceRules.PacksAsync(_texts, cancellationToken).ConfigureAwait(false);
+                RaceValues before = RaceValues.Of(race, packs);
+
+                race.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
+                race.ColorKey = Blank(values.ColorKey);
+                race.SortOrder = values.SortOrder;
+                race.MoodKey = WorldTextKeys.Of(WorldTextKeys.Race, race.Code, WorldTextKeys.MoodPart);
+                race.TraitKeys = [.. (values.Traits ?? []).Select((_, index) => TraitKey(race.Code, index))];
+                race.Version++;
+
+                await _texts.SetAsync(
+                    RaceValues.Entries(_texts, race, values),
+                    adminId,
+                    cancellationToken).ConfigureAwait(false);
+
+                return AdminReferenceRules.Change(
+                    AdminReferenceEndpoints.Target(RaceKind, race.Id),
+                    before,
+                    RaceValues.Of(race, values.Trimmed(_texts)),
+                    race.Id,
+                    race.Version);
+            },
+            cancellationToken);
+
+    /// <summary>
+    /// Checks the strengths of a race: every one of them has a text in every language.
+    /// </summary>
+    private void CheckRaceTraits(Dictionary<string, List<string>> failures, RaceValues values)
+    {
+        foreach (RaceTraitValues trait in values.Traits ?? [])
+        {
+            AdminReferenceRules.CheckTexts(failures, _texts, trait.Trait, trait.Trait);
+        }
+    }
+
+    /// <summary>
+    /// The key of the text of one trait of a race.
+    /// </summary>
+    private static string TraitKey(string raceCode, int index) =>
+        WorldTextKeys.Of(WorldTextKeys.Race, raceCode, WorldTextKeys.TraitPart + (index + 1).ToString(CultureInfo.InvariantCulture));
+
     /// <summary>
     /// Checks the values of a resource: the texts, a known group that is not archived (the group
     /// it already has is kept even when it is archived) and a stored picture.
@@ -640,6 +837,12 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             .ToListAsync(cancellationToken).ConfigureAwait(false)).FirstOrDefault()
         ?? throw new AdminReferenceException(GameErrorCodes.NotFound);
 
+    private async Task<RaceEntity> LockRaceAsync(int id, CancellationToken cancellationToken) =>
+        (await _dbContext.Races
+            .FromSql($"SELECT * FROM race WHERE id = {id} FOR UPDATE")
+            .ToListAsync(cancellationToken).ConfigureAwait(false)).FirstOrDefault()
+        ?? throw new AdminReferenceException(GameErrorCodes.NotFound);
+
     /// <summary>
     /// The values of the form of a resource.
     /// </summary>
@@ -728,6 +931,129 @@ public sealed class WorldReferenceAdminService : IAdminReferenceService
             [IconToneField] = IconTone,
         };
     }
+
+    /// <summary>
+    /// The values of the form of a race.
+    /// </summary>
+    /// <param name="Name">The name by language.</param>
+    /// <param name="Description">The description by language.</param>
+    /// <param name="Mood">The mood shown on the card of the race, by language.</param>
+    /// <param name="Traits">The strengths shown on the card of the race, each by language.</param>
+    /// <param name="ImageKey">The key of the picture.</param>
+    /// <param name="ColorKey">The key of the colour of the race in the style of the client.</param>
+    /// <param name="SortOrder">The order of the race in the list of the client.</param>
+    private sealed record RaceValues(
+        Dictionary<string, string>? Name,
+        Dictionary<string, string>? Description,
+        Dictionary<string, string>? Mood,
+        IReadOnlyList<RaceTraitValues>? Traits,
+        string? ImageKey,
+        string? ColorKey,
+        int SortOrder)
+    {
+        /// <summary>
+        /// The values of the race with the texts of the packs of the languages.
+        /// </summary>
+        public static RaceValues Of(RaceEntity race, IReadOnlyList<LocalizationPack> packs) =>
+            new(
+                AdminReferenceRules.TextsOf(packs, race.NameKey),
+                AdminReferenceRules.TextsOf(packs, race.DescriptionKey),
+                AdminReferenceRules.TextsOf(packs, race.MoodKey),
+                [.. race.TraitKeys.Select(key => new RaceTraitValues(AdminReferenceRules.TextsOf(packs, key)))],
+                race.ImageKey,
+                race.ColorKey,
+                race.SortOrder);
+
+        /// <summary>
+        /// The values of the race with the texts the form sent.
+        /// </summary>
+        public static RaceValues Of(RaceEntity race, (Dictionary<string, string> Name, Dictionary<string, string> Description) texts) =>
+            new(
+                texts.Name,
+                texts.Description,
+                new Dictionary<string, string>(),
+                [],
+                race.ImageKey,
+                race.ColorKey,
+                race.SortOrder);
+
+        /// <summary>
+        /// The values of the race with the texts trimmed and with the texts of the mood and of the
+        /// traits kept.
+        /// </summary>
+        public (Dictionary<string, string> Name, Dictionary<string, string> Description) Trimmed(ILocalizationTexts texts) =>
+            (Trim(texts, Name), Trim(texts, Description));
+
+        /// <summary>
+        /// The texts of the race: the name, the description, the mood and the strengths.
+        /// </summary>
+        public static IEnumerable<LocalizationTextEntry> Entries(
+            ILocalizationTexts texts,
+            RaceEntity race,
+            RaceValues values)
+        {
+            foreach (LocalizationTextEntry entry in AdminReferenceRules.Entries(
+                texts,
+                race.NameKey,
+                race.DescriptionKey,
+                values.Name!,
+                values.Description!))
+            {
+                yield return entry;
+            }
+
+            foreach (LocalizationTextEntry entry in TextsOf(texts, race.MoodKey, values.Mood))
+            {
+                yield return entry;
+            }
+
+            int index = 0;
+            foreach (RaceTraitValues trait in values.Traits ?? [])
+            {
+                string key = index < race.TraitKeys.Count
+                    ? race.TraitKeys[index]
+                    : WorldTextKeys.Of(WorldTextKeys.Race, race.Code, WorldTextKeys.TraitPart + (index + 1).ToString(CultureInfo.InvariantCulture));
+
+                foreach (LocalizationTextEntry entry in TextsOf(texts, key, trait.Trait))
+                {
+                    yield return entry;
+                }
+
+                index++;
+            }
+        }
+
+        /// <summary>
+        /// The texts of one key by language.
+        /// </summary>
+        private static IEnumerable<LocalizationTextEntry> TextsOf(
+            ILocalizationTexts texts,
+            string key,
+            Dictionary<string, string>? values) =>
+            texts.Languages.Select(language => new LocalizationTextEntry(key, language, values?.GetValueOrDefault(language)?.Trim() ?? string.Empty));
+
+        /// <summary>
+        /// The values of the race for the form.
+        /// </summary>
+        public Dictionary<string, object?> ToDictionary() => new()
+        {
+            [AdminReferenceRules.ImageField] = ImageKey,
+            [AdminReferenceRules.NameField] = Name,
+            [AdminReferenceRules.DescriptionField] = Description,
+            [MoodField] = Mood,
+            [TraitsField] = Traits is null
+                ? null
+                : new List<object>([.. Traits.Select(trait => (object)new Dictionary<string, object?> { ["trait"] = trait.Trait })]),
+            [ColorKeyField] = ColorKey,
+            [SortOrderField] = SortOrder,
+        };
+    }
+
+    /// <summary>
+    /// One trait of a race: the text of the trait by language.
+    /// </summary>
+    /// <param name="Trait">The text of the trait.</param>
+    private sealed record RaceTraitValues(Dictionary<string, string>? Trait);
 
     /// <summary>
     /// Checks the shape and the tone of the icon of a group: each is empty or one of the known

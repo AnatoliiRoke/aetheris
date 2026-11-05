@@ -5,7 +5,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!--
+    The module of the fleet reads the world for the races and the bodies, the planets module
+    for the limit of the projects of the design bureau, and the production module for the
+    catalog of the ships: the hulls, their slots and the modules that go into them. The
+    dependencies go one way only.
+  -->
+  <ItemGroup>
     <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
+    <ProjectReference Include="..\Aetheris.Planets\Aetheris.Planets.csproj" />
+    <ProjectReference Include="..\Aetheris.Production\Aetheris.Production.csproj" />
+    <ProjectReference Include="..\Aetheris.World\Aetheris.World.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
   </ItemGroup>
 
 </Project>

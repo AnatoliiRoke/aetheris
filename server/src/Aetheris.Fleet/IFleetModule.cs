@@ -1,12 +1,12 @@
 namespace Aetheris.Fleet;
 
 /// <summary>
-/// Marker contract for the Fleet module.
+/// The public contract of the Fleet module (task 00038): the projects of the ships.
 /// </summary>
 /// <remarks>
-/// Modules communicate only through public interfaces (documentation/tech/01,
-/// section 8). This interface is the module's public surface; everything else in
-/// <c>Aetheris.Fleet</c> is internal to the module.
+/// Modules communicate only through public interfaces (documentation/tech/01, section 8). The
+/// module reads the world, the bodies and the production through their contracts and keeps
+/// its own tables.
 /// </remarks>
 public interface IFleetModule
 {

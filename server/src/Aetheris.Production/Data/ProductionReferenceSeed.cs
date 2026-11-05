@@ -137,6 +137,7 @@ public static class ProductionReferenceSeed
                 NameKey = ProductionTextKeys.CharacteristicName(code),
                 DescriptionKey = ProductionTextKeys.CharacteristicDescription(code),
                 UnitKey = characteristic.Unit is null ? null : ProductionTextKeys.CharacteristicUnit(code),
+                Kind = characteristic.Kind,
                 SortOrder = characteristic.SortOrder,
             };
 
@@ -166,6 +167,7 @@ public static class ProductionReferenceSeed
                 NameKey = ProductionTextKeys.GroupName(code),
                 DescriptionKey = ProductionTextKeys.GroupDescription(code),
                 SortOrder = group.SortOrder,
+                IsHullGroup = group.IsHullGroup,
             };
 
             dbContext.PartGroups.Add(entity);
@@ -284,6 +286,37 @@ public static class ProductionReferenceSeed
                 ],
                 ProductionSeedActor,
                 cancellationToken).ConfigureAwait(false);
+        }
+
+        // The hulls a part fits and the races it belongs to are written after the parts, so
+        // both sides of every link point at real rows (task 00042).
+        foreach (SeedPartHull link in data.PartHulls ?? [])
+        {
+            foreach (string hull in link.Hulls)
+            {
+                dbContext.PartHullCompatibilities.Add(new PartHullCompatibilityEntity
+                {
+                    PartTypeId = partTypeIds[link.Part],
+                    HullPartTypeId = partTypeIds[hull],
+                });
+            }
+        }
+
+        foreach (SeedPartRace link in data.PartRaces ?? [])
+        {
+            foreach (string race in link.Races)
+            {
+                dbContext.PartRaceCompatibilities.Add(new PartRaceCompatibilityEntity
+                {
+                    PartTypeId = partTypeIds[link.Part],
+                    RaceId = raceIds[race],
+                });
+            }
+        }
+
+        if (data.PartHulls is { Count: > 0 } || data.PartRaces is { Count: > 0 })
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         Dictionary<string, int> recipeIds = [];
@@ -418,13 +451,17 @@ public static class ProductionReferenceSeed
 /// <param name="RaceBonuses">The bonuses of the races in the groups of the parts.</param>
 /// <param name="Characteristics">The characteristics of the parts (task 00027).</param>
 /// <param name="GroupCharacteristics">The characteristics of the groups of the parts (task 00027).</param>
+/// <param name="PartHulls">The hulls every part fits (task 00042).</param>
+/// <param name="PartRaces">The races every part belongs to (task 00042).</param>
 public sealed record ProductionSeedData(
     IReadOnlyList<SeedPartGroup> PartGroups,
     IReadOnlyList<SeedPart> Parts,
     IReadOnlyList<SeedRecipe> Recipes,
     IReadOnlyList<SeedRaceBonus> RaceBonuses,
     IReadOnlyList<SeedCharacteristic>? Characteristics = null,
-    IReadOnlyList<SeedGroupCharacteristic>? GroupCharacteristics = null);
+    IReadOnlyList<SeedGroupCharacteristic>? GroupCharacteristics = null,
+    IReadOnlyList<SeedPartHull>? PartHulls = null,
+    IReadOnlyList<SeedPartRace>? PartRaces = null);
 
 /// <summary>A characteristic of the starting data.</summary>
 /// <param name="Code">The neutral code of the characteristic.</param>
@@ -437,7 +474,8 @@ public sealed record SeedCharacteristic(
     int SortOrder,
     IReadOnlyDictionary<string, string> Name,
     IReadOnlyDictionary<string, string> Description,
-    IReadOnlyDictionary<string, string>? Unit = null);
+    IReadOnlyDictionary<string, string>? Unit = null,
+    string? Kind = null);
 
 /// <summary>A characteristic of a group of the parts of the starting data.</summary>
 /// <param name="Group">The neutral code of the group of the parts.</param>
@@ -450,6 +488,20 @@ public sealed record SeedGroupCharacteristic(
     int SortOrder,
     bool IsRequired = false);
 
+/// <summary>The hulls a part of the starting data fits (task 00042).</summary>
+/// <param name="Part">The code of the part of the file.</param>
+/// <param name="Hulls">The codes of the hulls of the file the part fits.</param>
+public sealed record SeedPartHull(
+    string Part,
+    IReadOnlyList<string> Hulls);
+
+/// <summary>The races a part of the starting data belongs to (task 00042).</summary>
+/// <param name="Part">The code of the part of the file.</param>
+/// <param name="Races">The codes of the races the part belongs to.</param>
+public sealed record SeedPartRace(
+    string Part,
+    IReadOnlyList<string> Races);
+
 /// <summary>A group of the parts of the starting data.</summary>
 /// <param name="Code">The neutral code of the group.</param>
 /// <param name="SortOrder">The order in the lists.</param>
@@ -461,7 +513,8 @@ public sealed record SeedPartGroup(
     int SortOrder,
     IReadOnlyDictionary<string, string> Name,
     IReadOnlyDictionary<string, string> Description,
-    string? Parent = null);
+    string? Parent = null,
+    bool IsHullGroup = false);
 
 /// <summary>A part of the starting data.</summary>
 /// <param name="Code">The neutral code of the part.</param>

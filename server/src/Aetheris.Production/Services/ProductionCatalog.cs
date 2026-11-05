@@ -88,7 +88,8 @@ public sealed record PartGroupInfo(
     int SortOrder,
     bool IsArchived,
     IReadOnlyList<PartGroupCharacteristicInfo> Characteristics,
-    int? ParentGroupId = null);
+    int? ParentGroupId = null,
+    bool IsHullGroup = false);
 
 /// <summary>A characteristic of a group of the parts.</summary>
 /// <param name="CharacteristicId">The characteristic.</param>
@@ -122,7 +123,8 @@ public sealed record CharacteristicInfo(
     string? UnitKey,
     string? ImageKey,
     int SortOrder,
-    bool IsArchived);
+    bool IsArchived,
+    string? Kind = null);
 
 /// <summary>A part with its attributes.</summary>
 /// <param name="Id">The part.</param>
@@ -137,6 +139,8 @@ public sealed record CharacteristicInfo(
 /// <param name="Attributes">The attributes of the part by their key.</param>
 /// <param name="Weight">The weight of one part in tonnes (task 00027).</param>
 /// <param name="Characteristics">The values of the characteristics of the part by the characteristic.</param>
+/// <param name="CompatibleHullIds">The hulls the part fits, by their identifier (task 00042).</param>
+/// <param name="RaceIds">The races the part belongs to, by their identifier (task 00042).</param>
 public sealed record PartTypeInfo(
     int Id,
     string Code,
@@ -149,7 +153,9 @@ public sealed record PartTypeInfo(
     bool IsArchived,
     IReadOnlyDictionary<string, PartAttributeInfo> Attributes,
     decimal Weight,
-    IReadOnlyDictionary<int, PartCharacteristicInfo> Characteristics);
+    IReadOnlyDictionary<int, PartCharacteristicInfo> Characteristics,
+    IReadOnlyList<int> CompatibleHullIds,
+    IReadOnlyList<int> RaceIds);
 
 /// <summary>The value of a characteristic of a part.</summary>
 /// <param name="CharacteristicId">The characteristic.</param>

@@ -84,10 +84,11 @@ public static class WorldAdminEndpoints
         secured.MapPut("/world/generation-rule-groups/{ruleGroupId:int}", UpdateRuleGroupAsync)
             .WithName("admin.world_generation_rule_group_updated");
 
-        // The resources and the resource groups are reference kinds: the list, the form, the
-        // change and the archive come from the shared endpoints (task 00023).
+        // The resources, the resource groups and the races are reference kinds: the list, the
+        // form, the change and the archive come from the shared endpoints (task 00023).
         secured.MapAdminReference<WorldReferenceAdminService>(WorldReferenceAdminService.ResourceDescriptor);
         secured.MapAdminReference<WorldReferenceAdminService>(WorldReferenceAdminService.ResourceGroupDescriptor);
+        secured.MapAdminReference<WorldReferenceAdminService>(WorldReferenceAdminService.RaceDescriptor);
 
         secured.MapGet("/world/generation/estimate", EstimateAsync)
             .WithName("admin.world_generation_estimated");

@@ -22,6 +22,12 @@ public sealed record ProductionSettings
     public TimeSpan CatalogCacheDuration { get; init; }
 
     /// <summary>
+    /// Gets the number of slots of a hull that has no number of slots of its own yet
+    /// (task 00038).
+    /// </summary>
+    public int DefaultHullSlots { get; init; }
+
+    /// <summary>
     /// Reads the parameters.
     /// </summary>
     /// <param name="config">The game configuration.</param>
@@ -35,6 +41,7 @@ public sealed record ProductionSettings
             QueueBaseSlots = ReadInt32(config, ProductionConfigKeys.QueueBaseSlots),
             QueueMaxExtraSlots = ReadInt32(config, ProductionConfigKeys.QueueMaxExtraSlots),
             CatalogCacheDuration = TimeSpan.FromSeconds(ReadInt64(config, ProductionConfigKeys.CatalogCacheSeconds)),
+            DefaultHullSlots = ReadInt32(config, ProductionConfigKeys.DefaultHullSlots),
         };
     }
 
