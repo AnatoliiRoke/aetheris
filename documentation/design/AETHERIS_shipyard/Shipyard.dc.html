@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>AETHERIS — верф</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#070B16}
+@keyframes pl-glow{0%,100%{box-shadow:0 0 0 1px rgba(46,196,196,.55),0 0 14px rgba(46,196,196,.15)}50%{box-shadow:0 0 0 1px rgba(46,196,196,.85),0 0 24px rgba(46,196,196,.32)}}
+.pl-done{animation:pl-glow 2.6s ease-in-out infinite}
+.pl-nav:hover{background:rgba(160,190,255,.06)}
+.pl-ibtn:hover{border-color:rgba(160,190,255,.4)!important;color:#E8EEFF!important}
+.pl-pbtn:hover{background:#4FDADA!important}
+.pl-pbtn:active{background:#2AA9A9!important}
+.pl-sbtn:hover{border-color:rgba(160,190,255,.5)!important;background:rgba(160,190,255,.06)!important}
+.pl-sbtn:active{background:rgba(160,190,255,.12)!important}
+.pl-tbtn:hover:not(:disabled){color:#FF8A66!important;text-decoration:underline}
+.pl-tbtn:disabled{opacity:.45;cursor:not-allowed!important}
+.pl-thumbs{scrollbar-width:thin;scrollbar-color:#2EC4C4 rgba(160,190,255,.08)}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #2EC4C4;outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.pl-done{animation:none}}
+/* construction screen */
+.pl-pbtn:disabled,.pl-sbtn:disabled{cursor:not-allowed}
+.pl-pbtn:disabled:hover{background:#2EC4C4!important}
+.pl-sbtn:disabled:hover{border-color:rgba(160,190,255,.28)!important;background:transparent!important}
+/* research screen */
+.rs-tab:hover{color:#E8EEFF!important;background:rgba(160,190,255,.06)!important}
+.rs-chip:hover{border-color:rgba(160,190,255,.5)!important;color:#E8EEFF!important}
+.rs-chip:active,.rs-tab:active{background:rgba(160,190,255,.12)!important}
+.rs-scroll{scrollbar-width:thin;scrollbar-color:#2EC4C4 rgba(160,190,255,.08)}
+input::placeholder{color:#9AA7C7;opacity:1}
+/* shipyard screen */
+.mk-row:hover{background:rgba(160,190,255,.05)}
+.mk-opt:hover:not(:disabled){background:rgba(160,190,255,.10)!important}
+input:disabled{opacity:.45;cursor:not-allowed}
+@keyframes mk-sh{0%{opacity:.45}50%{opacity:.9}100%{opacity:.45}}
+.mk-sk{display:block;background:rgba(160,190,255,.16);animation:mk-sh 1.4s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.mk-sk{animation:none}}
+</style>
+</helmet>
+
+<div style="{{rootStyle}}">
+
+<!-- ================= TOP BAR (desktop) ================= -->
+<sc-if value="{{desk}}" hint-placeholder-val="{{ true }}">
+<header style="position: sticky; top: 0; z-index: 30; height: 64px; display: flex; align-items: center; gap: 24px; padding: 0 20px; background: rgba(7,11,22,0.92); border-bottom: 1px solid rgba(160,190,255,0.16); box-sizing: border-box">
+<div style="display: flex; align-items: center; gap: 16px; flex: 0 0 auto">
+<span style="display: flex; align-items: center; gap: 10px">
+<img src="/_blob/5d05da37d4cbf8c079ada5da8fd59a29" alt="" width="28" height="28" style="width: 28px; height: 28px; border-radius: 7px; object-fit: cover">
+<span style="font-weight: 700; font-size: 18px; letter-spacing: 0.04em">AETHERIS</span>
+</span>
+<span style="display: inline-flex; align-items: center; gap: 8px; padding: 5px 10px 5px 8px; border-radius: 999px; background: #141B33; border: 1px solid rgba(160,190,255,0.16); font-size: 14px; font-weight: 600">
+<span aria-hidden="true" style="width: 14px; height: 14px; background: #6C8DB8; clip-path: polygon(50% 0, 100% 16%, 100% 58%, 50% 100%, 0 58%, 0 16%)"></span>
+Kapitan_Zoria<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">, раса Терани</span>
+</span>
+<span style="{{planChip}}">{{planLabel}}</span>
+</div>
+<ul aria-label="{{t.resources}}" style="flex: 1 1 auto; display: flex; justify-content: center; gap: 22px; margin: 0; padding: 0; list-style: none; min-width: 0">
+<sc-for list="{{topRes}}" as="r" hint-placeholder-count="3">
+<li title="{{r.name}}" style="display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; white-space: nowrap">
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="{{r.d}}" fill="{{r.fill}}" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{r.name}}:</span>{{r.value}}
+</li>
+</sc-for>
+</ul>
+<div style="display: flex; align-items: center; gap: 8px; flex: 0 0 auto">
+<sc-for list="{{alerts}}" as="a" hint-placeholder-count="3">
+<button type="button" style="{{a.style}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="{{a.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{a.label}}</button>
+</sc-for>
+<span aria-hidden="true" style="width: 1px; height: 28px; background: rgba(160,190,255,0.16); margin: 0 4px"></span>
+<button type="button" class="pl-ibtn" aria-label="{{t.mail}}: 3 {{t.unread}}" style="{{ibtn}} position: relative;">
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.mail}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span aria-hidden="true" style="position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 999px; background: #2EC4C4; color: #070B16; font-size: 11px; font-weight: 700; line-height: 16px; text-align: center">3</span>
+</button>
+<button type="button" class="pl-ibtn" aria-label="{{t.settings}}" style="{{ibtn}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.settings}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+<button type="button" class="pl-ibtn" aria-label="{{t.signout}}" style="{{ibtn}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+</div>
+</header>
+</sc-if>
+
+<!-- ================= TOP BAR (mobile) ================= -->
+<sc-if value="{{mob}}" hint-placeholder-val="{{ false }}">
+<header style="position: sticky; top: 0; z-index: 30; display: flex; flex-direction: column; gap: 8px; padding: 10px 16px; background: rgba(7,11,22,0.95); border-bottom: 1px solid rgba(160,190,255,0.16)">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<img src="/_blob/5d05da37d4cbf8c079ada5da8fd59a29" alt="" width="28" height="28" style="width: 28px; height: 28px; border-radius: 7px; object-fit: cover">
+<span style="display: flex; flex-direction: column; line-height: 1.2; min-width: 0">
+<span style="font-weight: 700; font-size: 15px; letter-spacing: 0.04em">AETHERIS</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #C3CCE4"><span aria-hidden="true" style="width: 11px; height: 11px; background: #6C8DB8; clip-path: polygon(50% 0, 100% 16%, 100% 58%, 50% 100%, 0 58%, 0 16%)"></span>Kapitan_Zoria · {{planLabel}}</span>
+</span>
+</span>
+<button type="button" class="pl-ibtn" aria-label="{{t.mail}}: 3 {{t.unread}}" style="{{ibtn}} position: relative;">
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.mail}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span aria-hidden="true" style="position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 999px; background: #2EC4C4; color: #070B16; font-size: 11px; font-weight: 700; line-height: 16px; text-align: center">3</span>
+</button>
+</div>
+<ul aria-label="{{t.resources}}" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 10px; margin: 0; padding: 0; list-style: none">
+<sc-for list="{{topRes}}" as="r" hint-placeholder-count="3">
+<li title="{{r.name}}" style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; white-space: nowrap">
+<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="{{r.d}}" fill="{{r.fill}}" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{r.name}}:</span>{{r.value}}
+</li>
+</sc-for>
+</ul>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{alerts}}" as="a" hint-placeholder-count="3">
+<button type="button" style="{{a.style}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="{{a.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{a.label}}</button>
+</sc-for>
+</div>
+</header>
+</sc-if>
+
+<!-- ================= BODY ================= -->
+<div style="{{bodyStyle}}">
+
+<!-- LEFT SIDEBAR: 13 rows -->
+<sc-if value="{{desk}}" hint-placeholder-val="{{ true }}">
+<nav aria-label="{{t.gameMenu}}" style="position: sticky; top: 64px; align-self: flex-start; flex: 0 0 220px; width: 220px; box-sizing: border-box; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; min-height: calc(100vh - 128px); border-right: 1px solid rgba(160,190,255,0.12); background: rgba(11,16,32,0.6)">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="13">
+<a href="#{{n.id}}" class="pl-nav" aria-current="{{n.current}}" style="{{n.style}}">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="{{n.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span style="flex: 1 1 auto">{{n.label}}</span>
+<sc-if value="{{n.badge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: #1C2544; color: #E8EEFF; font-size: 12px; font-weight: 700; line-height: 20px; text-align: center">{{n.badge}}</span></sc-if>
+</a>
+</sc-for>
+<div style="margin-top: auto; padding: 16px 6px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<span style="font-size: 13px; color: #9AA7C7">{{t.language}}</span>
+<div role="group" aria-label="Мова / Language" style="display: flex; padding: 3px; border-radius: 10px; border: 1px solid rgba(160,190,255,0.16); background: #0B1020">
+<sc-for list="{{langs}}" as="l" hint-placeholder-count="2">
+<button type="button" aria-pressed="{{l.on}}" onClick="{{l.pick}}" style="{{l.style}}">{{l.label}}</button>
+</sc-for>
+</div>
+</div>
+</nav>
+</sc-if>
+
+<!-- MAIN -->
+<main style="{{mainStyle}}">
+<img src="/_blob/ac6fddbe0222bb895fce26ebc36ae140" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.18; pointer-events: none; z-index: 0">
+<div style="position: relative; z-index: 1; display: flex; flex-direction: column; gap: 16px">
+
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="{{h1Style}}">{{t.title}} <span style="color: #9AA7C7; font-weight: 600">{{planetName}}</span></h1>
+<p style="margin: 0; font-size: 14px; color: #9AA7C7">{{coords}}</p>
+</div>
+
+<div role="tablist" aria-label="{{t.tabsAria}}" class="rs-scroll" style="{{tabsWrap}}">
+<sc-for list="{{mtabs}}" as="tb" hint-placeholder-count="3">
+<button type="button" role="tab" id="sy-tab-{{tb.id}}" class="rs-tab" aria-selected="{{tb.sel}}" onClick="{{tb.pick}}" style="{{tb.style}}">{{tb.label}}<sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="{{tb.badgeStyle}}">{{tb.badge}}</span></sc-if></button>
+</sc-for>
+</div>
+
+<sc-if value="{{flash}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: rgba(76,208,138,0.08); border: 1px solid rgba(76,208,138,0.4); color: #4CD08A; font-size: 14px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="flex: 1 1 auto">{{flash}}</span></div>
+</sc-if>
+
+<div role="tabpanel" aria-labelledby="sy-tab-{{tab}}" style="display: flex; flex-direction: column; gap: 16px; min-width: 0">
+
+<!-- ===== error ===== -->
+<sc-if value="{{errOn}}" hint-placeholder-val="{{ false }}">
+<section role="alert" style="{{emptyBox}}">
+<svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true" style="color: #FF8A66"><path d="M12 3l10 18H2z M12 10v4 M12 17.5v.01" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<h2 style="margin: 0; font-size: 18px; font-weight: 600">{{t.errTitle}}</h2>
+<p style="margin: 0; max-width: 420px; font-size: 14px; color: #9AA7C7">{{t.errText}}</p>
+<button type="button" class="pl-pbtn" onClick="{{retry}}" style="{{btnP}}">{{t.retry}}</button>
+</section>
+</sc-if>
+
+<!-- ===== skeleton ===== -->
+<sc-if value="{{loadOn}}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="{{t.loading}}" style="{{skelGrid}}">
+<section style="{{panel}} padding: 8px;"><sc-for list="{{skel}}" as="k" hint-placeholder-count="5"><div style="{{skelRow}}"><span class="mk-sk" style="{{k.a}}"></span><span class="mk-sk" style="{{k.b}}"></span><span class="mk-sk" style="{{k.c}}"></span></div></sc-for></section>
+<section style="{{panel}} padding: 8px;"><sc-for list="{{skel}}" as="k" hint-placeholder-count="5"><div style="{{skelRow}}"><span class="mk-sk" style="{{k.a}}"></span><span class="mk-sk" style="{{k.b}}"></span><span class="mk-sk" style="{{k.c}}"></span></div></sc-for></section>
+</div>
+</sc-if>
+
+<!-- ===== requirement / empty panels ===== -->
+<sc-if value="{{reqOn}}" hint-placeholder-val="{{ false }}">
+<section style="{{emptyBox}}">
+<svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true" style="color: #F2C14E"><path d="M3 21V10l6 4V10l6 4V6h6v15z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">{{req.title}}</h2>
+<p style="margin: 0; max-width: 460px; font-size: 14px; color: #9AA7C7">{{req.text}}</p>
+<a href="#build" class="pl-pbtn" style="{{btnPLink}}">{{t.toBuild}}</a>
+</section>
+</sc-if>
+
+<sc-if value="{{noDesignsOn}}" hint-placeholder-val="{{ false }}">
+<section style="{{emptyBox}}">
+<svg width="160" height="90" viewBox="0 0 160 90" aria-hidden="true"><rect x="2" y="2" width="156" height="86" rx="12" fill="rgba(20,27,51,0.6)" stroke="rgba(160,190,255,0.28)" stroke-dasharray="5 5"></rect><path d="M28 46 L58 30 H104 L134 46 L104 62 H58 z M58 30 L70 14 H88 L92 30 M58 62 L70 78 H88 L92 62" fill="none" stroke="#4FDADA" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path><path d="M76 46h28" stroke="#9AA7C7" stroke-width="2" stroke-linecap="round"></path></svg>
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">{{t.noDesTitle}}</h2>
+<p style="margin: 0; max-width: 460px; font-size: 14px; color: #9AA7C7">{{t.noDesText}}</p>
+<button type="button" class="pl-pbtn" onClick="{{newDesign}}" style="{{btnP}}">{{t.addNew}}</button>
+</section>
+</sc-if>
+
+<!-- ================= DESIGNS ================= -->
+<sc-if value="{{designOn}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 16px; min-width: 0">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+<span style="font-size: 16px; color: #C3CCE4">{{t.designsCount}}: <b style="color: #E8EEFF">{{designsN}} {{t.of}} {{designsMax}}</b></span>
+<sc-if value="{{canNew}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-pbtn" onClick="{{newDesign}}" style="{{btnAdd}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 5v14 M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>&nbsp;{{t.addNew}}</button></sc-if>
+<sc-if value="{{cannotNew}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-pbtn" disabled title="{{t.limitDesigns}}" style="{{btnAddOff}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 5v14 M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>&nbsp;{{t.addNew}}</button></sc-if>
+</div>
+<div role="group" aria-label="{{t.filterAria}}" class="rs-scroll" style="display: flex; gap: 8px; overflow-x: auto; padding: 2px 0">
+<sc-for list="{{filters}}" as="f" hint-placeholder-count="6"><button type="button" class="rs-chip" aria-pressed="{{f.on}}" onClick="{{f.pick}}" style="{{f.style}}">{{f.label}}</button></sc-for>
+</div>
+<sc-if value="{{noMatch}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 28px; border-radius: 14px; border: 1px dashed rgba(160,190,255,0.28); text-align: center; font-size: 14px; color: #9AA7C7">{{t.noMatch}}</p></sc-if>
+<div style="{{cardGrid}}">
+<sc-for list="{{cards}}" as="d" hint-placeholder-count="6">
+<article aria-label="{{d.name}}" style="{{card}}">
+<div style="{{d.pic}}"><svg viewBox="0 0 100 56" aria-hidden="true" style="width: 100%; height: 100%; display: block"><path d="{{d.art}}" fill="{{d.color}}" fill-opacity="0.92"></path></svg></div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h3 style="margin: 0; font-size: 17px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere">{{d.name}}</h3>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px"><span style="font-size: 13px; color: #C3CCE4">{{t.hullWord}} «{{d.hull}}»</span><span style="{{d.chipSt}}">{{d.cls}}</span>
+<sc-if value="{{d.issue}}" hint-placeholder-val="{{ false }}"><span style="{{issueChip}}" title="{{d.issueTxt}}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 8v5 M12 16.5v.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{t.issue}}</span></sc-if></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; font-weight: 600; color: #9AA7C7">{{t.installed}}</span>
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{d.mods}}" as="r" hint-placeholder-count="5"><li style="display: flex; align-items: center; gap: 8px; font-size: 13px; min-width: 0"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto; color: #9AA7C7"><path d="{{r.d}}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere">{{r.name}} {{r.mk}}</span><b style="flex: 0 0 auto">×{{r.n}}</b></li></sc-for>
+</ul></div>
+<dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; padding: 10px 12px; border-radius: 10px; background: #0F1529; border: 1px solid rgba(160,190,255,0.12); font-size: 13px">
+<sc-for list="{{d.stats}}" as="r" hint-placeholder-count="9"><div style="{{r.style}}"><dt style="color: #9AA7C7; font-size: 12px">{{r.k}}</dt><dd style="margin: 0; font-weight: 600; overflow-wrap: anywhere">{{r.v}}</dd></div></sc-for>
+</dl>
+<div style="{{actGrid}}">
+<button type="button" class="pl-sbtn" onClick="{{d.edit}}" style="{{btnSs}}">{{t.edit}}</button>
+<sc-if value="{{d.canAsm}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-pbtn" onClick="{{d.toAsm}}" style="{{btnPs2}}">{{t.toAsm}}</button></sc-if>
+<sc-if value="{{d.cannotAsm}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-pbtn" disabled title="{{t.toYardOff}}" style="{{btnPs2Off}}">{{t.toAsm}}</button></sc-if>
+<button type="button" class="pl-sbtn" onClick="{{d.del}}" style="{{btnDangerS}}">{{t.delete}}</button>
+</div>
+</article>
+</sc-for>
+</div>
+<div style="display: flex; justify-content: center">
+<sc-if value="{{canNew}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-pbtn" onClick="{{newDesign}}" style="{{btnAdd}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 5v14 M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>&nbsp;{{t.addNew}}</button></sc-if>
+<sc-if value="{{cannotNew}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-pbtn" disabled title="{{t.limitDesigns}}" style="{{btnAddOff}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 5v14 M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>&nbsp;{{t.addNew}}</button></sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= ASSEMBLY ================= -->
+<sc-if value="{{asmOn}}" hint-placeholder-val="{{ false }}">
+<div style="{{asmGrid}}">
+<section style="{{card}}" aria-label="{{t.asmTitle}}">
+<h2 style="{{h2Style}}">{{t.asmTitle}}</h2>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span id="sy-l-asm" style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{t.chooseDesign}}</span>
+<div style="position: relative">
+<button type="button" aria-haspopup="listbox" aria-expanded="{{asmSel.open}}" aria-labelledby="sy-l-asm" onClick="{{asmSel.toggle}}" style="{{selBtn}}"><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{asmSel.label}}</span><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+<sc-if value="{{asmSel.open}}" hint-placeholder-val="{{ false }}"><ul role="listbox" aria-labelledby="sy-l-asm" style="{{selList}}"><sc-for list="{{asmSel.opts}}" as="o" hint-placeholder-count="7"><li role="presentation" style="margin: 0; padding: 0"><button type="button" role="option" aria-selected="{{o.sel}}" class="mk-opt" onClick="{{o.pick}}" style="{{o.style}}">{{o.label}}</button></li></sc-for></ul></sc-if>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{t.checklist}} · {{planetName}}</span>
+<div role="table" aria-label="{{t.checklist}}">
+<div role="row" style="{{headChk}}"><span role="columnheader" style="font-size: 13px; color: #9AA7C7">{{t.cItem}}</span><span role="columnheader" style="font-size: 13px; color: #9AA7C7; text-align: right">{{t.needStock}}</span><span role="columnheader" style="font-size: 13px; color: #9AA7C7; text-align: right">{{t.cStatus}}</span></div>
+<sc-for list="{{checks}}" as="r" hint-placeholder-count="8">
+<div role="row" class="mk-row" style="{{rowChk}}">
+<span role="rowheader" style="display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 14px; overflow-wrap: anywhere">{{r.name}}</span>
+<span role="cell" style="text-align: right; font-weight: 600; font-size: 14px; white-space: nowrap">{{r.have}}</span>
+<span role="cell" style="display: flex; justify-content: flex-end; align-items: center">
+<sc-if value="{{r.ok}}" hint-placeholder-val="{{ true }}"><span style="{{okChip}}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{t.enough}}</span></sc-if>
+<sc-if value="{{r.bad}}" hint-placeholder-val="{{ false }}"><span style="{{badChip}}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>{{r.miss}}</span></sc-if>
+</span>
+<sc-if value="{{r.bad}}" hint-placeholder-val="{{ false }}"><span style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; padding: 0 0 8px"><a href="#production" class="pl-sbtn" style="{{btnTiny}}">{{t.produce}}</a><a href="#market" class="pl-sbtn" style="{{btnTiny}}">{{t.buyMarket}}</a></span></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+<dl style="{{sumBox}}">
+<div style="{{sumRow}}"><dt style="color: #9AA7C7">{{t.crew}}</dt><dd style="margin: 0; font-weight: 600">{{crewTxt}}</dd></div>
+<div style="{{sumRow}}"><dt style="color: #9AA7C7">{{t.cost}}</dt><dd style="margin: 0; font-weight: 600">{{costTxt}}</dd></div>
+<div style="{{sumRow}}"><dt style="color: #9AA7C7">{{t.materials}}</dt><dd style="margin: 0; font-weight: 600">{{matTxt}}</dd></div>
+<div style="{{sumRow}} border-top: 1px solid rgba(160,190,255,0.16); padding-top: 8px"><dt style="font-weight: 600">{{t.buildTime}}</dt><dd style="margin: 0; font-weight: 700; color: #4FDADA">{{timeTxt}}</dd></div>
+</dl>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-if value="{{canQueue}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-pbtn" onClick="{{addQueue}}" style="{{btnPfull}}">{{t.addQueue}}</button></sc-if>
+<sc-if value="{{cannotQueue}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-pbtn" disabled title="{{queueReason}}" style="{{btnPfullOff}}">{{t.addQueue}}</button><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #FF8A66"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 3l10 18H2z M12 10v4 M12 17.5v.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{queueReason}}</span></sc-if>
+<span style="font-size: 12px; color: #9AA7C7">{{t.crewNote}}</span>
+</div>
+</section>
+
+<div style="display: flex; flex-direction: column; gap: 16px; min-width: 0">
+<section style="{{card}}" aria-label="{{t.queueTitle}}">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap"><h2 style="{{h2Style}}">{{t.queueTitle}}</h2><span style="font-size: 14px; color: #C3CCE4">{{t.slots}}: <b style="color: #E8EEFF">{{queueN}} {{t.of}} {{queueMax}}</b></span></div>
+<sc-if value="{{queueEmpty}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 16px; border-radius: 10px; border: 1px dashed rgba(160,190,255,0.28); text-align: center; font-size: 14px; color: #9AA7C7">{{t.queueEmpty}}</p></sc-if>
+<sc-for list="{{queue}}" as="q" hint-placeholder-count="2">
+<div style="{{q.style}}">
+<div style="display: flex; align-items: center; gap: 10px; min-width: 0"><span style="{{q.num}}">{{q.n}}</span><svg viewBox="0 0 100 56" aria-hidden="true" style="{{q.thumb}}"><path d="{{q.art}}" fill="{{q.color}}" fill-opacity="0.9"></path></svg><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 600; font-size: 14px; overflow-wrap: anywhere">{{q.name}}</span><span style="font-size: 12px; color: {{q.stColor}}">{{q.status}}</span></span></div>
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><span role="progressbar" aria-label="{{q.name}}" aria-valuenow="{{q.pct}}" aria-valuemin="0" aria-valuemax="100" style="display: block; height: 6px; border-radius: 999px; background: rgba(160,190,255,0.12); overflow: hidden"><span style="{{q.bar}}"></span></span><span style="font-size: 15px; font-weight: 700">{{q.left}}</span></div>
+<button type="button" class="pl-sbtn" onClick="{{q.cancel}}" style="{{btnSs}}">{{t.cancel}}</button>
+</div>
+</sc-for>
+</section>
+
+<section style="{{card}}" aria-label="{{t.readyTitle}}">
+<h2 style="{{h2Style}}">{{t.readyTitle}}</h2>
+<sc-if value="{{noShips}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 16px; border-radius: 10px; border: 1px dashed rgba(160,190,255,0.28); text-align: center; font-size: 14px; color: #9AA7C7">{{t.noShips}}</p></sc-if>
+<sc-for list="{{ships}}" as="r" hint-placeholder-count="3">
+<div style="{{r.style}}">
+<div style="display: flex; align-items: center; gap: 10px; min-width: 0"><svg viewBox="0 0 100 56" aria-hidden="true" style="{{r.thumb}}"><path d="{{r.art}}" fill="{{r.color}}" fill-opacity="0.9"></path></svg><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 600; font-size: 14px; overflow-wrap: anywhere">{{r.name}}</span><span style="font-size: 12px; color: #9AA7C7">{{r.hull}}</span></span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: #C3CCE4"><span>{{t.crew}}: <b style="color: #E8EEFF">{{r.crew}}</b></span><span>{{t.upkeep}}: <b style="color: #E8EEFF">{{r.upkeep}}</b></span></div>
+<button type="button" class="pl-sbtn" onClick="{{r.toFleet}}" style="{{btnSs}}">{{t.toFleet}}</button>
+</div>
+</sc-for>
+</section>
+</div>
+</div>
+</sc-if>
+
+<!-- ================= DISMANTLE ================= -->
+<sc-if value="{{disOn}}" hint-placeholder-val="{{ false }}">
+<div style="{{disGrid}}">
+<section style="{{card}}" aria-label="{{t.pickShip}}">
+<h2 style="{{h2Style}}">{{t.pickShip}}</h2>
+<sc-if value="{{noShips}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 16px; border-radius: 10px; border: 1px dashed rgba(160,190,255,0.28); text-align: center; font-size: 14px; color: #9AA7C7">{{t.noShips}}</p></sc-if>
+<div role="radiogroup" aria-label="{{t.pickShip}}" style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{disShips}}" as="r" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{r.sel}}" onClick="{{r.pick}}" style="{{r.row}}">
+<svg viewBox="0 0 100 56" aria-hidden="true" style="{{r.thumb}}"><path d="{{r.art}}" fill="{{r.color}}" fill-opacity="0.9"></path></svg>
+<span style="display: flex; flex-direction: column; min-width: 0; align-items: flex-start; flex: 1 1 auto"><span style="font-weight: 600; font-size: 14px; overflow-wrap: anywhere; text-align: left">{{r.name}}</span><span style="font-size: 12px; color: #9AA7C7">{{r.hull}} · {{t.crew}} {{r.crew}}</span></span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="{{r.tick}}"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</sc-for>
+</div>
+</section>
+<section style="{{card}}" aria-label="{{t.returnsTitle}}">
+<h2 style="{{h2Style}}">{{t.returnsTitle}}</h2>
+<sc-if value="{{hasDis}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{t.retModules}}</span>
+<sc-for list="{{disMods}}" as="r" hint-placeholder-count="5"><div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 6px 0; border-bottom: 1px solid rgba(160,190,255,0.12)"><span style="overflow-wrap: anywhere">{{r.name}}</span><b>× {{r.n}}</b></div></sc-for></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{t.retHull}}</span>
+<sc-for list="{{disRes}}" as="r" hint-placeholder-count="2"><div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 6px 0; border-bottom: 1px solid rgba(160,190,255,0.12)"><span>{{r.name}}</span><b>{{r.v}}</b></div></sc-for></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px"><span style="font-weight: 600; color: #C3CCE4">{{t.retCrew}}</span><b>{{disCrew}}</b></div>
+<button type="button" class="pl-sbtn" onClick="{{askDismantle}}" style="{{btnDangerFull2}}">{{t.dismantle}}</button>
+</div>
+</sc-if>
+<sc-if value="{{noDis}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 14px; color: #9AA7C7">{{t.pickHint}}</p></sc-if>
+</section>
+</div>
+</sc-if>
+
+</div>
+</div>
+</main>
+
+</div>
+
+<!-- ================= BOTTOM BAR (desktop) ================= -->
+<sc-if value="{{desk}}" hint-placeholder-val="{{ true }}">
+<footer style="position: sticky; bottom: 0; z-index: 30; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 8px 20px; background: rgba(7,11,22,0.94); border-top: 1px solid rgba(160,190,255,0.16); box-sizing: border-box">
+<div role="group" aria-label="{{t.switcher}}" class="pl-thumbs" style="display: flex; gap: 6px; min-width: 0; overflow-x: auto; padding: 2px">
+<sc-for list="{{thumbs}}" as="s" hint-placeholder-count="6">
+<button type="button" onClick="{{s.pick}}" aria-pressed="{{s.selStr}}" aria-label="{{s.name}}" title="{{s.name}}" style="{{s.btn}}"><img src="{{s.art}}" alt="" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; -webkit-mask-image: radial-gradient(closest-side, #000 85%, transparent 100%); mask-image: radial-gradient(closest-side, #000 85%, transparent 100%)"></button>
+</sc-for>
+</div>
+<form onSubmit="{{sendChat}}" style="display: flex; align-items: center; gap: 10px; flex: 0 1 520px; min-width: 0">
+<label for="chat" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{t.chatLabel}}</label>
+<input id="chat" type="text" value="{{chat}}" onChange="{{setChat}}" placeholder="{{t.chatPh}}" autocomplete="off" style="flex: 1 1 auto; min-width: 0; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(160,190,255,0.28); background: #1C2544; color: #E8EEFF; font-family: Inter, Roboto, system-ui, Arial, sans-serif; font-size: 14px; box-sizing: border-box">
+<button type="submit" class="pl-pbtn" aria-label="{{t.send}}" title="{{t.send}}" style="flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 10px; background: #2EC4C4; color: #070B16; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path></svg></button>
+</form>
+</footer>
+</sc-if>
+
+<!-- ================= TAB BAR (mobile) ================= -->
+<sc-if value="{{mob}}" hint-placeholder-val="{{ false }}">
+<nav aria-label="{{t.gameMenu}}" style="position: sticky; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: rgba(7,11,22,0.96); border-top: 1px solid rgba(160,190,255,0.16)">
+<sc-for list="{{tabs}}" as="tb" hint-placeholder-count="5">
+<a href="#{{tb.id}}" aria-current="{{tb.current}}" style="{{tb.style}}">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="{{tb.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span>{{tb.label}}</span>
+</a>
+</sc-for>
+</nav>
+</sc-if>
+
+<!-- ================= DISMANTLE DIALOG ================= -->
+<sc-if value="{{dlgOn}}" hint-placeholder-val="{{ false }}">
+<div style="{{dlgOverlay}}" onClick="{{closeDlg}}">
+<div role="dialog" aria-modal="true" aria-labelledby="sy-dlg-title" onClick="{{stopClick}}" style="{{dlgBox}}">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+<h2 id="sy-dlg-title" style="margin: 0; font-size: 20px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere">{{t.dlgTitle}}</h2>
+<button type="button" class="pl-ibtn" aria-label="{{t.close}}" onClick="{{closeDlg}}" style="{{ibtnX}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button>
+</div>
+<p style="margin: 0; font-size: 15px; font-weight: 600">{{dlgShip}}</p>
+<p style="margin: 0; font-size: 14px; color: #C3CCE4">{{t.dlgText}}</p>
+<dl style="{{sumBox}}">
+<sc-for list="{{disRes}}" as="r" hint-placeholder-count="2"><div style="{{sumRow}}"><dt style="color: #9AA7C7">{{r.name}}</dt><dd style="margin: 0; font-weight: 600">{{r.v}}</dd></div></sc-for>
+<div style="{{sumRow}}"><dt style="color: #9AA7C7">{{t.retCrew}}</dt><dd style="margin: 0; font-weight: 600">{{disCrew}}</dd></div>
+</dl>
+<div style="{{dlgBtns}}">
+<button type="button" class="pl-sbtn" onClick="{{closeDlg}}" style="{{btnSdlg}}">{{t.cancel}}</button>
+<button type="button" onClick="{{confirmDis}}" style="{{btnDangerFill}}">{{t.dismantle}}</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+
+<!-- ================= DELETE DESIGN DIALOG ================= -->
+<sc-if value="{{delOn}}" hint-placeholder-val="{{ false }}">
+<div style="{{dlgOverlay}}" onClick="{{closeDlg}}">
+<div role="dialog" aria-modal="true" aria-labelledby="sy-del-title" onClick="{{stopClick}}" style="{{dlgBox}}">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px"><h2 id="sy-del-title" style="margin: 0; font-size: 20px; font-weight: 700; line-height: 1.25">{{t.delTitle}}</h2><button type="button" class="pl-ibtn" aria-label="{{t.close}}" onClick="{{closeDlg}}" style="{{ibtnX}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button></div>
+<p style="margin: 0; font-size: 15px; font-weight: 600; overflow-wrap: anywhere">{{delName}}</p>
+<p style="margin: 0; font-size: 14px; color: #C3CCE4">{{t.delText}}</p>
+<div style="{{dlgBtns}}"><button type="button" class="pl-sbtn" onClick="{{closeDlg}}" style="{{btnSdlg}}">{{t.cancel}}</button><button type="button" onClick="{{delConfirm}}" style="{{btnDangerFill}}">{{t.delete}}</button></div>
+</div></div>
+</sc-if>
+
+<!-- ================= DESIGN EDITOR (hull step + design window) ================= -->
+<sc-if value="{{edOn}}" hint-placeholder-val="{{ false }}">
+<div style="{{edOverlay}}">
+<div role="dialog" aria-modal="true" aria-labelledby="sy-ed-title" style="{{edBox}}">
+<div style="{{edHead}}"><h2 id="sy-ed-title" style="margin: 0; font-size: 20px; font-weight: 700; line-height: 1.25">{{edTitle}}</h2><button type="button" class="pl-ibtn" aria-label="{{t.cancel}}" onClick="{{closeEd}}" style="{{ibtnX}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button></div>
+
+<sc-if value="{{edIsHull}}" hint-placeholder-val="{{ true }}">
+<div style="{{edBody}}">
+<div><h3 style="{{h2Style}}">{{t.hullStepTitle}}</h3><p style="margin: 4px 0 0; font-size: 13px; color: #9AA7C7">{{t.modsNote}}</p></div>
+<div role="tablist" aria-label="{{t.hullClassAria}}" class="rs-scroll" style="{{tabsWrap}}">
+<sc-for list="{{hullTabs}}" as="c" hint-placeholder-count="5"><button type="button" role="tab" class="rs-tab" aria-selected="{{c.sel}}" onClick="{{c.pick}}" style="{{c.style}}">{{c.label}}</button></sc-for>
+</div>
+<sc-if value="{{hullWarn}}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="{{warnBox}}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 3l10 18H2z M12 10v4 M12 17.5v.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="flex: 1 1 200px">{{hullWarn}}</span><span style="display: inline-flex; gap: 8px"><button type="button" class="pl-pbtn" onClick="{{applyHull}}" style="{{btnPs2}}">{{t.apply}}</button><button type="button" class="pl-sbtn" onClick="{{cancelHull}}" style="{{btnSs}}">{{t.cancel}}</button></span></div>
+</sc-if>
+<div style="{{hullGrid}}">
+<sc-for list="{{hulls}}" as="h" hint-placeholder-count="2">
+<div style="{{h.card}}">
+<div style="{{h.pic}}"><svg viewBox="0 0 100 56" aria-hidden="true" style="width: 100%; height: 100%; display: block"><path d="{{h.art}}" fill="{{h.color}}" fill-opacity="0.92"></path></svg>
+<sc-if value="{{h.locked}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(7,11,22,0.62)"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" style="color: #F2C14E"><path d="M6 11h12v9H6z M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></sc-if>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><span style="font-weight: 700; font-size: 16px">{{h.name}}</span><span style="{{h.chipSt}}">{{h.cls}}</span></div>
+<dl style="margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; font-size: 13px"><dt style="color: #9AA7C7">{{t.hSlots}}</dt><dd style="margin: 0; font-weight: 600; text-align: right">{{h.slots}}</dd><dt style="color: #9AA7C7">{{t.hCargo}}</dt><dd style="margin: 0; font-weight: 600; text-align: right">{{h.cargo}}</dd><dt style="color: #9AA7C7">{{t.hDur}}</dt><dd style="margin: 0; font-weight: 600; text-align: right">{{h.dur}}</dd></dl>
+<sc-if value="{{h.locked}}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #F2C14E"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11h12v9H6z M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{h.req}}</span>
+<button type="button" class="pl-sbtn" disabled title="{{h.req}}" style="{{btnSfullOff}}">{{t.choose}}</button></sc-if>
+<sc-if value="{{h.open}}" hint-placeholder-val="{{ true }}"><button type="button" class="{{h.btnCls}}" onClick="{{h.pick}}" aria-pressed="{{h.cur}}" style="{{h.btn}}">{{h.btnLabel}}</button></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="{{edFoot}}">
+<sc-if value="{{hasHull}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-sbtn" onClick="{{backToDesign}}" style="{{btnSend}}">{{t.back}}</button></sc-if>
+<button type="button" class="pl-sbtn" onClick="{{closeEd}}" style="{{btnSend}}">{{t.cancel}}</button>
+</div>
+</sc-if>
+
+<sc-if value="{{edIsDesign}}" hint-placeholder-val="{{ false }}">
+<div style="{{edBody}}">
+<div style="{{edHeadCard}}">
+<div style="{{edHullPic}}"><svg viewBox="0 0 100 56" aria-hidden="true" style="width: 100%; height: 100%; display: block"><path d="{{eHull.art}}" fill="{{eHull.color}}" fill-opacity="0.92"></path></svg></div>
+<div style="display: flex; flex-direction: column; gap: 8px; min-width: 0"><div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px"><span style="font-size: 20px; font-weight: 700">{{eHull.name}}</span><span style="{{eHull.chipSt}}">{{eHull.cls}}</span></div>
+<dl style="margin: 0; display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 14px"><div><dt style="display: inline; color: #9AA7C7">{{t.hSlots}}: </dt><dd style="display: inline; margin: 0; font-weight: 600">{{eHull.slots}}</dd></div><div><dt style="display: inline; color: #9AA7C7">{{t.hCargo}}: </dt><dd style="display: inline; margin: 0; font-weight: 600">{{eHull.cargo}}</dd></div><div><dt style="display: inline; color: #9AA7C7">{{t.hDur}}: </dt><dd style="display: inline; margin: 0; font-weight: 600">{{eHull.dur}}</dd></div></dl></div>
+<button type="button" class="pl-sbtn" onClick="{{backToHull}}" style="{{btnSfull2}}">{{t.changeHull}}</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="sy-name" style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{t.designName}}</label><input id="sy-name" type="text" value="{{edName}}" onChange="{{setEdName}}" placeholder="{{t.namePh}}" autocomplete="off" style="{{inputFill}}"></div>
+<div style="{{edCols}}">
+<div style="display: flex; flex-direction: column; gap: 16px; min-width: 0">
+<section style="{{card}}" aria-label="{{t.slotsTitle}}">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap"><h3 style="{{h2Style}}">{{t.slotsTitle}}</h3><span style="font-size: 14px; color: #C3CCE4">{{t.slots}}: <b style="color: #E8EEFF">{{slotsTxt}}</b></span></div>
+<div style="{{slotGrid}}">
+<sc-for list="{{slotTiles}}" as="x" hint-placeholder-count="12">
+<sc-if value="{{x.filled}}" hint-placeholder-val="{{ true }}"><div style="{{x.style}}"><span style="font-size: 11px; color: #9AA7C7">{{x.n}}</span><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="color: #4FDADA"><path d="{{x.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="font-weight: 600; font-size: 13px; line-height: 1.25; overflow-wrap: anywhere">{{x.name}} <span style="color: #9AA7C7; font-weight: 500">{{x.mk}}</span></span><span style="font-size: 12px; color: #C3CCE4">{{x.k}}: <b>{{x.v}}</b></span>
+<button type="button" class="pl-ibtn" aria-label="{{x.aria}}" title="{{t.remove}}" onClick="{{x.remove}}" style="{{tileX}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button></div></sc-if>
+<sc-if value="{{x.empty}}" hint-placeholder-val="{{ false }}"><button type="button" class="mk-opt" aria-label="{{x.aria}}" onClick="{{x.add}}" style="{{x.style}}"><span style="font-size: 11px">{{x.n}}</span><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14 M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button></sc-if>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px">
+<span style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{t.drones}}</span>
+<sc-for list="{{eDrones}}" as="r" hint-placeholder-count="1"><div style="{{rowDrone}}"><span style="font-size: 14px; overflow-wrap: anywhere">{{r.name}} <span style="color: #9AA7C7">· {{r.cargo}}</span></span><button type="button" class="pl-sbtn" onClick="{{r.minus}}" aria-label="{{r.aria}}" title="{{t.remove}}" style="{{btnIcon}}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button></div></sc-for>
+<span style="font-size: 12px; color: #9AA7C7">{{t.dronesNote2}}</span>
+</div>
+</section>
+</div>
+<aside aria-label="{{t.sumTitle}}" style="{{summaryCard}}">
+<h3 style="{{h2Style}}">{{t.sumTitle}}</h3>
+<sc-for list="{{sumRows}}" as="r" hint-placeholder-count="8"><div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px"><span style="color: #9AA7C7">{{r.k}}</span><span style="font-weight: 600; text-align: right">{{r.v}}</span></div></sc-for>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px"><span style="color: #9AA7C7">{{t.sPower}}</span><b style="{{sum.powerSt}}">{{sum.powerTxt}}</b></span><span role="progressbar" aria-label="{{t.sPower}}" aria-valuenow="{{sum.powerPct}}" aria-valuemin="0" aria-valuemax="100" style="display: block; height: 8px; border-radius: 999px; background: rgba(160,190,255,0.12); overflow: hidden"><span style="{{sum.powerBar}}"></span></span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px"><span style="color: #9AA7C7">{{t.sCargo}}</span><b>{{sum.cargoTxt}}</b></span><span role="progressbar" aria-label="{{t.sCargo}}" aria-valuenow="{{sum.cargoPct}}" aria-valuemin="0" aria-valuemax="100" style="display: block; height: 8px; border-radius: 999px; background: rgba(160,190,255,0.12); overflow: hidden"><span style="{{sum.cargoBar}}"></span></span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{t.valid}}</span>
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="2"><span role="status" style="{{c.style}}"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="{{c.d}}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{c.text}}</span></sc-for></div>
+</aside>
+</div>
+</div>
+<div style="{{edFoot}}">
+<button type="button" class="pl-sbtn" onClick="{{closeEd}}" style="{{btnSend}}">{{t.cancel}}</button>
+<sc-if value="{{canSave}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-pbtn" onClick="{{saveEd}}" style="{{btnPsave}}">{{t.save}}</button></sc-if>
+<sc-if value="{{cannotSave}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-pbtn" disabled title="{{t.needName}}" style="{{btnPsaveOff}}">{{t.save}}</button></sc-if>
+</div>
+</sc-if>
+</div>
+</div>
+
+<!-- ================= MODULE PICKER ================= -->
+<sc-if value="{{pkOn}}" hint-placeholder-val="{{ false }}">
+<div style="{{pkOverlay}}" onClick="{{closePicker}}">
+<div role="dialog" aria-modal="true" aria-labelledby="sy-pk-title" onClick="{{stopClick}}" style="{{pkBox}}">
+<div style="{{edHead}}"><h2 id="sy-pk-title" style="margin: 0; font-size: 20px; font-weight: 700; line-height: 1.25">{{pkTitle}}</h2><button type="button" class="pl-ibtn" aria-label="{{t.close}}" onClick="{{closePicker}}" style="{{ibtnX}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button></div>
+<div style="{{edBody}}">
+<div role="tablist" aria-label="{{t.catAria}}" class="rs-scroll" style="{{catWrap}}">
+<sc-for list="{{catTabs}}" as="c" hint-placeholder-count="8"><button type="button" role="tab" class="rs-tab" aria-selected="{{c.sel}}" onClick="{{c.pick}}" style="{{c.style}}">{{c.label}}</button></sc-for>
+</div>
+<sc-if value="{{hasSub}}" hint-placeholder-val="{{ false }}">
+<div role="tablist" aria-label="{{t.subAria}}" class="rs-scroll" style="display: flex; gap: 8px; overflow-x: auto; padding: 2px 0">
+<sc-for list="{{subTabs}}" as="c" hint-placeholder-count="3"><button type="button" role="tab" class="rs-chip" aria-selected="{{c.sel}}" onClick="{{c.pick}}" style="{{c.style}}">{{c.label}}</button></sc-for>
+</div>
+</sc-if>
+<div style="{{modGrid}}">
+<sc-for list="{{catalog}}" as="c" hint-placeholder-count="4">
+<sc-if value="{{c.can}}" hint-placeholder-val="{{ true }}"><button type="button" class="mk-opt" onClick="{{c.pick}}" style="{{c.card}}"><span style="display: flex; align-items: center; gap: 10px"><span style="{{c.pic}}"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="{{c.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 700; font-size: 15px; line-height: 1.25; overflow-wrap: anywhere">{{c.name}}</span><span style="font-size: 12px; color: #9AA7C7">{{c.mk}}</span></span></span>
+<span style="display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; font-size: 13px"><span style="color: #9AA7C7">{{t.energy}}</span><span style="{{c.enSt}} text-align: right">{{c.en}}</span><span style="color: #9AA7C7">{{t.mass}}</span><span style="text-align: right; font-weight: 600">{{c.mass}}</span><span style="color: #9AA7C7">{{c.statK}}</span><span style="text-align: right; font-weight: 600">{{c.statV}}</span></span>
+<span style="font-size: 12px; color: #C3CCE4">{{t.inStorage}}: <b>{{c.stock}}</b></span></button></sc-if>
+<sc-if value="{{c.cannot}}" hint-placeholder-val="{{ false }}"><div style="{{c.wrap}}"><button type="button" disabled title="{{c.reason}}" style="{{c.inner}}"><span style="display: flex; align-items: center; gap: 10px"><span style="{{c.pic}}"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="{{c.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 700; font-size: 15px; line-height: 1.25; overflow-wrap: anywhere">{{c.name}}</span><span style="font-size: 12px; color: #9AA7C7">{{c.mk}}</span></span></span>
+<span style="display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; font-size: 13px"><span style="color: #9AA7C7">{{t.energy}}</span><span style="{{c.enSt}} text-align: right">{{c.en}}</span><span style="color: #9AA7C7">{{t.mass}}</span><span style="text-align: right; font-weight: 600">{{c.mass}}</span><span style="color: #9AA7C7">{{c.statK}}</span><span style="text-align: right; font-weight: 600">{{c.statV}}</span></span>
+<span style="font-size: 12px; color: #C3CCE4">{{t.inStorage}}: <b>{{c.stock}}</b></span></button><span style="display: inline-flex; align-items: flex-start; gap: 6px; font-size: 12px; color: #FF8A66"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto; margin-top: 2px"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M5.6 5.6l12.8 12.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>{{c.reason}}</span></div></sc-if>
+</sc-for>
+</div>
+</div>
+</div></div>
+</sc-if>
+</sc-if>
+
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props='{"mobile":{"editor":"boolean","default":false},"lang":{"editor":"enum","options":["uk","en"],"default":"uk"},"tab":{"editor":"enum","options":["designs","assembly","dismantle"],"default":"designs"},"state":{"editor":"enum","options":["ok","loading","error","nobureau","noyard","nodesigns"],"default":"ok"},"design":{"editor":"string","default":"d1"},"editor":{"editor":"enum","options":["","newhull","hull","design","picker"],"default":""},"filter":{"editor":"string","default":""},"asm":{"editor":"string","default":"d1"},"step":{"editor":"enum","options":["hull","modules","sum"],"default":"hull"},"cat":{"editor":"string","default":"weapons"},"sub":{"editor":"string","default":""},"hullCls":{"editor":"string","default":""},"warn":{"editor":"boolean","default":false},"sheet":{"editor":"boolean","default":false},"dialog":{"editor":"string","default":""},"pick":{"editor":"boolean","default":false},"premium":{"editor":"boolean","default":false},"frozen":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const p = props || {};
+    const tr = (v) => v === true || v === 'true';
+    this.DB = this.buildDB();
+    const D = this.DB;
+    const stv = p.state || 'ok';
+    this.state = {
+      t: 0, chat: '', lang: p.lang || 'uk', vw: (typeof window !== 'undefined' ? window.innerWidth : 1440),
+      tab: p.tab === 'assembly' || p.tab === 'dismantle' ? p.tab : 'designs',
+      st: (stv === 'loading' || stv === 'error') ? stv : 'ok',
+      designs: stv === 'nodesigns' ? [] : JSON.parse(JSON.stringify(D.designs0)), filter: p.filter === undefined || p.filter === '' ? 'all' : (isNaN(Number(p.filter)) ? 'all' : Number(p.filter)), delId: p.dialog === 'del' ? 'd4' : '', ed: this.initEd(p),
+      asmId: p.asm || 'd1', asmOpen: false, crewUsed: 0, nextId: 1, flash: '', dlg: p.dialog === 'del' ? 2 : (p.dialog ? 1 : 0), disSel: p.pick ? 'sh2' : '',
+      queue: [{ id: 'q0a', did: 'd2', name: 'Sapsan — розвідник', hull: 'sapsan', rem: 2840, tot: 3200, crew: 14 }, { id: 'q0b', did: 'd7', name: 'Корвет — ескорт', hull: 'korvet', rem: 4800, tot: 4800, crew: 60 }],
+      ships: [{ id: 'sh1', did: 'd1', name: 'Barracuda — long range', hull: 'korvet', crew: 120, upkeep: 340 }, { id: 'sh2', did: 'd2', name: 'Sapsan — розвідник', hull: 'sapsan', crew: 28, upkeep: 90 }, { id: 'sh3', did: 'd3', name: 'Атлас — колоніст', hull: 'atlas', crew: 56, upkeep: 160 }]
+    };
+  }
+  componentDidMount() {
+    this.onR = () => this.setState({ vw: window.innerWidth });
+    this.onK = (e) => { if (e.key === 'Escape') this.setState({ dlg: 0, asmOpen: false, sheet: false }); };
+    window.addEventListener('resize', this.onR);
+    window.addEventListener('keydown', this.onK);
+    this.onR();
+    this.iv = setInterval(() => this.setState((s) => ({ t: s.t + 1 })), 1000);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); window.removeEventListener('keydown', this.onK); clearInterval(this.iv); if (this.tm) clearTimeout(this.tm); if (this.tf) clearTimeout(this.tf); }
+  buildDB() {
+    const CLS = [['civ', 'Цивільні', 'Civilian', '#9AA7C7'], ['light', 'Легкі', 'Light', '#4FDADA'], ['med', 'Середні', 'Medium', '#6FA8FF'], ['heavy', 'Важкі', 'Heavy', '#F2C14E'], ['super', 'Надважкі', 'Super-heavy', '#FF8A66']];
+    const ARTS = [
+      'M16 28 L36 18 H72 L86 28 L72 38 H36 z M36 18 L44 9 H60 L64 18 z M36 38 L44 47 H60 L64 38 z',
+      'M12 28 L34 14 H78 L90 28 L78 42 H34 z M50 14 L54 6 H66 L66 14 z M50 42 L54 50 H66 L66 42 z',
+      'M20 28 L50 10 L86 28 L50 46 z M50 10 L56 3 H64 L62 14 z M50 46 L56 53 H64 L62 42 z',
+      'M10 28 L40 20 L90 24 V32 L40 36 z M40 20 L52 8 H60 L56 21 z M40 36 L52 48 H60 L56 35 z',
+      'M14 28 L30 14 H70 L92 28 L70 42 H30 z M30 14 L38 6 H54 L56 14 z M30 42 L38 50 H54 L56 42 z',
+      'M8 28 L36 12 H80 L94 28 L80 44 H36 z M36 12 L50 4 H64 L66 12 z M36 44 L50 52 H64 L66 44 z',
+      'M12 28 L28 10 H74 L92 20 V36 L74 46 H28 z',
+      'M6 28 L30 8 H82 L96 28 L82 48 H30 z M30 8 L38 2 H56 L58 8 z M30 48 L38 54 H56 L58 48 z',
+      'M10 28 L26 6 H70 L94 18 V38 L70 50 H26 z M26 6 L34 1 H50 L52 6 z M26 50 L34 55 H50 L52 50 z',
+      'M4 28 L24 4 H78 L98 20 V36 L78 52 H24 z M24 4 L40 0 H62 L66 4 z M24 52 L40 56 H62 L66 52 z'
+    ];
+    /* id, uk, en, cls, slots, cargo, dur, mass, crew, req[uk,en]|null, transport, art, stock */
+    const HULLS = [
+      ['mand', 'Мандрівник', 'Wanderer', 0, 12, 400, 800, 90, 20, null, 0, 0, 1], ['atlas', 'Атлас', 'Atlas', 0, 16, 1200, 1100, 140, 30, null, 1, 1, 1],
+      ['sapsan', 'Сапсан', 'Sapsan', 1, 10, 80, 600, 60, 14, null, 0, 2, 3], ['strizh', 'Стриж', 'Swift', 1, 15, 120, 900, 80, 18, null, 0, 3, 1],
+      ['korvet', 'Корвет', 'Corvette', 2, 24, 300, 2400, 180, 60, null, 0, 4, 2], ['fregat', 'Фрегат', 'Frigate', 2, 30, 420, 3200, 240, 80, ['Математика 6', 'Mathematics 6'], 0, 5, 0],
+      ['dred', 'Дредноут', 'Dreadnought', 3, 48, 900, 8000, 520, 200, ['Верф рівень 9', 'Shipyard level 9'], 0, 6, 0], ['bastion', 'Бастіон', 'Bastion', 3, 56, 1100, 9500, 600, 230, ['Математика 9', 'Mathematics 9'], 0, 7, 0],
+      ['titan', 'Титан', 'Titan', 4, 80, 2500, 20000, 1400, 480, ['Математика 12', 'Mathematics 12'], 0, 8, 0], ['levi', 'Левіафан', 'Leviathan', 4, 96, 3200, 26000, 1800, 600, ['Верф рівень 14', 'Shipyard level 14'], 0, 9, 0]
+    ].map((a) => ({ id: a[0], uk: a[1], en: a[2], cls: a[3], slots: a[4], cargo: a[5], dur: a[6], mass: a[7], crew: a[8], req: a[9], transport: !!a[10], art: ARTS[a[11]], stock: a[12] }));
+    const IC = {
+      drill: 'M12 3v10 M8 9l4 4 4-4 M5 21h14 M7 17h10', scan: 'M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0 M12 12m-6 0a6 6 0 1 0 12 0a6 6 0 1 0-12 0 M12 3v3',
+      eng: 'M4 8h10l6 4-6 4H4z M2 10v4', reac: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 3', las: 'M3 12h14l4-3v6l-4-3 M7 12v5h4', kin: 'M2 12h12l4-4h4v8h-4l-4-4 M6 12v5',
+      ammo: 'M9 3h6l1 6v12H8V9z M8 9h8', arm: 'M4 5h16v8c0 4-3.5 7-8 8-4.5-1-8-4-8-8z', shd: 'M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z',
+      rad: 'M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0 M5 19a10 10 0 0 1 0-14 M19 5a10 10 0 0 1 0 14', stl: 'M3 12s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z M4 4l16 16',
+      bay: 'M3 7l9-4 9 4v10l-9 4-9-4z M3 7l9 4 9-4 M12 11v10', col: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M3 12h18 M12 3c3 3 3 15 0 18 M12 3c-3 3-3 15 0 18',
+      crw: 'M9 8a3 3 0 1 0 6 0a3 3 0 1 0-6 0 M4 21c0-4 3.5-6 8-6s8 2 8 6', drn: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8z M3 5l4 4 M21 5l-4 4 M3 19l4-4 M21 19l-4-4'
+    };
+    /* id, uk, en, cat, sub, mk, energy, mass, statKey[uk,en], statVal[uk,en], o */
+    const mk = (id, uk, en, cat, sub, mkv, e, mass, sk, sv, icon, o) => Object.assign({ id, uk, en, cat, sub, mk: mkv, e, mass, sk, sv, icon: IC[icon], min: 0, stock: 0 }, o || {});
+    const MODS = [
+      mk('mlas', 'Лазерний бур', 'Laser drill', 'mining', '', 2, -6, 4, ['Видобуток', 'Yield'], ['40 т/год', '40 t/h'], 'drill', { stock: 4 }),
+      mk('mscan', 'Сканер надр', 'Subsoil scanner', 'mining', '', 1, -3, 3, ['Радіус', 'Range'], ['2 орбіти', '2 orbits'], 'scan', { stock: 2 }),
+      mk('ion', 'Іонний двигун', 'Ion engine', 'engines', '', 1, -8, 6, ['Тяга', 'Thrust'], ['120 кН', '120 kN'], 'eng', { stock: 6, thr: 120 }),
+      mk('plasma', 'Плазмовий двигун', 'Plasma engine', 'engines', '', 2, -14, 9, ['Тяга', 'Thrust'], ['260 кН', '260 kN'], 'eng', { stock: 4, thr: 260, min: 1 }),
+      mk('heavyeng', 'Маршовий двигун', 'Cruise engine', 'engines', '', 3, -30, 20, ['Тяга', 'Thrust'], ['640 кН', '640 kN'], 'eng', { stock: 1, thr: 640, min: 2 }),
+      mk('fus1', 'Термоядерний реактор', 'Fusion reactor', 'reactors', '', 1, 60, 10, ['Потужність', 'Output'], ['60 МВт', '60 MW'], 'reac', { stock: 3 }),
+      mk('fus2', 'Термоядерний реактор', 'Fusion reactor', 'reactors', '', 2, 120, 16, ['Потужність', 'Output'], ['120 МВт', '120 MW'], 'reac', { stock: 2, min: 1 }),
+      mk('fus3', 'Термоядерний реактор', 'Fusion reactor', 'reactors', '', 3, 300, 40, ['Потужність', 'Output'], ['300 МВт', '300 MW'], 'reac', { stock: 0, min: 2, tech: ['Фізика 8', 'Physics 8'] }),
+      mk('laser', 'Лазерна гармата', 'Laser cannon', 'weapons', 'energy', 1, -10, 5, ['Шкода за раунд', 'Damage per round'], ['24', '24'], 'las', { stock: 6, combat: true, dE: 24 }),
+      mk('pulse', 'Імпульсна гармата', 'Pulse cannon', 'weapons', 'energy', 2, -16, 7, ['Шкода за раунд', 'Damage per round'], ['48', '48'], 'las', { stock: 2, combat: true, dE: 48, min: 1 }),
+      mk('auto', 'Автогармата', 'Autocannon', 'weapons', 'kinetic', 1, -4, 8, ['Шкода за раунд', 'Damage per round'], ['30', '30'], 'kin', { stock: 5, combat: true, dK: 30, min: 1 }),
+      mk('rail', 'Рейкган', 'Railgun', 'weapons', 'kinetic', 2, -8, 12, ['Шкода за раунд', 'Damage per round'], ['60', '60'], 'kin', { stock: 3, combat: true, dK: 60, min: 2 }),
+      mk('ammoL', 'Кінетичний боєзапас', 'Kinetic ammunition', 'weapons', 'ammo', 1, 0, 2, ['Займає в трюмі', 'Hold space'], ['20 т', '20 t'], 'ammo', { stock: 8, combat: true, hold: 20 }),
+      mk('ammoH', 'Важкий боєзапас', 'Heavy ammunition', 'weapons', 'ammo', 2, 0, 4, ['Займає в трюмі', 'Hold space'], ['40 т', '40 t'], 'ammo', { stock: 3, combat: true, hold: 40, min: 1 }),
+      mk('plateC', 'Композитна плита', 'Composite plate', 'armour', '', 1, 0, 12, ['Міцність', 'Durability'], ['+400', '+400'], 'arm', { stock: 6, dur: 400 }),
+      mk('plateK', 'Керамічна плита', 'Ceramic plate', 'armour', '', 2, 0, 18, ['Міцність', 'Durability'], ['+900', '+900'], 'arm', { stock: 1, dur: 900, min: 1 }),
+      mk('shS', 'Малий щит', 'Small shield', 'shields', '', 1, -12, 6, ['Щит', 'Shield'], ['+300', '+300'], 'shd', { stock: 4, sh: 300 }),
+      mk('shM', 'Середній щит', 'Medium shield', 'shields', '', 2, -20, 12, ['Щит', 'Shield'], ['+800', '+800'], 'shd', { stock: 2, sh: 800, min: 2 }),
+      mk('radar', 'Радар', 'Radar', 'recon', '', 1, -5, 3, ['Радіус', 'Range'], ['4 сектори', '4 sectors'], 'rad', { stock: 3 }),
+      mk('stealth', 'Поле маскування', 'Stealth field', 'recon', '', 2, -18, 8, ['Ухиляння', 'Evasion'], ['−30%', '−30%'], 'stl', { stock: 1, min: 1 }),
+      mk('bay', 'Вантажний відсік', 'Cargo bay', 'other', '', 1, 0, 5, ['Місткість', 'Capacity'], ['+80 т', '+80 t'], 'bay', { stock: 5, cb: 80 }),
+      mk('colony', 'Колонізаційний модуль', 'Colony module', 'other', '', 3, -20, 30, ['Колоністи', 'Colonists'], ['5 000', '5 000'], 'col', { stock: 1, colony: true }),
+      mk('crewq', 'Каюти екіпажу', 'Crew quarters', 'other', '', 1, -2, 6, ['Екіпаж', 'Crew'], ['+60', '+60'], 'crw', { stock: 3, cr: 60 }),
+      mk('dmine', 'Дрон-видобувач', 'Mining drone', 'other', '', 1, 0, 0, ['Займає в трюмі', 'Hold space'], ['10 т', '10 t'], 'drn', { stock: 12, drone: true, hold: 10 }),
+      mk('drep', 'Дрон-ремонтник', 'Repair drone', 'other', '', 1, 0, 0, ['Займає в трюмі', 'Hold space'], ['10 т', '10 t'], 'drn', { stock: 4, drone: true, hold: 10 })
+    ];
+    const designs0 = [
+      { id: 'd1', name: 'Barracuda — long range', hull: 'korvet', mods: [['plasma', 2], ['fus2', 3], ['laser', 4], ['rail', 2], ['ammoL', 2], ['shM', 2], ['plateK', 2], ['radar', 1]], drones: [] },
+      { id: 'd2', name: 'Sapsan — розвідник', hull: 'sapsan', mods: [['ion', 1], ['fus1', 1], ['radar', 1], ['stealth', 1], ['laser', 1]], drones: [] },
+      { id: 'd3', name: 'Атлас — колоніст', hull: 'atlas', mods: [['ion', 2], ['fus2', 1], ['bay', 4], ['colony', 1]], drones: [['dmine', 4]] },
+      { id: 'd4', name: 'Мандрівник — пробний', hull: 'mand', mods: [['pulse', 4], ['shM', 2], ['stealth', 1], ['radar', 2], ['mlas', 1], ['crewq', 1], ['fus2', 1]], drones: [] },
+      { id: 'd5', name: 'Стриж — перехоплювач', hull: 'strizh', mods: [['plasma', 2], ['fus2', 1], ['auto', 2], ['ammoL', 1], ['plateC', 2]], drones: [] },
+      { id: 'd6', name: 'Корвет — шахтар', hull: 'korvet', mods: [['ion', 2], ['fus2', 1], ['mlas', 6], ['bay', 4]], drones: [['dmine', 6]] },
+      { id: 'd7', name: 'Корвет — ескорт', hull: 'korvet', mods: [['plasma', 2], ['fus2', 2], ['pulse', 2], ['shS', 2], ['plateC', 3]], drones: [] }
+    ];
+    return { CLS, HULLS, MODS, designs0 };
+  }
+  mkEd(mode, d0, step) {
+    const h = this.DB.HULLS.find((x) => x.id === d0.hull); const slots = [];
+    d0.mods.forEach((x) => { for (let i = 0; i < x[1]; i++) slots.push(x[0]); });
+    while (slots.length < h.slots) slots.push('');
+    return { mode, id: d0.id, name: d0.name, hull: d0.hull, slots, drones: JSON.parse(JSON.stringify(d0.drones)), step, hullCls: h.cls, pend: '', picker: -2, cat: 'engines', sub: '' };
+  }
+  initEd(p) {
+    const e = p.editor; if (!e) return null;
+    if (e === 'newhull') return { mode: 'new', id: '', name: '', hull: '', slots: [], drones: [], step: 'hull', hullCls: p.hullCls !== undefined && p.hullCls !== '' ? Number(p.hullCls) : 1, pend: '', picker: -2, cat: 'engines', sub: '' };
+    const d0 = this.DB.designs0.find((x) => x.id === (p.design || 'd1'));
+    const ed = this.mkEd('edit', d0, e === 'hull' ? 'hull' : 'design');
+    if (e === 'hull' && p.warn) ed.pend = 'strizh';
+    if (e === 'hull' && p.hullCls !== undefined && p.hullCls !== '') ed.hullCls = Number(p.hullCls);
+    if (e === 'picker') { ed.picker = Math.max(0, ed.slots.indexOf('')); ed.cat = p.cat || 'weapons'; ed.sub = p.sub || (ed.cat === 'weapons' ? 'energy' : ''); }
+    return ed;
+  }
+  renderVals() {
+    const s = this.state;
+    const P = this.props || {};
+    const tr = (v) => v === true || v === 'true';
+    const m = tr(P.mobile) || s.vw < 768;
+    const premium = tr(P.premium);
+    const frozen = tr(P.frozen);
+    const FONT = 'Inter, Roboto, system-ui, Arial, sans-serif';
+    const en = s.lang === 'en';
+    const L = {
+      uk: { resources: 'Ресурси', gameMenu: 'Меню гри', language: 'Мова', switcher: 'Перемикач планет', mail: 'Пошта', unread: 'непрочитані', settings: 'Налаштування', signout: 'Вийти', attack: 'Атака', battle: 'Бій триває', storageFull: 'Склад повний', chatLabel: 'Глобальний чат', chatPh: 'Написати всім гравцям…', send: 'Надіслати', planPremium: 'Преміум', planStandard: 'Стандарт', more: 'Ще',
+        nav: { overview: 'Огляд', planet: 'Планета', storage: 'Склад', production: 'Виробництво', shipyard: 'Верф', fleets: 'Флоти', map: 'Карта', research: 'Дослідження', market: 'Ринок', ranking: 'Рейтинг', mail: 'Пошта', help: 'Допомога', settings: 'Налаштування' },
+        addNew: 'Додати новий дизайн', fAll: 'Усі', filterAria: 'Фільтр за класом корпусу', issue: 'Потребує виправлення', installed: 'Встановлені модулі', edit: 'Редагувати', toAsm: 'До збірки', noMatch: 'Немає дизайнів цього класу.',
+        edNewTitle: 'Новий дизайн', edEditTitle: 'Редагування дизайну', hullStepTitle: 'Оберіть корпус', changeHull: 'Змінити корпус', back: 'Назад', slotsTitle: 'Слоти корпусу', slotWord: 'Слот', addToSlot: 'Додати модуль у слот', pickModule: 'Оберіть модуль', needName: 'Вкажіть назву дизайну', namePh: 'Наприклад, Barracuda — long range', dronesNote2: 'Дрони не займають слотів: додайте їх через будь-який слот у категорії «Інші модулі».',
+        delTitle: 'Видалити дизайн?', delText: 'Дизайн буде видалено. Кораблі, що вже збудовані за ним, залишаться.',
+        title: 'Верф', tabsAria: 'Розділи верфі', tDesigns: 'Дизайни', tAssembly: 'Збірка', tDismantle: 'Розбирання', coords: 'Сектор 3 · Система Ліра · Орбіта 5',
+        errTitle: 'Не вдалося завантажити дані', errText: 'Перевірте з’єднання й спробуйте ще раз.', retry: 'Спробувати знову', loading: 'Завантаження…',
+        noBureauTitle: 'Збудуйте Бюро проєктування, щоб створювати дизайни', noBureauText: 'Бюро проєктування відкриває конструктор кораблів і збереження дизайнів.', noYardTitle: 'Збудуйте Верф, щоб збирати кораблі', noYardText: 'Верф потрібна для складання та розбирання кораблів на цій планеті.', toBuild: 'До будівництва',
+        noDesTitle: 'Створіть свій перший дизайн', noDesText: 'Оберіть корпус, додайте модулі та збережіть дизайн — потім його можна збирати на верфі.', createFirst: 'Створити перший дизайн',
+        designsCount: 'Дизайни', of: 'з', newDesign: 'Новий дизайн', limitDesigns: 'Ліміт дизайнів вичерпано — підвищіть рівень Бюро проєктування', savedDesigns: 'Збережені дизайни', stepsAria: 'Кроки конструктора', stHull: 'Корпус', stModules: 'Модулі', stSum: 'Підсумок',
+        designName: 'Назва дизайну', hullTitle: 'Корпус', hullClassAria: 'Клас корпусу', hSlots: 'Слоти', hCargo: 'Трюм', hDur: 'Міцність', choose: 'Обрати', chosen: 'Обрано', apply: 'Застосувати', cancel: 'Скасувати', hullWarn: 'Новий корпус має менше слотів: буде видалено модулів — {n}',
+        modsTitle: 'Модулі дизайну', modsNote: 'Корпус задає лише розмір і місткість — роль корабля визначають модулі.', slots: 'Слоти', noMods: 'Модулів ще немає — додайте їх із каталогу нижче.', remove: 'Прибрати', drones: 'Дрони в трюмі', dronesNote: 'Дрони не займають слотів — вони перевозяться як вантаж.',
+        catTitle: 'Каталог модулів', catAria: 'Категорії модулів', subAria: 'Підкатегорії зброї', cMining: 'Видобуток', cEngines: 'Двигуни', cReactors: 'Реактори', cWeapons: 'Зброя', cArmour: 'Броня', cShields: 'Щити', cRecon: 'Розвідка й маскування', cOther: 'Інші модулі', sEnergy: 'Енергетична зброя', sKinetic: 'Кінетична зброя', sAmmo: 'Боєприпаси',
+        energy: 'Енергія', mass: 'Маса', inStorage: 'На складі', add: 'Додати', rTech: 'Не досліджено', rColony: 'Колонізаційний модуль лише на транспортних корпусах', rCombat: 'Бойовий модуль на цивільному корпусі', rFit: 'Не підходить цьому корпусу', rSlots: 'Немає вільних слотів',
+        sumTitle: 'Підсумок дизайну', sPower: 'Енергія', sCargo: 'Трюм', valid: 'Перевірка', sMass: 'Маса', sSlots: 'Слоти', crew: 'Екіпаж', sThrust: 'Тяга', sSpeed: 'Швидкість', sDmg: 'Шкода/раунд', dEn: 'енерг.', dKin: 'кінет.', sDur: 'Міцність', sShield: 'Щит',
+        vNoEngine: 'Немає двигуна', vNoReactor: 'Немає реактора', vPower: 'Недостатньо потужності реактора', vCargo: 'Трюм замалий для мінімального боєзапасу', vCombat: 'Бойовий модуль на цивільному корпусі', vSlots: 'Модулів більше, ніж слотів', vOk: 'Дизайн готовий до збірки',
+        save: 'Зберегти дизайн', saveNew: 'Зберегти як новий', delete: 'Видалити', toYard: 'На верф', toYardOff: 'Спершу виправте помилки дизайну',
+        asmTitle: 'Готовність до збірки', chooseDesign: 'Дизайн', checklist: 'Чек-лист', cItem: 'Позиція', needStock: 'Потрібно / на складі', cStatus: 'Стан', enough: 'Достатньо', produce: 'Виробити', buyMarket: 'Купити на ринку', cost: 'Вартість збірки', materials: 'Матеріали', buildTime: 'Час збірки', addQueue: 'Додати в чергу', crewNote: 'Екіпаж береться з населення, коли корабель потрапляє в чергу, і повертається, якщо скасувати.',
+        queueTitle: 'Черга верфі', queueEmpty: 'Черга порожня.', readyTitle: 'Готові кораблі на цій планеті', noShips: 'На планеті немає вільних кораблів.', upkeep: 'Утримання', toFleet: 'У флот',
+        pickShip: 'Оберіть вільний корабель', returnsTitle: 'Що повернеться', retModules: 'Модулі — цілими на склад деталей', retHull: 'Ресурси корпусу (частина)', retCrew: 'Екіпаж — у населення', dismantle: 'Розібрати', pickHint: 'Оберіть корабель зліва, щоб побачити, що повернеться.',
+        mw: 'МВт', tn: 'т', kn: 'кН', spd: 'од./год', hr: 'год', min: 'хв', cr: 'кр.', crh: 'кр./год', ppl: 'осіб', free: 'вільно', needed: 'потрібно', freePop: 'вільно населення', metal: 'Метал', compos: 'Композити', missing: 'Бракує', hullWord: 'Корпус',
+        qMissing: 'Не вистачає позицій на складі планети', qCrew: 'Недостатньо вільного населення для екіпажу', qFull: 'Усі слоти черги зайняті', inWork: 'Збирається', waiting: 'Очікує',
+        fSaved: 'Дизайн збережено.', fSavedNew: 'Збережено як новий дизайн.', fDeleted: 'Дизайн видалено.', fQueued: 'Корабель додано в чергу верфі.', fCancelled: 'Збірку скасовано, екіпаж повернуто.', fFleet: 'Корабель додано до флоту.', fDismantled: 'Корабель розібрано, ресурси повернуто.',
+        dlgTitle: 'Розібрати корабель?', dlgText: 'Корабель буде знищено без можливості відновлення. Модулі повернуться на склад деталей, екіпаж — у населення.', close: 'Закрити' },
+      en: { resources: 'Resources', gameMenu: 'Game menu', language: 'Language', switcher: 'Planet switcher', mail: 'Mail', unread: 'unread', settings: 'Settings', signout: 'Sign out', attack: 'Attack', battle: 'In battle', storageFull: 'Storage full', chatLabel: 'Global chat', chatPh: 'Message all players…', send: 'Send', planPremium: 'Premium', planStandard: 'Standard', more: 'More',
+        nav: { overview: 'Overview', planet: 'Planet', storage: 'Storage', production: 'Production', shipyard: 'Shipyard', fleets: 'Fleets', map: 'Map', research: 'Research', market: 'Market', ranking: 'Ranking', mail: 'Mail', help: 'Help', settings: 'Settings' },
+        addNew: 'Add new design', fAll: 'All', filterAria: 'Filter by hull class', issue: 'Needs fixing', installed: 'Installed modules', edit: 'Edit', toAsm: 'To assembly', noMatch: 'No designs of this class.',
+        edNewTitle: 'New design', edEditTitle: 'Edit design', hullStepTitle: 'Choose a hull', changeHull: 'Change hull', back: 'Back', slotsTitle: 'Hull slots', slotWord: 'Slot', addToSlot: 'Add a module to slot', pickModule: 'Choose a module', needName: 'Enter a design name', namePh: 'For example, Barracuda — long range', dronesNote2: 'Drones take no slots: add them via any slot in the “Other modules” category.',
+        delTitle: 'Delete the design?', delText: 'The design will be deleted. Ships already built from it stay.',
+        title: 'Shipyard', tabsAria: 'Shipyard sections', tDesigns: 'Designs', tAssembly: 'Assembly', tDismantle: 'Dismantle', coords: 'Sector 3 · System Lyra · Orbit 5',
+        errTitle: 'Could not load the data', errText: 'Check your connection and try again.', retry: 'Try again', loading: 'Loading…',
+        noBureauTitle: 'Build the Design Bureau to create designs', noBureauText: 'The Design Bureau unlocks the ship designer and saved designs.', noYardTitle: 'Build the Shipyard to assemble ships', noYardText: 'A shipyard is needed to assemble and dismantle ships on this planet.', toBuild: 'Construction',
+        noDesTitle: 'Create your first design', noDesText: 'Pick a hull, add modules and save the design — then you can assemble it at the shipyard.', createFirst: 'Create your first design',
+        designsCount: 'Designs', of: 'of', newDesign: 'New design', limitDesigns: 'Design limit reached — upgrade the Design Bureau', savedDesigns: 'Saved designs', stepsAria: 'Designer steps', stHull: 'Hull', stModules: 'Modules', stSum: 'Summary',
+        designName: 'Design name', hullTitle: 'Hull', hullClassAria: 'Hull class', hSlots: 'Slots', hCargo: 'Cargo hold', hDur: 'Durability', choose: 'Choose', chosen: 'Chosen', apply: 'Apply', cancel: 'Cancel', hullWarn: 'The new hull has fewer slots: {n} modules will be removed',
+        modsTitle: 'Design modules', modsNote: 'The hull sets only size and capacity — the ship’s role comes from its modules.', slots: 'Slots', noMods: 'No modules yet — add them from the catalog below.', remove: 'Remove', drones: 'Drones in the hold', dronesNote: 'Drones take no slots — they travel as cargo.',
+        catTitle: 'Module catalog', catAria: 'Module categories', subAria: 'Weapon subcategories', cMining: 'Mining', cEngines: 'Engines', cReactors: 'Reactors', cWeapons: 'Weapons', cArmour: 'Armour', cShields: 'Shields', cRecon: 'Recon and stealth', cOther: 'Other modules', sEnergy: 'Energy weapons', sKinetic: 'Kinetic weapons', sAmmo: 'Ammunition',
+        energy: 'Energy', mass: 'Mass', inStorage: 'In storage', add: 'Add', rTech: 'Not researched', rColony: 'Colony module only on transport hulls', rCombat: 'Combat module on a civilian hull', rFit: 'Does not fit this hull', rSlots: 'No free slots',
+        sumTitle: 'Design summary', sPower: 'Energy', sCargo: 'Hold', valid: 'Validation', sMass: 'Mass', sSlots: 'Slots', crew: 'Crew', sThrust: 'Thrust', sSpeed: 'Speed', sDmg: 'Damage/round', dEn: 'energy', dKin: 'kinetic', sDur: 'Durability', sShield: 'Shield',
+        vNoEngine: 'No engine', vNoReactor: 'No reactor', vPower: 'Not enough reactor power', vCargo: 'Cargo hold too small for the minimum ammunition', vCombat: 'Combat module on a civilian hull', vSlots: 'More modules than slots', vOk: 'Design is ready to assemble',
+        save: 'Save design', saveNew: 'Save as new', delete: 'Delete', toYard: 'To the shipyard', toYardOff: 'Fix the design errors first',
+        asmTitle: 'Assembly readiness', chooseDesign: 'Design', checklist: 'Checklist', cItem: 'Item', needStock: 'Needed / in storage', cStatus: 'Status', enough: 'Enough', produce: 'Produce', buyMarket: 'Buy on market', cost: 'Assembly cost', materials: 'Materials', buildTime: 'Assembly time', addQueue: 'Add to queue', crewNote: 'The crew is taken from the population when the ship enters the queue and returns if you cancel.',
+        queueTitle: 'Shipyard queue', queueEmpty: 'The queue is empty.', readyTitle: 'Ready ships on this planet', noShips: 'No free ships on this planet.', upkeep: 'Upkeep', toFleet: 'Add to fleet',
+        pickShip: 'Pick a free ship', returnsTitle: 'What returns', retModules: 'Modules — intact to the parts storage', retHull: 'Hull resources (part)', retCrew: 'Crew — back to the population', dismantle: 'Dismantle', pickHint: 'Pick a ship on the left to see what returns.',
+        mw: 'MW', tn: 't', kn: 'kN', spd: 'u/h', hr: 'h', min: 'min', cr: 'cr', crh: 'cr/h', ppl: 'people', free: 'free', needed: 'needed', freePop: 'free population', metal: 'Metal', compos: 'Composites', missing: 'Missing', hullWord: 'Hull',
+        qMissing: 'Some items are missing in this planet’s storage', qCrew: 'Not enough free population for the crew', qFull: 'All queue slots are taken', inWork: 'Assembling', waiting: 'Waiting',
+        fSaved: 'Design saved.', fSavedNew: 'Saved as a new design.', fDeleted: 'Design deleted.', fQueued: 'Ship added to the shipyard queue.', fCancelled: 'Assembly cancelled, the crew returned.', fFleet: 'Ship added to the fleet.', fDismantled: 'Ship dismantled, resources returned.',
+        dlgTitle: 'Dismantle the ship?', dlgText: 'The ship will be destroyed for good. Modules return to the parts storage, the crew to the population.', close: 'Close' }
+    };
+    const t = L[s.lang] || L.uk;
+    const GC = { metal: '#A7B1C2', crystal: '#6FA8FF', fuel: '#FF9F43', credits: '#3DD6A6', trade: '#B79CFF', energy: '#FFD84D', prod: '#C3CCE4' };
+    const RESI = {
+      credits: ['Кредити', 'Credits', 'credits', 's', 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v10 M9 9.5h4.5a1.5 1.5 0 0 1 0 3H10a1.5 1.5 0 0 0 0 3h5'],
+      trade: ['Торгова валюта', 'Trade Currency', 'trade', 's', 'M12 3l8 9-8 9-8-9z M12 8l4 4-4 4-4-4z'], energy: ['Енергія', 'Energy', 'energy', 'f', 'M13 2L4 14h7l-1 8 9-12h-7z']
+    };
+    const ic = (k) => { const r = RESI[k]; const c = GC[r[2]]; return { name: en ? r[1] : r[0], d: r[4], fill: r[3] === 'f' ? c : 'none', stroke: r[3] === 's' ? c : 'none' }; };
+    const nf = (n) => Number(n).toLocaleString('uk-UA').replace(/[   ]/g, ' ');
+    const dec = (n, k) => { const x = Number(n).toFixed(k === undefined ? 2 : k); return en ? x : x.replace('.', ','); };
+    const topRes = [Object.assign(ic('credits'), { value: nf(48210) }), Object.assign(ic('trade'), { value: nf(1250) }), Object.assign(ic('energy'), { value: nf(4860) })];
+    const mmss = (x) => Math.floor(x / 60) + ':' + String(x % 60).padStart(2, '0');
+    const hms = (x) => { x = Math.max(0, x); return Math.floor(x / 3600) + ':' + String(Math.floor(x / 60) % 60).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0'); };
+    const pill = (kind2) => 'display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer; font-family: ' + FONT + '; font-size: 13px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; ' + (kind2 === 'danger' ? 'background: rgba(255,107,61,0.12); border: 1px solid rgba(255,107,61,0.6); color: #FF8A66;' : 'background: rgba(242,193,78,0.10); border: 1px solid rgba(242,193,78,0.55); color: #F2C14E;');
+    const alerts = [
+      { label: t.attack + ' · ' + mmss(Math.max(0, 760 - s.t)), d: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v3M12 14v3M7 12h3M14 12h3', style: pill('danger') },
+      { label: t.battle, d: 'M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2', style: pill('danger') },
+      { label: t.storageFull, d: 'M3 7l9-4 9 4v10l-9 4-9-4z M3 7l9 4 9-4 M12 11v10', style: pill('warning') }
+    ];
+    const ICON = {
+      overview: 'M3 3h8v8H3z M13 3h8v5h-8z M13 10h8v11h-8z M3 13h8v8H3z',
+      planet: 'M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16z M2 13c4 3 16 3 20-2',
+      storage: 'M3 8l9-5 9 5v10l-9 4-9-4z M3 8l9 5 9-5 M12 13v9',
+      production: 'M3 21V10l6 4V10l6 4V6h6v15z',
+      shipyard: 'M12 2l4 8v8l-4 4-4-4v-8z M8 14l-4 3v3h4 M16 14l4 3v3h-4',
+      fleets: 'M2 12l8-4v8z M12 5l8-4v8z M12 19l8-4v8z',
+      map: 'M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z M9 3v15 M15 6v15',
+      research: 'M9 3h6 M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3',
+      market: 'M3 9l2-5h14l2 5 M3 9h18v11H3z M9 20v-6h6v6',
+      ranking: 'M8 21h8 M12 17v4 M6 4h12v4a6 6 0 0 1-12 0z M6 6H3a3 3 0 0 0 3 4 M18 6h3a3 3 0 0 1-3 4',
+      mail: 'M3 5h18v14H3z M3 6l9 7 9-7',
+      help: 'M12 21a9 9 0 1 0 0-18a9 9 0 1 0 0 18z M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14 M12 17.5v.01',
+      settings: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8z M12 2v3 M12 19v3 M2 12h3 M19 12h3 M4.9 4.9l2.1 2.1 M17 17l2.1 2.1 M4.9 19.1L7 17 M17 7l2.1-2.1',
+      more: 'M5 12h.01 M12 12h.01 M19 12h.01'
+    };
+    const navIds = ['overview', 'planet', 'storage', 'production', 'shipyard', 'fleets', 'map', 'research', 'market', 'ranking', 'mail', 'help', 'settings'];
+    const nav = navIds.map((id) => {
+      const cur0 = id === 'shipyard';
+      return {
+        id, label: t.nav[id], d: ICON[id], current: cur0 ? 'page' : 'false', badge: id === 'mail' ? '3' : '',
+        style: 'position: relative; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (cur0 ? '600' : '500') + '; color: ' + (cur0 ? '#4FDADA' : '#C3CCE4') + '; background: ' + (cur0 ? 'rgba(46,196,196,0.12)' : 'transparent') + '; box-shadow: ' + (cur0 ? 'inset 3px 0 0 #2EC4C4' : 'none') + ';'
+      };
+    });
+    const tabsBar = [['overview', t.nav.overview], ['planet', t.nav.planet], ['shipyard', t.nav.shipyard], ['map', t.nav.map], ['more', t.more]].map((x) => {
+      const cur0 = x[0] === 'shipyard';
+      return { id: x[0], label: x[1], d: ICON[x[0]], current: cur0 ? 'page' : 'false', style: 'display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 58px; text-decoration: none; font-size: 12px; font-weight: 600; color: ' + (cur0 ? '#4FDADA' : '#9AA7C7') + '; box-shadow: ' + (cur0 ? 'inset 0 2px 0 #2EC4C4' : 'none') + ';' };
+    });
+    const langs = [['uk', 'UA'], ['en', 'EN']].map((l) => ({
+      label: l[1], on: s.lang === l[0] ? 'true' : 'false', pick: () => this.setState({ lang: l[0] }),
+      style: 'min-width: 40px; min-height: 34px; padding: 0 8px; border: 0; border-radius: 8px; cursor: pointer; font-family: ' + FONT + '; font-weight: 600; font-size: 13px; ' + (s.lang === l[0] ? 'background: #1C2544; color: #E8EEFF; box-shadow: inset 0 0 0 1px rgba(160,190,255,0.3);' : 'background: transparent; color: #9AA7C7;')
+    }));
+    const ARTW = { earth: '/_blob/7fb5e5caaad796dc0189bcf9b95f0386', volcanic: '/_blob/8bf1f10ffc8db4dfb154927bb6f4d649', icy: '/_blob/de071ec5f961015305206752803a81a2', desert: '/_blob/6c74b1de3e61b606f6c39bea71f03a06', oceanic: '/_blob/e351f527fa96febc0f5455e14104e181', gas: '/_blob/3064d9bda040535e0d03836035e5c3b1' };
+    const NAMES = { earth: 'Нова Тесса', volcanic: 'Горнило', icy: 'Кріон', desert: 'Дюна', oceanic: 'Таласса', gas: 'Аквілон' };
+    const thumbs = ['earth', 'volcanic', 'icy', 'desert', 'oceanic', 'gas'].map((k) => {
+      const cur0 = k === 'volcanic';
+      return { name: NAMES[k], art: ARTW[k], selStr: cur0 ? 'true' : 'false', pick: () => {},
+        btn: 'flex: 0 0 auto; width: 44px; height: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; background: #0A1124; ' + (cur0 ? 'border: 2px solid #2EC4C4; box-shadow: 0 0 0 3px rgba(46,196,196,0.2);' : 'border: 1px solid rgba(160,190,255,0.24);') };
+    });
+    /* ================= shipyard data ================= */
+    const DB = this.DB;
+    const HULL = {}; DB.HULLS.forEach((h) => { HULL[h.id] = h; });
+    const MOD = {}; DB.MODS.forEach((x) => { MOD[x.id] = x; });
+    const nm = (o) => en ? o.en : o.uk;
+    const hullName = (id) => nm(HULL[id]);
+    const clsOf = (h) => DB.CLS[h.cls];
+    const clsName = (i) => en ? DB.CLS[i][2] : DB.CLS[i][1];
+    const chipC = (c) => 'display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; color: ' + c + '; background: ' + c + '1A; border: 1px solid ' + c + '80;';
+    const sg = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + nf(Math.abs(v));
+    const fmtDur = (sec) => { const h0 = Math.floor(sec / 3600); const mn = Math.round((sec % 3600) / 60); return (h0 ? h0 + ' ' + t.hr + ' ' : '') + mn + ' ' + t.min; };
+
+    /* ---------- state derived ---------- */
+    const designs = s.designs;
+    const ed = s.ed;
+    const usedSlots = (d0) => d0.mods.reduce((a, x) => a + x[1], 0);
+    const calc = (d0) => {
+      const h = HULL[d0.hull]; const r = { mass: h.mass, slots: 0, use: 0, gen: 0, thrust: 0, dE: 0, dK: 0, dur: h.dur, sh: 0, cargo: h.cargo, hold: 0, crew: h.crew, comb: 0, kin: 0, hasEng: false, hasReac: false };
+      d0.mods.forEach((x) => { const md = MOD[x[0]]; const n = x[1]; r.slots += n; r.mass += md.mass * n; if (md.e < 0) r.use += -md.e * n; else r.gen += md.e * n; r.thrust += (md.thr || 0) * n; r.dE += (md.dE || 0) * n; r.dK += (md.dK || 0) * n; r.dur += (md.dur || 0) * n; r.sh += (md.sh || 0) * n; r.cargo += (md.cb || 0) * n; r.hold += (md.hold || 0) * n; r.crew += 2 * n + (md.cr || 0) * n; if (md.combat) r.comb += n; if (md.dK || md.id === 'ammoL' || md.id === 'ammoH') r.kin += (md.dK ? n : 0); if (md.thr) r.hasEng = true; if (md.e > 0) r.hasReac = true; });
+      d0.drones.forEach((x) => { r.hold += MOD[x[0]].hold * x[1]; });
+      r.speed = r.thrust ? Math.round(r.thrust / r.mass * 40) : 0;
+      r.minAmmo = r.kin * 6; r.free = r.cargo - r.hold;
+      return r;
+    };
+
+    /* ---------- styles ---------- */
+    const bBase = 'font-family: ' + FONT + '; font-weight: 700; cursor: pointer; border-radius: 10px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; text-align: center;';
+    const off = ' opacity: 0.45; cursor: not-allowed;';
+    const full = ' width: 100%;';
+    const btnP = bBase + ' padding: 0 22px; border: 0; background: #2EC4C4; color: #070B16; font-size: 15px;';
+    const btnPs2 = bBase + ' padding: 0 16px; border: 0; background: #2EC4C4; color: #070B16; font-size: 14px;';
+    const btnS = bBase + ' padding: 0 16px; border: 1px solid rgba(160,190,255,0.28); background: transparent; color: #E8EEFF; font-size: 14px; font-weight: 600;';
+    const btnSs = btnS + ' font-size: 13px; padding: 0 12px;';
+    const btnDanger = btnSs + ' border-color: rgba(255,107,61,0.6); color: #FF8A66;';
+    const btnTiny = btnS + ' font-size: 13px; padding: 0 12px; min-height: ' + (m ? 44 : 36) + 'px; text-decoration: none;';
+    const inputBase = 'width: 100%; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(160,190,255,0.28); background: #1C2544; color: #E8EEFF; font-family: ' + FONT + '; font-size: 15px; box-sizing: border-box; min-width: 0;';
+    const card = 'display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 14px; background: #141B33; border: 1px solid rgba(160,190,255,0.16); box-shadow: 0 8px 24px rgba(0,0,0,0.28); min-width: 0;';
+    const panel = 'border-radius: 14px; background: #141B33; border: 1px solid rgba(160,190,255,0.16); box-shadow: 0 8px 24px rgba(0,0,0,0.28); min-width: 0;';
+    const tabStyle = (on) => 'position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 ' + (m ? 14 : 18) + 'px; border: 0; border-radius: 8px 8px 0 0; background: transparent; color: ' + (on ? '#4FDADA' : '#C3CCE4') + '; font-family: ' + FONT + '; font-size: 15px; font-weight: ' + (on ? '700' : '500') + '; white-space: nowrap; cursor: pointer; flex: 0 0 auto; box-shadow: ' + (on ? 'inset 0 -3px 0 #2EC4C4' : 'none') + ';';
+    const chipStyle = (on) => 'flex: 0 0 auto; min-height: ' + (m ? 44 : 40) + 'px; padding: 0 14px; border-radius: 10px; border: 1px solid ' + (on ? 'rgba(46,196,196,0.6)' : 'rgba(160,190,255,0.24)') + '; background: ' + (on ? 'rgba(46,196,196,0.12)' : 'transparent') + '; color: ' + (on ? '#4FDADA' : '#C3CCE4') + '; font-family: ' + FONT + '; font-size: 14px; font-weight: ' + (on ? '700' : '500') + '; white-space: nowrap; cursor: pointer;';
+
+    /* ---------- states ---------- */
+    const stP = P.state || 'ok';
+    const loadOn = s.st === 'loading';
+    const errOn = s.st === 'error';
+    const okSt = s.st === 'ok';
+    const yardMissing = stP === 'noyard' && (s.tab === 'assembly' || s.tab === 'dismantle');
+    const bureauMissing = stP === 'nobureau' && s.tab === 'designs';
+    const reqOn = okSt && (yardMissing || bureauMissing);
+    const req = bureauMissing ? { title: t.noBureauTitle, text: t.noBureauText } : { title: t.noYardTitle, text: t.noYardText };
+    const noDesignsOn = okSt && !reqOn && s.tab === 'designs' && designs.length === 0;
+    const designOn = okSt && !reqOn && s.tab === 'designs' && designs.length > 0;
+    const asmOn = okSt && !reqOn && s.tab === 'assembly';
+    const disOn = okSt && !reqOn && s.tab === 'dismantle';
+    const mtabs = [['designs', t.tDesigns, ''], ['assembly', t.tAssembly, s.queue.length], ['dismantle', t.tDismantle, '']].map((x) => {
+      const on = s.tab === x[0];
+      return { id: x[0], label: x[1], sel: on ? 'true' : 'false', hasBadge: x[2] !== '' && x[2] > 0, badge: String(x[2]), pick: () => this.setState({ tab: x[0], dlg: 0, asmOpen: false, flash: '' }), style: tabStyle(on),
+        badgeStyle: 'min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: ' + (on ? 'rgba(46,196,196,0.2)' : '#1C2544') + '; color: ' + (on ? '#4FDADA' : '#E8EEFF') + '; font-size: 12px; font-weight: 700; line-height: 20px; text-align: center;' };
+    });
+    const skel = [0, 1, 2, 3, 4].map((i) => ({ a: 'width: 44px; height: 26px; border-radius: 6px;', b: 'width: ' + (120 + (i % 3) * 36) + 'px; height: 14px; border-radius: 6px;', c: 'margin-left: auto; width: ' + (50 + (i % 2) * 30) + 'px; height: 14px; border-radius: 6px;' }));
+
+    /* ---------- analysis ---------- */
+    const ROM = ['', 'I', 'II', 'III', 'IV', 'V'];
+    const mkr = (n) => 'Mk ' + ROM[n];
+    const DD = 'M12 3l10 18H2z M12 10v4 M12 17.5v.01'; const WD = 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 8v5 M12 16.5v.01';
+    const chipBox = 'display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 10px; font-size: 13px; font-weight: 600; line-height: 1.3;';
+    const bad = (text) => ({ ok: false, text, d: DD, style: chipBox + ' color: #FF8A66; background: rgba(255,107,61,0.10); border: 1px solid rgba(255,107,61,0.55);' });
+    const warn = (text) => ({ ok: false, text, d: WD, style: chipBox + ' color: #F2C14E; background: rgba(242,193,78,0.10); border: 1px solid rgba(242,193,78,0.55);' });
+    const okChipV = { ok: true, text: t.vOk, d: 'M5 12l5 5L20 7', style: chipBox + ' color: #4CD08A; background: rgba(76,208,138,0.10); border: 1px solid rgba(76,208,138,0.5);' };
+    const analyze = (d0) => {
+      const h = HULL[d0.hull]; const c = calc(d0); const chips = []; const over = c.use > c.gen;
+      if (!c.hasEng) chips.push(warn(t.vNoEngine));
+      if (!c.hasReac) chips.push(warn(t.vNoReactor));
+      if (c.hasReac && over) chips.push(bad(t.vPower + ': ' + nf(c.use) + ' / ' + nf(c.gen)));
+      if (c.kin > 0 && c.free < c.minAmmo) chips.push(bad(t.vCargo));
+      if (h.cls === 0 && c.comb > 0) chips.push(bad(t.vCombat));
+      return { h, c, chips, ok: chips.length === 0, over };
+    };
+    const statsOf = (an) => { const c = an.c; return [[t.sMass, nf(c.mass) + ' ' + t.tn], [t.sSlots, c.slots + ' / ' + an.h.slots], [t.sPower, nf(c.use) + ' / ' + nf(c.gen) + ' ' + t.mw], [t.sCargo, nf(c.hold) + ' / ' + nf(c.cargo) + ' ' + t.tn], [t.crew, nf(c.crew)], [t.sSpeed, c.speed + ' ' + t.spd], [t.sDur, nf(c.dur)], [t.sShield, nf(c.sh)], [t.sDmg, nf(c.dE) + ' ' + t.dEn + ' · ' + nf(c.dK) + ' ' + t.dKin]]; };
+    const flashSet = (txt) => { this.setState({ flash: txt }); if (this.tf) clearTimeout(this.tf); this.tf = setTimeout(() => this.setState({ flash: '' }), 3500); };
+    const setEd = (patch) => this.setState((st0) => ({ ed: Object.assign({}, st0.ed, typeof patch === 'function' ? patch(st0.ed) : patch) }));
+
+    /* ---------- designs grid ---------- */
+    const designsN = designs.length; const designsMax = 12; const canNew = designsN < designsMax;
+    const flt = s.filter;
+    const filters = [['all', t.fAll, designs.length]].concat(DB.CLS.map((x, i) => [i, en ? x[2] : x[1], designs.filter((d0) => HULL[d0.hull].cls === i).length])).map((x) => { const on = String(flt) === String(x[0]); return { label: x[1] + ' · ' + x[2], on: on ? 'true' : 'false', style: chipStyle(on), pick: () => this.setState({ filter: x[0] }) }; });
+    const shown = designs.filter((d0) => flt === 'all' || HULL[d0.hull].cls === Number(flt));
+    const cards = shown.map((d0) => {
+      const an = analyze(d0); const h = an.h; const col = DB.CLS[h.cls][3];
+      const mods = d0.mods.concat(d0.drones).map((x) => ({ name: nm(MOD[x[0]]), mk: mkr(MOD[x[0]].mk), n: String(x[1]), d: MOD[x[0]].icon }));
+      const st = statsOf(an).map((x, i) => ({ k: x[0], v: x[1], style: 'display: flex; flex-direction: column; gap: 1px; min-width: 0;' + (i === 8 ? ' grid-column: 1 / -1;' : '') }));
+      return { name: d0.name, hull: nm(h), cls: clsName(h.cls), chipSt: chipC(col), art: h.art, color: col, mods, stats: st, issue: !an.ok, issueTxt: an.ok ? '' : an.chips[0].text,
+        pic: 'aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; padding: 8px; box-sizing: border-box; background: linear-gradient(135deg, #0F1529, #1C2544);',
+        edit: () => this.setState({ ed: this.mkEd('edit', d0, 'design') }), canAsm: an.ok, cannotAsm: !an.ok, toAsm: () => this.setState({ tab: 'assembly', asmId: d0.id }), del: () => this.setState({ dlg: 2, delId: d0.id }) };
+    });
+    const newDesign = () => { if (!canNew) return; this.setState({ ed: { mode: 'new', id: '', name: '', hull: '', slots: [], drones: [], step: 'hull', hullCls: 1, pend: '', picker: -2, cat: 'engines', sub: '' } }); };
+    const delConfirm = () => { const id = s.delId; this.setState((st0) => ({ designs: st0.designs.filter((d0) => d0.id !== id), dlg: 0, delId: '' })); flashSet(t.fDeleted); };
+    const delName = (designs.find((d0) => d0.id === s.delId) || { name: '' }).name;
+
+    /* ---------- editor ---------- */
+    const edOn = !!ed && s.st === 'ok';
+    let eHull = { name: '', cls: '', chipSt: '', art: '', color: '', slots: '', cargo: '', dur: '' };
+    let hullTabs = []; let hulls = []; let hullWarn = ''; let slotTiles = []; let eDrones = []; let sum = { slotsTxt: '', powerSt: '', powerTxt: '', powerPct: 0, powerBar: '', cargoTxt: '', cargoPct: 0, cargoBar: '' };
+    let sumRows = []; let chips = []; let catTabs = []; let subTabs = []; let catalog = []; let slotsTxt = ''; let canSave = false; let pkTitle = ''; let hasHull = false;
+    if (ed) {
+      const eh = ed.hull ? HULL[ed.hull] : null; hasHull = !!eh;
+      const filled = ed.slots.filter(Boolean);
+      const applyHullTo = (id) => setEd((e0) => { const ns = HULL[id].slots; const f = e0.slots.filter(Boolean).slice(0, ns); return { hull: id, slots: f.concat(new Array(ns - f.length).fill('')), step: 'design', pend: '' }; });
+      hullTabs = DB.CLS.map((x, i) => ({ label: en ? x[2] : x[1], sel: ed.hullCls === i ? 'true' : 'false', style: tabStyle(ed.hullCls === i), pick: () => setEd({ hullCls: i }) }));
+      hulls = DB.HULLS.filter((x) => x.cls === ed.hullCls).map((x) => {
+        const locked = !!x.req; const isCur = x.id === ed.hull; const col = DB.CLS[x.cls][3];
+        return { name: nm(x), cls: clsName(x.cls), chipSt: chipC(col), color: col, art: x.art, slots: String(x.slots), cargo: nf(x.cargo) + ' ' + t.tn, dur: nf(x.dur), locked, open: !locked, req: x.req ? (en ? x.req[1] : x.req[0]) : '', cur: isCur ? 'true' : 'false',
+          card: 'display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; background: #0F1529; min-width: 0; border: ' + (isCur ? '2px solid #2EC4C4' : '1px solid rgba(160,190,255,0.16)') + ';',
+          pic: 'position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; padding: 8px; box-sizing: border-box; background: linear-gradient(135deg, #141B33, #1C2544);',
+          btnCls: isCur ? 'pl-sbtn' : 'pl-pbtn', btnLabel: isCur ? t.chosen : t.choose, btn: isCur ? btnS + full + ' border-color: rgba(46,196,196,0.6); color: #4FDADA;' : btnPs2 + full,
+          pick: () => { if (!ed.hull) setEd({ hull: x.id, slots: new Array(x.slots).fill(''), step: 'design', pend: '' }); else if (isCur) setEd({ step: 'design' }); else if (filled.length > x.slots) setEd({ pend: x.id }); else applyHullTo(x.id); } };
+      });
+      if (ed.pend) hullWarn = t.hullWarn.replace('{n}', String(Math.max(0, filled.length - HULL[ed.pend].slots)));
+      var applyHull = () => applyHullTo(ed.pend);
+      if (eh) {
+        const col = DB.CLS[eh.cls][3];
+        eHull = { name: nm(eh), cls: clsName(eh.cls), chipSt: chipC(col), art: eh.art, color: col, slots: String(eh.slots), cargo: nf(eh.cargo) + ' ' + t.tn, dur: nf(eh.dur) };
+        slotsTxt = filled.length + ' ' + t.of + ' ' + eh.slots;
+        slotTiles = ed.slots.map((id, i) => {
+          const base = 'position: relative; min-width: 0; min-height: 116px; box-sizing: border-box; border-radius: 12px;';
+          if (id) { const md = MOD[id]; return { n: String(i + 1), filled: true, empty: false, name: nm(md), mk: mkr(md.mk), d: md.icon, k: en ? md.sk[1] : md.sk[0], v: en ? md.sv[1] : md.sv[0], aria: t.remove + ': ' + nm(md) + ', ' + t.slotWord + ' ' + (i + 1),
+            style: base + ' display: flex; flex-direction: column; gap: 4px; padding: 10px; background: #0F1529; border: 1px solid rgba(160,190,255,0.28);',
+            remove: () => setEd((e0) => { const sl = e0.slots.slice(); sl[i] = ''; return { slots: sl }; }) }; }
+          return { n: String(i + 1), filled: false, empty: true, aria: t.addToSlot + ' ' + (i + 1), style: base + ' display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 2px; cursor: pointer; font-family: ' + FONT + '; color: #9AA7C7; background: transparent; border: 2px dashed rgba(160,190,255,0.32);',
+            add: () => setEd({ picker: i }) };
+        });
+        eDrones = ed.drones.map((x, i) => ({ name: nm(MOD[x[0]]) + ' × ' + x[1], cargo: nf(MOD[x[0]].hold * x[1]) + ' ' + t.tn, aria: t.remove + ': ' + nm(MOD[x[0]]), minus: () => setEd((e0) => ({ drones: e0.drones.map((y, j) => (j === i ? [y[0], y[1] - 1] : y)).filter((y) => y[1] > 0) })) }));
+        const agg = []; filled.forEach((id) => { const f = agg.find((y) => y[0] === id); if (f) f[1] += 1; else agg.push([id, 1]); });
+        const an = analyze({ hull: ed.hull, mods: agg, drones: ed.drones }); const c = an.c;
+        const pPct = c.gen > 0 ? Math.min(100, Math.round(c.use / c.gen * 100)) : (c.use > 0 ? 100 : 0); const cPct = c.cargo > 0 ? Math.min(100, Math.round(c.hold / c.cargo * 100)) : 0;
+        sum = { powerTxt: nf(c.use) + ' / ' + nf(c.gen) + ' ' + t.mw, powerPct: pPct, powerSt: 'color: ' + (an.over ? '#FF8A66' : '#E8EEFF') + ';', powerBar: 'display: block; height: 100%; width: ' + pPct + '%; border-radius: 999px; background: ' + (an.over ? '#FF6B3D' : '#FFD84D') + ';',
+          cargoTxt: nf(c.hold) + ' / ' + nf(c.cargo) + ' ' + t.tn + ' · ' + t.free + ' ' + nf(c.free), cargoPct: cPct, cargoBar: 'display: block; height: 100%; width: ' + cPct + '%; border-radius: 999px; background: #6FA8FF;' };
+        sumRows = [[t.sMass, nf(c.mass) + ' ' + t.tn], [t.sSlots, c.slots + ' ' + t.of + ' ' + eh.slots], [t.crew, nf(c.crew)], [t.sThrust, nf(c.thrust) + ' ' + t.kn], [t.sSpeed, c.speed + ' ' + t.spd], [t.sDmg, nf(c.dE) + ' ' + t.dEn + ' · ' + nf(c.dK) + ' ' + t.dKin], [t.sDur, nf(c.dur)], [t.sShield, nf(c.sh)]].map((x) => ({ k: x[0], v: x[1] }));
+        chips = an.chips.length ? an.chips : [okChipV];
+        canSave = ed.name.trim().length > 0;
+        if (ed.picker !== -2) {
+          pkTitle = t.pickModule + ' · ' + t.slotWord + ' ' + (ed.picker + 1);
+          const cats = [['mining', t.cMining], ['engines', t.cEngines], ['reactors', t.cReactors], ['weapons', t.cWeapons], ['armour', t.cArmour], ['shields', t.cShields], ['recon', t.cRecon], ['other', t.cOther]];
+          catTabs = cats.map((x) => ({ label: x[1], sel: ed.cat === x[0] ? 'true' : 'false', style: m ? chipStyle(ed.cat === x[0]) : tabStyle(ed.cat === x[0]), pick: () => setEd({ cat: x[0], sub: x[0] === 'weapons' ? 'energy' : '' }) }));
+          subTabs = [['energy', t.sEnergy], ['kinetic', t.sKinetic], ['ammo', t.sAmmo]].map((x) => ({ label: x[1], sel: ed.sub === x[0] ? 'true' : 'false', style: chipStyle(ed.sub === x[0]), pick: () => setEd({ sub: x[0] }) }));
+          catalog = DB.MODS.filter((x) => x.cat === ed.cat && (ed.cat !== 'weapons' || x.sub === (ed.sub || 'energy'))).map((x) => {
+            let reason = '';
+            if (x.tech) reason = t.rTech + ': ' + (en ? x.tech[1] : x.tech[0]); else if (x.colony && !eh.transport) reason = t.rColony; else if (x.combat && eh.cls === 0) reason = t.rCombat; else if (eh.cls < x.min) reason = t.rFit;
+            const ok = !reason;
+            return { name: nm(x), mk: mkr(x.mk), d: x.icon, en: x.e === 0 ? '0 ' + t.mw : sg(x.e) + ' ' + t.mw, enSt: 'color: ' + (x.e > 0 ? '#4CD08A' : (x.e < 0 ? '#FFD84D' : '#C3CCE4')) + '; font-weight: 600;', mass: x.mass ? nf(x.mass) + ' ' + t.tn : '—', statK: en ? x.sk[1] : x.sk[0], statV: en ? x.sv[1] : x.sv[0], stock: String(x.stock), can: ok, cannot: !ok, reason,
+              pic: 'flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 10px; background: #1C2544; color: #4FDADA;',
+              card: 'display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; background: #0F1529; border: 1px solid rgba(160,190,255,0.16); min-width: 0; text-align: left; font-family: ' + FONT + '; color: #E8EEFF; cursor: pointer; width: 100%; box-sizing: border-box;',
+              wrap: 'display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: #0F1529; border: 1px solid rgba(160,190,255,0.16); min-width: 0;',
+              inner: 'display: flex; flex-direction: column; gap: 10px; width: 100%; padding: 0; border: 0; background: transparent; text-align: left; font-family: ' + FONT + '; color: #E8EEFF; opacity: 0.45; cursor: not-allowed;',
+              pick: () => setEd((e0) => { if (x.drone) { const f = e0.drones.find((y) => y[0] === x.id); const dr = f ? e0.drones.map((y) => (y[0] === x.id ? [y[0], y[1] + 1] : y)) : e0.drones.concat([[x.id, 1]]); return { drones: dr, picker: -2 }; } const sl = e0.slots.slice(); sl[e0.picker] = x.id; return { slots: sl, picker: -2 }; }) };
+          });
+        }
+      }
+    }
+    const saveEd = () => { if (!canSave) return; this.setState((st0) => { const e0 = st0.ed; const mods = []; e0.slots.filter(Boolean).forEach((id) => { const f = mods.find((y) => y[0] === id); if (f) f[1] += 1; else mods.push([id, 1]); }); const obj = { id: e0.mode === 'edit' ? e0.id : 'n' + (st0.nextId || 1), name: e0.name.trim(), hull: e0.hull, mods, drones: e0.drones }; return { designs: e0.mode === 'edit' ? st0.designs.map((d0) => (d0.id === e0.id ? obj : d0)) : st0.designs.concat([obj]), ed: null, nextId: (st0.nextId || 1) + 1, asmId: st0.asmId }; }); flashSet(t.fSaved); };
+    const closeEd = () => this.setState({ ed: null });
+
+    /* ---------- assembly ---------- */
+    const asmD = designs.find((d0) => d0.id === s.asmId) || designs[0] || null;
+    const asmSel = { open: !!s.asmOpen, label: asmD ? asmD.name : '', toggle: () => this.setState({ asmOpen: !s.asmOpen }),
+      opts: designs.map((d0) => { const on = asmD && d0.id === asmD.id; return { label: d0.name, sel: on ? 'true' : 'false', pick: () => this.setState({ asmId: d0.id, asmOpen: false }),
+        style: 'display: flex; align-items: center; width: 100%; min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px; cursor: pointer; text-align: left; font-family: ' + FONT + '; font-size: 14px; color: ' + (on ? '#4FDADA' : '#E8EEFF') + '; font-weight: ' + (on ? '700' : '500') + '; background: ' + (on ? 'rgba(46,196,196,0.12)' : 'transparent') + ';' }; }) };
+    let checks = []; let crewTxt = ''; let costTxt = ''; let matTxt = ''; let timeTxt = ''; let canQueue = false; let queueReason = ''; let crewNeed = 0; let tSec = 0; let asmH = null;
+    const crewFree = 860 - (s.crewUsed || 0);
+    const queueMax = premium ? 8 : 4;
+    if (asmD) {
+      asmH = HULL[asmD.hull]; const c = calc(asmD);
+      const rows = [{ name: t.hullWord + ' «' + nm(asmH) + '»', need: 1, have: asmH.stock }].concat(asmD.mods.map((x) => ({ name: nm(MOD[x[0]]) + ' ' + mkr(MOD[x[0]].mk), need: x[1], have: MOD[x[0]].stock })), asmD.drones.map((x) => ({ name: nm(MOD[x[0]]), need: x[1], have: MOD[x[0]].stock })));
+      checks = rows.map((r) => { const ok = r.have >= r.need; return { name: r.name, have: r.need + ' / ' + r.have, ok, bad: !ok, miss: t.missing + ' ' + (r.need - r.have) }; });
+      crewNeed = c.crew; crewTxt = t.needed + ' ' + nf(c.crew) + ' / ' + t.freePop + ' ' + nf(crewFree);
+      const credits = asmH.mass * 8 + c.slots * 60; costTxt = nf(credits) + ' ' + t.cr;
+      matTxt = t.metal + ' ' + nf(Math.round(asmH.mass * 0.8)) + ' · ' + t.compos + ' ' + nf(c.slots);
+      tSec = 1200 + c.slots * 200; timeTxt = fmtDur(tSec);
+      const missing = checks.some((r) => r.bad);
+      if (missing) queueReason = t.qMissing; else if (crewFree < c.crew) queueReason = t.qCrew; else if (s.queue.length >= queueMax) queueReason = t.qFull;
+      canQueue = !queueReason;
+    }
+    const addQueue = () => { if (!asmD || !canQueue) return; const id = 'q' + (s.nextId || 1); this.setState((st0) => ({ queue: st0.queue.concat([{ id, did: asmD.id, name: asmD.name, hull: asmD.hull, rem: tSec, tot: tSec, crew: crewNeed }]), crewUsed: (st0.crewUsed || 0) + crewNeed, nextId: (st0.nextId || 1) + 1 })); flashSet(t.fQueued); };
+    const queue = s.queue.map((q, i) => {
+      const h = HULL[q.hull]; const left = i === 0 ? Math.max(0, q.rem - s.t) : q.tot; const pct = Math.min(100, Math.round((q.tot - left) / q.tot * 100));
+      return { n: String(i + 1), name: q.name, art: h.art, color: DB.CLS[h.cls][3], left: hms(left), pct, status: i === 0 ? t.inWork : t.waiting, stColor: i === 0 ? '#4FDADA' : '#9AA7C7',
+        cancel: () => { this.setState((st0) => ({ queue: st0.queue.filter((y) => y.id !== q.id), crewUsed: Math.max(0, (st0.crewUsed || 0) - (q.crew && q.id[0] === 'q' ? q.crew : 0)) })); flashSet(t.fCancelled); },
+        style: 'display: grid; grid-template-columns: ' + (m ? '1fr' : 'minmax(0, 1.8fr) minmax(0, 1fr) auto') + '; gap: 12px; align-items: center; padding: 12px; border-radius: 12px; background: #0F1529; border: 1px solid rgba(160,190,255,0.16);',
+        num: 'flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #1C2544; font-size: 13px; font-weight: 700;',
+        thumb: 'flex: 0 0 auto; width: 56px; height: 32px; border-radius: 6px; background: #141B33;',
+        bar: 'display: block; height: 100%; width: ' + pct + '%; border-radius: 999px; background: #2EC4C4;' };
+    });
+    const shipsRaw = s.ships;
+    const ships = shipsRaw.map((r) => { const h = HULL[r.hull]; return { name: r.name, hull: nm(h), crew: nf(r.crew), upkeep: nf(r.upkeep) + ' ' + t.crh, art: h.art, color: DB.CLS[h.cls][3],
+      toFleet: () => { this.setState((st0) => ({ ships: st0.ships.filter((y) => y.id !== r.id), disSel: st0.disSel === r.id ? '' : st0.disSel })); flashSet(t.fFleet); },
+      style: 'display: grid; grid-template-columns: ' + (m ? '1fr' : 'minmax(0, 1.2fr) minmax(0, 1fr) auto') + '; gap: 10px 14px; align-items: center; padding: 12px; border-radius: 12px; background: #0F1529; border: 1px solid rgba(160,190,255,0.16);', thumb: 'flex: 0 0 auto; width: 56px; height: 32px; border-radius: 6px; background: #141B33;' }; });
+    /* dismantle */
+    const selShip = shipsRaw.find((r) => r.id === s.disSel) || null;
+    const disShips = shipsRaw.map((r) => { const h = HULL[r.hull]; const on = selShip && selShip.id === r.id;
+      return { name: r.name, hull: nm(h), crew: nf(r.crew), art: h.art, color: DB.CLS[h.cls][3], sel: on ? 'true' : 'false', pick: () => this.setState({ disSel: r.id }),
+        row: 'display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 12px; border-radius: 12px; cursor: pointer; font-family: ' + FONT + '; color: #E8EEFF; text-align: left; background: ' + (on ? 'rgba(46,196,196,0.10)' : '#0F1529') + '; border: 1px solid ' + (on ? 'rgba(46,196,196,0.6)' : 'rgba(160,190,255,0.16)') + ';',
+        thumb: 'flex: 0 0 auto; width: 56px; height: 32px; border-radius: 6px; background: #141B33;', tick: 'flex: 0 0 auto; color: #4FDADA; visibility: ' + (on ? 'visible' : 'hidden') + ';' }; });
+    let disMods = []; let disRes = []; let disCrew = '';
+    if (selShip) {
+      const d0 = designs.find((x) => x.id === selShip.did) || { mods: [], drones: [] }; const h = HULL[selShip.hull];
+      disMods = d0.mods.concat(d0.drones).map((x) => ({ name: nm(MOD[x[0]]) + ' ' + mkr(MOD[x[0]].mk), n: String(x[1]) }));
+      disRes = [{ name: t.metal, v: nf(Math.round(h.mass * 0.4)) + ' ' + t.tn }, { name: t.compos, v: nf(Math.round(h.mass * 0.1)) + ' ' + t.tn }];
+      disCrew = nf(selShip.crew) + ' ' + t.ppl;
+    }
+    const doDismantle = () => { if (!selShip) return; this.setState((st0) => ({ ships: st0.ships.filter((y) => y.id !== selShip.id), disSel: '', dlg: 0 })); flashSet(t.fDismantled); };
+    const dlgShip = selShip ? selShip.name : '';
+
+    const edIsHull = !!ed && ed.step === 'hull'; const edIsDesign = !!ed && ed.step === 'design';
+    return {
+      t, desk: !m, mob: m, topRes, alerts, nav, tabs: tabsBar, mtabs, langs, icons: Object.assign({}, ICON), thumbs,
+      planLabel: premium ? t.planPremium : t.planStandard,
+      planChip: 'display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; ' + (premium ? 'color: #E9C46A; border: 1px solid rgba(233,196,106,0.55); background: rgba(233,196,106,0.10);' : 'color: #9AA7C7; border: 1px solid rgba(160,190,255,0.24);'),
+      ibtn: 'width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(160,190,255,0.16); background: transparent; color: #C3CCE4; cursor: pointer;',
+      chat: s.chat, setChat: (e) => this.setState({ chat: e.target.value }), sendChat: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ chat: '' }); },
+      rootStyle: 'min-height: 100vh; display: flex; flex-direction: column; background: #070B16; color: #E8EEFF; font-family: ' + FONT + '; font-size: 15px; line-height: 1.4; font-variant-numeric: tabular-nums; overflow-x: hidden;' + (frozen ? ' height: 100vh; overflow: hidden;' : ''),
+      bodyStyle: 'flex: 1 1 auto; display: flex; ' + (m ? 'flex-direction: column;' : 'align-items: stretch;') + ' min-width: 0;' + (frozen ? ' min-height: 0; overflow: hidden;' : ''),
+      mainStyle: 'position: relative; flex: 1 1 auto; min-width: 0; padding: ' + (m ? '16px 16px 24px' : '20px 28px 40px') + '; box-sizing: border-box;',
+      h1Style: 'margin: 0; font-size: ' + (m ? '30px' : '40px') + '; font-weight: 700; line-height: 1.15;', h2Style: 'margin: 0; font-size: 18px; font-weight: 600; line-height: 1.25;',
+      planetName: NAMES.volcanic, coords: t.coords,
+      tabsWrap: 'display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid rgba(160,190,255,0.16); scrollbar-width: thin;', tab: s.tab, flash: s.flash,
+      catWrap: m ? 'display: flex; gap: 8px; overflow-x: auto; padding: 2px 0; scrollbar-width: thin;' : 'display: flex; flex-wrap: wrap; gap: 0 4px; border-bottom: 1px solid rgba(160,190,255,0.16);',
+      emptyBox: 'display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 44px 20px; text-align: center; border-radius: 14px; border: 1px dashed rgba(160,190,255,0.28); background: rgba(20,27,51,0.5);',
+      errOn, loadOn, retry: () => { this.setState({ st: 'loading' }); this.tm = setTimeout(() => this.setState({ st: 'ok' }), 1200); },
+      skel, skelGrid: 'display: grid; gap: 16px; grid-template-columns: ' + (m ? '1fr' : 'repeat(3, minmax(0, 1fr))') + ';', skelRow: 'display: flex; align-items: center; gap: 14px; padding: 14px 10px; border-bottom: 1px solid rgba(160,190,255,0.12);', panel,
+      reqOn, req, noDesignsOn, btnP, btnPLink: btnP + ' text-decoration: none;', newDesign,
+      designOn, designsN, designsMax, canNew, cannotNew: !canNew, btnAdd: btnP + (m ? full : ''), btnAddOff: btnP + off + (m ? full : ''), filters, noMatch: cards.length === 0, cards,
+      cardGrid: 'display: grid; gap: 16px; align-items: stretch; grid-template-columns: ' + (m ? 'minmax(0, 1fr)' : 'repeat(auto-fill, minmax(340px, 1fr))') + ';',
+      card, issueChip: 'display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #F2C14E; background: rgba(242,193,78,0.10); border: 1px solid rgba(242,193,78,0.5);',
+      btnSs, btnDangerS: btnDanger, btnPs2, btnPs2Off: btnPs2 + off, actGrid: 'display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: auto;',
+      asmOn, asmGrid: 'display: grid; gap: 16px; align-items: start; grid-template-columns: ' + ((m || s.vw < 1200) ? 'minmax(0, 1fr)' : 'minmax(0, 1.05fr) minmax(0, 1fr)') + ';', asmSel, selBtn: inputBase + ' display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; text-align: left;',
+      selList: 'position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 6px; list-style: none; border-radius: 12px; background: #1C2544; border: 1px solid rgba(160,190,255,0.28); box-shadow: 0 12px 32px rgba(0,0,0,0.5); max-height: 280px; overflow: auto;',
+      checks, headChk: 'display: grid; grid-template-columns: minmax(0, 1fr) 84px ' + (m ? 112 : 128) + 'px; gap: 0 10px; align-items: center; min-height: 36px; border-bottom: 1px solid rgba(160,190,255,0.28);',
+      rowChk: 'display: grid; grid-template-columns: minmax(0, 1fr) 84px ' + (m ? 112 : 128) + 'px; gap: 0 10px; align-items: center; align-content: center; min-height: 48px; padding: 4px 0; border-bottom: 1px solid rgba(160,190,255,0.12);',
+      okChip: 'display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #4CD08A; background: rgba(76,208,138,0.10); border: 1px solid rgba(76,208,138,0.5);',
+      badChip: 'display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #FF8A66; background: rgba(255,107,61,0.10); border: 1px solid rgba(255,107,61,0.55);', btnTiny,
+      crewTxt, costTxt, matTxt, timeTxt, sumBox: 'margin: 0; padding: 12px 14px; border-radius: 10px; background: #0F1529; border: 1px solid rgba(160,190,255,0.16); display: flex; flex-direction: column; gap: 8px;', sumRow: 'display: flex; justify-content: space-between; align-items: baseline; gap: 16px; font-size: 14px;',
+      btnPfull: btnP + full, btnPfullOff: btnP + full + off,
+      canQueue, cannotQueue: !canQueue, queueReason, addQueue, queueN: s.queue.length, queueMax, queueEmpty: s.queue.length === 0, queue, noShips: shipsRaw.length === 0, ships,
+      disOn, disGrid: 'display: grid; gap: 16px; align-items: start; grid-template-columns: ' + ((m || s.vw < 1100) ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) minmax(0, 1fr)') + ';', disShips, hasDis: !!selShip, noDis: !selShip && shipsRaw.length > 0, disMods, disRes, disCrew,
+      btnDangerFull2: btnDanger + full, askDismantle: () => this.setState({ dlg: 1 }),
+      dlgOn: s.dlg === 1, delOn: s.dlg === 2, delName, delConfirm, dlgShip, closeDlg: () => this.setState({ dlg: 0 }), confirmDis: doDismantle, stopClick: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      dlgOverlay: 'position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; background: rgba(4,7,14,0.72); ' + (m ? 'align-items: flex-end; padding: 0 16px;' : 'align-items: flex-start; padding: 72px 24px 24px;'),
+      dlgBox: 'width: 100%; max-width: 520px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; padding: 20px; background: #141B33; border: 1px solid rgba(160,190,255,0.28); box-shadow: 0 24px 60px rgba(0,0,0,0.5); ' + (m ? 'max-height: 92vh; overflow-y: auto; border-radius: 20px 20px 0 0; border-bottom: 0;' : 'border-radius: 16px;'),
+      dlgBtns: 'display: flex; gap: 10px; ' + (m ? 'flex-direction: column-reverse;' : 'justify-content: flex-end;'), btnSdlg: btnS + (m ? full : ''), btnDangerFill: bBase + ' padding: 0 22px; border: 0; background: #FF6B3D; color: #070B16; font-size: 15px;' + (m ? full : ''),
+      ibtnX: 'width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(160,190,255,0.16); background: transparent; color: #C3CCE4; cursor: pointer; flex: 0 0 auto;',
+      /* editor */
+      edOn, edIsHull, edIsDesign, edTitle: ed ? (ed.mode === 'new' ? t.edNewTitle : t.edEditTitle) : '', hasHull, closeEd, backToHull: () => setEd((e0) => ({ step: 'hull', hullCls: e0.hull ? HULL[e0.hull].cls : e0.hullCls })), edName: ed ? ed.name : '', setEdName: (e) => setEd({ name: e.target.value }), eHull,
+      edOverlay: 'position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background: rgba(4,7,14,0.78); ' + (m ? '' : 'padding: 32px 24px; box-sizing: border-box;'),
+      edBox: 'display: flex; flex-direction: column; box-sizing: border-box; background: #141B33; border: 1px solid rgba(160,190,255,0.28); box-shadow: 0 24px 60px rgba(0,0,0,0.5); ' + (m ? 'width: 100%; height: 100%; border-radius: 0;' : 'width: 100%; max-width: 1140px; max-height: 100%; border-radius: 16px;'),
+      edHead: 'display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: ' + (m ? '10px 12px 10px 16px' : '14px 16px 14px 24px') + '; border-bottom: 1px solid rgba(160,190,255,0.16); flex: 0 0 auto;',
+      edBody: 'flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: ' + (m ? '16px' : '20px 24px') + ';',
+      edFoot: 'display: flex; gap: 10px; flex: 0 0 auto; padding: ' + (m ? '10px 16px' : '14px 24px') + '; border-top: 1px solid rgba(160,190,255,0.16); ' + (m ? 'flex-direction: column-reverse;' : 'justify-content: flex-end; align-items: center;'),
+      hullTabs, hullWarn, warnBox: 'display: flex; align-items: center; flex-wrap: wrap; gap: 10px 12px; padding: 10px 14px; border-radius: 10px; background: rgba(242,193,78,0.10); border: 1px solid rgba(242,193,78,0.55); color: #F2C14E; font-size: 14px; font-weight: 600;',
+      applyHull: typeof applyHull === 'function' ? applyHull : () => {}, cancelHull: () => setEd({ pend: '' }), backToDesign: () => setEd({ step: 'design', pend: '' }), hullGrid: 'display: grid; gap: 12px; grid-template-columns: ' + (m ? '1fr' : 'repeat(auto-fill, minmax(240px, 1fr))') + ';', hulls, btnSfullOff: btnSs + full + off,
+      edHeadCard: 'display: grid; gap: 14px 20px; align-items: center; padding: 14px; border-radius: 14px; background: #0F1529; border: 1px solid rgba(160,190,255,0.16); grid-template-columns: ' + (m ? '1fr' : '200px minmax(0, 1fr) auto') + ';',
+      edHullPic: 'aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; padding: 6px; box-sizing: border-box; background: linear-gradient(135deg, #141B33, #1C2544);', inputFill: inputBase, btnSfull2: btnS + (m ? full : ''),
+      edCols: 'display: grid; gap: 16px; align-items: start; grid-template-columns: ' + (m ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 300px') + ';',
+      slotsTxt, slotTiles, slotGrid: 'display: grid; gap: 10px; grid-template-columns: ' + (m ? (s.vw >= 400 ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))') : 'repeat(auto-fill, minmax(150px, 1fr))') + ';',
+      tileX: 'position: absolute; top: 0; right: 0; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: transparent; color: #C3CCE4; cursor: pointer;',
+      eDrones, rowDrone: 'display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 4px 4px 12px; border-radius: 10px; background: #0F1529; border: 1px solid rgba(160,190,255,0.16);', btnIcon: 'width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(160,190,255,0.24); background: transparent; color: #C3CCE4; cursor: pointer; flex: 0 0 auto;',
+      sum, sumRows, chips, saveEd, canSave, cannotSave: !!ed && !canSave, btnPsave: btnP + (m ? full : ''), btnPsaveOff: btnP + off + (m ? full : ''), btnSend: btnS + (m ? full : ''), summaryCard: card + (m ? '' : ' position: sticky; top: 0;'),
+      /* picker */
+      pkOn: edOn && ed.picker !== -2 && edIsDesign, pkTitle, closePicker: () => setEd({ picker: -2 }), catTabs, subTabs, hasSub: !!ed && ed.cat === 'weapons', catalog,
+      pkOverlay: 'position: fixed; inset: 0; z-index: 110; display: flex; align-items: center; justify-content: center; background: rgba(4,7,14,0.6); ' + (m ? '' : 'padding: 48px 24px; box-sizing: border-box;'),
+      pkBox: 'display: flex; flex-direction: column; box-sizing: border-box; background: #141B33; border: 1px solid rgba(160,190,255,0.28); box-shadow: 0 24px 60px rgba(0,0,0,0.6); ' + (m ? 'width: 100%; height: 100%; border-radius: 0;' : 'width: 100%; max-width: 980px; max-height: 100%; border-radius: 16px;'),
+      modGrid: 'display: grid; gap: 12px; grid-template-columns: ' + (m ? '1fr' : 'repeat(auto-fill, minmax(210px, 1fr))') + ';'
+    };
+  }
+}
+</script>
+</body>
+</html>

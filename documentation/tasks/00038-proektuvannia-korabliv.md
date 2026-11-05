@@ -2,7 +2,7 @@
 
 > ⚠️ **ОБОВ'ЯЗКОВО ПРОЧИТАЙ ПЕРЕД РОБОТОЮ:** [tech/09 Зведені правила коду, логіки та кодів](../tech/09-zvedeni-pravyla-kodu-lohiky-ta-kodiv.md) і [tech/08](../tech/08-pravyla-kodu-dlia-ahentiv.md). Нуль хардкоду, нейтральні коди від сервера, тексти лише в `localization_text`, сид ніколи не перезаписує наявні записи.
 >
-> **Статус:** ✏️ чернетка. Правила гри взято з рішень автора 04.11.2026 (документ [game-design/05](../game-design/05-flot-ta-korabli.md), §3.1–3.2). Чекає затвердження автором.
+> **Статус:** ✅ виконано. Сервер, клієнт і тести зроблені; результат — у §7, питання без відповіді — у [00038-pytannia.md](00038-pytannia.md).
 > **Етап:** 1 (production/01)
 > **Залежить від:** [00013](00013-vyrobnytstvo-retsepty-zavody-sklad-detalei.md) (деталі, склад деталей, характеристики), [00011](00011-vymohy-budivli-ta-cherha-budivnytstva.md) (будівлі, вимоги, черги), [00028](00028-pershyi-sid-z-obranykh-elementiv.md) (сид каталогу деталей), **[00041](00041-modeliuvannia-korabliv.md) (моделювання: числа слотів і місткості трюма)**, **[00042](00042-rozkladka-moduliv-po-korpusakh.md) (приналежність модулів до корпусів — перевірка в конструкторі)**.
 > **Наступна:** [00039 — Складання кораблів](00039-skladannia-korabliv.md), потім [00040 — Формування флотів](00040-formuvannia-flotiv.md)
@@ -116,4 +116,133 @@
 
 ## 7. Результат виконання
 
-_(заповнюється після виконання)_
+> Питання, на які немає відповіді без автора, — у файлі [00038-pytannia.md](00038-pytannia.md).
+
+### 7.1. Дані в модулі Production
+
+| Що | Як зроблено | Де |
+|---|---|---|
+| Кількість слотів корпусу | Характеристика `char_hull_slots`, прив'язана до 7 груп корпусів; значення для кожного корпусу — з моделювання (00041), а поки його немає — дефолт **8** з конфігурації | `production-reference-seed.json`, `ProductionConfigKeys.DefaultHullSlots` |
+| Ознака призначення корпусу | Атрибут `hull_role` на деталях корпусів: `combat`, `transport`, `civil`, `drone` | сид, `PartAttributeKeys.HullRole` |
+| Ознака призначення модуля | Атрибут `role` на деталях модулів: `combat`, `transport`, `civil`, `universal` | сид, `PartAttributeKeys.Role` |
+| Обов'язкові компоненти | Атрибут `component` на деталях: `drive`, `reactor`, `life_support` | сид, `PartAttributeKeys.Component`, `PartComponents` |
+| Додатковий слот раси | Характеристика `char_hull_race_slot` у груп «Важкі» і «Надважкі» | сид, `CharacteristicKinds.HullRaceSlot` |
+| Стабільний код характеристики | Нова колонка `characteristic.kind`: нейтральний код характеристики дає сервер і він різниться від бази до бази, тому програма читає характеристику за **видом** (`hull_slots`, `energy_use`, `power`, `crew`, `integrity`, `hull_capacity`, `hull_race_slot`) | міграція `20261105042513_CharacteristicKind` |
+
+Ролі й види — логічні коди програми (як `PartRoles` і `HullRoles`), а не рядкові константи в правилах.
+
+### 7.2. Модуль Fleet
+
+Новий модуль `server/src/Aetheris.Fleet` (був порожньою загстовкою):
+
+| Файл | Що в ньому |
+|---|---|
+| `Data/Entities/FleetEntities.cs` | `ShipDesignEntity` (проєкт) і `ShipDesignSlotEntity` (слот) |
+| `Data/FleetDbContext.cs` | таблиці `ship_design` і `ship_design_slot`, індекси, без зовнішніх FK (міжмодульна межа) |
+| `Data/Migrations/20261105040247_InitialFleet.cs` | таблиці проєктів і слотів |
+| `Services/ShipDesignService.cs` | сервіс проєктів і всі перевірки конструктора |
+| `Services/FleetEndpoints.cs` | `GET /api/v1/fleet/designs`, `GET /api/v1/fleet/designs/{id}`, `GET /api/v1/fleet/ship-catalog` |
+| `Api/FleetCommands.cs` | `fleet.design_create`, `fleet.design_rename`, `fleet.design_save`, `fleet.design_archive` |
+| `FleetServiceCollectionExtensions.cs` | реєстрація модуля в DI |
+
+Модуль читає Production через контракт `IProductionModule.GetShipCatalogAsync` і Planets через
+`IPlanetsModule.GetOwnerBuildingBonusAsync` — внутрішніх таблиць інших модулів не читає.
+
+### 7.3. Перевірки конструктора (сервер — єдине джерело правди)
+
+| Перевірка | Код причини |
+|---|---|
+| Число модулів ≤ слотів корпусу (+1 за расу) | `fleet_slots_full` |
+| Є двигун | `fleet_drive_missing` |
+| Є реактор | `fleet_reactor_missing` |
+| Є життєзабезпечення | `fleet_life_support_missing` |
+| Споживання енергії ≤ потужність реакторів | `fleet_energy_short` |
+| Бойовий модуль — тільки на бойовий корпус, транспортний — тільки на транспортний | `fleet_role_mismatch` |
+| Модуль придатний цьому корпусу | `fleet_not_compatible` |
+| Базовий трюм вміщає мінімальний боєкомплект | `fleet_hold_too_small` |
+| Ліміт проєктів бюро | `fleet_design_limit_reached` |
+| Корпус не дрон і не архівний | `fleet_hull_is_drone`, `fleet_hull_archived` |
+
+Вільні слоти не вимагаються (рішення автора, §2, «вільні слоти не вимагаються»). Проєкт із
+рівно зайнятими слотами валідний.
+
+**Зміна корпуса**: якщо корпус змінили і слотів стало менше, зайві слоти **очищаються**
+(рішення автора, §6.7). Коли корпус не змінили, поставити модуль понад слоти не можна —
+причина «Слоти корабля закінчилися».
+
+**Зміна корпуса в наявному проєкті**: якщо слотів стало менше, старі слоти, що не вміщаються,
+зникають, а нові заповнюються.
+
+### 7.4. Ліміт проєктів
+
+Ліміт береться з ефекту будівлі «Конструкторське бюро» (`design_queue_slots`) через
+`IPlanetsModule.GetOwnerBuildingBonusAsync` — це дані, не код. Двадцять паралельних команд
+не створюють більше проєктів, ніж дозволяє ліміт: зміни одного гравця серіалізує advisory-lock
+PostgreSQL у межах транзакції.
+
+### 7.5. Сид і міграції
+
+- `production-reference-seed.json`: `char_hull_slots`, `char_hull_race_slot`, вид
+  `kind` у характеристик, атрибути `role`, `hull_role`, `component`.
+- `ProductionSeedAdditions.AddMissingCharacteristicsAsync`: додає лише відсутні характеристики
+  й не трогає наявні (задача 00023, рішення 7).
+- Міграції:
+  - `20261105042513_CharacteristicKind` (Production) — колонка `characteristic.kind` і заливка
+    видів за стартовими даними;
+  - `20261105043240_FuelPartsEnergy` (Production) — `char_energy_use` двигунів і життєзабезпечення
+    дорівнює 0: ці деталі живляться **паливом**, а потужність реактора оплачує модулі
+    (рішення автора §2.9 «реактор обмежує модулі»); без цього жоден корабель не проходив
+    перевірку енергії;
+  - `20261105040247_InitialFleet` (Fleet) — таблиці проєктів і слотів;
+  - `20261105050443_ShipDesignSlotLink` (Fleet) — зв'язок слота з проєктом.
+
+### 7.6. Читання без N+1
+
+`ShipCatalogService` читає **лише кеш каталогу** Production: жодного додаткового запиту на
+таблиці. Характеристики, ролі й вид компонента читаються з `PartTypeInfo` у пам'яті.
+`ShipDesignService.ReadAsync` читає слоти всіх проєктів **одним** запитом (`ids.Contains`).
+
+### 7.7. Клієнт
+
+- Нова сторінка «Верф» (`client/src/pages/player/ShipyardPage.tsx`): вибір корпусу, слоти
+  корабля, лічильник зайнятих слотів, список модулів із причинами, чому модуль не ставиться
+  (слоти закінчилися, не для цього корпусу, не придатний цьому корпусу, немає на складі),
+  збереження проєкту з назвою, перейменування, архівування та список проєктів.
+- Новий клієнт `client/src/api/fleetApi.ts` і маршрут `/shipyard`; пункт меню «Верф» тепер
+  відкриває екран (був неактивним).
+- Тексти: `shipyard.*` і `reason.fleet_*` в `client/src/i18n/uk.ts` та `en.ts`; префікс
+  `fleet_` у списку кодів, що мають свій текст (`screenNotice.ts`).
+- Стилі — тільки готові класи й токени (`panel`, `card`, `grid-cards`, `btn`, `field`).
+
+### 7.8. Тести й перевірки
+
+| Перевірка | Результат |
+|---|---|
+| `dotnet build -c Release` | ✅ без помилок |
+| `dotnet test -c Release` | ✅ 584 тести, 583 зелені; одне падіння `SectorGeneratorTests.The_types_and_sizes_follow_the_configured_weights` — **не регресія цієї задачі** (падає і на чистому HEAD, перевірено `git stash`) |
+| `dotnet format --verify-no-changes --no-restore` | ✅ чисто |
+| `npm run lint` (клієнт) | ✅ чисто |
+| `npm run build` (клієнт) | ✅ зібрано |
+| `npx vitest run` (клієнт) | ✅ 413 тестів, усі зелені |
+
+Нові тести сервера — `server/tests/Aetheris.Tests/Fleet/ShipDesignTests.cs` (12 тестів):
+створення, перейменування, збереження й архівування; ліміт бюро; слоти; обов'язкові
+компоненти; енергія; призначення; приналежність до корпусу; расовий слот; місткість трюма;
+зміна корпуса й очищення зайвих слотів; 20 паралельних команд; довідник кораблів.
+
+Нові тести клієнта — `client/src/pages/player/__tests__/ShipyardPage.test.tsx` (5 тестів).
+
+Оновлені архітектурні тести: `ModuleIsolationTests` (дозволений зв'язок Fleet → World, Planets,
+Production; Fleet тепер scoped, бо в нього є таблиці), `ModuleInternalsTests` (без змін),
+`NoGameTermsTests` (теки модуля Fleet і його тестів, префікс `fleet.` для ключів конфігурації).
+
+### 7.9. Що лишилося за автором
+
+- Ручна перевірка в Chrome: створити проєкт, поставити модулі, побачити відмову за слотами
+  і за призначенням (критерій 12), і перевірка в CI.
+- Розподіл модулів по корпусах (задача 00042) і довідник деталей — на перегляді автора;
+  «Бортовий комп'ютер» додано до всіх корабельних корпусів, щоб правило обов'язкових
+  компонентів не робило половину кораблів нескладними (`00038-pytannia.md`, п. 1).
+- Числа слотів і місткості трюма — задача 00041 (моделювання); поки їх немає, діють дефолти
+  з конфігурації.
+

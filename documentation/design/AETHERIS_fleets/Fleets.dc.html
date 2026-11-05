@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>AETHERIS — флоти</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#070B16}
+@keyframes pl-glow{0%,100%{box-shadow:0 0 0 1px rgba(46,196,196,.55),0 0 14px rgba(46,196,196,.15)}50%{box-shadow:0 0 0 1px rgba(46,196,196,.85),0 0 24px rgba(46,196,196,.32)}}
+.pl-done{animation:pl-glow 2.6s ease-in-out infinite}
+.pl-nav:hover{background:rgba(160,190,255,.06)}
+.pl-ibtn:hover{border-color:rgba(160,190,255,.4)!important;color:#E8EEFF!important}
+.pl-pbtn:hover{background:#4FDADA!important}
+.pl-pbtn:active{background:#2AA9A9!important}
+.pl-sbtn:hover{border-color:rgba(160,190,255,.5)!important;background:rgba(160,190,255,.06)!important}
+.pl-sbtn:active{background:rgba(160,190,255,.12)!important}
+.pl-tbtn:hover:not(:disabled){color:#FF8A66!important;text-decoration:underline}
+.pl-tbtn:disabled{opacity:.45;cursor:not-allowed!important}
+.pl-thumbs{scrollbar-width:thin;scrollbar-color:#2EC4C4 rgba(160,190,255,.08)}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #2EC4C4;outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.pl-done{animation:none}}
+/* construction screen */
+.pl-pbtn:disabled,.pl-sbtn:disabled{cursor:not-allowed}
+.pl-pbtn:disabled:hover{background:#2EC4C4!important}
+.pl-sbtn:disabled:hover{border-color:rgba(160,190,255,.28)!important;background:transparent!important}
+/* research screen */
+.rs-tab:hover{color:#E8EEFF!important;background:rgba(160,190,255,.06)!important}
+.rs-chip:hover{border-color:rgba(160,190,255,.5)!important;color:#E8EEFF!important}
+.rs-chip:active,.rs-tab:active{background:rgba(160,190,255,.12)!important}
+.rs-scroll{scrollbar-width:thin;scrollbar-color:#2EC4C4 rgba(160,190,255,.08)}
+input::placeholder{color:#9AA7C7;opacity:1}
+/* fleets screen */
+.mk-row:hover{background:rgba(160,190,255,.05)}
+.mk-opt:hover:not(:disabled){background:rgba(160,190,255,.10)!important}
+input:disabled{opacity:.45;cursor:not-allowed}
+@keyframes mk-sh{0%{opacity:.45}50%{opacity:.9}100%{opacity:.45}}
+.mk-sk{display:block;background:rgba(160,190,255,.16);animation:mk-sh 1.4s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.mk-sk{animation:none}}
+</style>
+</helmet>
+
+<div style="{{rootStyle}}">
+
+<!-- ================= TOP BAR (desktop) ================= -->
+<sc-if value="{{desk}}" hint-placeholder-val="{{ true }}">
+<header style="position: sticky; top: 0; z-index: 30; height: 64px; display: flex; align-items: center; gap: 24px; padding: 0 20px; background: rgba(7,11,22,0.92); border-bottom: 1px solid rgba(160,190,255,0.16); box-sizing: border-box">
+<div style="display: flex; align-items: center; gap: 16px; flex: 0 0 auto">
+<span style="display: flex; align-items: center; gap: 10px">
+<img src="/_blob/5d05da37d4cbf8c079ada5da8fd59a29" alt="" width="28" height="28" style="width: 28px; height: 28px; border-radius: 7px; object-fit: cover">
+<span style="font-weight: 700; font-size: 18px; letter-spacing: 0.04em">AETHERIS</span>
+</span>
+<span style="display: inline-flex; align-items: center; gap: 8px; padding: 5px 10px 5px 8px; border-radius: 999px; background: #141B33; border: 1px solid rgba(160,190,255,0.16); font-size: 14px; font-weight: 600">
+<span aria-hidden="true" style="width: 14px; height: 14px; background: #6C8DB8; clip-path: polygon(50% 0, 100% 16%, 100% 58%, 50% 100%, 0 58%, 0 16%)"></span>
+Kapitan_Zoria<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">, раса Терани</span>
+</span>
+<span style="{{planChip}}">{{planLabel}}</span>
+</div>
+<ul aria-label="{{t.resources}}" style="flex: 1 1 auto; display: flex; justify-content: center; gap: 22px; margin: 0; padding: 0; list-style: none; min-width: 0">
+<sc-for list="{{topRes}}" as="r" hint-placeholder-count="3">
+<li title="{{r.name}}" style="display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; white-space: nowrap">
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="{{r.d}}" fill="{{r.fill}}" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{r.name}}:</span>{{r.value}}
+</li>
+</sc-for>
+</ul>
+<div style="display: flex; align-items: center; gap: 8px; flex: 0 0 auto">
+<sc-for list="{{alerts}}" as="a" hint-placeholder-count="3">
+<button type="button" style="{{a.style}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="{{a.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{a.label}}</button>
+</sc-for>
+<span aria-hidden="true" style="width: 1px; height: 28px; background: rgba(160,190,255,0.16); margin: 0 4px"></span>
+<button type="button" class="pl-ibtn" aria-label="{{t.mail}}: 3 {{t.unread}}" style="{{ibtn}} position: relative;">
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.mail}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span aria-hidden="true" style="position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 999px; background: #2EC4C4; color: #070B16; font-size: 11px; font-weight: 700; line-height: 16px; text-align: center">3</span>
+</button>
+<button type="button" class="pl-ibtn" aria-label="{{t.settings}}" style="{{ibtn}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.settings}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+<button type="button" class="pl-ibtn" aria-label="{{t.signout}}" style="{{ibtn}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+</div>
+</header>
+</sc-if>
+
+<!-- ================= TOP BAR (mobile) ================= -->
+<sc-if value="{{mob}}" hint-placeholder-val="{{ false }}">
+<header style="position: sticky; top: 0; z-index: 30; display: flex; flex-direction: column; gap: 8px; padding: 10px 16px; background: rgba(7,11,22,0.95); border-bottom: 1px solid rgba(160,190,255,0.16)">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<img src="/_blob/5d05da37d4cbf8c079ada5da8fd59a29" alt="" width="28" height="28" style="width: 28px; height: 28px; border-radius: 7px; object-fit: cover">
+<span style="display: flex; flex-direction: column; line-height: 1.2; min-width: 0">
+<span style="font-weight: 700; font-size: 15px; letter-spacing: 0.04em">AETHERIS</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #C3CCE4"><span aria-hidden="true" style="width: 11px; height: 11px; background: #6C8DB8; clip-path: polygon(50% 0, 100% 16%, 100% 58%, 50% 100%, 0 58%, 0 16%)"></span>Kapitan_Zoria · {{planLabel}}</span>
+</span>
+</span>
+<button type="button" class="pl-ibtn" aria-label="{{t.mail}}: 3 {{t.unread}}" style="{{ibtn}} position: relative;">
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.mail}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span aria-hidden="true" style="position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 999px; background: #2EC4C4; color: #070B16; font-size: 11px; font-weight: 700; line-height: 16px; text-align: center">3</span>
+</button>
+</div>
+<ul aria-label="{{t.resources}}" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 10px; margin: 0; padding: 0; list-style: none">
+<sc-for list="{{topRes}}" as="r" hint-placeholder-count="3">
+<li title="{{r.name}}" style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; white-space: nowrap">
+<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="{{r.d}}" fill="{{r.fill}}" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{r.name}}:</span>{{r.value}}
+</li>
+</sc-for>
+</ul>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{alerts}}" as="a" hint-placeholder-count="3">
+<button type="button" style="{{a.style}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="{{a.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{a.label}}</button>
+</sc-for>
+</div>
+</header>
+</sc-if>
+
+<!-- ================= BODY ================= -->
+<div style="{{bodyStyle}}">
+
+<!-- LEFT SIDEBAR: 13 rows -->
+<sc-if value="{{desk}}" hint-placeholder-val="{{ true }}">
+<nav aria-label="{{t.gameMenu}}" style="position: sticky; top: 64px; align-self: flex-start; flex: 0 0 220px; width: 220px; box-sizing: border-box; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; min-height: calc(100vh - 128px); border-right: 1px solid rgba(160,190,255,0.12); background: rgba(11,16,32,0.6)">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="13">
+<a href="#{{n.id}}" class="pl-nav" aria-current="{{n.current}}" style="{{n.style}}">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="{{n.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span style="flex: 1 1 auto">{{n.label}}</span>
+<sc-if value="{{n.badge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: #1C2544; color: #E8EEFF; font-size: 12px; font-weight: 700; line-height: 20px; text-align: center">{{n.badge}}</span></sc-if>
+</a>
+</sc-for>
+<div style="margin-top: auto; padding: 16px 6px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<span style="font-size: 13px; color: #9AA7C7">{{t.language}}</span>
+<div role="group" aria-label="Мова / Language" style="display: flex; padding: 3px; border-radius: 10px; border: 1px solid rgba(160,190,255,0.16); background: #0B1020">
+<sc-for list="{{langs}}" as="l" hint-placeholder-count="2">
+<button type="button" aria-pressed="{{l.on}}" onClick="{{l.pick}}" style="{{l.style}}">{{l.label}}</button>
+</sc-for>
+</div>
+</div>
+</nav>
+</sc-if>
+
+<!-- MAIN -->
+<main style="{{mainStyle}}">
+<img src="/_blob/ac6fddbe0222bb895fce26ebc36ae140" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.18; pointer-events: none; z-index: 0">
+<div style="position: relative; z-index: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0">
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px">
+<div style="display: flex; flex-direction: column; gap: 4px"><h1 style="{{h1Style}}">{{t.title}}</h1><p style="margin: 0; font-size: 15px; color: #C3CCE4">{{t.fleetsCount}}: <b style="color: #E8EEFF">{{fleetsN}} {{t.of}} {{limit}}</b></p></div>
+<div style="{{createWrap}}">
+<sc-if value="{{canCreate}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-pbtn" onClick="{{openCreate}}" style="{{btnCreate}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 5v14 M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>{{t.create}}</button></sc-if>
+<sc-if value="{{cannotCreate}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-pbtn" disabled title="{{t.limitReason}}" style="{{btnCreateOff}}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 5v14 M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>{{t.create}}</button><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #FF8A66"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z M12 10v4 M12 17.5v.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{t.limitReason}}</span></sc-if>
+</div>
+</div>
+
+<sc-if value="{{flash}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: rgba(76,208,138,0.08); border: 1px solid rgba(76,208,138,0.4); color: #4CD08A; font-size: 14px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span style="flex: 1 1 auto">{{flash}}</span></div>
+</sc-if>
+
+<sc-if value="{{errOn}}" hint-placeholder-val="{{ false }}">
+<section role="alert" style="{{emptyBox}}"><svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true" style="color: #FF8A66"><path d="M12 3l10 18H2z M12 10v4 M12 17.5v.01" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<h2 style="margin: 0; font-size: 18px; font-weight: 600">{{t.errTitle}}</h2><p style="margin: 0; max-width: 420px; font-size: 14px; color: #9AA7C7">{{t.errText}}</p>
+<button type="button" class="pl-pbtn" onClick="{{retry}}" style="{{btnP}}">{{t.retry}}</button></section>
+</sc-if>
+
+<sc-if value="{{loadOn}}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="{{t.loading}}" style="display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))">
+<sc-for list="{{skel}}" as="k" hint-placeholder-count="4"><section style="{{panel}}"><div style="{{skelRow}}"><span class="mk-sk" style="{{k.a}}"></span><span class="mk-sk" style="{{k.b}}"></span><span class="mk-sk" style="{{k.c}}"></span></div></section></sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{noShipsOn}}" hint-placeholder-val="{{ false }}">
+<section style="{{emptyBox}}">
+<svg width="160" height="90" viewBox="0 0 160 90" aria-hidden="true"><rect x="2" y="2" width="156" height="86" rx="12" fill="rgba(20,27,51,0.6)" stroke="rgba(160,190,255,0.28)" stroke-dasharray="5 5"></rect><path d="M28 46 L58 30 H104 L134 46 L104 62 H58 z" fill="none" stroke="#4FDADA" stroke-width="2" stroke-linejoin="round"></path><path d="M76 46h28" stroke="#9AA7C7" stroke-width="2" stroke-linecap="round"></path></svg>
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">{{t.noShipsTitle}}</h2><p style="margin: 0; max-width: 460px; font-size: 14px; color: #9AA7C7">{{t.noShipsText}}</p>
+<a href="#shipyard" class="pl-pbtn" style="{{btnPLink}}">{{t.toShipyard}}</a></section>
+</sc-if>
+
+<sc-if value="{{noFleetsOn}}" hint-placeholder-val="{{ false }}">
+<section style="{{emptyBox}}">
+<svg width="160" height="90" viewBox="0 0 160 90" aria-hidden="true"><rect x="2" y="2" width="156" height="86" rx="12" fill="rgba(20,27,51,0.6)" stroke="rgba(160,190,255,0.28)" stroke-dasharray="5 5"></rect><path d="M30 56 L58 42 H88 L112 56 L88 70 H58 z M62 30 L90 18 H116 L136 30 L116 42 H90 z" fill="none" stroke="#4FDADA" stroke-width="2" stroke-linejoin="round"></path></svg>
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">{{t.noFleetsTitle}}</h2><p style="margin: 0; max-width: 460px; font-size: 14px; color: #9AA7C7">{{t.noFleetsText}}</p>
+<button type="button" class="pl-pbtn" onClick="{{openCreate}}" style="{{btnFirst}}">{{t.createFirst}}</button></section>
+</sc-if>
+
+<sc-if value="{{listOn}}" hint-placeholder-val="{{ true }}">
+<div style="{{filterBar}}">
+<div role="group" aria-label="{{t.fPlanetAria}}" class="rs-scroll" style="{{chipRow}}"><sc-for list="{{planetChips}}" as="f" hint-placeholder-count="4"><button type="button" class="rs-chip" aria-pressed="{{f.on}}" onClick="{{f.pick}}" style="{{f.style}}">{{f.label}}</button></sc-for></div>
+<div role="group" aria-label="{{t.fStateAria}}" class="rs-scroll" style="{{chipRow}}"><sc-for list="{{stateChips}}" as="f" hint-placeholder-count="4"><button type="button" class="rs-chip" aria-pressed="{{f.on}}" onClick="{{f.pick}}" style="{{f.style}}">{{f.label}}</button></sc-for></div>
+<div style="{{searchWrap}}"><label for="fl-q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{t.searchLbl}}</label><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; left: 13px; top: 13px; color: #9AA7C7; pointer-events: none"><path d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14z M20 20l-4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg><input id="fl-q" type="text" value="{{q}}" onChange="{{setQ}}" placeholder="{{t.searchPh}}" autocomplete="off" style="{{inputSearch}}"></div>
+</div>
+
+<div style="{{layout}}">
+<div style="display: flex; flex-direction: column; gap: 20px; min-width: 0">
+<sc-if value="{{noMatch}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 28px; border-radius: 14px; border: 1px dashed rgba(160,190,255,0.28); text-align: center; font-size: 14px; color: #9AA7C7">{{t.noMatch}}</p></sc-if>
+<div style="{{cols}}">
+<sc-for list="{{fCards}}" as="f" hint-placeholder-count="2">
+<button type="button" class="mk-opt" aria-pressed="{{f.cur}}" onClick="{{f.pick}}" style="{{f.style}}">
+<span style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; width: 100%"><span style="font-size: 17px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere">{{f.name}}</span></span>
+<span style="display: flex; align-items: center; gap: 8px; color: #C3CCE4"><img src="{{f.art}}" alt="" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover"><span>{{t.home}}: <b style="color: #E8EEFF">{{f.home}}</b></span></span>
+<span style="display: flex; align-items: center; gap: 8px; color: #C3CCE4"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16z M2 13c4 3 16 3 20-2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg><span>{{f.place}}</span></span>
+<sc-if value="{{f.flight}}" hint-placeholder-val="{{ false }}"><span role="progressbar" aria-label="{{f.place}}" aria-valuenow="{{f.pct}}" aria-valuemin="0" aria-valuemax="100" style="display: block; width: 100%; height: 6px; border-radius: 999px; background: rgba(160,190,255,0.12); overflow: hidden"><span style="{{f.bar}}"></span></span></sc-if>
+<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px"><b>{{f.n}}</b><sc-for list="{{f.comp}}" as="c" hint-placeholder-count="2"><span style="{{c.style}}">{{c.txt}}</span></sc-for></span>
+<span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-size: 13px; color: #C3CCE4"><span>{{t.commander}}: {{f.noCmd}}</span><span>{{t.upkeep}}: <b style="color: #E8EEFF">{{f.up}}</b></span></span>
+<span style="{{f.stSt}}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="{{f.stD}}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{f.stTxt}}</span>
+</button>
+</sc-for>
+</div>
+
+<section style="{{card}}" aria-label="{{t.freeTitle}}">
+<h2 style="{{h2Style}}">{{t.freeTitle}}</h2>
+<p style="margin: 0; font-size: 13px; color: #9AA7C7">{{t.freeNote}}</p>
+<sc-if value="{{noFreeAny}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 18px; border-radius: 10px; border: 1px dashed rgba(160,190,255,0.28); text-align: center; font-size: 14px; color: #9AA7C7">{{t.noFree}}</p></sc-if>
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="{{groupHead}}"><span style="display: inline-flex; align-items: center; gap: 8px"><img src="{{g.art}}" alt="" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover"><b style="font-size: 15px">{{g.name}}</b><span style="font-size: 13px; color: #9AA7C7">{{g.cnt}}</span></span>
+<span style="display: inline-flex; align-items: center; gap: 10px"><span style="font-size: 13px; color: #C3CCE4">{{g.selTxt}}</span>
+<sc-if value="{{g.can}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-pbtn" onClick="{{g.add}}" style="{{btnPs}}">{{t.addToFleet}}</button></sc-if>
+<sc-if value="{{g.cannot}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-pbtn" disabled title="{{t.pickFirst}}" style="{{btnAddFleetOff}}">{{t.addToFleet}}</button></sc-if></span></div>
+<sc-for list="{{g.ships}}" as="r" hint-placeholder-count="3"><button type="button" role="checkbox" aria-checked="{{r.checked}}" onClick="{{r.toggle}}" style="{{r.row}}"><span style="{{r.box}}"><sc-if value="{{r.tick}}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if></span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; align-items: flex-start"><span style="font-weight: 600; font-size: 14px; overflow-wrap: anywhere">{{r.name}}</span><span style="font-size: 12px; color: #9AA7C7; overflow-wrap: anywhere">{{r.design}}</span></span><span style="{{r.chipSt}}">{{r.cls}}</span></button></sc-for>
+</div>
+</sc-for>
+</section>
+</div>
+
+<sc-if value="{{panelOn}}" hint-placeholder-val="{{ true }}">
+<aside aria-label="{{P1.name}}" style="{{panelWrap}}">
+<sc-if value="{{mob}}" hint-placeholder-val="{{ false }}"><div style="display: flex; justify-content: flex-end"><button type="button" class="pl-ibtn" aria-label="{{t.closePanel}}" onClick="{{closePanel}}" style="{{ibtnX}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button></div></sc-if>
+<div style="{{panelInner}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-if value="{{notRename}}" hint-placeholder-val="{{ true }}"><div style="display: flex; align-items: center; gap: 8px"><h2 style="margin: 0; font-size: 22px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; flex: 1 1 auto">{{P1.name}}</h2><button type="button" class="pl-ibtn" aria-label="{{t.renameBtn}}" title="{{t.renameBtn}}" onClick="{{startRename}}" style="{{ibtnX}}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z M13 7l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div></sc-if>
+<sc-if value="{{rename}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; gap: 8px"><label for="fl-ren" style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{t.fleetName}}</label><input id="fl-ren" type="text" value="{{nameDraft}}" onChange="{{setDraft}}" autocomplete="off" style="{{inputFill}}"><div style="display: flex; gap: 8px"><button type="button" class="pl-pbtn" onClick="{{saveName}}" style="{{btnPs}}">{{t.save}}</button><button type="button" class="pl-sbtn" onClick="{{cancelRename}}" style="{{btnSs}}">{{t.cancel}}</button></div></div></sc-if>
+<span style="display: flex; align-items: center; gap: 8px; color: #C3CCE4"><img src="{{P1.art}}" alt="" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover"><span>{{t.home}}: <b style="color: #E8EEFF">{{P1.home}}</b></span></span>
+<span style="color: #C3CCE4; font-size: 14px">{{P1.place}}</span>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px"><span style="{{P1.stSt}}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="{{P1.stD}}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{P1.stTxt}}</span><a href="#map" class="pl-sbtn" style="{{btnSs}} text-decoration: none;">{{t.showMap}}</a></div>
+</div>
+<dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; padding: 12px; border-radius: 12px; background: #0F1529; border: 1px solid rgba(160,190,255,0.12)">
+<sc-for list="{{sumRows}}" as="r" hint-placeholder-count="8"><div style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><dt style="font-size: 12px; color: #9AA7C7">{{r.k}}</dt><dd style="margin: 0; font-size: 14px; font-weight: 600; overflow-wrap: anywhere">{{r.v}}</dd></div></sc-for>
+</dl>
+<div style="display: flex; flex-direction: column; gap: 8px"><h3 style="margin: 0; font-size: 15px; font-weight: 600">{{t.shipsTitle}}</h3>
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{pShips}}" as="x" hint-placeholder-count="4"><li style="{{shipRow}}">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 600; font-size: 14px; overflow-wrap: anywhere">{{x.name}}</span><span style="font-size: 12px; color: #9AA7C7; overflow-wrap: anywhere">{{x.design}}</span></span>
+<span style="display: inline-flex; gap: 6px"><button type="button" class="pl-sbtn" onClick="{{x.move}}" aria-label="{{x.aMove}}" title="{{t.moveShip}}" style="{{iconBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14 M14 4l4 4-4 4 M20 16H6 M10 12l-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><button type="button" class="pl-sbtn" onClick="{{x.remove}}" aria-label="{{x.aRemove}}" title="{{t.removeShip}}" style="{{iconBtn}}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></button></span></div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px"><span style="{{x.chipSt}}">{{x.cls}}</span><span style="display: inline-flex; align-items: center; gap: 8px; flex: 1 1 120px; min-width: 120px"><span style="color: #9AA7C7">{{t.cond}}</span><span role="progressbar" aria-label="{{t.cond}}" aria-valuenow="{{x.condPct}}" aria-valuemin="0" aria-valuemax="100" style="display: block; flex: 1 1 auto; height: 6px; border-radius: 999px; background: rgba(160,190,255,0.12); overflow: hidden"><span style="{{x.condBar}}"></span></span><b>{{x.cond}}</b></span><span style="color: #C3CCE4">{{t.crewWord}}: <b style="color: #E8EEFF">{{x.crew}}</b></span></div>
+</li></sc-for></ul></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><h3 style="margin: 0; font-size: 15px; font-weight: 600">{{t.cmdTitle}}</h3>
+<div style="{{cmdBox}}"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto; color: #9AA7C7"><path d="M9 8a3 3 0 1 0 6 0a3 3 0 1 0-6 0 M4 21c0-4 3.5-6 8-6s8 2 8 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg><span style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start"><span style="font-size: 14px; color: #C3CCE4">{{t.cmdEmpty}}</span><button type="button" class="pl-sbtn" disabled title="{{t.cmdSoon}}" style="{{btnAssignOff}}">{{t.assignCmd}}</button></span></div>
+<span style="font-size: 12px; color: #9AA7C7">{{t.cmdSoon}}</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><h3 style="margin: 0; font-size: 15px; font-weight: 600">{{t.ordersTitle}}</h3>
+<div style="{{ordersGrid}}"><sc-for list="{{orders}}" as="o" hint-placeholder-count="6"><button type="button" class="pl-sbtn" disabled title="{{t.ordersSoon}}" style="{{orderBtn}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{o.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{o.label}}</button></sc-for></div>
+<span style="font-size: 12px; color: #9AA7C7">{{t.ordersSoon}}</span></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-if value="{{canAddShips}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-sbtn" onClick="{{openAdd}}" style="{{btnSfull}}">{{t.addShips}}</button></sc-if>
+<sc-if value="{{cannotAddShips}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-sbtn" disabled title="{{addOffReason}}" style="{{btnSfull}} opacity: 0.45; cursor: not-allowed;">{{t.addShips}}</button></sc-if>
+<button type="button" class="pl-sbtn" onClick="{{askDisband}}" style="{{btnDangerFull}}">{{t.disband}}</button>
+</div>
+</div>
+</aside>
+</sc-if>
+</div>
+</sc-if>
+
+</div>
+</main>
+
+</div>
+
+<!-- ================= BOTTOM BAR (desktop) ================= -->
+<sc-if value="{{desk}}" hint-placeholder-val="{{ true }}">
+<footer style="position: sticky; bottom: 0; z-index: 30; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 8px 20px; background: rgba(7,11,22,0.94); border-top: 1px solid rgba(160,190,255,0.16); box-sizing: border-box">
+<div role="group" aria-label="{{t.switcher}}" class="pl-thumbs" style="display: flex; gap: 6px; min-width: 0; overflow-x: auto; padding: 2px">
+<sc-for list="{{thumbs}}" as="s" hint-placeholder-count="6">
+<button type="button" onClick="{{s.pick}}" aria-pressed="{{s.selStr}}" aria-label="{{s.name}}" title="{{s.name}}" style="{{s.btn}}"><img src="{{s.art}}" alt="" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; -webkit-mask-image: radial-gradient(closest-side, #000 85%, transparent 100%); mask-image: radial-gradient(closest-side, #000 85%, transparent 100%)"></button>
+</sc-for>
+</div>
+<form onSubmit="{{sendChat}}" style="display: flex; align-items: center; gap: 10px; flex: 0 1 520px; min-width: 0">
+<label for="chat" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{t.chatLabel}}</label>
+<input id="chat" type="text" value="{{chat}}" onChange="{{setChat}}" placeholder="{{t.chatPh}}" autocomplete="off" style="flex: 1 1 auto; min-width: 0; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(160,190,255,0.28); background: #1C2544; color: #E8EEFF; font-family: Inter, Roboto, system-ui, Arial, sans-serif; font-size: 14px; box-sizing: border-box">
+<button type="submit" class="pl-pbtn" aria-label="{{t.send}}" title="{{t.send}}" style="flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 10px; background: #2EC4C4; color: #070B16; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path></svg></button>
+</form>
+</footer>
+</sc-if>
+
+<!-- ================= TAB BAR (mobile) ================= -->
+<sc-if value="{{mob}}" hint-placeholder-val="{{ false }}">
+<nav aria-label="{{t.gameMenu}}" style="position: sticky; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: rgba(7,11,22,0.96); border-top: 1px solid rgba(160,190,255,0.16)">
+<sc-for list="{{tabs}}" as="tb" hint-placeholder-count="5">
+<a href="#{{tb.id}}" aria-current="{{tb.current}}" style="{{tb.style}}">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="{{tb.d}}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span>{{tb.label}}</span>
+</a>
+</sc-for>
+</nav>
+</sc-if>
+
+
+<!-- ================= DIALOGS ================= -->
+<sc-if value="{{dCreate}}" hint-placeholder-val="{{ false }}">
+<div style="{{dlgOverlay}}" onClick="{{closeDlg}}"><div role="dialog" aria-modal="true" aria-labelledby="fl-d1" onClick="{{stopClick}}" style="{{dlgBox}}">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px"><h2 id="fl-d1" style="margin: 0; font-size: 20px; font-weight: 700">{{t.createTitle}}</h2><button type="button" class="pl-ibtn" aria-label="{{t.close}}" onClick="{{closeDlg}}" style="{{ibtnX}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="fl-cn" style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{t.fleetName}}</label><input id="fl-cn" type="text" value="{{cNameV}}" onChange="{{setCName}}" placeholder="{{t.namePh}}" autocomplete="off" style="{{inputFill}}"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span id="fl-hp" style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{t.homePlanet}}</span>
+<div role="radiogroup" aria-labelledby="fl-hp" style="display: flex; flex-direction: column; gap: 6px"><sc-for list="{{cPlanets}}" as="p" hint-placeholder-count="3"><button type="button" role="radio" aria-checked="{{p.sel}}" onClick="{{p.pick}}" style="{{p.style}}"><img src="{{p.art}}" alt="" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover"><span style="flex: 1 1 auto; font-weight: 600">{{p.name}}</span><span style="font-size: 12px; color: #9AA7C7">{{p.cnt}}</span></button></sc-for></div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 600; color: #C3CCE4">{{cHint}}</span>
+<sc-if value="{{cNoShips}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 14px; border-radius: 10px; border: 1px dashed rgba(160,190,255,0.28); text-align: center; font-size: 14px; color: #9AA7C7">{{t.noFreeShips}}</p></sc-if>
+<sc-for list="{{cShips}}" as="r" hint-placeholder-count="3"><button type="button" role="checkbox" aria-checked="{{r.checked}}" onClick="{{r.toggle}}" style="{{r.row}}"><span style="{{r.box}}"><sc-if value="{{r.tick}}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if></span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; align-items: flex-start"><span style="font-weight: 600; font-size: 14px; overflow-wrap: anywhere">{{r.name}}</span><span style="font-size: 12px; color: #9AA7C7; overflow-wrap: anywhere">{{r.design}}</span></span><span style="{{r.chipSt}}">{{r.cls}}</span></button></sc-for></div>
+<sc-if value="{{cCannot}}" hint-placeholder-val="{{ false }}"><span role="alert" style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #FF8A66"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 3l10 18H2z M12 10v4 M12 17.5v.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>{{cErr}}</span></sc-if>
+<div style="{{dlgBtns}}"><button type="button" class="pl-sbtn" onClick="{{closeDlg}}" style="{{btnSdlg}}">{{t.cancel}}</button>
+<sc-if value="{{cCan}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-pbtn" onClick="{{doCreate}}" style="{{btnPdlg}}">{{t.createBtn}}</button></sc-if>
+<sc-if value="{{cCannot}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-pbtn" disabled title="{{cErr}}" style="{{btnPdlgOff}}">{{t.createBtn}}</button></sc-if></div>
+</div></div>
+</sc-if>
+
+<sc-if value="{{dDisband}}" hint-placeholder-val="{{ false }}">
+<div style="{{dlgOverlay}}" onClick="{{closeDlg}}"><div role="dialog" aria-modal="true" aria-labelledby="fl-d2" onClick="{{stopClick}}" style="{{dlgBox}}">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px"><h2 id="fl-d2" style="margin: 0; font-size: 20px; font-weight: 700">{{t.disbandTitle}}</h2><button type="button" class="pl-ibtn" aria-label="{{t.close}}" onClick="{{closeDlg}}" style="{{ibtnX}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button></div>
+<p style="margin: 0; font-size: 15px; font-weight: 600; overflow-wrap: anywhere">{{selFleetName}}</p><p style="margin: 0; font-size: 14px; color: #C3CCE4">{{t.disbandText}}</p>
+<div style="{{dlgBtns}}"><button type="button" class="pl-sbtn" onClick="{{closeDlg}}" style="{{btnSdlg}}">{{t.cancel}}</button><button type="button" onClick="{{doDisband}}" style="{{btnDangerFill}}">{{t.disband}}</button></div>
+</div></div>
+</sc-if>
+
+<sc-if value="{{dLast}}" hint-placeholder-val="{{ false }}">
+<div style="{{dlgOverlay}}" onClick="{{closeDlg}}"><div role="dialog" aria-modal="true" aria-labelledby="fl-d3" onClick="{{stopClick}}" style="{{dlgBox}}">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px"><h2 id="fl-d3" style="margin: 0; font-size: 20px; font-weight: 700; line-height: 1.25">{{t.lastTitle}}</h2><button type="button" class="pl-ibtn" aria-label="{{t.close}}" onClick="{{closeDlg}}" style="{{ibtnX}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button></div>
+<p style="margin: 0; font-size: 14px; color: #C3CCE4">{{t.lastText}}</p>
+<div style="{{dlgBtns}}"><button type="button" class="pl-sbtn" onClick="{{closeDlg}}" style="{{btnSdlg}}">{{t.cancel}}</button><button type="button" onClick="{{goDisband}}" style="{{btnDangerFill}}">{{t.disband}}</button></div>
+</div></div>
+</sc-if>
+
+<sc-if value="{{dAdd}}" hint-placeholder-val="{{ false }}">
+<div style="{{dlgOverlay}}" onClick="{{closeDlg}}"><div role="dialog" aria-modal="true" aria-labelledby="fl-d4" onClick="{{stopClick}}" style="{{dlgBox}}">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px"><h2 id="fl-d4" style="margin: 0; font-size: 20px; font-weight: 700; line-height: 1.25">{{t.addTitle}}</h2><button type="button" class="pl-ibtn" aria-label="{{t.close}}" onClick="{{closeDlg}}" style="{{ibtnX}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button></div>
+<p style="margin: 0; font-size: 13px; color: #9AA7C7">{{t.freeNote}}</p>
+<sc-if value="{{aNone}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 14px; border-radius: 10px; border: 1px dashed rgba(160,190,255,0.28); text-align: center; font-size: 14px; color: #9AA7C7">{{t.noFreeShips}}</p></sc-if>
+<div style="display: flex; flex-direction: column; gap: 6px"><sc-for list="{{aShips}}" as="r" hint-placeholder-count="3"><button type="button" role="checkbox" aria-checked="{{r.checked}}" onClick="{{r.toggle}}" style="{{r.row}}"><span style="{{r.box}}"><sc-if value="{{r.tick}}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if></span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; align-items: flex-start"><span style="font-weight: 600; font-size: 14px; overflow-wrap: anywhere">{{r.name}}</span><span style="font-size: 12px; color: #9AA7C7; overflow-wrap: anywhere">{{r.design}}</span></span><span style="{{r.chipSt}}">{{r.cls}}</span></button></sc-for></div>
+<div style="{{dlgBtns}}"><button type="button" class="pl-sbtn" onClick="{{closeDlg}}" style="{{btnSdlg}}">{{t.cancel}}</button>
+<sc-if value="{{aCan}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-pbtn" onClick="{{doAdd}}" style="{{btnPdlg}}">{{t.addBtn}}</button></sc-if>
+<sc-if value="{{aCannot}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-pbtn" disabled title="{{t.pickFirst}}" style="{{btnPdlgOff}}">{{t.addBtn}}</button></sc-if></div>
+</div></div>
+</sc-if>
+
+<sc-if value="{{dPick}}" hint-placeholder-val="{{ false }}">
+<div style="{{dlgOverlay}}" onClick="{{closeDlg}}"><div role="dialog" aria-modal="true" aria-labelledby="fl-d5" onClick="{{stopClick}}" style="{{dlgBox}}">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px"><h2 id="fl-d5" style="margin: 0; font-size: 20px; font-weight: 700">{{t.pickFleetTitle}}</h2><button type="button" class="pl-ibtn" aria-label="{{t.close}}" onClick="{{closeDlg}}" style="{{ibtnX}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button></div>
+<p style="margin: 0; font-size: 13px; color: #9AA7C7">{{t.pickFleetText}}</p>
+<sc-if value="{{pfNone}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 14px; border-radius: 10px; border: 1px dashed rgba(160,190,255,0.28); text-align: center; font-size: 14px; color: #9AA7C7">{{t.noFleetsHere}}</p></sc-if>
+<div role="radiogroup" aria-label="{{t.pickFleetTitle}}" style="display: flex; flex-direction: column; gap: 6px"><sc-for list="{{pfList}}" as="f" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{f.sel}}" onClick="{{f.pick}}" style="{{f.style}}"><span style="{{f.box}}"></span><span style="flex: 1 1 auto; font-weight: 600; overflow-wrap: anywhere">{{f.name}}</span><span style="font-size: 12px; color: #9AA7C7">{{f.n}}</span></button></sc-for></div>
+<div style="{{dlgBtns}}"><button type="button" class="pl-sbtn" onClick="{{closeDlg}}" style="{{btnSdlg}}">{{t.cancel}}</button>
+<sc-if value="{{pfCan}}" hint-placeholder-val="{{ false }}"><button type="button" class="pl-pbtn" onClick="{{doPickFleet}}" style="{{btnPdlg}}">{{t.confirm}}</button></sc-if>
+<sc-if value="{{pfCannot}}" hint-placeholder-val="{{ true }}"><button type="button" class="pl-pbtn" disabled title="{{t.pickFleetFirst}}" style="{{btnPdlgOff}}">{{t.confirm}}</button></sc-if></div>
+</div></div>
+</sc-if>
+
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props='{"mobile":{"editor":"boolean","default":false},"lang":{"editor":"enum","options":["uk","en"],"default":"uk"},"state":{"editor":"enum","options":["ok","loading","error","noships","nofleets"],"default":"ok"},"sel":{"editor":"string","default":""},"limit":{"editor":"string","default":"3"},"flight":{"editor":"boolean","default":false},"cplanet":{"editor":"string","default":""},"sheet":{"editor":"boolean","default":false},"dialog":{"editor":"string","default":""},"checked":{"editor":"boolean","default":false},"fPlanet":{"editor":"string","default":"all"},"fState":{"editor":"string","default":"all"},"premium":{"editor":"boolean","default":false},"frozen":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const p = props || {};
+    const tr = (v) => v === true || v === 'true';
+    this.DB = this.buildDB();
+    const D = this.DB;
+    const stv = p.state || 'ok';
+    let fleets = JSON.parse(JSON.stringify(D.fleets0)); let ships = JSON.parse(JSON.stringify(D.ships0));
+    if (stv === 'noships') { fleets = []; ships = []; }
+    if (stv === 'nofleets') { fleets = []; ships = ships.map((x) => Object.assign({}, x, { fleet: '' })); }
+    const first = fleets[0] ? fleets[0].id : '';
+    const pre = {}; if (p.checked) { ships.filter((x) => !x.fleet && x.planet === 'volcanic').slice(0, 2).forEach((x) => { pre[x.id] = true; }); }
+    let dlg = ''; let dd = null;
+    if (p.dialog === 'create') { dlg = 'create'; dd = { name: '', planet: p.cplanet || 'volcanic', picked: {} }; if (p.checked) { dd.name = 'Другий ескадрон'; dd.picked = pre; } }
+    else if (p.dialog === 'disband') dlg = 'disband'; else if (p.dialog === 'last') dlg = 'last';
+    else if (p.dialog === 'addships') { dlg = 'addships'; dd = { apicked: {} }; }
+    else if (p.dialog === 'pickfleet') { dlg = 'pickfleet'; dd = { shipIds: ['s12'], planet: 'volcanic', exclude: '' }; }
+    this.state = {
+      t: 0, chat: '', lang: p.lang || 'uk', vw: (typeof window !== 'undefined' ? window.innerWidth : 1440), st: (stv === 'loading' || stv === 'error') ? stv : 'ok',
+      fleets, ships, sel: p.sel || first, sheet: tr(p.sheet), rename: false, nameDraft: '', fPlanet: p.fPlanet || 'all', fState: p.fState || 'all', q: '', freeSel: pre, dlg, dd, flash: '', nextId: 10
+    };
+  }
+  componentDidMount() {
+    this.onR = () => this.setState({ vw: window.innerWidth });
+    this.onK = (e) => { if (e.key === 'Escape') this.setState({ dlg: '', dd: null, sheet: false }); };
+    window.addEventListener('resize', this.onR);
+    window.addEventListener('keydown', this.onK);
+    this.onR();
+    this.iv = setInterval(() => this.setState((s) => ({ t: s.t + 1 })), 1000);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); window.removeEventListener('keydown', this.onK); clearInterval(this.iv); if (this.tm) clearTimeout(this.tm); if (this.tf) clearTimeout(this.tf); }
+  buildDB() {
+    const ARTS = {
+      sapsan: 'M20 28 L50 10 L86 28 L50 46 z M50 10 L56 3 H64 L62 14 z M50 46 L56 53 H64 L62 42 z',
+      strizh: 'M10 28 L40 20 L90 24 V32 L40 36 z M40 20 L52 8 H60 L56 21 z M40 36 L52 48 H60 L56 35 z',
+      korvet: 'M14 28 L30 14 H70 L92 28 L70 42 H30 z M30 14 L38 6 H54 L56 14 z M30 42 L38 50 H54 L56 42 z',
+      atlas: 'M12 28 L34 14 H78 L90 28 L78 42 H34 z M50 14 L54 6 H66 L66 14 z M50 42 L54 50 H66 L66 42 z'
+    };
+    /* hull: uk, en, class key, speed, cargo, dE, dK, dur, shield, crew, upkeep, drones */
+    const HULLS = {
+      sapsan: ['Сапсан', 'Sapsan', 'light', 52, 80, 24, 0, 600, 0, 28, 90, 0], strizh: ['Стриж', 'Swift', 'light', 71, 120, 0, 60, 1700, 0, 34, 120, 0],
+      korvet: ['Корвет', 'Corvette', 'med', 58, 300, 96, 120, 4200, 1600, 120, 340, 0], atlas: ['Атлас', 'Atlas', 'transp', 44, 1520, 0, 0, 1100, 0, 56, 160, 4]
+    };
+    const CLS = { light: ['Легкі', 'Light', '#4FDADA'], med: ['Середні', 'Medium', '#6FA8FF'], transp: ['Транспорт', 'Transport', '#B79CFF'] };
+    const PLANETS = [['volcanic', 'Горнило', 'Ліра 5', 'Lyra 5'], ['earth', 'Нова Тесса', 'Ліра 2', 'Lyra 2'], ['icy', 'Кріон', 'Вега 3', 'Vega 3']];
+    const D = { s: 'Sapsan — розвідник', t: 'Стриж — перехоплювач', b: 'Barracuda — long range', e: 'Корвет — ескорт', a: 'Атлас — колоніст' };
+    /* id, name, design, hull, planet, fleet, cond */
+    const ships0 = [
+      ['s1', 'Сокіл-1', D.s, 'sapsan', 'volcanic', 'f1', 100], ['s2', 'Сокіл-2', D.s, 'sapsan', 'volcanic', 'f1', 96], ['s3', 'Сокіл-3', D.s, 'sapsan', 'volcanic', 'f1', 88],
+      ['s4', 'Стриж-1', D.t, 'strizh', 'volcanic', 'f1', 100], ['s5', 'Стриж-2', D.t, 'strizh', 'volcanic', 'f1', 72], ['s6', 'Стриж-3', D.t, 'strizh', 'volcanic', 'f1', 100],
+      ['s7', 'Барракуда-1', D.b, 'korvet', 'volcanic', 'f1', 94], ['s8', 'Барракуда-2', D.b, 'korvet', 'volcanic', 'f1', 81],
+      ['s9', 'Атлас-1', D.a, 'atlas', 'earth', 'f2', 100], ['s10', 'Сокіл-4', D.s, 'sapsan', 'earth', 'f2', 90], ['s11', 'Сокіл-5', D.s, 'sapsan', 'earth', 'f2', 100],
+      ['s12', 'Ескорт-1', D.e, 'korvet', 'volcanic', '', 100], ['s13', 'Стриж-4', D.t, 'strizh', 'volcanic', '', 100], ['s14', 'Сокіл-6', D.s, 'sapsan', 'volcanic', '', 100],
+      ['s15', 'Атлас-2', D.a, 'atlas', 'earth', '', 100], ['s16', 'Сокіл-7', D.s, 'sapsan', 'earth', '', 100]
+    ].map((a) => ({ id: a[0], name: a[1], design: a[2], hull: a[3], planet: a[4], fleet: a[5], cond: a[6] }));
+    const fleets0 = [{ id: 'f1', name: 'Перший ескадрон', home: 'volcanic', at: 'volcanic', noCr: false, flight: null }, { id: 'f2', name: 'Конвой «Атлас»', home: 'earth', at: 'earth', noCr: true, flight: null }];
+    return { ARTS, HULLS, CLS, PLANETS, ships0, fleets0 };
+  }
+  renderVals() {
+    const s = this.state;
+    const P = this.props || {};
+    const tr = (v) => v === true || v === 'true';
+    const m = tr(P.mobile) || s.vw < 768;
+    const premium = tr(P.premium);
+    const frozen = tr(P.frozen);
+    const FONT = 'Inter, Roboto, system-ui, Arial, sans-serif';
+    const en = s.lang === 'en';
+    const L = {
+      uk: { resources: 'Ресурси', gameMenu: 'Меню гри', language: 'Мова', switcher: 'Перемикач планет', mail: 'Пошта', unread: 'непрочитані', settings: 'Налаштування', signout: 'Вийти', attack: 'Атака', battle: 'Бій триває', storageFull: 'Склад повний', chatLabel: 'Глобальний чат', chatPh: 'Написати всім гравцям…', send: 'Надіслати', planPremium: 'Преміум', planStandard: 'Стандарт', more: 'Ще',
+        nav: { overview: 'Огляд', planet: 'Планета', storage: 'Склад', production: 'Виробництво', shipyard: 'Верф', fleets: 'Флоти', map: 'Карта', research: 'Дослідження', market: 'Ринок', ranking: 'Рейтинг', mail: 'Пошта', help: 'Допомога', settings: 'Налаштування' },
+        title: 'Флоти', fleetsCount: 'Флоти', of: 'з', create: 'Створити флот', limitReason: 'Ліміт флотів вичерпано', limitErr: 'Ліміт флотів вичерпано: {a} з {b}',
+        errTitle: 'Не вдалося завантажити дані', errText: 'Перевірте з’єднання й спробуйте ще раз.', retry: 'Спробувати знову', loading: 'Завантаження…',
+        noShipsTitle: 'Зберіть корабель на верфі', noShipsText: 'Кораблі збираються на верфі планети — потім їх можна об’єднати у флоти.', toShipyard: 'Верф', noFleetsTitle: 'Створіть свій перший флот', noFleetsText: 'У вас є вільні кораблі — об’єднайте їх у флот.', createFirst: 'Створити перший флот',
+        fPlanetAria: 'Домашня планета', fStateAria: 'Стан флоту', searchLbl: 'Пошук за назвою флоту', searchPh: 'Пошук за назвою флоту', allPlanets: 'Усі планети', sAll: 'Усі стани', sReady: 'Готові', sFlight: 'У польоті', sNoCr: 'Без кредитів', noMatch: 'Немає флотів за вашими фільтрами.',
+        home: 'Дім', onOrbit: 'На орбіті', inFlightTo: 'У польоті до', noCmd: 'Без командира', commander: 'Командир', upkeep: 'Утримання', crh: 'кр./год', stReady: 'Готовий', stNoCr: 'Немає кредитів: політ неможливий', stFlight: 'У польоті',
+        freeTitle: 'Вільні кораблі', freeNote: 'Корабель може бути лише в одному флоті; кораблі долучаються до флотів на планеті, де вони стоять.', noFree: 'Вільних кораблів немає.', freeCount: 'вільних', addToFleet: 'Додати до флоту…', selected: 'Обрано', pickFirst: 'Спершу оберіть кораблі',
+        closePanel: 'Закрити панель', renameBtn: 'Перейменувати флот', fleetName: 'Назва флоту', save: 'Зберегти', cancel: 'Скасувати', showMap: 'Показати на карті',
+        sSpeed: 'Швидкість (найповільніший)', sCargo: 'Трюм', sDmg: 'Шкода за раунд', dEn: 'енерг.', dKin: 'кінет.', sDur: 'Міцність', sShield: 'Щит', sDrones: 'Дрони в трюмах', sCrew: 'Екіпаж', sUpkeep: 'Утримання за годину', spd: 'од./год', tn: 'т',
+        shipsTitle: 'Кораблі', moveShip: 'Перемістити в інший флот', removeShip: 'Вилучити з флоту', cond: 'Стан', crewWord: 'екіпаж',
+        cmdTitle: 'Командир', cmdEmpty: 'Командира немає', assignCmd: 'Призначити командира', cmdSoon: 'Скоро: командири з’являться пізніше', ordersTitle: 'Накази', ordersSoon: 'Польоти з’являться пізніше',
+        fly: 'Летіти', mine: 'Видобувати', ordAttack: 'Атакувати', escort: 'Ескортувати', colonize: 'Колонізувати', returnHome: 'Додому',
+        addShips: 'Додати кораблі', disband: 'Розформувати флот', addOffFlight: 'Флот у польоті — додати кораблі не можна', noFreeShips: 'На цій планеті немає вільних кораблів',
+        createTitle: 'Створити флот', homePlanet: 'Домашня планета', namePh: 'Наприклад, Перший ескадрон', pickShips: 'Вільні кораблі', needName: 'Вкажіть назву флоту', needShip: 'Оберіть щонайменше один корабель', createBtn: 'Створити', close: 'Закрити',
+        disbandTitle: 'Розформувати флот?', disbandText: 'Кораблі залишаться на планеті як вільні.', lastTitle: 'Флот має мати хоча б один корабель', lastText: 'Вилучити останній корабель не можна. Розформувати флот натомість?',
+        addTitle: 'Додати кораблі до флоту', addBtn: 'Додати', pickFleetTitle: 'Оберіть флот', pickFleetText: 'Лише флоти на цій самій планеті.', noFleetsHere: 'На цій планеті немає іншого флоту.', confirm: 'Підтвердити', pickFleetFirst: 'Спершу оберіть флот',
+        fCreated: 'Флот створено.', fRenamed: 'Назву змінено.', fRemoved: 'Корабель вилучено з флоту.', fMoved: 'Корабель переміщено.', fAdded: 'Кораблі додано до флоту.', fDisbanded: 'Флот розформовано, кораблі залишилися на планеті.' },
+      en: { resources: 'Resources', gameMenu: 'Game menu', language: 'Language', switcher: 'Planet switcher', mail: 'Mail', unread: 'unread', settings: 'Settings', signout: 'Sign out', ordAttack: 'Attack', battle: 'In battle', storageFull: 'Storage full', chatLabel: 'Global chat', chatPh: 'Message all players…', send: 'Send', planPremium: 'Premium', planStandard: 'Standard', more: 'More',
+        nav: { overview: 'Overview', planet: 'Planet', storage: 'Storage', production: 'Production', shipyard: 'Shipyard', fleets: 'Fleets', map: 'Map', research: 'Research', market: 'Market', ranking: 'Ranking', mail: 'Mail', help: 'Help', settings: 'Settings' },
+        title: 'Fleets', fleetsCount: 'Fleets', of: 'of', create: 'Create fleet', limitReason: 'Fleet limit reached', limitErr: 'Fleet limit reached: {a} of {b}',
+        errTitle: 'Could not load the data', errText: 'Check your connection and try again.', retry: 'Try again', loading: 'Loading…',
+        noShipsTitle: 'Assemble a ship in the shipyard', noShipsText: 'Ships are assembled in a planet’s shipyard — then you can group them into fleets.', toShipyard: 'Shipyard', noFleetsTitle: 'Create your first fleet', noFleetsText: 'You have free ships — group them into a fleet.', createFirst: 'Create your first fleet',
+        fPlanetAria: 'Home planet', fStateAria: 'Fleet state', searchLbl: 'Search by fleet name', searchPh: 'Search by fleet name', allPlanets: 'All planets', sAll: 'All states', sReady: 'Ready', sFlight: 'In flight', sNoCr: 'No credits', noMatch: 'No fleets match your filters.',
+        home: 'Home', onOrbit: 'On orbit', inFlightTo: 'In flight to', noCmd: 'No commander', commander: 'Commander', upkeep: 'Upkeep', crh: 'cr/h', stReady: 'Ready', stNoCr: 'No credits: cannot fly', stFlight: 'In flight',
+        freeTitle: 'Free ships', freeNote: 'A ship can be in only one fleet; ships join fleets on the planet where they stand.', noFree: 'No free ships.', freeCount: 'free', addToFleet: 'Add to fleet…', selected: 'Selected', pickFirst: 'Select ships first',
+        closePanel: 'Close panel', renameBtn: 'Rename fleet', fleetName: 'Fleet name', save: 'Save', cancel: 'Cancel', showMap: 'Show on map',
+        sSpeed: 'Speed (slowest ship)', sCargo: 'Cargo hold', sDmg: 'Damage per round', dEn: 'energy', dKin: 'kinetic', sDur: 'Durability', sShield: 'Shield', sDrones: 'Drones in holds', sCrew: 'Crew', sUpkeep: 'Upkeep per hour', spd: 'u/h', tn: 't',
+        shipsTitle: 'Ships', moveShip: 'Move to another fleet', removeShip: 'Remove from fleet', cond: 'Condition', crewWord: 'crew',
+        cmdTitle: 'Commander', cmdEmpty: 'No commander', assignCmd: 'Assign commander', cmdSoon: 'Coming soon: commanders arrive later', ordersTitle: 'Orders', ordersSoon: 'Flights arrive later',
+        fly: 'Fly', mine: 'Mine', ordAttack: 'Attack', escort: 'Escort', colonize: 'Colonize', returnHome: 'Return home',
+        addShips: 'Add ships', disband: 'Disband fleet', addOffFlight: 'The fleet is in flight — ships cannot be added', noFreeShips: 'No free ships on this planet',
+        createTitle: 'Create fleet', homePlanet: 'Home planet', namePh: 'For example, First Squadron', pickShips: 'Free ships', needName: 'Enter a fleet name', needShip: 'Select at least one ship', createBtn: 'Create', close: 'Close',
+        disbandTitle: 'Disband the fleet?', disbandText: 'Ships stay on the planet as free ships.', lastTitle: 'A fleet keeps at least one ship', lastText: 'The last ship cannot be removed. Disband the fleet instead?',
+        addTitle: 'Add ships to the fleet', addBtn: 'Add', pickFleetTitle: 'Choose a fleet', pickFleetText: 'Only fleets on the same planet.', noFleetsHere: 'There is no other fleet on this planet.', confirm: 'Confirm', pickFleetFirst: 'Choose a fleet first',
+        fCreated: 'Fleet created.', fRenamed: 'Name changed.', fRemoved: 'Ship removed from the fleet.', fMoved: 'Ship moved.', fAdded: 'Ships added to the fleet.', fDisbanded: 'Fleet disbanded, the ships stay on the planet.' }
+    };
+    const t = L[s.lang] || L.uk;
+    const GC = { metal: '#A7B1C2', crystal: '#6FA8FF', fuel: '#FF9F43', credits: '#3DD6A6', trade: '#B79CFF', energy: '#FFD84D', prod: '#C3CCE4' };
+    const RESI = {
+      credits: ['Кредити', 'Credits', 'credits', 's', 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v10 M9 9.5h4.5a1.5 1.5 0 0 1 0 3H10a1.5 1.5 0 0 0 0 3h5'],
+      trade: ['Торгова валюта', 'Trade Currency', 'trade', 's', 'M12 3l8 9-8 9-8-9z M12 8l4 4-4 4-4-4z'], energy: ['Енергія', 'Energy', 'energy', 'f', 'M13 2L4 14h7l-1 8 9-12h-7z']
+    };
+    const ic = (k) => { const r = RESI[k]; const c = GC[r[2]]; return { name: en ? r[1] : r[0], d: r[4], fill: r[3] === 'f' ? c : 'none', stroke: r[3] === 's' ? c : 'none' }; };
+    const nf = (n) => Number(n).toLocaleString('uk-UA').replace(/[   ]/g, ' ');
+    const dec = (n, k) => { const x = Number(n).toFixed(k === undefined ? 2 : k); return en ? x : x.replace('.', ','); };
+    const topRes = [Object.assign(ic('credits'), { value: nf(48210) }), Object.assign(ic('trade'), { value: nf(1250) }), Object.assign(ic('energy'), { value: nf(4860) })];
+    const mmss = (x) => Math.floor(x / 60) + ':' + String(x % 60).padStart(2, '0');
+    const hms = (x) => { x = Math.max(0, x); return Math.floor(x / 3600) + ':' + String(Math.floor(x / 60) % 60).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0'); };
+    const pill = (kind2) => 'display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer; font-family: ' + FONT + '; font-size: 13px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; ' + (kind2 === 'danger' ? 'background: rgba(255,107,61,0.12); border: 1px solid rgba(255,107,61,0.6); color: #FF8A66;' : 'background: rgba(242,193,78,0.10); border: 1px solid rgba(242,193,78,0.55); color: #F2C14E;');
+    const alerts = [
+      { label: t.attack + ' · ' + mmss(Math.max(0, 760 - s.t)), d: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v3M12 14v3M7 12h3M14 12h3', style: pill('danger') },
+      { label: t.battle, d: 'M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2', style: pill('danger') },
+      { label: t.storageFull, d: 'M3 7l9-4 9 4v10l-9 4-9-4z M3 7l9 4 9-4 M12 11v10', style: pill('warning') }
+    ];
+    const ICON = {
+      overview: 'M3 3h8v8H3z M13 3h8v5h-8z M13 10h8v11h-8z M3 13h8v8H3z',
+      planet: 'M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16z M2 13c4 3 16 3 20-2',
+      storage: 'M3 8l9-5 9 5v10l-9 4-9-4z M3 8l9 5 9-5 M12 13v9',
+      production: 'M3 21V10l6 4V10l6 4V6h6v15z',
+      shipyard: 'M12 2l4 8v8l-4 4-4-4v-8z M8 14l-4 3v3h4 M16 14l4 3v3h-4',
+      fleets: 'M2 12l8-4v8z M12 5l8-4v8z M12 19l8-4v8z',
+      map: 'M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z M9 3v15 M15 6v15',
+      research: 'M9 3h6 M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3',
+      market: 'M3 9l2-5h14l2 5 M3 9h18v11H3z M9 20v-6h6v6',
+      ranking: 'M8 21h8 M12 17v4 M6 4h12v4a6 6 0 0 1-12 0z M6 6H3a3 3 0 0 0 3 4 M18 6h3a3 3 0 0 1-3 4',
+      mail: 'M3 5h18v14H3z M3 6l9 7 9-7',
+      help: 'M12 21a9 9 0 1 0 0-18a9 9 0 1 0 0 18z M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14 M12 17.5v.01',
+      settings: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8z M12 2v3 M12 19v3 M2 12h3 M19 12h3 M4.9 4.9l2.1 2.1 M17 17l2.1 2.1 M4.9 19.1L7 17 M17 7l2.1-2.1',
+      more: 'M5 12h.01 M12 12h.01 M19 12h.01'
+    };
+    const navIds = ['overview', 'planet', 'storage', 'production', 'shipyard', 'fleets', 'map', 'research', 'market', 'ranking', 'mail', 'help', 'settings'];
+    const nav = navIds.map((id) => {
+      const cur0 = id === 'fleets';
+      return {
+        id, label: t.nav[id], d: ICON[id], current: cur0 ? 'page' : 'false', badge: id === 'mail' ? '3' : '',
+        style: 'position: relative; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: ' + (cur0 ? '600' : '500') + '; color: ' + (cur0 ? '#4FDADA' : '#C3CCE4') + '; background: ' + (cur0 ? 'rgba(46,196,196,0.12)' : 'transparent') + '; box-shadow: ' + (cur0 ? 'inset 3px 0 0 #2EC4C4' : 'none') + ';'
+      };
+    });
+    const tabsBar = [['overview', t.nav.overview], ['planet', t.nav.planet], ['shipyard', t.nav.shipyard], ['map', t.nav.map], ['more', t.more]].map((x) => {
+      const cur0 = x[0] === 'more';
+      return { id: x[0], label: x[1], d: ICON[x[0]], current: cur0 ? 'page' : 'false', style: 'display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 58px; text-decoration: none; font-size: 12px; font-weight: 600; color: ' + (cur0 ? '#4FDADA' : '#9AA7C7') + '; box-shadow: ' + (cur0 ? 'inset 0 2px 0 #2EC4C4' : 'none') + ';' };
+    });
+    const langs = [['uk', 'UA'], ['en', 'EN']].map((l) => ({
+      label: l[1], on: s.lang === l[0] ? 'true' : 'false', pick: () => this.setState({ lang: l[0] }),
+      style: 'min-width: 40px; min-height: 34px; padding: 0 8px; border: 0; border-radius: 8px; cursor: pointer; font-family: ' + FONT + '; font-weight: 600; font-size: 13px; ' + (s.lang === l[0] ? 'background: #1C2544; color: #E8EEFF; box-shadow: inset 0 0 0 1px rgba(160,190,255,0.3);' : 'background: transparent; color: #9AA7C7;')
+    }));
+    const ARTW = { earth: '/_blob/7fb5e5caaad796dc0189bcf9b95f0386', volcanic: '/_blob/8bf1f10ffc8db4dfb154927bb6f4d649', icy: '/_blob/de071ec5f961015305206752803a81a2', desert: '/_blob/6c74b1de3e61b606f6c39bea71f03a06', oceanic: '/_blob/e351f527fa96febc0f5455e14104e181', gas: '/_blob/3064d9bda040535e0d03836035e5c3b1' };
+    const NAMES = { earth: 'Нова Тесса', volcanic: 'Горнило', icy: 'Кріон', desert: 'Дюна', oceanic: 'Таласса', gas: 'Аквілон' };
+    const thumbs = ['earth', 'volcanic', 'icy', 'desert', 'oceanic', 'gas'].map((k) => {
+      const cur0 = k === 'volcanic';
+      return { name: NAMES[k], art: ARTW[k], selStr: cur0 ? 'true' : 'false', pick: () => {},
+        btn: 'flex: 0 0 auto; width: 44px; height: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; background: #0A1124; ' + (cur0 ? 'border: 2px solid #2EC4C4; box-shadow: 0 0 0 3px rgba(46,196,196,0.2);' : 'border: 1px solid rgba(160,190,255,0.24);') };
+    });
+    /* ================= fleets ================= */
+    const DB = this.DB;
+    const PL = {}; DB.PLANETS.forEach((p0) => { PL[p0[0]] = p0; });
+    const plName = (id) => PL[id][1];
+    const plPlace = (id) => (en ? PL[id][3] : PL[id][2]);
+    const clsN = (k) => (en ? DB.CLS[k][1] : DB.CLS[k][0]);
+    const chipC = (c) => 'display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; color: ' + c + '; background: ' + c + '1A; border: 1px solid ' + c + '80;';
+    const plural = (n) => { if (en) return n === 1 ? 'ship' : 'ships'; const a = n % 10; const b = n % 100; return a === 1 && b !== 11 ? 'корабель' : (a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'кораблі' : 'кораблів'); };
+    const flashSet = (txt) => { this.setState({ flash: txt }); if (this.tf) clearTimeout(this.tf); this.tf = setTimeout(() => this.setState({ flash: '' }), 3500); };
+    const LIMIT = Number(P.limit) || 3;
+    const stP = P.state || 'ok';
+    const fleets = s.fleets; const ships = s.ships;
+    const hs = (sh) => DB.HULLS[sh.hull];
+    const shipsOf = (fid) => ships.filter((x) => x.fleet === fid);
+    const fleetStats = (f) => {
+      const l = shipsOf(f.id); const r = { n: l.length, speed: 0, cargo: 0, dE: 0, dK: 0, dur: 0, sh: 0, drones: 0, crew: 0, up: 0, comp: {} };
+      l.forEach((x) => { const h = hs(x); r.speed = r.speed ? Math.min(r.speed, h[3]) : h[3]; r.cargo += h[4]; r.dE += h[5]; r.dK += h[6]; r.dur += h[7]; r.sh += h[8]; r.crew += h[9]; r.up += h[10]; r.drones += h[11]; r.comp[h[2]] = (r.comp[h[2]] || 0) + 1; });
+      return r;
+    };
+    const fFlight = (f) => (P.flight === 'true' || P.flight === true) && f.id === 'f1' ? { to: en ? 'Sector 3 · Vega' : 'Сектор 3 · Вега', total: 9600, left: Math.max(0, 6130 - s.t) } : null;
+    const stateOf = (f) => (fFlight(f) ? 'flight' : (f.noCr ? 'nocr' : 'ready'));
+    const STY = { ready: ['#4CD08A', 'M5 12l5 5L20 7', t.stReady], nocr: ['#F2C14E', 'M12 3l10 18H2z M12 10v4 M12 17.5v.01', t.stNoCr], flight: ['#4FDADA', 'M3 12l18-8-6 16-3-7z', t.stFlight] };
+    const stChip = (k) => 'align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; line-height: 1.3; color: ' + STY[k][0] + '; background: ' + STY[k][0] + '1A; border: 1px solid ' + STY[k][0] + '80;';
+    const fleetsN = fleets.length; const canCreate = fleetsN < LIMIT;
+    const sel = fleets.find((f) => f.id === s.sel) || null;
+
+    /* ---------- styles ---------- */
+    const bBase = 'font-family: ' + FONT + '; font-weight: 700; cursor: pointer; border-radius: 10px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; text-align: center; gap: 8px;';
+    const off = ' opacity: 0.45; cursor: not-allowed;'; const full = ' width: 100%;';
+    const btnP = bBase + ' padding: 0 22px; border: 0; background: #2EC4C4; color: #070B16; font-size: 15px;';
+    const btnPs = bBase + ' padding: 0 16px; border: 0; background: #2EC4C4; color: #070B16; font-size: 14px;';
+    const btnS = bBase + ' padding: 0 16px; border: 1px solid rgba(160,190,255,0.28); background: transparent; color: #E8EEFF; font-size: 14px; font-weight: 600;';
+    const btnSs = btnS + ' font-size: 13px; padding: 0 12px;';
+    const btnDanger = btnS + ' border-color: rgba(255,107,61,0.6); color: #FF8A66;';
+    const inputBase = 'width: 100%; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(160,190,255,0.28); background: #1C2544; color: #E8EEFF; font-family: ' + FONT + '; font-size: 15px; box-sizing: border-box; min-width: 0;';
+    const card = 'display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 14px; background: #141B33; border: 1px solid rgba(160,190,255,0.16); box-shadow: 0 8px 24px rgba(0,0,0,0.28); min-width: 0;';
+    const chipStyle = (on) => 'flex: 0 0 auto; min-height: ' + (m ? 44 : 40) + 'px; padding: 0 14px; border-radius: 10px; border: 1px solid ' + (on ? 'rgba(46,196,196,0.6)' : 'rgba(160,190,255,0.24)') + '; background: ' + (on ? 'rgba(46,196,196,0.12)' : 'transparent') + '; color: ' + (on ? '#4FDADA' : '#C3CCE4') + '; font-family: ' + FONT + '; font-size: 14px; font-weight: ' + (on ? '700' : '500') + '; white-space: nowrap; cursor: pointer;';
+    const TICK = 'M5 12l5 5L20 7';
+
+    /* ---------- states ---------- */
+    const okSt = s.st === 'ok'; const loadOn = s.st === 'loading'; const errOn = s.st === 'error';
+    const noShipsOn = okSt && ships.length === 0;
+    const noFleetsOn = okSt && ships.length > 0 && fleets.length === 0;
+    const listOn = okSt && ships.length > 0 && fleets.length > 0;
+    const skel = [0, 1, 2, 3].map((i) => ({ a: 'width: ' + (140 + (i % 3) * 30) + 'px; height: 18px; border-radius: 6px;', b: 'width: 60%; height: 12px; border-radius: 6px;', c: 'width: 40%; height: 12px; border-radius: 6px;' }));
+
+    /* ---------- filters + cards ---------- */
+    const pf = s.fPlanet; const sf = s.fState; const q = s.q.trim().toLowerCase();
+    const planetChips = [['all', t.allPlanets]].concat(DB.PLANETS.map((p0) => [p0[0], p0[1]])).map((x) => ({ label: x[1], on: pf === x[0] ? 'true' : 'false', style: chipStyle(pf === x[0]), pick: () => this.setState({ fPlanet: x[0] }) }));
+    const stateChips = [['all', t.sAll], ['ready', t.sReady], ['flight', t.sFlight], ['nocr', t.sNoCr]].map((x) => ({ label: x[1], on: sf === x[0] ? 'true' : 'false', style: chipStyle(sf === x[0]), pick: () => this.setState({ fState: x[0] }) }));
+    const shown = fleets.filter((f) => (pf === 'all' || f.home === pf) && (sf === 'all' || stateOf(f) === sf) && (!q || f.name.toLowerCase().indexOf(q) > -1));
+    const fCards = shown.map((f) => {
+      const st = fleetStats(f); const k = stateOf(f); const fl = fFlight(f); const on = sel && sel.id === f.id;
+      return { name: f.name, home: plName(f.home), art: ARTW[f.home], n: st.n + ' ' + plural(st.n), up: nf(st.up) + ' ' + t.crh, noCmd: t.noCmd, stTxt: STY[k][2], stD: STY[k][1], stSt: stChip(k),
+        comp: Object.keys(st.comp).map((c) => ({ txt: clsN(c) + ' ×' + st.comp[c], style: chipC(DB.CLS[c][2]) })), flight: !!fl, orbit: !fl, place: fl ? t.inFlightTo + ' ' + fl.to + ', ' + hms(fl.left) : t.onOrbit + ': ' + plPlace(f.at),
+        pct: fl ? Math.round((fl.total - fl.left) / fl.total * 100) : 0, bar: 'display: block; height: 100%; width: ' + (fl ? Math.round((fl.total - fl.left) / fl.total * 100) : 0) + '%; border-radius: 999px; background: #2EC4C4;',
+        pick: () => this.setState({ sel: f.id, sheet: true, rename: false }), cur: on ? 'true' : 'false',
+        style: 'display: flex; flex-direction: column; gap: 10px; width: 100%; padding: 14px; border-radius: 14px; cursor: pointer; text-align: left; font-family: ' + FONT + '; font-size: 14px; color: #E8EEFF; box-sizing: border-box; min-width: 0; background: ' + (on ? 'rgba(46,196,196,0.08)' : '#141B33') + '; border: 1px solid ' + (on ? 'rgba(46,196,196,0.6)' : 'rgba(160,190,255,0.16)') + '; box-shadow: ' + (on ? 'inset 3px 0 0 #2EC4C4, 0 8px 24px rgba(0,0,0,0.28)' : '0 8px 24px rgba(0,0,0,0.28)') + ';' };
+    });
+    const panelOn = listOn && !!sel && (!m || s.sheet);
+    const cols2 = !!sel && !m && s.vw >= 1280;
+    const layout = 'display: grid; gap: 16px; align-items: start; grid-template-columns: ' + (m || !sel || s.vw < 1100 ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) ' + (s.vw < 1280 ? '380px' : '440px')) + ';';
+
+    /* ---------- panel ---------- */
+    let P1 = { name: '', home: '', art: '', place: '', stTxt: '', stD: '', stSt: '' }; let sumRows = []; let pShips = []; let canDisband = true; let fl0 = null;
+    if (sel) {
+      const st = fleetStats(sel); const k = stateOf(sel); fl0 = fFlight(sel);
+      P1 = { name: sel.name, home: plName(sel.home), art: ARTW[sel.home], place: fl0 ? t.inFlightTo + ' ' + fl0.to + ', ' + hms(fl0.left) : t.onOrbit + ': ' + plPlace(sel.at), stTxt: STY[k][2], stD: STY[k][1], stSt: stChip(k) };
+      sumRows = [[t.sSpeed, st.speed + ' ' + t.spd], [t.sCargo, nf(st.cargo) + ' ' + t.tn], [t.sDmg, nf(st.dE) + ' ' + t.dEn + ' · ' + nf(st.dK) + ' ' + t.dKin], [t.sDur, nf(st.dur)], [t.sShield, nf(st.sh)], [t.sDrones, nf(st.drones)], [t.sCrew, nf(st.crew)], [t.sUpkeep, nf(st.up) + ' ' + t.crh]].map((x) => ({ k: x[0], v: x[1] }));
+      pShips = shipsOf(sel.id).map((x) => { const h = hs(x); const col = x.cond >= 85 ? '#4CD08A' : (x.cond >= 60 ? '#F2C14E' : '#FF8A66'); return { name: x.name, design: x.design, cls: clsN(h[2]), chipSt: chipC(DB.CLS[h[2]][2]), cond: x.cond + '%', condPct: x.cond, crew: nf(h[9]), condBar: 'display: block; height: 100%; width: ' + x.cond + '%; border-radius: 999px; background: ' + col + ';',
+        move: () => this.setState({ dlg: 'pickfleet', dd: { shipIds: [x.id], planet: sel.at, exclude: sel.id } }), remove: () => { if (shipsOf(sel.id).length <= 1) this.setState({ dlg: 'last' }); else { this.setState((st0) => ({ ships: st0.ships.map((y) => (y.id === x.id ? Object.assign({}, y, { fleet: '' }) : y)) })); flashSet(t.fRemoved); } },
+        aMove: t.moveShip + ': ' + x.name, aRemove: t.removeShip + ': ' + x.name }; });
+    }
+    const saveName = () => { const v = (s.nameDraft || '').trim(); if (!v) return; this.setState((st0) => ({ fleets: st0.fleets.map((f) => (f.id === st0.sel ? Object.assign({}, f, { name: v }) : f)), rename: false })); flashSet(t.fRenamed); };
+    const orders = [['fly', t.fly, 'M3 12l18-8-6 16-3-7z'], ['mine', t.mine, 'M12 3v10 M8 9l4 4 4-4 M5 21h14 M7 17h10'], ['attack', t.ordAttack, 'M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2'], ['escort', t.escort, 'M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z'], ['colonize', t.colonize, 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M3 12h18 M12 3c3 3 3 15 0 18 M12 3c-3 3-3 15 0 18'], ['home', t.returnHome, 'M3 11l9-8 9 8 M5 10v10h14V10']].map((o) => ({ label: o[1], d: o[2] }));
+
+    /* ---------- free ships ---------- */
+    const free = ships.filter((x) => !x.fleet);
+    const rowStyle = (on) => 'display: flex; align-items: center; gap: 12px; width: 100%; min-height: 52px; padding: 6px 12px; border-radius: 10px; cursor: pointer; text-align: left; font-family: ' + FONT + '; color: #E8EEFF; box-sizing: border-box; background: ' + (on ? 'rgba(46,196,196,0.10)' : '#0F1529') + '; border: 1px solid ' + (on ? 'rgba(46,196,196,0.6)' : 'rgba(160,190,255,0.16)') + ';';
+    const boxStyle = (on) => 'flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; box-sizing: border-box; color: #070B16; background: ' + (on ? '#2EC4C4' : 'transparent') + '; border: 2px solid ' + (on ? '#2EC4C4' : 'rgba(160,190,255,0.5)') + ';';
+    const shipRow = (x, picked, toggle) => { const h = hs(x); const on = !!picked[x.id]; return { name: x.name, design: x.design, cls: clsN(h[2]), chipSt: chipC(DB.CLS[h[2]][2]), crew: nf(h[9]), up: nf(h[10]) + ' ' + t.crh, checked: on ? 'true' : 'false', tick: on, row: rowStyle(on), box: boxStyle(on), toggle: () => toggle(x.id) }; };
+    const freeToggle = (id) => this.setState((st0) => { const c0 = Object.assign({}, st0.freeSel); if (c0[id]) delete c0[id]; else c0[id] = true; return { freeSel: c0 }; });
+    const groups = DB.PLANETS.map((p0) => { const l = free.filter((x) => x.planet === p0[0]); const picked = l.filter((x) => s.freeSel[x.id]).map((x) => x.id); const n = picked.length;
+      return { name: p0[1], art: ARTW[p0[0]], cnt: l.length + ' ' + t.freeCount, ships: l.map((x) => shipRow(x, s.freeSel, freeToggle)), empty: l.length === 0, any: l.length > 0, can: n > 0, cannot: n === 0, selTxt: n ? t.selected + ': ' + n : '',
+        add: () => this.setState({ dlg: 'pickfleet', dd: { shipIds: picked, planet: p0[0], exclude: '' } }) }; }).filter((g) => g.any);
+    const noFreeAny = free.length === 0;
+
+    /* ---------- dialogs ---------- */
+    const dd = s.dd || {}; const dlg = s.dlg;
+    const closeDlg = () => this.setState({ dlg: '', dd: null });
+    const toggleIn = (key) => (id) => this.setState((st0) => { const c0 = Object.assign({}, (st0.dd || {})[key] || {}); if (c0[id]) delete c0[id]; else c0[id] = true; return { dd: Object.assign({}, st0.dd, { [key]: c0 }) }; });
+    /* create */
+    const cPlanet = dd.planet || 'volcanic'; const cFree = free.filter((x) => x.planet === cPlanet); const cPicked = dd.picked || {}; const cN = cFree.filter((x) => cPicked[x.id]).length;
+    const cName = (dd.name || '').trim();
+    let cErr = ''; if (!canCreate) cErr = t.limitErr.replace('{a}', String(fleetsN)).replace('{b}', String(LIMIT)); else if (cFree.length === 0) cErr = t.noFreeShips; else if (!cName) cErr = t.needName; else if (cN === 0) cErr = t.needShip;
+    const cPlanets = DB.PLANETS.map((p0) => { const n = free.filter((x) => x.planet === p0[0]).length; const on = cPlanet === p0[0]; return { name: p0[1], art: ARTW[p0[0]], cnt: n + ' ' + t.freeCount, sel: on ? 'true' : 'false', pick: () => this.setState((st0) => ({ dd: Object.assign({}, st0.dd, { planet: p0[0], picked: {} }) })), style: rowStyle(on) + ' min-height: 52px;' }; });
+    const cShips = cFree.map((x) => shipRow(x, cPicked, toggleIn('picked')));
+    const doCreate = () => { if (cErr) return; const id = 'f' + (s.nextId || 10); this.setState((st0) => ({ fleets: st0.fleets.concat([{ id, name: cName, home: cPlanet, at: cPlanet, noCr: false, flight: null }]), ships: st0.ships.map((y) => (cPicked[y.id] && y.planet === cPlanet && !y.fleet ? Object.assign({}, y, { fleet: id }) : y)), sel: id, sheet: true, nextId: (st0.nextId || 10) + 1, dlg: '', dd: null, freeSel: {} })); flashSet(t.fCreated); };
+    /* disband / last */
+    const doDisband = () => { const id = s.sel; this.setState((st0) => { const rest = st0.fleets.filter((f) => f.id !== id); return { fleets: rest, ships: st0.ships.map((y) => (y.fleet === id ? Object.assign({}, y, { fleet: '' }) : y)), sel: rest[0] ? rest[0].id : '', sheet: false, dlg: '', dd: null }; }); flashSet(t.fDisbanded); };
+    /* add ships to selected fleet */
+    const aFree = sel ? free.filter((x) => x.planet === sel.at) : []; const aPicked = dd.apicked || {}; const aN = aFree.filter((x) => aPicked[x.id]).length;
+    const aShips = aFree.map((x) => shipRow(x, aPicked, toggleIn('apicked')));
+    const doAdd = () => { if (!aN) return; const id = s.sel; this.setState((st0) => ({ ships: st0.ships.map((y) => (aPicked[y.id] ? Object.assign({}, y, { fleet: id }) : y)), dlg: '', dd: null })); flashSet(t.fAdded); };
+    /* pick fleet */
+    const pfFleets = fleets.filter((f) => f.at === dd.planet && f.id !== dd.exclude && !fFlight(f)); const pfSel = dd.fleetId || '';
+    const pfList = pfFleets.map((f) => { const on = pfSel === f.id; return { name: f.name, n: shipsOf(f.id).length + ' ' + plural(shipsOf(f.id).length), sel: on ? 'true' : 'false', style: rowStyle(on), box: 'flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; box-sizing: border-box; border: 2px solid ' + (on ? '#2EC4C4' : 'rgba(160,190,255,0.5)') + '; background: ' + (on ? 'radial-gradient(circle, #2EC4C4 45%, transparent 50%)' : 'transparent') + ';', pick: () => this.setState((st0) => ({ dd: Object.assign({}, st0.dd, { fleetId: f.id }) })) }; });
+    const doPickFleet = () => { if (!pfSel) return; const ids = dd.shipIds || []; this.setState((st0) => ({ ships: st0.ships.map((y) => (ids.indexOf(y.id) > -1 ? Object.assign({}, y, { fleet: pfSel }) : y)), dlg: '', dd: null, freeSel: {} })); flashSet(ids.length > 1 || !dd.exclude ? t.fAdded : t.fMoved); };
+
+    return {
+      t, desk: !m, mob: m, topRes, alerts, nav, tabs: tabsBar, langs, icons: Object.assign({}, ICON), thumbs,
+      planLabel: premium ? t.planPremium : t.planStandard,
+      planChip: 'display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; ' + (premium ? 'color: #E9C46A; border: 1px solid rgba(233,196,106,0.55); background: rgba(233,196,106,0.10);' : 'color: #9AA7C7; border: 1px solid rgba(160,190,255,0.24);'),
+      ibtn: 'width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(160,190,255,0.16); background: transparent; color: #C3CCE4; cursor: pointer;',
+      chat: s.chat, setChat: (e) => this.setState({ chat: e.target.value }), sendChat: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ chat: '' }); },
+      rootStyle: 'min-height: 100vh; display: flex; flex-direction: column; background: #070B16; color: #E8EEFF; font-family: ' + FONT + '; font-size: 15px; line-height: 1.4; font-variant-numeric: tabular-nums; overflow-x: hidden;' + (frozen ? ' height: 100vh; overflow: hidden;' : ''),
+      bodyStyle: 'flex: 1 1 auto; display: flex; ' + (m ? 'flex-direction: column;' : 'align-items: stretch;') + ' min-width: 0;' + (frozen ? ' min-height: 0; overflow: hidden;' : ''),
+      mainStyle: 'position: relative; flex: 1 1 auto; min-width: 0; padding: ' + (m ? '16px 16px 24px' : '20px 28px 40px') + '; box-sizing: border-box;',
+      h1Style: 'margin: 0; font-size: ' + (m ? '30px' : '40px') + '; font-weight: 700; line-height: 1.15;', h2Style: 'margin: 0; font-size: 18px; font-weight: 600; line-height: 1.25;',
+      flash: s.flash, fleetsN, limit: LIMIT, canCreate, cannotCreate: !canCreate, btnCreate: btnP + (m ? full : ''), btnCreateOff: btnP + off + (m ? full : ''), openCreate: () => { if (canCreate) this.setState({ dlg: 'create', dd: { name: '', planet: 'volcanic', picked: {} } }); },
+      emptyBox: 'display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 44px 20px; text-align: center; border-radius: 14px; border: 1px dashed rgba(160,190,255,0.28); background: rgba(20,27,51,0.5);',
+      errOn, loadOn, retry: () => { this.setState({ st: 'loading' }); this.tm = setTimeout(() => this.setState({ st: 'ok' }), 1200); }, skel, panel: 'border-radius: 14px; background: #141B33; border: 1px solid rgba(160,190,255,0.16); padding: 8px; min-width: 0;', skelRow: 'display: flex; flex-direction: column; gap: 10px; padding: 14px 10px;',
+      noShipsOn, noFleetsOn, listOn, btnP, btnPLink: btnP + ' text-decoration: none;', btnFirst: btnP,
+      planetChips, stateChips, q: s.q, setQ: (e) => this.setState({ q: e.target.value }), inputSearch: inputBase + ' padding-left: 40px; font-size: 14px;', searchWrap: 'position: relative; ' + (m ? 'width: 100%;' : 'flex: 0 0 300px;'),
+      filterBar: 'display: flex; flex-direction: ' + (m ? 'column' : 'row') + '; flex-wrap: wrap; gap: 10px 16px; align-items: ' + (m ? 'stretch' : 'center') + ';', chipRow: 'display: flex; gap: 8px; ' + (m ? 'overflow-x: auto;' : 'flex-wrap: wrap;'),
+      layout, cols: 'display: grid; gap: 12px; grid-template-columns: ' + (m || s.vw < 1100 ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))') + ';', fCards, noMatch: fCards.length === 0, card,
+      panelOn, panelWrap: m ? 'position: fixed; inset: 0; z-index: 90; overflow-y: auto; background: #0B1020; padding: 12px 16px 24px; box-sizing: border-box;' : 'position: sticky; top: 84px; max-height: calc(100vh - 108px); overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 14px; background: #141B33; border: 1px solid rgba(160,190,255,0.16); box-shadow: 0 8px 24px rgba(0,0,0,0.28);',
+      panelInner: 'display: flex; flex-direction: column; gap: 14px;', P1, fl0: !!fl0, rename: !!s.rename, notRename: !s.rename, startRename: () => this.setState({ rename: true, nameDraft: sel ? sel.name : '' }), nameDraft: s.nameDraft || '', setDraft: (e) => this.setState({ nameDraft: e.target.value }), saveName, cancelRename: () => this.setState({ rename: false }), inputFill: inputBase,
+      createWrap: 'display: flex; flex-direction: column; gap: 6px; ' + (m ? 'width: 100%; align-items: stretch;' : 'align-items: flex-end;'),
+      closePanel: () => this.setState({ sheet: false }), btnSs, btnPs, btnDanger, btnDangerFull: btnDanger + full, btnSfull: btnS + full,
+      sumRows, pShips, shipRow: 'display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #0F1529; border: 1px solid rgba(160,190,255,0.16);', iconBtn: 'width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(160,190,255,0.24); background: transparent; color: #C3CCE4; cursor: pointer; flex: 0 0 auto;',
+      cmdBox: 'display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; border: 2px dashed rgba(160,190,255,0.32);', orders, orderBtn: btnS + ' padding: 0 8px; font-size: 13px; opacity: 0.45; cursor: not-allowed; flex-direction: column; min-height: 64px; gap: 4px;', ordersGrid: 'display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr));',
+      btnAssignOff: btnSs + ' opacity: 0.45; cursor: not-allowed;', openAdd: () => this.setState({ dlg: 'addships', dd: { apicked: {} } }), askDisband: () => this.setState({ dlg: 'disband' }), canAddShips: !!sel && aFree.length > 0 && !fl0, cannotAddShips: !sel || aFree.length === 0 || !!fl0, addOffReason: fl0 ? t.addOffFlight : t.noFreeShips,
+      groups, noFreeAny, groupHead: 'display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px;', btnAddFleetOff: btnPs + off, btnAddFleet: btnPs,
+      dlgOverlay: 'position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; background: rgba(4,7,14,0.72); ' + (m ? 'align-items: flex-end; padding: 0;' : 'align-items: flex-start; padding: 56px 24px 24px;'),
+      dlgBox: 'width: 100%; max-width: 560px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; padding: 20px; background: #141B33; border: 1px solid rgba(160,190,255,0.28); box-shadow: 0 24px 60px rgba(0,0,0,0.5); ' + (m ? 'max-height: 92vh; overflow-y: auto; border-radius: 20px 20px 0 0; border-bottom: 0;' : 'max-height: calc(100vh - 80px); overflow-y: auto; border-radius: 16px;'),
+      dlgBtns: 'display: flex; gap: 10px; ' + (m ? 'flex-direction: column-reverse;' : 'justify-content: flex-end;'), btnSdlg: btnS + (m ? full : ''), btnPdlg: btnP + (m ? full : ''), btnPdlgOff: btnP + off + (m ? full : ''), btnDangerFill: bBase + ' padding: 0 22px; border: 0; background: #FF6B3D; color: #070B16; font-size: 15px;' + (m ? full : ''),
+      ibtnX: 'width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(160,190,255,0.16); background: transparent; color: #C3CCE4; cursor: pointer; flex: 0 0 auto;', closeDlg, stopClick: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      dCreate: dlg === 'create', dDisband: dlg === 'disband', dLast: dlg === 'last', dAdd: dlg === 'addships', dPick: dlg === 'pickfleet',
+      cNameV: dd.name || '', setCName: (e) => this.setState((st0) => ({ dd: Object.assign({}, st0.dd, { name: e.target.value }) })), cPlanets, cShips, cNoShips: cFree.length === 0, cErr, cCan: !cErr, cCannot: !!cErr, doCreate, cHint: t.pickShips + ' · ' + plName(cPlanet),
+      selFleetName: sel ? sel.name : '', doDisband, aShips, aN, aCan: aN > 0, aCannot: aN === 0, doAdd, aNone: aFree.length === 0,
+      pfList, pfNone: pfList.length === 0, pfCan: !!pfSel, pfCannot: !pfSel, doPickFleet, pfShips: (dd.shipIds || []).length,
+      goDisband: () => this.setState({ dlg: 'disband' })
+    };
+  }
+}
+</script>
+</body>
+</html>

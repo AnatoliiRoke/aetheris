@@ -1,6 +1,6 @@
 # Задача 00043 — Модуль РПУ-X1B і вкладка «Зброя» на сторінці виробництва
 
-> **Статус:** 🔒 затверджено автором 04.11.2026, чекає запуску.
+> **Статус:** ✅ ВИКОНАНО, прийнято автором 04.11.2026.
 > **Етап:** 1 (production/01)
 > **Документи:** [references/perelik-3-moduli.md](../references/perelik-3-moduli.md), [game-design/05a Модулі](../game-design/05a-moduli-ta-komponenty.md), [tech/08 правила коду](../tech/08-pravyla-kodu-dlia-ahentiv.md), [tech/09 зведені правила](../tech/09-zvedeni-pravyla-kodu-lohiky-ta-kodiv.md), [ui-art/05 єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md), задача [00032](00032-storinka-vyrobnytstvo.md).
 

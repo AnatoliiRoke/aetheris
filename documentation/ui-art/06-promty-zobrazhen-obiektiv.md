@@ -857,6 +857,8 @@ A railgun, a long twin-rail gun with blue sparks running along the rails. A hard
 A missile launcher X1, a small launcher rack with a single missile ready. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized.
 ```
 
+**24a. РПУ-X1B** — Launcher X1B (`part_m_84`, файл `part_111.webp`): власна картинка автора (04.11.2026), промпт не потрібен.
+
 **25. РПУ-X2** — Launcher X2 (`part_m_25`, файл `part_m_25.webp`)
 
 ```
