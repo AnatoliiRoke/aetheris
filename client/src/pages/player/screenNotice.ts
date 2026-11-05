@@ -12,7 +12,7 @@ export type Notice = { kind: 'error' | 'success'; text: string } | null;
 /**
  * The prefixes of the error codes of the server that have their own text for the player.
  */
-const reasonPrefixes = ['research_', 'planets_'];
+const reasonPrefixes = ['research_', 'planets_', 'fleet_'];
 
 /**
  * The message for the player from the error of a command: a refusal of the server has its own

@@ -4,6 +4,7 @@ import { createAuthApi } from './api/authApi';
 import { ApiContext, type Api } from './api/context';
 import { createEconomyApi } from './api/economyApi';
 import { createGameApi } from './api/gameApi';
+import { createFleetApi } from './api/fleetApi';
 import { createMarketApi } from './api/marketApi';
 import { HttpClient } from './api/http';
 import { mockContentApi } from './api/mockContentApi';
@@ -53,6 +54,7 @@ const ProductionPage = lazy(() => import('./pages/player/ProductionPage').then((
 const MapPage = lazy(() => import('./pages/player/map/MapPage').then((module) => ({ default: module.MapPage })));
 const ResearchPage = lazy(() => import('./pages/player/ResearchPage').then((module) => ({ default: module.ResearchPage })));
 const StoragePage = lazy(() => import('./pages/player/StoragePage').then((module) => ({ default: module.StoragePage })));
+const ShipyardPage = lazy(() => import('./pages/player/ShipyardPage').then((module) => ({ default: module.ShipyardPage })));
 
 const pages: Record<string, () => ReactNode> = {
   [routes.home]: () => <LandingPage />,
@@ -76,6 +78,7 @@ const playerPages: Record<string, () => ReactNode> = {
   [routes.planetResearch]: () => <ResearchPage />,
   [routes.planetStorage]: () => <StoragePage />,
   [routes.market]: () => <MarketPage />,
+  [routes.shipyard]: () => <ShipyardPage />,
   [routes.civilization]: () => <CivilizationPage />,
   [routes.account]: () => <AccountPage />,
 };
@@ -85,7 +88,7 @@ const playerPages: Record<string, () => ReactNode> = {
  * frame is one element above them, so it stays mounted when the player goes from one of them to
  * another: its data is not read again and its blocks are not drawn again.
  */
-const framedPaths: ReadonlySet<string> = new Set([routes.game, routes.planet, routes.planetBuild, routes.planetProduction, routes.planetResearch, routes.planetStorage, routes.map, routes.market]);
+const framedPaths: ReadonlySet<string> = new Set([routes.game, routes.planet, routes.planetBuild, routes.planetProduction, routes.planetResearch, routes.planetStorage, routes.map, routes.market, routes.shipyard]);
 
 /**
  * Shows the page of the current address.
@@ -222,6 +225,7 @@ export default function App() {
       game: createGameApi(http),
       map: createMapApi(http),
       market: createMarketApi(http),
+      fleet: createFleetApi(http),
       planets: createPlanetApi(http),
       processes: createProcessesApi(http),
       production: createProductionApi(http),

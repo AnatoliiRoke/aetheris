@@ -255,10 +255,17 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.production.catalog.cache_seconds.description': 'Скільки секунд таблиці виробництва тримаються в пам’яті сервера до повторного читання.',
   'config.production.part.default_weight.description':
     'Вага однієї деталі в тоннах, для деталей, у яких ще немає власної ваги.',
+  'config.production.hull.default_slots.description':
+    'Кількість слотів корпусу, для корпусів, у яких ще немає власної кількості слотів.',
 
   'config.processes.queue.base_slots.description': 'Місць у черзі процесу, разом із тим, що виконується.',
   'config.processes.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черги процесу.',
   'config.processes.catalog.cache_seconds.description': 'Скільки секунд таблиці процесів тримаються в пам’яті сервера до повторного читання.',
+  'config.fleet.hold.minimum_ammunition.description':
+    'Найменший боєкомплект, який має вмістити базовий трюм корпусу.',
+  'config.fleet.design.name_max_length.description':
+    'Найбільша кількість символів у назві проєкту корабля.',
+
   'config.economy.population.growth_percent.description':
     'Відсоток від найбільшого населення, на який населення зростає за годину.',
   'config.economy.population.decline_per_hour.description':

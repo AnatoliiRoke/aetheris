@@ -19,6 +19,7 @@ export const routes = {
   planetStorage: '/planet/storage',
   map: '/map',
   market: '/market',
+  shipyard: '/shipyard',
   civilization: '/civilization',
   account: '/account',
 } as const;

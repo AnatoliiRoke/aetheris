@@ -7,6 +7,7 @@ import type { Api } from '../api/context';
 import type { ContentApi } from '../api/contentApi';
 import type { CurrencyBalanceFacts, EconomyApi, EconomyOverview, PopulationFacts } from '../api/economyApi';
 import type { GameApi, Race } from '../api/gameApi';
+import type { FleetApi, ShipCatalog, ShipDesign, ShipHull, ShipModule } from '../api/fleetApi';
 import type { MarketApi, MarketLot, MarketOverview, MyLot } from '../api/marketApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
@@ -536,6 +537,115 @@ export function fakeMarketApi(overrides: Partial<MarketApi> = {}): MarketApi {
     cancelLot: vi.fn().mockResolvedValue(sampleMyLot({ state: 'cancelled' })),
     buy: vi.fn().mockResolvedValue({ id: 1, lotId: 101, direction: 'bought' }),
     exchange: vi.fn().mockResolvedValue({ id: 1, fromResourceTypeId: 18, toResourceTypeId: 19, fromAmount: 1000, toAmount: 9, rate: 100, commissionPercent: 5, createdAt: '2026-10-26T12:00:00Z' }),
+    ...overrides,
+  };
+}
+
+/**
+ * A hull of the catalog of the ships for the tests (task 00038).
+ */
+export function sampleShipHull(overrides: Partial<ShipHull> = {}): ShipHull {
+  return {
+    id: 84,
+    code: 'part_84',
+    nameKey: 'production.part_type.part_84.name',
+    descriptionKey: 'production.part_type.part_84.description',
+    imageKey: null,
+    partGroupCode: 'part_group_12',
+    role: 'combat',
+    slots: 8,
+    holdCapacity: 100,
+    integrity: 100,
+    weight: 10,
+    allowsRaceBonusSlot: false,
+    stock: 0,
+    ...overrides,
+  };
+}
+
+/**
+ * A module of the catalog of the ships for the tests (task 00038).
+ */
+export function sampleShipModule(overrides: Partial<ShipModule> = {}): ShipModule {
+  return {
+    id: 1,
+    code: 'part_1',
+    nameKey: 'production.part_type.part_1.name',
+    descriptionKey: 'production.part_type.part_1.description',
+    imageKey: null,
+    partGroupCode: 'part_group_1',
+    role: 'universal',
+    component: 'drive',
+    compatibleHullIds: [],
+    raceIds: [],
+    energyUse: 0,
+    power: 0,
+    crew: 0,
+    weight: 1,
+    markLevels: [1],
+    stock: 1,
+    ...overrides,
+  };
+}
+
+/**
+ * The catalog of the ships for the tests (task 00038).
+ */
+export function sampleShipCatalog(overrides: Partial<ShipCatalog> = {}): ShipCatalog {
+  return {
+    hulls: [sampleShipHull()],
+    modules: [sampleShipModule()],
+    designLimit: 4,
+    designCount: 0,
+    ...overrides,
+  };
+}
+
+/**
+ * A project of a ship for the tests (task 00038).
+ */
+export function sampleShipDesign(overrides: Partial<ShipDesign> = {}): ShipDesign {
+  return {
+    id: 1,
+    name: 'Перехоплювач',
+    planetId: 1,
+    hullPartTypeId: 84,
+    hasRaceBonusSlot: false,
+    isArchived: false,
+    createdAt: '2026-11-05T00:00:00Z',
+    updatedAt: '2026-11-05T00:00:00Z',
+    version: 1,
+    slots: [],
+    summary: {
+      totalSlots: 8,
+      usedSlots: 0,
+      freeSlots: 8,
+      weight: 10,
+      energyUse: 0,
+      energyPower: 0,
+      crew: 0,
+      holdCapacity: 100,
+      integrity: 100,
+      hasDrive: false,
+      hasReactor: false,
+      hasLifeSupport: false,
+    },
+    ...overrides,
+  };
+}
+
+/**
+ * A fleet API whose every method is a spy; a test overrides what it needs.
+ */
+export function fakeFleetApi(overrides: Partial<FleetApi> = {}): FleetApi {
+  return {
+    shipCatalog: vi.fn().mockResolvedValue(sampleShipCatalog()),
+    designs: vi.fn().mockResolvedValue([sampleShipDesign()]),
+    design: vi.fn().mockResolvedValue(sampleShipDesign()),
+    createDesign: vi.fn().mockResolvedValue(sampleShipDesign()),
+    renameDesign: vi.fn().mockResolvedValue(sampleShipDesign({ name: 'Новий' })),
+    saveDesign: vi.fn().mockResolvedValue(sampleShipDesign()),
+    archiveDesign: vi.fn().mockResolvedValue(sampleShipDesign({ isArchived: true })),
     ...overrides,
   };
 }
@@ -1151,7 +1261,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
 /**
  * The fake server interfaces of the tests that a test may override.
  */
-type FakeApis = { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; game?: GameApi; map?: MapApi; market?: MarketApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi };
+type FakeApis = { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; fleet?: FleetApi; game?: GameApi; map?: MapApi; market?: MarketApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi };
 
 /**
  * The server interfaces of a test: every one is a fake unless the test gives its own.
@@ -1161,6 +1271,7 @@ function buildApi(options: FakeApis): Api {
     auth: options.auth ?? fakeAuthApi(),
     content: options.content ?? mockContentApi,
     economy: options.economy ?? fakeEconomyApi(),
+    fleet: options.fleet ?? fakeFleetApi(),
     game: options.game ?? fakeGameApi(),
     map: options.map ?? fakeMapApi(),
     market: options.market ?? fakeMarketApi(),

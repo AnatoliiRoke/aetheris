@@ -5,7 +5,7 @@ import { mockContentApi } from '../../api/mockContentApi';
 import type { TextsApi } from '../../api/textsApi';
 import { serverConfig } from '../../config/server';
 import { I18nProvider } from '../../i18n/I18nProvider';
-import { fakeAuthApi, fakeEconomyApi, fakeGameApi, fakeMapApi, fakeMarketApi, fakePlanetApi, fakeProcessesApi, fakeProductionApi, fakeResearchApi, fakeWorldApi } from '../../test/renderPage';
+import { fakeAuthApi, fakeEconomyApi, fakeFleetApi, fakeGameApi, fakeMapApi, fakeMarketApi, fakePlanetApi, fakeProcessesApi, fakeProductionApi, fakeResearchApi, fakeWorldApi } from '../../test/renderPage';
 import { TextsProvider } from '../TextsProvider';
 import { useTexts } from '../useTexts';
 
@@ -22,7 +22,7 @@ function Names({ keys }: { keys: string[] }) {
 }
 
 function renderTexts(texts: TextsApi, keys: string[], language: 'uk' | 'en' = 'en') {
-  const api: Api = { auth: fakeAuthApi(), content: mockContentApi, economy: fakeEconomyApi(), game: fakeGameApi(), map: fakeMapApi(), market: fakeMarketApi(), planets: fakePlanetApi(), processes: fakeProcessesApi(), production: fakeProductionApi(), research: fakeResearchApi(), texts, world: fakeWorldApi() };
+  const api: Api = { auth: fakeAuthApi(), content: mockContentApi, economy: fakeEconomyApi(), fleet: fakeFleetApi(), game: fakeGameApi(), map: fakeMapApi(), market: fakeMarketApi(), planets: fakePlanetApi(), processes: fakeProcessesApi(), production: fakeProductionApi(), research: fakeResearchApi(), texts, world: fakeWorldApi() };
 
   return render(
     <I18nProvider initialLanguage={language}>

@@ -176,7 +176,7 @@ describe('the menu, the tabs of the phone and the bottom bar of the design (task
     const labels = [...menu.querySelectorAll('.civ-nav__label')].map((label) => label.textContent);
     expect(labels).toEqual(menuOrder);
 
-    const withScreen = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Виробництво', 'Карта', 'Дослідження', 'Ринок'];
+    const withScreen = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Виробництво', 'Карта', 'Дослідження', 'Ринок', 'Верф'];
 
     for (const label of menuOrder) {
       if (withScreen.includes(label)) {
@@ -220,7 +220,7 @@ describe('the menu, the tabs of the phone and the bottom bar of the design (task
     expect(within(menu).getByRole('link', { name: 'Будівництво' })).toHaveAttribute('href', '/planet/build');
     expect(menu.querySelectorAll('.civ-nav__tag')).toHaveLength(0);
     expect(within(menu).queryByText('Скоро')).toBeNull();
-    expect(within(menu).getByRole('button', { name: 'Верф' })).toBeDisabled();
+    expect(within(menu).getByRole('link', { name: 'Верф' })).toHaveAttribute('href', '/shipyard');
   });
 
   it('opens every section of the menu on the phone through the tab "More" and marks the current tab', async () => {

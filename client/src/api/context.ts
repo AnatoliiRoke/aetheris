@@ -2,6 +2,7 @@ import { createContext } from 'react';
 import type { AuthApi } from './authApi';
 import type { ContentApi } from './contentApi';
 import type { EconomyApi } from './economyApi';
+import type { FleetApi } from './fleetApi';
 import type { GameApi } from './gameApi';
 import type { MapApi } from './mapApi';
 import type { MarketApi } from './marketApi';
@@ -19,6 +20,7 @@ export interface Api {
   auth: AuthApi;
   content: ContentApi;
   economy: EconomyApi;
+  fleet: FleetApi;
   game: GameApi;
   map: MapApi;
   market: MarketApi;

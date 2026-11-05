@@ -5,7 +5,7 @@ import { ApiContext, type Api } from '../../api/context';
 import { mockContentApi } from '../../api/mockContentApi';
 import { ApiError } from '../../api/http';
 import { serverConfig } from '../../config/server';
-import { fakeAuthApi, fakeEconomyApi, fakeGameApi, fakeMapApi, fakeMarketApi, fakePlanetApi, fakeProcessesApi, fakeProductionApi, fakeResearchApi, fakeTextsApi, fakeWorldApi, signedInMe } from '../../test/renderPage';
+import { fakeAuthApi, fakeEconomyApi, fakeFleetApi, fakeGameApi, fakeMapApi, fakeMarketApi, fakePlanetApi, fakeProcessesApi, fakeProductionApi, fakeResearchApi, fakeTextsApi, fakeWorldApi, signedInMe } from '../../test/renderPage';
 import { SessionProvider } from '../SessionProvider';
 import { useSession } from '../useSession';
 
@@ -16,7 +16,7 @@ function Status() {
 }
 
 function renderSession(me: () => Promise<Me | null>) {
-  const api: Api = { auth: fakeAuthApi({ me }), content: mockContentApi, economy: fakeEconomyApi(), game: fakeGameApi(), map: fakeMapApi(), market: fakeMarketApi(), planets: fakePlanetApi(), processes: fakeProcessesApi(), production: fakeProductionApi(), research: fakeResearchApi(), texts: fakeTextsApi(), world: fakeWorldApi() };
+  const api: Api = { auth: fakeAuthApi({ me }), content: mockContentApi, economy: fakeEconomyApi(), fleet: fakeFleetApi(), game: fakeGameApi(), map: fakeMapApi(), market: fakeMarketApi(), planets: fakePlanetApi(), processes: fakeProcessesApi(), production: fakeProductionApi(), research: fakeResearchApi(), texts: fakeTextsApi(), world: fakeWorldApi() };
 
   return render(
     <ApiContext.Provider value={api}>
