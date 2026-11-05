@@ -192,6 +192,13 @@ public static class PartAttributeKeys
     public const string Component = "component";
 
     /// <summary>
+    /// The mark of a part that is not a module of a ship: the ammunition and the capsules of
+    /// inhabitants are carried in the hold or used on a body, so they are never fitted to a
+    /// hull and never show in the constructor (the decision of the author, task 00038).
+    /// </summary>
+    public const string NotAShipModule = "not_a_ship_module";
+
+    /// <summary>
     /// Gets every key of an attribute, in the order of the form of the admin panel.
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -209,6 +216,7 @@ public static class PartAttributeKeys
         Role,
         HullRole,
         Component,
+        NotAShipModule,
     ];
 }
 
@@ -234,15 +242,9 @@ public static class PartComponents
     public const string Reactor = "reactor";
 
     /// <summary>
-    /// The life support of the ship: it gives the ship its crew. A ship without it has no
-    /// crew.
-    /// </summary>
-    public const string LifeSupport = "life_support";
-
-    /// <summary>
     /// Gets every kind, in the order of the form of the admin panel.
     /// </summary>
-    public static IReadOnlyList<string> All { get; } = [Drive, Reactor, LifeSupport];
+    public static IReadOnlyList<string> All { get; } = [Drive, Reactor];
 
     /// <summary>
     /// Tells whether the kind is known to the program.
@@ -284,6 +286,15 @@ public static class CharacteristicKinds
     /// <summary>The crew a module needs.</summary>
     public const string Crew = "crew";
 
+    /// <summary>The push a drive gives the hull.</summary>
+    public const string DrivePush = "drive_push";
+
+    /// <summary>The damage a weapon makes.</summary>
+    public const string Damage = "damage";
+
+    /// <summary>The capacity of a shield.</summary>
+    public const string ShieldCapacity = "shield_capacity";
+
     /// <summary>
     /// Gets every kind, in the order of the form of the admin panel.
     /// </summary>
@@ -296,6 +307,9 @@ public static class CharacteristicKinds
         EnergyUse,
         Power,
         Crew,
+        DrivePush,
+        Damage,
+        ShieldCapacity,
     ];
 
     /// <summary>
@@ -305,37 +319,6 @@ public static class CharacteristicKinds
     /// <returns><see langword="true"/> when the kind is known.</returns>
     public static bool IsKnown(string? kind) =>
         kind is not null && All.Contains(kind, StringComparer.Ordinal);
-}
-
-/// <summary>
-/// The kinds of the damage a part makes (task 00013, decision 2.11).
-/// </summary>
-/// <remarks>
-/// The kinds are logical codes of the program, so the battle reads them whatever the part is.
-/// Their words differ from the old codes of the game entities, so a part attribute never
-/// looks like a resource or a class of size (task 00022).
-/// </remarks>
-public static class PartDamageKinds
-{
-    /// <summary>The energy damage of the lasers.</summary>
-    public const string Energy = "energy";
-
-    /// <summary>The thermal damage of the incinerators.</summary>
-    public const string Thermal = "thermal";
-
-    /// <summary>The kinetic damage of the guns.</summary>
-    public const string Kinetic = "kinetic";
-
-    /// <summary>The ion damage.</summary>
-    public const string Ion = "ion";
-
-    /// <summary>The explosive damage of the rockets and the torpedoes.</summary>
-    public const string Explosive = "explosive";
-
-    /// <summary>
-    /// Gets every kind, in the order of the form of the admin panel.
-    /// </summary>
-    public static IReadOnlyList<string> All { get; } = [Energy, Thermal, Kinetic, Ion, Explosive];
 }
 
 /// <summary>

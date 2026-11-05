@@ -25,11 +25,11 @@ namespace Aetheris.Tests.Processes;
 [Collection(DatabaseCollection.Name)]
 public sealed class ProcessActiveOrdersTests
 {
-    private const string Fuel = "resource_group_3";
+    private const string Ores = "resource_group_1";
 
-    private const string Deuterium = "resource_12";
+    private const string IronOre = "resource_1";
 
-    private const string Helium = "resource_13";
+    private const string TitaniumOre = "resource_2";
 
     private const string ConversionTechnology = "tech_18";
 
@@ -67,12 +67,12 @@ public sealed class ProcessActiveOrdersTests
         (long converterId, long recyclingId, ProcessRecipeInfo conversion, ProcessRecipeInfo recycling) = await PrepareTwoBuildingsAsync(player, services);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         string playerId = player.Account.UserId;
-        int deuteriumId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int plasmaId = await ProcessesTestData.ResourceIdAsync(services, Helium);
+        int ironOreId = await ProcessesTestData.ResourceIdAsync(services, IronOre);
+        int titaniumOreId = await ProcessesTestData.ResourceIdAsync(services, TitaniumOre);
         PartFacts hull = await ProcessesTestData.PartAsync(services, Hull);
 
-        await processes.EnqueueAsync(playerId, player.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(10, deuteriumId, plasmaId), Token);
-        await processes.EnqueueAsync(playerId, player.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(5, deuteriumId, plasmaId), Token);
+        await processes.EnqueueAsync(playerId, player.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(10, ironOreId, titaniumOreId), Token);
+        await processes.EnqueueAsync(playerId, player.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(5, ironOreId, titaniumOreId), Token);
         await processes.EnqueueAsync(playerId, player.PlanetId, recyclingId, recycling.Id, new ProcessOrderRequest(2, PartTypeId: hull.PartTypeId), Token);
 
         HttpResponseMessage response = await player.Client.GetAsync($"/api/v1/processes/orders?planet_id={player.PlanetId}", Token);
@@ -143,9 +143,9 @@ public sealed class ProcessActiveOrdersTests
         long converterId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
         await ProcessesTestData.GiveEveryResourceAsync(player, services);
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
-        ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-        int deuteriumId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int plasmaId = await ProcessesTestData.ResourceIdAsync(services, Helium);
+        ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+        int ironOreId = await ProcessesTestData.ResourceIdAsync(services, IronOre);
+        int titaniumOreId = await ProcessesTestData.ResourceIdAsync(services, TitaniumOre);
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
         string playerId = player.Account.UserId;
 
@@ -154,7 +154,7 @@ public sealed class ProcessActiveOrdersTests
         Assert.Equal(0, empty.QueueUsedSlots);
         Assert.True(empty.QueueSlots > 0);
 
-        ProcessBuildingDto queued = await processes.EnqueueAsync(playerId, player.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(10, deuteriumId, plasmaId), Token);
+        ProcessBuildingDto queued = await processes.EnqueueAsync(playerId, player.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(10, ironOreId, titaniumOreId), Token);
         ProcessActiveOrdersDto one = await processes.GetActiveOrdersAsync(playerId, player.PlanetId, Token);
 
         Assert.Equal(queued.Queue[0].OrderId, Assert.Single(one.Orders).OrderId);
@@ -185,12 +185,12 @@ public sealed class ProcessActiveOrdersTests
         long converterId = await ProcessesTestData.BuildAsync(owner, services, BuildingClasses.Converter);
         await ProcessesTestData.GiveEveryResourceAsync(owner, services);
         await ProcessesTestData.LearnAsync(owner, services, ConversionTechnology, 1);
-        ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-        int deuteriumId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int plasmaId = await ProcessesTestData.ResourceIdAsync(services, Helium);
+        ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+        int ironOreId = await ProcessesTestData.ResourceIdAsync(services, IronOre);
+        int titaniumOreId = await ProcessesTestData.ResourceIdAsync(services, TitaniumOre);
 
         await services.GetRequiredService<IProcessesModule>()
-            .EnqueueAsync(owner.Account.UserId, owner.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(10, deuteriumId, plasmaId), Token);
+            .EnqueueAsync(owner.Account.UserId, owner.PlanetId, converterId, conversion.Id, new ProcessOrderRequest(10, ironOreId, titaniumOreId), Token);
 
         string url = $"/api/v1/processes/orders?planet_id={owner.PlanetId}";
         HttpResponseMessage own = await owner.Client.GetAsync(url, Token);
@@ -220,7 +220,7 @@ public sealed class ProcessActiveOrdersTests
         PartFacts hull = await ProcessesTestData.PartAsync(services, Hull);
         await ProcessesTestData.PutPartsAsync(player, services, hull.PartTypeId, PartCondition.Full, 4);
 
-        ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
+        ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
         ProcessRecipeInfo recycling = await ProcessesTestData.RecipeOfAsync(services, ProcessHandlerCodes.Recycling);
 
         return (converterId, recyclingId, conversion, recycling);

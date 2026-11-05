@@ -81,20 +81,20 @@ public static class BuildingEffectTypes
     public const string FleetLimit = "fleet_limit";
 
     /// <summary>
-    /// Adds capacity to the storage that the raid does not reach: the value is the capacity in
-    /// tonnes of every kind of resource of the body.
+    /// Protects a share of the storage from the raid: the value is the share of the capacity of
+    /// every kind of resource of the body that the raid does not reach (task 00045).
     /// </summary>
-    public const string ProtectedStorageCapacity = "protected_storage_capacity";
+    public const string ProtectedStorageShare = "protected_storage_share";
 
     /// <summary>
-    /// Raises the share of the goods that the conversion of the resources keeps: the value is the
-    /// share the building gives on top of the share of the starting data.
+    /// Sets the share of the goods that the conversion of the resources keeps: the value of the
+    /// level of the converter is the share itself (task 00045).
     /// </summary>
     public const string ConversionCoefficient = "conversion_coefficient";
 
     /// <summary>
-    /// Raises the share of the goods that the recycling of the parts keeps: the value is the share
-    /// the building gives on top of the share of the starting data.
+    /// Sets the share of the cost of a part that the recycling returns: the value of the level of
+    /// the recycling factory is the share itself (task 00045).
     /// </summary>
     public const string RecyclingCoefficient = "recycling_coefficient";
 
@@ -129,6 +129,12 @@ public static class BuildingEffectTypes
     public const string DesignQueueSlots = "design_queue_slots";
 
     /// <summary>
+    /// Speeds the production of a factory up: the value is the share of the time the level of the
+    /// factory takes off, and the time of a unit is divided by one plus that share (task 00045).
+    /// </summary>
+    public const string ProductionSpeedBonus = "production_speed_bonus";
+
+    /// <summary>
     /// Gets every effect type, in the order of the form of the admin panel (task 00023).
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -149,7 +155,7 @@ public static class BuildingEffectTypes
         ResearchQueueSlots,
         ResearchSpeedBonus,
         FleetLimit,
-        ProtectedStorageCapacity,
+        ProtectedStorageShare,
         ConversionCoefficient,
         RecyclingCoefficient,
         RadarRangeBonus,
@@ -157,6 +163,7 @@ public static class BuildingEffectTypes
         PortalMassPerHour,
         HullClassLimit,
         DesignQueueSlots,
+        ProductionSpeedBonus,
     ];
 
     /// <summary>

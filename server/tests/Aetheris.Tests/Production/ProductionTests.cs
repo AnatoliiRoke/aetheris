@@ -662,6 +662,40 @@ public sealed class ProductionTests
         await Assert.ThrowsAsync<InvalidOperationException>(UnitSecondsAsync);
     }
 
+    /// <summary>
+    /// The level of the factory speeds the unit up: the time is divided by one plus the bonus of
+    /// the level, so the twentieth level makes a unit 1.475 times faster than the first one
+    /// (task 00045, criterion 3).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_level_of_the_factory_speeds_the_unit_up()
+    {
+        const int TopLevel = 20;
+        const decimal TopSpeed = 1.475m;
+
+        await ResetAsync();
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+        IProductionModule production = services.GetRequiredService<IProductionModule>();
+
+        long buildingId = await ProductionTestData.BuildFactoryAsync(player, services);
+        RecipeInfo recipe = await ProductionTestData.FirstRecipeAsync(services);
+
+        async Task<long> UnitSecondsAsync() =>
+            (await production.GetFactoryAsync(player.Account.UserId, player.PlanetId, buildingId, Token)).Recipes.Single(entry => entry.RecipeId == recipe.Id).UnitSeconds;
+
+        Assert.Equal(recipe.DurationSeconds, await UnitSecondsAsync());
+
+        PlanetsDbContext planets = services.GetRequiredService<PlanetsDbContext>();
+        PlanetBuildingEntity factory = await planets.PlanetBuildings.SingleAsync(building => building.Id == buildingId, Token);
+        factory.Level = TopLevel;
+        await planets.SaveChangesAsync(Token);
+
+        Assert.Equal((long)Math.Ceiling(recipe.DurationSeconds / TopSpeed), await UnitSecondsAsync());
+    }
+
     private static string ServerRoot()
     {
         string? directory = AppContext.BaseDirectory;

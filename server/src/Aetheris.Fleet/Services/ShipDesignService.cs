@@ -39,11 +39,6 @@ public sealed class ShipDesignService
     /// </summary>
     public const string ReactorComponent = "reactor";
 
-    /// <summary>
-    /// The code of the component that gives the ship its crew.
-    /// </summary>
-    public const string LifeSupportComponent = "life_support";
-
     private readonly FleetDbContext _dbContext;
     private readonly FleetUnitOfWork _unitOfWork;
     private readonly IProductionModule _production;
@@ -333,10 +328,15 @@ public sealed class ShipDesignService
     }
 
     /// <summary>
-    /// Reads the catalog of the ships for the builder, with what the body has on its stock.
+    /// Reads the catalog of the ships for the builder.
     /// </summary>
-    /// <param name="playerId">The owner of the stock.</param>
-    /// <param name="planetId">The body whose stock is read.</param>
+    /// <remarks>
+    /// The stock of the body is not read: a project is a project on paper, so it is designed and
+    /// saved whatever the body has and whatever the technology of the player opens (the decision
+    /// of the author, task 00038).
+    /// </remarks>
+    /// <param name="playerId">The owner of the projects.</param>
+    /// <param name="planetId">The body whose projects are counted.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The catalog of the ships.</returns>
     public async Task<ShipCatalogViewDto> ReadCatalogAsync(
@@ -345,13 +345,6 @@ public sealed class ShipDesignService
         CancellationToken cancellationToken)
     {
         ShipCatalogDto catalog = await _production.GetShipCatalogAsync(cancellationToken).ConfigureAwait(false);
-        ProductionStockDto stock = await _production.GetStockAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
-
-        Dictionary<int, long> stockByPart = [];
-        foreach (ProductionStackDto stack in stock.Stacks)
-        {
-            stockByPart[stack.PartTypeId] = stockByPart.GetValueOrDefault(stack.PartTypeId) + stack.Quantity;
-        }
 
         int limit = await DesignLimitAsync(playerId, cancellationToken).ConfigureAwait(false);
         int count = await _dbContext.ShipDesigns.AsNoTracking()
@@ -369,13 +362,13 @@ public sealed class ShipDesignService
                     hull.DescriptionKey,
                     hull.ImageKey,
                     hull.PartGroupCode,
+                    hull.PartGroupNameKey,
                     hull.Role,
                     hull.Slots,
                     hull.HoldCapacity,
                     hull.Integrity,
                     hull.Weight,
-                    hull.RaceBonusSlots > 0,
-                    stockByPart.GetValueOrDefault(hull.Id)))
+                    hull.RaceBonusSlots))
         ];
 
         List<ShipModuleViewDto> modules =
@@ -389,6 +382,7 @@ public sealed class ShipDesignService
                     module.DescriptionKey,
                     module.ImageKey,
                     module.PartGroupCode,
+                    module.PartGroupNameKey,
                     module.Role,
                     module.Component,
                     module.CompatibleHullIds,
@@ -396,12 +390,41 @@ public sealed class ShipDesignService
                     module.EnergyUse,
                     module.Power,
                     module.Crew,
+                    module.DrivePush,
+                    module.Damage,
+                    module.DamageKind,
+                    module.ShieldCapacity,
                     module.Weight,
                     module.MarkLevels,
-                    stockByPart.GetValueOrDefault(module.Id)))
+                    module.IsAmmunition,
+                    module.IsCapsule))
         ];
 
-        return new ShipCatalogViewDto(hulls, modules, limit, count);
+        // The types of the modules that go into a ship: the counts are of the modules the builder
+        // offers, so the filter of the picker shows what is really there.
+        Dictionary<string, int> countsByGroup = [];
+
+        foreach (ShipModuleViewDto module in modules)
+        {
+            if (string.IsNullOrEmpty(module.PartGroupCode))
+            {
+                continue;
+            }
+
+            countsByGroup[module.PartGroupCode] = countsByGroup.GetValueOrDefault(module.PartGroupCode) + 1;
+        }
+
+        List<ShipModuleGroupViewDto> moduleGroups =
+        [
+            .. catalog.ModuleGroups
+                .Where(group => countsByGroup.ContainsKey(group.Code))
+                .Select(group => new ShipModuleGroupViewDto(
+                    group.Code,
+                    group.NameKey,
+                    countsByGroup[group.Code]))
+        ];
+
+        return new ShipCatalogViewDto(hulls, modules, moduleGroups, limit, count);
     }
 
     /// <summary>
@@ -525,13 +548,15 @@ public sealed class ShipDesignService
 
     /// <summary>
     /// Tells whether the module goes into a ship: the modules of the combat, of the transport
-    /// and the ones that fit any hull. The modules of the civil go into the structures.
+    /// and of the peace, and the ones that fit any hull. The modules of the peace go on the
+    /// transport hulls, because the transport hull is a peaceful hull (game-design/05, 3.1б).
     /// </summary>
     /// <param name="role">The role of the module.</param>
     /// <returns><see langword="true"/> when the module goes into a ship.</returns>
     private static bool IsShipModule(string role) =>
         string.Equals(role, PartRoles.Combat, StringComparison.Ordinal)
         || string.Equals(role, PartRoles.Transport, StringComparison.Ordinal)
+        || string.Equals(role, PartRoles.Civil, StringComparison.Ordinal)
         || string.Equals(role, PartRoles.Universal, StringComparison.Ordinal);
 
     /// <summary>
@@ -692,7 +717,6 @@ public sealed class ShipDesignService
 
         bool hasDrive = false;
         bool hasReactor = false;
-        bool hasLifeSupport = false;
         decimal energyUse = 0m;
         decimal power = 0m;
 
@@ -716,9 +740,6 @@ public sealed class ShipDesignService
                 case ReactorComponent:
                     hasReactor = true;
                     break;
-                case LifeSupportComponent:
-                    hasLifeSupport = true;
-                    break;
             }
 
             energyUse += module.EnergyUse;
@@ -735,11 +756,6 @@ public sealed class ShipDesignService
             throw new GameException(FleetErrorCodes.ReactorMissing, "The ship has no reactor.");
         }
 
-        if (!hasLifeSupport)
-        {
-            throw new GameException(FleetErrorCodes.LifeSupportMissing, "The ship has no life support.");
-        }
-
         if (energyUse > power)
         {
             throw new GameException(FleetErrorCodes.EnergyShort, "The modules of the ship take more energy than the reactors give.");
@@ -748,9 +764,14 @@ public sealed class ShipDesignService
 
     /// <summary>
     /// Checks that the module may be put on the hull: a combat module goes only on a combat
-    /// hull, a transport module only on a transport hull, a civil module only on a civil hull
-    /// (task 00038, section 3.2, check 4).
+    /// hull, a civil module only on a peaceful hull, and a transport module only on a transport
+    /// hull (task 00038, section 3.2, check 4).
     /// </summary>
+    /// <remarks>
+    /// A transport hull is a peaceful hull: the transports of the author are the civil hulls
+    /// («Жук», «Бик», «Слон», «Кит»), so a peaceful module — the drilling rig, the geological
+    /// survey — goes on them (game-design/05, section 3.1б).
+    /// </remarks>
     /// <param name="hull">The hull of the project.</param>
     /// <param name="module">The module.</param>
     /// <exception cref="GameException">The module is of another role.</exception>
@@ -762,6 +783,13 @@ public sealed class ShipDesignService
         }
 
         if (string.Equals(module.Role, hull.Role, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        // The transport hull is a peaceful hull, so a peaceful module goes on it.
+        if (string.Equals(module.Role, PartRoles.Civil, StringComparison.Ordinal)
+            && string.Equals(hull.Role, HullRoles.Transport, StringComparison.Ordinal))
         {
             return;
         }
@@ -879,9 +907,12 @@ public sealed class ShipDesignService
         decimal power = 0m;
         decimal crew = 0m;
         decimal weight = hull?.Weight ?? 0m;
+        decimal drivePush = 0m;
+        decimal energyDamage = 0m;
+        decimal kineticDamage = 0m;
+        decimal shieldCapacity = 0m;
         bool hasDrive = false;
         bool hasReactor = false;
-        bool hasLifeSupport = false;
 
         foreach (ShipDesignSlotEntity row in rows)
         {
@@ -896,10 +927,20 @@ public sealed class ShipDesignService
             power += module.Power;
             crew += module.Crew;
             weight += module.Weight;
+            drivePush += module.DrivePush;
+            shieldCapacity += module.ShieldCapacity;
+
+            if (string.Equals(module.DamageKind, PartDamageKinds.Energy, StringComparison.Ordinal))
+            {
+                energyDamage += module.Damage;
+            }
+            else if (string.Equals(module.DamageKind, PartDamageKinds.Kinetic, StringComparison.Ordinal))
+            {
+                kineticDamage += module.Damage;
+            }
 
             hasDrive |= string.Equals(module.Component, DriveComponent, StringComparison.Ordinal);
             hasReactor |= string.Equals(module.Component, ReactorComponent, StringComparison.Ordinal);
-            hasLifeSupport |= string.Equals(module.Component, LifeSupportComponent, StringComparison.Ordinal);
         }
 
         int total = hull is null ? 0 : AvailableSlots(hull, design.HasRaceBonusSlot);
@@ -914,9 +955,12 @@ public sealed class ShipDesignService
             crew,
             hull?.HoldCapacity ?? 0m,
             hull?.Integrity ?? 0m,
+            drivePush,
+            energyDamage,
+            kineticDamage,
+            shieldCapacity,
             hasDrive,
-            hasReactor,
-            hasLifeSupport);
+            hasReactor);
 
         return new ShipDesignDto(
             design.Id,

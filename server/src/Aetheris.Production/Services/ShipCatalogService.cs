@@ -38,6 +38,15 @@ public sealed class ShipCatalogService
     /// <summary>The kind of the characteristic that holds the crew a module needs.</summary>
     public const string CrewCharacteristic = CharacteristicKinds.Crew;
 
+    /// <summary>The kind of the characteristic that holds the push a drive gives.</summary>
+    public const string DrivePushCharacteristic = CharacteristicKinds.DrivePush;
+
+    /// <summary>The kind of the characteristic that holds the damage a weapon makes.</summary>
+    public const string DamageCharacteristic = CharacteristicKinds.Damage;
+
+    /// <summary>The kind of the characteristic that holds the capacity of a shield.</summary>
+    public const string ShieldCapacityCharacteristic = CharacteristicKinds.ShieldCapacity;
+
     /// <summary>The kind of the characteristic that holds the extra slots the race gives a hull.</summary>
     public const string RaceBonusSlotsCharacteristic = CharacteristicKinds.HullRaceSlot;
 
@@ -110,6 +119,13 @@ public sealed class ShipCatalogService
             }
         }
 
+        // The hulls a ship may be built of: the combat and the transport ones. The drones are
+        // carried in the hold and the structures are not ships (game-design/05, section 3.1б).
+        HashSet<int> shipHullIds = [.. catalog.Parts
+            .Where(part => hullGroupIds.Contains(part.PartGroupId))
+            .Where(part => IsShipHullRole(groupRoles.GetValueOrDefault(part.PartGroupId)))
+            .Select(part => part.Id)];
+
         List<ShipHullDto> hulls =
         [
             .. catalog.Parts
@@ -122,6 +138,7 @@ public sealed class ShipCatalogService
                     part.ImageKey,
                     part.PartGroupId,
                     catalog.FindGroup(part.PartGroupId)?.Code ?? string.Empty,
+                    catalog.FindGroup(part.PartGroupId)?.NameKey ?? string.Empty,
                     groupRoles.GetValueOrDefault(part.PartGroupId, HullRoles.Civil),
                     SlotsOf(part, characteristicIds, settings.DefaultHullSlots),
                     RaceBonusSlotsOf(part, characteristicIds),
@@ -135,6 +152,8 @@ public sealed class ShipCatalogService
         [
             .. catalog.Parts
                 .Where(part => !hullGroupIds.Contains(part.PartGroupId))
+                .Where(part => !IsNotAShipModule(part))
+                .Where(part => part.CompatibleHullIds.Any(id => shipHullIds.Contains(id)))
                 .Select(part => new ShipModuleDto(
                     part.Id,
                     part.Code,
@@ -143,6 +162,7 @@ public sealed class ShipCatalogService
                     part.ImageKey,
                     part.PartGroupId,
                     catalog.FindGroup(part.PartGroupId)?.Code ?? string.Empty,
+                    catalog.FindGroup(part.PartGroupId)?.NameKey ?? string.Empty,
                     RoleOf(part, PartAttributeKeys.Role) ?? PartRoles.Universal,
                     RoleOf(part, PartAttributeKeys.Component),
                     part.CompatibleHullIds,
@@ -150,12 +170,34 @@ public sealed class ShipCatalogService
                     ValueOf(part, characteristicIds, EnergyUseCharacteristic),
                     ValueOf(part, characteristicIds, PowerCharacteristic),
                     ValueOf(part, characteristicIds, CrewCharacteristic),
+                    ValueOf(part, characteristicIds, DrivePushCharacteristic),
+                    ValueOf(part, characteristicIds, DamageCharacteristic),
+                    RoleOf(part, PartAttributeKeys.DamageKind),
+                    ValueOf(part, characteristicIds, ShieldCapacityCharacteristic),
                     part.Weight,
                     [part.MarkLevel],
-                    part.IsArchived)),
+                    part.IsArchived,
+                    IsAmmunition(part),
+                    IsCapsule(part))),
         ];
 
-        return new ShipCatalogDto(hulls, modules);
+        // The types of the modules: the groups of the parts are the types, so the picker of the
+        // modules filters by them (task 00038, the filters of the module picker). The counts are
+        // of the modules of the catalog, so the reader of the catalog counts the modules of
+        // every type again for the ones it offers.
+        List<ShipModuleGroupDto> moduleGroups =
+        [
+            .. modules
+                .Where(module => !string.IsNullOrEmpty(module.PartGroupCode))
+                .GroupBy(module => module.PartGroupCode, StringComparer.Ordinal)
+                .Select(group => new ShipModuleGroupDto(
+                    group.Key,
+                    group.First().PartGroupNameKey,
+                    group.Count()))
+                .OrderBy(group => group.Code, StringComparer.Ordinal),
+        ];
+
+        return new ShipCatalogDto(hulls, modules, moduleGroups);
     }
 
     /// <summary>
@@ -212,4 +254,44 @@ public sealed class ShipCatalogService
         part.Attributes.TryGetValue(key, out PartAttributeInfo? attribute)
             ? attribute.CodeValue
             : null;
+
+    /// <summary>
+    /// Tells whether the part is marked as not a module of a ship: the ammunition and the
+    /// capsules of inhabitants are not fitted to a hull, so they never show in the constructor
+    /// (the decision of the author, task 00038).
+    /// </summary>
+    /// <param name="part">The part.</param>
+    /// <returns><see langword="true"/> when the part is not a module of a ship.</returns>
+    private static bool IsNotAShipModule(PartTypeInfo part) =>
+        part.Attributes.ContainsKey(PartAttributeKeys.NotAShipModule);
+
+    /// <summary>
+    /// Tells whether a hull of the role may carry a ship: a combat hull and a transport one.
+    /// A drone is carried in the hold and a structure is not a ship (game-design/05, section
+    /// 3.1б, and the decision of the author in task 00042).
+    /// </summary>
+    /// <param name="role">The role of the hull, or <see langword="null"/> when it has none.</param>
+    /// <returns><see langword="true"/> when a ship may be built of the hull.</returns>
+    private static bool IsShipHullRole(string? role) =>
+        string.Equals(role, HullRoles.Combat, StringComparison.Ordinal)
+        || string.Equals(role, HullRoles.Transport, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Tells whether the part is ammunition of a weapon: it is loaded into the weapon, not
+    /// fitted to a hull.
+    /// </summary>
+    /// <param name="part">The part.</param>
+    /// <returns><see langword="true"/> when the part is ammunition.</returns>
+    private static bool IsAmmunition(PartTypeInfo part) =>
+        part.Attributes.ContainsKey(PartAttributeKeys.NotAShipModule)
+        && !part.Attributes.ContainsKey(PartAttributeKeys.PopulationCapsule);
+
+    /// <summary>
+    /// Tells whether the part is a capsule of inhabitants: it is used on a body, not fitted to
+    /// a hull.
+    /// </summary>
+    /// <param name="part">The part.</param>
+    /// <returns><see langword="true"/> when the part is a capsule.</returns>
+    private static bool IsCapsule(PartTypeInfo part) =>
+        part.Attributes.ContainsKey(PartAttributeKeys.PopulationCapsule);
 }

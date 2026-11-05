@@ -691,7 +691,7 @@
       },
       "image_key": "part_13.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
@@ -729,7 +729,7 @@
       },
       "image_key": "part_14.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
@@ -767,7 +767,7 @@
       },
       "image_key": "part_15.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
@@ -805,7 +805,7 @@
       },
       "image_key": "part_16.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
@@ -843,7 +843,7 @@
       },
       "image_key": "part_17.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
@@ -881,7 +881,7 @@
       },
       "image_key": "part_18.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
@@ -919,7 +919,7 @@
       },
       "image_key": "part_19.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
@@ -957,7 +957,7 @@
       },
       "image_key": "part_20.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
@@ -995,7 +995,7 @@
       },
       "image_key": "part_21.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
@@ -1036,7 +1036,7 @@
       },
       "image_key": "part_22.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
@@ -1077,7 +1077,7 @@
       },
       "image_key": "part_23.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
@@ -1118,7 +1118,7 @@
       },
       "image_key": "part_24.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
@@ -1159,7 +1159,7 @@
       },
       "image_key": "part_25.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
@@ -1200,7 +1200,7 @@
       },
       "image_key": "part_26.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
@@ -1753,11 +1753,14 @@
       },
       "image_key": "part_43.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
           "code": "combat"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 54.763699,
@@ -1785,11 +1788,14 @@
       },
       "image_key": "part_44.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
           "code": "combat"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 60.240069,
@@ -1817,11 +1823,14 @@
       },
       "image_key": "part_45.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
           "code": "combat"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 66.264076,
@@ -1849,11 +1858,14 @@
       },
       "image_key": "part_46.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
           "code": "combat"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 72.890484,
@@ -1887,11 +1899,14 @@
       },
       "image_key": "part_47.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
           "code": "combat"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 80.179532,
@@ -1925,11 +1940,14 @@
       },
       "image_key": "part_48.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
           "code": "combat"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 88.197485,
@@ -1963,11 +1981,14 @@
       },
       "image_key": "part_49.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
           "code": "combat"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 97.017234,
@@ -2001,11 +2022,14 @@
       },
       "image_key": "part_50.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
           "code": "combat"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 106.718957,
@@ -2036,11 +2060,14 @@
       },
       "image_key": "part_51.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "energy"
         },
         "role": {
           "code": "combat"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 117.390853,
@@ -2071,11 +2098,14 @@
       },
       "image_key": "part_52.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
           "code": "combat"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 129.129938,
@@ -2427,9 +2457,6 @@
       "attributes": {
         "role": {
           "code": "universal"
-        },
-        "component": {
-          "code": "life_support"
         }
       },
       "weight": 405.265062,
@@ -2493,7 +2520,7 @@
       "image_key": "part_66.webp",
       "attributes": {
         "role": {
-          "code": "transport"
+          "code": "universal"
         }
       },
       "weight": 490.370725,
@@ -2522,7 +2549,7 @@
       "image_key": "part_67.webp",
       "attributes": {
         "role": {
-          "code": "transport"
+          "code": "universal"
         }
       },
       "weight": 539.407798,
@@ -2583,7 +2610,7 @@
       "image_key": "part_69.webp",
       "attributes": {
         "role": {
-          "code": "transport"
+          "code": "universal"
         }
       },
       "weight": 652.683435,
@@ -2926,6 +2953,9 @@
         },
         "role": {
           "code": "universal"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 1862.182013,
@@ -2958,6 +2988,9 @@
         },
         "role": {
           "code": "universal"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 2048.400215,
@@ -2990,6 +3023,9 @@
         },
         "role": {
           "code": "universal"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 2253.240236,
@@ -3022,6 +3058,9 @@
         },
         "role": {
           "code": "universal"
+        },
+        "not_a_ship_module": {
+          "code": "true"
         }
       },
       "weight": 2478.56426,
@@ -3904,7 +3943,7 @@
       },
       "image_key": "part_111.webp",
       "attributes": {
-        "damage_type": {
+        "damage_kind": {
           "code": "kinetic"
         },
         "role": {
@@ -3975,23 +4014,7 @@
           "amount": 100
         }
       ],
-      "requirements": [
-        {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 4
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 6
-        }
-      ],
+      "requirements": [],
       "race": null
     },
     {
@@ -4049,19 +4072,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 3
         }
       ],
       "race": null
@@ -4111,19 +4124,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 8
         }
       ],
       "race": null
@@ -4168,19 +4171,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 11
         }
       ],
       "race": null
@@ -4230,19 +4223,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_13",
-          "target_level": 18
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 13
         }
       ],
       "race": null
@@ -4287,24 +4270,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 25
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 25
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_13",
-          "target_level": 22
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 17
         }
       ],
       "race": null
@@ -4347,23 +4315,7 @@
           "amount": 100
         }
       ],
-      "requirements": [
-        {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_3",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 10
-        }
-      ],
+      "requirements": [],
       "race": null
     },
     {
@@ -4406,19 +4358,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_41",
+          "target_level": 4
         }
       ],
       "race": null
@@ -4468,19 +4410,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_4",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_41",
+          "target_level": 9
         }
       ],
       "race": null
@@ -4525,19 +4457,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_4",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_41",
+          "target_level": 12
         }
       ],
       "race": null
@@ -4582,19 +4504,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 25
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_41",
+          "target_level": 13
         }
       ],
       "race": null
@@ -4644,24 +4556,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_4",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 25
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_41",
+          "target_level": 19
         }
       ],
       "race": null
@@ -4706,19 +4603,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 4
+          "type": "building_level",
+          "target": "building_42",
+          "target_level": 2
         }
       ],
       "race": null
@@ -4768,19 +4655,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_42",
+          "target_level": 3
         }
       ],
       "race": null
@@ -4825,19 +4702,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_42",
+          "target_level": 4
         }
       ],
       "race": null
@@ -4882,19 +4749,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_42",
+          "target_level": 7
         }
       ],
       "race": null
@@ -4939,19 +4796,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 16
+          "type": "building_level",
+          "target": "building_42",
+          "target_level": 8
         }
       ],
       "race": null
@@ -4996,18 +4843,8 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
+          "type": "building_level",
+          "target": "building_42",
           "target_level": 12
         }
       ],
@@ -5053,19 +4890,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_3",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 16
+          "type": "building_level",
+          "target": "building_42",
+          "target_level": 13
         }
       ],
       "race": null
@@ -5110,24 +4937,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 25
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
+          "type": "building_level",
+          "target": "building_42",
           "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 12
         }
       ],
       "race": null
@@ -5162,14 +4974,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 4
+          "type": "building_level",
+          "target": "building_43",
+          "target_level": 11
         }
       ],
       "race": null
@@ -5214,14 +5021,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_43",
+          "target_level": 13
         }
       ],
       "race": null
@@ -5271,19 +5073,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_43",
+          "target_level": 8
         }
       ],
       "race": null
@@ -5328,14 +5120,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_43",
+          "target_level": 3
         }
       ],
       "race": null
@@ -5380,19 +5167,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_43",
+          "target_level": 12
         }
       ],
       "race": null
@@ -5442,23 +5219,8 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 24
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
+          "type": "building_level",
+          "target": "building_43",
           "target_level": 14
         }
       ],
@@ -5494,14 +5256,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
+          "type": "building_level",
+          "target": "building_44",
           "target_level": 3
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 4
         }
       ],
       "race": null
@@ -5541,14 +5298,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_44",
+          "target_level": 4
         }
       ],
       "race": null
@@ -5588,14 +5340,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_44",
+          "target_level": 4
         }
       ],
       "race": null
@@ -5635,14 +5382,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_44",
+          "target_level": 8
         }
       ],
       "race": null
@@ -5682,14 +5424,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_44",
+          "target_level": 11
         }
       ],
       "race": null
@@ -5729,14 +5466,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 20
+          "type": "building_level",
+          "target": "building_44",
+          "target_level": 9
         }
       ],
       "race": null
@@ -5776,14 +5508,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 25
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_44",
+          "target_level": 13
         }
       ],
       "race": null
@@ -5828,24 +5555,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_44",
+          "target_level": 15
         }
       ],
       "race": null
@@ -5885,14 +5597,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_45",
+          "target_level": 2
         }
       ],
       "race": null
@@ -5932,14 +5639,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 6
+          "type": "building_level",
+          "target": "building_45",
+          "target_level": 3
         }
       ],
       "race": null
@@ -5984,14 +5686,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_45",
+          "target_level": 4
         }
       ],
       "race": null
@@ -6036,19 +5733,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_45",
+          "target_level": 7
         }
       ],
       "race": null
@@ -6088,14 +5775,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_3",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_45",
+          "target_level": 8
         }
       ],
       "race": null
@@ -6135,14 +5817,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 16
+          "type": "building_level",
+          "target": "building_45",
+          "target_level": 13
         }
       ],
       "race": null
@@ -6187,19 +5864,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 22
+          "type": "building_level",
+          "target": "building_45",
+          "target_level": 18
         }
       ],
       "race": null
@@ -6244,24 +5911,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 25
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_45",
+          "target_level": 19
         }
       ],
       "race": null
@@ -6296,14 +5948,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 4
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 2
+          "type": "building_level",
+          "target": "building_46",
+          "target_level": 11
         }
       ],
       "race": null
@@ -6343,14 +5990,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 4
+          "type": "building_level",
+          "target": "building_46",
+          "target_level": 12
         }
       ],
       "race": null
@@ -6390,14 +6032,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_46",
+          "target_level": 9
         }
       ],
       "race": null
@@ -6437,14 +6074,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 6
+          "type": "building_level",
+          "target": "building_46",
+          "target_level": 4
         }
       ],
       "race": null
@@ -6484,14 +6116,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_46",
+          "target_level": 5
         }
       ],
       "race": null
@@ -6536,14 +6163,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_46",
+          "target_level": 12
         }
       ],
       "race": null
@@ -6588,24 +6210,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
+          "type": "building_level",
+          "target": "building_46",
           "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 10
         }
       ],
       "race": null
@@ -6645,14 +6252,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_4",
-          "target_level": 18
+          "type": "building_level",
+          "target": "building_46",
+          "target_level": 13
         }
       ],
       "race": null
@@ -6692,13 +6294,8 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
+          "type": "building_level",
+          "target": "building_46",
           "target_level": 16
         }
       ],
@@ -6739,14 +6336,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_3",
-          "target_level": 22
+          "type": "building_level",
+          "target": "building_46",
+          "target_level": 19
         }
       ],
       "race": null
@@ -6784,18 +6376,7 @@
           "amount": 100
         }
       ],
-      "requirements": [
-        {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 4
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_5",
-          "target_level": 8
-        }
-      ],
+      "requirements": [],
       "race": null
     },
     {
@@ -6836,23 +6417,7 @@
           "amount": 120
         }
       ],
-      "requirements": [
-        {
-          "type": "technology_level",
-          "target": "tech_5",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 8
-        }
-      ],
+      "requirements": [],
       "race": null
     },
     {
@@ -6890,14 +6455,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_5",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_13",
-          "target_level": 16
+          "type": "building_level",
+          "target": "building_47",
+          "target_level": 5
         }
       ],
       "race": null
@@ -6942,14 +6502,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_5",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 18
+          "type": "building_level",
+          "target": "building_47",
+          "target_level": 15
         }
       ],
       "race": null
@@ -6994,14 +6549,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_5",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_13",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_47",
+          "target_level": 9
         }
       ],
       "race": null
@@ -7056,19 +6606,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_13",
-          "target_level": 20
+          "type": "building_level",
+          "target": "building_48",
+          "target_level": 7
         }
       ],
       "race": null
@@ -7118,14 +6658,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_48",
+          "target_level": 6
         }
       ],
       "race": null
@@ -7165,14 +6700,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_5",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_12",
-          "target_level": 16
+          "type": "building_level",
+          "target": "building_48",
+          "target_level": 4
         }
       ],
       "race": null
@@ -7222,14 +6752,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_48",
+          "target_level": 12
         }
       ],
       "race": null
@@ -7279,13 +6804,8 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
+          "type": "building_level",
+          "target": "building_48",
           "target_level": 12
         }
       ],
@@ -7326,14 +6846,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_6",
+          "type": "building_level",
+          "target": "building_49",
           "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 14
         }
       ],
       "race": null
@@ -7383,19 +6898,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_1",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 25
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 18
         }
       ],
       "race": null
@@ -7430,14 +6935,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 8
         }
       ],
       "race": null
@@ -7475,18 +6975,7 @@
           "amount": 170
         }
       ],
-      "requirements": [
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_11",
-          "target_level": 4
-        }
-      ],
+      "requirements": [],
       "race": null
     },
     {
@@ -7524,14 +7013,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_11",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 9
         }
       ],
       "race": null
@@ -7581,19 +7065,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 12
         }
       ],
       "race": null
@@ -7638,14 +7112,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 8
         }
       ],
       "race": null
@@ -7685,19 +7154,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_16",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_17",
-          "target_level": 18
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 9
         }
       ],
       "race": null
@@ -7737,14 +7196,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_16",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 10
         }
       ],
       "race": null
@@ -7784,14 +7238,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_15",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 6
         }
       ],
       "race": null
@@ -7836,14 +7285,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
+          "type": "building_level",
+          "target": "building_49",
           "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 14
         }
       ],
       "race": null
@@ -7878,14 +7322,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_11",
-          "target_level": 6
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 10
         }
       ],
       "race": null
@@ -7925,19 +7364,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_11",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_19",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 10
         }
       ],
       "race": null
@@ -7982,14 +7411,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_4",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 20
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 16
         }
       ],
       "race": null
@@ -8029,24 +7453,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_4",
+          "type": "building_level",
+          "target": "building_49",
           "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_14",
-          "target_level": 25
         }
       ],
       "race": null
@@ -8086,18 +7495,8 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_5",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
+          "type": "building_level",
+          "target": "building_49",
           "target_level": 16
         }
       ],
@@ -8148,23 +7547,8 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_13",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_20",
+          "type": "building_level",
+          "target": "building_49",
           "target_level": 20
         }
       ],
@@ -8205,14 +7589,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_16",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 9
         }
       ],
       "race": "race_1"
@@ -8252,14 +7631,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_16",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 9
         }
       ],
       "race": "race_2"
@@ -8299,14 +7673,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_16",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 9
         }
       ],
       "race": "race_3"
@@ -8346,14 +7715,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_16",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_49",
+          "target_level": 9
         }
       ],
       "race": "race_4"
@@ -8393,14 +7757,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 6
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 2
         }
       ],
       "race": null
@@ -8445,19 +7804,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 3
         }
       ],
       "race": null
@@ -8502,14 +7851,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 3
         }
       ],
       "race": null
@@ -8554,19 +7898,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_3",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 4
         }
       ],
       "race": null
@@ -8601,14 +7935,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 6
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 7
         }
       ],
       "race": null
@@ -8648,19 +7977,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 7
         }
       ],
       "race": null
@@ -8700,14 +8019,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 7
         }
       ],
       "race": null
@@ -8752,19 +8066,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 6
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 7
         }
       ],
       "race": null
@@ -8814,19 +8118,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
+          "type": "building_level",
+          "target": "building_51",
           "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 10
         }
       ],
       "race": null
@@ -8871,19 +8165,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 8
         }
       ],
       "race": null
@@ -8928,24 +8212,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 11
         }
       ],
       "race": null
@@ -8995,18 +8264,8 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
+          "type": "building_level",
+          "target": "building_51",
           "target_level": 12
         }
       ],
@@ -9057,24 +8316,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 13
         }
       ],
       "race": null
@@ -9119,14 +8363,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 16
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 13
         }
       ],
       "race": null
@@ -9176,19 +8415,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 16
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 14
         }
       ],
       "race": null
@@ -9238,24 +8467,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 17
         }
       ],
       "race": null
@@ -9305,24 +8519,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
+          "type": "building_level",
+          "target": "building_51",
           "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 12
         }
       ],
       "race": null
@@ -9372,24 +8571,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 18
         }
       ],
       "race": null
@@ -9439,29 +8623,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 24
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 22
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 16
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 19
         }
       ],
       "race": null
@@ -9511,29 +8675,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 25
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_7",
+          "type": "building_level",
+          "target": "building_51",
           "target_level": 20
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 24
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 18
         }
       ],
       "race": null
@@ -9571,18 +8715,7 @@
           "amount": 100
         }
       ],
-      "requirements": [
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_11",
-          "target_level": 6
-        }
-      ],
+      "requirements": [],
       "race": null
     },
     {
@@ -9625,19 +8758,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 6
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_11",
-          "target_level": 8
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 5
         }
       ],
       "race": null
@@ -9682,19 +8805,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_11",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 15
         }
       ],
       "race": null
@@ -9739,19 +8852,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 10
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_11",
-          "target_level": 12
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 9
         }
       ],
       "race": null
@@ -9801,18 +8904,8 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
+          "type": "building_level",
+          "target": "building_51",
           "target_level": 10
         }
       ],
@@ -9863,24 +8956,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_7",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 18
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_9",
-          "target_level": 8
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 14
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 16
         }
       ],
       "race": null
@@ -9925,19 +9003,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_5",
-          "target_level": 16
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_8",
-          "target_level": 12
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_10",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 6
         }
       ],
       "race": null
@@ -10260,14 +9328,9 @@
       ],
       "requirements": [
         {
-          "type": "technology_level",
-          "target": "tech_2",
-          "target_level": 14
-        },
-        {
-          "type": "technology_level",
-          "target": "tech_6",
-          "target_level": 10
+          "type": "building_level",
+          "target": "building_43",
+          "target_level": 4
         }
       ],
       "race": null
@@ -10308,6 +9371,7 @@
   "characteristics": [
     {
       "code": "char_thrust",
+      "kind": "drive_push",
       "sort_order": 1,
       "name": {
         "uk": "Тяга",
@@ -10358,6 +9422,7 @@
     },
     {
       "code": "char_damage",
+      "kind": "damage",
       "sort_order": 5,
       "name": {
         "uk": "Шкода",
@@ -10419,6 +9484,7 @@
     },
     {
       "code": "char_shield_capacity",
+      "kind": "shield_capacity",
       "sort_order": 10,
       "name": {
         "uk": "Ємність щита",

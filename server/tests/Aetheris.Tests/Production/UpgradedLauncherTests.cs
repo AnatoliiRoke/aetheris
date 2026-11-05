@@ -77,7 +77,14 @@ public sealed class UpgradedLauncherTests
         Assert.Equal(baseRecipe.SortOrder, upgradeRecipe.SortOrder);
         Assert.Equal(baseRecipe.Race, upgradeRecipe.Race);
         Assert.Equal(baseRecipe.Ingredients, upgradeRecipe.Ingredients);
-        Assert.Equal(baseRecipe.Requirements, upgradeRecipe.Requirements);
+
+        // The ladder of the hulls and the modules gives every part a level of its own factory
+        // (task 00045), so the upgrade asks for the same factory and no science.
+        Assert.All(upgradeRecipe.Requirements, requirement =>
+        {
+            Assert.Equal(RequirementTypes.BuildingLevel, requirement.Type);
+            Assert.Equal(upgradeRecipe.Factory, requirement.Target);
+        });
     }
 
     /// <summary>
@@ -140,8 +147,19 @@ public sealed class UpgradedLauncherTests
         SeedRecipe seedRecipe = data.Recipes[^1];
         IReadOnlyList<RequirementDefinition> restoredGates = await requirements.GetAsync(RequirementSubjectTypes.Recipe, restoredRecipe.Id, 1, Token);
         Assert.NotEmpty(restoredGates);
+
+        List<(string Type, int TargetId, int TargetLevel)> expectedGates = [];
+
+        foreach (Aetheris.Production.Data.SeedRequirement gate in seedRecipe.Requirements)
+        {
+            int targetId = gate.Type == RequirementTypes.BuildingLevel
+                ? (await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>().FindBuildingTypeIdAsync(gate.Target, Token))!.Value
+                : technologyIds[gate.Target];
+            expectedGates.Add((gate.Type, targetId, gate.TargetLevel));
+        }
+
         Assert.Equal(
-            seedRecipe.Requirements.Select(gate => (gate.Type, technologyIds[gate.Target], gate.TargetLevel)).Order(),
+            expectedGates.Order(),
             restoredGates.Select(gate => (gate.RequirementType, gate.TargetId, gate.TargetLevel)).Order());
 
         // A second start finds nothing missing.

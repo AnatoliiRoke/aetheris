@@ -772,9 +772,19 @@ public sealed class PlanetQueryService
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
+        // The speed bonus of a level comes from the catalog in memory, so the answer costs no
+        // second read (task 00045).
+        BuildingCatalog catalog = await _catalogCache.GetAsync(_dbContext, _world, _requirements, cancellationToken).ConfigureAwait(false);
+
         return
         [
-            .. rows.Select(building => new PlanetBuildingLevelById(building.Id, building.BuildingTypeId, building.Level))
+            .. rows.Select(building => new PlanetBuildingLevelById(
+                building.Id,
+                building.BuildingTypeId,
+                building.Level,
+                catalog.FindType(building.BuildingTypeId)?.Levels.GetValueOrDefault(building.Level)?.Effects
+                    .Where(effect => string.Equals(effect.EffectType, BuildingEffectTypes.ProductionSpeedBonus, StringComparison.Ordinal))
+                    .Sum(effect => effect.Value) ?? decimal.Zero))
         ];
     }
 

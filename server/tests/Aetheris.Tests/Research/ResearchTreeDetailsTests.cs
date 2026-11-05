@@ -56,6 +56,11 @@ public sealed class ResearchTreeDetailsTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ScienceCenter, 10);
+
+        // The sciences grow from the first two, so the player knows them well and the others are
+        // open (the tree of the sciences of task 00045).
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_1", 10);
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_2", 10);
         IResearchModule research = services.GetRequiredService<IResearchModule>();
 
         TechnologyDto technology = (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token))
@@ -129,6 +134,11 @@ public sealed class ResearchTreeDetailsTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ScienceCenter, 10);
+
+        // The sciences grow from the first two, so the player knows them well and the others are
+        // open (the tree of the sciences of task 00045).
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_1", 10);
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_2", 10);
         IResearchModule research = services.GetRequiredService<IResearchModule>();
 
         TechnologyDto before = (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token))
@@ -161,10 +171,18 @@ public sealed class ResearchTreeDetailsTests
         using IServiceScope scope = _factory.Services.CreateScope();
         IServiceProvider services = scope.ServiceProvider;
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ScienceCenter, 10);
+
+        // The sciences grow from the first two, so the player knows them well and the others are
+        // open (the tree of the sciences of task 00045).
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_1", 10);
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_2", 10);
         IResearchModule research = services.GetRequiredService<IResearchModule>();
 
+        // The two root sciences are learned, so the chain is made of the sciences that grow from them.
         List<TechnologyDto> open = [.. (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token))
-            .Technologies.Where(technology => technology.Status == ResearchTechnologyStatuses.Available)];
+            .Technologies.Where(technology => technology.Status == ResearchTechnologyStatuses.Available
+                && technology.NameKey != "research.technology.tech_1.name"
+                && technology.NameKey != "research.technology.tech_2.name")];
         TechnologyDto root = open[0];
         TechnologyDto next = open[1];
         TechnologyDto beyond = open[2];

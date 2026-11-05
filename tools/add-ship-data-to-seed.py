@@ -47,30 +47,32 @@ PART_GROUP_ROLES = {
 }
 
 # The modules of the group of the other ship modules that have a role of their own: the
-# defensive ones are of the combat, the cargo ones and the colonial one are of the transport.
+# defensive ones are of the combat, the colonial one is of the transport. The cargo ones and
+# the module of transmission go on every hull, for the ships of war carry cargo too, so they
+# are of no role of their own (the layout of the author, task 00042).
 PART_ROLES = {
     "part_m_63": "combat",
-    "part_m_66": "transport",
-    "part_m_67": "transport",
+    "part_m_66": "universal",
+    "part_m_67": "universal",
     "part_m_68": "combat",
-    "part_m_69": "transport",
+    "part_m_69": "universal",
     "part_m_70": "transport",
 }
 
 # The kind of the mandatory component of a module, by the group of the module. The drive gives
-# the ship its movement, the reactor gives it the energy and the life support gives it the crew
-# (decision 9).
+# the ship its movement and the reactor gives it the energy. There is no third one: the life
+# support of the ship does not exist (the decision of the author, 05.11.2026).
 PART_GROUP_COMPONENTS = {
     "pg_1": "drive",
     "pg_2": "reactor",
 }
 
-# The life support of the ship is the module of the crew. The list of the author holds one such
-# module in the group of the other ship modules, so it fills the place of the life support
-# until the catalogue holds the life support itself.
-PART_COMPONENTS = {
-    "part_m_64": "life_support",
-}
+# The modules of a kind of their own, out of the groups of the modules.
+PART_COMPONENTS: dict[str, str] = {}
+
+# The life support of the ship does not exist: there is no such rule in the game (the decision
+# of the author, 05.11.2026). The board computer is an ordinary module: it lowers the crew the
+# ship needs and gives a bonus to the push, the shields and the scan speed.
 
 # The groups of the hulls whose race gives one more slot (decision 11).
 RACE_BONUS_SLOT_GROUPS = ("pg_15", "pg_16")
@@ -84,6 +86,12 @@ SHIP_HULL_GROUPS = ("pg_12", "pg_14", "pg_15", "pg_16", "pg_17")
 # "the reactor limits the modules").
 FUEL_PARTS = ("pg_1", "part_m_64")
 
+# The parts that are not modules of a ship: the ammunition of the weapons and the capsules of
+# the inhabitants. They are carried in the hold or used on a body, never fitted to a hull, so
+# they never show in the constructor of the ships (the decision of the author).
+NOT_SHIP_MODULE_GROUPS = ("pg_7",)
+NOT_SHIP_MODULE_PARTS = ("part_m_80", "part_m_81", "part_m_82", "part_m_83")
+
 
 def main() -> None:
     with open(SEED, encoding="utf-8") as handle:
@@ -92,23 +100,9 @@ def main() -> None:
     ship_hulls = [part["code"] for part in data["parts"]
                   if part["group"] in SHIP_HULL_GROUPS]
 
-    # The life support is the module of the crew, so every hull a ship may be built of takes
-    # it: without it the ship has no crew and cannot be saved (decision 9).
-    links = {row["part"]: list(row["hulls"]) for row in data["part_hulls"]}
-    for part in data["parts"]:
-        component = PART_COMPONENTS.get(part["code"]) or PART_GROUP_COMPONENTS.get(part["group"])
-        if component != "life_support":
-            continue
-
-        current = links.get(part["code"], [])
-        for hull in ship_hulls:
-            if hull not in current:
-                current.append(hull)
-
-        links[part["code"]] = current
-
-    for row in data["part_hulls"]:
-        row["hulls"] = links[row["part"]]
+    # The life support of the ship does not exist, so no hull needs it (the decision of the
+    # author, 05.11.2026). The belonging of the modules to the hulls is the layout of the
+    # author (task 00042), and the seed keeps it as it is.
 
     characteristics = data["characteristics"]
     if not any(row["code"] == "char_hull_race_slot" for row in characteristics):
@@ -168,6 +162,9 @@ def main() -> None:
             if "char_energy_use" in characteristics:
                 characteristics["char_energy_use"] = collections.OrderedDict([("number", 0)])
 
+        if group in NOT_SHIP_MODULE_GROUPS or code in NOT_SHIP_MODULE_PARTS:
+            attributes["not_a_ship_module"] = collections.OrderedDict([("code", "true")])
+
     with open(SEED, "w", encoding="utf-8") as handle:
         json.dump(data, handle, ensure_ascii=False, indent=2)
         handle.write("\n")
@@ -176,12 +173,11 @@ def main() -> None:
     modules = sum(1 for part in data["parts"] if "role" in part.get("attributes", {}))
     components = sum(1 for part in data["parts"] if "component" in part.get("attributes", {}))
     bonus = sum(1 for part in data["parts"] if "char_hull_race_slot" in part.get("characteristics", {}))
-    life = [row for row in data["part_hulls"]
-            if row["part"] in PART_COMPONENTS and row["part"] in links
-            and len(row["hulls"]) == len(ship_hulls)]
+    not_modules = sum(1 for part in data["parts"]
+                       if "not_a_ship_module" in part.get("attributes", {}))
     print(f"hulls with a role: {hulls}, modules with a role: {modules}, "
           f"components: {components}, hulls with the extra slot of the race: {bonus}, "
-          f"life support on every ship hull: {len(life)}")
+          f"parts that are not modules of a ship: {not_modules}")
 
 
 if __name__ == "__main__":

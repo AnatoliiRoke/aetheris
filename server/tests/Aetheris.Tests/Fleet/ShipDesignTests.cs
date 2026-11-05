@@ -54,7 +54,6 @@ public sealed class ShipDesignTests
         ShipHull hull = catalog.HullWithComponents("combat");
         int[] slots = [.. catalog.ComponentsFor(hull, "drive").Take(1)
             .Concat(catalog.ComponentsFor(hull, "reactor").Take(1))
-            .Concat(catalog.ComponentsFor(hull, "life_support").Take(1))
             .Select(module => module.Id)];
 
         HttpResponseMessage created = await CreateAsync(player, "Перехоплювач", hull.Id);
@@ -72,7 +71,6 @@ public sealed class ShipDesignTests
         Assert.Equal(slots.Length, savedBody.RootElement.GetProperty("slots").GetArrayLength());
         Assert.True(savedBody.RootElement.GetProperty("summary").GetProperty("has_drive").GetBoolean());
         Assert.True(savedBody.RootElement.GetProperty("summary").GetProperty("has_reactor").GetBoolean());
-        Assert.True(savedBody.RootElement.GetProperty("summary").GetProperty("has_life_support").GetBoolean());
 
         HttpResponseMessage renamed = await SendAsync(player, Designs + "/rename", new { design_id = designId, name = "Новий" });
         Assert.Equal(HttpStatusCode.OK, renamed.StatusCode);
@@ -155,11 +153,12 @@ public sealed class ShipDesignTests
     }
 
     /// <summary>
-    /// The ship needs a drive, a reactor and the life support.
+    /// The ship needs a drive and a reactor. There is no life support: the rule does not exist
+    /// in the game (the decision of the author, 05.11.2026).
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task The_ship_needs_a_drive_a_reactor_and_the_life_support()
+    public async Task The_ship_needs_a_drive_and_a_reactor()
     {
         await ResetAsync();
         PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -170,18 +169,14 @@ public sealed class ShipDesignTests
 
         int drive = catalog.ComponentsFor(hull, "drive").First().Id;
         int reactor = catalog.ComponentsFor(hull, "reactor").First().Id;
-        int lifeSupport = catalog.ComponentsFor(hull, "life_support").First().Id;
 
-        HttpResponseMessage noDrive = await SaveAsync(player, await CreateIdAsync(player, "Без руху", hull.Id), hull.Id, [reactor, lifeSupport]);
+        HttpResponseMessage noDrive = await SaveAsync(player, await CreateIdAsync(player, "Без руху", hull.Id), hull.Id, [reactor]);
         Assert.Equal("fleet_drive_missing", await TestAccounts.ReadErrorAsync(noDrive));
 
-        HttpResponseMessage noReactor = await SaveAsync(player, await CreateIdAsync(player, "Без енергії", hull.Id), hull.Id, [drive, lifeSupport]);
+        HttpResponseMessage noReactor = await SaveAsync(player, await CreateIdAsync(player, "Без енергії", hull.Id), hull.Id, [drive]);
         Assert.Equal("fleet_reactor_missing", await TestAccounts.ReadErrorAsync(noReactor));
 
-        HttpResponseMessage noLifeSupport = await SaveAsync(player, await CreateIdAsync(player, "Без екіпажу", hull.Id), hull.Id, [drive, reactor]);
-        Assert.Equal("fleet_life_support_missing", await TestAccounts.ReadErrorAsync(noLifeSupport));
-
-        HttpResponseMessage complete = await SaveAsync(player, await CreateIdAsync(player, "Повний", hull.Id), hull.Id, [drive, reactor, lifeSupport]);
+        HttpResponseMessage complete = await SaveAsync(player, await CreateIdAsync(player, "Повний", hull.Id), hull.Id, [drive, reactor]);
         Assert.Equal(HttpStatusCode.OK, complete.StatusCode);
     }
 
@@ -211,13 +206,12 @@ public sealed class ShipDesignTests
             .First();
 
         int drive = catalog.ComponentsFor(hull, "drive").First().Id;
-        int lifeSupport = catalog.ComponentsFor(hull, "life_support").First().Id;
 
         HttpResponseMessage response = await SaveAsync(
             player,
             await CreateIdAsync(player, "Без енергії", hull.Id),
             hull.Id,
-            [drive, lifeSupport, reactor.Id, hungry.Id]);
+            [drive, reactor.Id, hungry.Id]);
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         Assert.Equal("fleet_energy_short", await TestAccounts.ReadErrorAsync(response));
@@ -241,7 +235,6 @@ public sealed class ShipDesignTests
 
         int[] combatKit = [.. catalog.ComponentsFor(combat, "drive").Take(1)
             .Concat(catalog.ComponentsFor(combat, "reactor").Take(1))
-            .Concat(catalog.ComponentsFor(combat, "life_support").Take(1))
             .Select(module => module.Id)];
 
         ShipModule weapon = catalog.Modules.First(module => module.Role == "combat");
@@ -284,7 +277,6 @@ public sealed class ShipDesignTests
 
         int[] kit = [.. catalog.ComponentsFor(hull, "drive").Take(1)
             .Concat(catalog.ComponentsFor(hull, "reactor").Take(1))
-            .Concat(catalog.ComponentsFor(hull, "life_support").Take(1))
             .Select(module => module.Id)];
 
         // The modules of the seed name the hulls they fit, so the test picks the module that
@@ -313,11 +305,11 @@ public sealed class ShipDesignTests
 
         ShipCatalog catalog = await ReadCatalogAsync(player);
 
-        ShipHull heavy = catalog.Hulls.First(entry => entry.AllowsRaceBonusSlot);
-        ShipHull light = catalog.Hulls.First(entry => !entry.AllowsRaceBonusSlot);
+        ShipHull heavy = catalog.Hulls.First(entry => entry.RaceBonusSlots > 0);
+        ShipHull light = catalog.Hulls.First(entry => entry.RaceBonusSlots == 0);
 
-        Assert.True(heavy.AllowsRaceBonusSlot);
-        Assert.False(light.AllowsRaceBonusSlot);
+        Assert.True(heavy.RaceBonusSlots > 0);
+        Assert.Equal(0, light.RaceBonusSlots);
 
         // The light hull takes no extra slot, so the project that asks for one is refused.
         HttpResponseMessage refused = await CreateAsync(player, "Легкий з бонусом", light.Id, true);
@@ -330,7 +322,122 @@ public sealed class ShipDesignTests
 
         using JsonDocument body = JsonDocument.Parse(await accepted.Content.ReadAsStringAsync(Token));
         int total = body.RootElement.GetProperty("summary").GetProperty("total_slots").GetInt32();
-        Assert.Equal(heavy.Slots + 1, total);
+        Assert.Equal(heavy.Slots + heavy.RaceBonusSlots, total);
+    }
+
+    /// <summary>
+    /// The stock of the body does not matter for a project: a module that is not on the stock
+    /// goes into the design and the design is saved (the decision of the author, task 00038).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_design_is_saved_whatever_the_stock_of_the_body_is()
+    {
+        await ResetAsync();
+        PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        await SetBureauLevelAsync(player.PlanetId, 5);
+
+        ShipCatalog catalog = await ReadCatalogAsync(player);
+        ShipHull hull = catalog.HullWithComponents("combat");
+        int[] kit = [.. catalog.ComponentsFor(hull, "drive").Take(1)
+            .Concat(catalog.ComponentsFor(hull, "reactor").Take(1))
+            .Select(module => module.Id)];
+
+        // The module of the weapon is not on the stock of the body, and the design takes it.
+        ShipModule weapon = catalog.Modules.First(module => module.Fits(hull) && module.Component is null);
+        int[] slots = [.. kit, weapon.Id];
+
+        HttpResponseMessage created = await CreateAsync(player, "Без складу", hull.Id);
+        Assert.Equal(HttpStatusCode.OK, created.StatusCode);
+
+        using JsonDocument createdBody = JsonDocument.Parse(await created.Content.ReadAsStringAsync(Token));
+        long designId = createdBody.RootElement.GetProperty("id").GetInt64();
+
+        HttpResponseMessage saved = await SaveAsync(player, designId, hull.Id, slots);
+        Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
+
+        using JsonDocument savedBody = JsonDocument.Parse(await saved.Content.ReadAsStringAsync(Token));
+        Assert.Equal(slots.Length, savedBody.RootElement.GetProperty("slots").GetArrayLength());
+    }
+
+    /// <summary>
+    /// A peaceful module goes on a transport hull: the transport hull is a peaceful hull, so
+    /// the drilling rig goes on the «Жук» (the decision of the author, game-design/05, 3.1б).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_peaceful_module_goes_on_a_transport_hull()
+    {
+        await ResetAsync();
+        PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        await SetBureauLevelAsync(player.PlanetId, 5);
+
+        ShipCatalog catalog = await ReadCatalogAsync(player);
+        ShipHull transport = catalog.Hulls.First(hull => hull.Role == "transport");
+        ShipModule peaceful = catalog.Modules.First(module => module.Role == "civil" && module.Fits(transport));
+
+        HttpResponseMessage created = await CreateAsync(player, "Копалка", transport.Id);
+        Assert.True(
+            created.StatusCode == HttpStatusCode.OK,
+            $"{(int)created.StatusCode}: {await created.Content.ReadAsStringAsync(Token)}");
+
+        using JsonDocument createdBody = JsonDocument.Parse(await created.Content.ReadAsStringAsync(Token));
+        long designId = createdBody.RootElement.GetProperty("id").GetInt64();
+
+        // The ship needs its drive and its reactor, so they join the peaceful module in the slots.
+        int[] slots = [.. catalog.ComponentsFor(transport, "drive").Take(1)
+            .Concat(catalog.ComponentsFor(transport, "reactor").Take(1))
+            .Select(module => module.Id)
+            .Append(peaceful.Id)];
+
+        HttpResponseMessage saved = await SaveAsync(player, designId, transport.Id, slots);
+        Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
+
+        using JsonDocument savedBody = JsonDocument.Parse(await saved.Content.ReadAsStringAsync(Token));
+        Assert.Equal(slots.Length, savedBody.RootElement.GetProperty("slots").GetArrayLength());
+    }
+
+    /// <summary>
+    /// The catalog of the constructor holds no ammunition and no capsule of inhabitants: they
+    /// are not modules of a ship, so they never show in the list (the decision of the author).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_catalog_holds_no_ammunition_and_no_capsule()
+    {
+        await ResetAsync();
+        PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        await SetBureauLevelAsync(player.PlanetId, 5);
+
+        ShipCatalog catalog = await ReadCatalogAsync(player);
+
+        // The ammunition of the weapons and the capsules of the inhabitants are not modules of
+        // a ship: they are carried in the hold or used on a body.
+        Assert.DoesNotContain(catalog.Modules, module => module.IsAmmunition);
+        Assert.DoesNotContain(catalog.Modules, module => module.IsCapsule);
+    }
+
+    /// <summary>
+    /// The catalog of the constructor holds the types of the modules, so the picker filters them.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_catalog_holds_the_types_of_the_modules()
+    {
+        await ResetAsync();
+        PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        await SetBureauLevelAsync(player.PlanetId, 5);
+
+        ShipCatalog catalog = await ReadCatalogAsync(player);
+
+        Assert.NotEmpty(catalog.ModuleGroups);
+
+        foreach (ShipModuleGroup group in catalog.ModuleGroups)
+        {
+            Assert.Equal(
+                catalog.Modules.Count(module => module.PartGroupCode == group.Code),
+                group.Count);
+        }
     }
 
     /// <summary>
@@ -374,17 +481,22 @@ public sealed class ShipDesignTests
         // slot more than the peaceful hull has. The two hulls are picked with the components
         // that go into both of them, so the change of the hull is the only thing that differs.
         (ShipHull heavy, ShipHull light, int[] kit) = catalog.Hulls
-            .Where(hull => hull.AllowsRaceBonusSlot)
+            .Where(hull => hull.RaceBonusSlots > 0)
             .SelectMany(heavy => catalog.Hulls
-                .Where(light => !light.AllowsRaceBonusSlot)
+                .Where(light => light.RaceBonusSlots == 0)
                 .Select(light => (heavy, light, kit: CommonKit(catalog, heavy, light))))
-            .Where(pair => pair.kit.Length == 3)
+            .Where(pair => pair.kit.Length == 2)
             .First();
 
-        // The ammunition fits every hull, so it fills the rest of the slots.
-        ShipModule filler = catalog.Modules.First(module => module.CompatibleHullIds.Count == 0);
+        // An ordinary module of the combat that goes into both hulls fills the rest of the slots.
+        ShipModule filler = catalog.Modules.First(module => module.Role == "combat"
+            && module.Component is null
+            && !module.IsAmmunition
+            && !module.IsCapsule
+            && module.Fits(heavy)
+            && module.Fits(light));
 
-        int[] slots = [.. kit.Concat(Enumerable.Repeat(filler.Id, heavy.Slots + 1 - kit.Length))];
+        int[] slots = [.. kit.Concat(Enumerable.Repeat(filler.Id, heavy.Slots + heavy.RaceBonusSlots - kit.Length))];
 
         HttpResponseMessage created = await CreateAsync(player, "Великий", heavy.Id, true);
         Assert.Equal(HttpStatusCode.OK, created.StatusCode);
@@ -396,7 +508,7 @@ public sealed class ShipDesignTests
         Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
 
         using JsonDocument savedBody = JsonDocument.Parse(await saved.Content.ReadAsStringAsync(Token));
-        Assert.Equal(heavy.Slots + 1, savedBody.RootElement.GetProperty("slots").GetArrayLength());
+        Assert.Equal(heavy.Slots + heavy.RaceBonusSlots, savedBody.RootElement.GetProperty("slots").GetArrayLength());
 
         // The hull changes and the new hull has fewer slots, so the slots that do not fit are
         // cleared (task 00038, section 6, question 7).
@@ -469,7 +581,7 @@ public sealed class ShipDesignTests
         Assert.All(catalog.Hulls, hull => Assert.True(hull.Slots > 0));
         Assert.Contains(catalog.Modules, module => module.Component == "drive");
         Assert.Contains(catalog.Modules, module => module.Component == "reactor");
-        Assert.Contains(catalog.Modules, module => module.Component == "life_support");
+        Assert.DoesNotContain(catalog.Modules, module => module.Component == "life_support");
     }
 
     /// <summary>
@@ -512,6 +624,7 @@ public sealed class ShipDesignTests
         return new ShipCatalog(
             [.. body.RootElement.GetProperty("hulls").EnumerateArray().Select(ReadHull)],
             [.. body.RootElement.GetProperty("modules").EnumerateArray().Select(ReadModule)],
+            [.. body.RootElement.GetProperty("module_groups").EnumerateArray().Select(ReadModuleGroup)],
             body.RootElement.GetProperty("design_limit").GetInt32(),
             body.RootElement.GetProperty("design_count").GetInt32());
     }
@@ -591,31 +704,49 @@ public sealed class ShipDesignTests
         element.GetProperty("id").GetInt32(),
         element.GetProperty("role").GetString() ?? string.Empty,
         element.GetProperty("slots").GetInt32(),
-        element.GetProperty("allows_race_bonus_slot").GetBoolean());
+        element.GetProperty("race_bonus_slots").GetInt32());
 
     private static ShipModule ReadModule(JsonElement element) => new(
         element.GetProperty("id").GetInt32(),
+        element.GetProperty("part_group_code").GetString() ?? string.Empty,
         element.GetProperty("role").GetString() ?? string.Empty,
         element.GetProperty("component").GetString(),
         element.GetProperty("energy_use").GetDecimal(),
         element.GetProperty("power").GetDecimal(),
-        [.. element.GetProperty("compatible_hull_ids").EnumerateArray().Select(id => id.GetInt32())]);
+        [.. element.GetProperty("compatible_hull_ids").EnumerateArray().Select(id => id.GetInt32())],
+        element.GetProperty("is_ammunition").GetBoolean(),
+        element.GetProperty("is_capsule").GetBoolean());
+
+    private static ShipModuleGroup ReadModuleGroup(JsonElement element) => new(
+        element.GetProperty("code").GetString() ?? string.Empty,
+        element.GetProperty("name_key").GetString() ?? string.Empty,
+        element.GetProperty("count").GetInt32());
+
+    /// <summary>
+    /// A type of a module as the test reads it.
+    /// </summary>
+    /// <param name="Code">The neutral code of the group.</param>
+    /// <param name="NameKey">The localisation key of the name of the group.</param>
+    /// <param name="Count">How many modules of the group the catalog holds.</param>
+    private sealed record ShipModuleGroup(string Code, string NameKey, int Count);
 
     /// <summary>
     /// The catalog of the ships as the test reads it.
     /// </summary>
     /// <param name="Hulls">The hulls.</param>
     /// <param name="Modules">The modules.</param>
+    /// <param name="ModuleGroups">The types of the modules.</param>
     /// <param name="DesignLimit">How many projects the player may keep.</param>
     /// <param name="DesignCount">How many projects the player has.</param>
     private sealed record ShipCatalog(
         IReadOnlyList<ShipHull> Hulls,
         IReadOnlyList<ShipModule> Modules,
+        IReadOnlyList<ShipModuleGroup> ModuleGroups,
         int DesignLimit,
         int DesignCount)
     {
         /// <summary>
-        /// Finds the hull of the role that takes a drive, a reactor and the life support, so
+        /// Finds the hull of the role that takes a drive and a reactor, so
         /// the test may build a ship of it.
         /// </summary>
         /// <param name="role">The role of the hull.</param>
@@ -623,8 +754,7 @@ public sealed class ShipDesignTests
         public ShipHull HullWithComponents(string role) =>
             Hulls.First(hull => hull.Role == role
                 && ComponentsFor(hull, "drive").Count > 0
-                && ComponentsFor(hull, "reactor").Count > 0
-                && ComponentsFor(hull, "life_support").Count > 0);
+                && ComponentsFor(hull, "reactor").Count > 0);
 
         /// <summary>
         /// Finds the modules of the kind that go into the hull.
@@ -637,7 +767,7 @@ public sealed class ShipDesignTests
     }
 
     /// <summary>
-    /// Finds the drive, the reactor and the life support that go into both hulls.
+    /// Finds the drive and the reactor that go into both hulls.
     /// </summary>
     /// <param name="catalog">The catalog of the ships.</param>
     /// <param name="heavy">The heavy hull.</param>
@@ -647,14 +777,13 @@ public sealed class ShipDesignTests
     {
         ShipModule? drive = catalog.ComponentsFor(heavy, "drive").FirstOrDefault(module => module.Fits(light));
         ShipModule? reactor = catalog.ComponentsFor(heavy, "reactor").FirstOrDefault(module => module.Fits(light));
-        ShipModule? lifeSupport = catalog.ComponentsFor(heavy, "life_support").FirstOrDefault(module => module.Fits(light));
 
-        if (drive is null || reactor is null || lifeSupport is null)
+        if (drive is null || reactor is null)
         {
             return [];
         }
 
-        return [drive.Id, reactor.Id, lifeSupport.Id];
+        return [drive.Id, reactor.Id];
     }
 
     /// <summary>
@@ -677,13 +806,14 @@ public sealed class ShipDesignTests
     /// <param name="Id">The hull.</param>
     /// <param name="Role">The role of the hull.</param>
     /// <param name="Slots">How many slots the hull has.</param>
-    /// <param name="AllowsRaceBonusSlot">Whether the race gives the hull one more slot.</param>
-    private sealed record ShipHull(int Id, string Role, int Slots, bool AllowsRaceBonusSlot);
+    /// <param name="RaceBonusSlots">How many extra slots the race gives the hull.</param>
+    private sealed record ShipHull(int Id, string Role, int Slots, int RaceBonusSlots);
 
     /// <summary>
     /// A module of the catalog as the test reads it.
     /// </summary>
     /// <param name="Id">The module.</param>
+    /// <param name="PartGroupCode">The neutral code of the group of the module: its type.</param>
     /// <param name="Role">The role of the module.</param>
     /// <param name="Component">The kind of the component the module is.</param>
     /// <param name="EnergyUse">How much energy the module takes.</param>
@@ -691,11 +821,14 @@ public sealed class ShipDesignTests
     /// <param name="CompatibleHullIds">The hulls the module fits.</param>
     private sealed record ShipModule(
         int Id,
+        string PartGroupCode,
         string Role,
         string? Component,
         decimal EnergyUse,
         decimal Power,
-        IReadOnlyList<int> CompatibleHullIds)
+        IReadOnlyList<int> CompatibleHullIds,
+        bool IsAmmunition = false,
+        bool IsCapsule = false)
     {
         /// <summary>
         /// Tells whether the module goes into the hull: a module with no hulls of its own

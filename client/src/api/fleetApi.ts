@@ -11,6 +11,8 @@ export interface ShipHull {
   descriptionKey: string;
   imageKey: string | null;
   partGroupCode: string;
+  /** The localisation key of the name of the group of the hull: the class of the hull. */
+  partGroupNameKey: string;
   /** The role of the hull: what it carries. */
   role: string;
   /** How many slots the hull has. */
@@ -21,10 +23,8 @@ export interface ShipHull {
   integrity: number;
   /** The weight of the hull in tonnes. */
   weight: number;
-  /** Whether the race of the player gives the hull one more slot. */
-  allowsRaceBonusSlot: boolean;
-  /** How many of the hull the body has on its stock. */
-  stock: number;
+  /** How many extra slots the race gives the hull. */
+  raceBonusSlots: number;
 }
 
 /**
@@ -36,7 +36,10 @@ export interface ShipModule {
   nameKey: string;
   descriptionKey: string;
   imageKey: string | null;
+  /** The neutral code of the group of the module: its type. */
   partGroupCode: string;
+  /** The localisation key of the name of the group of the module: its type. */
+  partGroupNameKey: string;
   /** The role of the module: what it may be put on. */
   role: string;
   /** The kind of the component the module is: the drive, the reactor or the life support. */
@@ -51,12 +54,22 @@ export interface ShipModule {
   power: number;
   /** How many people the module needs. */
   crew: number;
+  /** The push the module gives, for a drive. */
+  drivePush: number;
+  /** The damage the module makes, for a weapon. */
+  damage: number;
+  /** The kind of the damage the module makes: the energy or the kinetic one. */
+  damageKind: string | null;
+  /** The capacity of the shield of the module, for a shield. */
+  shieldCapacity: number;
   /** The weight of one module in tonnes. */
   weight: number;
   /** The marks of the module that the catalog holds. */
   markLevels: number[];
-  /** How many of the module the body has on its stock. */
-  stock: number;
+  /** Whether the module is ammunition of a weapon: it is loaded, not fitted. */
+  isAmmunition: boolean;
+  /** Whether the module is a capsule of inhabitants: it is used on a body, not fitted. */
+  isCapsule: boolean;
 }
 
 /**
@@ -65,10 +78,25 @@ export interface ShipModule {
 export interface ShipCatalog {
   hulls: ShipHull[];
   modules: ShipModule[];
+  /** The types of the modules, for the filters of the picker. */
+  moduleGroups: ShipModuleGroup[];
   /** How many projects the player may keep. */
   designLimit: number;
   /** How many projects the player has. */
   designCount: number;
+}
+
+/**
+ * A type of a module: the group of the module, with the name of the group and how many modules
+ * of it the catalog holds (task 00038).
+ */
+export interface ShipModuleGroup {
+  /** The neutral code of the group. */
+  code: string;
+  /** The localisation key of the name of the group. */
+  nameKey: string;
+  /** How many modules of the group the catalog holds. */
+  count: number;
 }
 
 /**
@@ -94,9 +122,16 @@ export interface ShipDesignSummary {
   crew: number;
   holdCapacity: number;
   integrity: number;
+  /** The push the drives of the ship give. */
+  drivePush: number;
+  /** The energy damage the weapons of the ship make. */
+  energyDamage: number;
+  /** The kinetic damage the weapons of the ship make. */
+  kineticDamage: number;
+  /** The capacity of the shields of the ship. */
+  shieldCapacity: number;
   hasDrive: boolean;
   hasReactor: boolean;
-  hasLifeSupport: boolean;
 }
 
 /**

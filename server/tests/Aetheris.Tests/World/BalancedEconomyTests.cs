@@ -336,7 +336,9 @@ public sealed class BalancedEconomyTests
             }
         }
 
-        foreach (SeedTechnology technology in Research.Technologies.Where(technology => technology.Requirements is { Count: > 0 }))
+        // A technology priced in a single resource (the matter conversion costs credits only) is
+        // outside the rule: the rule is for the technologies that grow a price of several resources.
+        foreach (SeedTechnology technology in Research.Technologies.Where(technology => technology.Costs.Count > 1))
         {
             for (int level = FirstMineralTechnologyLevel; level <= technology.MaxLevel; level++)
             {

@@ -115,18 +115,18 @@ public static class PlanetEconomy
     }
 
     /// <summary>
-    /// Gets the capacity of the storage of the body that the raid does not reach: the bunkers
-    /// hold this much of every resource of the body, in tonnes.
+    /// Gets the share of the storage of the body that the raid does not reach: the bunkers
+    /// protect this share of the capacity of every resource of the body (task 00045).
     /// </summary>
     /// <param name="catalog">The building catalog.</param>
     /// <param name="levels">The levels by building type.</param>
-    /// <returns>The capacity in tonnes; zero when the body has no bunker.</returns>
-    public static long ProtectedCapacity(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels)
+    /// <returns>The share, between zero and one; zero when the body has no bunker.</returns>
+    public static decimal ProtectedShare(BuildingCatalog catalog, IReadOnlyDictionary<int, int> levels)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(levels);
 
-        return (long)decimal.Floor(EffectSum(catalog, levels, BuildingEffectTypes.ProtectedStorageCapacity));
+        return Math.Clamp(EffectSum(catalog, levels, BuildingEffectTypes.ProtectedStorageShare), decimal.Zero, decimal.One);
     }
 
     /// <summary>

@@ -34,11 +34,11 @@ namespace Aetheris.Tests.Processes;
 [Collection(DatabaseCollection.Name)]
 public sealed partial class ProcessesTests
 {
-    private const string Fuel = "resource_group_3";
+    private const string Ores = "resource_group_1";
 
-    private const string Deuterium = "resource_12";
+    private const string IronOre = "resource_1";
 
-    private const string Helium = "resource_13";
+    private const string TitaniumOre = "resource_2";
 
     private const string Quartzite = "resource_8";
 
@@ -127,9 +127,9 @@ public sealed partial class ProcessesTests
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
 
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-        int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int targetId = await ProcessesTestData.ResourceIdAsync(services, Helium);
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+        int sourceId = await ProcessesTestData.ResourceIdAsync(services, IronOre);
+        int targetId = await ProcessesTestData.ResourceIdAsync(services, TitaniumOre);
 
         long sourceBefore = await ProcessesTestData.BalanceAsync(player, services, sourceId);
         long targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
@@ -188,27 +188,27 @@ public sealed partial class ProcessesTests
         await ProcessesTestData.GiveEveryResourceAsync(player, services);
 
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-        int deuterium = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int plasma = await ProcessesTestData.ResourceIdAsync(services, Helium);
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+        int ironOre = await ProcessesTestData.ResourceIdAsync(services, IronOre);
+        int titaniumOre = await ProcessesTestData.ResourceIdAsync(services, TitaniumOre);
         int quartzite = await ProcessesTestData.ResourceIdAsync(services, Quartzite);
         int produced = await ProcessesTestData.ResourceIdAsync(services, BuildingMaterials);
 
         // Without the technology the conversion would burn the source, so it is refused.
-        Assert.Equal(ProcessErrorCodes.RequirementTechnology, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, plasma)));
+        Assert.Equal(ProcessErrorCodes.RequirementTechnology, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, ironOre, titaniumOre)));
 
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
-        long before = await ProcessesTestData.BalanceAsync(player, services, deuterium);
+        long before = await ProcessesTestData.BalanceAsync(player, services, ironOre);
 
-        Assert.Equal(ProcessErrorCodes.SourceGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, quartzite, plasma)));
-        Assert.Equal(ProcessErrorCodes.SourceGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, produced, plasma)));
-        Assert.Equal(ProcessErrorCodes.TargetGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, quartzite)));
-        Assert.Equal(ProcessErrorCodes.TargetGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, produced)));
-        Assert.Equal(ProcessErrorCodes.SameSourceAndTarget, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, deuterium, deuterium)));
-        Assert.Equal(ProcessErrorCodes.QuantityInvalid, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(0, deuterium, plasma)));
-        Assert.Equal(ProcessErrorCodes.QuantityInvalid, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(long.MaxValue, deuterium, plasma)));
+        Assert.Equal(ProcessErrorCodes.SourceGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, quartzite, titaniumOre)));
+        Assert.Equal(ProcessErrorCodes.SourceGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, produced, titaniumOre)));
+        Assert.Equal(ProcessErrorCodes.TargetGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, ironOre, quartzite)));
+        Assert.Equal(ProcessErrorCodes.TargetGroupMismatch, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, ironOre, produced)));
+        Assert.Equal(ProcessErrorCodes.SameSourceAndTarget, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(10, ironOre, ironOre)));
+        Assert.Equal(ProcessErrorCodes.QuantityInvalid, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(0, ironOre, titaniumOre)));
+        Assert.Equal(ProcessErrorCodes.QuantityInvalid, await RefusedAsync(processes, player, buildingId, recipe.Id, new ProcessOrderRequest(long.MaxValue, ironOre, titaniumOre)));
 
-        Assert.Equal(before, await ProcessesTestData.BalanceAsync(player, services, deuterium));
+        Assert.Equal(before, await ProcessesTestData.BalanceAsync(player, services, ironOre));
         Assert.Empty(await ProcessesTestData.OrdersAsync(player, services, buildingId));
     }
 
@@ -230,9 +230,9 @@ public sealed partial class ProcessesTests
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 10);
 
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-        int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int targetId = await ProcessesTestData.ResourceIdAsync(services, Helium);
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+        int sourceId = await ProcessesTestData.ResourceIdAsync(services, IronOre);
+        int targetId = await ProcessesTestData.ResourceIdAsync(services, TitaniumOre);
         long before = await ProcessesTestData.BalanceAsync(player, services, sourceId);
 
         // A whole order that is cancelled at once returns everything.
@@ -411,13 +411,13 @@ public sealed partial class ProcessesTests
 
     /// <summary>
     /// The step of the technology of the converter is only the right to convert since the
-    /// coefficient moved to the building (task 00028, update of 04.11.2026): archiving the step
-    /// stops nothing, the next order is taken and both orders give the coefficient of the
-    /// converter (decision of the author of 04.11.2026: such steps are not archived).
+    /// coefficient moved to the building (task 00028, task 00045): the data hold one step, so
+    /// archiving it takes the right away and no new order is taken, while the order that was made
+    /// before still finishes and gives the coefficient of the converter.
     /// </summary>
     /// <returns>A task that completes when the assertion has been evaluated.</returns>
     [Fact]
-    public async Task An_archived_step_of_the_technology_does_not_stop_the_conversion()
+    public async Task An_archived_step_of_the_technology_stops_new_conversions_only()
     {
         await ProcessesTestData.ResetAsync(_factory);
         using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
@@ -432,9 +432,9 @@ public sealed partial class ProcessesTests
             int technologyId = await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
 
             IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
-            ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-            int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-            int targetId = await ProcessesTestData.ResourceIdAsync(services, Helium);
+            ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+            int sourceId = await ProcessesTestData.ResourceIdAsync(services, IronOre);
+            int targetId = await ProcessesTestData.ResourceIdAsync(services, TitaniumOre);
             ProcessOrderRequest request = new(10, sourceId, targetId);
             long targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
 
@@ -443,19 +443,18 @@ public sealed partial class ProcessesTests
             ProcessParamInfo step = catalog.ParamAt(recipe.ProcessTypeId, ProcessParamKinds.ValueByLevel, ProcessLevelSources.Technology, technologyId, 1)!;
             await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
 
-            // The step is archived: the next order of the same kind is still taken.
+            // The only step of the technology is the gate of the conversion (task 00045). Once it
+            // is archived no new order is taken, but the order that was made still finishes.
             ProcessReferenceAdminService admin = services.GetRequiredService<ProcessReferenceAdminService>();
             ProcessParamEntity stored = await services.GetRequiredService<ProcessesDbContext>().ProcessParams.AsNoTracking().SingleAsync(entry => entry.Id == step.Id, Token);
             await admin.SetArchivedAsync(ProcessReferenceAdminService.ProcessParamKind, step.Id, true, new Aetheris.Core.Admin.AdminReferenceInput(stored.Version, "test", EmptyValues()), Token);
 
-            await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
-            Assert.Equal(2, (await ProcessesTestData.OrdersAsync(player, services, buildingId)).Count);
+            Assert.Equal(ProcessErrorCodes.ParamMissing, await RefusedAsync(processes, player, buildingId, recipe.Id, request));
 
-            // Both orders give the coefficient of the first level of the converter.
+            // The order gives the coefficient of the first level of the converter.
             long output = (long)decimal.Floor(10 * await ProcessesTestData.BuildingCoefficientAsync(services, BuildingClasses.Converter, 1, BuildingEffectTypes.ConversionCoefficient));
             await ProcessesTestData.CompleteAsync(player, services, buildingId);
-            await ProcessesTestData.CompleteAsync(player, services, buildingId);
-            Assert.Equal(targetBefore + output + output, await ProcessesTestData.BalanceAsync(player, services, targetId));
+            Assert.Equal(targetBefore + output, await ProcessesTestData.BalanceAsync(player, services, targetId));
             Assert.Empty(await ProcessesTestData.OrdersAsync(player, services, buildingId));
         }
         finally
@@ -486,9 +485,9 @@ public sealed partial class ProcessesTests
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
 
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-        int sourceId = await ProcessesTestData.ResourceIdAsync(services, Deuterium);
-        int targetId = await ProcessesTestData.ResourceIdAsync(services, Helium);
+        ProcessRecipeInfo conversion = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+        int sourceId = await ProcessesTestData.ResourceIdAsync(services, IronOre);
+        int targetId = await ProcessesTestData.ResourceIdAsync(services, TitaniumOre);
         long targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
 
         PartFacts hull = await ProcessesTestData.PartAsync(services, Hull);
@@ -552,9 +551,9 @@ public sealed partial class ProcessesTests
             player.Account.UserId,
             Token);
         Assert.False(closed.IsAvailable);
-        Aetheris.Planets.Api.RequirementDto reason = Assert.Single(closed.UnmetRequirements);
-        Assert.Equal(Aetheris.Requirements.Services.RequirementTypes.TechnologyLevel, reason.RequirementType);
-        Assert.Equal(technologyId, reason.TargetId);
+        Aetheris.Planets.Api.RequirementDto reason = Assert.Single(
+            closed.UnmetRequirements,
+            requirement => requirement.RequirementType == Aetheris.Requirements.Services.RequirementTypes.TechnologyLevel && requirement.TargetId == technologyId);
         Assert.Equal(1, reason.TargetLevel);
 
         // The data hold the opening once, at the minimal level of the technology, and not again
@@ -565,15 +564,19 @@ public sealed partial class ProcessesTests
             .ToListAsync(Token);
         Assert.Equal([1], openingLevels);
 
-        // The first level of the technology opens it, and a higher level changes nothing.
+        // The first level of the technology removes its reason; the building still waits for the
+        // other sciences and the administrative centre it asks for.
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
-        Assert.True((await planets.CheckRequirementsAsync(
+        Aetheris.Planets.Api.AvailabilityDto opened = await planets.CheckRequirementsAsync(
             Aetheris.Requirements.Services.RequirementSubjectTypes.BuildingType,
             converterTypeId,
             1,
             player.PlanetId,
             player.Account.UserId,
-            Token)).IsAvailable);
+            Token);
+        Assert.DoesNotContain(
+            opened.UnmetRequirements,
+            requirement => requirement.RequirementType == Aetheris.Requirements.Services.RequirementTypes.TechnologyLevel && requirement.TargetId == technologyId);
     }
 
     /// <summary>
@@ -716,8 +719,8 @@ public sealed partial class ProcessesTests
         await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
 
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-        ProcessOrderRequest request = new(3, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Helium));
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+        ProcessOrderRequest request = new(3, await ProcessesTestData.ResourceIdAsync(services, IronOre), await ProcessesTestData.ResourceIdAsync(services, TitaniumOre));
 
         await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
         ProcessBuildingDto two = await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
@@ -761,8 +764,8 @@ public sealed partial class ProcessesTests
             await ProcessesTestData.GiveEveryResourceAsync(player, services);
             await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 10);
 
-            ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-            targetId = await ProcessesTestData.ResourceIdAsync(services, Helium);
+            ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+            targetId = await ProcessesTestData.ResourceIdAsync(services, TitaniumOre);
             targetBefore = await ProcessesTestData.BalanceAsync(player, services, targetId);
 
             ProcessBuildingDto queued = await services.GetRequiredService<IProcessesModule>().EnqueueAsync(
@@ -770,7 +773,7 @@ public sealed partial class ProcessesTests
                 player.PlanetId,
                 buildingId,
                 recipe.Id,
-                new ProcessOrderRequest(2, await ProcessesTestData.ResourceIdAsync(services, Deuterium), targetId),
+                new ProcessOrderRequest(2, await ProcessesTestData.ResourceIdAsync(services, IronOre), targetId),
                 Token);
             orderId = queued.Queue[0].OrderId;
         }
@@ -882,8 +885,8 @@ public sealed partial class ProcessesTests
         await ProcessesTestData.LearnAsync(stranger, services, ConversionTechnology, 1);
 
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
-        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-        ProcessOrderRequest request = new(2, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Helium));
+        ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+        ProcessOrderRequest request = new(2, await ProcessesTestData.ResourceIdAsync(services, IronOre), await ProcessesTestData.ResourceIdAsync(services, TitaniumOre));
         ProcessBuildingDto queued = await processes.EnqueueAsync(owner.Account.UserId, owner.PlanetId, buildingId, recipe.Id, request, Token);
         long orderId = queued.Queue[0].OrderId;
 
@@ -967,8 +970,8 @@ public sealed partial class ProcessesTests
             await ProcessesTestData.LearnAsync(player, services, ConversionTechnology, 1);
 
             IProcessesModule processes = services.GetRequiredService<IProcessesModule>();
-            ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Fuel);
-            ProcessOrderRequest request = new(1, await ProcessesTestData.ResourceIdAsync(services, Deuterium), await ProcessesTestData.ResourceIdAsync(services, Helium));
+            ProcessRecipeInfo recipe = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, Ores);
+            ProcessOrderRequest request = new(1, await ProcessesTestData.ResourceIdAsync(services, IronOre), await ProcessesTestData.ResourceIdAsync(services, TitaniumOre));
             await processes.EnqueueAsync(player.Account.UserId, player.PlanetId, buildingId, recipe.Id, request, Token);
 
             ProcessReferenceAdminService admin = services.GetRequiredService<ProcessReferenceAdminService>();
@@ -983,12 +986,12 @@ public sealed partial class ProcessesTests
             Assert.Equal(1, await ProcessesTestData.CompleteAsync(player, services, buildingId));
 
             ProcessTypeEntity type = await services.GetRequiredService<ProcessesDbContext>().ProcessTypes.AsNoTracking().SingleAsync(entry => entry.Id == recipe.ProcessTypeId, Token);
-            ProcessRecipeInfo other = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, "resource_group_1");
+            ProcessRecipeInfo other = await ProcessesTestData.RecipeOfGroupAsync(services, ProcessHandlerCodes.MatterConversion, "resource_group_2");
             await admin.SetArchivedAsync(ProcessReferenceAdminService.ProcessTypeKind, type.Id, true, new Aetheris.Core.Admin.AdminReferenceInput(type.Version, "test", EmptyValues()), Token);
 
             Assert.Equal(
                 ProcessErrorCodes.TypeArchived,
-                await RefusedAsync(processes, player, buildingId, other.Id, new ProcessOrderRequest(1, await ProcessesTestData.ResourceIdAsync(services, "resource_1"), await ProcessesTestData.ResourceIdAsync(services, "resource_2"))));
+                await RefusedAsync(processes, player, buildingId, other.Id, new ProcessOrderRequest(1, await ProcessesTestData.ResourceIdAsync(services, "resource_8"), await ProcessesTestData.ResourceIdAsync(services, "resource_9"))));
         }
         finally
         {
@@ -1011,7 +1014,7 @@ public sealed partial class ProcessesTests
 
         long buildingId = await ProcessesTestData.BuildAsync(player, services, BuildingClasses.Converter);
         await ProcessesTestData.GiveEveryResourceAsync(player, services);
-        int gift = await ProcessesTestData.ResourceIdAsync(services, Helium);
+        int gift = await ProcessesTestData.ResourceIdAsync(services, TitaniumOre);
         int buildingTypeId = (await services.GetRequiredService<Aetheris.Planets.IPlanetsModule>().FindBuildingTypeIdByClassAsync(BuildingClasses.Converter, Token))!.Value;
 
         ProcessesDbContext dbContext = services.GetRequiredService<ProcessesDbContext>();

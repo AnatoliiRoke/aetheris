@@ -1,0 +1,1388 @@
+{
+  "source": "aetheris hull ladder",
+  "ladder": [
+    {
+      "position": 1,
+      "hull": "part_h_21",
+      "name": "Малий транспорт «Жук»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 1
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_1",
+          "name": "Реактивний двигун",
+          "factory": "building_40",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_40",
+              "target_level": 1
+            }
+          ]
+        },
+        {
+          "part": "part_m_7",
+          "name": "Ядерний реактор",
+          "factory": "building_41",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_41",
+              "target_level": 1
+            }
+          ]
+        },
+        {
+          "part": "part_m_54",
+          "name": "Бурова установка",
+          "factory": "building_47",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_47",
+              "target_level": 1
+            }
+          ]
+        },
+        {
+          "part": "part_m_66",
+          "name": "Вантажний відсік",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 1
+            }
+          ]
+        },
+        {
+          "part": "part_m_53",
+          "name": "Модуль геологорозвідки",
+          "factory": "building_47",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_47",
+              "target_level": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "hull": "part_h_1",
+      "name": "Винищувач «Сапсан»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 2
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_13",
+          "name": "Легкий лазер",
+          "factory": "building_42",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_42",
+              "target_level": 2
+            }
+          ]
+        },
+        {
+          "part": "part_m_27",
+          "name": "Сталева плита",
+          "factory": "building_44",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_44",
+              "target_level": 3
+            }
+          ]
+        },
+        {
+          "part": "part_m_35",
+          "name": "Силовий щит",
+          "factory": "building_45",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_45",
+              "target_level": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "hull": "part_h_2",
+      "name": "Важкий винищувач «Шершень»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 3
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_2",
+          "name": "Плазмовий двигун",
+          "factory": "building_40",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_40",
+              "target_level": 3
+            }
+          ]
+        },
+        {
+          "part": "part_m_14",
+          "name": "Важкий лазер",
+          "factory": "building_42",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_42",
+              "target_level": 3
+            }
+          ]
+        },
+        {
+          "part": "part_m_28",
+          "name": "Сегментна броня",
+          "factory": "building_44",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_44",
+              "target_level": 4
+            }
+          ]
+        },
+        {
+          "part": "part_m_8",
+          "name": "Імпульсний реактор",
+          "factory": "building_41",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_41",
+              "target_level": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "hull": "part_h_3",
+      "name": "Торпедоносець «Гадюка»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 3
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_24",
+          "name": "РПУ-X1",
+          "factory": "building_43",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_43",
+              "target_level": 3
+            }
+          ]
+        },
+        {
+          "part": "part_m_46",
+          "name": "Стріла-X1",
+          "factory": "building_46",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_46",
+              "target_level": 4
+            }
+          ]
+        },
+        {
+          "part": "part_m_36",
+          "name": "Кварцовий щит",
+          "factory": "building_45",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_45",
+              "target_level": 3
+            }
+          ]
+        },
+        {
+          "part": "part_m_29",
+          "name": "Кобальтова броня",
+          "factory": "building_44",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_44",
+              "target_level": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 5,
+      "hull": "part_h_4",
+      "name": "Важкий торпедоносець «Кобра»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 4
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_84",
+          "name": "РПУ-X1B",
+          "factory": "building_43",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_43",
+              "target_level": 4
+            }
+          ]
+        },
+        {
+          "part": "part_m_47",
+          "name": "Блискавка-X1",
+          "factory": "building_46",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_46",
+              "target_level": 5
+            }
+          ]
+        },
+        {
+          "part": "part_m_15",
+          "name": "Імпульсний лазер",
+          "factory": "building_42",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_42",
+              "target_level": 4
+            }
+          ]
+        },
+        {
+          "part": "part_m_37",
+          "name": "Магнітний щит",
+          "factory": "building_45",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_45",
+              "target_level": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 6,
+      "hull": "part_h_22",
+      "name": "Середній транспорт «Бик»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 5
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_55",
+          "name": "Кристалічний екстрактор",
+          "factory": "building_47",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_47",
+              "target_level": 5
+            }
+          ]
+        },
+        {
+          "part": "part_m_60",
+          "name": "Археологічний модуль",
+          "factory": "building_48",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_48",
+              "target_level": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 7,
+      "hull": "part_h_27",
+      "name": "Видобувна станція",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 6
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_72",
+          "name": "Орбітальний склад",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 8,
+      "hull": "part_h_8",
+      "name": "Корвет «Коршун»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 7
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_16",
+          "name": "Плазмова гармата",
+          "factory": "building_42",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_42",
+              "target_level": 7
+            }
+          ]
+        },
+        {
+          "part": "part_m_30",
+          "name": "Титанова плита",
+          "factory": "building_44",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_44",
+              "target_level": 8
+            }
+          ]
+        },
+        {
+          "part": "part_m_38",
+          "name": "Гравітаційний щит",
+          "factory": "building_45",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_45",
+              "target_level": 7
+            }
+          ]
+        },
+        {
+          "part": "part_m_59",
+          "name": "Корабельний радар",
+          "factory": "building_48",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_48",
+              "target_level": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 9,
+      "hull": "part_h_5",
+      "name": "«Ґедзь»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 7
+        }
+      ],
+      "modules": []
+    },
+    {
+      "position": 10,
+      "hull": "part_h_6",
+      "name": "«Цикада»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 7
+        }
+      ],
+      "modules": []
+    },
+    {
+      "position": 11,
+      "hull": "part_h_7",
+      "name": "«Кліщ»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 7
+        }
+      ],
+      "modules": []
+    },
+    {
+      "position": 12,
+      "hull": "part_h_9",
+      "name": "Фрегат «Барракуда»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 8
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_3",
+          "name": "Іонний двигун",
+          "factory": "building_40",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_40",
+              "target_level": 8
+            }
+          ]
+        },
+        {
+          "part": "part_m_9",
+          "name": "Термоядерний реактор",
+          "factory": "building_41",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_41",
+              "target_level": 9
+            }
+          ]
+        },
+        {
+          "part": "part_m_17",
+          "name": "Іонна гармата",
+          "factory": "building_42",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_42",
+              "target_level": 8
+            }
+          ]
+        },
+        {
+          "part": "part_m_63",
+          "name": "Відновлювач щитів",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 8
+            }
+          ]
+        },
+        {
+          "part": "part_m_58",
+          "name": "Астросканер",
+          "factory": "building_48",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_48",
+              "target_level": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 13,
+      "hull": "part_h_10",
+      "name": "Есмінець «Акула»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 8
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_23",
+          "name": "Рейкова гармата",
+          "factory": "building_43",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_43",
+              "target_level": 8
+            }
+          ]
+        },
+        {
+          "part": "part_m_45",
+          "name": "Рейковий стрижень",
+          "factory": "building_46",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_46",
+              "target_level": 9
+            }
+          ]
+        },
+        {
+          "part": "part_m_32",
+          "name": "Іридієва плита",
+          "factory": "building_44",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_44",
+              "target_level": 9
+            }
+          ]
+        },
+        {
+          "part": "part_m_39",
+          "name": "Нейтронний щит",
+          "factory": "building_45",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_45",
+              "target_level": 8
+            }
+          ]
+        },
+        {
+          "part": "part_m_65",
+          "name": "Збирач уламків",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 8
+            }
+          ]
+        },
+        {
+          "part": "part_m_69",
+          "name": "Модуль передачі",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 14,
+      "hull": "part_h_24",
+      "name": "Важкий транспорт «Кит»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 9
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_70",
+          "name": "Колоніальний модуль",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 9
+            }
+          ]
+        },
+        {
+          "part": "part_m_80",
+          "name": "Кріокапсула (Террани)",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 9
+            }
+          ]
+        },
+        {
+          "part": "part_m_81",
+          "name": "Кріокапсула (Літаріони)",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 9
+            }
+          ]
+        },
+        {
+          "part": "part_m_82",
+          "name": "Кріокапсула (Драккури)",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 9
+            }
+          ]
+        },
+        {
+          "part": "part_m_83",
+          "name": "Кріокапсула (Вейрани)",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 9
+            }
+          ]
+        },
+        {
+          "part": "part_m_57",
+          "name": "Туманнісний збирач",
+          "factory": "building_47",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_47",
+              "target_level": 9
+            }
+          ]
+        },
+        {
+          "part": "part_m_67",
+          "name": "Великий вантажний відсік",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 15,
+      "hull": "part_h_25",
+      "name": "Орбітальна база",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 10
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_71",
+          "name": "Житловий модуль",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 10
+            }
+          ]
+        },
+        {
+          "part": "part_m_73",
+          "name": "Ремонтні майстерні",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 10
+            }
+          ]
+        },
+        {
+          "part": "part_m_74",
+          "name": "Школа командирів",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 10
+            }
+          ]
+        },
+        {
+          "part": "part_m_75",
+          "name": "Торговий центр",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 16,
+      "hull": "part_h_11",
+      "name": "Легкий крейсер «Ягуар»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 11
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_4",
+          "name": "Гравітаційний двигун",
+          "factory": "building_40",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_40",
+              "target_level": 11
+            }
+          ]
+        },
+        {
+          "part": "part_m_21",
+          "name": "Кінетична гармата",
+          "factory": "building_43",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_43",
+              "target_level": 11
+            }
+          ]
+        },
+        {
+          "part": "part_m_43",
+          "name": "Сталевий снаряд",
+          "factory": "building_46",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_46",
+              "target_level": 11
+            }
+          ]
+        },
+        {
+          "part": "part_m_31",
+          "name": "Композитна броня",
+          "factory": "building_44",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_44",
+              "target_level": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 17,
+      "hull": "part_h_12",
+      "name": "Крейсер «Носоріг»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 12
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_10",
+          "name": "Реактор холодного синтезу",
+          "factory": "building_41",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_41",
+              "target_level": 12
+            }
+          ]
+        },
+        {
+          "part": "part_m_18",
+          "name": "Мікрохвильовий випромінювач",
+          "factory": "building_42",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_42",
+              "target_level": 12
+            }
+          ]
+        },
+        {
+          "part": "part_m_25",
+          "name": "РПУ-X2",
+          "factory": "building_43",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_43",
+              "target_level": 12
+            }
+          ]
+        },
+        {
+          "part": "part_m_48",
+          "name": "Спис-X2",
+          "factory": "building_46",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_46",
+              "target_level": 12
+            }
+          ]
+        },
+        {
+          "part": "part_m_44",
+          "name": "Кобальтовий снаряд",
+          "factory": "building_46",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_46",
+              "target_level": 12
+            }
+          ]
+        },
+        {
+          "part": "part_m_68",
+          "name": "Протиракетна система",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 18,
+      "hull": "part_h_13",
+      "name": "Важкий крейсер «Бегемот»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 13
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_5",
+          "name": "Гіпердвигун",
+          "factory": "building_40",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_40",
+              "target_level": 13
+            }
+          ]
+        },
+        {
+          "part": "part_m_19",
+          "name": "Частинковий прискорювач",
+          "factory": "building_42",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_42",
+              "target_level": 13
+            }
+          ]
+        },
+        {
+          "part": "part_m_33",
+          "name": "Наноплита",
+          "factory": "building_44",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_44",
+              "target_level": 13
+            }
+          ]
+        },
+        {
+          "part": "part_m_40",
+          "name": "Плазмовий щит",
+          "factory": "building_45",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_45",
+              "target_level": 13
+            }
+          ]
+        },
+        {
+          "part": "part_m_61",
+          "name": "Радіооптичне маскування",
+          "factory": "building_48",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_48",
+              "target_level": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 19,
+      "hull": "part_h_14",
+      "name": "Броненосець «Панцирник»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 13
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_11",
+          "name": "Гравітаційний реактор",
+          "factory": "building_41",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_41",
+              "target_level": 13
+            }
+          ]
+        },
+        {
+          "part": "part_m_22",
+          "name": "Скорострільна гармата",
+          "factory": "building_43",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_43",
+              "target_level": 13
+            }
+          ]
+        },
+        {
+          "part": "part_m_62",
+          "name": "Детектор маскування",
+          "factory": "building_48",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_48",
+              "target_level": 12
+            }
+          ]
+        },
+        {
+          "part": "part_m_50",
+          "name": "Термоядерна торпеда",
+          "factory": "building_46",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_46",
+              "target_level": 13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 20,
+      "hull": "part_h_15",
+      "name": "Лінкор «Кракен»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 14
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_26",
+          "name": "РПУ-X3",
+          "factory": "building_43",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_43",
+              "target_level": 14
+            }
+          ]
+        },
+        {
+          "part": "part_m_49",
+          "name": "Валькірія-X3",
+          "factory": "building_46",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_46",
+              "target_level": 16
+            }
+          ]
+        },
+        {
+          "part": "part_m_34",
+          "name": "Адаптивна броня",
+          "factory": "building_44",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_44",
+              "target_level": 15
+            }
+          ]
+        },
+        {
+          "part": "part_m_51",
+          "name": "Протонна торпеда",
+          "factory": "building_46",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_46",
+              "target_level": 16
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 21,
+      "hull": "part_h_23",
+      "name": "Великий транспорт «Слон»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 15
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_56",
+          "name": "Збирач ефіру",
+          "factory": "building_47",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_47",
+              "target_level": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 22,
+      "hull": "part_h_26",
+      "name": "Космобаза",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 16
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_76",
+          "name": "Орбітальний термоядерний реактор",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 16
+            }
+          ]
+        },
+        {
+          "part": "part_m_77",
+          "name": "Збагачувач ізотопів гелію",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 16
+            }
+          ]
+        },
+        {
+          "part": "part_m_78",
+          "name": "Екстрактор темної матерії",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 16
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 23,
+      "hull": "part_h_16",
+      "name": "Важкий лінкор «Мамонт»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 17
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_6",
+          "name": "Джамп-двигун",
+          "factory": "building_40",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_40",
+              "target_level": 17
+            }
+          ]
+        },
+        {
+          "part": "part_m_52",
+          "name": "Уранова торпеда",
+          "factory": "building_46",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_46",
+              "target_level": 19
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 24,
+      "hull": "part_h_17",
+      "name": "Дредноут «Горгона»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 18
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_20",
+          "name": "Орексова гармата",
+          "factory": "building_42",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_42",
+              "target_level": 18
+            }
+          ]
+        },
+        {
+          "part": "part_m_64",
+          "name": "Бортовий комп'ютер",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 25,
+      "hull": "part_h_18",
+      "name": "Дестроєр «Каратель»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 18
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_12",
+          "name": "Важкий реактор",
+          "factory": "building_41",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_41",
+              "target_level": 19
+            }
+          ]
+        },
+        {
+          "part": "part_m_41",
+          "name": "Орексовий щит",
+          "factory": "building_45",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_45",
+              "target_level": 18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 26,
+      "hull": "part_h_19",
+      "name": "Супер-лінкор «Тиранозавр»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 19
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_42",
+          "name": "Ефірний щит",
+          "factory": "building_45",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_45",
+              "target_level": 19
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "position": 27,
+      "hull": "part_h_20",
+      "name": "Супер-дредноут «Левіафан»",
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_51",
+          "target_level": 20
+        }
+      ],
+      "modules": [
+        {
+          "part": "part_m_79",
+          "name": "Джамп-модуль",
+          "factory": "building_49",
+          "requirements": [
+            {
+              "type": "building_level",
+              "target": "building_49",
+              "target_level": 20
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

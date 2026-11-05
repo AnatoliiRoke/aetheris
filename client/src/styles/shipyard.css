@@ -1,0 +1,124 @@
+/* AETHERIS — стилі сторінки «Верф» (задача 00038, макет екрана верфі).
+
+   Розміщення і шрифти — ті самі, що в грі: токени вище, готові класи карток і панелей.
+   Макет дав лише структуру екрана, його числа й тексти — серверу. */
+
+/* ---------- лічильник проєктів і фільтр за класом корпусу ---------- */
+.sh-overline { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.sh-overline__counter { margin: 0; color: var(--text-2); font-size: var(--fs-small); }
+.sh-overline__counter b { color: var(--text-1); font-variant-numeric: tabular-nums; }
+
+.sh-filters { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.sh-filter {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  min-height: 32px; padding: 4px 12px;
+  border: 1px solid var(--border); border-radius: var(--r-full);
+  background: transparent; color: var(--text-2);
+  font-size: var(--fs-small); font-weight: 600; cursor: pointer;
+  transition: border-color 0.15s var(--ease), color 0.15s var(--ease), background 0.15s var(--ease);
+}
+.sh-filter:hover { border-color: var(--border-strong); color: var(--text-1); }
+.sh-filter[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--text-1); }
+.sh-filter:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sh-filter__count { color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+/* ---------- картка проєкту ---------- */
+.sh-designs { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-4); }
+
+.sh-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--bg-2); box-shadow: var(--shadow-card); }
+.sh-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.sh-card__badges { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.sh-card__title { margin: 0; font-size: var(--fs-card); font-weight: 700; line-height: 1.25; }
+.sh-card__hull { margin: 0; color: var(--text-2); font-size: var(--fs-small); }
+.sh-card__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.sh-card__actions .btn { flex: 1 1 auto; }
+
+.sh-modules { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1); }
+.sh-modules__row { display: flex; align-items: baseline; gap: var(--space-2); font-size: var(--fs-small); }
+.sh-modules__name { flex: 1 1 auto; color: var(--text-soft); }
+.sh-modules__mark { color: var(--text-2); }
+.sh-modules__count { color: var(--text-1); font-variant-numeric: tabular-nums; }
+
+/* ---------- сітка характеристик ---------- */
+.sh-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-2) var(--space-4); margin: 0; }
+.sh-facts--tight { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: var(--space-2) var(--space-3); }
+.sh-facts__term { color: var(--text-2); font-size: var(--fs-tiny); }
+.sh-facts__value { margin: 0; font-variant-numeric: tabular-nums; }
+
+/* ---------- діалог ---------- */
+.sh-dialog {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-5);
+  background: rgba(7, 11, 22, 0.72);
+  backdrop-filter: blur(2px);
+}
+.sh-dialog__box {
+  display: flex; flex-direction: column; gap: var(--space-4);
+  width: min(960px, 100%); max-height: 88vh; overflow-y: auto;
+  padding: var(--space-5);
+  border: 1px solid var(--border-strong); border-radius: var(--r-xl);
+  background: var(--bg-1); box-shadow: var(--shadow-lg);
+}
+.sh-dialog__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.sh-dialog__title { margin: 0; font-size: var(--fs-name); font-weight: 700; line-height: 1.25; }
+.sh-dialog__lead { margin: 0; color: var(--text-2); font-size: var(--fs-small); }
+.sh-dialog__actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
+
+/* ---------- крок 1: вибір корпусу ---------- */
+.sh-hulls { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-3); }
+.sh-hull { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-2); }
+.sh-hull__name { margin: 0; font-size: var(--fs-card); font-weight: 600; }
+.sh-hull__class { margin: 0; color: var(--text-2); font-size: var(--fs-small); }
+
+/* ---------- крок 2: вікно проєкту ---------- */
+.sh-window__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+.sh-window__hull { display: flex; flex-direction: column; gap: var(--space-1); }
+.sh-window__hull-name { margin: 0; font-size: var(--fs-name); font-weight: 700; }
+.sh-window__hull-class { margin: 0; color: var(--text-2); font-size: var(--fs-small); }
+
+.sh-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-2); }
+.sh-slot {
+  display: flex; flex-direction: column; gap: var(--space-1);
+  min-height: 92px; padding: var(--space-3);
+  border: 1px dashed var(--border-strong); border-radius: var(--r-lg);
+  background: transparent; color: var(--text-2); text-align: left; cursor: pointer;
+}
+.sh-slot--filled { border-style: solid; border-color: var(--border); background: var(--bg-2); cursor: default; }
+.sh-slot__index { color: var(--text-2); font-size: var(--fs-tiny); font-variant-numeric: tabular-nums; }
+.sh-slot__name { color: var(--text-1); font-size: var(--fs-small); font-weight: 600; }
+.sh-slot__mark { color: var(--text-2); font-size: var(--fs-tiny); }
+.sh-slot__fact { color: var(--text-soft); font-size: var(--fs-tiny); font-variant-numeric: tabular-nums; }
+.sh-slot__remove { align-self: flex-start; margin-top: auto; border: 0; background: transparent; color: var(--text-2); font-size: var(--fs-tiny); cursor: pointer; }
+.sh-slot__remove:hover { color: var(--danger-text); }
+.sh-slot__plus { margin: auto; font-size: 20px; line-height: 1; }
+
+.sh-check { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.sh-check__item { display: inline-flex; align-items: center; gap: var(--space-2); padding: 4px 10px; border: 1px solid var(--border); border-radius: var(--r-full); font-size: var(--fs-small); }
+.sh-check__item--warn { border-color: var(--warning); color: var(--warning); }
+.sh-check__item--ok { border-color: var(--success); color: var(--success); }
+
+.sh-note { margin: 0; color: var(--text-2); font-size: var(--fs-small); }
+
+/* ---------- вибір модуля ---------- */
+.sh-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3); }
+.sh-module { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--bg-2); }
+.sh-module--closed { opacity: 0.45; }
+.sh-module__name { margin: 0; font-size: var(--fs-ui); font-weight: 600; }
+.sh-module__facts { margin: 0; color: var(--text-soft); font-size: var(--fs-tiny); font-variant-numeric: tabular-nums; }
+.sh-module__reason { margin: 0; color: var(--warning); font-size: var(--fs-tiny); }
+.sh-module__stock { margin: 0; color: var(--text-2); font-size: var(--fs-tiny); font-variant-numeric: tabular-nums; }
+
+.sh-empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-6) var(--space-4); text-align: center; }
+.sh-empty__text { margin: 0; color: var(--text-2); }
+
+/* ---------- вузькі екрани ---------- */
+@media (max-width: 720px) {
+  .sh-dialog { padding: 0; align-items: flex-end; }
+  .sh-dialog__box { width: 100%; max-height: 92vh; border-radius: var(--r-xl) var(--r-xl) 0 0; border-bottom: 0; }
+  .sh-dialog__actions { flex-direction: column-reverse; }
+  .sh-dialog__actions .btn { width: 100%; }
+  .sh-designs { grid-template-columns: 1fr; }
+  .sh-slots { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .sh-filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: var(--space-1); }
+}

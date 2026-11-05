@@ -71,9 +71,12 @@ public sealed record ShipDesignSlotDto(
 /// <param name="Crew">How many people the modules need.</param>
 /// <param name="HoldCapacity">How much the hold of the hull takes.</param>
 /// <param name="Integrity">How strong the hull is.</param>
+/// <param name="DrivePush">How much push the drives of the ship give.</param>
+/// <param name="EnergyDamage">How much energy damage the weapons of the ship make.</param>
+/// <param name="KineticDamage">How much kinetic damage the weapons of the ship make.</param>
+/// <param name="ShieldCapacity">How much the shields of the ship take.</param>
 /// <param name="HasDrive">Whether the project has a drive.</param>
 /// <param name="HasReactor">Whether the project has a reactor.</param>
-/// <param name="HasLifeSupport">Whether the project has life support.</param>
 public sealed record ShipDesignSummaryDto(
     int TotalSlots,
     int UsedSlots,
@@ -84,20 +87,25 @@ public sealed record ShipDesignSummaryDto(
     decimal Crew,
     decimal HoldCapacity,
     decimal Integrity,
+    decimal DrivePush,
+    decimal EnergyDamage,
+    decimal KineticDamage,
+    decimal ShieldCapacity,
     bool HasDrive,
-    bool HasReactor,
-    bool HasLifeSupport);
+    bool HasReactor);
 
 /// <summary>
 /// The catalog of the ships as the builder reads it (task 00038, section 3.2).
 /// </summary>
 /// <param name="Hulls">The hulls a player may build of.</param>
 /// <param name="Modules">The modules that go into the slots of a hull.</param>
+/// <param name="ModuleGroups">The types of the modules, for the filters of the picker.</param>
 /// <param name="DesignLimit">How many projects the player may keep.</param>
 /// <param name="DesignCount">How many projects the player has.</param>
 public sealed record ShipCatalogViewDto(
     IReadOnlyList<ShipHullViewDto> Hulls,
     IReadOnlyList<ShipModuleViewDto> Modules,
+    IReadOnlyList<ShipModuleGroupViewDto> ModuleGroups,
     int DesignLimit,
     int DesignCount);
 
@@ -110,13 +118,13 @@ public sealed record ShipCatalogViewDto(
 /// <param name="DescriptionKey">The localisation key of the description of the hull.</param>
 /// <param name="ImageKey">The key of the picture of the hull, or <see langword="null"/>.</param>
 /// <param name="PartGroupCode">The neutral code of the group of the hull.</param>
+/// <param name="PartGroupNameKey">The localisation key of the name of the group of the hull: the class of the hull.</param>
 /// <param name="Role">The role of the hull: what it carries.</param>
 /// <param name="Slots">How many slots the hull has.</param>
 /// <param name="HoldCapacity">How much the hold of the hull takes.</param>
 /// <param name="Integrity">How strong the hull is.</param>
 /// <param name="Weight">The weight of the hull in tonnes.</param>
-/// <param name="AllowsRaceBonusSlot">Whether the race may give the hull one more slot.</param>
-/// <param name="Stock">How many of the hull the body has on its stock.</param>
+/// <param name="RaceBonusSlots">How many extra slots the race gives the hull.</param>
 public sealed record ShipHullViewDto(
     int Id,
     string Code,
@@ -124,13 +132,13 @@ public sealed record ShipHullViewDto(
     string DescriptionKey,
     string? ImageKey,
     string PartGroupCode,
+    string PartGroupNameKey,
     string Role,
     int Slots,
     decimal HoldCapacity,
     decimal Integrity,
     decimal Weight,
-    bool AllowsRaceBonusSlot,
-    long Stock);
+    int RaceBonusSlots);
 
 /// <summary>
 /// A module of the catalog of the ships for the builder (task 00038, section 3.3).
@@ -148,9 +156,14 @@ public sealed record ShipHullViewDto(
 /// <param name="EnergyUse">How much energy the module takes, or gives for a generator.</param>
 /// <param name="Power">How much power the module gives, for a reactor.</param>
 /// <param name="Crew">How many people the module needs.</param>
+/// <param name="DrivePush">How much push the module gives, for a drive.</param>
+/// <param name="Damage">How much damage the module makes, for a weapon.</param>
+/// <param name="DamageKind">The kind of the damage the module makes: the energy or the kinetic one.</param>
+/// <param name="ShieldCapacity">How much the shield of the module takes, for a shield.</param>
 /// <param name="Weight">The weight of one module in tonnes.</param>
 /// <param name="MarkLevels">The marks of the module that the catalog holds.</param>
-/// <param name="Stock">How many of the module the body has on its stock.</param>
+/// <param name="IsAmmunition">Whether the module is ammunition of a weapon: it is loaded, not fitted.</param>
+/// <param name="IsCapsule">Whether the module is a capsule of inhabitants: it is used on a body, not fitted.</param>
 public sealed record ShipModuleViewDto(
     int Id,
     string Code,
@@ -158,6 +171,7 @@ public sealed record ShipModuleViewDto(
     string DescriptionKey,
     string? ImageKey,
     string PartGroupCode,
+    string PartGroupNameKey,
     string Role,
     string? Component,
     IReadOnlyList<int> CompatibleHullIds,
@@ -165,6 +179,23 @@ public sealed record ShipModuleViewDto(
     decimal EnergyUse,
     decimal Power,
     decimal Crew,
+    decimal DrivePush,
+    decimal Damage,
+    string? DamageKind,
+    decimal ShieldCapacity,
     decimal Weight,
     IReadOnlyList<int> MarkLevels,
-    long Stock);
+    bool IsAmmunition,
+    bool IsCapsule);
+
+/// <summary>
+/// A type of the modules of the catalog: the group of a module, with the name of the group and
+/// how many modules of it the catalog holds (task 00038, the filters of the module picker).
+/// </summary>
+/// <param name="Code">The neutral code of the group.</param>
+/// <param name="NameKey">The localisation key of the name of the group.</param>
+/// <param name="Count">How many modules of the group the catalog holds.</param>
+public sealed record ShipModuleGroupViewDto(
+    string Code,
+    string NameKey,
+    int Count);

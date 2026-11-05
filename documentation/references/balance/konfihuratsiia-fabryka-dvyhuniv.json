@@ -1,0 +1,835 @@
+{
+  "source": "aetheris engine factory configurator",
+  "building": {
+    "code": "building_40",
+    "name": "Фабрика двигунів",
+    "max_level": 20,
+    "duration_seconds": {
+      "base": 40,
+      "growth": 1.74,
+      "step": 0,
+      "significant": 2
+    },
+    "costs": [
+      {
+        "from_level": 1,
+        "resource": "resource_1",
+        "base": 49.995,
+        "growth": 1.5,
+        "step": 0,
+        "significant": 2
+      },
+      {
+        "from_level": 1,
+        "resource": "resource_20",
+        "base": 24.9975,
+        "growth": 1.5,
+        "step": 0,
+        "significant": 2
+      },
+      {
+        "from_level": 1,
+        "resource": "resource_27",
+        "base": 24.9975,
+        "growth": 1.5,
+        "step": 0,
+        "significant": 2
+      },
+      {
+        "from_level": 10,
+        "resource": "resource_9",
+        "base": 9.999,
+        "growth": 1.5,
+        "step": 0,
+        "significant": 2
+      },
+      {
+        "from_level": 10,
+        "resource": "resource_22",
+        "base": 19.998,
+        "growth": 1.5,
+        "step": 0,
+        "significant": 2
+      },
+      {
+        "from_level": 15,
+        "resource": "resource_10",
+        "base": 9.999,
+        "growth": 1.5,
+        "step": 0,
+        "significant": 2
+      },
+      {
+        "from_level": 1,
+        "resource": "resource_30",
+        "base": 4,
+        "growth": 1,
+        "step": 0,
+        "values": [
+          4,
+          7,
+          12,
+          20,
+          33,
+          53,
+          83,
+          125,
+          180,
+          248,
+          327,
+          412,
+          494,
+          563,
+          640,
+          725,
+          819,
+          923,
+          1037,
+          1161
+        ],
+        "significant": 0
+      }
+    ],
+    "effects": [
+      {
+        "type": "energy_consumption",
+        "base": 9,
+        "growth": 1.3,
+        "step": 0,
+        "significant": 2
+      }
+    ],
+    "requirements": [
+      {
+        "type": "technology_level",
+        "target": "tech_1",
+        "target_level": 6,
+        "subject_level": 2
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 5,
+        "subject_level": 2
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 2,
+        "subject_level": 3
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 1,
+        "subject_level": 3
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 3,
+        "subject_level": 4
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 2,
+        "subject_level": 4
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 4,
+        "subject_level": 5
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 3,
+        "subject_level": 5
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 5,
+        "subject_level": 6
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 4,
+        "subject_level": 6
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 1,
+        "subject_level": 6
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 6,
+        "subject_level": 7
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 5,
+        "subject_level": 7
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 2,
+        "subject_level": 7
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 7,
+        "subject_level": 8
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 6,
+        "subject_level": 8
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 3,
+        "subject_level": 8
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 8,
+        "subject_level": 9
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 7,
+        "subject_level": 9
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 4,
+        "subject_level": 9
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 9,
+        "subject_level": 10
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 8,
+        "subject_level": 10
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 5,
+        "subject_level": 10
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 10,
+        "subject_level": 11
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 9,
+        "subject_level": 11
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 6,
+        "subject_level": 11
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 12,
+        "subject_level": 12
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 10,
+        "subject_level": 12
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 7,
+        "subject_level": 12
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 13,
+        "subject_level": 13
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 11,
+        "subject_level": 13
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 8,
+        "subject_level": 13
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 14,
+        "subject_level": 14
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 12,
+        "subject_level": 14
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 15,
+        "subject_level": 15
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 13,
+        "subject_level": 15
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 9,
+        "subject_level": 15
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 16,
+        "subject_level": 16
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 14,
+        "subject_level": 16
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 10,
+        "subject_level": 16
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 17,
+        "subject_level": 17
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 15,
+        "subject_level": 17
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 11,
+        "subject_level": 17
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 18,
+        "subject_level": 18
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 16,
+        "subject_level": 18
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 12,
+        "subject_level": 18
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 19,
+        "subject_level": 19
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 17,
+        "subject_level": 19
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 13,
+        "subject_level": 19
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_2",
+        "target_level": 25,
+        "subject_level": 20
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_6",
+        "target_level": 25,
+        "subject_level": 20
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_7",
+        "target_level": 25,
+        "subject_level": 20
+      },
+      {
+        "type": "technology_level",
+        "target": "tech_10",
+        "target_level": 25,
+        "subject_level": 20
+      }
+    ]
+  },
+  "technology_unlocks": [
+    {
+      "technology": "tech_2",
+      "type": "unlocks",
+      "unlock_kind": "building_type",
+      "unlock_target": "building_40",
+      "level": 1
+    },
+    {
+      "technology": "tech_7",
+      "type": "unlocks",
+      "unlock_kind": "building_type",
+      "unlock_target": "building_40",
+      "level": 1
+    },
+    {
+      "technology": "tech_10",
+      "type": "unlocks",
+      "unlock_kind": "building_type",
+      "unlock_target": "building_40",
+      "level": 1
+    }
+  ],
+  "recipes": [
+    {
+      "code": "recipe_1",
+      "part": "part_m_1",
+      "name": "Реактивний двигун",
+      "factory": "building_40",
+      "output_quantity": 1,
+      "duration_seconds": 300,
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 8
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 8
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_6",
+          "target_level": 4
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_7",
+          "target_level": 6
+        },
+        {
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 2
+        }
+      ],
+      "ingredients": [
+        {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 200
+        },
+        {
+          "resource": "resource_9",
+          "part": null,
+          "amount": 40
+        },
+        {
+          "resource": "resource_12",
+          "part": null,
+          "amount": 40
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 80
+        },
+        {
+          "resource": "resource_27",
+          "part": null,
+          "amount": 100
+        }
+      ]
+    },
+    {
+      "code": "recipe_2",
+      "part": "part_m_2",
+      "name": "Плазмовий двигун",
+      "factory": "building_40",
+      "output_quantity": 1,
+      "duration_seconds": 360,
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 11
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 12
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_6",
+          "target_level": 8
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_7",
+          "target_level": 10
+        },
+        {
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 6
+        }
+      ],
+      "ingredients": [
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 240
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 240
+        },
+        {
+          "resource": "resource_9",
+          "part": null,
+          "amount": 48
+        },
+        {
+          "resource": "resource_12",
+          "part": null,
+          "amount": 48
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 96
+        },
+        {
+          "resource": "resource_23",
+          "part": null,
+          "amount": 96
+        },
+        {
+          "resource": "resource_27",
+          "part": null,
+          "amount": 120
+        }
+      ]
+    },
+    {
+      "code": "recipe_3",
+      "part": "part_m_3",
+      "name": "Іонний двигун",
+      "factory": "building_40",
+      "output_quantity": 1,
+      "duration_seconds": 430,
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 14
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 16
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_6",
+          "target_level": 12
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_7",
+          "target_level": 14
+        },
+        {
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 10
+        }
+      ],
+      "ingredients": [
+        {
+          "resource": "resource_10",
+          "part": null,
+          "amount": 58
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 120
+        },
+        {
+          "resource": "resource_23",
+          "part": null,
+          "amount": 120
+        },
+        {
+          "resource": "resource_27",
+          "part": null,
+          "amount": 140
+        },
+        {
+          "resource": "resource_12",
+          "part": null,
+          "amount": 60
+        }
+      ]
+    },
+    {
+      "code": "recipe_4",
+      "part": "part_m_4",
+      "name": "Гравітаційний двигун",
+      "factory": "building_40",
+      "output_quantity": 1,
+      "duration_seconds": 520,
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 17
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 20
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_7",
+          "target_level": 18
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_9",
+          "target_level": 10
+        },
+        {
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 13
+        }
+      ],
+      "ingredients": [
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 350
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 140
+        },
+        {
+          "resource": "resource_23",
+          "part": null,
+          "amount": 140
+        },
+        {
+          "resource": "resource_27",
+          "part": null,
+          "amount": 170
+        },
+        {
+          "resource": "resource_13",
+          "part": null,
+          "amount": 55
+        }
+      ]
+    },
+    {
+      "code": "recipe_5",
+      "part": "part_m_5",
+      "name": "Гіпердвигун",
+      "factory": "building_40",
+      "output_quantity": 1,
+      "duration_seconds": 620,
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 20
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 22
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_7",
+          "target_level": 20
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_13",
+          "target_level": 18
+        },
+        {
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 16
+        }
+      ],
+      "ingredients": [
+        {
+          "resource": "resource_17",
+          "part": null,
+          "amount": 41
+        },
+        {
+          "resource": "resource_18",
+          "part": null,
+          "amount": 41
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 170
+        },
+        {
+          "resource": "resource_23",
+          "part": null,
+          "amount": 170
+        },
+        {
+          "resource": "resource_27",
+          "part": null,
+          "amount": 210
+        },
+        {
+          "resource": "resource_13",
+          "part": null,
+          "amount": 126
+        }
+      ]
+    },
+    {
+      "code": "recipe_6",
+      "part": "part_m_6",
+      "name": "Джамп-двигун",
+      "factory": "building_40",
+      "output_quantity": 1,
+      "duration_seconds": 750,
+      "requirements": [
+        {
+          "type": "technology_level",
+          "target": "tech_1",
+          "target_level": 24
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_2",
+          "target_level": 25
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_7",
+          "target_level": 25
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_9",
+          "target_level": 12
+        },
+        {
+          "type": "technology_level",
+          "target": "tech_13",
+          "target_level": 22
+        },
+        {
+          "type": "building_level",
+          "target": "building_40",
+          "target_level": 20
+        }
+      ],
+      "ingredients": [
+        {
+          "resource": "resource_15",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 200
+        },
+        {
+          "resource": "resource_25",
+          "part": null,
+          "amount": 200
+        },
+        {
+          "resource": "resource_27",
+          "part": null,
+          "amount": 250
+        }
+      ]
+    }
+  ]
+}

@@ -253,7 +253,7 @@ public static class PlanetOverviewBuilder
 
         Dictionary<int, decimal> rates = PlanetEconomy.ProductionRates(catalog, figures.Levels, figures.Deposits, figures.Bonuses);
         Dictionary<int, long> capacities = PlanetEconomy.Capacities(catalog, figures.Levels, figures.Bonuses);
-        long protectedCapacity = PlanetEconomy.ProtectedCapacity(catalog, figures.Levels);
+        decimal protectedShare = PlanetEconomy.ProtectedShare(catalog, figures.Levels);
         Dictionary<int, int> queuedLevels = figures.QueuedLevels();
         EnergyBalance energy = PlanetEconomy.Energy(catalog, figures.Levels, figures.Bonuses);
 
@@ -293,7 +293,7 @@ public static class PlanetOverviewBuilder
                     fullAt,
                     weight,
                     amount * weight,
-                    protectedCapacity));
+                    (long)decimal.Floor(capacity * protectedShare)));
             }
         }
 

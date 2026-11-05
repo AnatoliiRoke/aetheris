@@ -42,9 +42,6 @@ public static class FleetErrorCodes
     /// <summary>The project has no reactor.</summary>
     public const string ReactorMissing = "fleet_reactor_missing";
 
-    /// <summary>The project has no life support.</summary>
-    public const string LifeSupportMissing = "fleet_life_support_missing";
-
     /// <summary>The modules of the project take more energy than the reactors give.</summary>
     public const string EnergyShort = "fleet_energy_short";
 
@@ -56,9 +53,6 @@ public static class FleetErrorCodes
 
     /// <summary>The hold of the hull does not take the least set of ammunition.</summary>
     public const string HoldTooSmall = "fleet_hold_too_small";
-
-    /// <summary>The part is not on the body, so there is none to put into the slot.</summary>
-    public const string PartMissing = "fleet_part_missing";
 
     /// <summary>The number of the slot is not a slot of the hull.</summary>
     public const string SlotUnknown = "fleet_slot_unknown";

@@ -214,7 +214,7 @@ public sealed class ProductionQueueService
                 Dictionary<int, long> resourceCosts = Costs(recipe, quantity, ingredient => ingredient.ResourceTypeId);
                 Dictionary<int, long> partCosts = Costs(recipe, quantity, ingredient => ingredient.PartTypeId);
                 DateTimeOffset now = _clock.GameNow;
-                CheckDuration(now, await ScaledSecondsAsync(playerId, planetId, recipe, cancellationToken).ConfigureAwait(false), quantity);
+                CheckDuration(now, await ScaledSecondsAsync(playerId, planetId, planetBuildingId, recipe, cancellationToken).ConfigureAwait(false), quantity);
 
                 // The costs of a civilization are paid from its balance and the rest from the
                 // balance of the body (task 00015).
@@ -384,6 +384,7 @@ public sealed class ProductionQueueService
         ResourceCatalog resources = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
         RequirementContext context = await RequirementContextAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
         ProductionMultipliers multipliers = await _multipliers.GetMultipliersAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        decimal speedBonus = await FactorySpeedBonusAsync(playerId, planetId, planetBuildingId, cancellationToken).ConfigureAwait(false);
         HashSet<int> queuedRecipeIds = [.. queue.Select(order => order.RecipeId)];
 
         // An archived recipe is not offered, but the one a batch of the queue still makes is
@@ -392,7 +393,7 @@ public sealed class ProductionQueueService
         [
             .. catalog.RecipesOfFactory(factory.BuildingTypeId)
                 .Where(recipe => IsOffered(catalog, recipe, resources) || queuedRecipeIds.Contains(recipe.Id))
-                .Select(recipe => RecipeDto(catalog, resources, recipe, context, multipliers)),
+                .Select(recipe => RecipeDto(catalog, resources, recipe, context, multipliers, speedBonus)),
         ];
 
         List<ProductionOrderDto> orders =
@@ -445,11 +446,18 @@ public sealed class ProductionQueueService
         ProductionMultipliers multipliers = await _multipliers.GetMultipliersAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
         HashSet<int> builtTypeIds = [.. factories.Where(factory => factory.Level > 0).Select(factory => factory.BuildingTypeId)];
 
+        // A recipe takes the speed bonus of the factory of its type: the bonus comes with the
+        // factories, so it costs no read of its own (task 00045).
+        Dictionary<int, decimal> typeBonuses = factories
+            .GroupBy(factory => factory.BuildingTypeId)
+            .ToDictionary(group => group.Key, group => group.Max(factory => factory.SpeedBonus));
+
         List<ProductionRecipeDto> recipes = [];
 
         foreach (RecipeInfo recipe in catalog.Recipes.Where(recipe => IsOffered(catalog, recipe, resources)).OrderBy(recipe => recipe.SortOrder))
         {
-            ProductionRecipeDto dto = RecipeDto(catalog, resources, recipe, context, multipliers);
+            decimal recipeBonus = recipe.BuildingTypeId is { } factoryTypeId ? typeBonuses.GetValueOrDefault(factoryTypeId) : decimal.Zero;
+            ProductionRecipeDto dto = RecipeDto(catalog, resources, recipe, context, multipliers, recipeBonus);
 
             if (recipe.BuildingTypeId is { } buildingTypeId && !builtTypeIds.Contains(buildingTypeId))
             {
@@ -530,6 +538,7 @@ public sealed class ProductionQueueService
         ProductionMultipliers multipliers = orders.Count == 0
             ? ProductionMultipliers.None
             : await _multipliers.GetMultipliersAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+        Dictionary<long, decimal> speedBonuses = factories.ToDictionary(factory => factory.PlanetBuildingId, factory => factory.SpeedBonus);
         List<ProductionActiveOrderDto> items = [];
 
         foreach (ProductionOrderEntity order in orders)
@@ -545,7 +554,7 @@ public sealed class ProductionQueueService
                 order.Quantity,
                 order.ProducedQuantity,
                 order.Position,
-                recipe is null ? 0 : ScaledSeconds(recipe, multipliers),
+                recipe is null ? 0 : ScaledSeconds(recipe, multipliers, speedBonuses.GetValueOrDefault(order.PlanetBuildingId)),
                 order.StartsAt,
                 order.NextUnitAt,
                 order.FinishesAt,
@@ -682,7 +691,8 @@ public sealed class ProductionQueueService
                 building.PlanetBuildingId,
                 building.BuildingTypeId,
                 building.Level,
-                nameKeys.GetValueOrDefault(building.BuildingTypeId, string.Empty)))
+                nameKeys.GetValueOrDefault(building.BuildingTypeId, string.Empty),
+                building.ProductionSpeedBonus))
         ];
 
         return factories;
@@ -720,7 +730,8 @@ public sealed class ProductionQueueService
         ResourceCatalog resources,
         RecipeInfo recipe,
         RequirementContext context,
-        ProductionMultipliers multipliers)
+        ProductionMultipliers multipliers,
+        decimal speedBonus)
     {
         List<ProductionReasonDto> reasons = UnmetReasons(catalog, recipe, context);
         PartTypeInfo? product = recipe.PartTypeId is { } productId ? catalog.FindPart(productId) : null;
@@ -752,7 +763,7 @@ public sealed class ProductionQueueService
             reasons.Count == 0,
             reasons,
             picture,
-            ScaledSeconds(recipe, multipliers),
+            ScaledSeconds(recipe, multipliers, speedBonus),
             [
                 .. recipe.IngredientIds.Select(ingredient => new ProductionIngredientDto(
                     ingredient.ResourceTypeId,
@@ -1283,7 +1294,7 @@ public sealed class ProductionQueueService
             }
             else
             {
-                long unitSeconds = await ScaledSecondsAsync(playerId, planetId, recipe, cancellationToken).ConfigureAwait(false);
+                long unitSeconds = await ScaledSecondsAsync(playerId, planetId, head.PlanetBuildingId, recipe, cancellationToken).ConfigureAwait(false);
                 head.NextUnitAt = readyAt.AddSeconds(unitSeconds);
                 head.FinishesAt = head.NextUnitAt.Value.AddSeconds(unitSeconds * (head.Quantity - head.ProducedQuantity - 1));
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -1395,20 +1406,50 @@ public sealed class ProductionQueueService
     }
 
     /// <summary>
-    /// The time of one unit of a recipe for a player: the time of the recipe times the
-    /// multiplier of the technologies, which is less than one for a faster production
-    /// (task 00013, decision 14).
+    /// The time of one unit of a recipe for a player in a factory: the time of the recipe times
+    /// the multiplier of the technologies, which is less than one for a faster production
+    /// (task 00013, decision 14), divided by one plus the speed bonus of the level of the factory
+    /// (task 00045).
     /// </summary>
     /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="planetBuildingId">The factory the unit is made in.</param>
     /// <param name="recipe">The recipe.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The time of one unit, in game seconds.</returns>
-    private async Task<long> ScaledSecondsAsync(string playerId, long planetId, RecipeInfo recipe, CancellationToken cancellationToken) =>
-        ScaledSeconds(recipe, await _multipliers.GetMultipliersAsync(playerId, planetId, cancellationToken).ConfigureAwait(false));
+    private async Task<long> ScaledSecondsAsync(
+        string playerId,
+        long planetId,
+        long planetBuildingId,
+        RecipeInfo recipe,
+        CancellationToken cancellationToken) =>
+        ScaledSeconds(
+            recipe,
+            await _multipliers.GetMultipliersAsync(playerId, planetId, cancellationToken).ConfigureAwait(false),
+            await FactorySpeedBonusAsync(playerId, planetId, planetBuildingId, cancellationToken).ConfigureAwait(false));
 
-    private static long ScaledSeconds(RecipeInfo recipe, ProductionMultipliers multipliers)
+    /// <summary>
+    /// The speed bonus of the level of one factory of a body (task 00045).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="planetBuildingId">The factory.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The share of the time the level takes off; zero for a factory without the bonus.</returns>
+    private async Task<decimal> FactorySpeedBonusAsync(
+        string playerId,
+        long planetId,
+        long planetBuildingId,
+        CancellationToken cancellationToken) =>
+        (await _planets.GetBuildingEffectsAsync(planetId, planetBuildingId, playerId, cancellationToken).ConfigureAwait(false))
+            .GetValueOrDefault(BuildingEffectTypes.ProductionSpeedBonus);
+
+    private static long ScaledSeconds(RecipeInfo recipe, ProductionMultipliers multipliers, decimal speedBonus)
     {
-        long rounded = (long)decimal.Ceiling(recipe.DurationSeconds * multipliers.ProductionTimeMultiplier);
+        // A negative bonus is broken data, which must never make the production slower than the
+        // recipe or divide by zero.
+        decimal speed = decimal.One + Math.Max(speedBonus, decimal.Zero);
+        long rounded = (long)decimal.Ceiling(recipe.DurationSeconds * multipliers.ProductionTimeMultiplier / speed);
 
         return rounded > 0 ? rounded : 1;
     }
@@ -1429,7 +1470,7 @@ public sealed class ProductionQueueService
             return false;
         }
 
-        long seconds = await ScaledSecondsAsync(playerId, head.PlanetId, recipe, cancellationToken).ConfigureAwait(false);
+        long seconds = await ScaledSecondsAsync(playerId, head.PlanetId, head.PlanetBuildingId, recipe, cancellationToken).ConfigureAwait(false);
         head.StartsAt = now;
         head.NextUnitAt = now.AddSeconds(seconds);
 

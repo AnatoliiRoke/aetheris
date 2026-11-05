@@ -203,6 +203,18 @@
     "uk": "Екіпаж",
     "en": "Crew"
   },
+  "admin.reference.kind.drive_push": {
+    "uk": "Тяга рушія",
+    "en": "Drive push"
+  },
+  "admin.reference.kind.damage": {
+    "uk": "Шкода",
+    "en": "Damage"
+  },
+  "admin.reference.kind.shield_capacity": {
+    "uk": "Місткість щита",
+    "en": "Capacity of the shield"
+  },
   "admin.reference.attribute.role": {
     "uk": "Роль",
     "en": "Role"
@@ -214,6 +226,10 @@
   "admin.reference.attribute.component": {
     "uk": "Компонент",
     "en": "Component"
+  },
+  "admin.reference.attribute.not_a_ship_module": {
+    "uk": "Не модуль корабля",
+    "en": "Not a ship module"
   },
   "admin.reference.role.combat": {
     "uk": "Бойовий",
@@ -243,8 +259,8 @@
     "uk": "Реактор",
     "en": "Reactor"
   },
-  "admin.reference.component.life_support": {
-    "uk": "Життєзабезпечення",
-    "en": "Life support"
+  "admin.reference.component.not_a_ship_module": {
+    "uk": "Не модуль корабля",
+    "en": "Not a ship module"
   }
 }

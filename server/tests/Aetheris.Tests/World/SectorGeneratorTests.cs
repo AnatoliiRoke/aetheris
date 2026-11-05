@@ -24,9 +24,11 @@ public sealed class SectorGeneratorTests
     private const double ShareTolerance = 0.03;
 
     /// <summary>
-    /// The smallest number of bodies of the distribution run (acceptance criterion 3).
+    /// The smallest number of bodies of the distribution run (acceptance criterion 3). Three
+    /// thousand keep the spread of a fair draw (about 0.009 for a share of 0.4) well inside the
+    /// tolerance: a thousand left only two spreads, so the fixed seeds failed the test by chance.
     /// </summary>
-    private const int DistributionBodies = 1000;
+    private const int DistributionBodies = 3000;
 
     private static Config TestConfig => Config.QuickThrowOnFailure.WithMaxTest(InvariantSeeds);
 

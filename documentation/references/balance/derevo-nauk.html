@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дерево наук</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #1c1915;
+    --muted: #5c564c;
+    --line: #e4ddd2;
+    --paper: #f7f4ee;
+    --card: #fff;
+    --mark: #0f6b4c;
+    --mark-bg: #e7f5ee;
+    --author-bg: #eef3fb;
+    --author-line: #b9cbe8;
+    --warn: #8a4b00;
+    --warn-bg: #fff3e0;
+    --changed-bg: #fff8d6;
+    --changed-line: #e6cf6a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.45 "Iowan Old Style", Palatino, Georgia, serif; color: var(--ink); background: var(--paper); }
+  header { position: sticky; top: 0; z-index: 3; background: rgba(247, 244, 238, 0.97); border-bottom: 1px solid var(--line); padding: 12px 20px 10px; }
+  h1 { margin: 0 0 2px; font-size: 1.35rem; }
+  header p { margin: 0 0 8px; color: var(--muted); font-size: 0.92rem; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  #count { font-weight: 700; margin-right: 8px; }
+  button, select, input { font: inherit; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--ink); }
+  button { padding: 6px 10px; cursor: pointer; }
+  button:hover { background: #f0ebe3; }
+  input[type="number"] { width: 3.6em; padding: 1px 3px; text-align: right; }
+  select { padding: 1px 2px; max-width: 10em; }
+  main { padding: 12px 20px 48px; }
+  h2 { margin: 22px 0 6px; font-size: 1.2rem; }
+  .note { margin: 0 0 8px; color: var(--muted); max-width: 70em; }
+  .rules { margin: 0 0 8px 1.2em; padding: 0; max-width: 70em; }
+  .rules li { margin: 4px 0; }
+  .tree { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(190px, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 6px; }
+  .tier { display: flex; flex-direction: column; gap: 8px; }
+  .tier h3 { margin: 0; font-size: 0.9rem; color: var(--muted); font-weight: 400; text-align: center; }
+  .node { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; cursor: pointer; }
+  .node.author { background: var(--author-bg); border-color: var(--author-line); }
+  .node.selected { outline: 2px solid var(--mark); }
+  .node.related { outline: 2px dashed #8fbfa9; }
+  .node .title { font-weight: 700; }
+  .node .after, .node .gives { font-size: 0.85rem; color: var(--muted); }
+  .branch { display: inline-block; font-size: 0.75rem; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; margin-left: 4px; font-weight: 400; }
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 400; font-size: 0.85rem; background: #fbf9f5; }
+  td.small { font-size: 0.86rem; color: var(--muted); }
+  td.name { font-weight: 700; white-space: nowrap; }
+  tr.author td.name { color: #2a4f8f; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .chip { display: inline-flex; gap: 3px; align-items: center; padding: 1px 2px 1px 7px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); white-space: nowrap; font-size: 0.9rem; }
+  .chip.add { background: transparent; border-style: dashed; }
+  .deps { flex-direction: column; align-items: flex-start; }
+  .deps .chip { white-space: nowrap; border-radius: 8px; }
+  #table td:nth-child(2) { min-width: 34em; }
+  #table td:nth-child(n+3) { min-width: 14em; }
+  .chip.author-chip { background: var(--author-bg); border-color: var(--author-line); }
+  .hint { font-size: 0.78rem; color: var(--muted); margin-left: 4px; }
+  #progress { width: auto; }
+  #progress th, #progress td { text-align: center; white-space: nowrap; min-width: 6.5em; }
+  #progress input { width: 3.4em; text-align: center; }
+  #progress td.changed input { background: var(--changed-bg); }
+  #progress td.first { background: var(--mark-bg); font-weight: 700; }
+  #progress td.empty { color: #c9c1b4; }
+  #progress th.level, #progress td.level { position: sticky; left: 0; background: #fbf9f5; }
+  .pick { cursor: pointer; }
+  .pick.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  label.toggle { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); }
+  .chip button { border: 0; background: transparent; padding: 0 4px; color: var(--muted); }
+  .changed { background: var(--changed-bg) !important; border-color: var(--changed-line) !important; }
+  .added { background: var(--mark-bg) !important; border-color: #b7dfcc !important; }
+  .removed { font-size: 0.8rem; color: var(--muted); }
+  .removed s { margin-right: 6px; }
+  .warn { color: var(--warn); background: var(--warn-bg); border-radius: 4px; padding: 0 4px; }
+  .legend { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+  .example { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; max-width: 70em; }
+  .example ol { margin: 4px 0 0 1.2em; padding: 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Дерево наук: пропозиція</h1>
+  <p>Пропозиція від 05.11.2026. Зараз у сіді будь-яку науку можна почати з 1-го рівня одразу. Тут кожна наука відкривається після інших, а з ростом рівня до неї додаються нові дотичні науки. Змінюйте залежності в таблиці, і дерево перебудується. Усе зберігається в цьому браузері.</p>
+  <div class="bar">
+    <span id="count">Змін: 0</span>
+    <label>+1 рівень батьківської науки кожні <input id="step" type="number" min="1" max="10"> рівні науки</label>
+    <button id="download" type="button">Завантажити</button>
+    <button id="upload" type="button">Відкрити</button>
+    <input id="upload-file" type="file" accept="application/json" hidden>
+    <button id="reset" type="button">Скинути до пропозиції</button>
+    <label class="toggle"><input id="shift-next" type="checkbox" checked> Зміна клітинки зсуває всі вищі рівні колонки на стільки ж</label>
+  </div>
+</header>
+<main>
+<h2>Як це працює</h2>
+<ol class="rules">
+  <li><b>Залежності з'являються з рівнем.</b> Кожна залежність має два числа: з якого рівня самої науки вона діє і якого рівня батьківської науки тоді треба. Наприклад, Розвиток науки з 1-го рівня просить Математику 5 (щоб швидше рахувати), з 8-го ще й Електроніку 5 (комп'ютери), з 14-го Кібернетику 6 (штучний інтелект у науці).</li>
+  <li><b>Зростання.</b> Залежність, що вже діє, росте: на кожні <span class="step-text"></span> рівні науки +1 рівень батьківської. Приклад: Розвиток науки 12 просить Електроніку <span id="example-growth"></span> (діє з 8-го рівня, на старті 5).</li>
+  <li><b>Науковий центр.</b> Рівень науки N просить Науковий центр рівня з таблиці нижче; 25-й рівень науки просить 20-й центр. Числа можна змінювати.</li>
+</ol>
+<div class="scroll" style="margin:6px 0 10px"><table><tbody id="centre"></tbody></table></div>
+<p class="note"><span class="legend" style="background:var(--author-bg);border-color:var(--author-line)"></span>залежність з вашого прикладу &nbsp; <span class="legend" style="background:var(--paper)"></span>моя пропозиція. Клацніть науку в дереві, щоб підсвітити її залежності.</p>
+
+<h2>1. Дерево відкриття</h2>
+<p class="note">Стовпець це «покоління»: скільки кроків від Математики й Фізики, рахуючи лише залежності 1-го рівня (що потрібно, щоб наука з'явилась).</p>
+<div id="tree" class="tree"></div>
+
+<h2>2. Залежності кожної науки (редагуються)</h2>
+<p class="note">У кожній клітинці «з рівня N: наука M». Змінюйте числа, прибирайте (×) і додавайте нові залежності. Сіра підказка пояснює, чому залежність така.</p>
+<div class="scroll"><table>
+  <thead><tr><th>Наука</th><th>Залежності</th><th>Щоб відкрити, мінімум треба мати</th><th>Рівень 10 просить</th><th>Рівень 25 просить</th></tr></thead>
+  <tbody id="table"></tbody>
+</table></div>
+
+<h2>3. Прогрес науки за рівнями</h2>
+<p class="note">Оберіть науку: таблиця показує, що треба мати для кожного з 25 рівнів. У режимі «Лише прямі» кожну клітинку можна правити вручну, ручне число важливіше за формулу. Зелена клітинка це рівень, з якого залежність з'являється. «Лише прямі» показує залежності самої науки, «Повний ланцюг» усе, що треба дослідити, разом із залежностями залежностей.</p>
+<div class="bar" style="margin-bottom:8px">
+  <label class="toggle"><input type="radio" name="progress-mode" value="direct" checked> Лише прямі</label>
+  <label class="toggle"><input type="radio" name="progress-mode" value="full"> Повний ланцюг</label>
+</div>
+<div id="progress-picker" class="chips" style="margin-bottom:8px"></div>
+<div id="progress-tools"></div>
+<div class="scroll"><table id="progress"></table></div>
+</main>
+<script id="seed" type="application/json">{"techs":[{"code":"tech_1","name":"Математика","branch":"Фундаментальні науки","max_level":25,"unlocks":["Адміністративний центр","Науковий центр","Конструкторське бюро","Археологічний центр"],"effects":[],"current_l1":[],"from_author":true,"deps":[]},{"code":"tech_2","name":"Фізика","branch":"Фундаментальні науки","max_level":25,"unlocks":["Адміністративний центр","Космопорт","Бункер","Науковий центр","Конструкторське бюро","Шахта титанової руди","Шахта іридієвої руди","Шахта кобальтової руди","Сонячна електростанція","Теплова електростанція","Ядерна електростанція","Термоядерна електростанція","Завод композитів","Завод нановолокна","Металургійний завод","Фабрика двигунів","Завод енергетичної зброї","Завод кінетичної зброї","Ливарний завод","Завод щитів","Фабрика боєприпасів","Завод точних приладів","Верф","Радар","Планетарна гармата","Планетарний щит","Портал"],"effects":[],"current_l1":[],"from_author":true,"deps":[]},{"code":"tech_3","name":"Ядерна фізика","branch":"Фундаментальні науки","max_level":25,"unlocks":["Адміністративний центр","Шахта уранової руди","Ядерна електростанція","Завод збагачення урану","Завод реакторів"],"effects":[],"current_l1":[],"from_author":true,"deps":[{"parent":"tech_2","from":1,"level":5,"reason":"будова ядра це розділ фізики","author":true},{"parent":"tech_1","from":1,"level":4,"reason":"розрахунки реакцій","author":false},{"parent":"tech_6","from":8,"level":5,"reason":"детектори частинок","author":false},{"parent":"tech_7","from":14,"level":8,"reason":"досвід реакторів","author":false}]},{"code":"tech_4","name":"Термоядерний синтез","branch":"Фундаментальні науки","max_level":25,"unlocks":["Адміністративний центр","Термоядерна електростанція","Завод реакторів"],"effects":[],"current_l1":[],"from_author":true,"deps":[{"parent":"tech_3","from":1,"level":5,"reason":"синтез продовжує ядерну фізику","author":true},{"parent":"tech_2","from":1,"level":10,"reason":"фізика плазми","author":false},{"parent":"tech_7","from":1,"level":6,"reason":"утримання й відбір енергії","author":false},{"parent":"tech_9","from":8,"level":4,"reason":"керування плазмою в реальному часі","author":false},{"parent":"tech_13","from":14,"level":8,"reason":"надпровідні магніти з кристалів","author":false},{"parent":"tech_14","from":20,"level":10,"reason":"робота з Гелієм-3","author":false}]},{"code":"tech_5","name":"Геологія","branch":"Економіка","max_level":25,"unlocks":["Адміністративний центр","Будівельний комбінат","Археологічний центр","Шахта залізної руди","Шахта титанової руди","Шахта іридієвої руди","Шахта кобальтової руди","Шахта уранової руди","Шахта силікорової руди","Шахта тектонітової руди","Кар'єр кварциту","Кар'єр обсидіану","Кар'єр лінтрію","Кар'єр орексу","Копальня квартану","Копальня стобію","Копальня туманію","Станція дейтерію","Завод будматеріалів","Перетворювач матерії","Фабрика бурових установок","Фабрика утилізації"],"effects":["видобуток руд і мінералів"],"current_l1":[],"from_author":true,"deps":[{"parent":"tech_1","from":1,"level":2,"reason":"карти й розрахунки покладів","author":true},{"parent":"tech_2","from":1,"level":2,"reason":"фізика порід","author":true},{"parent":"tech_6","from":8,"level":6,"reason":"сейсмічні датчики","author":false},{"parent":"tech_10","from":14,"level":6,"reason":"автоматичне буріння","author":false}]},{"code":"tech_6","name":"Електроніка","branch":"Фундаментальні науки","max_level":25,"unlocks":["Адміністративний центр","Науковий центр","Шахта силікорової руди","Кар'єр кварциту","Кар'єр лінтрію","Сонячна електростанція","Оптоволоконний завод","Фабрика мікропроцесорів","Завод енергострижнів","Завод енергетичної зброї","Завод щитів","Завод точних приладів","Радар"],"effects":[],"current_l1":[],"from_author":true,"deps":[{"parent":"tech_1","from":1,"level":3,"reason":"теорія сигналів","author":true},{"parent":"tech_2","from":1,"level":3,"reason":"електрика й струм","author":false},{"parent":"tech_13","from":6,"level":3,"reason":"напівпровідники з кристалів","author":false},{"parent":"tech_9","from":16,"level":8,"reason":"проєктування схем обчислювачами","author":false}]},{"code":"tech_7","name":"Енергетика","branch":"Економіка","max_level":25,"unlocks":["Адміністративний центр","Космопорт","Науковий центр","Кар'єр обсидіану","Кар'єр орексу","Станція дейтерію","Сонячна електростанція","Теплова електростанція","Ядерна електростанція","Термоядерна електростанція","Завод енергострижнів","Завод збагачення урану","Фабрика двигунів","Завод реакторів","Завод енергетичної зброї","Завод щитів","Планетарна гармата","Планетарний щит","Портал"],"effects":["виробіток енергії"],"current_l1":[],"from_author":true,"deps":[{"parent":"tech_1","from":1,"level":3,"reason":"розрахунки мереж","author":true},{"parent":"tech_2","from":1,"level":3,"reason":"перетворення енергії","author":true},{"parent":"tech_6","from":6,"level":4,"reason":"керування мережами","author":false},{"parent":"tech_3","from":10,"level":6,"reason":"ядерні станції","author":false},{"parent":"tech_4","from":16,"level":6,"reason":"термоядерні станції","author":false}]},{"code":"tech_8","name":"Будівництво","branch":"Економіка","max_level":25,"unlocks":["Адміністративний центр","Житловий комплекс (Міста)","Медичний центр","Будівельний комбінат","Космопорт","Склад","Бункер","Науковий центр","Шахта залізної руди","Шахта титанової руди","Шахта іридієвої руди","Шахта кобальтової руди","Шахта уранової руди","Шахта силікорової руди","Шахта тектонітової руди","Кар'єр кварциту","Кар'єр обсидіану","Кар'єр лінтрію","Кар'єр орексу","Копальня квартану","Копальня стобію","Копальня туманію","Завод будматеріалів","Оптоволоконний завод","Фабрика мікропроцесорів","Завод композитів","Завод енергострижнів","Завод нановолокна","Металургійний завод","Завод збагачення урану","Перетворювач матерії","Завод кінетичної зброї","Ливарний завод","Фабрика бурових установок","Індустріальний комплекс","Фабрика утилізації","Верф","Планетарна гармата","Планетарний щит","Торговий центр"],"effects":["швидкість будівництва"],"current_l1":[],"from_author":true,"deps":[{"parent":"tech_1","from":1,"level":5,"reason":"креслення й розрахунки конструкцій","author":true},{"parent":"tech_2","from":1,"level":5,"reason":"механіка матеріалів","author":true},{"parent":"tech_5","from":5,"level":4,"reason":"ґрунти й фундаменти","author":false},{"parent":"tech_10","from":10,"level":5,"reason":"будівельні роботи","author":false},{"parent":"tech_9","from":16,"level":6,"reason":"автоматизоване проєктування","author":false}]},{"code":"tech_9","name":"Кібернетика","branch":"Фундаментальні науки","max_level":25,"unlocks":["Адміністративний центр","Медичний центр","Банк","Космопорт","Науковий центр","Конструкторське бюро","Фабрика мікропроцесорів","Завод точних приладів","Радар","Торговий центр","Портал"],"effects":[],"current_l1":[],"from_author":true,"deps":[{"parent":"tech_10","from":1,"level":4,"reason":"кібернетика керує роботами","author":true},{"parent":"tech_6","from":1,"level":8,"reason":"обчислювальна техніка","author":false},{"parent":"tech_1","from":1,"level":10,"reason":"теорія керування","author":false},{"parent":"tech_2","from":15,"level":14,"reason":"квантові обчислення","author":false}]},{"code":"tech_10","name":"Робототехніка","branch":"Фундаментальні науки","max_level":25,"unlocks":["Адміністративний центр","Будівельний комбінат","Конструкторське бюро","Завод будматеріалів","Завод композитів","Завод нановолокна","Металургійний завод","Перетворювач матерії","Фабрика двигунів","Завод реакторів","Завод кінетичної зброї","Ливарний завод","Фабрика боєприпасів","Фабрика бурових установок","Індустріальний комплекс","Фабрика утилізації","Верф"],"effects":["швидкість виробництва"],"current_l1":[],"from_author":true,"deps":[{"parent":"tech_6","from":1,"level":5,"reason":"електроприводи й датчики","author":true},{"parent":"tech_1","from":1,"level":6,"reason":"кінематика","author":false},{"parent":"tech_8","from":1,"level":3,"reason":"механічні конструкції","author":false},{"parent":"tech_9","from":8,"level":3,"reason":"розумне керування","author":false},{"parent":"tech_13","from":16,"level":8,"reason":"точна оптика й сенсори","author":false}]},{"code":"tech_11","name":"Економіка","branch":"Економіка","max_level":25,"unlocks":["Адміністративний центр","Житловий комплекс (Міста)","Банк","Склад","Науковий центр","Індустріальний комплекс","Торговий центр"],"effects":["дохід кредитів"],"current_l1":[],"from_author":true,"deps":[{"parent":"tech_1","from":1,"level":2,"reason":"облік і розрахунки","author":true},{"parent":"tech_16","from":8,"level":3,"reason":"попит населення","author":false},{"parent":"tech_6","from":10,"level":6,"reason":"обчислення й облік на машинах","author":false},{"parent":"tech_9","from":15,"level":8,"reason":"алгоритми ринку","author":false},{"parent":"tech_19","from":18,"level":10,"reason":"правила торгівлі","author":false}]},{"code":"tech_12","name":"Археологія","branch":"Фундаментальні науки","max_level":25,"unlocks":["Адміністративний центр","Археологічний центр"],"effects":[],"current_l1":[],"from_author":true,"deps":[{"parent":"tech_1","from":1,"level":10,"reason":"аналіз знахідок","author":true},{"parent":"tech_2","from":1,"level":10,"reason":"методи дослідження","author":true},{"parent":"tech_5","from":1,"level":8,"reason":"розкопки й шари порід","author":false},{"parent":"tech_13","from":6,"level":6,"reason":"датування за кристалами","author":false},{"parent":"tech_3","from":12,"level":10,"reason":"радіоізотопне датування","author":false},{"parent":"tech_9","from":18,"level":12,"reason":"розшифрування чужих систем","author":false}]},{"code":"tech_13","name":"Кристалографія","branch":"Економіка","max_level":25,"unlocks":["Адміністративний центр","Копальня квартану","Копальня стобію","Копальня туманію","Портал"],"effects":["видобуток кристалів"],"current_l1":[],"from_author":false,"deps":[{"parent":"tech_5","from":1,"level":5,"reason":"кристали це мінерали","author":false},{"parent":"tech_2","from":1,"level":8,"reason":"оптика й ґратки","author":false},{"parent":"tech_1","from":1,"level":8,"reason":"симетрія ґраток","author":false},{"parent":"tech_6","from":8,"level":8,"reason":"рентгенівський аналіз","author":false},{"parent":"tech_3","from":15,"level":10,"reason":"опромінення кристалів","author":false}]},{"code":"tech_14","name":"Газова інженерія","branch":"Економіка","max_level":25,"unlocks":["Адміністративний центр","Станція дейтерію"],"effects":[],"current_l1":[],"from_author":false,"deps":[{"parent":"tech_5","from":1,"level":5,"reason":"газові поклади","author":false},{"parent":"tech_7","from":1,"level":5,"reason":"енергія газів","author":false},{"parent":"tech_2","from":1,"level":8,"reason":"фізика газів","author":false},{"parent":"tech_8","from":8,"level":6,"reason":"газові установки","author":false},{"parent":"tech_4","from":14,"level":5,"reason":"паливо для синтезу","author":false}]},{"code":"tech_15","name":"Логістика складів","branch":"Економіка","max_level":25,"unlocks":["Адміністративний центр","Склад"],"effects":["місткість складу"],"current_l1":[],"from_author":false,"deps":[{"parent":"tech_11","from":1,"level":4,"reason":"облік запасів","author":false},{"parent":"tech_8","from":1,"level":3,"reason":"склади й сховища","author":false},{"parent":"tech_6","from":8,"level":6,"reason":"облік на машинах","author":false},{"parent":"tech_10","from":14,"level":8,"reason":"автоматичні склади","author":false},{"parent":"tech_9","from":20,"level":10,"reason":"керування потоками","author":false}]},{"code":"tech_16","name":"Демографія","branch":"Економіка","max_level":25,"unlocks":["Адміністративний центр","Житловий комплекс (Міста)","Медичний центр"],"effects":["максимум населення","приріст населення"],"current_l1":[],"from_author":false,"deps":[{"parent":"tech_11","from":1,"level":4,"reason":"добробут населення","author":false},{"parent":"tech_1","from":1,"level":6,"reason":"статистика","author":false},{"parent":"tech_8","from":8,"level":6,"reason":"житло","author":false},{"parent":"tech_9","from":16,"level":8,"reason":"керування містами","author":false}]},{"code":"tech_17","name":"Колоніальне управління","branch":"Інше","max_level":25,"unlocks":["Адміністративний центр"],"effects":[],"current_l1":[],"from_author":false,"deps":[{"parent":"tech_16","from":1,"level":5,"reason":"переселенці","author":false},{"parent":"tech_11","from":1,"level":8,"reason":"утримання колоній","author":false},{"parent":"tech_1","from":1,"level":12,"reason":"планування колоній","author":false},{"parent":"tech_7","from":1,"level":8,"reason":"енергія для перельотів","author":false},{"parent":"tech_15","from":6,"level":6,"reason":"постачання колоній","author":false},{"parent":"tech_9","from":12,"level":8,"reason":"зв'язок і керування на відстані","author":false}]},{"code":"tech_18","name":"Перетворення матерії","branch":"Інше","max_level":25,"unlocks":["Перетворювач матерії"],"effects":[],"current_l1":[],"from_author":false,"deps":[{"parent":"tech_3","from":1,"level":10,"reason":"перебудова ядер","author":false},{"parent":"tech_5","from":1,"level":10,"reason":"склад речовин","author":false},{"parent":"tech_1","from":1,"level":15,"reason":"теорія перетворень","author":false},{"parent":"tech_2","from":1,"level":15,"reason":"фізика речовини","author":false},{"parent":"tech_4","from":5,"level":8,"reason":"енергія синтезу","author":false},{"parent":"tech_13","from":12,"level":12,"reason":"точна будова ґраток","author":false}]},{"code":"tech_19","name":"Торговельне право","branch":"Торгівля","max_level":25,"unlocks":["Адміністративний центр","Банк","Торговий центр"],"effects":[],"current_l1":[],"from_author":false,"deps":[{"parent":"tech_11","from":1,"level":6,"reason":"торгівля частина економіки","author":false},{"parent":"tech_1","from":1,"level":8,"reason":"договори й розрахунки","author":false},{"parent":"tech_16","from":6,"level":5,"reason":"права громадян","author":false},{"parent":"tech_9","from":12,"level":8,"reason":"електронна торгівля","author":false},{"parent":"tech_20","from":18,"level":5,"reason":"торгівля через портали","author":false}]},{"code":"tech_20","name":"Стабілізація порталу","branch":"Торгівля","max_level":25,"unlocks":["Адміністративний центр","Портал"],"effects":[],"current_l1":[],"from_author":false,"deps":[{"parent":"tech_1","from":1,"level":20,"reason":"геометрія простору","author":true},{"parent":"tech_2","from":1,"level":19,"reason":"фізика простору","author":true},{"parent":"tech_13","from":1,"level":10,"reason":"кристали фокусують портал","author":false},{"parent":"tech_7","from":1,"level":15,"reason":"живлення порталу","author":false},{"parent":"tech_9","from":1,"level":8,"reason":"точне наведення","author":false},{"parent":"tech_4","from":6,"level":10,"reason":"енергія синтезу","author":false},{"parent":"tech_18","from":12,"level":8,"reason":"перебудова матерії під час переходу","author":false}]},{"code":"tech_21","name":"Розвиток науки","branch":"Фундаментальні науки","max_level":25,"unlocks":[],"effects":["швидкість досліджень"],"current_l1":[],"from_author":false,"deps":[{"parent":"tech_1","from":1,"level":5,"reason":"щоб швидше рахувати","author":true},{"parent":"tech_2","from":5,"level":5,"reason":"експериментальний метод","author":false},{"parent":"tech_6","from":8,"level":5,"reason":"комп'ютери","author":true},{"parent":"tech_9","from":14,"level":6,"reason":"штучний інтелект у науці","author":false},{"parent":"tech_12","from":20,"level":8,"reason":"знання зниклих цивілізацій","author":false}]}],"research_centre_levels":[1,2,3,4,4,5,6,7,8,8,9,10,11,12,12,13,14,15,16,16,17,18,19,20,20],"step_levels":1,"research_centre_seed":[1,2,2,3,3,4,5,5,6,6,7,8,8,9,9,10,11,11,12,12,13,14,14,15,15]}</script>
+<script>
+const seed = JSON.parse(document.getElementById("seed").textContent);
+const storageKey = "aetheris-tech-tree-v4";
+const techByCode = Object.fromEntries(seed.techs.map((tech) => [tech.code, tech]));
+const order = seed.techs.map((tech) => tech.code);
+const nameOf = (code) => techByCode[code].name;
+const reasons = {};
+const fromAuthor = new Set();
+for (const tech of seed.techs) {
+  for (const dep of tech.deps) {
+    reasons[tech.code + ">" + dep.parent] = dep.reason;
+    if (dep.author) {
+      fromAuthor.add(tech.code + ">" + dep.parent);
+    }
+  }
+}
+
+function initialState() {
+  return {
+    step: seed.step_levels,
+    centre: [...seed.research_centre_levels],
+    deps: Object.fromEntries(seed.techs.map((tech) => [tech.code, tech.deps.map((dep) => ({ parent: dep.parent, from: dep.from, level: dep.level }))])),
+    overrides: {},
+  };
+}
+
+const original = initialState();
+let state = initialState();
+let selected = null;
+let changes = 0;
+
+try {
+  const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+  if (saved && saved.deps && saved.step && saved.centre) {
+    state = { overrides: {}, ...saved };
+  }
+} catch (error) {
+  state = initialState();
+}
+
+function save() {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(state));
+  } catch (error) {
+    // The page keeps working without the storage.
+  }
+}
+
+function sortDeps(list) {
+  return [...list].sort((first, second) => first.from - second.from || order.indexOf(first.parent) - order.indexOf(second.parent));
+}
+
+// The level of the parent a dependency asks for at a level of the science: nothing before the
+// dependency starts, then its starting level plus one for every step.
+function dependencyNeed(dep, level) {
+  if (level < dep.from) {
+    return 0;
+  }
+  return Math.min(25, dep.level + Math.floor((level - dep.from) / state.step));
+}
+
+function researchCentreFor(level) {
+  return state.centre[Math.min(level, state.centre.length) - 1];
+}
+
+function needsAt(code, level) {
+  const needs = {};
+  for (const dep of state.deps[code]) {
+    const need = dependencyNeed(dep, level);
+    if (need > 0) {
+      needs[dep.parent] = Math.max(needs[dep.parent] || 0, need);
+    }
+  }
+  // A number typed into the table of the levels wins over the formula; zero removes the need.
+  for (const [parent, byLevel] of Object.entries(state.overrides[code] || {})) {
+    if (String(level) in byLevel) {
+      if (byLevel[level] > 0) {
+        needs[parent] = byLevel[level];
+      } else {
+        delete needs[parent];
+      }
+    }
+  }
+  return needs;
+}
+
+function overrideCount() {
+  let count = 0;
+  for (const byParent of Object.values(state.overrides)) {
+    for (const byLevel of Object.values(byParent)) {
+      count += Object.keys(byLevel).length;
+    }
+  }
+  return count;
+}
+
+// Everything that must be reached to have a science at a level; a science that in the end
+// asks for a higher level of itself cannot be reached.
+function closure(code, level) {
+  const reached = {};
+  const stack = [[code, level]];
+  let guard = 0;
+  while (stack.length > 0 && guard < 20000) {
+    guard += 1;
+    const [current, currentLevel] = stack.pop();
+    if ((reached[current] || 0) >= currentLevel) {
+      continue;
+    }
+    reached[current] = currentLevel;
+    for (const [parent, need] of Object.entries(needsAt(current, currentLevel))) {
+      stack.push([parent, need]);
+    }
+  }
+  const centre = Math.max(...Object.values(reached).map(researchCentreFor));
+  return { reached, centre, impossible: reached[code] > level };
+}
+
+function closureText(code, level) {
+  const { reached, centre, impossible } = closure(code, level);
+  delete reached[code];
+  const list = order.filter((parent) => parent in reached).map((parent) => nameOf(parent) + " " + reached[parent]);
+  const text = ["Науковий центр " + centre, ...list].join(", ");
+  return impossible ? `<span class="warn">неможливо: наука просить вищий рівень самої себе</span> ${text}` : text;
+}
+
+function needsText(code, level) {
+  const needs = needsAt(code, level);
+  const list = order.filter((parent) => parent in needs).map((parent) => nameOf(parent) + " " + needs[parent]);
+  return ["Науковий центр " + researchCentreFor(level), ...list].join(", ");
+}
+
+// The generation counts only what a science needs to appear: the dependencies from level 1.
+function generations() {
+  const result = {};
+  const visiting = new Set();
+  const visit = (code) => {
+    if (code in result) {
+      return result[code];
+    }
+    if (visiting.has(code)) {
+      return Infinity;
+    }
+    visiting.add(code);
+    const parents = state.deps[code].filter((dep) => dep.from <= 1).map((dep) => dep.parent);
+    const depth = parents.length === 0 ? 0 : 1 + Math.max(...parents.map(visit));
+    visiting.delete(code);
+    result[code] = depth;
+    return depth;
+  };
+  order.forEach(visit);
+  return result;
+}
+
+function nodeHtml(code, related) {
+  const tech = techByCode[code];
+  const opening = state.deps[code].filter((dep) => dep.from <= 1);
+  const later = sortDeps(state.deps[code].filter((dep) => dep.from > 1));
+  const isAuthor = state.deps[code].some((dep) => fromAuthor.has(code + ">" + dep.parent));
+  const classes = ["node", isAuthor ? "author" : "", selected === code ? "selected" : "", related.has(code) ? "related" : ""].join(" ");
+  const openingText = opening.length === 0 ? "відкрита одразу" : "після " + opening.map((dep) => nameOf(dep.parent) + " " + dep.level).join(", ");
+  const laterText = later.length ? `<div class="gives">далі: ${later.map((dep) => `з ${dep.from}-го ${nameOf(dep.parent)} ${dep.level}`).join("; ")}</div>` : "";
+  return `<div class="${classes}" data-select="${code}">
+    <div class="title">${tech.name}<span class="branch">${tech.branch}</span></div>
+    <div class="after">${openingText}</div>
+    ${laterText}
+  </div>`;
+}
+
+function renderTree() {
+  const depth = generations();
+  const finite = Object.values(depth).filter(Number.isFinite);
+  const maxDepth = finite.length ? Math.max(...finite) : 0;
+  const related = new Set();
+  if (selected) {
+    state.deps[selected].forEach((dep) => related.add(dep.parent));
+    order.filter((code) => state.deps[code].some((dep) => dep.parent === selected)).forEach((code) => related.add(code));
+  }
+  const columns = [];
+  for (let level = 0; level <= maxDepth; level += 1) {
+    const nodes = order.filter((code) => depth[code] === level).map((code) => nodeHtml(code, related));
+    columns.push(`<div class="tier"><h3>${level === 0 ? "Старт" : "Покоління " + level}</h3>${nodes.join("")}</div>`);
+  }
+  const loops = order.filter((code) => !Number.isFinite(depth[code]));
+  if (loops.length) {
+    columns.push(`<div class="tier"><h3 class="warn">Цикл у залежностях 1-го рівня</h3>${loops.map((code) => nodeHtml(code, related)).join("")}</div>`);
+  }
+  document.getElementById("tree").innerHTML = columns.join("");
+}
+
+function depsHtml(code) {
+  const base = original.deps[code];
+  const chips = state.deps[code].map((dep, index) => ({ dep, index })).sort((first, second) => first.dep.from - second.dep.from || order.indexOf(first.dep.parent) - order.indexOf(second.dep.parent)).map(({ dep, index }) => {
+    const baseDep = base.find((item) => item.parent === dep.parent);
+    let status = "";
+    if (!baseDep) {
+      status = "added";
+      changes += 1;
+    } else if (baseDep.from !== dep.from || baseDep.level !== dep.level) {
+      status = "changed";
+      changes += 1;
+    }
+    const key = code + ">" + dep.parent;
+    const reason = reasons[key] ? `<span class="hint">${reasons[key]}</span>` : "";
+    const author = fromAuthor.has(key) ? "author-chip" : "";
+    return `<span class="chip ${status} ${author}" title="${reasons[key] || ""}">з <input type="number" min="1" max="25" value="${dep.from}" data-code="${code}" data-index="${index}" data-field="from"> : ${nameOf(dep.parent)} <input type="number" min="1" max="25" value="${dep.level}" data-code="${code}" data-index="${index}" data-field="level"><button type="button" title="Прибрати" data-remove="${code}" data-index="${index}">×</button>${reason}</span>`;
+  });
+  const removed = base.filter((dep) => !state.deps[code].some((item) => item.parent === dep.parent));
+  changes += removed.length;
+  const used = new Set(state.deps[code].map((dep) => dep.parent));
+  const options = order.filter((other) => other !== code && !used.has(other)).map((other) => `<option value="${other}">${nameOf(other)}</option>`).join("");
+  const add = options ? `<span class="chip add">з <input type="number" min="1" max="25" value="1" data-add-from="${code}"> : <select data-add-select="${code}">${options}</select><input type="number" min="1" max="25" value="1" data-add-level="${code}"><button type="button" data-add="${code}">+</button></span>` : "";
+  const removedHtml = removed.length ? `<span class="removed">прибрано: ${removed.map((dep) => `<s>${nameOf(dep.parent)}</s>`).join("")}</span>` : "";
+  return `<div class="chips deps">${chips.join("")}${add}${removedHtml}</div>`;
+}
+
+function renderTable() {
+  const rows = order.map((code) => {
+    const tech = techByCode[code];
+    const gives = [tech.effects.length ? "бонус: " + tech.effects.join(", ") : "", tech.unlocks.length ? "показує будівель: " + tech.unlocks.length : ""].filter(Boolean).join("; ");
+    return `<tr>
+      <td class="name">${tech.name}<div class="small" style="font-weight:400">${tech.branch}</div><div class="small" style="font-weight:400">${gives}</div></td>
+      <td>${depsHtml(code)}</td>
+      <td class="small">${closureText(code, 1)}</td>
+      <td class="small">${needsText(code, 10)}</td>
+      <td class="small">${needsText(code, 25)}</td>
+    </tr>`;
+  });
+  document.getElementById("table").innerHTML = rows.join("");
+}
+
+function renderCentre() {
+  const levels = state.centre.map((_, index) => `<th style="text-align:center">${index + 1}</th>`).join("");
+  const values = state.centre.map((value, index) => {
+    const changed = value !== original.centre[index];
+    if (changed) {
+      changes += 1;
+    }
+    return `<td style="text-align:center"><input type="number" min="1" max="20" value="${value}" data-centre="${index}" class="${changed ? "changed" : ""}"></td>`;
+  }).join("");
+  const now = seed.research_centre_seed.map((value) => `<td class="small" style="text-align:center">${value}</td>`).join("");
+  document.getElementById("centre").innerHTML = `<tr><th>Рівень науки</th>${levels}</tr><tr><th>Науковий центр</th>${values}</tr><tr><th>Зараз у сіді</th>${now}</tr>`;
+}
+
+function renderRules() {
+  document.getElementById("step").value = state.step;
+  document.querySelectorAll(".step-text").forEach((node) => { node.textContent = state.step; });
+  const dep = state.deps.tech_21.find((item) => item.parent === "tech_6");
+  document.getElementById("example-growth").textContent = dep ? dependencyNeed(dep, 12) : "—";
+}
+
+let progressCode = "tech_21";
+let progressMode = "direct";
+
+function renderProgress() {
+  document.getElementById("progress-picker").innerHTML = order.map((code) => `<span class="chip pick ${code === progressCode ? "active" : ""}" data-progress="${code}">${nameOf(code)}</span>`).join("");
+  const editable = progressMode === "direct";
+  const perLevel = [];
+  for (let level = 1; level <= 25; level += 1) {
+    if (editable) {
+      perLevel.push({ needs: needsAt(progressCode, level), centre: researchCentreFor(level), impossible: closure(progressCode, level).impossible });
+    } else {
+      const { reached, centre, impossible } = closure(progressCode, level);
+      delete reached[progressCode];
+      perLevel.push({ needs: reached, centre, impossible });
+    }
+  }
+  const manual = state.overrides[progressCode] || {};
+  const columns = order.filter((code) => code !== progressCode && (perLevel.some((row) => code in row.needs) || code in manual));
+  const head = `<tr><th class="level">Рівень</th><th>Науковий центр</th>${columns.map((code) => `<th>${nameOf(code)}</th>`).join("")}</tr>`;
+  const rows = perLevel.map((row, index) => {
+    const level = index + 1;
+    const previous = index > 0 ? perLevel[index - 1].needs : {};
+    const cells = columns.map((code) => {
+      const value = row.needs[code];
+      const isManual = editable && manual[code] && String(level) in manual[code];
+      const classes = [value === undefined ? "empty" : (code in previous ? "" : "first"), isManual ? "changed" : ""].join(" ");
+      if (editable) {
+        return `<td class="${classes}"><input type="number" min="0" max="25" value="${value === undefined ? "" : value}" placeholder="—" data-cell="${code}" data-level="${level}"></td>`;
+      }
+      return `<td class="${classes}">${value === undefined ? "—" : value}</td>`;
+    }).join("");
+    const warn = row.impossible ? ` <span class="warn">неможливо</span>` : "";
+    return `<tr><td class="level"><b>${level}</b>${warn}</td><td>${row.centre}</td>${cells}</tr>`;
+  });
+  const used = new Set(columns);
+  const options = order.filter((code) => code !== progressCode && !used.has(code)).map((code) => `<option value="${code}">${nameOf(code)}</option>`).join("");
+  const tools = editable
+    ? `<div class="bar" style="margin:8px 0"><span class="chip add"><select id="new-column">${options}</select><button type="button" id="add-column">+ додати науку в таблицю</button></span><button type="button" id="clear-manual">Прибрати ручні правки цієї науки</button><span class="note" style="margin:0">Порожня клітинка або 0: на цьому рівні наука не потрібна. Ручні правки жовті.</span></div>`
+    : `<p class="note">Повний ланцюг лише для перегляду; правити можна в режимі «Лише прямі».</p>`;
+  document.getElementById("progress-tools").innerHTML = tools;
+  document.getElementById("progress").innerHTML = `<thead>${head}</thead><tbody>${rows.join("")}</tbody>`;
+}
+
+function render() {
+  changes = (state.step !== original.step ? 1 : 0) + overrideCount();
+  renderRules();
+  renderTree();
+  renderTable();
+  renderCentre();
+  document.getElementById("count").textContent = "Змін: " + changes;
+  renderProgress();
+}
+
+function update() {
+  save();
+  render();
+}
+
+document.addEventListener("click", (event) => {
+  if (event.target.id === "add-column") {
+    const code = document.getElementById("new-column").value;
+    if (code) {
+      const byParent = state.overrides[progressCode] = state.overrides[progressCode] || {};
+      byParent[code] = byParent[code] || {};
+      renderProgress();
+    }
+    return;
+  }
+  if (event.target.id === "clear-manual") {
+    if (confirm("Прибрати всі ручні правки науки «" + nameOf(progressCode) + "»?")) {
+      delete state.overrides[progressCode];
+      update();
+    }
+    return;
+  }
+  const pick = event.target.closest("[data-progress]");
+  if (pick) {
+    progressCode = pick.dataset.progress;
+    renderProgress();
+    return;
+  }
+  const node = event.target.closest("[data-select]");
+  if (node) {
+    selected = selected === node.dataset.select ? null : node.dataset.select;
+    if (selected) {
+      progressCode = selected;
+      renderProgress();
+    }
+    renderTree();
+    return;
+  }
+  const target = event.target;
+  if (target.dataset.remove) {
+    state.deps[target.dataset.remove].splice(Number(target.dataset.index), 1);
+  } else if (target.dataset.add) {
+    const code = target.dataset.add;
+    const parent = document.querySelector(`[data-add-select="${code}"]`).value;
+    const from = Number(document.querySelector(`[data-add-from="${code}"]`).value);
+    const level = Number(document.querySelector(`[data-add-level="${code}"]`).value);
+    if (!Number.isFinite(from) || !Number.isFinite(level) || from < 1 || level < 1) {
+      return;
+    }
+    state.deps[code].push({ parent, from: Math.min(25, from), level: Math.min(25, level) });
+  } else {
+    return;
+  }
+  update();
+});
+
+document.addEventListener("change", (event) => {
+  const target = event.target;
+  if (target.dataset.cell) {
+    const code = target.dataset.cell;
+    const value = target.value === "" ? 0 : Number(target.value);
+    if (!Number.isFinite(value) || value < 0) {
+      return;
+    }
+    const level = Number(target.dataset.level);
+    const old = needsAt(progressCode, level)[code] || 0;
+    const byParent = state.overrides[progressCode] = state.overrides[progressCode] || {};
+    const byLevel = byParent[code] = byParent[code] || {};
+    // The levels above move by the same step, so a column keeps its slope.
+    if (document.getElementById("shift-next").checked && old > 0 && value > 0 && value !== old) {
+      const delta = value - old;
+      for (let next = level + 1; next <= 25; next += 1) {
+        const current = needsAt(progressCode, next)[code];
+        if (current !== undefined) {
+          byLevel[next] = Math.max(1, Math.min(25, current + delta));
+        }
+      }
+    }
+    byLevel[level] = Math.min(25, value);
+    update();
+    return;
+  }
+  if (target.name === "progress-mode") {
+    progressMode = target.value;
+    renderProgress();
+    return;
+  }
+  if (target.dataset.field) {
+    const value = Number(target.value);
+    if (Number.isFinite(value) && value >= 1) {
+      state.deps[target.dataset.code][Number(target.dataset.index)][target.dataset.field] = Math.min(25, value);
+    }
+    update();
+  } else if (target.dataset.centre) {
+    const level = Number(target.value);
+    if (Number.isFinite(level) && level >= 1) {
+      state.centre[Number(target.dataset.centre)] = Math.min(20, level);
+    }
+    update();
+  } else if (target.id === "step") {
+    const step = Number(target.value);
+    if (Number.isFinite(step) && step >= 1) {
+      state.step = step;
+    }
+    update();
+  }
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  if (!confirm("Повернути пропозицію? Ваші зміни зникнуть.")) {
+    return;
+  }
+  state = initialState();
+  update();
+});
+
+document.getElementById("download").addEventListener("click", () => {
+  const result = {
+    source: "aetheris tech tree",
+    parent_level_step: state.step,
+    research_centre_by_level: state.centre,
+    technologies: order.map((code) => ({
+      code,
+      name: nameOf(code),
+      dependencies: sortDeps(state.deps[code]).map((dep) => ({ technology: dep.parent, from_level: dep.from, level: dep.level })),
+      manual_levels: state.overrides[code] || {},
+      requirements: Array.from({ length: 25 }, (_, index) => index + 1).flatMap((level) => [
+        { type: "building_level", target: "building_9", target_level: researchCentreFor(level), subject_level: level },
+        ...Object.entries(needsAt(code, level)).map(([parent, need]) => ({ type: "technology_level", target: parent, target_level: need, subject_level: level })),
+      ]),
+    })),
+  };
+  const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "derevo-nauk.json";
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
+document.getElementById("upload").addEventListener("click", () => document.getElementById("upload-file").click());
+
+document.getElementById("upload-file").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    return;
+  }
+  try {
+    const loaded = JSON.parse(await file.text());
+    const next = { step: loaded.parent_level_step, centre: loaded.research_centre_by_level || [...seed.research_centre_levels], deps: {}, overrides: {} };
+    for (const tech of seed.techs) {
+      const row = loaded.technologies.find((item) => item.code === tech.code);
+      next.deps[tech.code] = row ? row.dependencies.map((dep) => ({ parent: dep.technology, from: dep.from_level, level: dep.level })) : [];
+      if (row && row.manual_levels) {
+        next.overrides[tech.code] = row.manual_levels;
+      }
+    }
+    state = next;
+    update();
+  } catch (error) {
+    alert("Файл не схожий на дерево наук цієї сторінки.");
+  }
+  event.target.value = "";
+});
+
+render();
+</script>
+</body>
+</html>

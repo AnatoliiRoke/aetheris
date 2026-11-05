@@ -278,4 +278,5 @@ public interface IPlanetsModule
 /// <param name="PlanetBuildingId">The building.</param>
 /// <param name="BuildingTypeId">The type of the building.</param>
 /// <param name="Level">The level of the building.</param>
-public sealed record PlanetBuildingLevelById(long PlanetBuildingId, int BuildingTypeId, int Level);
+/// <param name="ProductionSpeedBonus">The share of the production time the level of the building takes off (task 00045); zero for a building without the bonus.</param>
+public sealed record PlanetBuildingLevelById(long PlanetBuildingId, int BuildingTypeId, int Level, decimal ProductionSpeedBonus = 0m);

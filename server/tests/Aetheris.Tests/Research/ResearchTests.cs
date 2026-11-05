@@ -192,6 +192,7 @@ public sealed class ResearchTests
         IServiceProvider services = scope.ServiceProvider;
 
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ScienceCenter, 1);
+        await LearnRootSciencesAsync(services, player);
         await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, await RichBalanceAsync(services), PlanetsTestData.GameNow(services));
 
         IResearchModule research = services.GetRequiredService<IResearchModule>();
@@ -253,7 +254,16 @@ public sealed class ResearchTests
         RequirementDto gate = Assert.Single(before.UnmetRequirements);
         Assert.Equal(PlanetsErrorCodes.RequirementTechnology, gate.ReasonCode);
 
-        // The technology is learned, so the mine opens.
+        // The technology is learned, so the mine opens. The levels before the gate and the root
+        // sciences its level grows from are taught first (the tree of the sciences of task 00045).
+        const int RootSciencesLevel = 10;
+        string gateCode = await services.GetRequiredService<ResearchDbContext>().Technologies.AsNoTracking()
+            .Where(technology => technology.Id == gate.TargetId)
+            .Select(technology => technology.Code)
+            .SingleAsync(Token);
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_1", RootSciencesLevel);
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_2", RootSciencesLevel);
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, gateCode, gate.TargetLevel - 1);
         await research.EnqueueAsync(player.Account.UserId, player.PlanetId, gate.TargetId, gate.TargetLevel, Token);
         await services.GetRequiredService<ResearchQueueService>()
             .CompleteDueAsync(player.Account.UserId, DateTimeOffset.MaxValue, Token);
@@ -646,6 +656,18 @@ public sealed class ResearchTests
         }
     }
 
+    /// <summary>
+    /// Teaches the player the two sciences every other science grows from, to the level the first
+    /// level of the geology asks for (the tree of the sciences of task 00045).
+    /// </summary>
+    private static async Task LearnRootSciencesAsync(IServiceProvider services, PlanetsTestPlayer player)
+    {
+        const int RootLevel = 2;
+
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_1", RootLevel);
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_2", RootLevel);
+    }
+
     private static DateTimeOffset FutureMoment(IServiceProvider services) =>
         PlanetsTestData.GameNow(services).AddHours(1);
 
@@ -672,6 +694,7 @@ public sealed class ResearchTests
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ScienceCenter, 1);
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.IronMine, 5);
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.PowerPlant, 10);
+        await LearnRootSciencesAsync(services, player);
 
         // A mine works only into a storage (task 00029).
         await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.MetalStorage, 5);

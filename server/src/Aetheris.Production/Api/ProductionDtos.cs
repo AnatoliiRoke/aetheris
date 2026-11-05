@@ -33,7 +33,8 @@ public sealed record ProductionFactorySummaryDto(
     long PlanetBuildingId,
     int BuildingTypeId,
     int Level,
-    string NameKey);
+    string NameKey,
+    decimal SpeedBonus = 0m);
 
 /// <summary>
 /// A recipe of a factory with the reasons why it is not available.

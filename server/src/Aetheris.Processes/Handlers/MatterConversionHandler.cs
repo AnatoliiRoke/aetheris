@@ -9,7 +9,8 @@ namespace Aetheris.Processes.Handlers;
 /// </summary>
 /// <remarks>
 /// The groups and the exceptions are in the data, so the author decides which resources may
-/// be converted: the ether and the produced goods are not in a group a recipe converts. The
+/// be converted: only the ores and the minerals mined on a body have a recipe; the fuel, the
+/// crystals and the produced goods have none (task 00045). The
 /// order takes the source for the whole batch, and the output is the source times the
 /// coefficient of the level of the converter the order runs in; the level of the technology
 /// gives the right to convert, and the level of the building also makes the process faster.
@@ -95,8 +96,7 @@ public sealed class MatterConversionHandler : IProcessHandler
         }
 
         // The recipe names the group of the source and the group of the target, so a raw
-        // material of another group, the ether or a produced good is refused before anything
-        // is spent.
+        // material of another group or a produced good is refused before anything is spent.
         if (context.Recipe.SourceGroupId is not { } sourceGroupId
             || !context.ResourceGroups.TryGetValue(sourceId, out int sourceGroup)
             || sourceGroup != sourceGroupId)
