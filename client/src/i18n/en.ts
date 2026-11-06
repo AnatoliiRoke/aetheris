@@ -1010,7 +1010,6 @@ export const en: Messages = {
   'build.effects': 'Effects',
   'build.noEffects': '—',
   'build.requiredResources': 'Required resources',
-  'build.missingAmount': 'short by {amount}',
   'build.duration': 'Build time',
   'build.energyAfter': 'Energy when done',
   'build.energyPair': '{consumption} / {output}',

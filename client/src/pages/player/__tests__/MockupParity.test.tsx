@@ -176,6 +176,10 @@ describe('/planet/build: the elements of the design', () => {
             canEnqueue: false,
             reasonCodes: ['planets_not_enough_resources'],
             missingResources: [{ resourceTypeId: 1, amount: 40 }],
+            availableResources: [
+              { resourceTypeId: 1, amount: 470 },
+              { resourceTypeId: 3, amount: 120 },
+            ],
           },
         },
         ...rest,
@@ -190,8 +194,14 @@ describe('/planet/build: the elements of the design', () => {
 
     expect(within(card).getByText('Ефекти')).toBeInTheDocument();
     expect(within(card).getAllByText('Потрібні ресурси').length).toBeGreaterThan(0);
-    expect(within(iron).getByText('не вистачає 40')).toBeInTheDocument();
-    expect(within(copper).queryByText(/не вистачає/)).not.toBeInTheDocument();
+    // The row shows what is needed and what the body has, and the shortage in brackets.
+    expect(iron.textContent).toContain('510');
+    expect(iron.textContent).toContain('470');
+    expect(within(iron).getByText('(40)')).toBeInTheDocument();
+    expect(iron).toHaveClass('cost-list__row--short');
+    // The copper is there, so the row is not marked as short.
+    expect(copper.textContent).toContain('120');
+    expect(copper).not.toHaveClass('cost-list__row--short');
     expect(within(card).getByRole('button', { name: 'Покращити' })).toBeDisabled();
   });
 
@@ -246,7 +256,20 @@ describe('/planet/research: the elements of the design', () => {
   it('shows what is short of in each row and keeps the button inactive with the reason', async () => {
     const [first] = sampleResearchTree().technologies[0].levels;
     const short = technology({
-      levels: [{ ...first, costs: [{ resourceTypeId: 1, amount: 300 }, { resourceTypeId: 3, amount: 200 }], missingResources: [{ resourceTypeId: 3, amount: 50 }] }],
+      levels: [
+        {
+          ...first,
+          costs: [
+            { resourceTypeId: 1, amount: 300 },
+            { resourceTypeId: 3, amount: 200 },
+          ],
+          missingResources: [{ resourceTypeId: 3, amount: 50 }],
+          availableResources: [
+            { resourceTypeId: 1, amount: 300 },
+            { resourceTypeId: 3, amount: 150 },
+          ],
+        },
+      ],
     });
     renderPage('/planet/research', { auth: signedIn(), research: fakeResearchApi({ tree: vi.fn().mockResolvedValue(treeWith([short])) }), ...researchTexts });
 
@@ -255,8 +278,13 @@ describe('/planet/research: the elements of the design', () => {
     const iron = within(tile).getByText('Залізо').closest('li')!;
     const button = within(tile).getByRole('button', { name: 'У чергу' });
 
-    expect(within(copper).getByText('не вистачає 50')).toBeInTheDocument();
+    expect(within(copper).getByText('(50)')).toBeInTheDocument();
+    // The row shows what is needed and what the body has, and the shortage in brackets.
+    expect(copper.textContent).toContain('200');
+    expect(copper.textContent).toContain('150');
+    expect(copper).toHaveClass('cost-list__row--short');
     expect(within(iron).queryByText(/не вистачає/)).not.toBeInTheDocument();
+    expect(iron).not.toHaveClass('cost-list__row--short');
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute('title', 'Не вистачає ресурсів');
   });

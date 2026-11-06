@@ -7,6 +7,7 @@ import { useI18n } from '../../i18n/useI18n';
 import { useTexts } from '../../texts/useTexts';
 import { formatAmount, formatDuration } from './planetText';
 import { reasonText } from './productionRecipes';
+import { type BodyAvailability, ingredientAvailability } from './productionStock';
 
 /**
  * The tile of a recipe on the production screen, drawn like the tile of a building or of a
@@ -18,6 +19,7 @@ import { reasonText } from './productionRecipes';
  * @param recipe The recipe with its availability.
  * @param factoryName The name of the factory that makes it.
  * @param resourceGroupCode The code of the group of a resource, for its icon.
+ * @param availability What the body has: the balances of the civilization, the resources of the body and the stock of its parts.
  * @param busy Whether a command is running.
  * @param onProduce What to do when the player starts the batch; it must be the same function between the draws.
  */
@@ -25,12 +27,14 @@ export const RecipeCard = memo(function RecipeCard({
   recipe,
   factoryName,
   resourceGroupCode,
+  availability,
   busy,
   onProduce,
 }: {
   recipe: ProductionRecipe;
   factoryName: string;
   resourceGroupCode: (id: number) => string | null;
+  availability: BodyAvailability;
   busy: boolean;
   onProduce: (recipe: ProductionRecipe, quantity: number) => void;
 }) {
@@ -39,6 +43,8 @@ export const RecipeCard = memo(function RecipeCard({
   const [typed, setTyped] = useState('1');
   const quantity = Number(typed);
   const valid = Number.isInteger(quantity) && quantity > 0;
+  // The ingredients of the batch of the number the player chose, with what the body has.
+  const ingredients = ingredientAvailability(recipe, valid ? quantity : 0, availability);
 
   return (
     <li className="building-card">
@@ -50,15 +56,24 @@ export const RecipeCard = memo(function RecipeCard({
       {factoryName ? <p className="meta">{t('production.madeAt', { name: factoryName })}</p> : null}
       <div className="building-card__next">
         <span className="civ-label">{t('build.requiredResources')}</span>
-        <ul aria-label={t('build.requiredResources')} className="cost-list">
-          {recipe.ingredients.map((ingredient) => (
-            <li className="cost-list__row" key={`${ingredient.resourceTypeId ?? 'part'}-${ingredient.partTypeId ?? 'resource'}`}>
-              {ingredient.resourceTypeId === null ? <span /> : <ResourceIcon groupCode={resourceGroupCode(ingredient.resourceTypeId)} />}
-              <span className="cost-list__name">{text(ingredient.nameKey) ?? ingredient.nameKey}</span>
-              <span className="num">{formatAmount(ingredient.amount, language)}</span>
-              <span className="cost-list__missing" />
-            </li>
-          ))}
+        <ul aria-label={t('build.requiredResources')} className="cost-list cost-list--stock">
+          {ingredients.map((entry) => {
+            const { ingredient, required, available, missing } = entry;
+            const short = missing > 0;
+
+            return (
+              <li className={short ? 'cost-list__row cost-list__row--short' : 'cost-list__row'} key={`${ingredient.resourceTypeId ?? 'part'}-${ingredient.partTypeId ?? 'resource'}`}>
+                {ingredient.resourceTypeId === null ? <span /> : <ResourceIcon groupCode={resourceGroupCode(ingredient.resourceTypeId)} />}
+                <span className="cost-list__name">{text(ingredient.nameKey) ?? ingredient.nameKey}</span>
+                <span className="num cost-list__amount">
+                  {formatAmount(required, language)}
+                  {' / '}
+                  <span className="cost-list__stock">{formatAmount(available, language)}</span>
+                  {short ? <span className="cost-list__missing"> ({formatAmount(missing, language)})</span> : null}
+                </span>
+              </li>
+            );
+          })}
         </ul>
         <dl className="facts facts--compact">
           <dt>{t('production.duration')}</dt>

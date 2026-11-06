@@ -236,6 +236,10 @@
 .civ__main--production .cost-list__missing,
 .civ__main--research .cost-list .num,
 .civ__main--production .cost-list .num { white-space: nowrap; }
+/* a list of costs that shows what the body has, so the row has a column for it */
+.cost-list--stock .cost-list__row { grid-template-columns: 16px minmax(0, 1fr) auto; }
+.cost-list__amount { color: var(--text-1); }
+.cost-list__stock { color: var(--text-soft); }
 .civ__main--research .cost-list__row--short .num,
 .civ__main--production .cost-list__row--short .num { color: var(--text-soft); }
 .civ__main--research .cost-list__missing,

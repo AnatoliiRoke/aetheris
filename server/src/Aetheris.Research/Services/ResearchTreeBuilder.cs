@@ -198,10 +198,17 @@ public sealed class ResearchTreeBuilder
         // currency is paid from the balance of the civilization and every other cost from the
         // balance of the body (task 00015, decision 5), so the two balances are read apart.
         IReadOnlyDictionary<int, long> balance = snapshot.SelectedBalance ?? new Dictionary<int, long>();
+        bool ofNext = isNext && snapshot.SelectedBalance is not null;
         List<ResourceAmountDto> missing =
         [
-            .. isNext && snapshot.SelectedBalance is not null
+            .. ofNext
                 ? Missing(snapshot, info?.Costs ?? new Dictionary<int, long>(), balance)
+                : [],
+        ];
+        List<ResourceAmountDto> available =
+        [
+            .. ofNext
+                ? Available(snapshot, info?.Costs ?? new Dictionary<int, long>(), balance)
                 : [],
         ];
 
@@ -212,6 +219,7 @@ public sealed class ResearchTreeBuilder
             Effects(snapshot, info),
             [.. unmet.Order()],
             missing,
+            available,
             unmetRequirements);
     }
 
@@ -264,6 +272,33 @@ public sealed class ResearchTreeBuilder
             RequirementTypes.Deposit => snapshot.ResourceNameKeys?.GetValueOrDefault(requirement.TargetId),
             _ => null,
         };
+
+    /// <summary>
+    /// What the player has of every resource of a level, by resource: the balance of the body, or
+    /// the balance of the civilization for a currency (task 00015, decision 5).
+    /// </summary>
+    /// <param name="snapshot">The tree and the queue of the player.</param>
+    /// <param name="costs">The costs of the level, by resource.</param>
+    /// <param name="bodyBalance">The balance of the selected body, by resource.</param>
+    /// <returns>The amounts the player has, by resource, in the order of the resource.</returns>
+    private static List<ResourceAmountDto> Available(
+        ResearchTreeSnapshot snapshot,
+        IReadOnlyDictionary<int, long> costs,
+        IReadOnlyDictionary<int, long> bodyBalance)
+    {
+        List<ResourceAmountDto> available = [];
+
+        foreach ((int resourceTypeId, long amount) in costs)
+        {
+            long onHand = snapshot.CurrencyResourceIds is { } currencyIds && currencyIds.Contains(resourceTypeId)
+                ? snapshot.CurrencyBalances?.GetValueOrDefault(resourceTypeId) ?? 0
+                : bodyBalance.GetValueOrDefault(resourceTypeId);
+
+            available.Add(new ResourceAmountDto(resourceTypeId, onHand));
+        }
+
+        return [.. available.OrderBy(entry => entry.ResourceTypeId)];
+    }
 
     /// <summary>
     /// The amounts the player is short of for a level, by resource.

@@ -46,6 +46,7 @@ public sealed record TechnologyDto(
 /// <param name="Effects">The effects of the level.</param>
 /// <param name="UnmetRequirementIds">The identifiers of the requirements that are not met.</param>
 /// <param name="MissingResources">For the next level of a technology the player can still research: the resources the selected body is short of, by how much; empty for every other level.</param>
+/// <param name="AvailableResources">For the next level of a technology the player can still research: what the player has of every resource of the cost — the balance of the body, or the balance of the civilization for a currency (task 00015, decision 5); empty for every other level.</param>
 /// <param name="UnmetRequirements">The requirements of the next level that are not met, with the name of the technology or the building.</param>
 public sealed record TechnologyLevelDto(
     int Level,
@@ -54,6 +55,7 @@ public sealed record TechnologyLevelDto(
     IReadOnlyList<TechnologyEffectDto> Effects,
     IReadOnlyList<int> UnmetRequirementIds,
     IReadOnlyList<ResourceAmountDto>? MissingResources = null,
+    IReadOnlyList<ResourceAmountDto>? AvailableResources = null,
     IReadOnlyList<Aetheris.Planets.Api.RequirementDto>? UnmetRequirements = null);
 
 /// <summary>

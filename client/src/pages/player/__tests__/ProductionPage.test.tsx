@@ -31,7 +31,9 @@ describe('the production screen (task 00032)', () => {
     const materials = within(within(recipes).getByText('Будматеріали').closest('li')!);
     const cost = materials.getByRole('list', { name: 'Потрібні ресурси' });
     expect(within(cost).getByText('Залізо')).toBeInTheDocument();
-    expect(within(cost).getByText('4')).toBeInTheDocument();
+    // The amount of the unit and what the body has are in one number: "4 / 900".
+    expect(within(cost).getByText('Залізо').closest('li')!.textContent).toContain('4');
+    expect(within(cost).getByText('Залізо').closest('li')!.textContent).toContain('900');
     expect(materials.getByText('Час виробництва')).toBeInTheDocument();
     expect(within(recipes).queryByText(/На одиницю/)).toBeNull();
     // The description of a recipe is not on the tile.
@@ -206,6 +208,43 @@ describe('the production screen (task 00032)', () => {
 
     expect(within(sections).getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Ресурси', 'Модулі кораблів']);
     expect(within(recipes).queryByText(/undefined/)).toBeNull();
+  });
+
+  it('shows how much of every ingredient the body has and what the chosen number needs', async () => {
+    renderPage('/planet/production', { auth: signedIn() });
+
+    const recipes = await screen.findByRole('region', { name: 'Рецепти' });
+    const card = (await within(recipes).findByText('Будматеріали')).closest('li')!;
+    const cost = within(card).getByRole('list', { name: 'Потрібні ресурси' });
+    const row = within(cost).getByText('Залізо').closest('li')!;
+
+    // One unit of the recipe takes four of iron, and the body has nine hundred of it.
+    expect(row.textContent).toContain('4');
+    expect(row.textContent).toContain('900');
+    // The body has enough, so the row is not marked as short.
+    expect(row).not.toHaveClass('cost-list__row--short');
+  });
+
+  it('marks the ingredient that the body does not have enough of when the number grows', async () => {
+    const user = userEvent.setup();
+    renderPage('/planet/production', { auth: signedIn() });
+
+    const recipes = await screen.findByRole('region', { name: 'Рецепти' });
+    const card = (await within(recipes).findByText('Будматеріали')).closest('li')!;
+    const quantity = within(card).getByLabelText('Кількість');
+
+    await user.clear(quantity);
+    await user.type(quantity, '300');
+
+    const cost = within(card).getByRole('list', { name: 'Потрібні ресурси' });
+    const row = within(cost).getByText('Залізо').closest('li')!;
+
+    // Three hundred units take twelve hundred of iron, and the body has nine hundred of it.
+    expect(row.textContent).toContain('1\u2009200');
+    expect(row.textContent).toContain('900');
+    // The row is marked as short, and the missing amount is shown in brackets.
+    expect(row.textContent).toContain('(300)');
+    expect(row).toHaveClass('cost-list__row--short');
   });
 
   it('puts the chosen number of units into the queue of the factory that makes the recipe', async () => {

@@ -90,6 +90,7 @@ public sealed record QueueItemFigure(
 /// <param name="ReasonCodes">The reasons it cannot be queued, in the order they are checked.</param>
 /// <param name="Unmet">The unmet requirements.</param>
 /// <param name="Missing">The resources that are short, by how much.</param>
+/// <param name="Available">What the body has of every resource of the cost, by resource.</param>
 /// <param name="EnergyAfter">The energy once the queue and this level are done.</param>
 public sealed record NextLevelCheck(
     int Level,
@@ -98,6 +99,7 @@ public sealed record NextLevelCheck(
     IReadOnlyList<string> ReasonCodes,
     IReadOnlyList<UnmetRequirement> Unmet,
     IReadOnlyDictionary<int, long> Missing,
+    IReadOnlyDictionary<int, long> Available,
     EnergyBalance EnergyAfter);
 
 /// <summary>
@@ -193,18 +195,21 @@ public static class ConstructionRules
         }
 
         Dictionary<int, long> missing = [];
+        Dictionary<int, long> available = [];
 
         foreach ((int resourceTypeId, long amount) in info?.Costs ?? new Dictionary<int, long>())
         {
             // A currency of the civilization is paid from the balance of the civilization.
             // Population is paid from the inhabitants of the body. Every other resource is paid
             // from the stock of the body (task 00015, decision 5).
-            long available = resourceTypeId == figures.PopulationResourceId
+            long onHand = resourceTypeId == figures.PopulationResourceId
                 ? figures.Population
                 : figures.CurrencyAmounts is { } currencies && currencies.TryGetValue(resourceTypeId, out long currency)
                     ? currency
                     : figures.Amounts.GetValueOrDefault(resourceTypeId);
-            long shortBy = amount - available;
+            long shortBy = amount - onHand;
+
+            available[resourceTypeId] = onHand;
 
             if (shortBy > 0)
             {
@@ -222,7 +227,7 @@ public static class ConstructionRules
         decimal timeMultiplier = figures.Bonuses.ConstructionTimeMultiplier / (1m + figures.BuildingSpeedBonus);
         long duration = info is null ? 0 : (long)decimal.Ceiling(info.DurationSeconds * timeMultiplier);
 
-        return new NextLevelCheck(level, info, duration, reasons, unmet, missing, energyAfter);
+        return new NextLevelCheck(level, info, duration, reasons, unmet, missing, available, energyAfter);
     }
 }
 
@@ -329,6 +334,7 @@ public static class PlanetOverviewBuilder
                     next.ReasonCodes,
                     Requirements(catalog, next.Unmet, figures.Levels, technologyNameKeys),
                     Amounts(next.Missing),
+                    Amounts(next.Available),
                     next.EnergyAfter.Output,
                     next.EnergyAfter.Consumption),
                 type.CategoryId,

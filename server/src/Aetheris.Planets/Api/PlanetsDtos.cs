@@ -166,6 +166,7 @@ public sealed record BuildingDto(
 /// <param name="ReasonCodes">The reasons it cannot, as localisation keys.</param>
 /// <param name="UnmetRequirements">The requirements that are not met.</param>
 /// <param name="MissingResources">The resources that are short, by how much.</param>
+/// <param name="AvailableResources">What the body has of every resource of the cost: the balance of the body, or the balance of the civilization for a currency (task 00015, decision 5).</param>
 /// <param name="EnergyOutputAfter">The energy the body produces once the queue and this level are done.</param>
 /// <param name="EnergyConsumptionAfter">The energy the body consumes once the queue and this level are done.</param>
 public sealed record NextLevelDto(
@@ -178,6 +179,7 @@ public sealed record NextLevelDto(
     IReadOnlyList<string> ReasonCodes,
     IReadOnlyList<RequirementDto> UnmetRequirements,
     IReadOnlyList<ResourceAmountDto> MissingResources,
+    IReadOnlyList<ResourceAmountDto>? AvailableResources = null,
     long EnergyOutputAfter = 0,
     long EnergyConsumptionAfter = 0);
 

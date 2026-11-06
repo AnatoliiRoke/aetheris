@@ -478,21 +478,21 @@
     },
     {
       "key": "world.seed.start.iron_ore",
-      "value": "500",
+      "value": "1000",
       "minimum": "0",
       "maximum": "1000000000",
       "description": "Iron ore of a new civilization."
     },
     {
       "key": "world.seed.start.building_materials",
-      "value": "300",
+      "value": "600",
       "minimum": "0",
       "maximum": "1000000000",
       "description": "Building materials of a new civilization."
     },
     {
       "key": "world.seed.start.credits",
-      "value": "600",
+      "value": "1200",
       "minimum": "0",
       "maximum": "1000000000",
       "description": "Credits of a new civilization."

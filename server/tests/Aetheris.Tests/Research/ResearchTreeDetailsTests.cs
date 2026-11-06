@@ -1,3 +1,5 @@
+using Aetheris.Economy;
+using Aetheris.Economy.Api;
 using Aetheris.Planets;
 using Aetheris.Planets.Api;
 using Aetheris.Planets.Data;
@@ -97,6 +99,74 @@ public sealed class ResearchTreeDetailsTests
         IReadOnlyList<ResearchAmount> richMissing = enough.Levels.Single(level => level.Level == 1).MissingResources!;
 
         Assert.Empty(richMissing);
+    }
+
+    /// <summary>
+    /// The next level tells what the player has of every resource of its cost: the balance of the
+    /// body, and for a currency the balance of the civilization (task 00015, decision 5). The
+    /// screen shows it as "needed / on hand", so the amount has to be the real one and not a part
+    /// of the cost.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_next_level_tells_what_the_player_has()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        IServiceProvider services = scope.ServiceProvider;
+        await PlanetsTestData.SetLevelAsync(services, player.PlanetId, SeedCodes.ScienceCenter, 10);
+
+        // The sciences grow from the first two, so the player knows them well and the others are
+        // open (the tree of the sciences of task 00045).
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_1", 10);
+        await Aetheris.Tests.Processes.ProcessesTestData.LearnAsync(player, services, "tech_2", 10);
+        IResearchModule research = services.GetRequiredService<IResearchModule>();
+
+        TechnologyDto technology = (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token))
+            .Technologies.First(entry => entry.Status == ResearchTechnologyStatuses.Available && entry.Levels.First().Costs.Count > 1);
+        IReadOnlyList<ResearchAmount> costs = technology.Levels.Single(level => level.Level == 1).Costs;
+        ResearchAmount first = costs[0];
+        ResearchAmount second = costs[1];
+        DateTimeOffset moment = PlanetsTestData.GameNow(services);
+
+        // The body has half of the first resource and none of the second.
+        Dictionary<int, long> balance = costs.ToDictionary(cost => cost.ResourceTypeId, cost => cost.Amount);
+        balance[first.ResourceTypeId] = first.Amount / 2;
+        balance[second.ResourceTypeId] = 0;
+        await PlanetsTestData.SetBalanceAsync(services, player.PlanetId, balance, moment);
+
+        TechnologyDto shown = (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token)).Technologies.Single(entry => entry.Id == technology.Id);
+        IReadOnlyList<ResearchAmount> available = shown.Levels.Single(level => level.Level == 1).AvailableResources!;
+
+        Assert.Equal(
+            costs.Select(cost => cost.ResourceTypeId).Order(),
+            available.Select(entry => entry.ResourceTypeId).Order());
+        Assert.Equal(first.Amount / 2, available.Single(entry => entry.ResourceTypeId == first.ResourceTypeId).Amount);
+        Assert.Equal(0, available.Single(entry => entry.ResourceTypeId == second.ResourceTypeId).Amount);
+        Assert.All(shown.Levels.Where(level => level.Level != 1), level => Assert.Empty(level.AvailableResources!));
+
+        // A currency of the civilization is paid from the balance of the civilization, so the amount
+        // is the one of the civilization and not the one of the body.
+        int creditsId = await Aetheris.Tests.Economy.EconomyTestData.CreditsIdAsync(services);
+        TechnologyDto withCredits = (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token))
+            .Technologies.First(entry => entry.Levels.Any(level => level.Costs.Any(cost => cost.ResourceTypeId == creditsId)));
+
+        await Aetheris.Tests.Economy.EconomyTestData.SetBalanceAsync(services, player.Account.UserId, creditsId, 777, moment);
+        TechnologyDto rich = (await research.GetTreeAsync(player.Account.UserId, player.PlanetId, Token)).Technologies.Single(entry => entry.Id == withCredits.Id);
+        // The next level is the one the player can research now, and the only one that tells what
+        // the player has.
+        TechnologyLevelDto creditsLevel = rich.Levels.First(level => level.AvailableResources is { Count: > 0 }
+            && level.Costs.Any(cost => cost.ResourceTypeId == creditsId));
+        ResearchAmount credits = creditsLevel.AvailableResources!.Single(entry => entry.ResourceTypeId == creditsId);
+
+        // The tree shows the balance of the civilization, and the balance grows with the income of
+        // the population, so it is not less than what was written and it is not the cost either.
+        CurrencyBalanceFacts currencyBalance = await services.GetRequiredService<IEconomyModule>()
+            .GetBalanceAsync(player.Account.UserId, creditsId, Token);
+
+        Assert.Equal(currencyBalance.Amount, credits.Amount);
+        Assert.True(credits.Amount >= 777, $"{credits.Amount} is below the balance that was written.");
     }
 
     /// <summary>

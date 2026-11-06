@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Модулі, корпуси й конструктор</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #1c1915; --muted: #5c564c; --line: #e4ddd2; --paper: #f7f4ee; --card: #fff;
+    --mark: #0f6b4c; --mark-bg: #e7f5ee; --warn: #8a4b00; --warn-bg: #fff3e0;
+    --bad: #9b2c1f; --bad-bg: #fbeae7; --changed-bg: #fff8d6; --changed-line: #e6cf6a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.4 "Iowan Old Style", Palatino, Georgia, serif; color: var(--ink); background: var(--paper); }
+  header { position: sticky; top: 0; z-index: 5; background: rgba(247, 244, 238, 0.97); border-bottom: 1px solid var(--line); padding: 10px 16px 8px; }
+  h1 { margin: 0 0 2px; font-size: 1.25rem; }
+  header p { margin: 0 0 6px; color: var(--muted); font-size: 0.88rem; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button, select, input { font: inherit; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--ink); }
+  button { padding: 5px 10px; cursor: pointer; }
+  button:hover { background: #f0ebe3; }
+  button.tab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  button.small { padding: 0 6px; font-size: 0.8rem; }
+  button.danger { color: var(--bad); }
+  input[type="number"] { width: 5.5em; padding: 1px 3px; text-align: right; }
+  input.text { width: 14em; padding: 1px 4px; }
+  select { padding: 1px 2px; max-width: 12em; }
+  main { padding: 10px 16px 40px; }
+  .note { color: var(--muted); margin: 0 0 8px; max-width: 80em; }
+  .scroll { overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--card); max-height: 80vh; width: 100%; }
+  table { border-collapse: collapse; width: 100%; }
+  main { padding-left: 8px; padding-right: 8px; }
+  .panel { padding: 8px 6px; }
+  td input.text { width: 100%; min-width: 12em; }
+  th, td { text-align: left; vertical-align: top; padding: 4px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 400; font-size: 0.8rem; background: #fbf9f5; position: sticky; top: 0; z-index: 2; }
+  td.sticky, th.sticky { position: sticky; left: 0; background: #fff; z-index: 1; }
+  th.sticky { z-index: 3; background: #fbf9f5; }
+  .chips { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; max-width: 34em; white-space: normal; }
+  .chip { display: inline-flex; gap: 2px; align-items: center; padding: 0 3px 0 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); font-size: 0.8rem; white-space: nowrap; }
+  .chip input[type="number"] { width: 4.5em; }
+  .chip button { border: 0; background: transparent; padding: 0 3px; color: var(--muted); }
+  .chip.add { background: transparent; border-style: dashed; }
+  .changed { background: var(--changed-bg) !important; border-color: var(--changed-line) !important; }
+  .added { background: var(--mark-bg) !important; }
+  .warn { color: var(--warn); background: var(--warn-bg); border-radius: 4px; padding: 0 5px; }
+  .bad { color: var(--bad); background: var(--bad-bg); border-radius: 4px; padding: 0 5px; }
+  .ok { color: var(--mark); background: var(--mark-bg); border-radius: 4px; padding: 0 5px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 8px 0; }
+  .grid { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(320px, 1fr); gap: 14px; }
+  @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+  .slot { display: flex; gap: 6px; align-items: center; margin: 3px 0; }
+  .slot .no { width: 1.8em; color: var(--muted); text-align: right; }
+  .slot select { max-width: 22em; width: 100%; }
+  table.totals td, table.totals th { white-space: normal; position: static; }
+  table.totals td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Модулі, корпуси й конструктор</h1>
+  <p>Дані сіду від 05.11.2026 з драбиною корпусів. Змінюйте значення, додавайте й прибирайте параметри та модулі; конструктор одразу показує підсумкові параметри корабля. Змінене жовте, нове зелене. Усе зберігається в цьому браузері.</p>
+  <div class="bar">
+    <button class="tab" data-tab="modules">Модулі</button>
+    <button class="tab" data-tab="hulls">Корпуси</button>
+    <button class="tab" data-tab="builder">Конструктор кораблів</button>
+    <span id="count" style="font-weight:700;margin-left:8px">Змін: 0</span>
+    <button id="download" type="button">Завантажити</button>
+    <button id="upload" type="button">Відкрити</button>
+    <input id="upload-file" type="file" accept="application/json" hidden>
+    <button id="reset" type="button">Скинути до сіду</button>
+  </div>
+</header>
+<main>
+  <section id="tab-modules"></section>
+  <section id="tab-hulls" class="hidden"></section>
+  <section id="tab-builder" class="hidden"></section>
+</main>
+<script id="seed" type="application/json">{"characteristics":[{"code":"char_thrust","name":"Тяга","kind":"drive_push"},{"code":"char_fuel_use","name":"Витрата пального","kind":null},{"code":"char_energy_use","name":"Споживання енергії","kind":"energy_use"},{"code":"char_power","name":"Вироблена потужність","kind":"power"},{"code":"char_damage","name":"Шкода","kind":"damage"},{"code":"char_rate","name":"Скорострільність","kind":null},{"code":"char_range","name":"Дальність","kind":null},{"code":"char_magazine","name":"Боєкомплект","kind":null},{"code":"char_integrity","name":"Міцність","kind":"integrity"},{"code":"char_shield_capacity","name":"Ємність щита","kind":"shield_capacity"},{"code":"char_shield_regen","name":"Відновлення щита","kind":null},{"code":"char_energy_block","name":"Блокування енергетичної шкоди","kind":null},{"code":"char_kinetic_block","name":"Блокування кінетичної шкоди","kind":null},{"code":"char_flight_speed","name":"Швидкість польоту","kind":null},{"code":"char_launcher_size","name":"Розмір пускової","kind":null},{"code":"char_yield","name":"Виробіток","kind":null},{"code":"char_scan_radius","name":"Радіус сканування","kind":null},{"code":"char_scan_speed","name":"Швидкість сканування","kind":null},{"code":"char_detection","name":"Дальність виявлення","kind":null},{"code":"char_dig_speed","name":"Швидкість розкопок","kind":null},{"code":"char_shield_restore","name":"Відновлення щитів","kind":null},{"code":"char_speed","name":"Швидкість","kind":null},{"code":"char_crew","name":"Екіпаж","kind":"crew"},{"code":"char_collect_speed","name":"Швидкість збору","kind":null},{"code":"char_cargo","name":"Місткість вантажу","kind":null},{"code":"char_missiles","name":"Знищені ракети","kind":null},{"code":"char_transfer_speed","name":"Швидкість передачі","kind":null},{"code":"char_transfer_volume","name":"Обсяг передачі","kind":null},{"code":"char_deploy_time","name":"Час розгортання","kind":null},{"code":"char_colonists","name":"Місткість колоністів","kind":null},{"code":"char_inhabitants","name":"Мешканців у капсулі","kind":null},{"code":"char_population","name":"Місткість населення","kind":null},{"code":"char_storage","name":"Місткість складу","kind":null},{"code":"char_repair_speed","name":"Швидкість ремонту","kind":null},{"code":"char_training_speed","name":"Швидкість навчання","kind":null},{"code":"char_trade_lots","name":"Кількість лотів","kind":null},{"code":"char_jump_prep","name":"Час підготовки стрибка","kind":null},{"code":"char_hull_size","name":"Розмір","kind":null},{"code":"char_hull_capacity","name":"Вмістимість","kind":"hull_capacity"},{"code":"char_hull_slots","name":"Кількість слотів","kind":"hull_slots"},{"code":"char_hull_race_slot","name":"Додатковий слот раси","kind":"hull_race_slot"}],"group_chars":{"pg_1":[{"c":"char_thrust","required":true},{"c":"char_fuel_use","required":true},{"c":"char_energy_use","required":true}],"pg_2":[{"c":"char_power","required":true}],"pg_3":[{"c":"char_damage","required":true},{"c":"char_rate","required":true},{"c":"char_range","required":true},{"c":"char_energy_use","required":true}],"pg_4":[{"c":"char_damage","required":true},{"c":"char_rate","required":true},{"c":"char_range","required":true},{"c":"char_energy_use","required":true},{"c":"char_magazine","required":false}],"pg_5":[{"c":"char_integrity","required":true}],"pg_6":[{"c":"char_shield_capacity","required":true},{"c":"char_shield_regen","required":true},{"c":"char_energy_block","required":true},{"c":"char_kinetic_block","required":true},{"c":"char_energy_use","required":true}],"pg_7":[{"c":"char_damage","required":true},{"c":"char_range","required":true},{"c":"char_flight_speed","required":false},{"c":"char_launcher_size","required":false}],"pg_8":[{"c":"char_yield","required":true},{"c":"char_energy_use","required":true},{"c":"char_scan_radius","required":false},{"c":"char_scan_speed","required":false}],"pg_9":[{"c":"char_energy_use","required":true},{"c":"char_detection","required":false},{"c":"char_dig_speed","required":false}],"pg_10":[{"c":"char_cargo","required":false},{"c":"char_collect_speed","required":false},{"c":"char_colonists","required":false},{"c":"char_crew","required":false},{"c":"char_deploy_time","required":false},{"c":"char_energy_use","required":false},{"c":"char_fuel_use","required":false},{"c":"char_inhabitants","required":false},{"c":"char_missiles","required":false},{"c":"char_range","required":false},{"c":"char_shield_restore","required":false},{"c":"char_speed","required":false},{"c":"char_transfer_speed","required":false},{"c":"char_transfer_volume","required":false}],"pg_11":[{"c":"char_energy_use","required":false},{"c":"char_jump_prep","required":false},{"c":"char_population","required":false},{"c":"char_power","required":false},{"c":"char_repair_speed","required":false},{"c":"char_storage","required":false},{"c":"char_trade_lots","required":false},{"c":"char_training_speed","required":false},{"c":"char_yield","required":false}],"pg_12":[{"c":"char_hull_size","required":true},{"c":"char_hull_capacity","required":true},{"c":"char_integrity","required":true},{"c":"char_hull_slots","required":false}],"pg_13":[{"c":"char_hull_size","required":true},{"c":"char_hull_capacity","required":true},{"c":"char_integrity","required":true},{"c":"char_hull_slots","required":false}],"pg_14":[{"c":"char_hull_size","required":true},{"c":"char_hull_capacity","required":true},{"c":"char_integrity","required":true},{"c":"char_hull_slots","required":false}],"pg_15":[{"c":"char_hull_size","required":true},{"c":"char_hull_capacity","required":true},{"c":"char_integrity","required":true},{"c":"char_hull_slots","required":false},{"c":"char_hull_race_slot","required":false}],"pg_16":[{"c":"char_hull_size","required":true},{"c":"char_hull_capacity","required":true},{"c":"char_integrity","required":true},{"c":"char_hull_slots","required":false},{"c":"char_hull_race_slot","required":false}],"pg_17":[{"c":"char_hull_size","required":true},{"c":"char_hull_capacity","required":true},{"c":"char_integrity","required":true},{"c":"char_hull_slots","required":false}],"pg_18":[{"c":"char_hull_size","required":true},{"c":"char_hull_capacity","required":true},{"c":"char_integrity","required":true},{"c":"char_hull_slots","required":false}]},"groups":{"pg_1":"Двигуни","pg_2":"Реактори","pg_3":"Енергетична зброя","pg_4":"Кінетична зброя","pg_5":"Броня","pg_6":"Щити","pg_7":"Боєприпаси","pg_8":"Видобуток","pg_9":"Розвідка й маскування","pg_10":"Інші модулі","pg_11":"Модулі бази","pg_12":"Легкі","pg_13":"Дрони","pg_14":"Середні","pg_15":"Важкі","pg_16":"Надважкі","pg_17":"Цивільні","pg_18":"Корпуси споруд","pg_19":"Модулі кораблів","pg_20":"Корпуси кораблів","pg_21":"Модулі бази","pg_22":"Зброя"},"resources":{"resource_1":"Залізна руда","resource_2":"Титанова руда","resource_3":"Іридієва руда","resource_4":"Кобальтова руда","resource_5":"Уранова руда","resource_6":"Силікорова руда","resource_7":"Тектонітова руда","resource_8":"Кварцит","resource_9":"Обсидіан","resource_10":"Лінтрій","resource_11":"Орекс","resource_12":"Дейтерій","resource_13":"Гелій-3","resource_14":"Темна матерія","resource_15":"Ефір","resource_16":"Збагачений Уран","resource_17":"Квартан","resource_18":"Стобій","resource_19":"Туманій","resource_20":"Будматеріали","resource_21":"Оптоволокно","resource_22":"Мікропроцесори","resource_23":"Композити","resource_24":"Енергострижні","resource_25":"Нановолокно","resource_26":"Титановий сплав","resource_27":"Кредити","resource_28":"Торгова валюта","resource_29":"Енергія","resource_30":"Населення","resource_31":"Реальна валюта"},"factories":{"building_40":"Фабрика двигунів","building_41":"Завод реакторів","building_42":"Завод енергетичної зброї","building_43":"Завод кінетичної зброї","building_44":"Ливарний завод","building_45":"Завод щитів","building_46":"Фабрика боєприпасів","building_47":"Фабрика бурових установок","building_48":"Завод точних приладів","building_49":"Індустріальний комплекс","building_50":"Фабрика утилізації","building_51":"Верф","building_52":"Радар","building_53":"Планетарна гармата","building_54":"Планетарний щит"},"modules":[{"code":"part_m_1","name":"Реактивний двигун","group":"pg_1","mark":1,"weight":1,"attributes":{"role":"universal","component":"drive"},"chars":{"char_thrust":100,"char_fuel_use":100,"char_energy_use":0},"hulls":["part_h_1","part_h_2","part_h_3","part_h_4","part_h_21"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_40","factory_level":1,"duration":300,"ingredients":{"resource_1":200,"resource_9":40,"resource_12":40,"resource_22":80,"resource_27":100}},{"code":"part_m_2","name":"Плазмовий двигун","group":"pg_1","mark":1,"weight":1.1,"attributes":{"role":"universal","component":"drive"},"chars":{"char_thrust":110,"char_fuel_use":110,"char_energy_use":0},"hulls":["part_h_1","part_h_2","part_h_3","part_h_4","part_h_8","part_h_9","part_h_21","part_h_22"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_40","factory_level":3,"duration":360,"ingredients":{"resource_2":240,"resource_4":240,"resource_9":48,"resource_12":48,"resource_22":96,"resource_23":96,"resource_27":120}},{"code":"part_m_3","name":"Іонний двигун","group":"pg_1","mark":1,"weight":1.21,"attributes":{"role":"universal","component":"drive"},"chars":{"char_thrust":121,"char_fuel_use":121,"char_energy_use":0},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_14","part_h_15","part_h_16","part_h_17","part_h_22","part_h_23"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_40","factory_level":8,"duration":430,"ingredients":{"resource_10":58,"resource_14":58,"resource_22":120,"resource_23":120,"resource_27":140}},{"code":"part_m_4","name":"Гравітаційний двигун","group":"pg_1","mark":1,"weight":1.331,"attributes":{"role":"universal","component":"drive"},"chars":{"char_thrust":133.1,"char_fuel_use":133.1,"char_energy_use":0},"hulls":["part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20","part_h_23","part_h_24"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_40","factory_level":11,"duration":520,"ingredients":{"resource_2":350,"resource_22":140,"resource_23":140,"resource_27":170}},{"code":"part_m_5","name":"Гіпердвигун","group":"pg_1","mark":1,"weight":1.4641,"attributes":{"role":"universal","component":"drive"},"chars":{"char_thrust":146.41,"char_fuel_use":146.41,"char_energy_use":0},"hulls":["part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20","part_h_24"],"races":["race_2"],"factory":"building_40","factory_level":13,"duration":620,"ingredients":{"resource_17":41,"resource_18":41,"resource_22":170,"resource_23":170,"resource_27":210}},{"code":"part_m_6","name":"Джамп-двигун","group":"pg_1","mark":1,"weight":1.61051,"attributes":{"role":"universal","component":"drive"},"chars":{"char_thrust":161.051,"char_fuel_use":161.051,"char_energy_use":0},"hulls":["part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_2"],"factory":"building_40","factory_level":17,"duration":750,"ingredients":{"resource_15":100,"resource_22":200,"resource_25":200,"resource_27":250}},{"code":"part_m_7","name":"Ядерний реактор","group":"pg_2","mark":1,"weight":1.771561,"attributes":{"role":"universal","component":"reactor"},"chars":{"char_power":100},"hulls":["part_h_1","part_h_2","part_h_3","part_h_4","part_h_8","part_h_21","part_h_22"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_41","factory_level":1,"duration":300,"ingredients":{"resource_1":200,"resource_16":40,"resource_22":80,"resource_27":100}},{"code":"part_m_8","name":"Імпульсний реактор","group":"pg_2","mark":1,"weight":1.948717,"attributes":{"role":"universal","component":"reactor"},"chars":{"char_power":110},"hulls":["part_h_2","part_h_3","part_h_4","part_h_8","part_h_9","part_h_10","part_h_22","part_h_23"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_41","factory_level":4,"duration":360,"ingredients":{"resource_11":48,"resource_22":96,"resource_23":96,"resource_27":120}},{"code":"part_m_9","name":"Термоядерний реактор","group":"pg_2","mark":1,"weight":2.143589,"attributes":{"role":"universal","component":"reactor"},"chars":{"char_power":121},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_23","part_h_24"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_41","factory_level":9,"duration":430,"ingredients":{"resource_4":290,"resource_13":58,"resource_22":120,"resource_23":120,"resource_27":140}},{"code":"part_m_10","name":"Реактор холодного синтезу","group":"pg_2","mark":1,"weight":2.357948,"attributes":{"role":"universal","component":"reactor"},"chars":{"char_power":133.1},"hulls":["part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_23"],"races":["race_4"],"factory":"building_41","factory_level":12,"duration":520,"ingredients":{"resource_13":69,"resource_22":140,"resource_25":140,"resource_27":170}},{"code":"part_m_11","name":"Гравітаційний реактор","group":"pg_2","mark":1,"weight":2.593742,"attributes":{"role":"universal","component":"reactor"},"chars":{"char_power":146.41},"hulls":["part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20","part_h_23","part_h_24"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_41","factory_level":13,"duration":620,"ingredients":{"resource_15":83,"resource_22":170,"resource_23":170,"resource_27":210}},{"code":"part_m_12","name":"Важкий реактор","group":"pg_2","mark":1,"weight":2.853117,"attributes":{"role":"universal","component":"reactor"},"chars":{"char_power":161.051},"hulls":["part_h_18","part_h_19","part_h_20","part_h_24"],"races":["race_4"],"factory":"building_41","factory_level":19,"duration":750,"ingredients":{"resource_3":500,"resource_15":100,"resource_22":200,"resource_26":200,"resource_27":250}},{"code":"part_m_13","name":"Легкий лазер","group":"pg_3","mark":1,"weight":3.138428,"attributes":{"damage_kind":"energy","role":"combat"},"chars":{"char_damage":100,"char_rate":100,"char_range":100,"char_energy_use":100},"hulls":["part_h_1","part_h_2"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_42","factory_level":2,"duration":300,"ingredients":{"resource_9":40,"resource_11":40,"resource_22":80,"resource_27":100}},{"code":"part_m_14","name":"Важкий лазер","group":"pg_3","mark":1,"weight":3.452271,"attributes":{"damage_kind":"energy","role":"combat"},"chars":{"char_damage":110,"char_rate":110,"char_range":110,"char_energy_use":110},"hulls":["part_h_2"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_42","factory_level":3,"duration":360,"ingredients":{"resource_9":48,"resource_10":48,"resource_11":48,"resource_23":96,"resource_27":120}},{"code":"part_m_15","name":"Імпульсний лазер","group":"pg_3","mark":1,"weight":3.797498,"attributes":{"damage_kind":"energy","role":"combat"},"chars":{"char_damage":121,"char_rate":121,"char_range":121,"char_energy_use":121},"hulls":["part_h_2"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_42","factory_level":4,"duration":430,"ingredients":{"resource_6":290,"resource_10":58,"resource_22":120,"resource_27":140}},{"code":"part_m_16","name":"Плазмова гармата","group":"pg_3","mark":1,"weight":4.177248,"attributes":{"damage_kind":"energy","role":"combat"},"chars":{"char_damage":133.1,"char_rate":133.1,"char_range":133.1,"char_energy_use":133.1},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_42","factory_level":7,"duration":520,"ingredients":{"resource_10":69,"resource_11":69,"resource_23":140,"resource_27":170}},{"code":"part_m_17","name":"Іонна гармата","group":"pg_3","mark":1,"weight":4.594973,"attributes":{"damage_kind":"energy","role":"combat"},"chars":{"char_damage":146.41,"char_rate":146.41,"char_range":146.41,"char_energy_use":146.41},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_42","factory_level":8,"duration":620,"ingredients":{"resource_11":83,"resource_14":83,"resource_23":170,"resource_27":210}},{"code":"part_m_18","name":"Мікрохвильовий випромінювач","group":"pg_3","mark":1,"weight":5.05447,"attributes":{"damage_kind":"energy","role":"combat"},"chars":{"char_damage":161.051,"char_rate":161.051,"char_range":161.051,"char_energy_use":161.051},"hulls":["part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_42","factory_level":12,"duration":750,"ingredients":{"resource_6":500,"resource_11":100,"resource_22":200,"resource_27":250}},{"code":"part_m_19","name":"Частинковий прискорювач","group":"pg_3","mark":1,"weight":5.559917,"attributes":{"damage_kind":"energy","role":"combat"},"chars":{"char_damage":177.1561,"char_rate":177.1561,"char_range":177.1561,"char_energy_use":177.1561},"hulls":["part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1"],"factory":"building_42","factory_level":13,"duration":900,"ingredients":{"resource_6":600,"resource_9":120,"resource_25":240,"resource_27":300}},{"code":"part_m_20","name":"Орексова гармата","group":"pg_3","mark":1,"weight":6.115909,"attributes":{"damage_kind":"energy","role":"combat"},"chars":{"char_damage":194.87171,"char_rate":194.87171,"char_range":194.87171,"char_energy_use":194.87171},"hulls":["part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1"],"factory":"building_42","factory_level":18,"duration":1100,"ingredients":{"resource_11":140,"resource_23":290,"resource_25":290,"resource_27":360}},{"code":"part_m_21","name":"Кінетична гармата","group":"pg_4","mark":1,"weight":6.7275,"attributes":{"damage_kind":"kinetic","role":"combat"},"chars":{"char_damage":100,"char_rate":100,"char_range":100,"char_energy_use":100,"char_magazine":100},"hulls":["part_h_11","part_h_12","part_h_13","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_43","factory_level":11,"duration":300,"ingredients":{"resource_1":200,"resource_27":100}},{"code":"part_m_22","name":"Скорострільна гармата","group":"pg_4","mark":1,"weight":7.40025,"attributes":{"damage_kind":"kinetic","role":"combat"},"chars":{"char_damage":110,"char_rate":110,"char_range":110,"char_energy_use":110,"char_magazine":110},"hulls":["part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_43","factory_level":13,"duration":360,"ingredients":{"resource_1":240,"resource_4":240,"resource_22":96,"resource_27":120}},{"code":"part_m_23","name":"Рейкова гармата","group":"pg_4","mark":1,"weight":8.140275,"attributes":{"damage_kind":"kinetic","role":"combat"},"chars":{"char_damage":121,"char_rate":121,"char_range":121,"char_energy_use":121,"char_magazine":121},"hulls":["part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_43","factory_level":8,"duration":430,"ingredients":{"resource_2":290,"resource_3":290,"resource_11":58,"resource_23":120,"resource_27":140}},{"code":"part_m_24","name":"РПУ-X1","group":"pg_4","mark":1,"weight":8.954302,"attributes":{"damage_kind":"kinetic","role":"combat"},"chars":{"char_damage":133.1,"char_rate":133.1,"char_range":133.1,"char_energy_use":133.1,"char_magazine":133.1},"hulls":["part_h_3","part_h_4"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_43","factory_level":3,"duration":520,"ingredients":{"resource_4":350,"resource_6":350,"resource_22":140,"resource_27":170}},{"code":"part_m_25","name":"РПУ-X2","group":"pg_4","mark":1,"weight":9.849733,"attributes":{"damage_kind":"kinetic","role":"combat"},"chars":{"char_damage":146.41,"char_rate":146.41,"char_range":146.41,"char_energy_use":146.41,"char_magazine":146.41},"hulls":["part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_43","factory_level":12,"duration":620,"ingredients":{"resource_6":410,"resource_22":170,"resource_23":170,"resource_27":210}},{"code":"part_m_26","name":"РПУ-X3","group":"pg_4","mark":1,"weight":10.834706,"attributes":{"damage_kind":"kinetic","role":"combat"},"chars":{"char_damage":161.051,"char_rate":161.051,"char_range":161.051,"char_energy_use":161.051,"char_magazine":161.051},"hulls":["part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_43","factory_level":14,"duration":750,"ingredients":{"resource_6":500,"resource_22":200,"resource_25":200,"resource_26":200,"resource_27":250}},{"code":"part_m_27","name":"Сталева плита","group":"pg_5","mark":1,"weight":11.918177,"attributes":{"role":"combat"},"chars":{"char_integrity":100},"hulls":["part_h_1","part_h_2"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_44","factory_level":3,"duration":300,"ingredients":{"resource_1":200,"resource_27":100}},{"code":"part_m_28","name":"Сегментна броня","group":"pg_5","mark":1,"weight":13.109994,"attributes":{"role":"combat"},"chars":{"char_integrity":110},"hulls":["part_h_2","part_h_3"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_44","factory_level":4,"duration":360,"ingredients":{"resource_1":240,"resource_2":240,"resource_27":120}},{"code":"part_m_29","name":"Кобальтова броня","group":"pg_5","mark":1,"weight":14.420994,"attributes":{"role":"combat"},"chars":{"char_integrity":121},"hulls":["part_h_3","part_h_4","part_h_8","part_h_9","part_h_10","part_h_11"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_44","factory_level":4,"duration":430,"ingredients":{"resource_1":290,"resource_4":290,"resource_27":140}},{"code":"part_m_30","name":"Титанова плита","group":"pg_5","mark":1,"weight":15.863093,"attributes":{"role":"combat"},"chars":{"char_integrity":133.1},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_44","factory_level":8,"duration":520,"ingredients":{"resource_2":350,"resource_23":140,"resource_27":170}},{"code":"part_m_31","name":"Композитна броня","group":"pg_5","mark":1,"weight":17.449402,"attributes":{"role":"combat"},"chars":{"char_integrity":146.41},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_44","factory_level":11,"duration":620,"ingredients":{"resource_2":410,"resource_23":170,"resource_27":210}},{"code":"part_m_32","name":"Іридієва плита","group":"pg_5","mark":1,"weight":19.194342,"attributes":{"role":"combat"},"chars":{"char_integrity":161.051},"hulls":["part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_44","factory_level":9,"duration":750,"ingredients":{"resource_3":500,"resource_23":200,"resource_27":250}},{"code":"part_m_33","name":"Наноплита","group":"pg_5","mark":1,"weight":21.113777,"attributes":{"role":"combat"},"chars":{"char_integrity":177.1561},"hulls":["part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_44","factory_level":13,"duration":900,"ingredients":{"resource_23":240,"resource_25":240,"resource_27":300}},{"code":"part_m_34","name":"Адаптивна броня","group":"pg_5","mark":1,"weight":23.225154,"attributes":{"role":"combat"},"chars":{"char_integrity":194.87171},"hulls":["part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_44","factory_level":15,"duration":1100,"ingredients":{"resource_22":290,"resource_23":290,"resource_25":290,"resource_27":360}},{"code":"part_m_35","name":"Силовий щит","group":"pg_6","mark":1,"weight":25.54767,"attributes":{"role":"combat"},"chars":{"char_shield_capacity":100,"char_shield_regen":100,"char_energy_block":100,"char_kinetic_block":100,"char_energy_use":100},"hulls":["part_h_1","part_h_2","part_h_3","part_h_4"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_45","factory_level":2,"duration":300,"ingredients":{"resource_11":40,"resource_22":80,"resource_27":100}},{"code":"part_m_36","name":"Кварцовий щит","group":"pg_6","mark":1,"weight":28.102437,"attributes":{"role":"combat"},"chars":{"char_shield_capacity":110,"char_shield_regen":110,"char_energy_block":110,"char_kinetic_block":110,"char_energy_use":110},"hulls":["part_h_3","part_h_4"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_45","factory_level":3,"duration":360,"ingredients":{"resource_8":48,"resource_10":48,"resource_27":120}},{"code":"part_m_37","name":"Магнітний щит","group":"pg_6","mark":1,"weight":30.912681,"attributes":{"role":"combat"},"chars":{"char_shield_capacity":121,"char_shield_regen":121,"char_energy_block":121,"char_kinetic_block":121,"char_energy_use":121},"hulls":["part_h_4","part_h_8","part_h_9","part_h_10"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_45","factory_level":4,"duration":430,"ingredients":{"resource_4":290,"resource_10":58,"resource_22":120,"resource_27":140}},{"code":"part_m_38","name":"Гравітаційний щит","group":"pg_6","mark":1,"weight":34.003949,"attributes":{"role":"combat"},"chars":{"char_shield_capacity":133.1,"char_shield_regen":133.1,"char_energy_block":133.1,"char_kinetic_block":133.1,"char_energy_use":133.1},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_45","factory_level":7,"duration":520,"ingredients":{"resource_9":69,"resource_22":140,"resource_23":140,"resource_27":170}},{"code":"part_m_39","name":"Нейтронний щит","group":"pg_6","mark":1,"weight":37.404343,"attributes":{"role":"combat"},"chars":{"char_shield_capacity":146.41,"char_shield_regen":146.41,"char_energy_block":146.41,"char_kinetic_block":146.41,"char_energy_use":146.41},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_45","factory_level":8,"duration":620,"ingredients":{"resource_10":83,"resource_23":170,"resource_27":210}},{"code":"part_m_40","name":"Плазмовий щит","group":"pg_6","mark":1,"weight":41.144778,"attributes":{"role":"combat"},"chars":{"char_shield_capacity":161.051,"char_shield_regen":161.051,"char_energy_block":161.051,"char_kinetic_block":161.051,"char_energy_use":161.051},"hulls":["part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_45","factory_level":13,"duration":750,"ingredients":{"resource_9":100,"resource_10":100,"resource_27":250}},{"code":"part_m_41","name":"Орексовий щит","group":"pg_6","mark":1,"weight":45.259256,"attributes":{"role":"combat"},"chars":{"char_shield_capacity":177.1561,"char_shield_regen":177.1561,"char_energy_block":177.1561,"char_kinetic_block":177.1561,"char_energy_use":177.1561},"hulls":["part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_3"],"factory":"building_45","factory_level":18,"duration":900,"ingredients":{"resource_11":120,"resource_22":240,"resource_25":240,"resource_27":300}},{"code":"part_m_42","name":"Ефірний щит","group":"pg_6","mark":1,"weight":49.785181,"attributes":{"role":"combat"},"chars":{"char_shield_capacity":194.87171,"char_shield_regen":194.87171,"char_energy_block":194.87171,"char_kinetic_block":194.87171,"char_energy_use":194.87171},"hulls":["part_h_18","part_h_19","part_h_20"],"races":["race_3"],"factory":"building_45","factory_level":19,"duration":1100,"ingredients":{"resource_10":140,"resource_15":140,"resource_25":290,"resource_27":360}},{"code":"part_m_43","name":"Сталевий снаряд","group":"pg_7","mark":1,"weight":54.763699,"attributes":{"damage_kind":"kinetic","role":"combat","not_a_ship_module":"true"},"chars":{"char_damage":100,"char_range":100},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_46","factory_level":11,"duration":300,"ingredients":{"resource_1":200,"resource_27":100}},{"code":"part_m_44","name":"Кобальтовий снаряд","group":"pg_7","mark":1,"weight":60.240069,"attributes":{"damage_kind":"kinetic","role":"combat","not_a_ship_module":"true"},"chars":{"char_damage":110,"char_range":110},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_46","factory_level":12,"duration":360,"ingredients":{"resource_1":240,"resource_4":240,"resource_27":120}},{"code":"part_m_45","name":"Рейковий стрижень","group":"pg_7","mark":1,"weight":66.264076,"attributes":{"damage_kind":"kinetic","role":"combat","not_a_ship_module":"true"},"chars":{"char_damage":121,"char_range":121},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_46","factory_level":9,"duration":430,"ingredients":{"resource_2":290,"resource_10":58,"resource_27":140}},{"code":"part_m_46","name":"Стріла-X1","group":"pg_7","mark":1,"weight":72.890484,"attributes":{"damage_kind":"kinetic","role":"combat","not_a_ship_module":"true"},"chars":{"char_damage":133.1,"char_range":133.1,"char_flight_speed":133.1,"char_launcher_size":1},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_46","factory_level":4,"duration":520,"ingredients":{"resource_1":350,"resource_22":140,"resource_27":170}},{"code":"part_m_47","name":"Блискавка-X1","group":"pg_7","mark":1,"weight":80.179532,"attributes":{"damage_kind":"energy","role":"combat","not_a_ship_module":"true"},"chars":{"char_damage":146.41,"char_range":146.41,"char_flight_speed":146.41,"char_launcher_size":1},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_46","factory_level":5,"duration":620,"ingredients":{"resource_6":410,"resource_9":83,"resource_27":210}},{"code":"part_m_48","name":"Спис-X2","group":"pg_7","mark":1,"weight":88.197485,"attributes":{"damage_kind":"kinetic","role":"combat","not_a_ship_module":"true"},"chars":{"char_damage":161.051,"char_range":161.051,"char_flight_speed":161.051,"char_launcher_size":2},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_46","factory_level":12,"duration":750,"ingredients":{"resource_2":500,"resource_22":200,"resource_23":200,"resource_27":250}},{"code":"part_m_49","name":"Валькірія-X3","group":"pg_7","mark":1,"weight":97.017234,"attributes":{"damage_kind":"kinetic","role":"combat","not_a_ship_module":"true"},"chars":{"char_damage":177.1561,"char_range":177.1561,"char_flight_speed":177.1561,"char_launcher_size":3},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_46","factory_level":16,"duration":900,"ingredients":{"resource_22":240,"resource_25":240,"resource_26":240,"resource_27":300}},{"code":"part_m_50","name":"Термоядерна торпеда","group":"pg_7","mark":1,"weight":106.718957,"attributes":{"damage_kind":"energy","role":"combat","not_a_ship_module":"true"},"chars":{"char_damage":194.87171,"char_range":194.87171,"char_flight_speed":194.87171},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_46","factory_level":13,"duration":1100,"ingredients":{"resource_13":140,"resource_23":290,"resource_27":360}},{"code":"part_m_51","name":"Протонна торпеда","group":"pg_7","mark":1,"weight":117.390853,"attributes":{"damage_kind":"energy","role":"combat","not_a_ship_module":"true"},"chars":{"char_damage":214.358881,"char_range":214.358881,"char_flight_speed":214.358881},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_46","factory_level":16,"duration":1300,"ingredients":{"resource_9":170,"resource_23":340,"resource_27":430}},{"code":"part_m_52","name":"Уранова торпеда","group":"pg_7","mark":1,"weight":129.129938,"attributes":{"damage_kind":"kinetic","role":"combat","not_a_ship_module":"true"},"chars":{"char_damage":235.794769,"char_range":235.794769,"char_flight_speed":235.794769},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_46","factory_level":19,"duration":1500,"ingredients":{"resource_2":1000,"resource_16":210,"resource_27":520}},{"code":"part_m_53","name":"Модуль геологорозвідки","group":"pg_8","mark":1,"weight":142.042932,"attributes":{"role":"civil"},"chars":{"char_yield":100,"char_energy_use":100,"char_scan_radius":100,"char_scan_speed":100},"hulls":["part_h_21","part_h_22"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_47","factory_level":1,"duration":300,"ingredients":{"resource_8":40,"resource_22":80,"resource_27":100}},{"code":"part_m_54","name":"Бурова установка","group":"pg_8","mark":1,"weight":156.247225,"attributes":{"role":"civil"},"chars":{"char_yield":110,"char_energy_use":110},"hulls":["part_h_21","part_h_22"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_47","factory_level":1,"duration":360,"ingredients":{"resource_1":240,"resource_8":48,"resource_23":96,"resource_27":120}},{"code":"part_m_55","name":"Кристалічний екстрактор","group":"pg_8","mark":1,"weight":171.871948,"attributes":{"role":"civil"},"chars":{"char_yield":121,"char_energy_use":121},"hulls":["part_h_21","part_h_22"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_47","factory_level":5,"duration":430,"ingredients":{"resource_8":58,"resource_23":120,"resource_27":140}},{"code":"part_m_56","name":"Збирач ефіру","group":"pg_8","mark":1,"weight":189.059142,"attributes":{"role":"civil"},"chars":{"char_yield":133.1,"char_energy_use":133.1},"hulls":["part_h_22","part_h_23"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_47","factory_level":15,"duration":520,"ingredients":{"resource_8":69,"resource_22":140,"resource_23":140,"resource_27":170}},{"code":"part_m_57","name":"Туманнісний збирач","group":"pg_8","mark":1,"weight":207.965057,"attributes":{"role":"civil"},"chars":{"char_yield":146.41,"char_energy_use":146.41},"hulls":["part_h_23","part_h_24"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_47","factory_level":9,"duration":620,"ingredients":{"resource_9":83,"resource_19":41,"resource_23":170,"resource_27":210}},{"code":"part_m_58","name":"Астросканер","group":"pg_9","mark":1,"weight":228.761562,"attributes":{"role":"universal"},"chars":{"char_energy_use":100,"char_detection":100},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_48","factory_level":7,"duration":300,"ingredients":{"resource_8":40,"resource_10":40,"resource_19":20,"resource_21":80,"resource_22":80,"resource_27":100}},{"code":"part_m_59","name":"Корабельний радар","group":"pg_9","mark":1,"weight":251.637719,"attributes":{"role":"universal"},"chars":{"char_energy_use":110,"char_detection":110},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_48","factory_level":6,"duration":360,"ingredients":{"resource_8":48,"resource_10":48,"resource_21":96,"resource_22":96,"resource_27":120}},{"code":"part_m_60","name":"Археологічний модуль","group":"pg_9","mark":1,"weight":276.80149,"attributes":{"role":"universal"},"chars":{"char_energy_use":121,"char_dig_speed":121},"hulls":["part_h_21","part_h_22"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_48","factory_level":4,"duration":430,"ingredients":{"resource_11":58,"resource_22":120,"resource_27":140}},{"code":"part_m_61","name":"Радіооптичне маскування","group":"pg_9","mark":1,"weight":304.48164,"attributes":{"role":"universal"},"chars":{"char_energy_use":133.1},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1"],"factory":"building_48","factory_level":12,"duration":520,"ingredients":{"resource_6":350,"resource_8":69,"resource_21":140,"resource_22":140,"resource_27":170}},{"code":"part_m_62","name":"Детектор маскування","group":"pg_9","mark":1,"weight":334.929803,"attributes":{"role":"universal"},"chars":{"char_energy_use":146.41},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_4"],"factory":"building_48","factory_level":12,"duration":620,"ingredients":{"resource_6":410,"resource_8":83,"resource_21":170,"resource_22":170,"resource_27":210}},{"code":"part_m_63","name":"Відновлювач щитів","group":"pg_10","mark":1,"weight":368.422784,"attributes":{"role":"combat"},"chars":{"char_shield_restore":100,"char_energy_use":100},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_3"],"factory":"building_49","factory_level":8,"duration":300,"ingredients":{"resource_8":40,"resource_22":80,"resource_27":100}},{"code":"part_m_64","name":"Бортовий комп'ютер","group":"pg_10","mark":1,"weight":405.265062,"attributes":{"role":"universal"},"chars":{"char_fuel_use":110,"char_speed":110,"char_crew":110,"char_energy_use":0},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20","part_h_1","part_h_2","part_h_3","part_h_4","part_h_21","part_h_22","part_h_23","part_h_24"],"races":["race_2"],"factory":"building_49","factory_level":18,"duration":360,"ingredients":{"resource_6":240,"resource_8":48,"resource_21":96,"resource_22":96,"resource_27":120}},{"code":"part_m_65","name":"Збирач уламків","group":"pg_10","mark":1,"weight":445.791568,"attributes":{"role":"universal"},"chars":{"char_collect_speed":121,"char_energy_use":121},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":8,"duration":430,"ingredients":{"resource_1":290,"resource_27":140}},{"code":"part_m_66","name":"Вантажний відсік","group":"pg_10","mark":1,"weight":490.370725,"attributes":{"role":"universal"},"chars":{"char_cargo":133.1,"char_energy_use":0},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20","part_h_21","part_h_22","part_h_23","part_h_24"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":1,"duration":520,"ingredients":{"resource_1":350,"resource_23":140,"resource_27":170}},{"code":"part_m_67","name":"Великий вантажний відсік","group":"pg_10","mark":1,"weight":539.407798,"attributes":{"role":"universal"},"chars":{"char_cargo":146.41,"char_energy_use":0},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20","part_h_23","part_h_24"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":9,"duration":620,"ingredients":{"resource_2":410,"resource_23":170,"resource_27":210}},{"code":"part_m_68","name":"Протиракетна система","group":"pg_10","mark":1,"weight":593.348578,"attributes":{"role":"combat"},"chars":{"char_missiles":161.051,"char_range":161.051,"char_energy_use":161.051},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":12,"duration":750,"ingredients":{"resource_4":500,"resource_8":100,"resource_21":200,"resource_22":200,"resource_27":250}},{"code":"part_m_69","name":"Модуль передачі","group":"pg_10","mark":1,"weight":652.683435,"attributes":{"role":"universal"},"chars":{"char_transfer_speed":177.1561,"char_transfer_volume":177.1561,"char_energy_use":177.1561},"hulls":["part_h_8","part_h_9","part_h_10","part_h_11","part_h_12","part_h_13","part_h_14","part_h_15","part_h_16","part_h_17","part_h_18","part_h_19","part_h_20"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":8,"duration":900,"ingredients":{"resource_8":120,"resource_21":240,"resource_22":240,"resource_27":300}},{"code":"part_m_70","name":"Колоніальний модуль","group":"pg_10","mark":1,"weight":717.951779,"attributes":{"role":"transport"},"chars":{"char_deploy_time":194.87171,"char_colonists":194.87171,"char_energy_use":0},"hulls":["part_h_24"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":9,"duration":1100,"ingredients":{"resource_22":290,"resource_23":290,"resource_27":360}},{"code":"part_m_71","name":"Житловий модуль","group":"pg_11","mark":1,"weight":789.746957,"attributes":{"role":"civil"},"chars":{"char_population":100,"char_energy_use":100},"hulls":["part_h_25","part_h_26"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":10,"duration":300,"ingredients":{"resource_22":80,"resource_23":80,"resource_27":100}},{"code":"part_m_72","name":"Орбітальний склад","group":"pg_11","mark":1,"weight":868.721652,"attributes":{"role":"civil"},"chars":{"char_storage":110,"char_energy_use":110},"hulls":["part_h_25","part_h_26","part_h_27"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":6,"duration":360,"ingredients":{"resource_1":240,"resource_23":96,"resource_27":120}},{"code":"part_m_73","name":"Ремонтні майстерні","group":"pg_11","mark":1,"weight":955.593818,"attributes":{"role":"civil"},"chars":{"char_repair_speed":121,"char_energy_use":121},"hulls":["part_h_25","part_h_26"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":10,"duration":430,"ingredients":{"resource_1":290,"resource_22":120,"resource_23":120,"resource_27":140}},{"code":"part_m_74","name":"Школа командирів","group":"pg_11","mark":1,"weight":1051.1532,"attributes":{"role":"civil"},"chars":{"char_training_speed":133.1,"char_energy_use":133.1},"hulls":["part_h_25","part_h_26"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":10,"duration":520,"ingredients":{"resource_22":140,"resource_27":170}},{"code":"part_m_75","name":"Торговий центр","group":"pg_11","mark":1,"weight":1156.268519,"attributes":{"role":"civil"},"chars":{"char_trade_lots":100,"char_energy_use":146.41},"hulls":["part_h_25","part_h_26"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":10,"duration":620,"ingredients":{"resource_21":170,"resource_22":170,"resource_27":210}},{"code":"part_m_76","name":"Орбітальний термоядерний реактор","group":"pg_11","mark":1,"weight":1271.895371,"attributes":{"role":"civil"},"chars":{"char_power":161.051},"hulls":["part_h_25","part_h_26","part_h_27"],"races":["race_4"],"factory":"building_49","factory_level":16,"duration":750,"ingredients":{"resource_4":500,"resource_13":100,"resource_23":200,"resource_27":250}},{"code":"part_m_77","name":"Збагачувач ізотопів гелію","group":"pg_11","mark":1,"weight":1399.084909,"attributes":{"role":"civil"},"chars":{"char_yield":177.1561,"char_energy_use":177.1561},"hulls":["part_h_25","part_h_26","part_h_27"],"races":["race_3"],"factory":"building_49","factory_level":16,"duration":900,"ingredients":{"resource_12":120,"resource_23":240,"resource_27":300}},{"code":"part_m_78","name":"Екстрактор темної матерії","group":"pg_11","mark":1,"weight":1538.993399,"attributes":{"role":"civil"},"chars":{"char_yield":194.87171,"char_energy_use":194.87171},"hulls":["part_h_25","part_h_26","part_h_27"],"races":["race_1"],"factory":"building_49","factory_level":16,"duration":1100,"ingredients":{"resource_22":290,"resource_23":290,"resource_27":360}},{"code":"part_m_79","name":"Джамп-модуль","group":"pg_11","mark":1,"weight":1692.892739,"attributes":{"role":"civil"},"chars":{"char_jump_prep":214.358881,"char_energy_use":214.358881},"hulls":["part_h_25","part_h_26","part_h_27"],"races":["race_2"],"factory":"building_49","factory_level":20,"duration":1300,"ingredients":{"resource_15":170,"resource_17":86,"resource_18":86,"resource_24":340,"resource_27":430}},{"code":"part_m_80","name":"Кріокапсула (Террани)","group":"pg_10","mark":1,"weight":1862.182013,"attributes":{"population_capsule":100,"capsule_race":"race_1","role":"universal","not_a_ship_module":"true"},"chars":{"char_inhabitants":100},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":9,"duration":1300,"ingredients":{"resource_22":340,"resource_23":340,"resource_27":430}},{"code":"part_m_81","name":"Кріокапсула (Літаріони)","group":"pg_10","mark":1,"weight":2048.400215,"attributes":{"population_capsule":100,"capsule_race":"race_2","role":"universal","not_a_ship_module":"true"},"chars":{"char_inhabitants":100},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":9,"duration":1500,"ingredients":{"resource_22":410,"resource_23":410,"resource_27":520}},{"code":"part_m_82","name":"Кріокапсула (Драккури)","group":"pg_10","mark":1,"weight":2253.240236,"attributes":{"population_capsule":100,"capsule_race":"race_3","role":"universal","not_a_ship_module":"true"},"chars":{"char_inhabitants":100},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":9,"duration":1900,"ingredients":{"resource_22":500,"resource_23":500,"resource_27":620}},{"code":"part_m_83","name":"Кріокапсула (Вейрани)","group":"pg_10","mark":1,"weight":2478.56426,"attributes":{"population_capsule":100,"capsule_race":"race_4","role":"universal","not_a_ship_module":"true"},"chars":{"char_inhabitants":100},"hulls":[],"races":["race_1","race_2","race_3","race_4"],"factory":"building_49","factory_level":9,"duration":2200,"ingredients":{"resource_22":590,"resource_23":590,"resource_27":740}},{"code":"part_m_84","name":"РПУ-X1B","group":"pg_4","mark":2,"weight":9.849733,"attributes":{"damage_kind":"kinetic","role":"combat"},"chars":{"char_damage":146.41,"char_rate":146.41,"char_range":146.41,"char_energy_use":146.41,"char_magazine":146.41},"hulls":["part_h_4"],"races":["race_1","race_2","race_3","race_4"],"factory":"building_43","factory_level":4,"duration":520,"ingredients":{"resource_4":350,"resource_6":350,"resource_22":140,"resource_27":170}}],"hulls":[{"code":"part_h_21","name":"Малий транспорт «Жук»","group":"pg_17","mark":1,"role":"transport","chars":{"char_hull_size":100,"char_hull_capacity":100,"char_integrity":100},"shipyard_level":1,"position":1,"duration":300,"ingredients":{"resource_1":200,"resource_22":80,"resource_27":100}},{"code":"part_h_1","name":"Винищувач «Сапсан»","group":"pg_12","mark":1,"role":"combat","chars":{"char_hull_size":100,"char_hull_capacity":100,"char_integrity":100},"shipyard_level":2,"position":2,"duration":300,"ingredients":{"resource_1":200,"resource_22":80,"resource_27":100}},{"code":"part_h_2","name":"Важкий винищувач «Шершень»","group":"pg_12","mark":1,"role":"combat","chars":{"char_hull_size":110,"char_hull_capacity":110,"char_integrity":110},"shipyard_level":3,"position":3,"duration":360,"ingredients":{"resource_1":240,"resource_2":240,"resource_22":96,"resource_27":120}},{"code":"part_h_3","name":"Торпедоносець «Гадюка»","group":"pg_12","mark":1,"role":"combat","chars":{"char_hull_size":121,"char_hull_capacity":121,"char_integrity":121},"shipyard_level":3,"position":4,"duration":430,"ingredients":{"resource_1":290,"resource_2":290,"resource_22":120,"resource_27":140}},{"code":"part_h_4","name":"Важкий торпедоносець «Кобра»","group":"pg_12","mark":1,"role":"combat","chars":{"char_hull_size":133.1,"char_hull_capacity":133.1,"char_integrity":133.1},"shipyard_level":4,"position":5,"duration":520,"ingredients":{"resource_2":350,"resource_22":140,"resource_23":140,"resource_27":170}},{"code":"part_h_22","name":"Середній транспорт «Бик»","group":"pg_17","mark":1,"role":"transport","chars":{"char_hull_size":110,"char_hull_capacity":110,"char_integrity":110},"shipyard_level":5,"position":6,"duration":360,"ingredients":{"resource_1":240,"resource_22":96,"resource_23":96,"resource_27":120}},{"code":"part_h_27","name":"Видобувна станція","group":"pg_18","mark":1,"role":"civil","chars":{"char_hull_size":121,"char_hull_capacity":121,"char_integrity":121},"shipyard_level":6,"position":7,"duration":430,"ingredients":{"resource_1":290,"resource_22":120,"resource_23":120,"resource_27":140}},{"code":"part_h_8","name":"Корвет «Коршун»","group":"pg_14","mark":1,"role":"combat","chars":{"char_hull_size":100,"char_hull_capacity":100,"char_integrity":100},"shipyard_level":7,"position":8,"duration":300,"ingredients":{"resource_1":200,"resource_2":200,"resource_22":80,"resource_27":100}},{"code":"part_h_5","name":"«Ґедзь»","group":"pg_13","mark":1,"role":"drone","chars":{"char_hull_size":100,"char_hull_capacity":100,"char_integrity":100},"shipyard_level":7,"position":9,"duration":300,"ingredients":{"resource_1":200,"resource_27":100}},{"code":"part_h_6","name":"«Цикада»","group":"pg_13","mark":1,"role":"drone","chars":{"char_hull_size":110,"char_hull_capacity":110,"char_integrity":110},"shipyard_level":7,"position":10,"duration":360,"ingredients":{"resource_1":240,"resource_22":96,"resource_27":120}},{"code":"part_h_7","name":"«Кліщ»","group":"pg_13","mark":1,"role":"drone","chars":{"char_hull_size":121,"char_hull_capacity":121,"char_integrity":121},"shipyard_level":7,"position":11,"duration":430,"ingredients":{"resource_1":290,"resource_4":290,"resource_27":140}},{"code":"part_h_9","name":"Фрегат «Барракуда»","group":"pg_14","mark":1,"role":"combat","chars":{"char_hull_size":110,"char_hull_capacity":110,"char_integrity":110},"shipyard_level":8,"position":12,"duration":360,"ingredients":{"resource_1":240,"resource_2":240,"resource_4":240,"resource_22":96,"resource_27":120}},{"code":"part_h_10","name":"Есмінець «Акула»","group":"pg_14","mark":1,"role":"combat","chars":{"char_hull_size":121,"char_hull_capacity":121,"char_integrity":121},"shipyard_level":8,"position":13,"duration":430,"ingredients":{"resource_2":290,"resource_22":120,"resource_23":120,"resource_27":140}},{"code":"part_h_24","name":"Важкий транспорт «Кит»","group":"pg_17","mark":1,"role":"transport","chars":{"char_hull_size":133.1,"char_hull_capacity":133.1,"char_integrity":133.1},"shipyard_level":9,"position":14,"duration":520,"ingredients":{"resource_22":140,"resource_23":140,"resource_26":140,"resource_27":170}},{"code":"part_h_25","name":"Орбітальна база","group":"pg_18","mark":1,"role":"civil","chars":{"char_hull_size":100,"char_hull_capacity":100,"char_integrity":100},"shipyard_level":10,"position":15,"duration":300,"ingredients":{"resource_1":200,"resource_2":200,"resource_22":80,"resource_23":80,"resource_27":100}},{"code":"part_h_11","name":"Легкий крейсер «Ягуар»","group":"pg_14","mark":1,"role":"combat","chars":{"char_hull_size":133.1,"char_hull_capacity":133.1,"char_integrity":133.1},"shipyard_level":11,"position":16,"duration":520,"ingredients":{"resource_2":350,"resource_22":140,"resource_23":140,"resource_27":170}},{"code":"part_h_12","name":"Крейсер «Носоріг»","group":"pg_14","mark":1,"role":"combat","chars":{"char_hull_size":146.41,"char_hull_capacity":146.41,"char_integrity":146.41},"shipyard_level":12,"position":17,"duration":620,"ingredients":{"resource_2":410,"resource_4":410,"resource_22":170,"resource_23":170,"resource_27":210}},{"code":"part_h_13","name":"Важкий крейсер «Бегемот»","group":"pg_14","mark":1,"role":"combat","chars":{"char_hull_size":161.051,"char_hull_capacity":161.051,"char_integrity":161.051},"shipyard_level":13,"position":18,"duration":750,"ingredients":{"resource_2":500,"resource_3":500,"resource_22":200,"resource_23":200,"resource_27":250}},{"code":"part_h_14","name":"Броненосець «Панцирник»","group":"pg_15","mark":1,"role":"combat","chars":{"char_hull_size":100,"char_hull_capacity":100,"char_integrity":100,"char_hull_race_slot":1},"shipyard_level":13,"position":19,"duration":300,"ingredients":{"resource_2":200,"resource_3":200,"resource_23":80,"resource_27":100}},{"code":"part_h_15","name":"Лінкор «Кракен»","group":"pg_15","mark":1,"role":"combat","chars":{"char_hull_size":110,"char_hull_capacity":110,"char_integrity":110,"char_hull_race_slot":1},"shipyard_level":14,"position":20,"duration":360,"ingredients":{"resource_3":240,"resource_22":96,"resource_23":96,"resource_26":96,"resource_27":120}},{"code":"part_h_23","name":"Великий транспорт «Слон»","group":"pg_17","mark":1,"role":"transport","chars":{"char_hull_size":121,"char_hull_capacity":121,"char_integrity":121},"shipyard_level":15,"position":21,"duration":430,"ingredients":{"resource_2":290,"resource_22":120,"resource_23":120,"resource_27":140}},{"code":"part_h_26","name":"Космобаза","group":"pg_18","mark":1,"role":"civil","chars":{"char_hull_size":110,"char_hull_capacity":110,"char_integrity":110},"shipyard_level":16,"position":22,"duration":360,"ingredients":{"resource_2":240,"resource_22":96,"resource_23":96,"resource_26":96,"resource_27":120}},{"code":"part_h_16","name":"Важкий лінкор «Мамонт»","group":"pg_15","mark":1,"role":"combat","chars":{"char_hull_size":121,"char_hull_capacity":121,"char_integrity":121,"char_hull_race_slot":1},"shipyard_level":17,"position":23,"duration":430,"ingredients":{"resource_3":290,"resource_22":120,"resource_23":120,"resource_26":120,"resource_27":140}},{"code":"part_h_17","name":"Дредноут «Горгона»","group":"pg_15","mark":1,"role":"combat","chars":{"char_hull_size":133.1,"char_hull_capacity":133.1,"char_integrity":133.1,"char_hull_race_slot":1},"shipyard_level":18,"position":24,"duration":520,"ingredients":{"resource_3":350,"resource_22":140,"resource_25":140,"resource_26":140,"resource_27":170}},{"code":"part_h_18","name":"Дестроєр «Каратель»","group":"pg_16","mark":1,"role":"combat","chars":{"char_hull_size":100,"char_hull_capacity":100,"char_integrity":100,"char_hull_race_slot":1},"shipyard_level":18,"position":25,"duration":300,"ingredients":{"resource_3":200,"resource_22":80,"resource_25":80,"resource_26":80,"resource_27":100}},{"code":"part_h_19","name":"Супер-лінкор «Тиранозавр»","group":"pg_16","mark":1,"role":"combat","chars":{"char_hull_size":110,"char_hull_capacity":110,"char_integrity":110,"char_hull_race_slot":1},"shipyard_level":19,"position":26,"duration":360,"ingredients":{"resource_3":240,"resource_22":96,"resource_25":96,"resource_26":96,"resource_27":120}},{"code":"part_h_20","name":"Супер-дредноут «Левіафан»","group":"pg_16","mark":1,"role":"combat","chars":{"char_hull_size":121,"char_hull_capacity":121,"char_integrity":121,"char_hull_race_slot":1},"shipyard_level":20,"position":27,"duration":430,"ingredients":{"resource_3":290,"resource_22":120,"resource_25":120,"resource_26":120,"resource_27":140}}],"default_slots":8,"races":["race_1","race_2","race_3","race_4"]}</script>
+<script>
+const seed = JSON.parse(document.getElementById("seed").textContent);
+const storageKey = "aetheris-modules-v4";
+const clone = (value) => JSON.parse(JSON.stringify(value));
+const original = { modules: clone(seed.modules), hulls: clone(seed.hulls), characteristics: clone(seed.characteristics), group_chars: clone(seed.group_chars) };
+let state = clone(original);
+let ui = { tab: "modules", group: "all", hull: seed.hulls[0].code, race: false, slots: [] };
+
+try {
+  const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+  if (saved && saved.modules && saved.hulls) {
+    state = saved;
+  }
+} catch (error) {
+  state = clone(original);
+}
+
+function save() {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(state));
+  } catch (error) {
+    // The page keeps working without the storage.
+  }
+}
+
+const esc = (text) => String(text).replace(/"/g, "&quot;");
+const charName = (code) => (state.characteristics.find((item) => item.code === code) || { name: code }).name;
+const groupName = (code) => seed.groups[code] || code;
+const resourceName = (code) => seed.resources[code] || code;
+const moduleByCode = (code) => state.modules.find((item) => item.code === code);
+const hullByCode = (code) => state.hulls.find((item) => item.code === code);
+const isModuleGroup = (group) => Number(group.slice(3)) <= 11;
+const moduleGroups = Object.keys(seed.groups).filter((code) => Number(code.slice(3)) <= 11);
+const roles = ["universal", "combat", "civil", "transport"];
+const damageKinds = ["", "energy", "kinetic"];
+const components = ["", "drive", "reactor"];
+
+function groupColumns(group) {
+  const set = new Set();
+  for (const item of state.modules.filter((entry) => entry.group === group)) {
+    Object.keys(item.chars).forEach((code) => set.add(code));
+  }
+  (state.group_chars[group] || []).forEach((entry) => set.add(entry.c));
+  return state.characteristics.map((item) => item.code).filter((code) => set.has(code));
+}
+
+function mark(changed) {
+  return changed ? "changed" : "";
+}
+
+function resourceChips(map, base, scope, id) {
+  base = base || {};
+  const chips = Object.keys(map).map((code) => {
+    const status = !(code in base) ? "added" : base[code] !== map[code] ? "changed" : "";
+    return `<span class="chip ${status}">${resourceName(code)} <input type="number" min="0" value="${map[code]}" data-ing="${scope}" data-id="${id}" data-code="${code}"><button type="button" data-ing-remove="${scope}" data-id="${id}" data-code="${code}">×</button></span>`;
+  });
+  const options = Object.entries(seed.resources).map(([code, name]) => `<option value="${code}">${name}</option>`).join("");
+  chips.push(`<span class="chip add"><select data-ing-select="${scope}:${id}">${options}</select><button type="button" data-ing-add="${scope}" data-id="${id}">+</button></span>`);
+  return `<div class="chips">${chips.join("")}</div>`;
+}
+
+function renderModules() {
+  const groups = ui.group === "all" ? moduleGroups : [ui.group];
+  const filters = ["all", ...moduleGroups].map((code) => `<button class="tab ${ui.group === code ? "active" : ""}" data-group="${code}">${code === "all" ? "Усі" : groupName(code)} <span class="small">(${state.modules.filter((entry) => code === "all" || entry.group === code).length})</span></button>`).join("");
+  const blocks = groups.map((group) => {
+    const rows = state.modules.filter((entry) => entry.group === group);
+    const columns = groupColumns(group);
+    const used = new Set(columns);
+    const addOptions = state.characteristics.filter((item) => !used.has(item.code)).map((item) => `<option value="${item.code}">${item.name}</option>`).join("");
+    const head = `<tr><th class="sticky">Назва</th><th>Код</th><th>Марка</th><th>Вага</th><th>Роль</th><th>Шкода</th><th>Компонент</th>${columns.map((code) => `<th>${charName(code)}<br><button type="button" class="small" title="Перейменувати параметр" data-char-rename="${code}">✎</button> <button type="button" class="small danger" title="Прибрати параметр у всій групі" data-col-remove="${group}" data-code="${code}">× параметр</button></th>`).join("")}<th>Завод</th><th>Рів. заводу</th><th>Час, с</th><th>Інгредієнти</th><th>Корпуси</th><th>Раси</th><th></th></tr>`;
+    const body = rows.map((item) => {
+      const base = original.modules.find((entry) => entry.code === item.code);
+      const isNew = !base;
+      const cell = (field, value, kind, isChar) => {
+        const baseValue = base ? (isChar ? base.chars[field] : base[field]) : undefined;
+        const changed = isNew ? "added" : mark(String(baseValue ?? "") !== String(value ?? ""));
+        return `<input type="number" step="any" class="${changed}" value="${value ?? ""}" data-mod="${item.code}" data-field="${field}" ${isChar ? 'data-char="1"' : ""} ${kind || ""}>`;
+      };
+      const select = (field, options, current, isAttr) => {
+        const baseValue = base ? (isAttr ? (base.attributes[field] || "") : base[field]) : undefined;
+        return `<select class="${isNew ? "added" : mark(String(baseValue ?? "") !== String(current ?? ""))}" data-mod="${item.code}" data-field="${field}" ${isAttr ? 'data-attr="1"' : ""}>${options.map((option) => `<option value="${option}" ${option === (current ?? "") ? "selected" : ""}>${option || "—"}</option>`).join("")}</select>`;
+      };
+      const factoryOptions = ["", ...Object.keys(seed.factories)];
+      const compatible = state.hulls.filter((hull) => item.hulls.includes(hull.code));
+      const free = state.hulls.filter((hull) => !item.hulls.includes(hull.code));
+      const hullPart = `<details><summary>${compatible.length} корпусів</summary><div class="chips">${compatible.map((hull) => `<span class="chip">${hull.name}<button type="button" data-hull-remove="${item.code}" data-code="${hull.code}">×</button></span>`).join("")}<span class="chip add"><select data-hull-select="${item.code}">${free.map((hull) => `<option value="${hull.code}">${hull.name}</option>`).join("")}</select><button type="button" data-hull-add="${item.code}">+</button></span></div></details>`;
+      const racePart = `<details><summary>${item.races.length} рас</summary><div class="chips">${seed.races.map((race) => `<label class="chip"><input type="checkbox" ${item.races.includes(race) ? "checked" : ""} data-race="${item.code}" data-code="${race}"> ${race}</label>`).join("")}</div></details>`;
+      const nameChanged = isNew ? "added" : mark(base.name !== item.name);
+      return `<tr class="${isNew ? "added" : ""}">
+        <td class="sticky"><input class="text ${nameChanged}" value="${esc(item.name)}" data-mod="${item.code}" data-field="name" data-text="1"></td>
+        <td class="small">${item.code}</td>
+        <td>${cell("mark", item.mark)}</td>
+        <td>${cell("weight", item.weight)}</td>
+        <td>${select("role", roles, item.attributes.role, true)}</td>
+        <td>${select("damage_kind", damageKinds, item.attributes.damage_kind, true)}</td>
+        <td>${select("component", components, item.attributes.component, true)}</td>
+        ${columns.map((code) => `<td>${cell(code, item.chars[code], "", true)}</td>`).join("")}
+        <td>${select("factory", factoryOptions, item.factory, false)}</td>
+        <td>${cell("factory_level", item.factory_level)}</td>
+        <td>${cell("duration", item.duration)}</td>
+        <td>${resourceChips(item.ingredients, base && base.ingredients, "m", item.code)}</td>
+        <td>${hullPart}</td>
+        <td>${racePart}</td>
+        <td><button type="button" class="small" title="Копія" data-mod-clone="${item.code}">копія</button> <button type="button" class="small danger" title="Видалити модуль" data-mod-delete="${item.code}">×</button></td>
+      </tr>`;
+    }).join("");
+    const removed = original.modules.filter((entry) => entry.group === group && !state.modules.some((item) => item.code === entry.code));
+    const addColumn = addOptions ? `<span class="chip add">+ параметр групі: <select data-col-select="${group}">${addOptions}</select><button type="button" data-col-add="${group}">+</button></span>` : "";
+    return `<div class="panel"><b>${groupName(group)}</b> <span class="small">${rows.length} модулів</span> ${addColumn}
+      <button type="button" class="small" data-char-new="${group}" title="Створити параметр, якого ще нема, наприклад тягу чи місткість">+ новий параметр</button>
+      <button type="button" class="small" data-mod-add="${group}">+ новий модуль</button>
+      ${removed.length ? `<span class="small">прибрано: ${removed.map((entry) => `<s>${entry.name}</s>`).join(" ")}</span>` : ""}
+      <div class="scroll" style="margin-top:6px"><table><thead>${head}</thead><tbody>${body}</tbody></table></div></div>`;
+  }).join("");
+  document.getElementById("tab-modules").innerHTML = `<p class="note">Усі параметри модулів із сіду. Колонки залежать від групи (параметри групи + ті, що вже є в модулях). «× параметр» прибирає параметр у всіх модулях групи, «+ параметр» додає його з нулями. Кожен корпус, на який модуль ставиться, можна додати чи прибрати.</p><div class="filters">${filters}</div>${blocks}`;
+}
+
+const hullFixedChars = ["char_hull_size", "char_hull_capacity", "char_integrity", "char_hull_slots", "char_hull_race_slot"];
+
+function hullExtraChars() {
+  return state.characteristics.map((item) => item.code).filter((code) => !hullFixedChars.includes(code) && state.hulls.some((hull) => code in hull.chars));
+}
+
+function renderHulls() {
+  const extra = hullExtraChars();
+  const extraOptions = state.characteristics.filter((item) => !hullFixedChars.includes(item.code) && !extra.includes(item.code)).map((item) => `<option value="${item.code}">${item.name}</option>`).join("");
+  const hullGroups = Object.keys(seed.groups).filter((code) => Number(code.slice(3)) > 11);
+  const head = `<tr><th class="sticky">Назва</th><th>Код</th><th>Клас</th><th>Роль</th><th>Рів. Верфі</th><th>Розмір</th><th>Місткість</th><th>Міцність</th><th>Слоти</th><th>Расовий слот</th>${extra.map((code) => `<th>${charName(code)}<br><button type="button" class="small" data-char-rename="${code}">✎</button> <button type="button" class="small danger" data-hull-col-remove="${code}">× параметр</button></th>`).join("")}<th>Час, с</th><th>Інгредієнти</th><th>Модулів</th><th></th></tr>`;
+  const body = state.hulls.map((hull) => {
+    const base = original.hulls.find((entry) => entry.code === hull.code);
+    const isNew = !base;
+    const num = (field, value, isChar) => {
+      const baseValue = base ? (isChar ? base.chars[field] : base[field]) : undefined;
+      return `<input type="number" step="any" class="${isNew ? "added" : mark(String(baseValue ?? "") !== String(value ?? ""))}" value="${value ?? ""}" data-hull="${hull.code}" data-field="${field}" ${isChar ? 'data-char="1"' : ""}>`;
+    };
+    const groupOptions = hullGroups.map((code) => `<option value="${code}" ${code === hull.group ? "selected" : ""}>${groupName(code)}</option>`).join("");
+    const roleOptions = ["combat", "transport", "drone", "civil"].map((role) => `<option ${role === hull.role ? "selected" : ""}>${role}</option>`).join("");
+    return `<tr class="${isNew ? "added" : ""}">
+      <td class="sticky"><input class="text ${isNew ? "added" : mark(base.name !== hull.name)}" value="${esc(hull.name)}" data-hull="${hull.code}" data-field="name" data-text="1"></td>
+      <td class="small">${hull.code}</td>
+      <td><select data-hull="${hull.code}" data-field="group" data-text="1">${groupOptions}</select></td>
+      <td><select data-hull="${hull.code}" data-field="role" data-text="1">${roleOptions}</select></td>
+      <td>${num("shipyard_level", hull.shipyard_level)}</td>
+      <td>${num("char_hull_size", hull.chars.char_hull_size, true)}</td>
+      <td>${num("char_hull_capacity", hull.chars.char_hull_capacity, true)}</td>
+      <td>${num("char_integrity", hull.chars.char_integrity, true)}</td>
+      <td>${num("char_hull_slots", hull.chars.char_hull_slots, true)}</td>
+      <td>${num("char_hull_race_slot", hull.chars.char_hull_race_slot, true)}</td>
+      ${extra.map((code) => `<td>${num(code, hull.chars[code], true)}</td>`).join("")}
+      <td>${num("duration", hull.duration)}</td>
+      <td>${resourceChips(hull.ingredients, base && base.ingredients, "h", hull.code)}</td>
+      <td class="small">${state.modules.filter((entry) => entry.hulls.includes(hull.code)).length}</td>
+      <td><button type="button" class="small danger" data-hull-delete="${hull.code}">×</button></td>
+    </tr>`;
+  }).join("");
+  document.getElementById("tab-hulls").innerHTML = `<p class="note">Усі корпуси за порядком драбини. «Слоти» порожні означають стандартне значення сервера (${seed.default_slots}). Рівень Верфі це вимога відкриття корпусу (драбина).</p>
+    <button type="button" data-hull-add-new="1">+ новий корпус</button>
+    <button type="button" data-char-new="hulls">+ новий параметр корпусів</button>
+    ${extraOptions ? `<span class="chip add">+ наявний параметр: <select data-hull-col-select="1">${extraOptions}</select><button type="button" data-hull-col-add="1">+</button></span>` : ""}
+    <div class="scroll" style="margin-top:6px"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+}
+
+function allowedModules(hull) {
+  return state.modules.filter((item) => !item.attributes.not_a_ship_module
+    && item.hulls.includes(hull.code)
+    && (item.attributes.role === "universal" || item.attributes.role === hull.role
+      // The transport hull is a peaceful hull, so a peaceful module goes on it (the rule of the server).
+      || (item.attributes.role === "civil" && hull.role === "transport")));
+}
+
+function renderBuilder() {
+  const hull = hullByCode(ui.hull) || state.hulls[0];
+  ui.hull = hull.code;
+  const baseSlots = hull.chars.char_hull_slots || seed.default_slots;
+  const raceSlot = ui.race && (hull.chars.char_hull_race_slot || 0) > 0 ? 1 : 0;
+  const slotCount = Number(baseSlots) + raceSlot;
+  while (ui.slots.length < slotCount) {
+    ui.slots.push("");
+  }
+  ui.slots.length = slotCount;
+  const allowed = allowedModules(hull);
+  const groupsInAllowed = [...new Set(allowed.map((item) => item.group))];
+  const slotsHtml = ui.slots.map((code, index) => `<div class="slot"><span class="no">${index + 1}</span><select data-slot="${index}"><option value="">— порожньо —</option>${groupsInAllowed.map((group) => `<optgroup label="${groupName(group)}">${allowed.filter((item) => item.group === group).map((item) => `<option value="${item.code}" ${item.code === code ? "selected" : ""}>${item.name}</option>`).join("")}</optgroup>`).join("")}</select></div>`).join("");
+  const picked = ui.slots.filter(Boolean).map(moduleByCode).filter(Boolean);
+  const totals = {};
+  for (const [code, value] of Object.entries(hull.chars)) {
+    if (["char_hull_slots", "char_hull_race_slot"].includes(code)) continue;
+    totals[code] = { hull: Number(value) || 0, modules: 0 };
+  }
+  for (const item of picked) {
+    for (const [code, value] of Object.entries(item.chars)) {
+      totals[code] = totals[code] || { hull: 0, modules: 0 };
+      totals[code].modules += Number(value) || 0;
+    }
+  }
+  const weight = picked.reduce((sum, item) => sum + (Number(item.weight) || 0), 0);
+  const power = totals.char_power ? totals.char_power.modules : 0;
+  const use = totals.char_energy_use ? totals.char_energy_use.modules : 0;
+  const thrust = totals.char_thrust ? totals.char_thrust.modules : 0;
+  const hasDrive = picked.some((item) => item.attributes.component === "drive");
+  const hasReactor = picked.some((item) => item.attributes.component === "reactor");
+  const checks = [
+    [picked.length <= slotCount, `Слоти: ${picked.length} з ${slotCount}`],
+    [hasDrive, hasDrive ? "Двигун є" : "Немає двигуна"],
+    [hasReactor, hasReactor ? "Реактор є" : "Немає реактора"],
+    [use <= power, `Енергія: ${use.toLocaleString("uk-UA")} з ${power.toLocaleString("uk-UA")}${use > power ? " (не вистачає)" : ""}`],
+  ];
+  const rows = Object.entries(totals).map(([code, value]) => `<tr><td>${charName(code)}</td><td class="num">${value.hull ? value.hull.toLocaleString("uk-UA", { maximumFractionDigits: 2 }) : ""}</td><td class="num">${value.modules ? value.modules.toLocaleString("uk-UA", { maximumFractionDigits: 2 }) : ""}</td><td class="num"><b>${(value.hull + value.modules).toLocaleString("uk-UA", { maximumFractionDigits: 2 })}</b></td></tr>`).join("");
+  const costs = {};
+  for (const [code, amount] of Object.entries(hull.ingredients)) costs[code] = (costs[code] || 0) + amount;
+  for (const item of picked) for (const [code, amount] of Object.entries(item.ingredients)) costs[code] = (costs[code] || 0) + amount;
+  const buildTime = (hull.duration || 0) + picked.reduce((sum, item) => sum + (Number(item.duration) || 0), 0);
+  const hullOptions = state.hulls.map((entry) => `<option value="${entry.code}" ${entry.code === hull.code ? "selected" : ""}>${entry.name}</option>`).join("");
+  document.getElementById("tab-builder").innerHTML = `<p class="note">Оберіть корпус і модулі в слоти: підсумок рахується одразу. Показано лише модулі, що ставляться на цей корпус і підходять за роллю. Перевірки як на сервері: слоти, двигун, реактор, енергія.</p>
+  <div class="grid">
+    <div class="panel"><b>Корпус</b> <select id="builder-hull">${hullOptions}</select>
+      ${(hull.chars.char_hull_race_slot || 0) > 0 ? `<label><input type="checkbox" id="builder-race" ${ui.race ? "checked" : ""}> расовий слот</label>` : ""}
+      <div class="small">Клас ${groupName(hull.group)}, роль ${hull.role}, Верф ${hull.shipyard_level}, слотів ${slotCount}, доступних модулів ${allowed.length}</div>
+      <div style="margin-top:8px">${slotsHtml}</div>
+      <button type="button" id="builder-clear" class="small">Очистити слоти</button></div>
+    <div class="panel"><b>Підсумок</b>
+      <div class="chips" style="margin:6px 0">${checks.map(([ok, text]) => `<span class="${ok ? "ok" : "bad"}">${text}</span>`).join("")}</div>
+      <table class="totals"><thead><tr><th>Параметр</th><th>Корпус</th><th>Модулі</th><th>Разом</th></tr></thead><tbody>${rows}
+        <tr><td>Вага модулів</td><td></td><td class="num">${weight.toLocaleString("uk-UA", { maximumFractionDigits: 2 })}</td><td class="num"><b>${weight.toLocaleString("uk-UA", { maximumFractionDigits: 2 })}</b></td></tr>
+        <tr><td>Тяга на одиницю ваги</td><td></td><td></td><td class="num"><b>${weight ? (thrust / weight).toLocaleString("uk-UA", { maximumFractionDigits: 2 }) : "—"}</b></td></tr>
+        <tr><td>Баланс енергії</td><td></td><td></td><td class="num"><b>${(power - use).toLocaleString("uk-UA", { maximumFractionDigits: 2 })}</b></td></tr></tbody></table>
+      <div class="small" style="margin-top:6px"><b>Вартість деталей (корпус + модулі):</b> ${Object.entries(costs).map(([code, amount]) => `${resourceName(code)} ${amount.toLocaleString("uk-UA")}`).join(", ") || "—"}<br><b>Час виробництва деталей:</b> ${buildTime.toLocaleString("uk-UA")} с</div></div>
+  </div>`;
+}
+
+function changeCount() {
+  let count = 0;
+  const compare = (current, base) => {
+    for (const key of new Set([...Object.keys(current), ...Object.keys(base)])) {
+      if (JSON.stringify(current[key]) !== JSON.stringify(base[key])) count += 1;
+    }
+  };
+  for (const item of state.modules) {
+    const base = original.modules.find((entry) => entry.code === item.code);
+    if (!base) { count += 1; continue; }
+    compare({ ...item, chars: undefined, ingredients: undefined, hulls: undefined, races: undefined, attributes: undefined }, { ...base, chars: undefined, ingredients: undefined, hulls: undefined, races: undefined, attributes: undefined });
+    compare(item.chars, base.chars); compare(item.ingredients, base.ingredients); compare(item.attributes, base.attributes);
+    count += item.hulls.filter((code) => !base.hulls.includes(code)).length + base.hulls.filter((code) => !item.hulls.includes(code)).length;
+    count += item.races.filter((code) => !base.races.includes(code)).length + base.races.filter((code) => !item.races.includes(code)).length;
+  }
+  count += original.modules.filter((entry) => !state.modules.some((item) => item.code === entry.code)).length;
+  for (const hull of state.hulls) {
+    const base = original.hulls.find((entry) => entry.code === hull.code);
+    if (!base) { count += 1; continue; }
+    compare({ ...hull, chars: undefined, ingredients: undefined }, { ...base, chars: undefined, ingredients: undefined });
+    compare(hull.chars, base.chars); compare(hull.ingredients, base.ingredients);
+  }
+  count += original.hulls.filter((entry) => !state.hulls.some((hull) => hull.code === entry.code)).length;
+  return count;
+}
+
+function render() {
+  for (const tab of ["modules", "hulls", "builder"]) {
+    document.getElementById("tab-" + tab).classList.toggle("hidden", ui.tab !== tab);
+  }
+  document.querySelectorAll("button.tab[data-tab]").forEach((button) => button.classList.toggle("active", button.dataset.tab === ui.tab));
+  if (ui.tab === "modules") renderModules();
+  if (ui.tab === "hulls") renderHulls();
+  if (ui.tab === "builder") renderBuilder();
+  document.getElementById("count").textContent = "Змін: " + changeCount();
+}
+
+function update() {
+  save();
+  render();
+}
+
+function nextCode(prefix, list) {
+  let number = 1;
+  while (list.some((item) => item.code === prefix + number)) number += 1;
+  return prefix + number;
+}
+
+document.addEventListener("change", (event) => {
+  const target = event.target;
+  if (target.id === "builder-hull") { ui.hull = target.value; ui.slots = []; render(); return; }
+  if (target.id === "builder-race") { ui.race = target.checked; render(); return; }
+  if (target.dataset.slot !== undefined) { ui.slots[Number(target.dataset.slot)] = target.value; render(); return; }
+  if (target.dataset.mod) {
+    const item = moduleByCode(target.dataset.mod);
+    const field = target.dataset.field;
+    if (target.dataset.attr) {
+      if (target.value === "") delete item.attributes[field]; else item.attributes[field] = target.value;
+    } else if (target.dataset.char) {
+      item.chars[field] = target.value === "" ? 0 : Number(target.value);
+    } else if (target.dataset.text || ["factory", "role"].includes(field)) {
+      item[field] = target.value === "" && field === "factory" ? null : target.value;
+    } else {
+      item[field] = target.value === "" ? null : Number(target.value);
+    }
+    update();
+    return;
+  }
+  if (target.dataset.hull && target.dataset.field) {
+    const hull = hullByCode(target.dataset.hull);
+    const field = target.dataset.field;
+    if (target.dataset.char) {
+      if (target.value === "") delete hull.chars[field]; else hull.chars[field] = Number(target.value);
+    } else if (target.dataset.text) {
+      hull[field] = target.value;
+    } else {
+      hull[field] = target.value === "" ? null : Number(target.value);
+    }
+    update();
+    return;
+  }
+  if (target.dataset.ing) {
+    const owner = target.dataset.ing === "m" ? moduleByCode(target.dataset.id) : hullByCode(target.dataset.id);
+    const value = Number(target.value);
+    if (Number.isFinite(value) && value >= 0) owner.ingredients[target.dataset.code] = value;
+    update();
+    return;
+  }
+  if (target.dataset.race) {
+    const item = moduleByCode(target.dataset.race);
+    item.races = target.checked ? [...new Set([...item.races, target.dataset.code])] : item.races.filter((code) => code !== target.dataset.code);
+    update();
+  }
+});
+
+document.addEventListener("click", (event) => {
+  const target = event.target;
+  if (target.dataset.tab) { ui.tab = target.dataset.tab; render(); return; }
+  if (target.dataset.group) { ui.group = target.dataset.group; render(); return; }
+  if (target.dataset.ingRemove) {
+    const owner = target.dataset.ingRemove === "m" ? moduleByCode(target.dataset.id) : hullByCode(target.dataset.id);
+    delete owner.ingredients[target.dataset.code];
+  } else if (target.dataset.ingAdd) {
+    const owner = target.dataset.ingAdd === "m" ? moduleByCode(target.dataset.id) : hullByCode(target.dataset.id);
+    const select = document.querySelector(`[data-ing-select="${target.dataset.ingAdd}:${target.dataset.id}"]`);
+    owner.ingredients[select.value] = owner.ingredients[select.value] || 1;
+  } else if (target.dataset.colRemove) {
+    const group = target.dataset.colRemove;
+    if (!confirm("Прибрати параметр «" + charName(target.dataset.code) + "» у всіх модулів групи «" + groupName(group) + "»?")) return;
+    state.modules.filter((entry) => entry.group === group).forEach((entry) => { delete entry.chars[target.dataset.code]; });
+    state.group_chars[group] = (state.group_chars[group] || []).filter((entry) => entry.c !== target.dataset.code);
+  } else if (target.dataset.colAdd) {
+    const group = target.dataset.colAdd;
+    const code = document.querySelector(`[data-col-select="${group}"]`).value;
+    state.modules.filter((entry) => entry.group === group).forEach((entry) => { entry.chars[code] = 0; });
+    state.group_chars[group] = [...(state.group_chars[group] || []), { c: code, required: false }];
+  } else if (target.dataset.charNew) {
+    const name = (prompt("Назва нового параметра (наприклад: Тяга, Місткість):") || "").trim();
+    if (!name) return;
+    if (state.characteristics.some((item) => item.name.toLowerCase() === name.toLowerCase())) {
+      alert("Параметр з такою назвою вже є: додайте його через «+ параметр».");
+      return;
+    }
+    let number = 1;
+    while (state.characteristics.some((item) => item.code === "custom_" + number)) number += 1;
+    const code = "custom_" + number;
+    state.characteristics.push({ code, name, kind: null });
+    if (target.dataset.charNew === "hulls") {
+      state.hulls.forEach((hull) => { hull.chars[code] = 0; });
+    } else {
+      state.modules.filter((entry) => entry.group === target.dataset.charNew).forEach((entry) => { entry.chars[code] = 0; });
+      state.group_chars[target.dataset.charNew] = [...(state.group_chars[target.dataset.charNew] || []), { c: code, required: false }];
+    }
+  } else if (target.dataset.charRename) {
+    const item = state.characteristics.find((entry) => entry.code === target.dataset.charRename);
+    const name = (prompt("Нова назва параметра:", item.name) || "").trim();
+    if (!name) return;
+    item.name = name;
+  } else if (target.dataset.hullColAdd) {
+    const code = document.querySelector("[data-hull-col-select]").value;
+    state.hulls.forEach((hull) => { hull.chars[code] = 0; });
+  } else if (target.dataset.hullColRemove) {
+    if (!confirm("Прибрати параметр «" + charName(target.dataset.hullColRemove) + "» у всіх корпусів?")) return;
+    state.hulls.forEach((hull) => { delete hull.chars[target.dataset.hullColRemove]; });
+  } else if (target.dataset.modDelete) {
+    const item = moduleByCode(target.dataset.modDelete);
+    if (!confirm("Видалити модуль «" + item.name + "»?")) return;
+    state.modules = state.modules.filter((entry) => entry.code !== item.code);
+  } else if (target.dataset.modClone || target.dataset.modAdd) {
+    const source = target.dataset.modClone ? moduleByCode(target.dataset.modClone) : state.modules.filter((entry) => entry.group === target.dataset.modAdd).pop();
+    const copy = clone(source);
+    copy.code = nextCode("new_module_", state.modules);
+    copy.name = source.name + " (новий)";
+    state.modules.push(copy);
+  } else if (target.dataset.hullRemove) {
+    const item = moduleByCode(target.dataset.hullRemove);
+    item.hulls = item.hulls.filter((code) => code !== target.dataset.code);
+  } else if (target.dataset.hullAdd) {
+    const item = moduleByCode(target.dataset.hullAdd);
+    const code = document.querySelector(`[data-hull-select="${target.dataset.hullAdd}"]`).value;
+    if (code) item.hulls = [...new Set([...item.hulls, code])];
+  } else if (target.dataset.hullDelete) {
+    const hull = hullByCode(target.dataset.hullDelete);
+    if (!confirm("Видалити корпус «" + hull.name + "»?")) return;
+    state.hulls = state.hulls.filter((entry) => entry.code !== hull.code);
+    state.modules.forEach((entry) => { entry.hulls = entry.hulls.filter((code) => code !== hull.code); });
+  } else if (target.dataset.hullAddNew) {
+    const copy = clone(state.hulls[state.hulls.length - 1]);
+    copy.code = nextCode("new_hull_", state.hulls);
+    copy.name = copy.name + " (новий)";
+    state.hulls.push(copy);
+  } else if (target.id === "builder-clear") {
+    ui.slots = [];
+    render();
+    return;
+  } else {
+    return;
+  }
+  update();
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  if (!confirm("Повернути дані сіду? Ваші зміни зникнуть.")) return;
+  state = clone(original);
+  ui.slots = [];
+  update();
+});
+
+document.getElementById("download").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify({ source: "aetheris modules", ...state }, null, 2)], { type: "application/json;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "moduli-ta-korpusy.json";
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
+document.getElementById("upload").addEventListener("click", () => document.getElementById("upload-file").click());
+document.getElementById("upload-file").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const loaded = JSON.parse(await file.text());
+    if (!loaded.modules || !loaded.hulls) throw new Error("shape");
+    state = { modules: loaded.modules, hulls: loaded.hulls, characteristics: loaded.characteristics || state.characteristics, group_chars: loaded.group_chars || state.group_chars };
+    ui.slots = [];
+    update();
+  } catch (error) {
+    alert("Файл не схожий на модулі й корпуси цієї сторінки.");
+  }
+  event.target.value = "";
+});
+
+render();
+</script>
+</body>
+</html>

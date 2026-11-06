@@ -21,6 +21,8 @@ import { usePlanet } from './usePlanet';
 import { useRecipes } from './useRecipes';
 import { useResourceGroups } from './useResourceGroups';
 import { useCurrentPlanetId, useShellActions } from './useShell';
+import { useEconomy } from './useEconomy';
+import { useProduction } from './useProduction';
 import { useWorldReference } from './useWorldReference';
 
 /**
@@ -45,6 +47,10 @@ export function ProductionPage() {
   const resourceGroupCode = useResourceGroups(useWorldReference());
   const { planet } = usePlanet(planetId);
   const { list, failed, reload } = useRecipes(planetId);
+  // What the body has for the ingredients of a recipe: the balances of the civilization, the
+  // resources of the body and the stock of its parts.
+  const { balances } = useEconomy();
+  const { stock, reload: reloadStock } = useProduction(planetId);
   const orders = useProductionOrders(planetId, () => void reload());
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
@@ -75,18 +81,22 @@ export function ProductionPage() {
       } catch (error) {
         setNotice(noticeFromError(error, language, t('error.generic.text'), reasonPrefixes));
       } finally {
-        await Promise.all([orders.reload(), reload()]);
+        await Promise.all([orders.reload(), reload(), reloadStock()]);
         refreshAfterCommand(planetId);
         setBusy(false);
       }
     },
-    [factories, planetId, production, t, language, orders, reload, refreshAfterCommand],
+    [factories, planetId, production, t, language, orders, reload, reloadStock, refreshAfterCommand],
   );
   const produceRef = useRef(produce);
   useEffect(() => {
     produceRef.current = produce;
   });
   const onProduce = useCallback((recipe: ProductionRecipe, quantity: number) => void produceRef.current(recipe, quantity), []);
+
+  // What the body has for the ingredients of a recipe. The object keeps its identity while the data
+  // does not change, so the tiles of the recipes are not drawn again for nothing.
+  const stockOfBody = useMemo(() => ({ balances, planet, stock }), [balances, planet, stock]);
 
   const recipes = list?.recipes;
   const partGroups = list?.groups;
@@ -264,7 +274,15 @@ export function ProductionPage() {
                 </h2>
                 <ul className="building-grid">
                   {entry.recipes.map((recipe) => (
-                    <RecipeCard busy={busy} factoryName={factoryNameOf(recipe.buildingTypeId)} key={recipe.recipeId} onProduce={onProduce} recipe={recipe} resourceGroupCode={resourceGroupCode} />
+                    <RecipeCard
+                      availability={stockOfBody}
+                      busy={busy}
+                      factoryName={factoryNameOf(recipe.buildingTypeId)}
+                      key={recipe.recipeId}
+                      onProduce={onProduce}
+                      recipe={recipe}
+                      resourceGroupCode={resourceGroupCode}
+                    />
                   ))}
                 </ul>
               </section>

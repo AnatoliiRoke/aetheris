@@ -1,0 +1,4542 @@
+{
+ "source": "aetheris modules",
+ "modules": [
+  {
+   "code": "part_m_1",
+   "name": "Реактивний двигун",
+   "group": "pg_1",
+   "mark": 1,
+   "weight": 1,
+   "attributes": {
+    "role": "universal",
+    "component": "drive"
+   },
+   "chars": {
+    "char_thrust": 100,
+    "char_fuel_use": 100,
+    "char_energy_use": 12
+   },
+   "hulls": [
+    "part_h_1",
+    "part_h_2",
+    "part_h_3",
+    "part_h_4",
+    "part_h_21"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_40",
+   "factory_level": 1,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_9": 40,
+    "resource_12": 40,
+    "resource_22": 80,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_2",
+   "name": "Плазмовий двигун",
+   "group": "pg_1",
+   "mark": 1,
+   "weight": 1.1,
+   "attributes": {
+    "role": "universal",
+    "component": "drive"
+   },
+   "chars": {
+    "char_thrust": 100,
+    "char_fuel_use": 110,
+    "char_energy_use": 12
+   },
+   "hulls": [
+    "part_h_1",
+    "part_h_2",
+    "part_h_3",
+    "part_h_4",
+    "part_h_8",
+    "part_h_9",
+    "part_h_21",
+    "part_h_22"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_40",
+   "factory_level": 3,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_4": 240,
+    "resource_9": 48,
+    "resource_12": 48,
+    "resource_22": 96,
+    "resource_23": 96,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_3",
+   "name": "Іонний двигун",
+   "group": "pg_1",
+   "mark": 1,
+   "weight": 1.21,
+   "attributes": {
+    "role": "universal",
+    "component": "drive"
+   },
+   "chars": {
+    "char_thrust": 300,
+    "char_fuel_use": 121,
+    "char_energy_use": 36
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_22",
+    "part_h_23"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_40",
+   "factory_level": 8,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_10": 58,
+    "resource_14": 58,
+    "resource_22": 120,
+    "resource_23": 120,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_4",
+   "name": "Гравітаційний двигун",
+   "group": "pg_1",
+   "mark": 1,
+   "weight": 1.331,
+   "attributes": {
+    "role": "universal",
+    "component": "drive"
+   },
+   "chars": {
+    "char_thrust": 300,
+    "char_fuel_use": 133.1,
+    "char_energy_use": 36
+   },
+   "hulls": [
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20",
+    "part_h_23",
+    "part_h_24"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_40",
+   "factory_level": 11,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_22": 140,
+    "resource_23": 140,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_5",
+   "name": "Гіпердвигун",
+   "group": "pg_1",
+   "mark": 1,
+   "weight": 1.4641,
+   "attributes": {
+    "role": "universal",
+    "component": "drive"
+   },
+   "chars": {
+    "char_thrust": 600,
+    "char_fuel_use": 146.41,
+    "char_energy_use": 72
+   },
+   "hulls": [
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20",
+    "part_h_24"
+   ],
+   "races": [
+    "race_2"
+   ],
+   "factory": "building_40",
+   "factory_level": 13,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_14": 15,
+    "resource_17": 41,
+    "resource_18": 41,
+    "resource_22": 170,
+    "resource_23": 170,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_6",
+   "name": "Джамп-двигун",
+   "group": "pg_1",
+   "mark": 1,
+   "weight": 1.61051,
+   "attributes": {
+    "role": "universal",
+    "component": "drive"
+   },
+   "chars": {
+    "char_thrust": 1000,
+    "char_fuel_use": 161.051,
+    "char_energy_use": 120
+   },
+   "hulls": [
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_2"
+   ],
+   "factory": "building_40",
+   "factory_level": 17,
+   "duration": 750,
+   "ingredients": {
+    "resource_1": 500,
+    "resource_2": 250,
+    "resource_3": 100,
+    "resource_4": 50,
+    "resource_14": 25,
+    "resource_15": 100,
+    "resource_22": 200,
+    "resource_25": 200,
+    "resource_27": 50
+   }
+  },
+  {
+   "code": "part_m_7",
+   "name": "Ядерний реактор",
+   "group": "pg_2",
+   "mark": 1,
+   "weight": 1.771561,
+   "attributes": {
+    "role": "universal",
+    "component": "reactor"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_power": 60
+   },
+   "hulls": [
+    "part_h_1",
+    "part_h_2",
+    "part_h_3",
+    "part_h_4",
+    "part_h_8",
+    "part_h_21",
+    "part_h_22"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_41",
+   "factory_level": 1,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_16": 40,
+    "resource_22": 80,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_8",
+   "name": "Імпульсний реактор",
+   "group": "pg_2",
+   "mark": 1,
+   "weight": 1.948717,
+   "attributes": {
+    "role": "universal",
+    "component": "reactor"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_power": 60
+   },
+   "hulls": [
+    "part_h_2",
+    "part_h_3",
+    "part_h_4",
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_22",
+    "part_h_23"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_41",
+   "factory_level": 4,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_11": 48,
+    "resource_22": 96,
+    "resource_23": 96,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_9",
+   "name": "Термоядерний реактор",
+   "group": "pg_2",
+   "mark": 1,
+   "weight": 2.143589,
+   "attributes": {
+    "role": "universal",
+    "component": "reactor"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_power": 180
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_23",
+    "part_h_24"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_41",
+   "factory_level": 9,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_13": 58,
+    "resource_22": 120,
+    "resource_23": 120,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_10",
+   "name": "Реактор холодного синтезу",
+   "group": "pg_2",
+   "mark": 1,
+   "weight": 2.357948,
+   "attributes": {
+    "role": "universal",
+    "component": "reactor"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_power": 180
+   },
+   "hulls": [
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_23"
+   ],
+   "races": [
+    "race_4"
+   ],
+   "factory": "building_41",
+   "factory_level": 12,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_13": 69,
+    "resource_22": 140,
+    "resource_25": 140,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_11",
+   "name": "Гравітаційний реактор",
+   "group": "pg_2",
+   "mark": 1,
+   "weight": 2.593742,
+   "attributes": {
+    "role": "universal",
+    "component": "reactor"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_power": 360
+   },
+   "hulls": [
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20",
+    "part_h_23",
+    "part_h_24"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_41",
+   "factory_level": 13,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_14": 15,
+    "resource_15": 83,
+    "resource_22": 170,
+    "resource_23": 170,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_12",
+   "name": "Важкий реактор",
+   "group": "pg_2",
+   "mark": 1,
+   "weight": 2.853117,
+   "attributes": {
+    "role": "universal",
+    "component": "reactor"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_power": 900
+   },
+   "hulls": [
+    "part_h_18",
+    "part_h_19",
+    "part_h_20",
+    "part_h_24"
+   ],
+   "races": [
+    "race_4"
+   ],
+   "factory": "building_41",
+   "factory_level": 19,
+   "duration": 750,
+   "ingredients": {
+    "resource_1": 500,
+    "resource_2": 250,
+    "resource_3": 100,
+    "resource_4": 50,
+    "resource_14": 25,
+    "resource_15": 100,
+    "resource_22": 200,
+    "resource_26": 200,
+    "resource_27": 50
+   }
+  },
+  {
+   "code": "part_m_13",
+   "name": "Легкий лазер",
+   "group": "pg_3",
+   "mark": 1,
+   "weight": 3.138428,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 18,
+    "char_damage": 41,
+    "char_rate": 1,
+    "char_range": 100
+   },
+   "hulls": [
+    "part_h_1",
+    "part_h_2"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_42",
+   "factory_level": 2,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_9": 40,
+    "resource_11": 40,
+    "resource_22": 80,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_14",
+   "name": "Важкий лазер",
+   "group": "pg_3",
+   "mark": 1,
+   "weight": 3.452271,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 18,
+    "char_damage": 49,
+    "char_rate": 1,
+    "char_range": 100
+   },
+   "hulls": [
+    "part_h_2"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_42",
+   "factory_level": 3,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_9": 48,
+    "resource_10": 48,
+    "resource_11": 48,
+    "resource_23": 96,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_15",
+   "name": "Імпульсний лазер",
+   "group": "pg_3",
+   "mark": 1,
+   "weight": 3.797498,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 18,
+    "char_damage": 41,
+    "char_rate": 1,
+    "char_range": 100
+   },
+   "hulls": [
+    "part_h_2"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_42",
+   "factory_level": 4,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_6": 290,
+    "resource_10": 58,
+    "resource_22": 120,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_16",
+   "name": "Плазмова гармата",
+   "group": "pg_3",
+   "mark": 1,
+   "weight": 4.177248,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 54,
+    "char_damage": 125,
+    "char_rate": 1,
+    "char_range": 300
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_42",
+   "factory_level": 7,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_10": 69,
+    "resource_11": 69,
+    "resource_23": 140,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_17",
+   "name": "Іонна гармата",
+   "group": "pg_3",
+   "mark": 1,
+   "weight": 4.594973,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 54,
+    "char_damage": 125,
+    "char_rate": 1,
+    "char_range": 300
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_42",
+   "factory_level": 8,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_11": 83,
+    "resource_14": 83,
+    "resource_23": 170,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_18",
+   "name": "Мікрохвильовий випромінювач",
+   "group": "pg_3",
+   "mark": 1,
+   "weight": 5.05447,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 54,
+    "char_damage": 125,
+    "char_rate": 1,
+    "char_range": 300
+   },
+   "hulls": [
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_42",
+   "factory_level": 12,
+   "duration": 750,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_6": 500,
+    "resource_11": 100,
+    "resource_22": 200,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_19",
+   "name": "Частинковий прискорювач",
+   "group": "pg_3",
+   "mark": 1,
+   "weight": 5.559917,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 108,
+    "char_damage": 250,
+    "char_rate": 1,
+    "char_range": 600
+   },
+   "hulls": [
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1"
+   ],
+   "factory": "building_42",
+   "factory_level": 13,
+   "duration": 900,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_6": 600,
+    "resource_9": 120,
+    "resource_14": 15,
+    "resource_25": 240,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_20",
+   "name": "Орексова гармата",
+   "group": "pg_3",
+   "mark": 1,
+   "weight": 6.115909,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 180,
+    "char_damage": 416,
+    "char_rate": 1,
+    "char_range": 1000
+   },
+   "hulls": [
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1"
+   ],
+   "factory": "building_42",
+   "factory_level": 18,
+   "duration": 1100,
+   "ingredients": {
+    "resource_1": 500,
+    "resource_2": 250,
+    "resource_3": 100,
+    "resource_4": 50,
+    "resource_11": 140,
+    "resource_14": 25,
+    "resource_23": 290,
+    "resource_25": 290,
+    "resource_27": 50
+   }
+  },
+  {
+   "code": "part_m_21",
+   "name": "Кінетична гармата",
+   "group": "pg_4",
+   "mark": 1,
+   "weight": 6.7275,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_damage": 125,
+    "char_rate": 1,
+    "char_range": 300,
+    "char_magazine": 100
+   },
+   "hulls": [
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_43",
+   "factory_level": 11,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_22",
+   "name": "Скорострільна гармата",
+   "group": "pg_4",
+   "mark": 1,
+   "weight": 7.40025,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_damage": 250,
+    "char_rate": 1,
+    "char_range": 600,
+    "char_magazine": 110
+   },
+   "hulls": [
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_43",
+   "factory_level": 13,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_14": 15,
+    "resource_22": 96,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_23",
+   "name": "Рейкова гармата",
+   "group": "pg_4",
+   "mark": 1,
+   "weight": 8.140275,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_damage": 125,
+    "char_rate": 1,
+    "char_range": 300,
+    "char_magazine": 121
+   },
+   "hulls": [
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_43",
+   "factory_level": 8,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_11": 58,
+    "resource_23": 120,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_24",
+   "name": "РПУ-X1",
+   "group": "pg_4",
+   "mark": 1,
+   "weight": 8.954302,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_damage": 41,
+    "char_rate": 1,
+    "char_range": 100,
+    "char_magazine": 133.1
+   },
+   "hulls": [
+    "part_h_3",
+    "part_h_4"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_43",
+   "factory_level": 3,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_4": 350,
+    "resource_6": 350,
+    "resource_22": 140,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_25",
+   "name": "РПУ-X2",
+   "group": "pg_4",
+   "mark": 1,
+   "weight": 9.849733,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_damage": 125,
+    "char_rate": 1,
+    "char_range": 300,
+    "char_magazine": 146.41
+   },
+   "hulls": [
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_43",
+   "factory_level": 12,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_6": 410,
+    "resource_22": 170,
+    "resource_23": 170,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_26",
+   "name": "РПУ-X3",
+   "group": "pg_4",
+   "mark": 1,
+   "weight": 10.834706,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_damage": 250,
+    "char_rate": 1,
+    "char_range": 600,
+    "char_magazine": 161.051
+   },
+   "hulls": [
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_43",
+   "factory_level": 14,
+   "duration": 750,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_6": 500,
+    "resource_14": 15,
+    "resource_22": 200,
+    "resource_25": 200,
+    "resource_26": 200,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_27",
+   "name": "Сталева плита",
+   "group": "pg_5",
+   "mark": 1,
+   "weight": 11.918177,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_integrity": 75
+   },
+   "hulls": [
+    "part_h_1",
+    "part_h_2"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_44",
+   "factory_level": 3,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_28",
+   "name": "Сегментна броня",
+   "group": "pg_5",
+   "mark": 1,
+   "weight": 13.109994,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_integrity": 75
+   },
+   "hulls": [
+    "part_h_2",
+    "part_h_3"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_44",
+   "factory_level": 4,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_29",
+   "name": "Кобальтова броня",
+   "group": "pg_5",
+   "mark": 1,
+   "weight": 14.420994,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_integrity": 75
+   },
+   "hulls": [
+    "part_h_3",
+    "part_h_4",
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_44",
+   "factory_level": 4,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_4": 290,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_30",
+   "name": "Титанова плита",
+   "group": "pg_5",
+   "mark": 1,
+   "weight": 15.863093,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_integrity": 225
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_44",
+   "factory_level": 8,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_23": 140,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_31",
+   "name": "Композитна броня",
+   "group": "pg_5",
+   "mark": 1,
+   "weight": 17.449402,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_integrity": 225
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_44",
+   "factory_level": 11,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_23": 170,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_32",
+   "name": "Іридієва плита",
+   "group": "pg_5",
+   "mark": 1,
+   "weight": 19.194342,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_integrity": 225
+   },
+   "hulls": [
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_44",
+   "factory_level": 9,
+   "duration": 750,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_23": 200,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_33",
+   "name": "Наноплита",
+   "group": "pg_5",
+   "mark": 1,
+   "weight": 21.113777,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_integrity": 450
+   },
+   "hulls": [
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_44",
+   "factory_level": 13,
+   "duration": 900,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_14": 15,
+    "resource_23": 240,
+    "resource_25": 240,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_34",
+   "name": "Адаптивна броня",
+   "group": "pg_5",
+   "mark": 1,
+   "weight": 23.225154,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_integrity": 450
+   },
+   "hulls": [
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_44",
+   "factory_level": 15,
+   "duration": 1100,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_14": 15,
+    "resource_22": 290,
+    "resource_23": 290,
+    "resource_25": 290,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_35",
+   "name": "Силовий щит",
+   "group": "pg_6",
+   "mark": 1,
+   "weight": 25.54767,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 15,
+    "char_shield_capacity": 125,
+    "char_shield_regen": 31,
+    "char_energy_block": 60,
+    "char_kinetic_block": 60
+   },
+   "hulls": [
+    "part_h_1",
+    "part_h_2",
+    "part_h_3",
+    "part_h_4"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_45",
+   "factory_level": 2,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_11": 40,
+    "resource_22": 80,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_36",
+   "name": "Кварцовий щит",
+   "group": "pg_6",
+   "mark": 1,
+   "weight": 28.102437,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 15,
+    "char_shield_capacity": 125,
+    "char_shield_regen": 31,
+    "char_energy_block": 80,
+    "char_kinetic_block": 50
+   },
+   "hulls": [
+    "part_h_3",
+    "part_h_4"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_45",
+   "factory_level": 3,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_8": 48,
+    "resource_10": 48,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_37",
+   "name": "Магнітний щит",
+   "group": "pg_6",
+   "mark": 1,
+   "weight": 30.912681,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 15,
+    "char_shield_capacity": 125,
+    "char_shield_regen": 31,
+    "char_energy_block": 50,
+    "char_kinetic_block": 75
+   },
+   "hulls": [
+    "part_h_4",
+    "part_h_8",
+    "part_h_9",
+    "part_h_10"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_45",
+   "factory_level": 4,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_4": 290,
+    "resource_10": 58,
+    "resource_22": 120,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_38",
+   "name": "Гравітаційний щит",
+   "group": "pg_6",
+   "mark": 1,
+   "weight": 34.003949,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 45,
+    "char_shield_capacity": 375,
+    "char_shield_regen": 93,
+    "char_energy_block": 65,
+    "char_kinetic_block": 65
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_45",
+   "factory_level": 7,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_9": 69,
+    "resource_22": 140,
+    "resource_23": 140,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_39",
+   "name": "Нейтронний щит",
+   "group": "pg_6",
+   "mark": 1,
+   "weight": 37.404343,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 45,
+    "char_shield_capacity": 375,
+    "char_shield_regen": 93,
+    "char_energy_block": 85,
+    "char_kinetic_block": 55
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_45",
+   "factory_level": 8,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_10": 83,
+    "resource_23": 170,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_40",
+   "name": "Плазмовий щит",
+   "group": "pg_6",
+   "mark": 1,
+   "weight": 41.144778,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 90,
+    "char_shield_capacity": 750,
+    "char_shield_regen": 187,
+    "char_energy_block": 55,
+    "char_kinetic_block": 80
+   },
+   "hulls": [
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_45",
+   "factory_level": 13,
+   "duration": 750,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_9": 100,
+    "resource_10": 100,
+    "resource_14": 15,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_41",
+   "name": "Орексовий щит",
+   "group": "pg_6",
+   "mark": 1,
+   "weight": 45.259256,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 150,
+    "char_shield_capacity": 1250,
+    "char_shield_regen": 312,
+    "char_energy_block": 75,
+    "char_kinetic_block": 75
+   },
+   "hulls": [
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_3"
+   ],
+   "factory": "building_45",
+   "factory_level": 18,
+   "duration": 900,
+   "ingredients": {
+    "resource_1": 500,
+    "resource_2": 250,
+    "resource_3": 100,
+    "resource_4": 50,
+    "resource_11": 120,
+    "resource_14": 25,
+    "resource_22": 240,
+    "resource_25": 240,
+    "resource_27": 50
+   }
+  },
+  {
+   "code": "part_m_42",
+   "name": "Ефірний щит",
+   "group": "pg_6",
+   "mark": 1,
+   "weight": 49.785181,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 150,
+    "char_shield_capacity": 1250,
+    "char_shield_regen": 312,
+    "char_energy_block": 85,
+    "char_kinetic_block": 65
+   },
+   "hulls": [
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_3"
+   ],
+   "factory": "building_45",
+   "factory_level": 19,
+   "duration": 1100,
+   "ingredients": {
+    "resource_1": 500,
+    "resource_2": 250,
+    "resource_3": 100,
+    "resource_4": 50,
+    "resource_10": 140,
+    "resource_14": 25,
+    "resource_15": 140,
+    "resource_25": 290,
+    "resource_27": 50
+   }
+  },
+  {
+   "code": "part_m_43",
+   "name": "Сталевий снаряд",
+   "group": "pg_7",
+   "mark": 1,
+   "weight": 54.763699,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_damage": 100,
+    "char_range": 100
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_46",
+   "factory_level": 11,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_44",
+   "name": "Кобальтовий снаряд",
+   "group": "pg_7",
+   "mark": 1,
+   "weight": 60.240069,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_damage": 110,
+    "char_range": 110
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_46",
+   "factory_level": 12,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_45",
+   "name": "Рейковий стрижень",
+   "group": "pg_7",
+   "mark": 1,
+   "weight": 66.264076,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_damage": 121,
+    "char_range": 121
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_46",
+   "factory_level": 9,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_10": 58,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_46",
+   "name": "Стріла-X1",
+   "group": "pg_7",
+   "mark": 1,
+   "weight": 72.890484,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_damage": 133.1,
+    "char_range": 133.1,
+    "char_flight_speed": 133.1,
+    "char_launcher_size": 1
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_46",
+   "factory_level": 4,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_22": 140,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_47",
+   "name": "Блискавка-X1",
+   "group": "pg_7",
+   "mark": 1,
+   "weight": 80.179532,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_damage": 146.41,
+    "char_range": 146.41,
+    "char_flight_speed": 146.41,
+    "char_launcher_size": 1
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_46",
+   "factory_level": 5,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_6": 410,
+    "resource_9": 83,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_48",
+   "name": "Спис-X2",
+   "group": "pg_7",
+   "mark": 1,
+   "weight": 88.197485,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_damage": 161.051,
+    "char_range": 161.051,
+    "char_flight_speed": 161.051,
+    "char_launcher_size": 2
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_46",
+   "factory_level": 12,
+   "duration": 750,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_22": 200,
+    "resource_23": 200,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_49",
+   "name": "Валькірія-X3",
+   "group": "pg_7",
+   "mark": 1,
+   "weight": 97.017234,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_damage": 177.1561,
+    "char_range": 177.1561,
+    "char_flight_speed": 177.1561,
+    "char_launcher_size": 3
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_46",
+   "factory_level": 16,
+   "duration": 900,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_14": 15,
+    "resource_22": 240,
+    "resource_25": 240,
+    "resource_26": 240,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_50",
+   "name": "Термоядерна торпеда",
+   "group": "pg_7",
+   "mark": 1,
+   "weight": 106.718957,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_damage": 194.87171,
+    "char_range": 194.87171,
+    "char_flight_speed": 194.87171
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_46",
+   "factory_level": 13,
+   "duration": 1100,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_13": 140,
+    "resource_14": 15,
+    "resource_23": 290,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_51",
+   "name": "Протонна торпеда",
+   "group": "pg_7",
+   "mark": 1,
+   "weight": 117.390853,
+   "attributes": {
+    "damage_kind": "energy",
+    "role": "combat",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_damage": 214.358881,
+    "char_range": 214.358881,
+    "char_flight_speed": 214.358881
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_46",
+   "factory_level": 16,
+   "duration": 1300,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_9": 170,
+    "resource_14": 15,
+    "resource_23": 340,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_52",
+   "name": "Уранова торпеда",
+   "group": "pg_7",
+   "mark": 1,
+   "weight": 129.129938,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_damage": 235.794769,
+    "char_range": 235.794769,
+    "char_flight_speed": 235.794769
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_46",
+   "factory_level": 19,
+   "duration": 1500,
+   "ingredients": {
+    "resource_1": 500,
+    "resource_2": 250,
+    "resource_3": 100,
+    "resource_4": 50,
+    "resource_14": 25,
+    "resource_16": 210,
+    "resource_27": 50
+   }
+  },
+  {
+   "code": "part_m_53",
+   "name": "Модуль геологорозвідки",
+   "group": "pg_8",
+   "mark": 1,
+   "weight": 142.042932,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 12,
+    "char_yield": 5,
+    "char_scan_radius": 100,
+    "char_scan_speed": 100
+   },
+   "hulls": [
+    "part_h_21",
+    "part_h_22"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_47",
+   "factory_level": 1,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_8": 40,
+    "resource_22": 80,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_54",
+   "name": "Бурова установка",
+   "group": "pg_8",
+   "mark": 1,
+   "weight": 156.247225,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 12,
+    "char_yield": 5
+   },
+   "hulls": [
+    "part_h_21",
+    "part_h_22"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_47",
+   "factory_level": 1,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_8": 48,
+    "resource_23": 96,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_55",
+   "name": "Кристалічний екстрактор",
+   "group": "pg_8",
+   "mark": 1,
+   "weight": 171.871948,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 12,
+    "char_yield": 5
+   },
+   "hulls": [
+    "part_h_21",
+    "part_h_22"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_47",
+   "factory_level": 5,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_8": 58,
+    "resource_23": 120,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_56",
+   "name": "Збирач ефіру",
+   "group": "pg_8",
+   "mark": 1,
+   "weight": 189.059142,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 72,
+    "char_yield": 30
+   },
+   "hulls": [
+    "part_h_22",
+    "part_h_23"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_47",
+   "factory_level": 15,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_8": 69,
+    "resource_14": 15,
+    "resource_22": 140,
+    "resource_23": 140,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_57",
+   "name": "Туманнісний збирач",
+   "group": "pg_8",
+   "mark": 1,
+   "weight": 207.965057,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 36,
+    "char_yield": 15
+   },
+   "hulls": [
+    "part_h_23",
+    "part_h_24"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_47",
+   "factory_level": 9,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_9": 83,
+    "resource_19": 41,
+    "resource_23": 170,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_58",
+   "name": "Астросканер",
+   "group": "pg_9",
+   "mark": 1,
+   "weight": 228.761562,
+   "attributes": {
+    "role": "universal"
+   },
+   "chars": {
+    "char_energy_use": 18,
+    "char_scan_radius": 15,
+    "char_detection": 100
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_48",
+   "factory_level": 7,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_8": 40,
+    "resource_10": 40,
+    "resource_19": 20,
+    "resource_21": 80,
+    "resource_22": 80,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_59",
+   "name": "Корабельний радар",
+   "group": "pg_9",
+   "mark": 1,
+   "weight": 251.637719,
+   "attributes": {
+    "role": "universal"
+   },
+   "chars": {
+    "char_energy_use": 18,
+    "char_scan_radius": 15,
+    "char_detection": 110
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_48",
+   "factory_level": 6,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_8": 48,
+    "resource_10": 48,
+    "resource_21": 96,
+    "resource_22": 96,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_60",
+   "name": "Археологічний модуль",
+   "group": "pg_9",
+   "mark": 1,
+   "weight": 276.80149,
+   "attributes": {
+    "role": "universal"
+   },
+   "chars": {
+    "char_energy_use": 6,
+    "char_scan_radius": 5,
+    "char_dig_speed": 121
+   },
+   "hulls": [
+    "part_h_21",
+    "part_h_22"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_48",
+   "factory_level": 4,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_11": 58,
+    "resource_22": 120,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_61",
+   "name": "Радіооптичне маскування",
+   "group": "pg_9",
+   "mark": 1,
+   "weight": 304.48164,
+   "attributes": {
+    "role": "universal"
+   },
+   "chars": {
+    "char_energy_use": 18,
+    "char_scan_radius": 15
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1"
+   ],
+   "factory": "building_48",
+   "factory_level": 12,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_6": 350,
+    "resource_8": 69,
+    "resource_21": 140,
+    "resource_22": 140,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_62",
+   "name": "Детектор маскування",
+   "group": "pg_9",
+   "mark": 1,
+   "weight": 334.929803,
+   "attributes": {
+    "role": "universal"
+   },
+   "chars": {
+    "char_energy_use": 18,
+    "char_scan_radius": 15
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_4"
+   ],
+   "factory": "building_48",
+   "factory_level": 12,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_6": 410,
+    "resource_8": 83,
+    "resource_21": 170,
+    "resource_22": 170,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_63",
+   "name": "Відновлювач щитів",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 368.422784,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 100,
+    "char_shield_restore": 100
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_3"
+   ],
+   "factory": "building_49",
+   "factory_level": 8,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_8": 40,
+    "resource_22": 80,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_64",
+   "name": "Бортовий комп'ютер",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 405.265062,
+   "attributes": {
+    "role": "universal"
+   },
+   "chars": {
+    "char_fuel_use": 110,
+    "char_energy_use": 0,
+    "char_speed": 110,
+    "char_crew": 110
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20",
+    "part_h_1",
+    "part_h_2",
+    "part_h_3",
+    "part_h_4",
+    "part_h_21",
+    "part_h_22",
+    "part_h_23",
+    "part_h_24"
+   ],
+   "races": [
+    "race_2"
+   ],
+   "factory": "building_49",
+   "factory_level": 18,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 500,
+    "resource_2": 250,
+    "resource_3": 100,
+    "resource_4": 50,
+    "resource_6": 240,
+    "resource_8": 48,
+    "resource_14": 25,
+    "resource_21": 96,
+    "resource_22": 96,
+    "resource_27": 50
+   }
+  },
+  {
+   "code": "part_m_65",
+   "name": "Збирач уламків",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 445.791568,
+   "attributes": {
+    "role": "universal"
+   },
+   "chars": {
+    "char_energy_use": 121,
+    "char_collect_speed": 121
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 8,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_66",
+   "name": "Вантажний відсік",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 490.370725,
+   "attributes": {
+    "role": "universal"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_cargo": 6750
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20",
+    "part_h_21",
+    "part_h_22",
+    "part_h_23",
+    "part_h_24"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 1,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_23": 140,
+    "resource_27": 5
+   }
+  },
+  {
+   "code": "part_m_67",
+   "name": "Великий вантажний відсік",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 539.407798,
+   "attributes": {
+    "role": "universal"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_cargo": 20250
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20",
+    "part_h_23"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 9,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_23": 170,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_68",
+   "name": "Протиракетна система",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 593.348578,
+   "attributes": {
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 161.051,
+    "char_range": 161.051,
+    "char_missiles": 161.051
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 12,
+   "duration": 750,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_8": 100,
+    "resource_21": 200,
+    "resource_22": 200,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_69",
+   "name": "Модуль передачі",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 652.683435,
+   "attributes": {
+    "role": "universal"
+   },
+   "chars": {
+    "char_energy_use": 177.1561,
+    "char_transfer_speed": 177.1561,
+    "char_transfer_volume": 177.1561
+   },
+   "hulls": [
+    "part_h_8",
+    "part_h_9",
+    "part_h_10",
+    "part_h_11",
+    "part_h_12",
+    "part_h_13",
+    "part_h_14",
+    "part_h_15",
+    "part_h_16",
+    "part_h_17",
+    "part_h_18",
+    "part_h_19",
+    "part_h_20"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 8,
+   "duration": 900,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_8": 120,
+    "resource_21": 240,
+    "resource_22": 240,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_70",
+   "name": "Колоніальний модуль",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 717.951779,
+   "attributes": {
+    "role": "transport"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_deploy_time": 194.87171,
+    "char_colonists": 194.87171
+   },
+   "hulls": [
+    "part_h_24"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 9,
+   "duration": 1100,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_22": 290,
+    "resource_23": 290,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_71",
+   "name": "Житловий модуль",
+   "group": "pg_11",
+   "mark": 1,
+   "weight": 789.746957,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 100,
+    "char_population": 100
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 10,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_22": 80,
+    "resource_23": 80,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_72",
+   "name": "Орбітальний склад",
+   "group": "pg_11",
+   "mark": 1,
+   "weight": 868.721652,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_cargo": 20250,
+    "char_storage": 110
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 6,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_23": 96,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_73",
+   "name": "Ремонтні майстерні",
+   "group": "pg_11",
+   "mark": 1,
+   "weight": 955.593818,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 121,
+    "char_repair_speed": 121
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 10,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_22": 120,
+    "resource_23": 120,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_74",
+   "name": "Школа командирів",
+   "group": "pg_11",
+   "mark": 1,
+   "weight": 1051.1532,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 133.1,
+    "char_training_speed": 133.1
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 10,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_22": 140,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_75",
+   "name": "Торговий центр",
+   "group": "pg_11",
+   "mark": 1,
+   "weight": 1156.268519,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 146.41,
+    "char_trade_lots": 100
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 10,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_21": 170,
+    "resource_22": 170,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_76",
+   "name": "Орбітальний термоядерний реактор",
+   "group": "pg_11",
+   "mark": 1,
+   "weight": 1271.895371,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_power": 161.051
+   },
+   "hulls": [],
+   "races": [
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 16,
+   "duration": 750,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_13": 100,
+    "resource_14": 15,
+    "resource_23": 200,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_77",
+   "name": "Збагачувач ізотопів гелію",
+   "group": "pg_11",
+   "mark": 1,
+   "weight": 1399.084909,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 177.1561,
+    "char_yield": 177.1561
+   },
+   "hulls": [],
+   "races": [
+    "race_3"
+   ],
+   "factory": "building_49",
+   "factory_level": 16,
+   "duration": 900,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_12": 120,
+    "resource_14": 15,
+    "resource_23": 240,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_78",
+   "name": "Екстрактор темної матерії",
+   "group": "pg_11",
+   "mark": 1,
+   "weight": 1538.993399,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 194.87171,
+    "char_yield": 194.87171
+   },
+   "hulls": [],
+   "races": [
+    "race_1"
+   ],
+   "factory": "building_49",
+   "factory_level": 16,
+   "duration": 1100,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_14": 15,
+    "resource_22": 290,
+    "resource_23": 290,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_m_79",
+   "name": "Джамп-модуль",
+   "group": "pg_11",
+   "mark": 1,
+   "weight": 1692.892739,
+   "attributes": {
+    "role": "civil"
+   },
+   "chars": {
+    "char_energy_use": 214.358881,
+    "char_jump_prep": 214.358881
+   },
+   "hulls": [],
+   "races": [
+    "race_2"
+   ],
+   "factory": "building_49",
+   "factory_level": 20,
+   "duration": 1300,
+   "ingredients": {
+    "resource_1": 500,
+    "resource_2": 250,
+    "resource_3": 100,
+    "resource_4": 50,
+    "resource_14": 25,
+    "resource_15": 170,
+    "resource_17": 86,
+    "resource_18": 86,
+    "resource_24": 340,
+    "resource_27": 50
+   }
+  },
+  {
+   "code": "part_m_80",
+   "name": "Кріокапсула (Террани)",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 1862.182013,
+   "attributes": {
+    "population_capsule": 100,
+    "capsule_race": "race_1",
+    "role": "universal",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_inhabitants": 100
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 9,
+   "duration": 1300,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_22": 340,
+    "resource_23": 340,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_81",
+   "name": "Кріокапсула (Літаріони)",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 2048.400215,
+   "attributes": {
+    "population_capsule": 100,
+    "capsule_race": "race_2",
+    "role": "universal",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_inhabitants": 100
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 9,
+   "duration": 1500,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_22": 410,
+    "resource_23": 410,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_82",
+   "name": "Кріокапсула (Драккури)",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 2253.240236,
+   "attributes": {
+    "population_capsule": 100,
+    "capsule_race": "race_3",
+    "role": "universal",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_inhabitants": 100
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 9,
+   "duration": 1900,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_22": 500,
+    "resource_23": 500,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_83",
+   "name": "Кріокапсула (Вейрани)",
+   "group": "pg_10",
+   "mark": 1,
+   "weight": 2478.56426,
+   "attributes": {
+    "population_capsule": 100,
+    "capsule_race": "race_4",
+    "role": "universal",
+    "not_a_ship_module": "true"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_inhabitants": 100
+   },
+   "hulls": [],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_49",
+   "factory_level": 9,
+   "duration": 2200,
+   "ingredients": {
+    "resource_1": 150,
+    "resource_2": 75,
+    "resource_3": 30,
+    "resource_4": 15,
+    "resource_22": 590,
+    "resource_23": 590,
+    "resource_27": 15
+   }
+  },
+  {
+   "code": "part_m_84",
+   "name": "РПУ-X1B",
+   "group": "pg_4",
+   "mark": 2,
+   "weight": 9.849733,
+   "attributes": {
+    "damage_kind": "kinetic",
+    "role": "combat"
+   },
+   "chars": {
+    "char_energy_use": 0,
+    "char_damage": 41,
+    "char_rate": 1,
+    "char_range": 100,
+    "char_magazine": 146.41
+   },
+   "hulls": [
+    "part_h_4"
+   ],
+   "races": [
+    "race_1",
+    "race_2",
+    "race_3",
+    "race_4"
+   ],
+   "factory": "building_43",
+   "factory_level": 4,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 50,
+    "resource_2": 25,
+    "resource_4": 350,
+    "resource_6": 350,
+    "resource_22": 140,
+    "resource_27": 5
+   }
+  }
+ ],
+ "hulls": [
+  {
+   "code": "part_h_21",
+   "name": "Малий транспорт «Жук»",
+   "group": "pg_17",
+   "mark": 1,
+   "role": "transport",
+   "chars": {
+    "char_integrity": 50,
+    "char_hull_size": 100,
+    "char_hull_capacity": 100,
+    "char_hull_slots": 8
+   },
+   "shipyard_level": 1,
+   "position": 1,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 100,
+    "resource_2": 50,
+    "resource_22": 80,
+    "resource_27": 10
+   }
+  },
+  {
+   "code": "part_h_1",
+   "name": "Винищувач «Сапсан»",
+   "group": "pg_12",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 50,
+    "char_hull_size": 100,
+    "char_hull_capacity": 100,
+    "char_hull_slots": 8
+   },
+   "shipyard_level": 2,
+   "position": 2,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 100,
+    "resource_2": 50,
+    "resource_22": 80,
+    "resource_27": 10
+   }
+  },
+  {
+   "code": "part_h_2",
+   "name": "Важкий винищувач «Шершень»",
+   "group": "pg_12",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 60,
+    "char_hull_size": 110,
+    "char_hull_capacity": 110,
+    "char_hull_slots": 10
+   },
+   "shipyard_level": 3,
+   "position": 3,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 100,
+    "resource_2": 50,
+    "resource_22": 96,
+    "resource_27": 10
+   }
+  },
+  {
+   "code": "part_h_3",
+   "name": "Торпедоносець «Гадюка»",
+   "group": "pg_12",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 50,
+    "char_hull_size": 121,
+    "char_hull_capacity": 121,
+    "char_hull_slots": 10
+   },
+   "shipyard_level": 3,
+   "position": 4,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 100,
+    "resource_2": 50,
+    "resource_22": 120,
+    "resource_27": 10
+   }
+  },
+  {
+   "code": "part_h_4",
+   "name": "Важкий торпедоносець «Кобра»",
+   "group": "pg_12",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 60,
+    "char_hull_size": 133.1,
+    "char_hull_capacity": 133.1,
+    "char_hull_slots": 12
+   },
+   "shipyard_level": 4,
+   "position": 5,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 100,
+    "resource_2": 50,
+    "resource_22": 140,
+    "resource_23": 140,
+    "resource_27": 10
+   }
+  },
+  {
+   "code": "part_h_22",
+   "name": "Середній транспорт «Бик»",
+   "group": "pg_17",
+   "mark": 1,
+   "role": "transport",
+   "chars": {
+    "char_integrity": 50,
+    "char_hull_size": 110,
+    "char_hull_capacity": 110,
+    "char_hull_slots": 16
+   },
+   "shipyard_level": 5,
+   "position": 6,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 100,
+    "resource_2": 50,
+    "resource_22": 96,
+    "resource_23": 96,
+    "resource_27": 10
+   }
+  },
+  {
+   "code": "part_h_8",
+   "name": "Корвет «Коршун»",
+   "group": "pg_14",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 150,
+    "char_hull_size": 100,
+    "char_hull_capacity": 100,
+    "char_hull_slots": 16
+   },
+   "shipyard_level": 7,
+   "position": 8,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_22": 80,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_h_5",
+   "name": "«Ґедзь»",
+   "group": "pg_13",
+   "mark": 1,
+   "role": "drone",
+   "chars": {
+    "char_integrity": 150,
+    "char_hull_size": 100,
+    "char_hull_capacity": 100
+   },
+   "shipyard_level": 7,
+   "position": 9,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_h_6",
+   "name": "«Цикада»",
+   "group": "pg_13",
+   "mark": 1,
+   "role": "drone",
+   "chars": {
+    "char_integrity": 150,
+    "char_hull_size": 110,
+    "char_hull_capacity": 110
+   },
+   "shipyard_level": 7,
+   "position": 10,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_22": 96,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_h_7",
+   "name": "«Кліщ»",
+   "group": "pg_13",
+   "mark": 1,
+   "role": "drone",
+   "chars": {
+    "char_integrity": 150,
+    "char_hull_size": 121,
+    "char_hull_capacity": 121
+   },
+   "shipyard_level": 7,
+   "position": 11,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_h_9",
+   "name": "Фрегат «Барракуда»",
+   "group": "pg_14",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 150,
+    "char_hull_size": 110,
+    "char_hull_capacity": 110,
+    "char_hull_slots": 18
+   },
+   "shipyard_level": 8,
+   "position": 12,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_22": 96,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_h_10",
+   "name": "Есмінець «Акула»",
+   "group": "pg_14",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 150,
+    "char_hull_size": 121,
+    "char_hull_capacity": 121,
+    "char_hull_slots": 22
+   },
+   "shipyard_level": 8,
+   "position": 13,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_22": 120,
+    "resource_23": 120,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_h_24",
+   "name": "Важкий транспорт «Кит»",
+   "group": "pg_17",
+   "mark": 1,
+   "role": "transport",
+   "chars": {
+    "char_integrity": 180,
+    "char_hull_size": 133.1,
+    "char_hull_capacity": 133.1,
+    "char_hull_slots": 20
+   },
+   "shipyard_level": 9,
+   "position": 14,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_22": 140,
+    "resource_23": 140,
+    "resource_26": 140,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_h_11",
+   "name": "Легкий крейсер «Ягуар»",
+   "group": "pg_14",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 150,
+    "char_hull_size": 133.1,
+    "char_hull_capacity": 133.1,
+    "char_hull_slots": 24
+   },
+   "shipyard_level": 11,
+   "position": 16,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_22": 140,
+    "resource_23": 140,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_h_12",
+   "name": "Крейсер «Носоріг»",
+   "group": "pg_14",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 150,
+    "char_hull_size": 146.41,
+    "char_hull_capacity": 146.41,
+    "char_hull_slots": 26
+   },
+   "shipyard_level": 12,
+   "position": 17,
+   "duration": 620,
+   "ingredients": {
+    "resource_1": 300,
+    "resource_2": 150,
+    "resource_3": 60,
+    "resource_4": 30,
+    "resource_22": 170,
+    "resource_23": 170,
+    "resource_27": 30
+   }
+  },
+  {
+   "code": "part_h_13",
+   "name": "Важкий крейсер «Бегемот»",
+   "group": "pg_14",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 360,
+    "char_hull_size": 161.051,
+    "char_hull_capacity": 161.051,
+    "char_hull_slots": 30
+   },
+   "shipyard_level": 13,
+   "position": 18,
+   "duration": 750,
+   "ingredients": {
+    "resource_1": 600,
+    "resource_2": 300,
+    "resource_3": 120,
+    "resource_4": 60,
+    "resource_14": 30,
+    "resource_22": 200,
+    "resource_23": 200,
+    "resource_27": 60
+   }
+  },
+  {
+   "code": "part_h_14",
+   "name": "Броненосець «Панцирник»",
+   "group": "pg_15",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 300,
+    "char_hull_size": 100,
+    "char_hull_capacity": 100,
+    "char_hull_slots": 32,
+    "char_hull_race_slot": 1
+   },
+   "shipyard_level": 13,
+   "position": 19,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 600,
+    "resource_2": 300,
+    "resource_3": 120,
+    "resource_4": 60,
+    "resource_14": 30,
+    "resource_23": 80,
+    "resource_27": 60
+   }
+  },
+  {
+   "code": "part_h_15",
+   "name": "Лінкор «Кракен»",
+   "group": "pg_15",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 300,
+    "char_hull_size": 110,
+    "char_hull_capacity": 110,
+    "char_hull_slots": 34,
+    "char_hull_race_slot": 1
+   },
+   "shipyard_level": 14,
+   "position": 20,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 600,
+    "resource_2": 300,
+    "resource_3": 120,
+    "resource_4": 60,
+    "resource_14": 30,
+    "resource_22": 96,
+    "resource_23": 96,
+    "resource_26": 96,
+    "resource_27": 60
+   }
+  },
+  {
+   "code": "part_h_23",
+   "name": "Великий транспорт «Слон»",
+   "group": "pg_17",
+   "mark": 1,
+   "role": "transport",
+   "chars": {
+    "char_integrity": 300,
+    "char_hull_size": 121,
+    "char_hull_capacity": 121,
+    "char_hull_slots": 24
+   },
+   "shipyard_level": 15,
+   "position": 21,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 600,
+    "resource_2": 300,
+    "resource_3": 120,
+    "resource_4": 60,
+    "resource_14": 30,
+    "resource_22": 120,
+    "resource_23": 120,
+    "resource_27": 60
+   }
+  },
+  {
+   "code": "part_h_16",
+   "name": "Важкий лінкор «Мамонт»",
+   "group": "pg_15",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 600,
+    "char_hull_size": 121,
+    "char_hull_capacity": 121,
+    "char_hull_slots": 38,
+    "char_hull_race_slot": 1
+   },
+   "shipyard_level": 17,
+   "position": 23,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 1000,
+    "resource_2": 500,
+    "resource_3": 200,
+    "resource_4": 100,
+    "resource_14": 50,
+    "resource_22": 120,
+    "resource_23": 120,
+    "resource_26": 120,
+    "resource_27": 100
+   }
+  },
+  {
+   "code": "part_h_17",
+   "name": "Дредноут «Горгона»",
+   "group": "pg_15",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 500,
+    "char_hull_size": 133.1,
+    "char_hull_capacity": 133.1,
+    "char_hull_slots": 40,
+    "char_hull_race_slot": 1
+   },
+   "shipyard_level": 18,
+   "position": 24,
+   "duration": 520,
+   "ingredients": {
+    "resource_1": 1000,
+    "resource_2": 500,
+    "resource_3": 200,
+    "resource_4": 100,
+    "resource_14": 50,
+    "resource_22": 140,
+    "resource_25": 140,
+    "resource_26": 140,
+    "resource_27": 100
+   }
+  },
+  {
+   "code": "part_h_18",
+   "name": "Дестроєр «Каратель»",
+   "group": "pg_16",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 500,
+    "char_hull_size": 100,
+    "char_hull_capacity": 100,
+    "char_hull_slots": 44,
+    "char_hull_race_slot": 1
+   },
+   "shipyard_level": 18,
+   "position": 25,
+   "duration": 300,
+   "ingredients": {
+    "resource_1": 1000,
+    "resource_2": 500,
+    "resource_3": 200,
+    "resource_4": 100,
+    "resource_14": 50,
+    "resource_22": 80,
+    "resource_25": 80,
+    "resource_26": 80,
+    "resource_27": 100
+   }
+  },
+  {
+   "code": "part_h_19",
+   "name": "Супер-лінкор «Тиранозавр»",
+   "group": "pg_16",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 600,
+    "char_hull_size": 110,
+    "char_hull_capacity": 110,
+    "char_hull_slots": 47,
+    "char_hull_race_slot": 1
+   },
+   "shipyard_level": 19,
+   "position": 26,
+   "duration": 360,
+   "ingredients": {
+    "resource_1": 1000,
+    "resource_2": 500,
+    "resource_3": 200,
+    "resource_4": 100,
+    "resource_14": 50,
+    "resource_22": 96,
+    "resource_25": 96,
+    "resource_26": 96,
+    "resource_27": 100
+   }
+  },
+  {
+   "code": "part_h_20",
+   "name": "Супер-дредноут «Левіафан»",
+   "group": "pg_16",
+   "mark": 1,
+   "role": "combat",
+   "chars": {
+    "char_integrity": 600,
+    "char_hull_size": 121,
+    "char_hull_capacity": 121,
+    "char_hull_slots": 50,
+    "char_hull_race_slot": 1
+   },
+   "shipyard_level": 20,
+   "position": 27,
+   "duration": 430,
+   "ingredients": {
+    "resource_1": 1000,
+    "resource_2": 500,
+    "resource_3": 200,
+    "resource_4": 100,
+    "resource_14": 50,
+    "resource_22": 120,
+    "resource_25": 120,
+    "resource_26": 120,
+    "resource_27": 100
+   }
+  }
+ ],
+ "characteristics": [
+  {
+   "code": "char_thrust",
+   "name": "Тяга",
+   "kind": "drive_push"
+  },
+  {
+   "code": "char_fuel_use",
+   "name": "Витрата пального",
+   "kind": null
+  },
+  {
+   "code": "char_energy_use",
+   "name": "Споживання енергії",
+   "kind": "energy_use"
+  },
+  {
+   "code": "char_power",
+   "name": "Вироблена потужність",
+   "kind": "power"
+  },
+  {
+   "code": "char_damage",
+   "name": "Шкода",
+   "kind": "damage"
+  },
+  {
+   "code": "char_rate",
+   "name": "Скорострільність",
+   "kind": null
+  },
+  {
+   "code": "char_range",
+   "name": "Дальність",
+   "kind": null
+  },
+  {
+   "code": "char_magazine",
+   "name": "Боєкомплект",
+   "kind": null
+  },
+  {
+   "code": "char_integrity",
+   "name": "Міцність",
+   "kind": "integrity"
+  },
+  {
+   "code": "char_shield_capacity",
+   "name": "Ємність щита",
+   "kind": "shield_capacity"
+  },
+  {
+   "code": "char_shield_regen",
+   "name": "Відновлення щита",
+   "kind": null
+  },
+  {
+   "code": "char_energy_block",
+   "name": "Блокування енергетичної шкоди",
+   "kind": null
+  },
+  {
+   "code": "char_kinetic_block",
+   "name": "Блокування кінетичної шкоди",
+   "kind": null
+  },
+  {
+   "code": "char_flight_speed",
+   "name": "Швидкість польоту",
+   "kind": null
+  },
+  {
+   "code": "char_launcher_size",
+   "name": "Розмір пускової",
+   "kind": null
+  },
+  {
+   "code": "char_yield",
+   "name": "Виробіток",
+   "kind": null
+  },
+  {
+   "code": "char_scan_radius",
+   "name": "Радіус сканування",
+   "kind": null
+  },
+  {
+   "code": "char_scan_speed",
+   "name": "Швидкість сканування",
+   "kind": null
+  },
+  {
+   "code": "char_detection",
+   "name": "Дальність виявлення",
+   "kind": null
+  },
+  {
+   "code": "char_dig_speed",
+   "name": "Швидкість розкопок",
+   "kind": null
+  },
+  {
+   "code": "char_shield_restore",
+   "name": "Відновлення щитів",
+   "kind": null
+  },
+  {
+   "code": "char_speed",
+   "name": "Швидкість",
+   "kind": null
+  },
+  {
+   "code": "char_crew",
+   "name": "Екіпаж",
+   "kind": "crew"
+  },
+  {
+   "code": "char_collect_speed",
+   "name": "Швидкість збору",
+   "kind": null
+  },
+  {
+   "code": "char_cargo",
+   "name": "Місткість вантажу",
+   "kind": null
+  },
+  {
+   "code": "char_missiles",
+   "name": "Знищені ракети",
+   "kind": null
+  },
+  {
+   "code": "char_transfer_speed",
+   "name": "Швидкість передачі",
+   "kind": null
+  },
+  {
+   "code": "char_transfer_volume",
+   "name": "Обсяг передачі",
+   "kind": null
+  },
+  {
+   "code": "char_deploy_time",
+   "name": "Час розгортання",
+   "kind": null
+  },
+  {
+   "code": "char_colonists",
+   "name": "Місткість колоністів",
+   "kind": null
+  },
+  {
+   "code": "char_inhabitants",
+   "name": "Мешканців у капсулі",
+   "kind": null
+  },
+  {
+   "code": "char_population",
+   "name": "Місткість населення",
+   "kind": null
+  },
+  {
+   "code": "char_storage",
+   "name": "Місткість складу",
+   "kind": null
+  },
+  {
+   "code": "char_repair_speed",
+   "name": "Швидкість ремонту",
+   "kind": null
+  },
+  {
+   "code": "char_training_speed",
+   "name": "Швидкість навчання",
+   "kind": null
+  },
+  {
+   "code": "char_trade_lots",
+   "name": "Кількість лотів",
+   "kind": null
+  },
+  {
+   "code": "char_jump_prep",
+   "name": "Час підготовки стрибка",
+   "kind": null
+  },
+  {
+   "code": "char_hull_size",
+   "name": "Розмір",
+   "kind": null
+  },
+  {
+   "code": "char_hull_capacity",
+   "name": "Вмістимість",
+   "kind": "hull_capacity"
+  },
+  {
+   "code": "char_hull_slots",
+   "name": "Кількість слотів",
+   "kind": "hull_slots"
+  },
+  {
+   "code": "char_hull_race_slot",
+   "name": "Додатковий слот раси",
+   "kind": "hull_race_slot"
+  }
+ ],
+ "group_chars": {
+  "pg_1": [
+   {
+    "c": "char_thrust",
+    "required": true
+   },
+   {
+    "c": "char_fuel_use",
+    "required": true
+   },
+   {
+    "c": "char_energy_use",
+    "required": true
+   }
+  ],
+  "pg_2": [
+   {
+    "c": "char_power",
+    "required": true
+   }
+  ],
+  "pg_3": [
+   {
+    "c": "char_damage",
+    "required": true
+   },
+   {
+    "c": "char_rate",
+    "required": true
+   },
+   {
+    "c": "char_range",
+    "required": true
+   },
+   {
+    "c": "char_energy_use",
+    "required": true
+   }
+  ],
+  "pg_4": [
+   {
+    "c": "char_damage",
+    "required": true
+   },
+   {
+    "c": "char_rate",
+    "required": true
+   },
+   {
+    "c": "char_range",
+    "required": true
+   },
+   {
+    "c": "char_energy_use",
+    "required": true
+   },
+   {
+    "c": "char_magazine",
+    "required": false
+   }
+  ],
+  "pg_5": [
+   {
+    "c": "char_integrity",
+    "required": true
+   }
+  ],
+  "pg_6": [
+   {
+    "c": "char_shield_capacity",
+    "required": true
+   },
+   {
+    "c": "char_shield_regen",
+    "required": true
+   },
+   {
+    "c": "char_energy_block",
+    "required": true
+   },
+   {
+    "c": "char_kinetic_block",
+    "required": true
+   },
+   {
+    "c": "char_energy_use",
+    "required": true
+   }
+  ],
+  "pg_7": [
+   {
+    "c": "char_damage",
+    "required": true
+   },
+   {
+    "c": "char_range",
+    "required": true
+   },
+   {
+    "c": "char_flight_speed",
+    "required": false
+   },
+   {
+    "c": "char_launcher_size",
+    "required": false
+   }
+  ],
+  "pg_8": [
+   {
+    "c": "char_yield",
+    "required": true
+   },
+   {
+    "c": "char_energy_use",
+    "required": true
+   },
+   {
+    "c": "char_scan_radius",
+    "required": false
+   },
+   {
+    "c": "char_scan_speed",
+    "required": false
+   }
+  ],
+  "pg_9": [
+   {
+    "c": "char_energy_use",
+    "required": true
+   },
+   {
+    "c": "char_detection",
+    "required": false
+   },
+   {
+    "c": "char_dig_speed",
+    "required": false
+   }
+  ],
+  "pg_10": [
+   {
+    "c": "char_cargo",
+    "required": false
+   },
+   {
+    "c": "char_collect_speed",
+    "required": false
+   },
+   {
+    "c": "char_colonists",
+    "required": false
+   },
+   {
+    "c": "char_crew",
+    "required": false
+   },
+   {
+    "c": "char_deploy_time",
+    "required": false
+   },
+   {
+    "c": "char_energy_use",
+    "required": false
+   },
+   {
+    "c": "char_fuel_use",
+    "required": false
+   },
+   {
+    "c": "char_inhabitants",
+    "required": false
+   },
+   {
+    "c": "char_missiles",
+    "required": false
+   },
+   {
+    "c": "char_range",
+    "required": false
+   },
+   {
+    "c": "char_shield_restore",
+    "required": false
+   },
+   {
+    "c": "char_speed",
+    "required": false
+   },
+   {
+    "c": "char_transfer_speed",
+    "required": false
+   },
+   {
+    "c": "char_transfer_volume",
+    "required": false
+   }
+  ],
+  "pg_11": [
+   {
+    "c": "char_energy_use",
+    "required": false
+   },
+   {
+    "c": "char_jump_prep",
+    "required": false
+   },
+   {
+    "c": "char_population",
+    "required": false
+   },
+   {
+    "c": "char_power",
+    "required": false
+   },
+   {
+    "c": "char_repair_speed",
+    "required": false
+   },
+   {
+    "c": "char_storage",
+    "required": false
+   },
+   {
+    "c": "char_trade_lots",
+    "required": false
+   },
+   {
+    "c": "char_training_speed",
+    "required": false
+   },
+   {
+    "c": "char_yield",
+    "required": false
+   }
+  ],
+  "pg_12": [
+   {
+    "c": "char_hull_size",
+    "required": true
+   },
+   {
+    "c": "char_hull_capacity",
+    "required": true
+   },
+   {
+    "c": "char_integrity",
+    "required": true
+   },
+   {
+    "c": "char_hull_slots",
+    "required": false
+   }
+  ],
+  "pg_13": [
+   {
+    "c": "char_hull_size",
+    "required": true
+   },
+   {
+    "c": "char_hull_capacity",
+    "required": true
+   },
+   {
+    "c": "char_integrity",
+    "required": true
+   },
+   {
+    "c": "char_hull_slots",
+    "required": false
+   }
+  ],
+  "pg_14": [
+   {
+    "c": "char_hull_size",
+    "required": true
+   },
+   {
+    "c": "char_hull_capacity",
+    "required": true
+   },
+   {
+    "c": "char_integrity",
+    "required": true
+   },
+   {
+    "c": "char_hull_slots",
+    "required": false
+   }
+  ],
+  "pg_15": [
+   {
+    "c": "char_hull_size",
+    "required": true
+   },
+   {
+    "c": "char_hull_capacity",
+    "required": true
+   },
+   {
+    "c": "char_integrity",
+    "required": true
+   },
+   {
+    "c": "char_hull_slots",
+    "required": false
+   },
+   {
+    "c": "char_hull_race_slot",
+    "required": false
+   }
+  ],
+  "pg_16": [
+   {
+    "c": "char_hull_size",
+    "required": true
+   },
+   {
+    "c": "char_hull_capacity",
+    "required": true
+   },
+   {
+    "c": "char_integrity",
+    "required": true
+   },
+   {
+    "c": "char_hull_slots",
+    "required": false
+   },
+   {
+    "c": "char_hull_race_slot",
+    "required": false
+   }
+  ],
+  "pg_17": [
+   {
+    "c": "char_hull_size",
+    "required": true
+   },
+   {
+    "c": "char_hull_capacity",
+    "required": true
+   },
+   {
+    "c": "char_integrity",
+    "required": true
+   },
+   {
+    "c": "char_hull_slots",
+    "required": false
+   }
+  ],
+  "pg_18": [
+   {
+    "c": "char_hull_size",
+    "required": true
+   },
+   {
+    "c": "char_hull_capacity",
+    "required": true
+   },
+   {
+    "c": "char_integrity",
+    "required": true
+   },
+   {
+    "c": "char_hull_slots",
+    "required": false
+   }
+  ]
+ }
+}

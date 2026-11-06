@@ -34,6 +34,9 @@ export function BuildingCard({
   const { next } = building;
   const name = names.building(building.buildingTypeId);
   const missing = new Map(next.missingResources.map((entry) => [entry.resourceTypeId, entry.amount]));
+  // What the body has of every resource of the cost: the server sends it, because a currency
+  // lies in the balance of the civilization and not in the stock of the body.
+  const availableResources = new Map((next.availableResources ?? []).map((entry) => [entry.resourceTypeId, entry.amount]));
   // A building that is not built and has a requirement out of reach is closed: the card shows no
   // cost and says what it opens with, instead of what to prepare for.
   const isClosed = building.level === 0 && next.unmetRequirements.some((requirement) => requirement.isClosed);
@@ -74,16 +77,21 @@ export function BuildingCard({
         <div className="building-card__next">
           <span className="meta">{t('planet.nextLevel', { level: next.level })}</span>
           <span className="civ-label">{t('build.requiredResources')}</span>
-          <ul aria-label={t('build.requiredResources')} className="cost-list">
+          <ul aria-label={t('build.requiredResources')} className="cost-list cost-list--stock">
             {next.costs.map((cost) => {
               const short = missing.get(cost.resourceTypeId);
+              const available = availableResources.get(cost.resourceTypeId) ?? 0;
 
               return (
                 <li className={short === undefined ? 'cost-list__row' : 'cost-list__row cost-list__row--short'} key={cost.resourceTypeId}>
                   <ResourceIcon groupCode={names.resourceGroupCode(cost.resourceTypeId)} />
                   <span className="cost-list__name">{names.resource(cost.resourceTypeId)}</span>
-                  <span className="num">{formatAmount(cost.amount, language)}</span>
-                  {short === undefined ? null : <span className="cost-list__missing">{t('build.missingAmount', { amount: formatAmount(short, language) })}</span>}
+                  <span className="num cost-list__amount">
+                    {formatAmount(cost.amount, language)}
+                    {' / '}
+                    <span className="cost-list__stock">{formatAmount(available, language)}</span>
+                    {short === undefined ? null : <span className="cost-list__missing"> ({formatAmount(short, language)})</span>}
+                  </span>
                 </li>
               );
             })}

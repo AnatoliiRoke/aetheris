@@ -101,6 +101,7 @@ export const TechnologyCard = memo(function TechnologyCard({
   const shownEffects = gains.length > 0 ? gains : technology.currentEffects.filter((effect) => !effect.unlockNameKey);
   const multiplier = timeMultiplier > 0 ? timeMultiplier : 1;
   const missing = new Map((next?.missingResources ?? []).map((entry) => [entry.resourceTypeId, entry.amount]));
+  const availableResources = new Map((next?.availableResources ?? []).map((entry) => [entry.resourceTypeId, entry.amount]));
   const reasons: string[] = [];
 
   if (status === technologyStatuses.unavailable && technology.reasonCode === 'research_center_level_unmet') {
@@ -165,16 +166,23 @@ export const TechnologyCard = memo(function TechnologyCard({
       ) : next ? (
         <div className="building-card__next">
           <span className="meta">{plateLabel}</span>
-          <ul aria-label={t('build.requiredResources')} className="cost-list">
+          <ul aria-label={t('build.requiredResources')} className="cost-list cost-list--stock">
             {next.costs.map((cost) => {
               const short = missing.get(cost.resourceTypeId);
+              // What the player has of the resource: the server sends it, because a currency lies
+              // in the balance of the civilization and not in the stock of the body.
+              const available = availableResources.get(cost.resourceTypeId) ?? 0;
 
               return (
                 <li className={short === undefined ? 'cost-list__row' : 'cost-list__row cost-list__row--short'} key={cost.resourceTypeId}>
                   <ResourceIcon groupCode={resourceGroupCode(cost.resourceTypeId)} />
                   <span className="cost-list__name">{resourceName(cost.resourceTypeId)}</span>
-                  <span className="num">{formatAmount(cost.amount, language)}</span>
-                  {short === undefined ? <span className="cost-list__missing" /> : <span className="cost-list__missing">{t('build.missingAmount', { amount: formatAmount(short, language) })}</span>}
+                  <span className="num cost-list__amount">
+                    {formatAmount(cost.amount, language)}
+                    {' / '}
+                    <span className="cost-list__stock">{formatAmount(available, language)}</span>
+                    {short === undefined ? null : <span className="cost-list__missing"> ({formatAmount(short, language)})</span>}
+                  </span>
                 </li>
               );
             })}

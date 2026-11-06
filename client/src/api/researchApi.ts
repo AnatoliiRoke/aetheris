@@ -23,6 +23,8 @@ export interface TechnologyLevel {
   unmetRequirementIds: number[];
   /** For the next level the player can research: what the selected body is short of, by how much; empty for other levels. */
   missingResources: ResourceAmount[];
+  /** For the next level the player can research: what the player has of every resource of the cost — the balance of the body, or the balance of the civilization for a currency; empty for other levels. */
+  availableResources?: ResourceAmount[];
   /** The technologies and buildings the next level still waits for. Empty on the other levels. */
   unmetRequirements?: UnmetRequirement[];
 }

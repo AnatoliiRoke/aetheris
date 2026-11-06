@@ -36,6 +36,34 @@ A neutral placeholder emblem for an item whose picture is not made yet, in a spa
 
 **Зроблено**
 
+- **Кількість для виробництва показує потрібні ресурси й те, що є.** Коли гравець вводить число
+  одиниць, плашка рецепта показує кожен інгредієнт як «потрібно / є» (наприклад `100 / 8 095`), а
+  коли ресурсу не вистачає — рядок підсвічується (`cost-list__row--short`, червона позначка
+  нестачі в дужках: `100 / 8 (-92)`). Кількість інгредієнта множиться на число одиниць так само,
+  як рахує сервер (`ProductionQueueService.Costs`: `amount × quantity`).
+  - **Звідки береться «є»:** ресурс-склад — з балансу тіла (`planet.resources`), валюта цивілізації
+    (кредити) — з балансу цивілізації (`economy.balances`), деталь — з сум стосів складу тіла
+    (`stock.stacks`). Розрізнення те саме, що на сервері: ресурс з групи «баланс» платиться з
+    балансу цивілізації, решта — з балансу тіла (`CostSplitter`).
+  - Клієнт: `productionStock.ts` (`availableAmounts`, `ingredientAvailability`), `RecipeCard`,
+    `ProductionPage` (бере `useEconomy`, `useProduction`); стилі — `gamepages.css`
+    (`.cost-list--stock`, `.cost-list__amount`, `.cost-list__stock`).
+  - **Той самий формат у будівництві й дослідженнях** (`BuildingCard` на `/planet/build`,
+    `TechnologyCard` на `/planet/research`): рядок вартості показує «потрібно / є», а нестача — у
+    дужках червоним.
+  - **Наявне приходить із сервера** (`available_resources`): `NextLevelDto` (Planets) і
+    `TechnologyLevelDto` (Research) мають нове поле з тим, що в гравець є, по кожному ресурсу
+    вартості. Це важливо: `missing_resources` містить **лише** нестачі, тож наявне з нього не
+    вивести, а кредити лежать у балансі **цивілізації**, а не тіла — без серверного поля
+    клієнт показував би «190 / 190» замість справжнього балансу. Сервер рахує наявне з того ж
+    балансу, з якого рахує нестачу: валюта — з балансу цивілізації, решта — з балансу тіла
+    (`ConstructionRules.CheckNext`, `ResearchTreeBuilder.Available`; те саме й `Missing`).
+  - У **виробництві** наявне рахує клієнт: `productionStock.ts` бере ресурси тіла з
+    `planet.resources`, а валюти цивілізації — з `economy.balances` (Economy віддає там лише
+    валюти), а деталі — зі стосів складу.
+  - Тести: `productionStock.test.ts` (6), `ProductionPage.test.tsx` — «показує, скільки є і скільки
+    потрібно» та «підсвічує нестачу, коли число зростає».
+
 - Стиль фільтрів і плашок сторінки «Виробництво» той самий, що в дослідженнях: клас головної колонки `civ__main--production` (`CivShell`), правила пошуку, чипів фільтра, вибору, блока «наступний рівень» і черги в `gamepages.css` діють і для нього.
 - Плашка рецепта: «Потрібні ресурси» списком по одному ресурсу з іконкою (як у будівництві й дослідженнях), «Час виробництва», «У партії» лише коли партія більша за одиницю; суцільний рядок «На одиницю: …» прибрано.
 - З усіх плашок (будівлі, технології, рецепти) прибрано загальні описи даних («Будівля групи …», «Розвиток групи …», «Виробництво …»); пошук іде за назвою. Описи плашок процесів на сторінці планети лишилися.
@@ -46,9 +74,19 @@ A neutral placeholder emblem for an item whose picture is not made yet, in a spa
 - Дослідження: `TechnologyCard`, `ResearchPage`, тексти `research.opens` прибрано.
 - Сервер: `ProductionQueueService.ReadRecipesAsync`, `GET /api/v1/production/recipes`, `ProductionRecipeListDto`, група деталі в `ProductionRecipeDto`, код причини `production_factory_not_built`.
 - Клієнт: `ProductionPage`, `RecipeCard`, `useRecipes`, `productionRecipes.ts` (фільтри й групування), маршрут `/planet/production`, пункт меню, тексти uk і en; `ProductionPanel` планети зведено до складу деталей і посилання; `useProduction` читає лише склад.
-- Тести: сервер `ProductionRecipeListTests` (2); клієнт `ProductionPage.test.tsx` (5), оновлені `ProductionPanel`, `OrderQueuesPage`, `ShellHeader`.
+- Тести: сервер `ProductionRecipeListTests` (2); клієнт `ProductionPage.test.tsx` (7), `productionStock.test.ts` (6), оновлені `ProductionPanel`, `OrderQueuesPage`, `ShellHeader`.
 
 **Перевірки**
 
-- Клієнт: `oxlint` чисто, `tsc -b` чисто, `vitest` 347/347, `npm run build` успішний.
+- Клієнт (06.11.2026, після показу потрібних ресурсів і наявних): `oxlint` чисто, `npm run build`
+  успішний, `vitest` 436/436 зелені.
+- Сервер (06.11.2026, після `available_resources`): `dotnet build -c Release` без помилок і
+  попереджень, `dotnet format --verify-no-changes --no-restore` чисто, `ResearchTreeDetailsTests`
+  (5) і `PlanetsTests` зелені. Повний прогін: 591 тест, 590 зелені; падає
+  `ChosenSeedTests.The_chosen_catalog_is_complete_and_reachable` (модуль World: число стартових
+  ресурсів рас) — **не регресія цієї задачі**: тест падає і без цих правок (перевірено на
+  прибраному коді), і стосується авторських змін сиду.
 - Сервер: `dotnet build -c Release` без попереджень; `ProductionRecipeListTests`, `PopulationCapsuleTests`, `ConfigDescriptionTests` зелені. Повний прогін сервера: див. нижче.
+- Ручна перевірка в Chrome (потрібна): ввести кількість на плашці рецепта й побачити «потрібно /
+  є» та підсвітку нестачі. Браузер сесії без входу, тому перевірити не вдалося
+  ([00032-pytannia.md](00032-pytannia.md)).

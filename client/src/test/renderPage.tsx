@@ -242,6 +242,7 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
           reasonCodes: [],
           unmetRequirements: [],
           missingResources: [],
+          availableResources: [{ resourceTypeId: 1, amount: 510 }],
         },
       },
       {
@@ -300,6 +301,7 @@ export function samplePlanet(overrides: Partial<Planet> = {}): Planet {
           reasonCodes: ['planets_level_capped'],
           unmetRequirements: [],
           missingResources: [],
+          availableResources: [{ resourceTypeId: 1, amount: 128 }],
         },
       },
     ],
@@ -368,6 +370,7 @@ export function sampleResearchTree(overrides: Partial<ResearchTree> = {}): Resea
             effects: [{ effectType: 'metal_production', unlockKind: null, unlockTargetId: null, unlockNameKey: null, value: 1.05 }],
             unmetRequirementIds: [],
             missingResources: [],
+            availableResources: [{ resourceTypeId: 1, amount: 200 }],
           },
         ],
         currentEffects: [],

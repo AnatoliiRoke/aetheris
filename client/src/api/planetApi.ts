@@ -49,6 +49,8 @@ export interface NextLevel {
   reasonCodes: string[];
   unmetRequirements: UnmetRequirement[];
   missingResources: ResourceAmount[];
+  /** What the body has of every resource of the cost: the balance of the body, or the balance of the civilization for a currency. */
+  availableResources?: ResourceAmount[];
 }
 
 /**

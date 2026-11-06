@@ -90,7 +90,7 @@ public static class ConfigSeed
 
         new(SecurityKeys.RateLimitPermits(RateLimitGroups.Ip), "300", "1", "100000", "Requests per window per IP address."),
         new(SecurityKeys.RateLimitWindow(RateLimitGroups.Ip), "60", "1", "3600", "Window of the IP limit, in seconds."),
-        new(SecurityKeys.RateLimitPermits(RateLimitGroups.Auth), "20", "1", "10000", "Sign-in, registration and reset requests per window per IP address."),
+        new(SecurityKeys.RateLimitPermits(RateLimitGroups.Auth), "100", "1", "10000", "Requests of the account endpoints (sign-in, registration, reset and the reads a page makes on every load) per window per IP address or account."),
         new(SecurityKeys.RateLimitWindow(RateLimitGroups.Auth), "60", "1", "3600", "Window of the sign-in limit, in seconds."),
         new(SecurityKeys.RateLimitPermits(RateLimitGroups.AdminAuth), "5", "1", "10000", "Administrator sign-in requests per window per IP address."),
         new(SecurityKeys.RateLimitWindow(RateLimitGroups.AdminAuth), "60", "1", "3600", "Window of the administrator sign-in limit, in seconds."),

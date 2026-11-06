@@ -1008,7 +1008,6 @@ export const uk = {
   'build.effects': 'Ефекти',
   'build.noEffects': '—',
   'build.requiredResources': 'Потрібні ресурси',
-  'build.missingAmount': 'не вистачає {amount}',
   'build.duration': 'Час будівництва',
   'build.energyAfter': 'Енергія після завершення',
   'build.energyPair': '{consumption} / {output}',
