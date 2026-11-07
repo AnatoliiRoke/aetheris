@@ -207,6 +207,29 @@ public sealed class PlanetSession
     }
 
     /// <summary>
+    /// Gets the stored amount of a resource. A resource without a row is empty.
+    /// </summary>
+    /// <param name="resourceTypeId">The resource.</param>
+    /// <returns>The amount.</returns>
+    public long AmountOf(int resourceTypeId) =>
+        _resources.FirstOrDefault(entry => entry.ResourceTypeId == resourceTypeId)?.Amount ?? 0;
+
+    /// <summary>
+    /// Replaces the amount of a resource. A missing row is created. The amount cannot be negative.
+    /// </summary>
+    /// <param name="resourceTypeId">The resource.</param>
+    /// <param name="amount">The amount.</param>
+    public void SetAmount(int resourceTypeId, long amount)
+    {
+        if (amount < 0)
+        {
+            throw new GameException(Core.Admin.PlayerAdminCodes.AmountNegative, "The amount of a resource cannot be negative.");
+        }
+
+        Row(resourceTypeId).Amount = amount;
+    }
+
+    /// <summary>
     /// Numbers the queue again from 1 in its order.
     /// </summary>
     public void Renumber()

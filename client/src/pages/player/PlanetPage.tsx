@@ -152,6 +152,7 @@ export function PlanetPage() {
                   orders={productionOrders.orders}
                   receivedAt={productionOrders.receivedAt}
                   timeMultiplier={planet.timeMultiplier}
+                  tools={chooseLabel(routes.planetProduction, t('planet.chooseProduction'))}
                 />
               ) : (
                 <QueueLoading

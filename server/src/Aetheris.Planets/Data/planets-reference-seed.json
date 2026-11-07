@@ -2486,56 +2486,56 @@
       },
       "image_key": "building_6.webp",
       "duration_seconds": {
-        "base": 20,
-        "growth": 2.77,
+        "base": 836.0,
+        "growth": 1.9729,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 16.665,
-          "growth": 1.5,
+          "base": 549.945,
+          "growth": 1.0916,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 16.665,
-          "growth": 1.5,
+          "base": 549.945,
+          "growth": 1.0916,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 439.956,
+          "growth": 1.0916,
           "step": 0,
           "from_level": 5,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 439.956,
+          "growth": 1.0916,
           "step": 0,
           "from_level": 5,
           "significant": 2
         },
         {
           "resource": "resource_25",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 439.956,
+          "growth": 1.0916,
           "step": 0,
           "from_level": 6,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 6.666,
-          "growth": 1.5,
+          "base": 219.978,
+          "growth": 1.0916,
           "step": 0,
           "from_level": 10,
           "significant": 2
@@ -3216,72 +3216,72 @@
       },
       "image_key": "building_8.webp",
       "duration_seconds": {
-        "base": 25,
-        "growth": 1.78,
+        "base": 4400.0,
+        "growth": 1.3559,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 1554.0734,
+          "growth": 1.1837,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 16.665,
-          "growth": 1.5,
+          "base": 777.0367,
+          "growth": 1.1837,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 16.665,
-          "growth": 1.5,
+          "base": 777.0367,
+          "growth": 1.1837,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_3",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 1554.0734,
+          "growth": 1.1837,
           "step": 0,
           "from_level": 5,
           "significant": 2
         },
         {
           "resource": "resource_23",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 621.6294,
+          "growth": 1.1837,
           "step": 0,
           "from_level": 8,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 6.666,
-          "growth": 1.5,
+          "base": 310.8147,
+          "growth": 1.1837,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 6.666,
-          "growth": 1.5,
+          "base": 310.8147,
+          "growth": 1.1837,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_17",
-          "base": 3.333,
-          "growth": 1.5,
+          "base": 155.4073,
+          "growth": 1.1837,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -4340,64 +4340,64 @@
       },
       "image_key": "building_10.webp",
       "duration_seconds": {
-        "base": 35,
-        "growth": 1.75,
+        "base": 561.0,
+        "growth": 1.5122,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 406.9593,
+          "growth": 1.28,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 406.9593,
+          "growth": 1.28,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 15.9984,
-          "growth": 1.5,
+          "base": 325.5674,
+          "growth": 1.28,
           "step": 0,
           "from_level": 5,
           "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 15.9984,
-          "growth": 1.5,
+          "base": 325.5674,
+          "growth": 1.28,
           "step": 0,
           "from_level": 8,
           "significant": 2
         },
         {
           "resource": "resource_8",
-          "base": 7.9992,
-          "growth": 1.5,
+          "base": 162.7837,
+          "growth": 1.28,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 7.9992,
-          "growth": 1.5,
+          "base": 162.7837,
+          "growth": 1.28,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_18",
-          "base": 3.9996,
-          "growth": 1.5,
+          "base": 81.3919,
+          "growth": 1.28,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -5141,48 +5141,48 @@
       },
       "image_key": "building_11.webp",
       "duration_seconds": {
-        "base": 35,
-        "growth": 1.75,
+        "base": 8800.0,
+        "growth": 1.3083,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 3123.6876,
+          "growth": 1.1463,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 3123.6876,
+          "growth": 1.1463,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 15.9984,
-          "growth": 1.5,
+          "base": 2498.9501,
+          "growth": 1.1463,
           "step": 0,
           "from_level": 8,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 7.9992,
-          "growth": 1.5,
+          "base": 1249.475,
+          "growth": 1.1463,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_8",
-          "base": 7.9992,
-          "growth": 1.5,
+          "base": 1249.475,
+          "growth": 1.1463,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -5733,7 +5733,7 @@
       "effects": [
         {
           "type": "metal_production",
-          "base": 60,
+          "base": 120,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -5944,7 +5944,7 @@
       "effects": [
         {
           "type": "metal_production",
-          "base": 60,
+          "base": 120,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -6155,7 +6155,7 @@
       "effects": [
         {
           "type": "metal_production",
-          "base": 60,
+          "base": 120,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -6372,7 +6372,7 @@
       "effects": [
         {
           "type": "metal_production",
-          "base": 60,
+          "base": 120,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -6589,7 +6589,7 @@
       "effects": [
         {
           "type": "metal_production",
-          "base": 60,
+          "base": 120,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -6872,7 +6872,7 @@
       "effects": [
         {
           "type": "metal_production",
-          "base": 60,
+          "base": 120,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -7161,7 +7161,7 @@
       "effects": [
         {
           "type": "metal_production",
-          "base": 60,
+          "base": 120,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -7378,7 +7378,7 @@
       "effects": [
         {
           "type": "crystal_production",
-          "base": 18,
+          "base": 36,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -7667,7 +7667,7 @@
       "effects": [
         {
           "type": "crystal_production",
-          "base": 18,
+          "base": 36,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -7956,7 +7956,7 @@
       "effects": [
         {
           "type": "crystal_production",
-          "base": 18,
+          "base": 36,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -8245,7 +8245,7 @@
       "effects": [
         {
           "type": "crystal_production",
-          "base": 18,
+          "base": 36,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -8534,7 +8534,7 @@
       "effects": [
         {
           "type": "crystal_production",
-          "base": 9,
+          "base": 18,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -8823,7 +8823,7 @@
       "effects": [
         {
           "type": "crystal_production",
-          "base": 9,
+          "base": 18,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -9112,7 +9112,7 @@
       "effects": [
         {
           "type": "crystal_production",
-          "base": 9,
+          "base": 18,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -9401,7 +9401,7 @@
       "effects": [
         {
           "type": "metal_production",
-          "base": 30,
+          "base": 60,
           "growth": 1.35,
           "step": 0,
           "significant": 2,
@@ -10053,56 +10053,56 @@
       },
       "image_key": "building_29.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 2.67,
+        "base": 1496.0,
+        "growth": 1.8714,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 831.7576,
+          "growth": 1.1196,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 16.665,
-          "growth": 1.5,
+          "base": 415.8788,
+          "growth": 1.1196,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 16.665,
-          "growth": 1.5,
+          "base": 415.8788,
+          "growth": 1.1196,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_3",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 831.7576,
+          "growth": 1.1196,
           "step": 0,
           "from_level": 6,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 6.666,
-          "growth": 1.5,
+          "base": 166.3515,
+          "growth": 1.1196,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_16",
-          "base": 6.666,
-          "growth": 1.5,
+          "base": 166.3515,
+          "growth": 1.1196,
           "step": 0,
           "from_level": 10,
           "significant": 2
@@ -10416,48 +10416,48 @@
       },
       "image_key": "building_30.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 2.67,
+        "base": 4400.0,
+        "growth": 1.6966,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_2",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 1554.0734,
+          "growth": 1.0578,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 16.665,
-          "growth": 1.5,
+          "base": 777.0367,
+          "growth": 1.0578,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 16.665,
-          "growth": 1.5,
+          "base": 777.0367,
+          "growth": 1.0578,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_4",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 1554.0734,
+          "growth": 1.0578,
           "step": 0,
           "from_level": 5,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 6.666,
-          "growth": 1.5,
+          "base": 310.8147,
+          "growth": 1.0578,
           "step": 0,
           "from_level": 10,
           "significant": 2
@@ -13865,56 +13865,56 @@
       },
       "image_key": "building_37.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.76,
+        "base": 1254.0,
+        "growth": 1.4461,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 39.996,
-          "growth": 1.5,
+          "base": 841.4159,
+          "growth": 1.2517,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 420.7079,
+          "growth": 1.2517,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 420.7079,
+          "growth": 1.2517,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_8",
-          "base": 7.9992,
-          "growth": 1.5,
+          "base": 168.2832,
+          "growth": 1.2517,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 7.9992,
-          "growth": 1.5,
+          "base": 168.2832,
+          "growth": 1.2517,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_19",
-          "base": 3.9996,
-          "growth": 1.5,
+          "base": 84.1416,
+          "growth": 1.2517,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -14450,48 +14450,48 @@
       },
       "image_key": "building_38.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.76,
+        "base": 1254.0,
+        "growth": 1.4461,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 39.996,
-          "growth": 1.5,
+          "base": 841.4159,
+          "growth": 1.2544,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 420.7079,
+          "growth": 1.2544,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 420.7079,
+          "growth": 1.2544,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 7.9992,
-          "growth": 1.5,
+          "base": 168.2832,
+          "growth": 1.2544,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_8",
-          "base": 7.9992,
-          "growth": 1.5,
+          "base": 168.2832,
+          "growth": 1.2544,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -14937,56 +14937,56 @@
       },
       "image_key": "building_39.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.76,
+        "base": 2992.0,
+        "growth": 1.3814,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 39.996,
-          "growth": 1.5,
+          "base": 1671.8328,
+          "growth": 1.2073,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2073,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2073,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 7.9992,
-          "growth": 1.5,
+          "base": 334.3666,
+          "growth": 1.2073,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_8",
-          "base": 7.9992,
-          "growth": 1.5,
+          "base": 334.3666,
+          "growth": 1.2073,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_17",
-          "base": 3.9996,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2073,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -15432,56 +15432,56 @@
       },
       "image_key": "building_40.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 1496.0,
+        "growth": 1.438,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 334.3666,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -16053,72 +16053,72 @@
       },
       "image_key": "building_41.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 1496.0,
+        "growth": 1.438,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2237,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2237,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2237,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_4",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2237,
           "step": 0,
           "from_level": 8,
           "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2237,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 334.3666,
+          "growth": 1.2237,
           "step": 0,
           "from_level": 12,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2237,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_18",
-          "base": 4.9995,
-          "growth": 1.5,
+          "base": 83.5916,
+          "growth": 1.2237,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -16648,56 +16648,56 @@
       },
       "image_key": "building_42.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 1496.0,
+        "growth": 1.438,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 334.3666,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2452,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -17221,64 +17221,64 @@
       },
       "image_key": "building_43.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 1496.0,
+        "growth": 1.438,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2307,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2307,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2307,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_4",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2307,
           "step": 0,
           "from_level": 6,
           "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2307,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2307,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_19",
-          "base": 4.9995,
-          "growth": 1.5,
+          "base": 83.5916,
+          "growth": 1.2307,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -17802,64 +17802,64 @@
       },
       "image_key": "building_44.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 1496.0,
+        "growth": 1.438,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.216,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.216,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.216,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_2",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.216,
           "step": 0,
           "from_level": 5,
           "significant": 2
         },
         {
           "resource": "resource_4",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.216,
           "step": 0,
           "from_level": 9,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.216,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.216,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -18383,64 +18383,64 @@
       },
       "image_key": "building_45.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 1496.0,
+        "growth": 1.438,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2429,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2429,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2429,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 334.3666,
+          "growth": 1.2429,
           "step": 0,
           "from_level": 9,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2429,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2429,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_17",
-          "base": 4.9995,
-          "growth": 1.5,
+          "base": 83.5916,
+          "growth": 1.2429,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -18958,56 +18958,56 @@
       },
       "image_key": "building_46.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 1496.0,
+        "growth": 1.438,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2326,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2326,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 417.9582,
+          "growth": 1.2326,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_4",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 835.9164,
+          "growth": 1.2326,
           "step": 0,
           "from_level": 4,
           "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2326,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 167.1833,
+          "growth": 1.2326,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -19519,64 +19519,64 @@
       },
       "image_key": "building_47.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 900.0,
+        "growth": 1.477,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 749.925,
+          "growth": 1.2501,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 374.9625,
+          "growth": 1.2501,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 374.9625,
+          "growth": 1.2501,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_23",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 299.97,
+          "growth": 1.2501,
           "step": 0,
           "from_level": 8,
           "significant": 2
         },
         {
           "resource": "resource_8",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 149.985,
+          "growth": 1.2501,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 149.985,
+          "growth": 1.2501,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_18",
-          "base": 4.9995,
-          "growth": 1.5,
+          "base": 74.9925,
+          "growth": 1.2501,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -20010,64 +20010,64 @@
       },
       "image_key": "building_48.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 231.0,
+        "growth": 1.5866,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 445.4554,
+          "growth": 1.2324,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 445.4554,
+          "growth": 1.2324,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_6",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 890.9109,
+          "growth": 1.2324,
           "step": 0,
           "from_level": 5,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 356.3644,
+          "growth": 1.2324,
           "step": 0,
           "from_level": 8,
           "significant": 2
         },
         {
           "resource": "resource_8",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 178.1822,
+          "growth": 1.2324,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 356.3644,
+          "growth": 1.2324,
           "step": 0,
           "from_level": 12,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 178.1822,
+          "growth": 1.2324,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -20591,72 +20591,72 @@
       },
       "image_key": "building_49.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 900.0,
+        "growth": 1.477,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 749.925,
+          "growth": 1.2416,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 374.9625,
+          "growth": 1.2416,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 374.9625,
+          "growth": 1.2416,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 299.97,
+          "growth": 1.2416,
           "step": 0,
           "from_level": 8,
           "significant": 2
         },
         {
           "resource": "resource_8",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 149.985,
+          "growth": 1.2416,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_23",
-          "base": 19.998,
-          "growth": 1.5,
+          "base": 299.97,
+          "growth": 1.2416,
           "step": 0,
           "from_level": 12,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 149.985,
+          "growth": 1.2416,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_19",
-          "base": 4.9995,
-          "growth": 1.5,
+          "base": 74.9925,
+          "growth": 1.2416,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -21288,48 +21288,48 @@
       },
       "image_key": "building_50.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 4840.0,
+        "growth": 1.3519,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 49.995,
-          "growth": 1.5,
+          "base": 1880.8119,
+          "growth": 1.203,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 940.406,
+          "growth": 1.203,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 24.9975,
-          "growth": 1.5,
+          "base": 940.406,
+          "growth": 1.203,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_8",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 376.1624,
+          "growth": 1.203,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 9.999,
-          "growth": 1.5,
+          "base": 376.1624,
+          "growth": 1.203,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -21775,88 +21775,88 @@
       },
       "image_key": "building_51.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 1072.5,
+        "growth": 1.4634,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 66.66,
-          "growth": 1.5,
+          "base": 926.2232,
+          "growth": 1.2043,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 463.1116,
+          "growth": 1.2043,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 463.1116,
+          "growth": 1.2043,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_2",
-          "base": 66.66,
-          "growth": 1.5,
+          "base": 926.2232,
+          "growth": 1.2043,
           "step": 0,
           "from_level": 4,
           "significant": 2
         },
         {
           "resource": "resource_23",
-          "base": 26.664,
-          "growth": 1.5,
+          "base": 370.4893,
+          "growth": 1.2043,
           "step": 0,
           "from_level": 8,
           "significant": 2
         },
         {
           "resource": "resource_9",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 185.2446,
+          "growth": 1.2043,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_26",
-          "base": 26.664,
-          "growth": 1.5,
+          "base": 370.4893,
+          "growth": 1.2043,
           "step": 0,
           "from_level": 12,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 26.664,
-          "growth": 1.5,
+          "base": 370.4893,
+          "growth": 1.2043,
           "step": 0,
           "from_level": 14,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 185.2446,
+          "growth": 1.2043,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_17",
-          "base": 6.666,
-          "growth": 1.5,
+          "base": 92.6223,
+          "growth": 1.2043,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -22448,56 +22448,56 @@
       },
       "image_key": "building_52.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 3.22,
+        "base": 1155.0,
+        "growth": 2.216,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_6",
-          "base": 66.66,
-          "growth": 1.5,
+          "base": 931.7364,
+          "growth": 1.119,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 465.8682,
+          "growth": 1.119,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 465.8682,
+          "growth": 1.119,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_21",
-          "base": 26.664,
-          "growth": 1.5,
+          "base": 372.6946,
+          "growth": 1.119,
           "step": 0,
           "from_level": 5,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 26.664,
-          "growth": 1.5,
+          "base": 372.6946,
+          "growth": 1.119,
           "step": 0,
           "from_level": 7,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 186.3473,
+          "growth": 1.119,
           "step": 0,
           "from_level": 10,
           "significant": 2
@@ -22536,16 +22536,16 @@
           "growth": 1,
           "step": 0,
           "values": [
-            0.0,
-            0.1111,
-            0.2222,
-            0.3333,
-            0.4444,
-            0.5556,
-            0.6667,
-            0.7778,
-            0.8889,
-            1.0
+            7.0,
+            3.5556,
+            2.4074,
+            1.8333,
+            1.4889,
+            1.2593,
+            1.0952,
+            0.9722,
+            0.8765,
+            0.8
           ]
         }
       ],
@@ -22731,64 +22731,64 @@
       },
       "image_key": "building_53.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 924.0,
+        "growth": 1.475,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 66.66,
-          "growth": 1.5,
+          "base": 745.3891,
+          "growth": 1.2221,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 372.6946,
+          "growth": 1.2221,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 372.6946,
+          "growth": 1.2221,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_2",
-          "base": 66.66,
-          "growth": 1.5,
+          "base": 745.3891,
+          "growth": 1.2221,
           "step": 0,
           "from_level": 5,
           "significant": 2
         },
         {
           "resource": "resource_3",
-          "base": 66.66,
-          "growth": 1.5,
+          "base": 745.3891,
+          "growth": 1.2221,
           "step": 0,
           "from_level": 8,
           "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 149.0778,
+          "growth": 1.2221,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 149.0778,
+          "growth": 1.2221,
           "step": 0,
           "from_level": 15,
           "significant": 2
@@ -23284,64 +23284,64 @@
       },
       "image_key": "building_54.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.74,
+        "base": 924.0,
+        "growth": 1.475,
         "step": 0,
         "significant": 2
       },
       "costs": [
         {
           "resource": "resource_1",
-          "base": 66.66,
-          "growth": 1.5,
+          "base": 745.3891,
+          "growth": 1.2495,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_20",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 372.6946,
+          "growth": 1.2495,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_27",
-          "base": 33.33,
-          "growth": 1.5,
+          "base": 372.6946,
+          "growth": 1.2495,
           "step": 0,
           "from_level": 1,
           "significant": 2
         },
         {
           "resource": "resource_22",
-          "base": 26.664,
-          "growth": 1.5,
+          "base": 298.1556,
+          "growth": 1.2495,
           "step": 0,
           "from_level": 8,
           "significant": 2
         },
         {
           "resource": "resource_10",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 149.0778,
+          "growth": 1.2495,
           "step": 0,
           "from_level": 10,
           "significant": 2
         },
         {
           "resource": "resource_11",
-          "base": 13.332,
-          "growth": 1.5,
+          "base": 149.0778,
+          "growth": 1.2495,
           "step": 0,
           "from_level": 15,
           "significant": 2
         },
         {
           "resource": "resource_18",
-          "base": 6.666,
-          "growth": 1.5,
+          "base": 74.5389,
+          "growth": 1.2495,
           "step": 0,
           "from_level": 15,
           "significant": 2

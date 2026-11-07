@@ -250,7 +250,7 @@ const BodyCard = memo(function BodyCard({
             {t('common.loading')}
           </p>
         )}
-        {confirmed ? <ProductionPanel planetId={planet.planetId} /> : null}
+        {confirmed ? <ProductionPanel planetId={planet.planetId} showOpenLink /> : null}
       </div>
 
       <div className="civ-body__col civ-body__col--wide">

@@ -558,8 +558,8 @@
       },
       "image_key": "tech_3.webp",
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.59,
+        "base": 143.0,
+        "growth": 1.4665,
         "step": 0,
         "significant": 2
       },
@@ -567,8 +567,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 209.0,
+            "growth": 1.319,
             "step": 0,
             "significant": 2
           },
@@ -577,8 +577,8 @@
         {
           "resource": "resource_5",
           "growth": {
-            "base": 100,
-            "growth": 1.4,
+            "base": 418.0,
+            "growth": 1.319,
             "step": 0,
             "significant": 2
           },
@@ -587,8 +587,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 83.6,
+            "growth": 1.319,
             "step": 0,
             "significant": 2
           },
@@ -597,8 +597,8 @@
         {
           "resource": "resource_16",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 83.6,
+            "growth": 1.319,
             "step": 0,
             "significant": 2
           },
@@ -607,8 +607,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 83.6,
+            "growth": 1.319,
             "step": 0,
             "significant": 2
           },
@@ -617,8 +617,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 83.6,
+            "growth": 1.319,
             "step": 0,
             "significant": 2
           },
@@ -1306,8 +1306,8 @@
       },
       "image_key": "tech_4.webp",
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.59,
+        "base": 1430.0,
+        "growth": 1.3323,
         "step": 0,
         "significant": 2
       },
@@ -1315,8 +1315,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 3861.0,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -1325,8 +1325,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 1544.4,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -1335,8 +1335,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 1544.4,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -1345,8 +1345,8 @@
         {
           "resource": "resource_17",
           "growth": {
-            "base": 10,
-            "growth": 1.4,
+            "base": 772.2,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -1355,8 +1355,8 @@
         {
           "resource": "resource_4",
           "growth": {
-            "base": 100,
-            "growth": 1.4,
+            "base": 7722.0,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -1365,8 +1365,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 1544.4,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -2216,8 +2216,8 @@
       },
       "image_key": "tech_5.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.56,
+        "base": 35.2,
+        "growth": 1.5499,
         "step": 0,
         "significant": 2
       },
@@ -2225,8 +2225,8 @@
         {
           "resource": "resource_1",
           "growth": {
-            "base": 100,
-            "growth": 1.4,
+            "base": 51.3333,
+            "growth": 1.4394,
             "step": 0,
             "significant": 2
           },
@@ -2235,8 +2235,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 25.6667,
+            "growth": 1.4394,
             "step": 0,
             "significant": 2
           },
@@ -2245,8 +2245,8 @@
         {
           "resource": "resource_2",
           "growth": {
-            "base": 100,
-            "growth": 1.4,
+            "base": 51.3333,
+            "growth": 1.4394,
             "step": 0,
             "significant": 2
           },
@@ -2255,8 +2255,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 10.2667,
+            "growth": 1.4394,
             "step": 0,
             "significant": 2
           },
@@ -2265,8 +2265,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 10.2667,
+            "growth": 1.4394,
             "step": 0,
             "significant": 2
           },
@@ -2275,8 +2275,8 @@
         {
           "resource": "resource_7",
           "growth": {
-            "base": 100,
-            "growth": 1.4,
+            "base": 51.3333,
+            "growth": 1.4394,
             "step": 0,
             "significant": 2
           },
@@ -2285,8 +2285,8 @@
         {
           "resource": "resource_3",
           "growth": {
-            "base": 100,
-            "growth": 1.4,
+            "base": 51.3333,
+            "growth": 1.4394,
             "step": 0,
             "significant": 2
           },
@@ -2295,8 +2295,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 10.2667,
+            "growth": 1.4394,
             "step": 0,
             "significant": 2
           },
@@ -3076,8 +3076,8 @@
       },
       "image_key": "tech_6.webp",
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.59,
+        "base": 56.1,
+        "growth": 1.5248,
         "step": 0,
         "significant": 2
       },
@@ -3085,8 +3085,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 107.8,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3095,8 +3095,8 @@
         {
           "resource": "resource_6",
           "growth": {
-            "base": 100,
-            "growth": 1.4,
+            "base": 215.6,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3105,8 +3105,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 43.12,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3115,8 +3115,8 @@
         {
           "resource": "resource_22",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 86.24,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3125,8 +3125,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 43.12,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3135,8 +3135,8 @@
         {
           "resource": "resource_18",
           "growth": {
-            "base": 10,
-            "growth": 1.4,
+            "base": 21.56,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3145,8 +3145,8 @@
         {
           "resource": "resource_21",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 86.24,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3155,8 +3155,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 43.12,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3826,8 +3826,8 @@
       },
       "image_key": "tech_7.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.56,
+        "base": 56.1,
+        "growth": 1.5201,
         "step": 0,
         "significant": 2
       },
@@ -3835,8 +3835,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 107.8,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3845,8 +3845,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 43.12,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3855,8 +3855,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 43.12,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3865,8 +3865,8 @@
         {
           "resource": "resource_22",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 86.24,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -3875,8 +3875,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 43.12,
+            "growth": 1.3559,
             "step": 0,
             "significant": 2
           },
@@ -4620,8 +4620,8 @@
       },
       "image_key": "tech_8.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.56,
+        "base": 143.0,
+        "growth": 1.462,
         "step": 0,
         "significant": 2
       },
@@ -4629,8 +4629,8 @@
         {
           "resource": "resource_20",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 104.5,
+            "growth": 1.3577,
             "step": 0,
             "significant": 2
           },
@@ -4639,8 +4639,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 104.5,
+            "growth": 1.3577,
             "step": 0,
             "significant": 2
           },
@@ -4649,8 +4649,8 @@
         {
           "resource": "resource_1",
           "growth": {
-            "base": 100,
-            "growth": 1.4,
+            "base": 209.0,
+            "growth": 1.3577,
             "step": 0,
             "significant": 2
           },
@@ -4659,8 +4659,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 41.8,
+            "growth": 1.3577,
             "step": 0,
             "significant": 2
           },
@@ -4669,8 +4669,8 @@
         {
           "resource": "resource_23",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 83.6,
+            "growth": 1.3577,
             "step": 0,
             "significant": 2
           },
@@ -4679,8 +4679,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 41.8,
+            "growth": 1.3577,
             "step": 0,
             "significant": 2
           },
@@ -4689,8 +4689,8 @@
         {
           "resource": "resource_19",
           "growth": {
-            "base": 10,
-            "growth": 1.4,
+            "base": 20.9,
+            "growth": 1.3577,
             "step": 0,
             "significant": 2
           },
@@ -4699,8 +4699,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 41.8,
+            "growth": 1.3577,
             "step": 0,
             "significant": 2
           },
@@ -4709,8 +4709,8 @@
         {
           "resource": "resource_22",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 83.6,
+            "growth": 1.3577,
             "step": 0,
             "significant": 2
           },
@@ -5622,8 +5622,8 @@
       },
       "image_key": "tech_9.webp",
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.59,
+        "base": 1430.0,
+        "growth": 1.3323,
         "step": 0,
         "significant": 2
       },
@@ -5631,8 +5631,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 2024.0,
+            "growth": 1.1999,
             "step": 0,
             "significant": 2
           },
@@ -5641,8 +5641,8 @@
         {
           "resource": "resource_22",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 1619.2,
+            "growth": 1.1999,
             "step": 0,
             "significant": 2
           },
@@ -5651,8 +5651,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 809.6,
+            "growth": 1.1999,
             "step": 0,
             "significant": 2
           },
@@ -5661,8 +5661,8 @@
         {
           "resource": "resource_21",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 1619.2,
+            "growth": 1.1999,
             "step": 0,
             "significant": 2
           },
@@ -5671,8 +5671,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 809.6,
+            "growth": 1.1999,
             "step": 0,
             "significant": 2
           },
@@ -5681,8 +5681,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 809.6,
+            "growth": 1.1999,
             "step": 0,
             "significant": 2
           },
@@ -6375,8 +6375,8 @@
       },
       "image_key": "tech_10.webp",
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.59,
+        "base": 220.0,
+        "growth": 1.4404,
         "step": 0,
         "significant": 2
       },
@@ -6384,8 +6384,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 297.0,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -6394,8 +6394,8 @@
         {
           "resource": "resource_1",
           "growth": {
-            "base": 100,
-            "growth": 1.4,
+            "base": 594.0,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -6404,8 +6404,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 118.8,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -6414,8 +6414,8 @@
         {
           "resource": "resource_22",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 237.6,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -6424,8 +6424,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 118.8,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -6434,8 +6434,8 @@
         {
           "resource": "resource_17",
           "growth": {
-            "base": 10,
-            "growth": 1.4,
+            "base": 59.4,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -6444,8 +6444,8 @@
         {
           "resource": "resource_23",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 237.6,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -6454,8 +6454,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 118.8,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -7295,8 +7295,8 @@
       },
       "image_key": "tech_11.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.56,
+        "base": 35.2,
+        "growth": 1.5499,
         "step": 0,
         "significant": 2
       },
@@ -7304,8 +7304,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 77.0,
+            "growth": 1.375,
             "step": 0,
             "significant": 2
           },
@@ -7314,8 +7314,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 30.8,
+            "growth": 1.375,
             "step": 0,
             "significant": 2
           },
@@ -7324,8 +7324,8 @@
         {
           "resource": "resource_22",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 61.6,
+            "growth": 1.375,
             "step": 0,
             "significant": 2
           },
@@ -7334,8 +7334,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 30.8,
+            "growth": 1.375,
             "step": 0,
             "significant": 2
           },
@@ -7344,8 +7344,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 30.8,
+            "growth": 1.375,
             "step": 0,
             "significant": 2
           },
@@ -8017,8 +8017,8 @@
       },
       "image_key": "tech_12.webp",
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.59,
+        "base": 1430.0,
+        "growth": 1.3323,
         "step": 0,
         "significant": 2
       },
@@ -8026,8 +8026,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 3861.0,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -8036,8 +8036,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 1544.4,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -8046,8 +8046,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 1544.4,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -8056,8 +8056,8 @@
         {
           "resource": "resource_18",
           "growth": {
-            "base": 10,
-            "growth": 1.4,
+            "base": 772.2,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -8066,8 +8066,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 1544.4,
+            "growth": 1.1681,
             "step": 0,
             "significant": 2
           },
@@ -8953,8 +8953,8 @@
       },
       "image_key": "tech_13.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.56,
+        "base": 561.0,
+        "growth": 1.381,
         "step": 0,
         "significant": 2
       },
@@ -8962,8 +8962,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 814.0,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -8972,8 +8972,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 325.6,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -8982,8 +8982,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 325.6,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -8992,8 +8992,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 325.6,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -9833,8 +9833,8 @@
       },
       "image_key": "tech_14.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.56,
+        "base": 561.0,
+        "growth": 1.381,
         "step": 0,
         "significant": 2
       },
@@ -9842,8 +9842,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 814.0,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -9852,8 +9852,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 325.6,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -9862,8 +9862,8 @@
         {
           "resource": "resource_12",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 325.6,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -9872,8 +9872,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 325.6,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -9882,8 +9882,8 @@
         {
           "resource": "resource_19",
           "growth": {
-            "base": 10,
-            "growth": 1.4,
+            "base": 162.8,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -9892,8 +9892,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 325.6,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -10707,8 +10707,8 @@
       },
       "image_key": "tech_15.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.56,
+        "base": 121.0,
+        "growth": 1.4722,
         "step": 0,
         "significant": 2
       },
@@ -10716,8 +10716,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 215.6,
+            "growth": 1.3173,
             "step": 0,
             "significant": 2
           },
@@ -10726,8 +10726,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 86.24,
+            "growth": 1.3173,
             "step": 0,
             "significant": 2
           },
@@ -10736,8 +10736,8 @@
         {
           "resource": "resource_22",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 172.48,
+            "growth": 1.3173,
             "step": 0,
             "significant": 2
           },
@@ -10746,8 +10746,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 86.24,
+            "growth": 1.3173,
             "step": 0,
             "significant": 2
           },
@@ -10756,8 +10756,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 86.24,
+            "growth": 1.3173,
             "step": 0,
             "significant": 2
           },
@@ -11465,8 +11465,8 @@
       },
       "image_key": "tech_16.webp",
       "duration_seconds": {
-        "base": 30,
-        "growth": 1.56,
+        "base": 220.0,
+        "growth": 1.436,
         "step": 0,
         "significant": 2
       },
@@ -11474,8 +11474,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 297.0,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -11484,8 +11484,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 118.8,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -11494,8 +11494,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 118.8,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -11504,8 +11504,8 @@
         {
           "resource": "resource_17",
           "growth": {
-            "base": 10,
-            "growth": 1.4,
+            "base": 59.4,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -11514,8 +11514,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 118.8,
+            "growth": 1.2998,
             "step": 0,
             "significant": 2
           },
@@ -12183,8 +12183,8 @@
       },
       "image_key": "tech_17.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.55,
+        "base": 3630.0,
+        "growth": 1.2853,
         "step": 0,
         "significant": 2
       },
@@ -12192,8 +12192,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 4851.0,
+            "growth": 1.157,
             "step": 0,
             "significant": 2
           },
@@ -12202,8 +12202,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 1940.4,
+            "growth": 1.157,
             "step": 0,
             "significant": 2
           },
@@ -12212,8 +12212,8 @@
         {
           "resource": "resource_22",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 3880.8,
+            "growth": 1.157,
             "step": 0,
             "significant": 2
           },
@@ -12222,8 +12222,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 1940.4,
+            "growth": 1.157,
             "step": 0,
             "significant": 2
           },
@@ -12232,8 +12232,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 1940.4,
+            "growth": 1.157,
             "step": 0,
             "significant": 2
           },
@@ -13214,8 +13214,8 @@
       },
       "image_key": "tech_18.webp",
       "duration_seconds": {
-        "base": 40,
-        "growth": 1.55,
+        "base": 14300.0,
+        "growth": 1.2139,
         "step": 0,
         "significant": 2
       },
@@ -13223,8 +13223,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 24310.0,
+            "growth": 1.0819,
             "step": 0,
             "significant": 2
           },
@@ -14218,8 +14218,8 @@
       },
       "image_key": "tech_19.webp",
       "duration_seconds": {
-        "base": 35,
-        "growth": 1.55,
+        "base": 561.0,
+        "growth": 1.381,
         "step": 0,
         "significant": 2
       },
@@ -14227,8 +14227,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 814.0,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -14237,8 +14237,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 325.6,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -14247,8 +14247,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 325.6,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -14257,8 +14257,8 @@
         {
           "resource": "resource_18",
           "growth": {
-            "base": 10,
-            "growth": 1.4,
+            "base": 162.8,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -14267,8 +14267,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 325.6,
+            "growth": 1.2464,
             "step": 0,
             "significant": 2
           },
@@ -15004,8 +15004,8 @@
       },
       "image_key": "tech_20.webp",
       "duration_seconds": {
-        "base": 35,
-        "growth": 1.55,
+        "base": 143000.0,
+        "growth": 1.0963,
         "step": 0,
         "significant": 2
       },
@@ -15013,8 +15013,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 125400.0,
+            "growth": 1.0104,
             "step": 0,
             "significant": 2
           },
@@ -15023,8 +15023,8 @@
         {
           "resource": "resource_24",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 100320.0,
+            "growth": 1.0104,
             "step": 0,
             "significant": 2
           },
@@ -15033,8 +15033,8 @@
         {
           "resource": "resource_9",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 50160.0,
+            "growth": 1.0104,
             "step": 0,
             "significant": 2
           },
@@ -15043,8 +15043,8 @@
         {
           "resource": "resource_21",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 100320.0,
+            "growth": 1.0104,
             "step": 0,
             "significant": 2
           },
@@ -15053,8 +15053,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 50160.0,
+            "growth": 1.0104,
             "step": 0,
             "significant": 2
           },
@@ -15063,8 +15063,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 50160.0,
+            "growth": 1.0104,
             "step": 0,
             "significant": 2
           },
@@ -16195,8 +16195,8 @@
       },
       "image_key": "tech_21.webp",
       "duration_seconds": {
-        "base": 20,
-        "growth": 1.59,
+        "base": 143.0,
+        "growth": 1.4665,
         "step": 0,
         "significant": 2
       },
@@ -16204,8 +16204,8 @@
         {
           "resource": "resource_20",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 109.2025,
+            "growth": 1.3552,
             "step": 0,
             "significant": 2
           },
@@ -16214,8 +16214,8 @@
         {
           "resource": "resource_27",
           "growth": {
-            "base": 50,
-            "growth": 1.4,
+            "base": 109.2025,
+            "growth": 1.3552,
             "step": 0,
             "significant": 2
           },
@@ -16224,8 +16224,8 @@
         {
           "resource": "resource_1",
           "growth": {
-            "base": 100,
-            "growth": 1.4,
+            "base": 218.405,
+            "growth": 1.3552,
             "step": 0,
             "significant": 2
           },
@@ -16234,8 +16234,8 @@
         {
           "resource": "resource_8",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 43.681,
+            "growth": 1.3552,
             "step": 0,
             "significant": 2
           },
@@ -16244,8 +16244,8 @@
         {
           "resource": "resource_23",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 87.362,
+            "growth": 1.3552,
             "step": 0,
             "significant": 2
           },
@@ -16254,8 +16254,8 @@
         {
           "resource": "resource_11",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 43.681,
+            "growth": 1.3552,
             "step": 0,
             "significant": 2
           },
@@ -16264,8 +16264,8 @@
         {
           "resource": "resource_19",
           "growth": {
-            "base": 10,
-            "growth": 1.4,
+            "base": 21.8405,
+            "growth": 1.3552,
             "step": 0,
             "significant": 2
           },
@@ -16274,8 +16274,8 @@
         {
           "resource": "resource_10",
           "growth": {
-            "base": 20,
-            "growth": 1.4,
+            "base": 43.681,
+            "growth": 1.3552,
             "step": 0,
             "significant": 2
           },
@@ -16284,8 +16284,8 @@
         {
           "resource": "resource_22",
           "growth": {
-            "base": 40,
-            "growth": 1.4,
+            "base": 87.362,
+            "growth": 1.3552,
             "step": 0,
             "significant": 2
           },

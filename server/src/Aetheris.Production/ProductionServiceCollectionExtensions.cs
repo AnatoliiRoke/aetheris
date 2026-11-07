@@ -39,6 +39,7 @@ public static class ProductionServiceCollectionExtensions
         services.AddScoped<ProductionUnitOfWork>();
         services.AddScoped<ProductionBootstrapService>();
         services.AddScoped<ProductionQueueService>();
+        services.AddScoped<ProductionPlayerAdminService>();
         services.AddScoped<ShipCatalogService>();
         services.AddScoped<CharacteristicQueryService>();
         services.AddScoped<PartStockService>();
@@ -77,7 +78,10 @@ public static class ProductionServiceCollectionExtensions
     /// </summary>
     /// <param name="secured">The secured admin group.</param>
     /// <returns>The same group.</returns>
-    public static RouteGroupBuilder MapAdminEndpoints(RouteGroupBuilder secured) =>
+    public static RouteGroupBuilder MapAdminEndpoints(RouteGroupBuilder secured)
+    {
+        ArgumentNullException.ThrowIfNull(secured);
+
         secured
             .MapAdminReference<ProductionReferenceAdminService>(ProductionReferenceAdminService.PartGroupDescriptor)
             .MapAdminReference<ProductionReferenceAdminService>(ProductionReferenceAdminService.PartDescriptor)
@@ -85,4 +89,8 @@ public static class ProductionServiceCollectionExtensions
             .MapAdminReference<CharacteristicReferenceAdminService>(CharacteristicReferenceAdminService.CharacteristicDescriptor)
             .MapAdminReference<CharacteristicReferenceAdminService>(CharacteristicReferenceAdminService.PartGroupCharacteristicDescriptor)
             .MapAdminReference<CharacteristicReferenceAdminService>(CharacteristicReferenceAdminService.PartCharacteristicDescriptor);
+        ProductionPlayerAdminEndpoints.Map(secured);
+
+        return secured;
+    }
 }

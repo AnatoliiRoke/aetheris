@@ -92,8 +92,108 @@ public static class EconomyAdminEndpoints
         })
             .WithName("admin.economy_balance_updated");
 
+        economy.MapPut("/players/{playerId}/balances", async (
+            string playerId,
+            AdminBalanceSet request,
+            EconomyService service,
+            IAdminAuditRecorder audit,
+            IAdminQueryLimits limits,
+            CancellationToken cancellationToken) =>
+        {
+            audit.Record(Target(playerId, request.ResourceTypeId), null, null);
+
+            if (ReasonError(request.Reason, limits) is { } refused)
+            {
+                return refused;
+            }
+
+            try
+            {
+                AdminBalanceChange applied = await service
+                    .SetBalanceToAsync(playerId, request, cancellationToken)
+                    .ConfigureAwait(false);
+
+                audit.Record(applied.Target, applied.OldValue, applied.NewValue);
+                audit.RecordReason(request.Reason!.Trim());
+
+                return Results.Json(new { id = applied.Id, version = applied.Version }, EconomyJson.Options);
+            }
+            catch (EconomyAdminException exception)
+            {
+                return BalanceFailure(exception);
+            }
+        })
+            .WithName("admin.player_balance_set");
+
+        economy.MapPut("/players/{playerId}/planets/{planetId:long}/population", async (
+            string playerId,
+            long planetId,
+            AdminPopulationSet request,
+            EconomyService service,
+            IAdminAuditRecorder audit,
+            IAdminQueryLimits limits,
+            CancellationToken cancellationToken) =>
+        {
+            string target = $"population:{playerId}:{planetId}";
+            audit.Record(target, null, null);
+
+            if (ReasonError(request.Reason, limits) is { } refused)
+            {
+                return refused;
+            }
+
+            try
+            {
+                (long before, long after) = await service
+                    .SetPopulationAsync(playerId, planetId, request.Amount, cancellationToken)
+                    .ConfigureAwait(false);
+
+                audit.Record(target, before.ToString(System.Globalization.CultureInfo.InvariantCulture), after.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                audit.RecordReason(request.Reason!.Trim());
+
+                return Results.Json(new { amount = after }, EconomyJson.Options);
+            }
+            catch (EconomyAdminException exception)
+            {
+                return BalanceFailure(exception);
+            }
+            catch (GameException exception)
+            {
+                return Results.Json(
+                    new { error = exception.Code },
+                    EconomyJson.Options,
+                    statusCode: exception.Code is GameErrorCodes.NotFound or EconomyErrorCodes.PlanetUnknown
+                        ? StatusCodes.Status404NotFound
+                        : StatusCodes.Status422UnprocessableEntity);
+            }
+        })
+            .WithName("admin.player_population_updated");
+
         return economy;
     }
+
+    private static IResult? ReasonError(string? reason, IAdminQueryLimits limits)
+    {
+        if (AdminReason.Check(reason, limits) is not { } reasonError)
+        {
+            return null;
+        }
+
+        return Results.Json(
+            new { error = GameErrorCodes.ValidationFailed, details = new Dictionary<string, string[]> { ["reason"] = [reasonError] } },
+            statusCode: StatusCodes.Status400BadRequest);
+    }
+
+    private static IResult BalanceFailure(EconomyAdminException exception) =>
+        Results.Json(
+            new { error = exception.Code },
+            EconomyJson.Options,
+            statusCode: exception.Code switch
+            {
+                GameErrorCodes.NotFound => StatusCodes.Status404NotFound,
+                AdminReferenceErrors.VersionConflict => StatusCodes.Status409Conflict,
+                _ => StatusCodes.Status400BadRequest,
+            });
 
     private static string Target(string playerId, int resourceTypeId) =>
         $"economy_balance:{playerId}:{resourceTypeId}";

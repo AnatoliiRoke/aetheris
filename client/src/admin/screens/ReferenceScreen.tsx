@@ -28,6 +28,11 @@ type RowsByKind = Record<string, ReferenceRow[]>;
 const newRecord = 'new';
 
 /**
+ * The field of the order in a list: it stands in its own column, under the version.
+ */
+const sortOrderField = 'sort_order';
+
+/**
  * The reference kinds of the admin panel (task 00023, decision 1), like the reference menus of
  * Odoo: the kinds on the left, the list of the chosen kind, and the form of a row. The server
  * describes every kind with its fields, so the screen knows no kind: a new kind of a module shows
@@ -166,6 +171,10 @@ function ReferenceList({ kind, described }: { kind: ReferenceKind; described: Re
   const [archived, setArchived] = useState(false);
   const [rows, setRows] = useState<Page<ReferenceRow> | null>(null);
   const columns = kind.fields.filter((field) => field.in_list && field.name !== 'name');
+  // The order in the list is a column of its own: it stands under the version, so the columns
+  // of the data of a row stay together and the last two are the order and the version.
+  const sortOrderColumn = columns.find((field) => field.name === sortOrderField) ?? null;
+  const dataColumns = columns.filter((field) => field.name !== sortOrderField);
 
   const options = useRowsOf(references, described.kinds, columns);
 
@@ -233,7 +242,7 @@ function ReferenceList({ kind, described }: { kind: ReferenceKind; described: Re
                 <tr>
                   <th scope="col">{t('admin.reference.picture')}</th>
                   <th scope="col">{t('admin.col.name')}</th>
-                  {columns.map((field) => (
+                  {dataColumns.map((field) => (
                     <th scope="col" key={field.name}>
                       {name(field.label_key, field.name)}
                     </th>
@@ -241,12 +250,15 @@ function ReferenceList({ kind, described }: { kind: ReferenceKind; described: Re
                   <th scope="col">{t('admin.col.code')}</th>
                   <th scope="col">{t('admin.reference.state')}</th>
                   <th scope="col">{t('admin.reference.version')}</th>
+                  {sortOrderColumn ? (
+                    <th scope="col">{name(sortOrderColumn.label_key, sortOrderColumn.name)}</th>
+                  ) : null}
                 </tr>
               </thead>
               <tbody>
                 {rows.items.length === 0 ? (
                   <tr>
-                    <td colSpan={columns.length + 5}>{t('admin.reference.empty')}</td>
+                    <td colSpan={dataColumns.length + (sortOrderColumn ? 6 : 5)}>{t('admin.reference.empty')}</td>
                   </tr>
                 ) : null}
                 {rows.items.map((row) => (
@@ -259,7 +271,7 @@ function ReferenceList({ kind, described }: { kind: ReferenceKind; described: Re
                         {name(row.name_key, row.code)}
                       </Link>
                     </td>
-                    {columns.map((field) => (
+                    {dataColumns.map((field) => (
                       <td key={field.name} className={field.type === 'number' ? 'num' : undefined}>
                         <ShownValue field={field} value={row.values[field.name]} options={options ?? {}} />
                       </td>
@@ -269,6 +281,11 @@ function ReferenceList({ kind, described }: { kind: ReferenceKind; described: Re
                     </td>
                     <td>{t(row.is_archived ? 'admin.reference.archived' : 'admin.reference.active')}</td>
                     <td className="num">{row.version}</td>
+                    {sortOrderColumn ? (
+                      <td className="num">
+                        <ShownValue field={sortOrderColumn} value={row.values[sortOrderColumn.name]} options={options ?? {}} />
+                      </td>
+                    ) : null}
                   </tr>
                 ))}
               </tbody>
@@ -692,8 +709,8 @@ function dependentKind(field: ReferenceField, row: ReferenceValues, siblings: Re
  *
  * The levels of a building are drawn in two rows: the number of the level and the time of its
  * build in the first, the blocks of the costs, the effects and the requirements under them,
- * aligned by the upper edge. The costs are a table whose headers of the columns are shown once,
- * above the rows, and not a label over every resource.
+ * aligned by the upper edge, in one row. The costs are a table whose headers of the columns are
+ * shown once, above the rows, and not a label over every resource.
  */
 function ListInput(props: FieldInputProps) {
   const { field, path, value, onChange, failure } = props;
@@ -720,11 +737,8 @@ function ListInput(props: FieldInputProps) {
 
   if (field.type === 'levels') {
     // The number of the level and the time of its build go in the first row; the blocks of the
-    // The number of the level and the time of its build go in the first row; the blocks of the
-    // costs and the effects go under them, aligned by the upper edge; the block of the
-    // requirements goes under them, in its own row.
-    const blocks = columns.filter((column) => column.type === 'costs' || column.type === 'effects');
-    const requirements = columns.filter((column) => column.type === 'requirements');
+    // costs, the effects and the requirements go under them, aligned by the upper edge, in one row.
+    const blocks = columns.filter((column) => column.type === 'costs' || column.type === 'effects' || column.type === 'requirements');
     const head = columns.filter((column) => column.type !== 'costs' && column.type !== 'effects' && column.type !== 'requirements');
 
     return (
@@ -751,22 +765,6 @@ function ListInput(props: FieldInputProps) {
             {blocks.length > 0 ? (
               <div className="admin-levels__blocks">
                 {blocks.map((column) => (
-                  <FieldInput
-                    key={column.name}
-                    {...props}
-                    field={column}
-                    path={`${path}.${index}.${column.name}`}
-                    value={entry[column.name]}
-                    row={entry}
-                    siblings={columns}
-                    onChange={(changed) => update(index, { ...entry, [column.name]: changed })}
-                  />
-                ))}
-              </div>
-            ) : null}
-            {requirements.length > 0 ? (
-              <div className="admin-levels__blocks">
-                {requirements.map((column) => (
                   <FieldInput
                     key={column.name}
                     {...props}

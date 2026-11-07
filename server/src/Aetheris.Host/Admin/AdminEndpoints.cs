@@ -7,6 +7,7 @@ using Aetheris.Core.Errors;
 using Aetheris.Core.Security;
 using Aetheris.Core.Time;
 using Aetheris.Economy;
+using Aetheris.Fleet;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
@@ -243,6 +244,7 @@ public static class AdminEndpoints
         ProcessesServiceCollectionExtensions.MapAdminEndpoints(secured);
         EconomyServiceCollectionExtensions.MapAdminEndpoints(secured);
         MarketServiceCollectionExtensions.MapAdminEndpoints(secured);
+        FleetServiceCollectionExtensions.MapAdminEndpoints(secured);
     }
 
     private static async Task<IResult> SignInAsync(

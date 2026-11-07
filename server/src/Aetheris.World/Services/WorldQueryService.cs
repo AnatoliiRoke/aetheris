@@ -495,6 +495,35 @@ public sealed class WorldQueryService
     }
 
     /// <summary>
+    /// Counts the bodies of several players in one read.
+    /// </summary>
+    /// <param name="playerIds">The players.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The number of bodies by player. A player with none is absent.</returns>
+    public async Task<IReadOnlyDictionary<string, int>> CountOwnedPlanetsAsync(
+        IReadOnlyCollection<string> playerIds,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(playerIds);
+
+        if (playerIds.Count == 0)
+        {
+            return new Dictionary<string, int>();
+        }
+
+        List<string> ids = [.. playerIds];
+
+        var counts = await _dbContext.Planets.AsNoTracking()
+            .Where(planet => planet.OwnerPlayerId != null && ids.Contains(planet.OwnerPlayerId))
+            .GroupBy(planet => planet.OwnerPlayerId!)
+            .Select(group => new { PlayerId = group.Key, PlanetCount = group.Count() })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return counts.ToDictionary(entry => entry.PlayerId, entry => entry.PlanetCount);
+    }
+
+    /// <summary>
     /// Gets the bodies of a player with everything the screen of the civilization shows about
     /// them: the name, the type, the place in the galaxy and the deposits (task 00010,
     /// section 7.4).

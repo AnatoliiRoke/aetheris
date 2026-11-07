@@ -171,6 +171,14 @@ public interface IWorldModule
     Task<IReadOnlyList<OwnedPlanet>> GetOwnedPlanetsAsync(string playerId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Counts the bodies of several players in one read.
+    /// </summary>
+    /// <param name="playerIds">The players.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The number of bodies by player. A player with none is absent.</returns>
+    Task<IReadOnlyDictionary<string, int>> CountOwnedPlanetsAsync(IReadOnlyCollection<string> playerIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the resource types and their groups.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>

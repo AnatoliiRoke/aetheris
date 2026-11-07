@@ -28,6 +28,7 @@ export function ProductionQueue({
   onCancel,
   onFinished,
   action,
+  tools,
   footnote,
 }: {
   orders: ActiveOrders;
@@ -37,6 +38,7 @@ export function ProductionQueue({
   onCancel: (order: ActiveOrder) => void;
   onFinished: () => void;
   action?: ReactNode;
+  tools?: ReactNode;
   footnote?: string;
 }) {
   const { t } = useI18n();
@@ -58,6 +60,7 @@ export function ProductionQueue({
     <QueuePanel
       action={action}
       busy={busy}
+      tools={tools}
       emptyText={t('production.queueEmpty')}
       entries={entries}
       footnote={footnote}

@@ -323,7 +323,7 @@
           "number": 100
         },
         "char_energy_use": {
-          "number": 0
+          "number": 12
         }
       }
     },
@@ -352,13 +352,13 @@
       "weight": 1.1,
       "characteristics": {
         "char_thrust": {
-          "number": 110
+          "number": 100
         },
         "char_fuel_use": {
           "number": 110
         },
         "char_energy_use": {
-          "number": 0
+          "number": 12
         }
       }
     },
@@ -387,13 +387,13 @@
       "weight": 1.21,
       "characteristics": {
         "char_thrust": {
-          "number": 121
+          "number": 300
         },
         "char_fuel_use": {
           "number": 121
         },
         "char_energy_use": {
-          "number": 0
+          "number": 36
         }
       }
     },
@@ -422,13 +422,13 @@
       "weight": 1.331,
       "characteristics": {
         "char_thrust": {
-          "number": 133.1
+          "number": 300
         },
         "char_fuel_use": {
           "number": 133.1
         },
         "char_energy_use": {
-          "number": 0
+          "number": 36
         }
       }
     },
@@ -457,13 +457,13 @@
       "weight": 1.4641,
       "characteristics": {
         "char_thrust": {
-          "number": 146.41
+          "number": 600
         },
         "char_fuel_use": {
           "number": 146.41
         },
         "char_energy_use": {
-          "number": 0
+          "number": 72
         }
       }
     },
@@ -492,13 +492,13 @@
       "weight": 1.61051,
       "characteristics": {
         "char_thrust": {
-          "number": 161.051
+          "number": 1000
         },
         "char_fuel_use": {
           "number": 161.051
         },
         "char_energy_use": {
-          "number": 0
+          "number": 120
         }
       }
     },
@@ -527,7 +527,7 @@
       "weight": 1.771561,
       "characteristics": {
         "char_power": {
-          "number": 100
+          "number": 60
         }
       }
     },
@@ -556,7 +556,7 @@
       "weight": 1.948717,
       "characteristics": {
         "char_power": {
-          "number": 110
+          "number": 130
         }
       }
     },
@@ -585,7 +585,7 @@
       "weight": 2.143589,
       "characteristics": {
         "char_power": {
-          "number": 121
+          "number": 200
         }
       }
     },
@@ -614,7 +614,7 @@
       "weight": 2.357948,
       "characteristics": {
         "char_power": {
-          "number": 133.1
+          "number": 350
         }
       }
     },
@@ -643,7 +643,7 @@
       "weight": 2.593742,
       "characteristics": {
         "char_power": {
-          "number": 146.41
+          "number": 550
         }
       }
     },
@@ -672,7 +672,7 @@
       "weight": 2.853117,
       "characteristics": {
         "char_power": {
-          "number": 161.051
+          "number": 900
         }
       }
     },
@@ -700,16 +700,16 @@
       },
       "weight": 3.138428,
       "characteristics": {
+        "char_energy_use": {
+          "number": 18
+        },
         "char_damage": {
-          "number": 100
+          "number": 41
         },
         "char_rate": {
-          "number": 100
+          "number": 1
         },
         "char_range": {
-          "number": 100
-        },
-        "char_energy_use": {
           "number": 100
         }
       }
@@ -738,17 +738,17 @@
       },
       "weight": 3.452271,
       "characteristics": {
+        "char_energy_use": {
+          "number": 18
+        },
         "char_damage": {
-          "number": 110
+          "number": 49
         },
         "char_rate": {
-          "number": 110
+          "number": 1
         },
         "char_range": {
-          "number": 110
-        },
-        "char_energy_use": {
-          "number": 110
+          "number": 100
         }
       }
     },
@@ -776,17 +776,17 @@
       },
       "weight": 3.797498,
       "characteristics": {
+        "char_energy_use": {
+          "number": 18
+        },
         "char_damage": {
-          "number": 121
+          "number": 41
         },
         "char_rate": {
-          "number": 121
+          "number": 1
         },
         "char_range": {
-          "number": 121
-        },
-        "char_energy_use": {
-          "number": 121
+          "number": 100
         }
       }
     },
@@ -814,17 +814,17 @@
       },
       "weight": 4.177248,
       "characteristics": {
+        "char_energy_use": {
+          "number": 54
+        },
         "char_damage": {
-          "number": 133.1
+          "number": 125
         },
         "char_rate": {
-          "number": 133.1
+          "number": 1
         },
         "char_range": {
-          "number": 133.1
-        },
-        "char_energy_use": {
-          "number": 133.1
+          "number": 300
         }
       }
     },
@@ -852,17 +852,17 @@
       },
       "weight": 4.594973,
       "characteristics": {
+        "char_energy_use": {
+          "number": 54
+        },
         "char_damage": {
-          "number": 146.41
+          "number": 125
         },
         "char_rate": {
-          "number": 146.41
+          "number": 1
         },
         "char_range": {
-          "number": 146.41
-        },
-        "char_energy_use": {
-          "number": 146.41
+          "number": 300
         }
       }
     },
@@ -890,17 +890,17 @@
       },
       "weight": 5.05447,
       "characteristics": {
+        "char_energy_use": {
+          "number": 54
+        },
         "char_damage": {
-          "number": 161.051
+          "number": 125
         },
         "char_rate": {
-          "number": 161.051
+          "number": 1
         },
         "char_range": {
-          "number": 161.051
-        },
-        "char_energy_use": {
-          "number": 161.051
+          "number": 300
         }
       }
     },
@@ -928,17 +928,17 @@
       },
       "weight": 5.559917,
       "characteristics": {
+        "char_energy_use": {
+          "number": 108
+        },
         "char_damage": {
-          "number": 177.1561
+          "number": 250
         },
         "char_rate": {
-          "number": 177.1561
+          "number": 1
         },
         "char_range": {
-          "number": 177.1561
-        },
-        "char_energy_use": {
-          "number": 177.1561
+          "number": 600
         }
       }
     },
@@ -966,17 +966,17 @@
       },
       "weight": 6.115909,
       "characteristics": {
+        "char_energy_use": {
+          "number": 180
+        },
         "char_damage": {
-          "number": 194.87171
+          "number": 416
         },
         "char_rate": {
-          "number": 194.87171
+          "number": 1
         },
         "char_range": {
-          "number": 194.87171
-        },
-        "char_energy_use": {
-          "number": 194.87171
+          "number": 1000
         }
       }
     },
@@ -1004,17 +1004,17 @@
       },
       "weight": 6.7275,
       "characteristics": {
+        "char_energy_use": {
+          "number": 24
+        },
         "char_damage": {
-          "number": 100
+          "number": 125
         },
         "char_rate": {
-          "number": 100
+          "number": 1
         },
         "char_range": {
-          "number": 100
-        },
-        "char_energy_use": {
-          "number": 100
+          "number": 300
         },
         "char_magazine": {
           "number": 100
@@ -1045,17 +1045,17 @@
       },
       "weight": 7.40025,
       "characteristics": {
+        "char_energy_use": {
+          "number": 35
+        },
         "char_damage": {
-          "number": 110
+          "number": 250
         },
         "char_rate": {
-          "number": 110
+          "number": 3
         },
         "char_range": {
-          "number": 110
-        },
-        "char_energy_use": {
-          "number": 110
+          "number": 600
         },
         "char_magazine": {
           "number": 110
@@ -1086,17 +1086,17 @@
       },
       "weight": 8.140275,
       "characteristics": {
+        "char_energy_use": {
+          "number": 70
+        },
         "char_damage": {
-          "number": 121
+          "number": 125
         },
         "char_rate": {
-          "number": 121
+          "number": 1
         },
         "char_range": {
-          "number": 121
-        },
-        "char_energy_use": {
-          "number": 121
+          "number": 300
         },
         "char_magazine": {
           "number": 121
@@ -1127,17 +1127,17 @@
       },
       "weight": 8.954302,
       "characteristics": {
+        "char_energy_use": {
+          "number": 12
+        },
         "char_damage": {
-          "number": 133.1
+          "number": 41
         },
         "char_rate": {
-          "number": 133.1
+          "number": 1
         },
         "char_range": {
-          "number": 133.1
-        },
-        "char_energy_use": {
-          "number": 133.1
+          "number": 100
         },
         "char_magazine": {
           "number": 133.1
@@ -1168,17 +1168,17 @@
       },
       "weight": 9.849733,
       "characteristics": {
+        "char_energy_use": {
+          "number": 24
+        },
         "char_damage": {
-          "number": 146.41
+          "number": 125
         },
         "char_rate": {
-          "number": 146.41
+          "number": 2
         },
         "char_range": {
-          "number": 146.41
-        },
-        "char_energy_use": {
-          "number": 146.41
+          "number": 300
         },
         "char_magazine": {
           "number": 146.41
@@ -1209,17 +1209,17 @@
       },
       "weight": 10.834706,
       "characteristics": {
+        "char_energy_use": {
+          "number": 33
+        },
         "char_damage": {
-          "number": 161.051
+          "number": 250
         },
         "char_rate": {
-          "number": 161.051
+          "number": 3
         },
         "char_range": {
-          "number": 161.051
-        },
-        "char_energy_use": {
-          "number": 161.051
+          "number": 600
         },
         "char_magazine": {
           "number": 161.051
@@ -1248,7 +1248,7 @@
       "weight": 11.918177,
       "characteristics": {
         "char_integrity": {
-          "number": 100
+          "number": 75
         }
       }
     },
@@ -1274,7 +1274,7 @@
       "weight": 13.109994,
       "characteristics": {
         "char_integrity": {
-          "number": 110
+          "number": 75
         }
       }
     },
@@ -1300,7 +1300,7 @@
       "weight": 14.420994,
       "characteristics": {
         "char_integrity": {
-          "number": 121
+          "number": 75
         }
       }
     },
@@ -1326,7 +1326,7 @@
       "weight": 15.863093,
       "characteristics": {
         "char_integrity": {
-          "number": 133.1
+          "number": 225
         }
       }
     },
@@ -1352,7 +1352,7 @@
       "weight": 17.449402,
       "characteristics": {
         "char_integrity": {
-          "number": 146.41
+          "number": 225
         }
       }
     },
@@ -1378,7 +1378,7 @@
       "weight": 19.194342,
       "characteristics": {
         "char_integrity": {
-          "number": 161.051
+          "number": 225
         }
       }
     },
@@ -1404,7 +1404,7 @@
       "weight": 21.113777,
       "characteristics": {
         "char_integrity": {
-          "number": 177.1561
+          "number": 450
         }
       }
     },
@@ -1430,7 +1430,7 @@
       "weight": 23.225154,
       "characteristics": {
         "char_integrity": {
-          "number": 194.87171
+          "number": 450
         }
       }
     },
@@ -1455,20 +1455,20 @@
       },
       "weight": 25.54767,
       "characteristics": {
+        "char_energy_use": {
+          "number": 15
+        },
         "char_shield_capacity": {
-          "number": 100
+          "number": 125
         },
         "char_shield_regen": {
-          "number": 100
+          "number": 25
         },
         "char_energy_block": {
-          "number": 100
+          "number": 60
         },
         "char_kinetic_block": {
-          "number": 100
-        },
-        "char_energy_use": {
-          "number": 100
+          "number": 60
         }
       }
     },
@@ -1493,20 +1493,20 @@
       },
       "weight": 28.102437,
       "characteristics": {
+        "char_energy_use": {
+          "number": 15
+        },
         "char_shield_capacity": {
-          "number": 110
+          "number": 200
         },
         "char_shield_regen": {
-          "number": 110
+          "number": 40
         },
         "char_energy_block": {
-          "number": 110
+          "number": 80
         },
         "char_kinetic_block": {
-          "number": 110
-        },
-        "char_energy_use": {
-          "number": 110
+          "number": 50
         }
       }
     },
@@ -1531,20 +1531,20 @@
       },
       "weight": 30.912681,
       "characteristics": {
+        "char_energy_use": {
+          "number": 15
+        },
         "char_shield_capacity": {
-          "number": 121
+          "number": 250
         },
         "char_shield_regen": {
-          "number": 121
+          "number": 50
         },
         "char_energy_block": {
-          "number": 121
+          "number": 50
         },
         "char_kinetic_block": {
-          "number": 121
-        },
-        "char_energy_use": {
-          "number": 121
+          "number": 75
         }
       }
     },
@@ -1569,20 +1569,20 @@
       },
       "weight": 34.003949,
       "characteristics": {
+        "char_energy_use": {
+          "number": 45
+        },
         "char_shield_capacity": {
-          "number": 133.1
+          "number": 375
         },
         "char_shield_regen": {
-          "number": 133.1
+          "number": 93
         },
         "char_energy_block": {
-          "number": 133.1
+          "number": 65
         },
         "char_kinetic_block": {
-          "number": 133.1
-        },
-        "char_energy_use": {
-          "number": 133.1
+          "number": 65
         }
       }
     },
@@ -1607,20 +1607,20 @@
       },
       "weight": 37.404343,
       "characteristics": {
+        "char_energy_use": {
+          "number": 45
+        },
         "char_shield_capacity": {
-          "number": 146.41
+          "number": 450
         },
         "char_shield_regen": {
-          "number": 146.41
+          "number": 93
         },
         "char_energy_block": {
-          "number": 146.41
+          "number": 85
         },
         "char_kinetic_block": {
-          "number": 146.41
-        },
-        "char_energy_use": {
-          "number": 146.41
+          "number": 55
         }
       }
     },
@@ -1645,20 +1645,20 @@
       },
       "weight": 41.144778,
       "characteristics": {
+        "char_energy_use": {
+          "number": 90
+        },
         "char_shield_capacity": {
-          "number": 161.051
+          "number": 750
         },
         "char_shield_regen": {
-          "number": 161.051
+          "number": 187
         },
         "char_energy_block": {
-          "number": 161.051
+          "number": 55
         },
         "char_kinetic_block": {
-          "number": 161.051
-        },
-        "char_energy_use": {
-          "number": 161.051
+          "number": 80
         }
       }
     },
@@ -1683,20 +1683,20 @@
       },
       "weight": 45.259256,
       "characteristics": {
+        "char_energy_use": {
+          "number": 150
+        },
         "char_shield_capacity": {
-          "number": 177.1561
+          "number": 1250
         },
         "char_shield_regen": {
-          "number": 177.1561
+          "number": 312
         },
         "char_energy_block": {
-          "number": 177.1561
+          "number": 75
         },
         "char_kinetic_block": {
-          "number": 177.1561
-        },
-        "char_energy_use": {
-          "number": 177.1561
+          "number": 75
         }
       }
     },
@@ -1721,20 +1721,20 @@
       },
       "weight": 49.785181,
       "characteristics": {
+        "char_energy_use": {
+          "number": 150
+        },
         "char_shield_capacity": {
-          "number": 194.87171
+          "number": 1250
         },
         "char_shield_regen": {
-          "number": 194.87171
+          "number": 312
         },
         "char_energy_block": {
-          "number": 194.87171
+          "number": 85
         },
         "char_kinetic_block": {
-          "number": 194.87171
-        },
-        "char_energy_use": {
-          "number": 194.87171
+          "number": 65
         }
       }
     },
@@ -1766,7 +1766,7 @@
       "weight": 54.763699,
       "characteristics": {
         "char_damage": {
-          "number": 100
+          "number": 150
         },
         "char_range": {
           "number": 100
@@ -1801,7 +1801,7 @@
       "weight": 60.240069,
       "characteristics": {
         "char_damage": {
-          "number": 110
+          "number": 280
         },
         "char_range": {
           "number": 110
@@ -1836,7 +1836,7 @@
       "weight": 66.264076,
       "characteristics": {
         "char_damage": {
-          "number": 121
+          "number": 550
         },
         "char_range": {
           "number": 121
@@ -1871,7 +1871,7 @@
       "weight": 72.890484,
       "characteristics": {
         "char_damage": {
-          "number": 133.1
+          "number": 120
         },
         "char_range": {
           "number": 133.1
@@ -1912,7 +1912,7 @@
       "weight": 80.179532,
       "characteristics": {
         "char_damage": {
-          "number": 146.41
+          "number": 175
         },
         "char_range": {
           "number": 146.41
@@ -1953,7 +1953,7 @@
       "weight": 88.197485,
       "characteristics": {
         "char_damage": {
-          "number": 161.051
+          "number": 220
         },
         "char_range": {
           "number": 161.051
@@ -1994,7 +1994,7 @@
       "weight": 97.017234,
       "characteristics": {
         "char_damage": {
-          "number": 177.1561
+          "number": 290
         },
         "char_range": {
           "number": 177.1561
@@ -2035,7 +2035,7 @@
       "weight": 106.718957,
       "characteristics": {
         "char_damage": {
-          "number": 194.87171
+          "number": 380
         },
         "char_range": {
           "number": 194.87171
@@ -2073,7 +2073,7 @@
       "weight": 117.390853,
       "characteristics": {
         "char_damage": {
-          "number": 214.358881
+          "number": 525
         },
         "char_range": {
           "number": 214.358881
@@ -2111,7 +2111,7 @@
       "weight": 129.129938,
       "characteristics": {
         "char_damage": {
-          "number": 235.794769
+          "number": 710
         },
         "char_range": {
           "number": 235.794769
@@ -2142,11 +2142,11 @@
       },
       "weight": 142.042932,
       "characteristics": {
-        "char_yield": {
-          "number": 100
-        },
         "char_energy_use": {
-          "number": 100
+          "number": 12
+        },
+        "char_yield": {
+          "number": 5
         },
         "char_scan_radius": {
           "number": 100
@@ -2177,11 +2177,11 @@
       },
       "weight": 156.247225,
       "characteristics": {
-        "char_yield": {
-          "number": 110
-        },
         "char_energy_use": {
-          "number": 110
+          "number": 12
+        },
+        "char_yield": {
+          "number": 140
         }
       }
     },
@@ -2206,11 +2206,11 @@
       },
       "weight": 171.871948,
       "characteristics": {
-        "char_yield": {
-          "number": 121
-        },
         "char_energy_use": {
-          "number": 121
+          "number": 12
+        },
+        "char_yield": {
+          "number": 10
         }
       }
     },
@@ -2235,11 +2235,11 @@
       },
       "weight": 189.059142,
       "characteristics": {
-        "char_yield": {
-          "number": 133.1
-        },
         "char_energy_use": {
-          "number": 133.1
+          "number": 72
+        },
+        "char_yield": {
+          "number": 30
         }
       }
     },
@@ -2264,11 +2264,11 @@
       },
       "weight": 207.965057,
       "characteristics": {
-        "char_yield": {
-          "number": 146.41
-        },
         "char_energy_use": {
-          "number": 146.41
+          "number": 36
+        },
+        "char_yield": {
+          "number": 15
         }
       }
     },
@@ -2294,7 +2294,10 @@
       "weight": 228.761562,
       "characteristics": {
         "char_energy_use": {
-          "number": 100
+          "number": 18
+        },
+        "char_scan_radius": {
+          "number": 15
         },
         "char_detection": {
           "number": 100
@@ -2323,7 +2326,10 @@
       "weight": 251.637719,
       "characteristics": {
         "char_energy_use": {
-          "number": 110
+          "number": 18
+        },
+        "char_scan_radius": {
+          "number": 15
         },
         "char_detection": {
           "number": 110
@@ -2352,7 +2358,10 @@
       "weight": 276.80149,
       "characteristics": {
         "char_energy_use": {
-          "number": 121
+          "number": 6
+        },
+        "char_scan_radius": {
+          "number": 5
         },
         "char_dig_speed": {
           "number": 121
@@ -2381,7 +2390,10 @@
       "weight": 304.48164,
       "characteristics": {
         "char_energy_use": {
-          "number": 133.1
+          "number": 18
+        },
+        "char_scan_radius": {
+          "number": 15
         }
       }
     },
@@ -2407,7 +2419,10 @@
       "weight": 334.929803,
       "characteristics": {
         "char_energy_use": {
-          "number": 146.41
+          "number": 18
+        },
+        "char_scan_radius": {
+          "number": 15
         }
       }
     },
@@ -2432,10 +2447,10 @@
       },
       "weight": 368.422784,
       "characteristics": {
-        "char_shield_restore": {
+        "char_energy_use": {
           "number": 100
         },
-        "char_energy_use": {
+        "char_shield_restore": {
           "number": 100
         }
       }
@@ -2464,14 +2479,14 @@
         "char_fuel_use": {
           "number": 110
         },
+        "char_energy_use": {
+          "number": 0
+        },
         "char_speed": {
           "number": 110
         },
         "char_crew": {
           "number": 110
-        },
-        "char_energy_use": {
-          "number": 0
         }
       }
     },
@@ -2496,10 +2511,10 @@
       },
       "weight": 445.791568,
       "characteristics": {
-        "char_collect_speed": {
+        "char_energy_use": {
           "number": 121
         },
-        "char_energy_use": {
+        "char_collect_speed": {
           "number": 121
         }
       }
@@ -2525,11 +2540,11 @@
       },
       "weight": 490.370725,
       "characteristics": {
-        "char_cargo": {
-          "number": 133.1
-        },
         "char_energy_use": {
-          "number": 133.1
+          "number": 0
+        },
+        "char_cargo": {
+          "number": 6750
         }
       }
     },
@@ -2554,11 +2569,11 @@
       },
       "weight": 539.407798,
       "characteristics": {
-        "char_cargo": {
-          "number": 146.41
-        },
         "char_energy_use": {
-          "number": 146.41
+          "number": 0
+        },
+        "char_cargo": {
+          "number": 20250
         }
       }
     },
@@ -2583,13 +2598,13 @@
       },
       "weight": 593.348578,
       "characteristics": {
-        "char_missiles": {
+        "char_energy_use": {
           "number": 161.051
         },
         "char_range": {
           "number": 161.051
         },
-        "char_energy_use": {
+        "char_missiles": {
           "number": 161.051
         }
       }
@@ -2615,14 +2630,14 @@
       },
       "weight": 652.683435,
       "characteristics": {
-        "char_transfer_speed": {
-          "number": 177.1561
-        },
-        "char_transfer_volume": {
-          "number": 177.1561
-        },
         "char_energy_use": {
           "number": 177.1561
+        },
+        "char_transfer_speed": {
+          "number": 2000
+        },
+        "char_transfer_volume": {
+          "number": 2000
         }
       }
     },
@@ -2647,14 +2662,14 @@
       },
       "weight": 717.951779,
       "characteristics": {
+        "char_energy_use": {
+          "number": 0
+        },
         "char_deploy_time": {
-          "number": 194.87171
+          "number": 129600
         },
         "char_colonists": {
-          "number": 194.87171
-        },
-        "char_energy_use": {
-          "number": 194.87171
+          "number": 150
         }
       }
     },
@@ -2679,10 +2694,10 @@
       },
       "weight": 789.746957,
       "characteristics": {
-        "char_population": {
+        "char_energy_use": {
           "number": 100
         },
-        "char_energy_use": {
+        "char_population": {
           "number": 100
         }
       }
@@ -2708,10 +2723,13 @@
       },
       "weight": 868.721652,
       "characteristics": {
-        "char_storage": {
-          "number": 110
-        },
         "char_energy_use": {
+          "number": 0
+        },
+        "char_cargo": {
+          "number": 20250
+        },
+        "char_storage": {
           "number": 110
         }
       }
@@ -2737,10 +2755,10 @@
       },
       "weight": 955.593818,
       "characteristics": {
-        "char_repair_speed": {
+        "char_energy_use": {
           "number": 121
         },
-        "char_energy_use": {
+        "char_repair_speed": {
           "number": 121
         }
       }
@@ -2766,10 +2784,10 @@
       },
       "weight": 1051.1532,
       "characteristics": {
-        "char_training_speed": {
+        "char_energy_use": {
           "number": 133.1
         },
-        "char_energy_use": {
+        "char_training_speed": {
           "number": 133.1
         }
       }
@@ -2795,6 +2813,9 @@
       },
       "weight": 1156.268519,
       "characteristics": {
+        "char_energy_use": {
+          "number": 146.41
+        },
         "char_trade_lots": {
           "number": 100,
           "levels": {
@@ -2811,9 +2832,6 @@
             "11": 259.374246,
             "12": 285.311671
           }
-        },
-        "char_energy_use": {
-          "number": 146.41
         }
       }
     },
@@ -2864,10 +2882,10 @@
       },
       "weight": 1399.084909,
       "characteristics": {
-        "char_yield": {
+        "char_energy_use": {
           "number": 177.1561
         },
-        "char_energy_use": {
+        "char_yield": {
           "number": 177.1561
         }
       }
@@ -2893,10 +2911,10 @@
       },
       "weight": 1538.993399,
       "characteristics": {
-        "char_yield": {
+        "char_energy_use": {
           "number": 194.87171
         },
-        "char_energy_use": {
+        "char_yield": {
           "number": 194.87171
         }
       }
@@ -2922,10 +2940,10 @@
       },
       "weight": 1692.892739,
       "characteristics": {
-        "char_jump_prep": {
+        "char_energy_use": {
           "number": 214.358881
         },
-        "char_energy_use": {
+        "char_jump_prep": {
           "number": 214.358881
         }
       }
@@ -2960,6 +2978,9 @@
       },
       "weight": 1862.182013,
       "characteristics": {
+        "char_energy_use": {
+          "number": 0
+        },
         "char_inhabitants": {
           "number": 100
         }
@@ -2995,6 +3016,9 @@
       },
       "weight": 2048.400215,
       "characteristics": {
+        "char_energy_use": {
+          "number": 0
+        },
         "char_inhabitants": {
           "number": 100
         }
@@ -3030,6 +3054,9 @@
       },
       "weight": 2253.240236,
       "characteristics": {
+        "char_energy_use": {
+          "number": 0
+        },
         "char_inhabitants": {
           "number": 100
         }
@@ -3065,6 +3092,9 @@
       },
       "weight": 2478.56426,
       "characteristics": {
+        "char_energy_use": {
+          "number": 0
+        },
         "char_inhabitants": {
           "number": 100
         }
@@ -3090,14 +3120,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 50
+        },
         "char_hull_size": {
           "number": 100
         },
         "char_hull_capacity": {
           "number": 100
         },
-        "char_integrity": {
-          "number": 100
+        "char_hull_slots": {
+          "number": 8
         }
       }
     },
@@ -3121,14 +3154,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 60
+        },
         "char_hull_size": {
           "number": 110
         },
         "char_hull_capacity": {
           "number": 110
         },
-        "char_integrity": {
-          "number": 110
+        "char_hull_slots": {
+          "number": 10
         }
       }
     },
@@ -3152,14 +3188,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 50
+        },
         "char_hull_size": {
           "number": 121
         },
         "char_hull_capacity": {
           "number": 121
         },
-        "char_integrity": {
-          "number": 121
+        "char_hull_slots": {
+          "number": 10
         }
       }
     },
@@ -3183,14 +3222,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 60
+        },
         "char_hull_size": {
           "number": 133.1
         },
         "char_hull_capacity": {
           "number": 133.1
         },
-        "char_integrity": {
-          "number": 133.1
+        "char_hull_slots": {
+          "number": 12
         }
       }
     },
@@ -3214,13 +3256,13 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 150
+        },
         "char_hull_size": {
           "number": 100
         },
         "char_hull_capacity": {
-          "number": 100
-        },
-        "char_integrity": {
           "number": 100
         }
       }
@@ -3245,13 +3287,13 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 150
+        },
         "char_hull_size": {
           "number": 110
         },
         "char_hull_capacity": {
-          "number": 110
-        },
-        "char_integrity": {
           "number": 110
         }
       }
@@ -3276,13 +3318,13 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 150
+        },
         "char_hull_size": {
           "number": 121
         },
         "char_hull_capacity": {
-          "number": 121
-        },
-        "char_integrity": {
           "number": 121
         }
       }
@@ -3307,14 +3349,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 150
+        },
         "char_hull_size": {
           "number": 100
         },
         "char_hull_capacity": {
           "number": 100
         },
-        "char_integrity": {
-          "number": 100
+        "char_hull_slots": {
+          "number": 16
         }
       }
     },
@@ -3338,14 +3383,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 150
+        },
         "char_hull_size": {
           "number": 110
         },
         "char_hull_capacity": {
           "number": 110
         },
-        "char_integrity": {
-          "number": 110
+        "char_hull_slots": {
+          "number": 18
         }
       }
     },
@@ -3369,14 +3417,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 150
+        },
         "char_hull_size": {
           "number": 121
         },
         "char_hull_capacity": {
           "number": 121
         },
-        "char_integrity": {
-          "number": 121
+        "char_hull_slots": {
+          "number": 22
         }
       }
     },
@@ -3400,14 +3451,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 150
+        },
         "char_hull_size": {
           "number": 133.1
         },
         "char_hull_capacity": {
           "number": 133.1
         },
-        "char_integrity": {
-          "number": 133.1
+        "char_hull_slots": {
+          "number": 24
         }
       }
     },
@@ -3431,14 +3485,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 150
+        },
         "char_hull_size": {
           "number": 146.41
         },
         "char_hull_capacity": {
           "number": 146.41
         },
-        "char_integrity": {
-          "number": 146.41
+        "char_hull_slots": {
+          "number": 26
         }
       }
     },
@@ -3462,14 +3519,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 360
+        },
         "char_hull_size": {
           "number": 161.051
         },
         "char_hull_capacity": {
           "number": 161.051
         },
-        "char_integrity": {
-          "number": 161.051
+        "char_hull_slots": {
+          "number": 30
         }
       }
     },
@@ -3493,14 +3553,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 300
+        },
         "char_hull_size": {
           "number": 100
         },
         "char_hull_capacity": {
           "number": 100
         },
-        "char_integrity": {
-          "number": 100
+        "char_hull_slots": {
+          "number": 32
         },
         "char_hull_race_slot": {
           "number": 1
@@ -3527,14 +3590,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 300
+        },
         "char_hull_size": {
           "number": 110
         },
         "char_hull_capacity": {
           "number": 110
         },
-        "char_integrity": {
-          "number": 110
+        "char_hull_slots": {
+          "number": 34
         },
         "char_hull_race_slot": {
           "number": 1
@@ -3561,14 +3627,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 600
+        },
         "char_hull_size": {
           "number": 121
         },
         "char_hull_capacity": {
           "number": 121
         },
-        "char_integrity": {
-          "number": 121
+        "char_hull_slots": {
+          "number": 38
         },
         "char_hull_race_slot": {
           "number": 1
@@ -3595,14 +3664,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 500
+        },
         "char_hull_size": {
           "number": 133.1
         },
         "char_hull_capacity": {
           "number": 133.1
         },
-        "char_integrity": {
-          "number": 133.1
+        "char_hull_slots": {
+          "number": 40
         },
         "char_hull_race_slot": {
           "number": 1
@@ -3629,14 +3701,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 500
+        },
         "char_hull_size": {
           "number": 100
         },
         "char_hull_capacity": {
           "number": 100
         },
-        "char_integrity": {
-          "number": 100
+        "char_hull_slots": {
+          "number": 44
         },
         "char_hull_race_slot": {
           "number": 1
@@ -3663,14 +3738,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 600
+        },
         "char_hull_size": {
           "number": 110
         },
         "char_hull_capacity": {
           "number": 110
         },
-        "char_integrity": {
-          "number": 110
+        "char_hull_slots": {
+          "number": 47
         },
         "char_hull_race_slot": {
           "number": 1
@@ -3697,14 +3775,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 600
+        },
         "char_hull_size": {
           "number": 121
         },
         "char_hull_capacity": {
           "number": 121
         },
-        "char_integrity": {
-          "number": 121
+        "char_hull_slots": {
+          "number": 50
         },
         "char_hull_race_slot": {
           "number": 1
@@ -3731,14 +3812,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 50
+        },
         "char_hull_size": {
           "number": 100
         },
         "char_hull_capacity": {
           "number": 100
         },
-        "char_integrity": {
-          "number": 100
+        "char_hull_slots": {
+          "number": 8
         }
       }
     },
@@ -3762,14 +3846,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 50
+        },
         "char_hull_size": {
           "number": 110
         },
         "char_hull_capacity": {
           "number": 110
         },
-        "char_integrity": {
-          "number": 110
+        "char_hull_slots": {
+          "number": 16
         }
       }
     },
@@ -3793,14 +3880,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 300
+        },
         "char_hull_size": {
-          "number": 121
+          "number": 133.1
         },
         "char_hull_capacity": {
-          "number": 121
+          "number": 133.1
         },
-        "char_integrity": {
-          "number": 121
+        "char_hull_slots": {
+          "number": 24
         }
       }
     },
@@ -3824,14 +3914,17 @@
         }
       },
       "characteristics": {
+        "char_integrity": {
+          "number": 180
+        },
         "char_hull_size": {
-          "number": 133.1
+          "number": 121
         },
         "char_hull_capacity": {
-          "number": 133.1
+          "number": 121
         },
-        "char_integrity": {
-          "number": 133.1
+        "char_hull_slots": {
+          "number": 20
         }
       }
     },
@@ -3952,17 +4045,17 @@
       },
       "weight": 9.849733,
       "characteristics": {
+        "char_energy_use": {
+          "number": 15
+        },
         "char_damage": {
-          "number": 146.41
+          "number": 41
         },
         "char_rate": {
-          "number": 146.41
+          "number": 2
         },
         "char_range": {
-          "number": 146.41
-        },
-        "char_energy_use": {
-          "number": 146.41
+          "number": 100
         },
         "char_magazine": {
           "number": 146.41
@@ -3991,15 +4084,15 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 200
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_9",
-          "part": null,
-          "amount": 40
-        },
-        {
-          "resource": "resource_12",
           "part": null,
           "amount": 40
         },
@@ -4011,7 +4104,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 5
         }
       ],
       "requirements": [],
@@ -4035,9 +4128,14 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 240
+          "amount": 25
         },
         {
           "resource": "resource_4",
@@ -4046,11 +4144,6 @@
         },
         {
           "resource": "resource_9",
-          "part": null,
-          "amount": 48
-        },
-        {
-          "resource": "resource_12",
           "part": null,
           "amount": 48
         },
@@ -4067,7 +4160,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 5
         }
       ],
       "requirements": [
@@ -4097,12 +4190,27 @@
       },
       "ingredients": [
         {
-          "resource": "resource_10",
+          "resource": "resource_1",
           "part": null,
-          "amount": 58
+          "amount": 150
         },
         {
-          "resource": "resource_14",
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
+          "resource": "resource_10",
           "part": null,
           "amount": 58
         },
@@ -4119,7 +4227,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 15
         }
       ],
       "requirements": [
@@ -4149,9 +4257,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 350
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_22",
@@ -4166,7 +4289,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 15
         }
       ],
       "requirements": [
@@ -4196,6 +4319,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
           "resource": "resource_17",
           "part": null,
           "amount": 41
@@ -4218,7 +4361,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 30
         }
       ],
       "requirements": [
@@ -4248,9 +4391,24 @@
       },
       "ingredients": [
         {
-          "resource": "resource_15",
+          "resource": "resource_1",
+          "part": null,
+          "amount": 500
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 250
+        },
+        {
+          "resource": "resource_3",
           "part": null,
           "amount": 100
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -4265,7 +4423,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 250
+          "amount": 50
         }
       ],
       "requirements": [
@@ -4297,7 +4455,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 200
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_16",
@@ -4312,7 +4475,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 5
         }
       ],
       "requirements": [],
@@ -4336,6 +4499,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_11",
           "part": null,
           "amount": 48
@@ -4353,7 +4526,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 5
         }
       ],
       "requirements": [
@@ -4383,9 +4556,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
           "resource": "resource_4",
           "part": null,
-          "amount": 290
+          "amount": 15
         },
         {
           "resource": "resource_13",
@@ -4405,7 +4593,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 15
         }
       ],
       "requirements": [
@@ -4435,6 +4623,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_13",
           "part": null,
           "amount": 69
@@ -4452,7 +4660,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 15
         }
       ],
       "requirements": [
@@ -4482,6 +4690,31 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_15",
           "part": null,
           "amount": 83
@@ -4499,7 +4732,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 30
         }
       ],
       "requirements": [
@@ -4529,9 +4762,29 @@
       },
       "ingredients": [
         {
-          "resource": "resource_3",
+          "resource": "resource_1",
           "part": null,
           "amount": 500
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 250
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_15",
@@ -4551,7 +4804,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 250
+          "amount": 50
         }
       ],
       "requirements": [
@@ -4581,6 +4834,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_9",
           "part": null,
           "amount": 40
@@ -4598,7 +4861,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 5
         }
       ],
       "requirements": [
@@ -4628,6 +4891,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_9",
           "part": null,
           "amount": 48
@@ -4650,7 +4923,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 5
         }
       ],
       "requirements": [
@@ -4680,6 +4953,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_6",
           "part": null,
           "amount": 290
@@ -4697,7 +4980,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 5
         }
       ],
       "requirements": [
@@ -4727,6 +5010,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_10",
           "part": null,
           "amount": 69
@@ -4744,7 +5047,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 15
         }
       ],
       "requirements": [
@@ -4774,6 +5077,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_11",
           "part": null,
           "amount": 83
@@ -4791,7 +5114,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 15
         }
       ],
       "requirements": [
@@ -4821,6 +5144,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_6",
           "part": null,
           "amount": 500
@@ -4838,7 +5181,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 250
+          "amount": 15
         }
       ],
       "requirements": [
@@ -4868,6 +5211,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
           "resource": "resource_6",
           "part": null,
           "amount": 600
@@ -4878,6 +5241,11 @@
           "amount": 120
         },
         {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_25",
           "part": null,
           "amount": 240
@@ -4885,7 +5253,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 300
+          "amount": 30
         }
       ],
       "requirements": [
@@ -4915,9 +5283,34 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 500
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 250
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 50
+        },
+        {
           "resource": "resource_11",
           "part": null,
           "amount": 140
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_23",
@@ -4932,7 +5325,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 360
+          "amount": 50
         }
       ],
       "requirements": [
@@ -4964,12 +5357,27 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 200
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 15
         }
       ],
       "requirements": [
@@ -5001,12 +5409,27 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 240
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 240
+          "amount": 30
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_22",
@@ -5016,7 +5439,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 30
         }
       ],
       "requirements": [
@@ -5046,14 +5469,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 290
+          "amount": 75
         },
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 290
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_11",
@@ -5068,7 +5501,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 15
         }
       ],
       "requirements": [
@@ -5098,6 +5531,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_4",
           "part": null,
           "amount": 350
@@ -5115,7 +5558,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 5
         }
       ],
       "requirements": [
@@ -5145,6 +5588,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_6",
           "part": null,
           "amount": 410
@@ -5162,7 +5625,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 15
         }
       ],
       "requirements": [
@@ -5192,9 +5655,34 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
           "resource": "resource_6",
           "part": null,
           "amount": 500
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_22",
@@ -5214,7 +5702,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 250
+          "amount": 30
         }
       ],
       "requirements": [
@@ -5246,12 +5734,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 200
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 5
         }
       ],
       "requirements": [
@@ -5283,17 +5776,17 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 240
+          "amount": 50
         },
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 240
+          "amount": 25
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 5
         }
       ],
       "requirements": [
@@ -5325,7 +5818,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 290
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_4",
@@ -5335,7 +5833,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 5
         }
       ],
       "requirements": [
@@ -5365,9 +5863,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 350
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_23",
@@ -5377,7 +5890,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 15
         }
       ],
       "requirements": [
@@ -5407,9 +5920,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 410
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_23",
@@ -5419,7 +5947,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 15
         }
       ],
       "requirements": [
@@ -5449,9 +5977,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
           "resource": "resource_3",
           "part": null,
-          "amount": 500
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_23",
@@ -5461,7 +6004,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 250
+          "amount": 15
         }
       ],
       "requirements": [
@@ -5491,6 +6034,31 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_23",
           "part": null,
           "amount": 240
@@ -5503,7 +6071,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 300
+          "amount": 30
         }
       ],
       "requirements": [
@@ -5533,6 +6101,31 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_22",
           "part": null,
           "amount": 290
@@ -5550,7 +6143,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 360
+          "amount": 30
         }
       ],
       "requirements": [
@@ -5580,6 +6173,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_11",
           "part": null,
           "amount": 40
@@ -5592,7 +6195,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 5
         }
       ],
       "requirements": [
@@ -5622,6 +6225,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_8",
           "part": null,
           "amount": 48
@@ -5634,7 +6247,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 5
         }
       ],
       "requirements": [
@@ -5664,6 +6277,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_4",
           "part": null,
           "amount": 290
@@ -5681,7 +6304,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 5
         }
       ],
       "requirements": [
@@ -5711,6 +6334,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_9",
           "part": null,
           "amount": 69
@@ -5728,7 +6371,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 15
         }
       ],
       "requirements": [
@@ -5758,6 +6401,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_10",
           "part": null,
           "amount": 83
@@ -5770,7 +6433,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 15
         }
       ],
       "requirements": [
@@ -5800,6 +6463,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
           "resource": "resource_9",
           "part": null,
           "amount": 100
@@ -5810,9 +6493,14 @@
           "amount": 100
         },
         {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_27",
           "part": null,
-          "amount": 250
+          "amount": 30
         }
       ],
       "requirements": [
@@ -5842,9 +6530,34 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 500
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 250
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 50
+        },
+        {
           "resource": "resource_11",
           "part": null,
           "amount": 120
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_22",
@@ -5859,7 +6572,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 300
+          "amount": 50
         }
       ],
       "requirements": [
@@ -5889,9 +6602,34 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 500
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 250
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 50
+        },
+        {
           "resource": "resource_10",
           "part": null,
           "amount": 140
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_15",
@@ -5906,7 +6644,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 360
+          "amount": 50
         }
       ],
       "requirements": [
@@ -5938,12 +6676,27 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 200
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 15
         }
       ],
       "requirements": [
@@ -5975,17 +6728,27 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 240
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 17
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 19
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 240
+          "amount": 95
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 56
         }
       ],
       "requirements": [
@@ -6015,9 +6778,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 290
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_10",
@@ -6059,7 +6837,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 350
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_22",
@@ -6069,7 +6852,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 74
         }
       ],
       "requirements": [
@@ -6099,6 +6882,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_6",
           "part": null,
           "amount": 410
@@ -6111,7 +6904,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 89
         }
       ],
       "requirements": [
@@ -6141,9 +6934,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 500
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_22",
@@ -6158,7 +6966,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 250
+          "amount": 115
         }
       ],
       "requirements": [
@@ -6188,6 +6996,31 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_22",
           "part": null,
           "amount": 240
@@ -6205,7 +7038,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 300
+          "amount": 130
         }
       ],
       "requirements": [
@@ -6235,9 +7068,34 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
           "resource": "resource_13",
           "part": null,
           "amount": 140
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_23",
@@ -6247,7 +7105,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 360
+          "amount": 130
         }
       ],
       "requirements": [
@@ -6277,9 +7135,34 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
           "resource": "resource_9",
           "part": null,
           "amount": 170
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_23",
@@ -6289,7 +7172,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 430
+          "amount": 130
         }
       ],
       "requirements": [
@@ -6319,9 +7202,29 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 500
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 1000
+          "amount": 250
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_16",
@@ -6331,7 +7234,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 520
+          "amount": 150
         }
       ],
       "requirements": [
@@ -6361,6 +7264,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_8",
           "part": null,
           "amount": 40
@@ -6373,7 +7286,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 5
         }
       ],
       "requirements": [],
@@ -6399,7 +7312,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 240
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_8",
@@ -6414,7 +7332,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 5
         }
       ],
       "requirements": [],
@@ -6438,6 +7356,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_8",
           "part": null,
           "amount": 58
@@ -6450,7 +7378,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 5
         }
       ],
       "requirements": [
@@ -6480,9 +7408,34 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
           "resource": "resource_8",
           "part": null,
           "amount": 69
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_22",
@@ -6497,7 +7450,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 30
         }
       ],
       "requirements": [
@@ -6527,6 +7480,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_9",
           "part": null,
           "amount": 83
@@ -6544,7 +7517,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 15
         }
       ],
       "requirements": [
@@ -6574,6 +7547,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_8",
           "part": null,
           "amount": 40
@@ -6601,7 +7594,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 15
         }
       ],
       "requirements": [
@@ -6631,6 +7624,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_8",
           "part": null,
           "amount": 48
@@ -6653,7 +7666,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 15
         }
       ],
       "requirements": [
@@ -6683,6 +7696,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_11",
           "part": null,
           "amount": 58
@@ -6695,7 +7718,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 5
         }
       ],
       "requirements": [
@@ -6725,6 +7748,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_6",
           "part": null,
           "amount": 350
@@ -6747,7 +7790,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 15
         }
       ],
       "requirements": [
@@ -6777,6 +7820,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_6",
           "part": null,
           "amount": 410
@@ -6799,7 +7862,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 15
         }
       ],
       "requirements": [
@@ -6829,6 +7892,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_8",
           "part": null,
           "amount": 40
@@ -6841,7 +7924,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 15
         }
       ],
       "requirements": [
@@ -6871,6 +7954,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 500
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 250
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 50
+        },
+        {
           "resource": "resource_6",
           "part": null,
           "amount": 240
@@ -6879,6 +7982,11 @@
           "resource": "resource_8",
           "part": null,
           "amount": 48
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_21",
@@ -6893,7 +8001,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 50
         }
       ],
       "requirements": [
@@ -6925,12 +8033,27 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 290
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 15
         }
       ],
       "requirements": [
@@ -6962,7 +8085,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 350
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
         },
         {
           "resource": "resource_23",
@@ -6972,7 +8100,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 5
         }
       ],
       "requirements": [],
@@ -6996,9 +8124,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 410
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_23",
@@ -7008,7 +8151,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 15
         }
       ],
       "requirements": [
@@ -7038,9 +8181,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
           "resource": "resource_4",
           "part": null,
-          "amount": 500
+          "amount": 15
         },
         {
           "resource": "resource_8",
@@ -7060,7 +8218,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 250
+          "amount": 15
         }
       ],
       "requirements": [
@@ -7090,6 +8248,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_8",
           "part": null,
           "amount": 120
@@ -7107,7 +8285,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 300
+          "amount": 15
         }
       ],
       "requirements": [
@@ -7125,7 +8303,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 1100,
+      "duration_seconds": 21600,
       "sort_order": 70,
       "name": {
         "uk": "Колоніальний модуль",
@@ -7137,19 +8315,74 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 8000
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 8000
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 8000
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 8000
+        },
+        {
+          "resource": "resource_5",
+          "part": null,
+          "amount": 8000
+        },
+        {
+          "resource": "resource_6",
+          "part": null,
+          "amount": 8000
+        },
+        {
+          "resource": "resource_7",
+          "part": null,
+          "amount": 8000
+        },
+        {
+          "resource": "resource_8",
+          "part": null,
+          "amount": 8000
+        },
+        {
+          "resource": "resource_9",
+          "part": null,
+          "amount": 8000
+        },
+        {
+          "resource": "resource_10",
+          "part": null,
+          "amount": 8000
+        },
+        {
+          "resource": "resource_11",
+          "part": null,
+          "amount": 8000
+        },
+        {
           "resource": "resource_22",
           "part": null,
-          "amount": 290
+          "amount": 3000
         },
         {
           "resource": "resource_23",
           "part": null,
-          "amount": 290
+          "amount": 3000
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 360
+          "amount": 10000
         }
       ],
       "requirements": [
@@ -7179,6 +8412,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_22",
           "part": null,
           "amount": 80
@@ -7191,7 +8444,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 15
         }
       ],
       "requirements": [
@@ -7223,7 +8476,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 240
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_23",
@@ -7233,7 +8501,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 15
         }
       ],
       "requirements": [
@@ -7265,7 +8533,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 290
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_22",
@@ -7280,7 +8563,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 15
         }
       ],
       "requirements": [
@@ -7310,6 +8593,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_22",
           "part": null,
           "amount": 140
@@ -7317,7 +8620,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 15
         }
       ],
       "requirements": [
@@ -7347,6 +8650,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 75
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_21",
           "part": null,
           "amount": 170
@@ -7359,7 +8682,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 15
         }
       ],
       "requirements": [
@@ -7389,14 +8712,34 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
           "resource": "resource_4",
           "part": null,
-          "amount": 500
+          "amount": 30
         },
         {
           "resource": "resource_13",
           "part": null,
           "amount": 100
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_23",
@@ -7406,7 +8749,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 250
+          "amount": 30
         }
       ],
       "requirements": [
@@ -7436,9 +8779,29 @@
       },
       "ingredients": [
         {
-          "resource": "resource_12",
+          "resource": "resource_1",
           "part": null,
-          "amount": 120
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
         },
         {
           "resource": "resource_23",
@@ -7448,7 +8811,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 300
+          "amount": 30
         }
       ],
       "requirements": [
@@ -7478,6 +8841,31 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 15
+        },
+        {
           "resource": "resource_22",
           "part": null,
           "amount": 290
@@ -7490,7 +8878,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 360
+          "amount": 30
         }
       ],
       "requirements": [
@@ -7520,6 +8908,31 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 500
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 250
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_15",
           "part": null,
           "amount": 170
@@ -7542,7 +8955,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 430
+          "amount": 50
         }
       ],
       "requirements": [
@@ -7560,7 +8973,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 1300,
+      "duration_seconds": 925,
       "sort_order": 80,
       "name": {
         "uk": "Кріокапсула (Террани)",
@@ -7572,19 +8985,29 @@
       },
       "ingredients": [
         {
-          "resource": "resource_22",
-          "part": null,
-          "amount": 340
-        },
-        {
           "resource": "resource_23",
           "part": null,
-          "amount": 340
+          "amount": 30
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 430
+          "amount": 246
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 89
+        },
+        {
+          "resource": "resource_30",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_26",
+          "part": null,
+          "amount": 33
         }
       ],
       "requirements": [
@@ -7602,7 +9025,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 1500,
+      "duration_seconds": 925,
       "sort_order": 81,
       "name": {
         "uk": "Кріокапсула (Літаріони)",
@@ -7614,19 +9037,29 @@
       },
       "ingredients": [
         {
-          "resource": "resource_22",
-          "part": null,
-          "amount": 410
-        },
-        {
           "resource": "resource_23",
           "part": null,
-          "amount": 410
+          "amount": 30
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 520
+          "amount": 246
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 89
+        },
+        {
+          "resource": "resource_30",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_26",
+          "part": null,
+          "amount": 33
         }
       ],
       "requirements": [
@@ -7644,7 +9077,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 1900,
+      "duration_seconds": 925,
       "sort_order": 82,
       "name": {
         "uk": "Кріокапсула (Драккури)",
@@ -7656,19 +9089,29 @@
       },
       "ingredients": [
         {
-          "resource": "resource_22",
-          "part": null,
-          "amount": 500
-        },
-        {
           "resource": "resource_23",
           "part": null,
-          "amount": 500
+          "amount": 30
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 620
+          "amount": 246
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 89
+        },
+        {
+          "resource": "resource_30",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_26",
+          "part": null,
+          "amount": 33
         }
       ],
       "requirements": [
@@ -7686,7 +9129,7 @@
       "resource": null,
       "factory": "building_49",
       "output_quantity": 1,
-      "duration_seconds": 2200,
+      "duration_seconds": 925,
       "sort_order": 83,
       "name": {
         "uk": "Кріокапсула (Вейрани)",
@@ -7698,19 +9141,29 @@
       },
       "ingredients": [
         {
-          "resource": "resource_22",
-          "part": null,
-          "amount": 590
-        },
-        {
           "resource": "resource_23",
           "part": null,
-          "amount": 590
+          "amount": 30
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 740
+          "amount": 246
+        },
+        {
+          "resource": "resource_22",
+          "part": null,
+          "amount": 89
+        },
+        {
+          "resource": "resource_30",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_26",
+          "part": null,
+          "amount": 33
         }
       ],
       "requirements": [
@@ -7742,7 +9195,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 200
+          "amount": 100
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -7752,7 +9210,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 10
         }
       ],
       "requirements": [
@@ -7784,12 +9242,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 240
+          "amount": 100
         },
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 240
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -7799,7 +9257,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 10
         }
       ],
       "requirements": [
@@ -7831,12 +9289,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 290
+          "amount": 100
         },
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 290
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -7846,7 +9304,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 10
         }
       ],
       "requirements": [
@@ -7876,9 +9334,14 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 100
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 350
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -7893,7 +9356,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 10
         }
       ],
       "requirements": [
@@ -7925,12 +9388,27 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 200
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 30
         }
       ],
       "requirements": [
@@ -7962,7 +9440,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 240
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
         },
         {
           "resource": "resource_22",
@@ -7972,7 +9465,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 30
         }
       ],
       "requirements": [
@@ -8004,17 +9497,27 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 290
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 290
+          "amount": 30
         },
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 30
         }
       ],
       "requirements": [
@@ -8046,12 +9549,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 200
+          "amount": 300
         },
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 200
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
         },
         {
           "resource": "resource_22",
@@ -8061,7 +9574,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 30
         }
       ],
       "requirements": [
@@ -8093,17 +9606,22 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 240
+          "amount": 300
         },
         {
           "resource": "resource_2",
           "part": null,
-          "amount": 240
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 240
+          "amount": 30
         },
         {
           "resource": "resource_22",
@@ -8113,7 +9631,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 30
         }
       ],
       "requirements": [
@@ -8143,9 +9661,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 290
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
         },
         {
           "resource": "resource_22",
@@ -8160,7 +9693,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 30
         }
       ],
       "requirements": [
@@ -8190,9 +9723,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 350
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
         },
         {
           "resource": "resource_22",
@@ -8207,7 +9755,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 30
         }
       ],
       "requirements": [
@@ -8237,14 +9785,24 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 410
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
         },
         {
           "resource": "resource_4",
           "part": null,
-          "amount": 410
+          "amount": 30
         },
         {
           "resource": "resource_22",
@@ -8259,7 +9817,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 210
+          "amount": 30
         }
       ],
       "requirements": [
@@ -8289,14 +9847,29 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 600
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 500
+          "amount": 300
         },
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 500
+          "amount": 120
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 30
         },
         {
           "resource": "resource_22",
@@ -8311,7 +9884,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 250
+          "amount": 60
         }
       ],
       "requirements": [
@@ -8341,14 +9914,29 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 600
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 200
+          "amount": 300
         },
         {
           "resource": "resource_3",
           "part": null,
-          "amount": 200
+          "amount": 120
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 30
         },
         {
           "resource": "resource_23",
@@ -8358,7 +9946,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 60
         }
       ],
       "requirements": [
@@ -8388,9 +9976,29 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 600
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 300
+        },
+        {
           "resource": "resource_3",
           "part": null,
-          "amount": 240
+          "amount": 120
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 30
         },
         {
           "resource": "resource_22",
@@ -8410,7 +10018,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 60
         }
       ],
       "requirements": [
@@ -8440,9 +10048,29 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 1000
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 500
+        },
+        {
           "resource": "resource_3",
           "part": null,
-          "amount": 290
+          "amount": 200
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -8462,7 +10090,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 100
         }
       ],
       "requirements": [
@@ -8492,9 +10120,29 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 1000
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 500
+        },
+        {
           "resource": "resource_3",
           "part": null,
-          "amount": 350
+          "amount": 200
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -8514,7 +10162,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 100
         }
       ],
       "requirements": [
@@ -8544,9 +10192,29 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 1000
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 500
+        },
+        {
           "resource": "resource_3",
           "part": null,
           "amount": 200
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -8596,9 +10264,29 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 1000
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 500
+        },
+        {
           "resource": "resource_3",
           "part": null,
-          "amount": 240
+          "amount": 200
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -8618,7 +10306,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 100
         }
       ],
       "requirements": [
@@ -8648,9 +10336,29 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 1000
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 500
+        },
+        {
           "resource": "resource_3",
           "part": null,
-          "amount": 290
+          "amount": 200
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 100
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -8670,7 +10378,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 100
         }
       ],
       "requirements": [
@@ -8702,7 +10410,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 200
+          "amount": 100
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -8712,7 +10425,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 100
+          "amount": 10
         }
       ],
       "requirements": [],
@@ -8738,7 +10451,12 @@
         {
           "resource": "resource_1",
           "part": null,
-          "amount": 240
+          "amount": 100
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 50
         },
         {
           "resource": "resource_22",
@@ -8753,7 +10471,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 120
+          "amount": 10
         }
       ],
       "requirements": [
@@ -8783,9 +10501,29 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 600
+        },
+        {
           "resource": "resource_2",
           "part": null,
-          "amount": 290
+          "amount": 300
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 120
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_14",
+          "part": null,
+          "amount": 30
         },
         {
           "resource": "resource_22",
@@ -8800,7 +10538,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 140
+          "amount": 60
         }
       ],
       "requirements": [
@@ -8830,6 +10568,26 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 300
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 150
+        },
+        {
+          "resource": "resource_3",
+          "part": null,
+          "amount": 60
+        },
+        {
+          "resource": "resource_4",
+          "part": null,
+          "amount": 30
+        },
+        {
           "resource": "resource_22",
           "part": null,
           "amount": 140
@@ -8847,7 +10605,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 30
         }
       ],
       "requirements": [
@@ -9306,6 +11064,16 @@
       },
       "ingredients": [
         {
+          "resource": "resource_1",
+          "part": null,
+          "amount": 50
+        },
+        {
+          "resource": "resource_2",
+          "part": null,
+          "amount": 25
+        },
+        {
           "resource": "resource_4",
           "part": null,
           "amount": 350
@@ -9323,7 +11091,7 @@
         {
           "resource": "resource_27",
           "part": null,
-          "amount": 170
+          "amount": 5
         }
       ],
       "requirements": [
@@ -10386,6 +12154,18 @@
       "characteristic": "char_hull_race_slot",
       "sort_order": 5,
       "is_required": false
+    },
+    {
+      "group": "pg_9",
+      "characteristic": "char_scan_radius",
+      "sort_order": 4,
+      "is_required": false
+    },
+    {
+      "group": "pg_11",
+      "characteristic": "char_cargo",
+      "sort_order": 10,
+      "is_required": false
     }
   ],
   "part_hulls": [
@@ -10424,7 +12204,7 @@
         "part_h_16",
         "part_h_17",
         "part_h_22",
-        "part_h_23"
+        "part_h_24"
       ]
     },
     {
@@ -10455,7 +12235,7 @@
         "part_h_18",
         "part_h_19",
         "part_h_20",
-        "part_h_24"
+        "part_h_23"
       ]
     },
     {

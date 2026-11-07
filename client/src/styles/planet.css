@@ -36,6 +36,9 @@
 .storage-resource { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto; align-items: center; gap: 0 var(--space-3); padding: 3px 0; font-size: var(--fs-ui); }
 .storage-resource__name { color: var(--text-1); overflow-wrap: anywhere; }
 .storage-resource__value { display: inline-flex; align-items: center; justify-content: flex-end; gap: var(--space-2); font-weight: 600; white-space: nowrap; }
+.storage-resource--part .storage-resource__name { flex-wrap: wrap; }
+.storage-resource--part .storage-resource__action { grid-column: 1 / -1; }
+.queue-panel__tools { display: inline-flex; flex-wrap: wrap; align-items: baseline; justify-content: flex-end; gap: var(--space-3); }
 /* Between 1140 px and 1240 px the bar of a resource is hidden: the column it takes is too narrow
    for it. Below 1140 px it has its own column again, as on a wide screen. */
 @media (max-width: 1239px) {

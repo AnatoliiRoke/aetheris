@@ -296,6 +296,8 @@ public sealed class EconomyService
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
         Snapshot snapshot = await SnapshotAsync(playerId, EconomyTime.Normalize(_clock.GameNow), null, cancellationToken).ConfigureAwait(false);
+        ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
+        Dictionary<int, string> names = catalog.Resources.ToDictionary(resource => resource.Id, resource => resource.NameKey);
 
         return
         [
@@ -306,9 +308,111 @@ public sealed class EconomyService
                 // A balance that has no row yet is made with the first version.
                 int version = snapshot.Rows.FirstOrDefault(row => row.ResourceTypeId == currencyId)?.Version ?? 1;
 
-                return new AdminBalanceFacts(playerId, currencyId, balance.Amount, balance.IncomePerHour, version);
+                return new AdminBalanceFacts(
+                    playerId,
+                    currencyId,
+                    balance.Amount,
+                    balance.IncomePerHour,
+                    version,
+                    names.GetValueOrDefault(currencyId));
             }),
         ];
+    }
+
+    /// <summary>
+    /// Sets the balance of a currency of a civilization to an absolute amount.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="request">The amount.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The change that was applied.</returns>
+    public async Task<AdminBalanceChange> SetBalanceToAsync(
+        string playerId,
+        AdminBalanceSet request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (!(await CurrencyIdsAsync(cancellationToken).ConfigureAwait(false)).Contains(request.ResourceTypeId))
+        {
+            throw new EconomyAdminException(EconomyErrorCodes.NotACurrency, "The resource is not a currency of a civilization.");
+        }
+
+        if (await _world.GetCivilizationAsync(playerId, cancellationToken).ConfigureAwait(false) is null)
+        {
+            throw new EconomyAdminException(GameErrorCodes.NotFound, "The player has no civilization.");
+        }
+
+        return await _unitOfWork.RunAsync(
+            async () =>
+            {
+                Locked locked = await LockAsync(playerId, await CurrencyIdsAsync(cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+
+                await FixAsync(playerId, locked, _clock.GameNow, cancellationToken).ConfigureAwait(false);
+
+                CivilizationBalanceEntity row = locked.Balances.Single(entry => entry.ResourceTypeId == request.ResourceTypeId);
+
+                if (request.Version is { } expectedVersion && expectedVersion != row.Version)
+                {
+                    throw new EconomyAdminException(AdminReferenceErrors.VersionConflict, "The balance changed since it was read.");
+                }
+
+                long before = row.Amount;
+
+                if (request.Amount < 0 && !(await DebtCurrencyIdsAsync(cancellationToken).ConfigureAwait(false)).Contains(request.ResourceTypeId))
+                {
+                    throw new EconomyAdminException(EconomyErrorCodes.CurrencyShort, "The civilization lacks the currency.");
+                }
+
+                row.Amount = request.Amount;
+                row.Version++;
+
+                await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                return new AdminBalanceChange(
+                    row.Id,
+                    $"economy_balance:{playerId}:{request.ResourceTypeId}",
+                    before.ToString(CultureInfo.InvariantCulture),
+                    request.Amount.ToString(CultureInfo.InvariantCulture),
+                    row.Version);
+            },
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets the number of inhabitants of a body. A number above the largest population is kept:
+    /// it dies down by the ordinary rule.
+    /// </summary>
+    /// <param name="playerId">The player, who must own the body.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="amount">The number of inhabitants.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The number before the change and the number after it.</returns>
+    public async Task<(long Before, long After)> SetPopulationAsync(
+        string playerId,
+        long planetId,
+        long amount,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        if (amount < 0)
+        {
+            throw new EconomyAdminException(PlayerAdminCodes.AmountNegative, "The number of the inhabitants cannot be negative.");
+        }
+
+        return await _unitOfWork.RunAsync(
+            async () =>
+            {
+                PlanetPopulationEntity row = await LockedPopulationAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+                long before = row.Amount;
+                row.Amount = amount;
+                row.AmountFraction = 0;
+
+                return (before, amount);
+            },
+            cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

@@ -43,6 +43,7 @@ public static class ResearchServiceCollectionExtensions
         services.AddScoped<ResearchUnitOfWork>();
         services.AddScoped<ResearchBootstrapService>();
         services.AddScoped<ResearchQueueService>();
+        services.AddScoped<PlayerTechnologyAdminService>();
         services.AddScoped<ResearchTreeBuilder>();
         services.AddScoped<IResearchModule, ResearchModule>();
         services.AddScoped<IScheduledEventHandler, ResearchCompleteHandler>();
@@ -84,8 +85,15 @@ public static class ResearchServiceCollectionExtensions
     /// </summary>
     /// <param name="secured">The secured admin group.</param>
     /// <returns>The same group.</returns>
-    public static RouteGroupBuilder MapAdminEndpoints(RouteGroupBuilder secured) =>
+    public static RouteGroupBuilder MapAdminEndpoints(RouteGroupBuilder secured)
+    {
+        ArgumentNullException.ThrowIfNull(secured);
+
         secured
             .MapAdminReference<ResearchReferenceAdminService>(ResearchReferenceAdminService.TechnologyDescriptor)
             .MapAdminReference<ResearchReferenceAdminService>(ResearchReferenceAdminService.BranchDescriptor);
+        PlayerTechnologyAdminEndpoints.Map(secured);
+
+        return secured;
+    }
 }

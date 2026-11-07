@@ -52,4 +52,12 @@ public static class FleetServiceCollectionExtensions
     /// <returns>The same builder.</returns>
     public static IEndpointRouteBuilder MapEndpoints(IEndpointRouteBuilder endpoints) =>
         FleetEndpoints.Map(endpoints);
+
+    /// <summary>
+    /// Maps the ship projects of a player on the secured admin group.
+    /// </summary>
+    /// <param name="secured">The secured admin group.</param>
+    /// <returns>The same group.</returns>
+    public static RouteGroupBuilder MapAdminEndpoints(RouteGroupBuilder secured) =>
+        FleetPlayerAdminEndpoints.Map(secured);
 }

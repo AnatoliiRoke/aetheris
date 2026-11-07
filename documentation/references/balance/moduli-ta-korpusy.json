@@ -319,7 +319,7 @@
       },
       "chars": {
         "char_energy_use": 0,
-        "char_power": 60
+        "char_power": 130
       },
       "hulls": [
         "part_h_2",
@@ -361,7 +361,7 @@
       },
       "chars": {
         "char_energy_use": 0,
-        "char_power": 180
+        "char_power": 200
       },
       "hulls": [
         "part_h_8",
@@ -409,7 +409,7 @@
       },
       "chars": {
         "char_energy_use": 0,
-        "char_power": 180
+        "char_power": 350
       },
       "hulls": [
         "part_h_11",
@@ -450,7 +450,7 @@
       },
       "chars": {
         "char_energy_use": 0,
-        "char_power": 360
+        "char_power": 550
       },
       "hulls": [
         "part_h_14",

@@ -134,6 +134,10 @@ public sealed class WorldModule : IWorldModule
         _queries.GetOwnedPlanetsAsync(playerId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<IReadOnlyDictionary<string, int>> CountOwnedPlanetsAsync(IReadOnlyCollection<string> playerIds, CancellationToken cancellationToken = default) =>
+        _queries.CountOwnedPlanetsAsync(playerIds, cancellationToken);
+
+    /// <inheritdoc />
     public Task<ResourceCatalog> GetResourceCatalogAsync(CancellationToken cancellationToken = default) =>
         _queries.GetResourceCatalogAsync(cancellationToken);
 

@@ -28,7 +28,30 @@ public sealed record AdminBalanceFacts(
     int ResourceTypeId,
     long Amount,
     decimal IncomePerHour,
-    int Version);
+    int Version,
+    string? NameKey = null);
+
+/// <summary>
+/// An absolute amount of a currency of a civilization, set by an administrator.
+/// </summary>
+/// <param name="ResourceTypeId">The currency of the balance.</param>
+/// <param name="Amount">The amount the balance becomes.</param>
+/// <param name="Reason">Why the administrator set the balance; it is required.</param>
+/// <param name="Version">The version of the balance the administrator read.</param>
+public sealed record AdminBalanceSet(
+    [property: JsonPropertyName("resource_type_id")] int ResourceTypeId,
+    [property: JsonPropertyName("amount")] long Amount,
+    [property: JsonPropertyName("reason")] string? Reason,
+    [property: JsonPropertyName("version")] int? Version = null);
+
+/// <summary>
+/// An absolute number of inhabitants of a body, set by an administrator.
+/// </summary>
+/// <param name="Amount">The number of inhabitants the body has.</param>
+/// <param name="Reason">Why the administrator set the population; it is required.</param>
+public sealed record AdminPopulationSet(
+    [property: JsonPropertyName("amount")] long Amount,
+    [property: JsonPropertyName("reason")] string? Reason);
 
 /// <summary>
 /// The change of a balance that was applied (task 00015).

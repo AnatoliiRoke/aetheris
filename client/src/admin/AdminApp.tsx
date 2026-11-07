@@ -6,6 +6,7 @@ import { useDocumentTitle } from '../components/useDocumentTitle';
 import { Link } from '../router/Router';
 import { useRouter } from '../router/useRouter';
 import { createAdminApi, type AdminApi, type AdminMe } from './adminApi';
+import { createPlayerAdminApi } from './playerAdminApi';
 import { AdminContext, errorKey, type AdminContextValue } from './adminContext';
 import { adminRoutes } from './adminRoutes';
 import type { AdminMessageKey } from './i18n/uk';
@@ -16,6 +17,7 @@ import { ObjectTypesScreen, RulesScreen } from './screens/ReferenceScreens';
 import { createReferenceApi, type ReferenceApi } from './referenceApi';
 import { ReferenceScreen } from './screens/ReferenceScreen';
 import { ResourcesScreen } from './screens/ResourcesScreen';
+import { PlayersScreen } from './screens/PlayersScreen';
 import { AuditScreen, RunsScreen } from './screens/RunsAndAudit';
 import { TextsScreen } from './screens/TextsScreen';
 import { FieldsScreen, ObjectsScreen, SectorsScreen, SystemsScreen } from './screens/WorldTables';
@@ -34,6 +36,7 @@ interface Screen {
 }
 
 const screens: Screen[] = [
+  { path: adminRoutes.players, label: 'admin.nav.players', permission: 'admin.players_read', render: () => <PlayersScreen />, nested: true },
   { path: adminRoutes.generation, label: 'admin.nav.generation', permission: 'admin.world_generation_estimated', render: () => <GenerationScreen /> },
   { path: adminRoutes.runs, label: 'admin.nav.runs', permission: 'admin.world_generation_runs_read', render: () => <RunsScreen /> },
   { path: adminRoutes.sectors, label: 'admin.nav.sectors', permission: 'admin.world_sectors_read', render: () => <SectorsScreen /> },
@@ -62,6 +65,7 @@ export default function AdminApp({ api: givenApi, references: givenReferences }:
   const { t } = useAdminText();
   const http = useMemo(() => new HttpClient(), []);
   const api = useMemo(() => givenApi ?? createAdminApi(http), [givenApi, http]);
+  const players = useMemo(() => createPlayerAdminApi(http), [http]);
   const references = useMemo(() => givenReferences ?? createReferenceApi(http), [givenReferences, http]);
   const [session, setSession] = useState<AdminSession>({ status: 'loading' });
   useDocumentTitle(t('admin.meta.title'));
@@ -113,17 +117,19 @@ export default function AdminApp({ api: givenApi, references: givenReferences }:
     return <AdminLogin api={api} notice={session.notice} onSignedIn={(me) => setSession({ status: 'signed-in', me })} />;
   }
 
-  return <AdminShell api={api} references={references} me={session.me} onError={onError} onSignOut={() => void signOut()} />;
+  return <AdminShell api={api} players={players} references={references} me={session.me} onError={onError} onSignOut={() => void signOut()} />;
 }
 
 function AdminShell({
   api,
+  players,
   references,
   me,
   onError,
   onSignOut,
 }: {
   api: AdminApi;
+  players: ReturnType<typeof createPlayerAdminApi>;
   references: ReferenceApi;
   me: AdminMe;
   onError: (error: unknown) => void;
@@ -135,7 +141,7 @@ function AdminShell({
   const allowed = screens.filter((screen) => can(screen.permission));
   const normalized = path.length > 1 ? path.replace(/\/+$/, '') : path;
   const current = allowed.find((screen) => screen.path === normalized || (screen.nested === true && normalized.startsWith(`${screen.path}/`)));
-  const value = useMemo<AdminContextValue>(() => ({ api, references, me, can, onError }), [api, references, me, can, onError]);
+  const value = useMemo<AdminContextValue>(() => ({ api, references, players, me, can, onError }), [api, references, players, me, can, onError]);
 
   useEffect(() => {
     if (!current && allowed.length > 0) {

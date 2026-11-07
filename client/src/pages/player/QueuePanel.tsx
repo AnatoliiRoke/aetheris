@@ -37,6 +37,7 @@ export function QueuePanel({
   onCancel,
   onFinished,
   action,
+  tools,
   footnote,
   collect,
   fillClass = 'f-accent',
@@ -56,6 +57,8 @@ export function QueuePanel({
   onCancel: (id: number) => void;
   onFinished: () => void;
   action?: ReactNode;
+  /** A control beside the slot line. It stays when the queue has no free place. */
+  tools?: ReactNode;
   footnote?: string;
   collect?: { label: string; reason: string };
   /** The fill of a record that is under way. */
@@ -77,11 +80,14 @@ export function QueuePanel({
         <h2 className="panel__title" id={id}>
           {title}
         </h2>
-        <span className="meta queue-panel__slots">
-          {slotsText ?? t('planet.queueSlots', { used, total })}
-          {/*
-          {freeSlots > 0 ? <span className="queue-panel__free">{freeSlotsText(language, t, freeSlots)}</span> : null}
-          */}
+        <span className="queue-panel__tools">
+          <span className="meta queue-panel__slots">
+            {slotsText ?? t('planet.queueSlots', { used, total })}
+            {/*
+            {freeSlots > 0 ? <span className="queue-panel__free">{freeSlotsText(language, t, freeSlots)}</span> : null}
+            */}
+          </span>
+          {tools}
         </span>
       </div>
       {entries.length === 0 ? <p className="lead">{emptyText}</p> : null}

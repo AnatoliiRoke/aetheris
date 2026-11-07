@@ -41,6 +41,7 @@ public static class ProcessesServiceCollectionExtensions
         services.AddScoped<ProcessesUnitOfWork>();
         services.AddScoped<ProcessesBootstrapService>();
         services.AddScoped<ProcessQueueService>();
+        services.AddScoped<ProcessPlayerAdminService>();
         services.AddScoped<IResourceUsage, ProcessesResourceUsage>();
         services.AddScoped<IProcessesModule, ProcessesModule>();
         services.AddScoped<IScheduledEventHandler, ProcessReadyHandler>();
@@ -79,9 +80,16 @@ public static class ProcessesServiceCollectionExtensions
     /// </summary>
     /// <param name="secured">The secured group of the admin panel.</param>
     /// <returns>The same group.</returns>
-    public static RouteGroupBuilder MapAdminEndpoints(RouteGroupBuilder secured) =>
+    public static RouteGroupBuilder MapAdminEndpoints(RouteGroupBuilder secured)
+    {
+        ArgumentNullException.ThrowIfNull(secured);
+
         secured
             .MapAdminReference<ProcessReferenceAdminService>(ProcessReferenceAdminService.ProcessTypeDescriptor)
             .MapAdminReference<ProcessReferenceAdminService>(ProcessReferenceAdminService.ProcessRecipeDescriptor)
             .MapAdminReference<ProcessReferenceAdminService>(ProcessReferenceAdminService.ProcessParamDescriptor);
+        ProcessPlayerAdminEndpoints.Map(secured);
+
+        return secured;
+    }
 }

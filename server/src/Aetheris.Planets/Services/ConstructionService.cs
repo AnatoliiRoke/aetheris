@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using Aetheris.Core.Admin;
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Scheduling;
@@ -664,6 +665,167 @@ public sealed class ConstructionService
     }
 
     /// <summary>
+    /// Sets the stock of one resource of a colony to an absolute amount.
+    /// </summary>
+    /// <param name="playerId">The owner.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="resourceTypeId">The resource.</param>
+    /// <param name="amount">The amount the stock becomes.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The amount before the change and the amount after it.</returns>
+    public Task<AdminAmountChange> SetStockAsync(
+        string playerId,
+        long planetId,
+        int resourceTypeId,
+        long amount,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        if (amount < 0)
+        {
+            throw new GameException(PlayerAdminCodes.AmountNegative, "The amount of a resource cannot be negative.");
+        }
+
+        DateTimeOffset now = Normalize(_clock.GameNow);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                await RequireOwnerAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+                await RequireStockAsync(resourceTypeId, cancellationToken).ConfigureAwait(false);
+
+                PlanetSession session = await OpenAsync(planetId, now, cancellationToken).ConfigureAwait(false);
+                long before = session.AmountOf(resourceTypeId);
+                session.SetAmount(resourceTypeId, amount);
+                session.RefreshStorage(now);
+
+                return new AdminAmountChange(before, amount);
+            },
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Sets the level of a building of a colony. A building that still has a queue record is refused.
+    /// </summary>
+    /// <param name="playerId">The owner.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="buildingTypeId">The building type.</param>
+    /// <param name="level">The level, zero when the building is not built.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The level before the change and the level after it.</returns>
+    public Task<AdminAmountChange> SetBuildingLevelAsync(
+        string playerId,
+        long planetId,
+        int buildingTypeId,
+        int level,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        DateTimeOffset now = Normalize(_clock.GameNow);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                await RequireOwnerAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+
+                PlanetSession session = await OpenAsync(planetId, now, cancellationToken).ConfigureAwait(false);
+
+                if (session.Queue.Any(entry => entry.BuildingTypeId == buildingTypeId))
+                {
+                    throw new GameException(PlayerAdminCodes.QueueBlocks, "A construction of the building is in the queue.");
+                }
+
+                BuildingTypeInfo buildingType = session.Catalog.FindType(buildingTypeId)
+                    ?? throw new GameException(PlanetsErrorCodes.BuildingUnknown, "The building type does not exist.");
+
+                int maxLevel = buildingType.Levels.Count == 0 ? 0 : buildingType.Levels.Keys.Max();
+
+                if (level < 0 || level > maxLevel)
+                {
+                    throw new GameException(PlayerAdminCodes.LevelOutOfRange, "The level is outside the range of the building.");
+                }
+
+                int before = session.Levels().GetValueOrDefault(buildingTypeId);
+
+                // The income of the population and of the credits is counted with the old rates
+                // until now. The stock was already brought to now by the open.
+                await _economy.FixPlayerAsync(playerId, now, cancellationToken).ConfigureAwait(false);
+
+                session.SetLevel(buildingTypeId, level);
+                session.RefreshStorage(now);
+
+                return new AdminAmountChange(before, level);
+            },
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Sets the extra places of the construction queue of a colony. The number cannot be negative.
+    /// </summary>
+    /// <param name="playerId">The owner.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="extraQueueSlots">The extra places.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The number before the change and the number after it.</returns>
+    public Task<AdminAmountChange> SetExtraQueueSlotsAsync(
+        string playerId,
+        long planetId,
+        int extraQueueSlots,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        if (extraQueueSlots < 0)
+        {
+            throw new GameException(PlayerAdminCodes.AmountNegative, "The number of the queue places cannot be negative.");
+        }
+
+        DateTimeOffset now = Normalize(_clock.GameNow);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                await RequireOwnerAsync(playerId, planetId, cancellationToken).ConfigureAwait(false);
+
+                PlanetSession session = await OpenAsync(planetId, now, cancellationToken).ConfigureAwait(false);
+                int before = session.State.ExtraQueueSlots;
+                session.State.ExtraQueueSlots = extraQueueSlots;
+
+                return new AdminAmountChange(before, extraQueueSlots);
+            },
+            cancellationToken);
+    }
+
+    private async Task RequireOwnerAsync(string playerId, long planetId, CancellationToken cancellationToken)
+    {
+        PlanetFacts? facts = await _world.GetPlanetFactsAsync(planetId, cancellationToken).ConfigureAwait(false);
+
+        if (facts is null || !string.Equals(facts.OwnerPlayerId, playerId, StringComparison.Ordinal))
+        {
+            throw new GameException(GameErrorCodes.NotFound, "The body is not a colony of the player.");
+        }
+    }
+
+    private async Task RequireStockAsync(int resourceTypeId, CancellationToken cancellationToken)
+    {
+        ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
+        ResourceTypeFact? resource = catalog.Resources.FirstOrDefault(entry => entry.Id == resourceTypeId);
+
+        if (resource is null || resource.IsCivilizationScope || resource.PaidByPopulation)
+        {
+            throw new GameException(PlayerAdminCodes.NotAStock, "The resource is not a stock of a body.");
+        }
+
+        if (resource.ResourceGroupId is int groupId
+            && catalog.Groups.FirstOrDefault(entry => entry.Id == groupId) is { IsBalance: true })
+        {
+            throw new GameException(PlayerAdminCodes.NotAStock, "The resource is a balance, not a stock of a body.");
+        }
+    }
+
+    /// <summary>
     /// The payload of the end of a construction.
     /// </summary>
     /// <param name="PlanetId">The body.</param>
@@ -679,3 +841,10 @@ public sealed class ConstructionService
 /// <param name="Population">The population of the body, or <see langword="null"/> when it has none.</param>
 /// <param name="HasDueConstruction">Whether a construction of the queue has finished and is not completed yet.</param>
 public sealed record PlanetRead(PlanetOverviewDto Overview, PopulationFacts? Population, bool HasDueConstruction);
+
+/// <summary>
+/// An absolute amount an administrator set, with the amount it replaced.
+/// </summary>
+/// <param name="Before">The amount before the change.</param>
+/// <param name="After">The amount after the change.</param>
+public readonly record struct AdminAmountChange(long Before, long After);

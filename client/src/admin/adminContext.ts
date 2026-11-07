@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react';
 import { ApiError } from '../api/http';
 import type { AdminApi, AdminMe } from './adminApi';
 import type { AdminMessageKey } from './i18n/uk';
+import type { PlayerAdminApi } from './playerAdminApi';
 import type { ReferenceApi } from './referenceApi';
 
 /**
@@ -11,6 +12,8 @@ export interface AdminContextValue {
   api: AdminApi;
   /** The endpoints of the reference kinds (task 00023). */
   references: ReferenceApi;
+  /** The player screen. It is not part of {@link AdminApi}. */
+  players: PlayerAdminApi;
   me: AdminMe;
   /** Whether a role of the administrator grants an action code. */
   can: (actionCode: string) => boolean;
@@ -55,6 +58,10 @@ const errorKeys: Record<string, AdminMessageKey> = {
   reference_version_conflict: 'admin.edit.conflict',
   world_config_invalid: 'admin.error.configInvalid',
   network_error: 'admin.error.network',
+  admin_amount_negative: 'admin.error.amountNegative',
+  admin_level_out_of_range: 'admin.error.levelRange',
+  admin_queue_blocks: 'admin.error.queueBlocks',
+  admin_not_a_stock: 'admin.error.notAStock',
 };
 
 /**

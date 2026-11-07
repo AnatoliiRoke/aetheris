@@ -1,10 +1,14 @@
+using Aetheris.Core.Admin;
 using Aetheris.Core.Errors;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Host.Security;
+using Aetheris.World;
+using Aetheris.World.Api;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aetheris.Host.Admin;
@@ -14,6 +18,40 @@ namespace Aetheris.Host.Admin;
 /// </summary>
 /// <param name="Email">The new address.</param>
 public sealed record AdminEmailChangeRequest(string? Email);
+
+/// <summary>One player in the list of the admin panel.</summary>
+/// <param name="UserId">The account.</param>
+/// <param name="Nickname">The nickname, the Identity user name.</param>
+/// <param name="Email">The address, for the administrator who opens the list.</param>
+/// <param name="EmailConfirmed">Whether the address is confirmed.</param>
+/// <param name="RegisteredAt">The moment of the registration.</param>
+/// <param name="RaceNameKey">The localisation key of the race, or <see langword="null"/> before a civilization exists.</param>
+/// <param name="PlanetCount">How many bodies the player owns.</param>
+public sealed record AdminPlayerRow(
+    string UserId,
+    string Nickname,
+    string? Email,
+    bool EmailConfirmed,
+    DateTimeOffset RegisteredAt,
+    string? RaceNameKey,
+    int PlanetCount);
+
+/// <summary>The card of a player. The bodies are labels: the panel does not edit the body itself.</summary>
+/// <param name="UserId">The account.</param>
+/// <param name="Nickname">The nickname.</param>
+/// <param name="Email">The address.</param>
+/// <param name="EmailConfirmed">Whether the address is confirmed.</param>
+/// <param name="RegisteredAt">The moment of the registration.</param>
+/// <param name="Civilization">The civilization, or <see langword="null"/> before the player founds one.</param>
+/// <param name="Planets">The bodies the player owns, in the order of their identifiers.</param>
+public sealed record AdminPlayerCard(
+    string UserId,
+    string Nickname,
+    string? Email,
+    bool EmailConfirmed,
+    DateTimeOffset RegisteredAt,
+    CivilizationSummary? Civilization,
+    IReadOnlyList<OwnedPlanet> Planets);
 
 /// <summary>Validates <see cref="AdminEmailChangeRequest"/>.</summary>
 public sealed class AdminEmailChangeRequestValidator : AbstractValidator<AdminEmailChangeRequest>
@@ -56,7 +94,150 @@ public static class AdminPlayerEndpoints
         secured.MapGet("/players/{userId}/access-log", ReadAccessLogAsync)
             .WithName("admin.player_access_log_read");
 
+        // One name: the list and the card are the same screen, and an endpoint name is the
+        // permission code. Two routes cannot share a name.
+        secured.MapGet("/players/{userId?}", ReadPlayersAsync)
+            .WithName("admin.players_read");
+
         return secured;
+    }
+
+    private static async Task<IResult> ReadPlayersAsync(
+        string? userId,
+        [FromQuery(Name = "page")] int? page,
+        [FromQuery(Name = "page_size")] int? pageSize,
+        [FromQuery(Name = "search")] string? search,
+        [FromQuery(Name = "sort")] string? sort,
+        [FromQuery(Name = "direction")] string? direction,
+        AetherisDbContext dbContext,
+        IWorldModule world,
+        IAdminQueryLimits limits,
+        AdminAuditScope audit,
+        CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrEmpty(userId))
+        {
+            return await ReadPlayerAsync(userId, dbContext, world, audit, cancellationToken);
+        }
+
+        return await ListPlayersAsync(page, pageSize, search, sort, direction, dbContext, world, limits, audit, cancellationToken);
+    }
+
+    private static async Task<IResult> ListPlayersAsync(
+        int? page,
+        int? pageSize,
+        string? search,
+        string? sort,
+        string? direction,
+        AetherisDbContext dbContext,
+        IWorldModule world,
+        IAdminQueryLimits limits,
+        AdminAuditScope audit,
+        CancellationToken cancellationToken)
+    {
+        PageRequest? request = AdminPaging.Create(page, pageSize, search, sort, direction, limits);
+
+        if (request is null)
+        {
+            return ApiErrors.Validation(new Dictionary<string, string[]>
+            {
+                ["search"] = [AdminPaging.SearchTooLong],
+            });
+        }
+
+        var accounts =
+            from profile in dbContext.PlayerProfiles.AsNoTracking()
+            join user in dbContext.Users.AsNoTracking() on profile.UserId equals user.Id
+            select new { profile, user };
+
+        if (request.Search is not null)
+        {
+            string pattern = AdminPaging.ContainsPattern(request.Search);
+            accounts = accounts.Where(account =>
+                (account.user.UserName != null && EF.Functions.ILike(account.user.UserName, pattern, AdminPaging.LikeEscape))
+                || (account.user.Email != null && EF.Functions.ILike(account.user.Email, pattern, AdminPaging.LikeEscape)));
+        }
+
+        int total = await accounts.CountAsync(cancellationToken);
+
+        var pageAccounts = await accounts
+            .OrderByDescending(account => account.profile.RegisteredAt)
+            .ThenBy(account => account.user.Id)
+            .Skip(request.Skip)
+            .Take(request.PageSize)
+            .Select(account => new
+            {
+                account.user.Id,
+                account.user.UserName,
+                account.user.Email,
+                account.user.EmailConfirmed,
+                account.profile.RegisteredAt,
+            })
+            .ToListAsync(cancellationToken);
+
+        // The search text may be an address, so the journal keeps only that the list was opened.
+        audit.Record("players", null, null);
+
+        if (pageAccounts.Count == 0)
+        {
+            return AdminJson.Ok(new PageResult<AdminPlayerRow>([], total, request.Page, request.PageSize));
+        }
+
+        List<string> playerIds = pageAccounts.ConvertAll(account => account.Id);
+        IReadOnlyDictionary<string, int> planetCounts = await world.CountOwnedPlanetsAsync(playerIds, cancellationToken);
+        IReadOnlyDictionary<string, PlayerRaceBrief> races = await world.GetRaceBriefsAsync(playerIds, cancellationToken);
+
+        List<AdminPlayerRow> players = pageAccounts.ConvertAll(account => new AdminPlayerRow(
+            account.Id,
+            account.UserName ?? string.Empty,
+            account.Email,
+            account.EmailConfirmed,
+            account.RegisteredAt,
+            races.GetValueOrDefault(account.Id)?.NameKey,
+            planetCounts.GetValueOrDefault(account.Id)));
+
+        return AdminJson.Ok(new PageResult<AdminPlayerRow>(players, total, request.Page, request.PageSize));
+    }
+
+    private static async Task<IResult> ReadPlayerAsync(
+        string userId,
+        AetherisDbContext dbContext,
+        IWorldModule world,
+        AdminAuditScope audit,
+        CancellationToken cancellationToken)
+    {
+        var account = await (
+            from profile in dbContext.PlayerProfiles.AsNoTracking()
+            join user in dbContext.Users.AsNoTracking() on profile.UserId equals user.Id
+            where profile.UserId == userId
+            select new
+            {
+                user.Id,
+                user.UserName,
+                user.Email,
+                user.EmailConfirmed,
+                profile.RegisteredAt,
+            }).SingleOrDefaultAsync(cancellationToken);
+
+        if (account is null)
+        {
+            return ApiErrors.Result(StatusCodes.Status404NotFound, GameErrorCodes.NotFound);
+        }
+
+        // The journal keeps the account, never the address.
+        audit.Record(account.Id, null, null);
+
+        CivilizationSummary? civilization = await world.GetCivilizationAsync(account.Id, cancellationToken);
+        IReadOnlyList<OwnedPlanet> planets = await world.GetOwnedPlanetsAsync(account.Id, cancellationToken);
+
+        return AdminJson.Ok(new AdminPlayerCard(
+            account.Id,
+            account.UserName ?? string.Empty,
+            account.Email,
+            account.EmailConfirmed,
+            account.RegisteredAt,
+            civilization,
+            planets));
     }
 
     private static async Task<IResult> ChangeEmailAsync(

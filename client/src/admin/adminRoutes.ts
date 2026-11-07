@@ -17,6 +17,7 @@ export const adminRoutes = {
   texts: '/admin/texts',
   config: '/admin/config',
   audit: '/admin/audit',
+  players: '/admin/players',
 } as const;
 
 /**
