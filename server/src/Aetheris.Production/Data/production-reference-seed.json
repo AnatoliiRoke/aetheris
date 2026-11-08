@@ -1007,9 +1007,6 @@
         "char_energy_use": {
           "number": 24
         },
-        "char_damage": {
-          "number": 125
-        },
         "char_rate": {
           "number": 1
         },
@@ -1047,9 +1044,6 @@
       "characteristics": {
         "char_energy_use": {
           "number": 35
-        },
-        "char_damage": {
-          "number": 250
         },
         "char_rate": {
           "number": 3
@@ -1089,9 +1083,6 @@
         "char_energy_use": {
           "number": 70
         },
-        "char_damage": {
-          "number": 125
-        },
         "char_rate": {
           "number": 1
         },
@@ -1129,9 +1120,6 @@
       "characteristics": {
         "char_energy_use": {
           "number": 12
-        },
-        "char_damage": {
-          "number": 41
         },
         "char_rate": {
           "number": 1
@@ -1174,9 +1162,6 @@
         "char_energy_use": {
           "number": 24
         },
-        "char_damage": {
-          "number": 125
-        },
         "char_rate": {
           "number": 2
         },
@@ -1217,9 +1202,6 @@
       "characteristics": {
         "char_energy_use": {
           "number": 33
-        },
-        "char_damage": {
-          "number": 250
         },
         "char_rate": {
           "number": 3
@@ -4218,9 +4200,6 @@
       "characteristics": {
         "char_energy_use": {
           "number": 15
-        },
-        "char_damage": {
-          "number": 41
         },
         "char_rate": {
           "number": 2
@@ -11939,12 +11918,6 @@
     },
     {
       "group": "pg_4",
-      "characteristic": "char_damage",
-      "sort_order": 1,
-      "is_required": true
-    },
-    {
-      "group": "pg_4",
       "characteristic": "char_rate",
       "sort_order": 2,
       "is_required": true
@@ -14033,6 +14006,59 @@
         "race_2",
         "race_3",
         "race_4"
+      ]
+    }
+  ],
+  "part_ammunition": [
+    {
+      "part": "part_m_21",
+      "ammunition": [
+        "part_m_43",
+        "part_m_44"
+      ]
+    },
+    {
+      "part": "part_m_22",
+      "ammunition": [
+        "part_m_43",
+        "part_m_44"
+      ]
+    },
+    {
+      "part": "part_m_23",
+      "ammunition": [
+        "part_m_45"
+      ]
+    },
+    {
+      "part": "part_m_24",
+      "ammunition": [
+        "part_m_46",
+        "part_m_47"
+      ]
+    },
+    {
+      "part": "part_m_84",
+      "ammunition": [
+        "part_m_46",
+        "part_m_47",
+        "part_m_48"
+      ]
+    },
+    {
+      "part": "part_m_25",
+      "ammunition": [
+        "part_m_49",
+        "part_m_50",
+        "part_m_51"
+      ]
+    },
+    {
+      "part": "part_m_26",
+      "ammunition": [
+        "part_m_50",
+        "part_m_51",
+        "part_m_52"
       ]
     }
   ]

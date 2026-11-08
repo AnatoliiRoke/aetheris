@@ -141,6 +141,7 @@ public sealed record CharacteristicInfo(
 /// <param name="Characteristics">The values of the characteristics of the part by the characteristic.</param>
 /// <param name="CompatibleHullIds">The hulls the part fits, by their identifier (task 00042).</param>
 /// <param name="RaceIds">The races the part belongs to, by their identifier (task 00042).</param>
+/// <param name="AmmunitionIds">The ammunition the part fires, when it is a weapon, by their identifier (task 00040).</param>
 public sealed record PartTypeInfo(
     int Id,
     string Code,
@@ -155,7 +156,8 @@ public sealed record PartTypeInfo(
     decimal Weight,
     IReadOnlyDictionary<int, PartCharacteristicInfo> Characteristics,
     IReadOnlyList<int> CompatibleHullIds,
-    IReadOnlyList<int> RaceIds);
+    IReadOnlyList<int> RaceIds,
+    IReadOnlyList<int>? AmmunitionIds = null);
 
 /// <summary>The value of a characteristic of a part.</summary>
 /// <param name="CharacteristicId">The characteristic.</param>

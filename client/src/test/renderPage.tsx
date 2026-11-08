@@ -562,6 +562,7 @@ export function sampleShipHull(overrides: Partial<ShipHull> = {}): ShipHull {
     integrity: 100,
     weight: 10,
     raceBonusSlots: 0,
+    crew: 0,
     ...overrides,
   };
 }
@@ -711,8 +712,8 @@ export function sampleFleet(overrides: Partial<Fleet> = {}): Fleet {
     ships: [sampleFleetShip({ id: 1, fleetId: 1 })],
     holdCapacity: 1200,
     integrity: 15300,
-    energyDamage: 264,
-    kineticDamage: 420,
+    damageMin: 264,
+    damageMax: 420,
     shieldCapacity: 3200,
     ...overrides,
   };

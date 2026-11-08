@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, type CSSProperties } from 'react';
 import { artImage } from '../../../assets/images';
 import type { MapField, MapGalaxy, MapNebula, MapObject, MapRadar, MapSector, MapSectorView, MapSystem, MapSystemView } from '../../../api/mapApi';
 import { GameIcon } from '../../../components/GameIcon';
@@ -6,6 +6,7 @@ import { useI18n } from '../../../i18n/useI18n';
 import { clusterPoints, orbitPlace, orbitRadius, systemWorldSize } from './mapGeometry';
 import { objectClasses, type MapLayers } from './mapLayers';
 import { MapMarker } from './MapMarker';
+import { asteroidMark, fieldRocks, nebulaMark, starPicture } from './mapPictures';
 import { sectorClipPath, sectorPath } from './mapSectorShape';
 import { worldStyle } from './mapStyle';
 import { useMapZoom } from './mapZoom';
@@ -110,19 +111,72 @@ export const GalaxyLayer = memo(function GalaxyLayer({ galaxy, context }: { gala
   );
 });
 
-/** The area of a nebula and the range of a radar as shapes of the world; the line keeps its width at any zoom. */
-function Shapes({ nebulas, radars, showNebulas }: { nebulas: MapNebula[]; radars: MapRadar[]; showNebulas: boolean }) {
+/** The picture of a nebula, sized to its area, and the dashed edge of that area. */
+function NebulaMark({ nebula }: { nebula: MapNebula }) {
+  const diameter = nebula.radius * 2;
+
+  return (
+    <span aria-hidden="true" className="map-nebula-art" style={worldStyle(nebula.x, nebula.y, diameter, diameter)}>
+      <img alt="" draggable={false} src={nebulaMark} />
+    </span>
+  );
+}
+
+/** The dashed edge of a nebula. The line keeps its width at any zoom. */
+function NebulaEdges({ nebulas }: { nebulas: MapNebula[] }) {
   return (
     <svg aria-hidden="true" className="map-shapes">
       <g className="map-shapes__world">
-      {showNebulas
-        ? nebulas.map((nebula) => <circle className="map-nebula" cx={nebula.x} cy={nebula.y} key={`n${nebula.id}`} r={nebula.radius} />)
-        : null}
-      {radars.map((radar) => (
-        <circle className="map-radar" cx={radar.x} cy={radar.y} key={`r${radar.planetId}`} r={radar.radius} />
-      ))}
+        {nebulas.map((nebula) => (
+          <circle className="map-nebula" cx={nebula.x} cy={nebula.y} key={nebula.id} r={nebula.radius} />
+        ))}
       </g>
     </svg>
+  );
+}
+
+/**
+ * The range of a radar, as in the design: a dashed disc, an inner ring and a wedge that turns.
+ * The disc grows with the map; the line stays one width.
+ */
+function RadarRange({ radar }: { radar: MapRadar }) {
+  const diameter = radar.radius * 2;
+
+  return (
+    <span aria-hidden="true" className="map-radar" style={worldStyle(radar.x, radar.y, diameter, diameter)}>
+      <span className="map-radar__ring" />
+      <span className="map-radar__sweep" />
+    </span>
+  );
+}
+
+/** One of the four star pictures, fixed for this system. A system of the player also carries the house. */
+function StarPicture({ systemId, own }: { systemId: number; own: boolean }) {
+  return (
+    <>
+      <img alt="" className="map-star-picture" draggable={false} height={25} src={starPicture(systemId)} width={25} />
+      {own ? <GameIcon className="map-marker__sign" name="house" size={11} /> : null}
+    </>
+  );
+}
+
+/** An asteroid field: the same clump several times, each a different size. */
+function AsteroidCluster({ seed }: { seed: number }) {
+  return (
+    <span className="map-field">
+      {fieldRocks(seed).map((rock, index) => (
+        <img
+          alt=""
+          className="map-field__rock"
+          draggable={false}
+          height={rock.size}
+          key={index}
+          src={asteroidMark}
+          style={{ '--rock-x': `${rock.offsetX}px`, '--rock-y': `${rock.offsetY}px`, width: rock.size, height: rock.size } as CSSProperties}
+          width={rock.size}
+        />
+      ))}
+    </span>
   );
 }
 
@@ -150,7 +204,11 @@ export const SectorLayer = memo(function SectorLayer({
 
   return (
     <>
-      <Shapes nebulas={sector.nebulas} radars={sector.radars} showNebulas={layers.nebulae} />
+      {layers.nebulae ? sector.nebulas.map((nebula) => <NebulaMark key={`art${nebula.id}`} nebula={nebula} />) : null}
+      {layers.nebulae && sector.nebulas.length > 0 ? <NebulaEdges nebulas={sector.nebulas} /> : null}
+      {sector.radars.map((radar) => (
+        <RadarRange key={`r${radar.planetId}`} radar={radar} />
+      ))}
       {layers.nebulae
         ? sector.nebulas.map((nebula) => (
             <span aria-hidden="true" className="map-nebula-label" key={`l${nebula.id}`} style={worldStyle(nebula.x, nebula.y + nebula.radius)}>
@@ -197,7 +255,7 @@ export const SectorLayer = memo(function SectorLayer({
             x={system.x}
             y={system.y}
           >
-            <GameIcon name={own ? 'house' : 'mapSystem'} size={own ? 14 : 12} />
+            <StarPicture own={own} systemId={system.id} />
             {system.inNebula ? <GameIcon className="map-marker__cloud" name="mapCloud" size={10} /> : null}
           </MapMarker>
         );
@@ -217,7 +275,7 @@ export const SectorLayer = memo(function SectorLayer({
                 x={field.x}
                 y={field.y}
               >
-                <GameIcon name="mapField" size={16} />
+                <AsteroidCluster seed={field.objectId} />
               </MapMarker>
             );
           })
@@ -285,7 +343,7 @@ export const SystemLayer = memo(function SystemLayer({
         ))}
         </g>
       </svg>
-      <span aria-hidden="true" className="map-star" style={worldStyle(middle, middle)} />
+      <img alt="" className="map-star" draggable={false} height={50} src={starPicture(view.system.id)} style={worldStyle(middle, middle)} width={50} />
       {orbits.map((orbit) => (
         <span aria-hidden="true" className="map-orbit-number" key={`o${orbit}`} style={worldStyle(middle, middle - orbitRadius(orbit, view.orbitCount))}>
           {orbit}
@@ -315,7 +373,7 @@ export const SystemLayer = memo(function SystemLayer({
               x={place.x}
               y={place.y}
             >
-              {known ? <GameIcon name="mapUnknown" size={16} /> : isField ? <GameIcon name="mapField" size={18} /> : <BodySymbol context={context} object={object} />}
+              {known ? <GameIcon name="mapUnknown" size={16} /> : isField ? <AsteroidCluster seed={object.id} /> : <BodySymbol context={context} object={object} />}
             </MapMarker>
           );
         })}

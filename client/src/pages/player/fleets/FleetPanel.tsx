@@ -81,7 +81,10 @@ export function FleetPanel({
     { label: t('fleets.statCargo'), value: t('fleets.tonnes', { amount: formatNumber(fleet.holdCapacity, language) }) },
     {
       label: t('fleets.statDamage'),
-      value: t('fleets.damageValue', { energy: formatNumber(fleet.energyDamage, language), kinetic: formatNumber(fleet.kineticDamage, language) }),
+      value:
+        fleet.damageMin === fleet.damageMax
+          ? formatNumber(fleet.damageMax, language)
+          : t('fleets.damageRange', { min: formatNumber(fleet.damageMin, language), max: formatNumber(fleet.damageMax, language) }),
     },
     { label: t('fleets.statIntegrity'), value: formatNumber(fleet.integrity, language) },
     { label: t('fleets.statShield'), value: formatNumber(fleet.shieldCapacity, language) },

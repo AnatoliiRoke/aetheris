@@ -254,7 +254,7 @@ public sealed class ShipyardQueueTests
 
             Assert.Equal(waitingOrderId, waiting.Id);
             Assert.NotNull(waiting.FinishesAt);
-            Assert.Equal(0m, finished.UpkeepPerHour);
+            Assert.Equal(await ProjectUpkeepAsync(scope.ServiceProvider, first), finished.UpkeepPerHour);
         }
 
         Ledger beforeCancel;
@@ -302,7 +302,7 @@ public sealed class ShipyardQueueTests
             shipId = ship.Id;
             shipCosts = ship.CostIds;
             shipModules = ship.ModuleIds;
-            Assert.Equal(0m, ship.UpkeepPerHour);
+            Assert.Equal(await ProjectUpkeepAsync(scope.ServiceProvider, first), ship.UpkeepPerHour);
         }
 
         HttpResponseMessage ships = await first.Player.Client.GetAsync($"{Ships}?planet_id={first.Player.PlanetId}", Token);
@@ -313,8 +313,14 @@ public sealed class ShipyardQueueTests
 
             using JsonDocument body = JsonDocument.Parse(await ships.Content.ReadAsStringAsync(Token));
             JsonElement shown = body.RootElement.EnumerateArray().Single();
+            decimal upkeepPerHour;
 
-            Assert.Equal(0m, shown.GetProperty("upkeep_per_hour").GetDecimal());
+            using (IServiceScope scope = _factory.Services.CreateScope())
+            {
+                upkeepPerHour = await ProjectUpkeepAsync(scope.ServiceProvider, first);
+            }
+
+            Assert.Equal(upkeepPerHour, shown.GetProperty("upkeep_per_hour").GetDecimal());
         }
 
         Ledger beforeDisassembly = await ReadLedgerInScopeAsync(first.Player);
@@ -652,6 +658,40 @@ public sealed class ShipyardQueueTests
         return stacks.ToDictionary(
             stack => new PartKey(stack.PartTypeId, stack.MarkLevel, stack.HasRaceBonus, stack.ConditionPercent),
             stack => stack.Quantity);
+    }
+
+    /// <summary>
+    /// The credits per hour of one ship: the configured share of the credit price of the fitted
+    /// modules. The hull stays out.
+    /// </summary>
+    /// <param name="services">The scoped services.</param>
+    /// <param name="yard">The colony whose project is priced.</param>
+    /// <returns>The upkeep of one ship.</returns>
+    private static async Task<decimal> ProjectUpkeepAsync(IServiceProvider services, PreparedYard yard)
+    {
+        IReadOnlyDictionary<int, PartFacts> facts = await services.GetRequiredService<PartStockService>().GetPartFactsAsync(Token);
+        ResourceCatalog catalog = await services.GetRequiredService<IWorldModule>().GetResourceCatalogAsync(Token);
+        int? creditId = catalog.Resources
+            .Where(resource => resource.IsCivilizationScope && resource.EarnsPopulationIncome && !resource.AllowsDebt)
+            .OrderBy(resource => resource.Id)
+            .Select(resource => (int?)resource.Id)
+            .FirstOrDefault();
+        decimal moduleCredits = 0m;
+
+        foreach (int partTypeId in new[] { yard.DriveId, yard.ReactorId })
+        {
+            if (creditId is null || !facts.TryGetValue(partTypeId, out PartFacts? partFacts))
+            {
+                continue;
+            }
+
+            if (partFacts.ResourceCost.TryGetValue(creditId.Value, out decimal amount) && amount > 0m)
+            {
+                moduleCredits += amount;
+            }
+        }
+
+        return ShipyardAssembly.Share(moduleCredits, FleetSettings.From(services.GetRequiredService<IGameConfig>()).UpkeepShare);
     }
 
     /// <summary>

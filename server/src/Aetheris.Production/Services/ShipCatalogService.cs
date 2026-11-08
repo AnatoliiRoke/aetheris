@@ -210,7 +210,8 @@ public sealed class ShipCatalogService
                     ValueOf(part, characteristicIds, RateCharacteristic),
                     ValueOf(part, characteristicIds, LauncherSizeCharacteristic),
                     FactsOf(part, catalog),
-                    ValueOf(part, characteristicIds, UpkeepCharacteristic))),
+                    ValueOf(part, characteristicIds, UpkeepCharacteristic),
+                    part.AmmunitionIds ?? [])),
         ];
 
         // The ammunition is not a module of a ship: the constructor does not offer it, and the

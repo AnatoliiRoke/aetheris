@@ -65,3 +65,37 @@ public sealed class PartRaceCompatibilityEntity
     /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
     public int Version { get; set; } = 1;
 }
+
+/// <summary>
+/// A kind of ammunition a weapon fires: the damage of a weapon that fires ammunition is the damage of
+/// the rounds it accepts, so the weapon has no damage of its own (task 00040, decision of the author
+/// of 08.11.2026).
+/// </summary>
+/// <remarks>
+/// <para>
+/// The link is data: a cobalt shell is fired by the cannon and the autocannon and a rail slug by the
+/// railgun, and a new round is bound to the weapon that fires it as a row, without a release of the
+/// server (documentation/tech/09, section 2.2).
+/// </para>
+/// <para>
+/// Both sides of the link are rows of the catalog of the parts: the weapon is a part of a group of
+/// the weapons and the ammunition is a part of the group of the ammunition.
+/// </para>
+/// </remarks>
+public sealed class PartAmmunitionCompatibilityEntity
+{
+    /// <summary>Gets or sets the primary key.</summary>
+    public int Id { get; set; }
+
+    /// <summary>Gets or sets the weapon.</summary>
+    public int PartTypeId { get; set; }
+
+    /// <summary>Gets or sets the ammunition the weapon fires.</summary>
+    public int AmmunitionPartTypeId { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the link is archived (task 00023, decision 5).</summary>
+    public bool IsArchived { get; set; }
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
+}

@@ -94,6 +94,7 @@ public sealed record ShipHullDto(
 /// <param name="Rate">How many shots the weapon makes in one round.</param>
 /// <param name="LauncherSize">The size of the launcher, or zero when the weapon has none.</param>
 /// <param name="Facts">The characteristics the plaque adds up. A characteristic the plaque already shows on its own row is not here.</param>
+/// <param name="AmmunitionIds">The ammunition the weapon fires, by their identifier (task 00040). A weapon that fires ammunition has no damage of its own.</param>
 public sealed record ShipModuleDto(
     int Id,
     string Code,
@@ -126,7 +127,8 @@ public sealed record ShipModuleDto(
     decimal Rate = 0m,
     decimal LauncherSize = 0m,
     IReadOnlyList<ShipModuleFactDto>? Facts = null,
-    decimal Upkeep = 0m);
+    decimal Upkeep = 0m,
+    IReadOnlyList<int>? AmmunitionIds = null);
 
 /// <summary>
 /// One characteristic of a module that the plaque of a project adds up.

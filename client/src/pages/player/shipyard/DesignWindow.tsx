@@ -67,7 +67,7 @@ export function DesignWindow({
   const energy = useMemo(() => {
     let use = 0;
     let power = 0;
-    let crew = 0;
+    let crew = hull.crew ?? 0;
     let weight = hull.weight;
     let drivePush = 0;
     let shield = 0;
@@ -109,7 +109,7 @@ export function DesignWindow({
       kineticMin: combat.kineticMin,
       kineticMax: combat.kineticMax,
     };
-  }, [ammunition, byId, hull.weight, slots]);
+  }, [ammunition, byId, hull.crew, hull.weight, slots]);
 
   const checks = [
     { ok: energy.hasDrive, text: t('shipyard.checkNoDrive') },

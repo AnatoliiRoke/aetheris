@@ -86,6 +86,44 @@ namespace Aetheris.Production.Data.Migrations
                     b.ToTable("characteristic", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartAmmunitionCompatibilityEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AmmunitionPartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ammunition_part_type_id");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
+                    b.Property<int>("PartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_type_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_part_ammunition_compatibility");
+
+                    b.HasIndex("AmmunitionPartTypeId")
+                        .HasDatabaseName("ix_part_ammunition_compatibility_ammunition_part_type_id");
+
+                    b.HasIndex("PartTypeId", "AmmunitionPartTypeId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_part_ammunition_compatibility_part_type_id_ammunition_part_~");
+
+                    b.ToTable("part_ammunition_compatibility", (string)null);
+                });
+
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartAttributeEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -890,6 +928,23 @@ namespace Aetheris.Production.Data.Migrations
                         {
                             t.HasCheckConstraint("ck_recipe_ingredient_amount", "amount >= 0");
                         });
+                });
+
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartAmmunitionCompatibilityEntity", b =>
+                {
+                    b.HasOne("Aetheris.Production.Data.Entities.PartTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AmmunitionPartTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_ammunition_compatibility_part_type_ammunition_part_typ~");
+
+                    b.HasOne("Aetheris.Production.Data.Entities.PartTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("PartTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_ammunition_compatibility_part_type_part_type_id");
                 });
 
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartAttributeEntity", b =>

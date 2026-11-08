@@ -32,8 +32,8 @@ public sealed record FleetsViewDto(
 /// <param name="Ships">The ships in the order they joined.</param>
 /// <param name="HoldCapacity">The hold of all the ships, as the projects of the ships give it.</param>
 /// <param name="Integrity">The integrity of all the ships.</param>
-/// <param name="EnergyDamage">The energy damage all the weapons make in one round.</param>
-/// <param name="KineticDamage">The kinetic damage all the weapons make in one round, at the greatest ammunition.</param>
+/// <param name="DamageMin">The least damage all the weapons make in one round, as the projects of the ships count it.</param>
+/// <param name="DamageMax">The greatest damage all the weapons make in one round.</param>
 /// <param name="ShieldCapacity">The capacity of all the shields.</param>
 public sealed record FleetDto(
     long Id,
@@ -48,8 +48,8 @@ public sealed record FleetDto(
     IReadOnlyList<FleetShipDto> Ships,
     decimal HoldCapacity = 0m,
     decimal Integrity = 0m,
-    decimal EnergyDamage = 0m,
-    decimal KineticDamage = 0m,
+    decimal DamageMin = 0m,
+    decimal DamageMax = 0m,
     decimal ShieldCapacity = 0m);
 
 /// <summary>

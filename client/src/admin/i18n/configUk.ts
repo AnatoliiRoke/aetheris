@@ -267,6 +267,32 @@ export const configDescriptionsUk: Record<string, string> = {
     'Найбільша кількість символів у назві проєкту корабля.',
   'config.fleet.formation.name_max_length.description':
     'Найбільша кількість символів у назві флоту.',
+  'config.fleet.shipyard.queue_base_slots.description':
+    'Місця черги верфі, коли в будівлі ще немає ефекту місць.',
+  'config.fleet.shipyard.queue_max_slots.description':
+    'Найбільша кількість місць у черзі однієї верфі.',
+  'config.fleet.shipyard.assembly_min_seconds.description':
+    'Найкоротший час складання корабля, у секундах ігрового часу. Орієнтир — десять хвилин.',
+  'config.fleet.shipyard.assembly_max_seconds.description':
+    'Найдовший час складання корабля, у секундах ігрового часу. Орієнтир — шість годин.',
+  'config.fleet.shipyard.size_min.description':
+    'Розмір проєкту в слотах, якому дістається найкоротший час складання.',
+  'config.fleet.shipyard.size_max.description':
+    'Розмір проєкту в слотах, якому дістається найдовший час складання.',
+  'config.fleet.shipyard.mass_per_slot.description':
+    'Скільки тонн маси рахуються як один слот розміру при складанні.',
+  'config.fleet.shipyard.credits_per_slot.description':
+    'Кредити складання за один слот корпусу.',
+  'config.fleet.shipyard.credits_per_tonne.description':
+    'Кредити складання за одну тонну проєкту.',
+  'config.fleet.shipyard.credit_share.description':
+    'Частка кредитів, витрачених на модулі проєкту, яку складання бере кредитами.',
+  'config.fleet.shipyard.material_share.description':
+    'Частка ресурсів, витрачених на модулі проєкту, яку складання бере матеріалами планети.',
+  'config.fleet.shipyard.upkeep_share.description':
+    'Частка кредитної ціни модулів проєкту, яку готовий корабель бере кредитами за годину. Корпус не входить.',
+  'config.fleet.shipyard.hull_return_share.description':
+    'Не застосовується. Розбір повертає всі компоненти проєкту й екіпаж і не повертає ресурси на склад.',
 
   'config.economy.population.growth_percent.description':
     'Відсоток від найбільшого населення, на який населення зростає за годину.',

@@ -279,6 +279,11 @@ function AssemblyDesignCard({
       <p className="sh-note">
         {t('shipyard.duration')}: {formatDuration(language, design.durationSeconds / multiplier)}
       </p>
+      {design.upkeepPerHour !== undefined ? (
+        <p className="sh-note">
+          {t('shipyard.upkeepLabel')}: {t('fleets.upkeepValue', { amount: formatNumber(design.upkeepPerHour, language) })}
+        </p>
+      ) : null}
       <AssemblyCosts costs={costs} />
       <p className="sh-note">{t('shipyard.parts')}</p>
       <ul className="sh-parts">

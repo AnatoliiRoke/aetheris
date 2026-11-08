@@ -7,10 +7,10 @@ import { useWorldReference } from './useWorldReference';
  * The finances of the civilization on the screen of a body: the credits with their balance, their
  * spending and their income per hour.
  *
- * The server sends the balance and the income of every currency of the civilization; the credits
- * are the currency the reference table of the world marks as the income of the population, so the
- * client knows no currency by its code. The server sends no spending while there are no fleets to
- * spend the credits, so the client shows a zero, never a made-up number.
+ * The server sends the balance, the spending and the income of every currency of the civilization.
+ * The credits are the currency the reference table of the world marks as the income of the
+ * population, so the client knows no currency by its code. The spending is the upkeep of every
+ * ship per hour, and the income is already after it.
  */
 export function FinancePanel() {
   const { t, language } = useI18n();
@@ -30,7 +30,7 @@ export function FinancePanel() {
         <dt>{t('finance.balance')}</dt>
         <dd className="num">{credits ? formatNumber(credits.amount, language) : '—'}</dd>
         <dt>{t('finance.consumption')}</dt>
-        <dd className="num">{credits ? formatNumber(0, language) : '—'}</dd>
+        <dd className="num">{credits ? formatNumber(credits.spendingPerHour ?? 0, language) : '—'}</dd>
         <dt>{t('finance.income')}</dt>
         <dd className="num">{credits ? formatSigned(credits.incomePerHour, language) : '—'}</dd>
       </dl>

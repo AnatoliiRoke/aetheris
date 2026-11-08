@@ -71,6 +71,17 @@ export function ShipyardPage() {
 
     return byDesignId;
   }, [shipyardState.data]);
+  const upkeepByDesign = useMemo(() => {
+    const byDesignId = new Map<number, number>();
+
+    for (const project of shipyardState.data?.designs ?? []) {
+      if (project.upkeepPerHour !== undefined) {
+        byDesignId.set(project.designId, project.upkeepPerHour);
+      }
+    }
+
+    return byDesignId;
+  }, [shipyardState.data]);
 
   const catalog: ShipCatalog | null = catalogState.data;
   const designs = useMemo(() => designsState.data ?? [], [designsState.data]);
@@ -288,6 +299,7 @@ export function ShipyardPage() {
                   busy={busy}
                   costs={costsByDesign.get(design.id) ?? noCosts}
                   design={design}
+                  upkeepPerHour={upkeepByDesign.get(design.id) ?? null}
                   hull={hulls.find((hull) => hull.id === design.hullPartTypeId) ?? null}
                   key={design.id}
                   modules={modules}

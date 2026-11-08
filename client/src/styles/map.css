@@ -92,7 +92,7 @@
 }
 .map-world { position: absolute; inset: 0; }
 /* A place of the world is a pair of numbers; the pixels come from the shift and the scale of the area. */
-.map-marker, .map-sector, .map-star, .map-orbit-number, .map-nebula-label, .map-route-label, .map-target {
+.map-marker, .map-sector, .map-star, .map-orbit-number, .map-nebula-label, .map-route-label, .map-target, .map-radar, .map-nebula-art {
   left: round(calc(var(--tx, 0px) + var(--wx, 0) * var(--k, 1) * 1px), 1px);
   top: round(calc(var(--ty, 0px) + var(--wy, 0) * var(--k, 1) * 1px), 1px);
 }
@@ -182,27 +182,43 @@
 .map-shapes { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 /* The group, not the whole picture, is scaled: a line whose width is `non-scaling-stroke` then keeps its width (and its dashes) at any zoom. */
 .map-shapes__world { transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--k, 1)); }
-/* A nebula: a dashed edge with a soft light inside, as in the new design. */
+/* A nebula: the picture fills the area, and a dashed edge in the nebula colour keeps the boundary. */
+.map-nebula-art {
+  position: absolute; pointer-events: none;
+  width: calc(var(--ww, 0) * var(--k, 1) * 1px); height: calc(var(--wh, 0) * var(--k, 1) * 1px);
+  transform: translate(-50%, -50%);
+}
+.map-nebula-art img { display: block; width: 100%; height: 100%; object-fit: contain; opacity: 40%; }
 .map-nebula {
-  fill: rgba(46, 196, 196, 0.08); stroke: rgba(46, 196, 196, 0.55); stroke-width: 1.5; stroke-dasharray: 6 5;
+  fill: none; stroke: color-mix(in srgb, var(--nebula-label) 55%, transparent); stroke-width: 1.5; stroke-dasharray: 6 5;
   vector-effect: non-scaling-stroke;
 }
-/* The range of a radar: a dashed edge with a soft light inside and a slow sweep. */
+/* The range of a radar, as in the design: a dashed disc, a faint inner ring and a wedge that turns. */
 .map-radar {
-  fill: rgba(46, 196, 196, 0.1); stroke: rgba(46, 196, 196, 0.65); stroke-width: 1.5; stroke-dasharray: 6 5;
-  vector-effect: non-scaling-stroke;
+  position: absolute; pointer-events: none; overflow: hidden; border-radius: 50%;
+  width: calc(var(--ww, 0) * var(--k, 1) * 1px); height: calc(var(--wh, 0) * var(--k, 1) * 1px);
+  transform: translate(-50%, -50%);
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 65%, transparent);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 10%, transparent), color-mix(in srgb, var(--accent) 3%, transparent) 55%, transparent 70%);
+  box-shadow: inset 0 0 40px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.map-radar__ring {
+  position: absolute; inset: 22%; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.map-radar__sweep {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 0deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70deg, transparent 360deg);
+  animation: map-spin 9s linear infinite;
+}
+@keyframes map-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .map-radar__sweep { animation: none; }
 }
 .map-orbit { fill: none; stroke: var(--border-strong); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .map-route { stroke: var(--accent-hover); stroke-width: 2; stroke-dasharray: 8 6; vector-effect: non-scaling-stroke; }
 .map-star {
-  position: absolute; width: 63px; height: 63px; border-radius: 50%; transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(255, 227, 160, 0.38), rgba(0, 0, 0, 0) 70%);
-  pointer-events: none;
-}
-.map-star::after {
-  content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px;
-  border-radius: 50%; background: radial-gradient(circle at 40% 35%, #FFFFFF 0%, #FFE3A0 60%);
-  box-shadow: 0 0 15px rgba(255, 227, 160, 0.8);
+  position: absolute; width: 50px; height: 50px; object-fit: contain; transform: translate(-50%, -50%);
+  pointer-events: none; opacity: 90%;
 }
 .map-orbit-number, .map-nebula-label, .map-route-label {
   position: absolute; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap;
@@ -260,6 +276,19 @@
 .map-marker--cluster .map-marker__symbol::before { background: radial-gradient(circle, rgba(46, 196, 196, 0.3), rgba(0, 0, 0, 0) 70%); }
 .map-cluster { font-size: var(--fs-tiny); font-weight: 700; color: var(--accent-hover); font-variant-numeric: tabular-nums; }
 .map-marker__cloud { position: absolute; right: -8px; top: -8px; color: var(--nebula-label); }
+.map-marker__symbol:has(.map-star-picture),
+.map-marker__symbol:has(.map-field) { width: auto; height: auto; overflow: visible; }
+.map-marker__symbol:has(.map-star-picture)::before,
+.map-marker__symbol:has(.map-star-picture)::after,
+.map-marker__symbol:has(.map-field)::before,
+.map-marker__symbol:has(.map-field)::after { display: none; }
+.map-marker--known .map-marker__symbol:has(.map-star-picture) { width: auto; height: auto; opacity: 0.55; }
+.map-star-picture { display: block; width: 25px; height: 25px; object-fit: contain; opacity: 80%; }
+.map-field { position: relative; display: block; width: 44px; height: 44px; }
+.map-field__rock {
+  position: absolute; left: 50%; top: 50%; object-fit: contain; pointer-events: none;
+  transform: translate(calc(-50% + var(--rock-x, 0px)), calc(-50% + var(--rock-y, 0px)));
+}
 .map-marker__sign { position: absolute; right: -5px; top: -5px; padding: 1px; border-radius: var(--r-full); background: var(--bg-0); color: var(--accent-hover); }
 .map-marker__sign--second { right: auto; left: -5px; }
 .map-body { width: 32px; height: 32px; border-radius: var(--r-full); object-fit: cover; }

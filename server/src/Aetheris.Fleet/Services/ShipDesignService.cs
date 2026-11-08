@@ -371,7 +371,8 @@ public sealed class ShipDesignService
                     hull.HoldCapacity,
                     hull.Integrity,
                     hull.Weight,
-                    hull.RaceBonusSlots))
+                    hull.RaceBonusSlots,
+                    hull.Crew))
         ];
 
         List<ShipModuleViewDto> modules =
@@ -414,7 +415,8 @@ public sealed class ShipDesignService
                             fact.UnitKey,
                             fact.Amount,
                             fact.SortOrder))
-                    ]))
+                    ],
+                    module.AmmunitionIds ?? []))
         ];
 
         // The types of the modules that go into a ship: the counts are of the modules the builder
@@ -973,7 +975,7 @@ public sealed class ShipDesignService
 
         decimal energyUse = 0m;
         decimal power = 0m;
-        decimal crew = 0m;
+        decimal crew = hull?.Crew ?? 0m;
         decimal weight = hull?.Weight ?? 0m;
         decimal drivePush = 0m;
         decimal energyDamage = 0m;
@@ -1008,16 +1010,18 @@ public sealed class ShipDesignService
             cargo += module.CargoCapacity;
             AddFacts(module.Facts, factsByKind, factOrder);
 
-            if (string.Equals(module.DamageKind, PartDamageKinds.Energy, StringComparison.Ordinal) && module.Damage > 0m)
+            if (FiresAmmunition(module))
             {
-                energyDamage += module.Damage * ShotsPerRound(module.Rate);
-            }
-            else if (string.Equals(module.DamageKind, PartDamageKinds.Kinetic, StringComparison.Ordinal))
-            {
-                (decimal least, decimal greatest) = KineticRound(module, catalog.Ammunition);
+                // A weapon that fires ammunition has no damage of its own: its damage is the damage of
+                // the rounds it accepts, so a round the weapon does not accept never counts.
+                (decimal least, decimal greatest) = AmmunitionRound(module, catalog.Ammunition);
 
                 kineticDamageMin += least;
                 kineticDamageMax += greatest;
+            }
+            else if (string.Equals(module.DamageKind, PartDamageKinds.Energy, StringComparison.Ordinal) && module.Damage > 0m)
+            {
+                energyDamage += module.Damage * ShotsPerRound(module.Rate);
             }
 
             hasDrive |= string.Equals(module.Component, DriveComponent, StringComparison.Ordinal);
@@ -1051,7 +1055,9 @@ public sealed class ShipDesignService
                     .OrderBy(pair => factOrder.GetValueOrDefault(pair.Key))
                     .ThenBy(pair => pair.Key, StringComparer.Ordinal)
                     .Select(pair => pair.Value)
-            ]);
+            ],
+            energyDamage + kineticDamageMin,
+            energyDamage + kineticDamageMax);
 
         return new ShipDesignDto(
             design.Id,
@@ -1111,36 +1117,29 @@ public sealed class ShipDesignService
     private static decimal ShotsPerRound(decimal rate) => rate > 0m ? rate : 1m;
 
     /// <summary>
-    /// The least and the greatest kinetic damage one weapon makes in a round.
+    /// Tells whether a weapon fires ammunition: it is a weapon of the kinetic kind or it has rounds bound
+    /// to it. Such a weapon has no damage of its own.
     /// </summary>
-    /// <param name="weapon">The fitted kinetic weapon.</param>
+    private static bool FiresAmmunition(ShipModuleDto weapon) =>
+        weapon.AmmunitionIds is { Count: > 0 }
+        || string.Equals(weapon.DamageKind, PartDamageKinds.Kinetic, StringComparison.Ordinal);
+
+    /// <summary>
+    /// The least and the greatest damage one weapon that fires ammunition makes in a round.
+    /// </summary>
+    /// <param name="weapon">The fitted weapon.</param>
     /// <param name="ammunition">The ammunition of the catalog.</param>
     /// <returns>
-    /// The range, or zeros when no kinetic round fits the weapon. A launcher takes the kinetic
-    /// rounds of its size. A weapon without a size takes the kinetic rounds that have no size.
+    /// The range over the rounds the weapon accepts, each at the shots of the weapon in a round, or zeros
+    /// when the weapon accepts no round. The player loads one of the rounds, so the least and the
+    /// greatest are what a round can make.
     /// </returns>
-    private static (decimal Least, decimal Greatest) KineticRound(
+    private static (decimal Least, decimal Greatest) AmmunitionRound(
         ShipModuleDto weapon,
         IReadOnlyList<ShipAmmunitionDto> ammunition)
     {
-        List<decimal> roundDamage = [];
-
-        foreach (ShipAmmunitionDto round in ammunition)
-        {
-            if (!string.Equals(round.DamageKind, PartDamageKinds.Kinetic, StringComparison.Ordinal) || round.Damage <= 0m)
-            {
-                continue;
-            }
-
-            bool sameSize = weapon.LauncherSize > 0m
-                ? round.LauncherSize == weapon.LauncherSize
-                : round.LauncherSize == 0m;
-
-            if (sameSize)
-            {
-                roundDamage.Add(round.Damage);
-            }
-        }
+        IReadOnlyList<int> accepted = weapon.AmmunitionIds ?? [];
+        List<decimal> roundDamage = [.. ammunition.Where(round => accepted.Contains(round.Id) && round.Damage > 0m).Select(round => round.Damage)];
 
         if (roundDamage.Count == 0)
         {

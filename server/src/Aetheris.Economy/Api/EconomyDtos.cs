@@ -23,12 +23,14 @@ public sealed record PopulationFacts(
 /// <param name="PlayerId">The player.</param>
 /// <param name="ResourceTypeId">The currency.</param>
 /// <param name="Amount">The balance.</param>
-/// <param name="IncomePerHour">How much the balance grows with in an hour.</param>
+/// <param name="IncomePerHour">How much the balance grows with in an hour, after the upkeep of the ships.</param>
+/// <param name="SpendingPerHour">The credits the ships cost per hour. Only the income currency carries it; the inflow is already after it.</param>
 public sealed record CurrencyBalanceFacts(
     string PlayerId,
     int ResourceTypeId,
     long Amount,
-    decimal IncomePerHour);
+    decimal IncomePerHour,
+    decimal SpendingPerHour = 0m);
 
 /// <summary>
 /// The economy of a player at a moment of game time (task 00015).

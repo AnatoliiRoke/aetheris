@@ -1065,13 +1065,14 @@ public sealed class EconomyService
             }
 
             decimal income = earns ? Views.Sum(view => view.Income) : 0m;
+            decimal spending = chargeCurrencyId == currencyId && ShipUpkeepPerHour > 0m ? ShipUpkeepPerHour : 0m;
 
-            if (chargeCurrencyId == currencyId && ShipUpkeepPerHour > 0m)
+            if (spending > 0m)
             {
-                income = income > ShipUpkeepPerHour ? income - ShipUpkeepPerHour : 0m;
+                income = income > spending ? income - spending : 0m;
             }
 
-            return new CurrencyBalanceFacts(playerId, currencyId, (long)decimal.Floor(exact), income);
+            return new CurrencyBalanceFacts(playerId, currencyId, (long)decimal.Floor(exact), income, spending);
         }
     }
 }

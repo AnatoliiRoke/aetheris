@@ -25,6 +25,8 @@ export interface ShipHull {
   weight: number;
   /** How many extra slots the race gives the hull. */
   raceBonusSlots: number;
+  /** How many people the hull needs. The seed sets this to the number of slots. */
+  crew: number;
 }
 
 /**
@@ -104,6 +106,8 @@ export interface ShipModule {
   rate?: number;
   /** The size of the launcher, or zero when the weapon has none. */
   launcherSize?: number;
+  /** The ammunition the weapon fires. A weapon that fires ammunition has no damage of its own. */
+  ammunitionIds?: number[];
   /** The characteristics the plaque adds up. */
   facts?: ShipModuleFact[];
   /** The weight of one module in tonnes. */
@@ -199,6 +203,10 @@ export interface ShipDesignSummary {
   kineticDamageMin?: number;
   /** The greatest kinetic damage the weapons make in one round. */
   kineticDamageMax?: number;
+  /** The least damage all the weapons make in one round, as the server counts it. */
+  damageMin?: number;
+  /** The greatest damage all the weapons make in one round. */
+  damageMax?: number;
   /** The characteristics of the fitted modules that the plaque adds up. */
   facts?: ShipDesignFact[];
 }
@@ -324,10 +332,10 @@ export interface Fleet {
   holdCapacity: number;
   /** The integrity of all the ships. */
   integrity: number;
-  /** The energy damage all the weapons make in one round. */
-  energyDamage: number;
-  /** The kinetic damage all the weapons make in one round. */
-  kineticDamage: number;
+  /** The least damage all the weapons make in one round. */
+  damageMin: number;
+  /** The greatest damage all the weapons make in one round. */
+  damageMax: number;
   /** The capacity of all the shields. */
   shieldCapacity: number;
 }
@@ -407,6 +415,8 @@ export interface ShipyardDesign {
   durationSeconds: number;
   costs: ShipyardCost[];
   parts: ShipyardPart[];
+  /** The credits one finished ship of the project costs per hour. */
+  upkeepPerHour?: number;
 }
 
 /**

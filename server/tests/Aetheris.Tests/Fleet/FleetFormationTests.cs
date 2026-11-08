@@ -115,8 +115,8 @@ public sealed class FleetFormationTests
         Assert.True(summary.GetProperty("integrity").GetDecimal() > 0);
         Assert.Equal(3 * summary.GetProperty("hold_capacity").GetDecimal(), fleet.GetProperty("hold_capacity").GetDecimal());
         Assert.Equal(3 * summary.GetProperty("integrity").GetDecimal(), fleet.GetProperty("integrity").GetDecimal());
-        Assert.Equal(3 * summary.GetProperty("energy_damage").GetDecimal(), fleet.GetProperty("energy_damage").GetDecimal());
-        Assert.Equal(3 * summary.GetProperty("kinetic_damage").GetDecimal(), fleet.GetProperty("kinetic_damage").GetDecimal());
+        Assert.Equal(3 * summary.GetProperty("damage_min").GetDecimal(), fleet.GetProperty("damage_min").GetDecimal());
+        Assert.Equal(3 * summary.GetProperty("damage_max").GetDecimal(), fleet.GetProperty("damage_max").GetDecimal());
         Assert.Equal(3 * summary.GetProperty("shield_capacity").GetDecimal(), fleet.GetProperty("shield_capacity").GetDecimal());
     }
 

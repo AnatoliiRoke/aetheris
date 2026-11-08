@@ -55,6 +55,9 @@ public sealed record FleetSettings
     /// <summary>Gets the share of the resources spent on the modules that the assembly takes.</summary>
     public decimal MaterialShare { get; init; }
 
+    /// <summary>Gets the share of the credit price of the fitted modules that a finished ship takes per hour.</summary>
+    public decimal UpkeepShare { get; init; }
+
     /// <summary>Gets the largest number of the characters of the name of a fleet.</summary>
     public int FleetNameMaxLength { get; init; }
 
@@ -82,6 +85,7 @@ public sealed record FleetSettings
             CreditsPerTonne = ReadDecimal(config, FleetConfigKeys.CreditsPerTonne),
             CreditShare = ReadDecimal(config, FleetConfigKeys.CreditShare),
             MaterialShare = ReadDecimal(config, FleetConfigKeys.MaterialShare),
+            UpkeepShare = ReadDecimal(config, FleetConfigKeys.UpkeepShare),
             FleetNameMaxLength = ReadInt32(config, FleetConfigKeys.FleetNameMaxLength),
         };
     }

@@ -100,7 +100,7 @@ describe('the fleets screen (task 00040)', () => {
     const panel = await screen.findByRole('complementary', { name: 'Деталі флоту' });
 
     expect(within(panel).getByText('1 200 т')).toBeInTheDocument();
-    expect(within(panel).getByText('264 енерг. · 420 кінет.')).toBeInTheDocument();
+    expect(within(panel).getByText('264–420')).toBeInTheDocument();
     expect(within(panel).getByText('15 300')).toBeInTheDocument();
     expect(within(panel).getByText('3 200')).toBeInTheDocument();
   });

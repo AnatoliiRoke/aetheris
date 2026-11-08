@@ -27,8 +27,10 @@ export interface CurrencyBalanceFacts {
   /** The currency: a resource of the scope of the civilization. */
   resourceTypeId: number;
   amount: number;
-  /** How much the balance grows with in an hour. */
+  /** How much the balance grows with in an hour, after the upkeep of the ships. */
   incomePerHour: number;
+  /** The credits the ships cost per hour. The inflow is already after it. */
+  spendingPerHour?: number;
 }
 
 /**

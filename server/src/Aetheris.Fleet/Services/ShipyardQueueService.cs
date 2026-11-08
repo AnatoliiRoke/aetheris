@@ -878,7 +878,8 @@ public sealed class ShipyardQueueService
                     line.Quantity,
                     Available(board.Stock, line),
                     line.IsHull)),
-            ]);
+            ],
+            quote.UpkeepPerHour);
     }
 
     private static ShipyardOrderDto OrderOf(
@@ -1052,16 +1053,16 @@ public sealed class ShipyardQueueService
 
         foreach (QuotedPart line in partLines)
         {
-            if (line.IsHull || !facts.TryGetValue(line.PartTypeId, out PartRecipeFacts? moduleFacts))
+            if (!facts.TryGetValue(line.PartTypeId, out PartRecipeFacts? partFacts))
             {
                 continue;
             }
 
-            foreach ((int resourceTypeId, decimal amount) in moduleFacts.ResourceCost)
+            foreach ((int resourceTypeId, decimal amount) in partFacts.ResourceCost)
             {
                 decimal spent = amount * line.Quantity;
 
-                if (spent <= 0m)
+                if (spent <= 0m || line.IsHull)
                 {
                     continue;
                 }
@@ -1104,7 +1105,7 @@ public sealed class ShipyardQueueService
             partLines,
             crew,
             ShipyardAssembly.Share(moduleCredits, settings.CreditShare),
-            hull.Upkeep > 0m ? hull.Upkeep : 0m,
+            ShipyardAssembly.Share(moduleCredits, settings.UpkeepShare),
             assemblySeconds,
             materials);
     }

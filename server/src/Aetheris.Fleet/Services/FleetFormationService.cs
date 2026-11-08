@@ -599,8 +599,8 @@ public sealed class FleetFormationService
                     members,
                     carried.Sum(summary => summary.HoldCapacity),
                     carried.Sum(summary => summary.Integrity),
-                    carried.Sum(summary => summary.EnergyDamage),
-                    carried.Sum(summary => summary.KineticDamage),
+                    carried.Sum(summary => summary.DamageMin),
+                    carried.Sum(summary => summary.DamageMax),
                     carried.Sum(summary => summary.ShieldCapacity));
             }),
         ];

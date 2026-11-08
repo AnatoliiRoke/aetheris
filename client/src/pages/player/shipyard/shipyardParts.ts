@@ -204,26 +204,20 @@ export function shotsPerRound(rate: number | undefined): number {
 }
 
 /**
- * The least and the greatest kinetic damage one weapon makes in a round, from the ammunition
- * it accepts. A launcher takes the kinetic rounds of its size. A weapon without a size takes
- * the kinetic rounds that have no size.
+ * The least and the greatest damage one weapon that fires ammunition makes in a round: the damage of
+ * the rounds the weapon accepts, each at the shots of the weapon. The weapon has no damage of its own, so
+ * a round the weapon does not accept never counts, whatever its kind of damage.
  *
- * @param weapon The fitted kinetic weapon.
+ * @param weapon The fitted weapon.
  * @param ammunition The ammunition of the catalog.
- * @returns The range, or `null` when no kinetic round fits the weapon.
+ * @returns The range, or `null` when the weapon accepts no round.
  */
 export function kineticRound(
   weapon: ShipModule,
   ammunition: ShipAmmunition[],
 ): { least: number; greatest: number } | null {
-  const launcherSize = weapon.launcherSize ?? 0;
-  const fitting = ammunition.filter((round) => {
-    if (round.damageKind !== 'kinetic' || round.damage <= 0) {
-      return false;
-    }
-
-    return launcherSize > 0 ? round.launcherSize === launcherSize : round.launcherSize === 0;
-  });
+  const accepted = new Set(weapon.ammunitionIds ?? []);
+  const fitting = ammunition.filter((round) => accepted.has(round.id) && round.damage > 0);
 
   if (fitting.length === 0) {
     return null;
@@ -266,15 +260,15 @@ export function fittedCombat(
     armor += module.armor ?? 0;
     shieldRegen += (module.shieldRegen ?? 0) + (module.shieldRestore ?? 0);
 
-    if (module.damageKind === 'energy' && module.damage > 0) {
-      energyDamage += module.damage * shotsPerRound(module.rate);
-    } else if (module.damageKind === 'kinetic') {
+    if ((module.ammunitionIds?.length ?? 0) > 0 || module.damageKind === 'kinetic') {
       const range = kineticRound(module, ammunition);
 
       if (range) {
         kineticMin += range.least;
         kineticMax += range.greatest;
       }
+    } else if (module.damageKind === 'energy' && module.damage > 0) {
+      energyDamage += module.damage * shotsPerRound(module.rate);
     }
   }
 

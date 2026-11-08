@@ -6,10 +6,11 @@ namespace Aetheris.Fleet.Services;
 /// The share of an assembly cost and the technology applied to a stored duration (task 00039).
 /// </summary>
 /// <remarks>
-/// The crew, the assembly time and the upkeep are characteristics of the hull. The assembly
-/// time is not the time to manufacture the hull. The credits and the materials are a share of
-/// what the fitted modules cost. The shares live in <see cref="FleetSettings"/>. A technology
-/// multiplies the time when the record starts.
+/// The crew and the assembly time are characteristics of the hull. The assembly time is not
+/// the time to manufacture the hull. The credits and the materials are a share of what the
+/// fitted modules cost. The upkeep is a share of the credit price of those modules.
+/// The shares live in <see cref="FleetSettings"/>. A technology multiplies the time when the
+/// record starts.
 /// </remarks>
 public static class ShipyardAssembly
 {

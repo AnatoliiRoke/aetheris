@@ -691,6 +691,32 @@ public static class ProductionSeedAdditions
             }
         }
 
+        HashSet<(int PartTypeId, int AmmunitionPartTypeId)> existingAmmunition =
+        [
+            .. (await dbContext.PartAmmunitionCompatibilities
+                .AsNoTracking()
+                .Select(link => new { link.PartTypeId, link.AmmunitionPartTypeId })
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false))
+                .Select(link => (link.PartTypeId, link.AmmunitionPartTypeId)),
+        ];
+
+        foreach (SeedPartAmmunition link in data.PartAmmunition ?? [])
+        {
+            if (!partIds.TryGetValue(link.Part, out int partId))
+            {
+                continue;
+            }
+
+            foreach (string round in link.Ammunition)
+            {
+                if (partIds.TryGetValue(round, out int roundId) && !existingAmmunition.Contains((partId, roundId)))
+                {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -752,7 +778,29 @@ public static class ProductionSeedAdditions
             }
         }
 
-        if (hulls.Count == 0 && races.Count == 0)
+        List<PartAmmunitionCompatibilityEntity> ammunition = [];
+
+        foreach (SeedPartAmmunition link in data.PartAmmunition ?? [])
+        {
+            if (!partIds.TryGetValue(link.Part, out int partId))
+            {
+                continue;
+            }
+
+            foreach (string round in link.Ammunition)
+            {
+                if (partIds.TryGetValue(round, out int roundId))
+                {
+                    ammunition.Add(new PartAmmunitionCompatibilityEntity
+                    {
+                        PartTypeId = partId,
+                        AmmunitionPartTypeId = roundId,
+                    });
+                }
+            }
+        }
+
+        if (hulls.Count == 0 && races.Count == 0 && ammunition.Count == 0)
         {
             return false;
         }
@@ -777,6 +825,12 @@ public static class ProductionSeedAdditions
 
         dbContext.PartHullCompatibilities.AddRange([.. hulls.Where(link => !existingHulls.Contains((link.PartTypeId, link.HullPartTypeId)))]);
         dbContext.PartRaceCompatibilities.AddRange([.. races.Where(link => !existingRaces.Contains((link.PartTypeId, link.RaceId)))]);
+
+        HashSet<(int PartTypeId, int AmmunitionPartTypeId)> existingAmmunition =
+            [.. (await dbContext.PartAmmunitionCompatibilities.AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false))
+                .Select(link => (link.PartTypeId, link.AmmunitionPartTypeId))];
+
+        dbContext.PartAmmunitionCompatibilities.AddRange([.. ammunition.Where(link => !existingAmmunition.Contains((link.PartTypeId, link.AmmunitionPartTypeId)))]);
 
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

@@ -68,6 +68,9 @@ public sealed class ProductionDbContext : DbContext
     /// <summary>Gets the links of the parts to the hulls they fit (task 00042).</summary>
     public DbSet<PartHullCompatibilityEntity> PartHullCompatibilities => Set<PartHullCompatibilityEntity>();
 
+    /// <summary>Gets the ammunition every weapon fires (task 00040).</summary>
+    public DbSet<PartAmmunitionCompatibilityEntity> PartAmmunitionCompatibilities => Set<PartAmmunitionCompatibilityEntity>();
+
     /// <summary>Gets the links of the parts to the races they belong to (task 00042).</summary>
     public DbSet<PartRaceCompatibilityEntity> PartRaceCompatibilities => Set<PartRaceCompatibilityEntity>();
 
@@ -187,6 +190,15 @@ public sealed class ProductionDbContext : DbContext
             entity.HasIndex(e => e.HullPartTypeId);
             entity.HasOne<PartTypeEntity>().WithMany(part => part.HullCompatibilityIds).HasForeignKey(e => e.PartTypeId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne<PartTypeEntity>().WithMany().HasForeignKey(e => e.HullPartTypeId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PartAmmunitionCompatibilityEntity>(entity =>
+        {
+            entity.ToTable("part_ammunition_compatibility");
+            entity.HasIndex(e => new { e.PartTypeId, e.AmmunitionPartTypeId }).IsUnique();
+            entity.HasIndex(e => e.AmmunitionPartTypeId);
+            entity.HasOne<PartTypeEntity>().WithMany().HasForeignKey(e => e.PartTypeId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<PartTypeEntity>().WithMany().HasForeignKey(e => e.AmmunitionPartTypeId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<PartRaceCompatibilityEntity>(entity =>

@@ -314,7 +314,19 @@ public static class ProductionReferenceSeed
             }
         }
 
-        if (data.PartHulls is { Count: > 0 } || data.PartRaces is { Count: > 0 })
+        foreach (SeedPartAmmunition link in data.PartAmmunition ?? [])
+        {
+            foreach (string round in link.Ammunition)
+            {
+                dbContext.PartAmmunitionCompatibilities.Add(new PartAmmunitionCompatibilityEntity
+                {
+                    PartTypeId = partTypeIds[link.Part],
+                    AmmunitionPartTypeId = partTypeIds[round],
+                });
+            }
+        }
+
+        if (data.PartHulls is { Count: > 0 } || data.PartRaces is { Count: > 0 } || data.PartAmmunition is { Count: > 0 })
         {
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -453,6 +465,7 @@ public static class ProductionReferenceSeed
 /// <param name="GroupCharacteristics">The characteristics of the groups of the parts (task 00027).</param>
 /// <param name="PartHulls">The hulls every part fits (task 00042).</param>
 /// <param name="PartRaces">The races every part belongs to (task 00042).</param>
+/// <param name="PartAmmunition">The ammunition every weapon fires (task 00040).</param>
 public sealed record ProductionSeedData(
     IReadOnlyList<SeedPartGroup> PartGroups,
     IReadOnlyList<SeedPart> Parts,
@@ -461,7 +474,8 @@ public sealed record ProductionSeedData(
     IReadOnlyList<SeedCharacteristic>? Characteristics = null,
     IReadOnlyList<SeedGroupCharacteristic>? GroupCharacteristics = null,
     IReadOnlyList<SeedPartHull>? PartHulls = null,
-    IReadOnlyList<SeedPartRace>? PartRaces = null);
+    IReadOnlyList<SeedPartRace>? PartRaces = null,
+    IReadOnlyList<SeedPartAmmunition>? PartAmmunition = null);
 
 /// <summary>A characteristic of the starting data.</summary>
 /// <param name="Code">The neutral code of the characteristic.</param>
@@ -494,6 +508,13 @@ public sealed record SeedGroupCharacteristic(
 public sealed record SeedPartHull(
     string Part,
     IReadOnlyList<string> Hulls);
+
+/// <summary>The ammunition a weapon of the starting data fires (task 00040).</summary>
+/// <param name="Part">The code of the weapon of the file.</param>
+/// <param name="Ammunition">The codes of the ammunition of the file the weapon fires.</param>
+public sealed record SeedPartAmmunition(
+    string Part,
+    IReadOnlyList<string> Ammunition);
 
 /// <summary>The races a part of the starting data belongs to (task 00042).</summary>
 /// <param name="Part">The code of the part of the file.</param>

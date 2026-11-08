@@ -84,6 +84,8 @@ public sealed record ShipDesignSlotDto(
 /// <param name="KineticDamageMin">The least kinetic damage the weapons make in one round, from the ammunition they accept.</param>
 /// <param name="KineticDamageMax">The greatest kinetic damage the weapons make in one round, from the ammunition they accept.</param>
 /// <param name="Facts">The characteristics of the fitted modules that the plaque adds up. A zero amount is left out.</param>
+/// <param name="DamageMin">The least damage all the weapons make in one round: the damage of the energy weapons and, for every weapon that fires ammunition, its least round (task 00040).</param>
+/// <param name="DamageMax">The greatest damage all the weapons make in one round, counted the same way with the greatest round of every weapon (task 00040).</param>
 public sealed record ShipDesignSummaryDto(
     int TotalSlots,
     int UsedSlots,
@@ -104,7 +106,9 @@ public sealed record ShipDesignSummaryDto(
     decimal ShieldRegen,
     decimal KineticDamageMin,
     decimal KineticDamageMax,
-    IReadOnlyList<ShipDesignFactDto> Facts);
+    IReadOnlyList<ShipDesignFactDto> Facts,
+    decimal DamageMin = 0m,
+    decimal DamageMax = 0m);
 
 /// <summary>
 /// One summed characteristic of the fitted modules.
@@ -152,6 +156,7 @@ public sealed record ShipCatalogViewDto(
 /// <param name="Integrity">How strong the hull is.</param>
 /// <param name="Weight">The weight of the hull in tonnes.</param>
 /// <param name="RaceBonusSlots">How many extra slots the race gives the hull.</param>
+/// <param name="Crew">How many people the hull needs. The starting data sets this to the number of slots.</param>
 public sealed record ShipHullViewDto(
     int Id,
     string Code,
@@ -165,7 +170,8 @@ public sealed record ShipHullViewDto(
     decimal HoldCapacity,
     decimal Integrity,
     decimal Weight,
-    int RaceBonusSlots);
+    int RaceBonusSlots,
+    decimal Crew);
 
 /// <summary>
 /// A module of the catalog of the ships for the builder (task 00038, section 3.3).
@@ -198,6 +204,7 @@ public sealed record ShipHullViewDto(
 /// <param name="Rate">How many shots the weapon makes in one round.</param>
 /// <param name="LauncherSize">The size of the launcher, or zero when the weapon has none.</param>
 /// <param name="Facts">The characteristics the plaque adds up.</param>
+/// <param name="AmmunitionIds">The ammunition the weapon fires; a weapon that fires ammunition has no damage of its own (task 00040).</param>
 public sealed record ShipModuleViewDto(
     int Id,
     string Code,
@@ -227,7 +234,8 @@ public sealed record ShipModuleViewDto(
     decimal ShieldRestore,
     decimal Rate,
     decimal LauncherSize,
-    IReadOnlyList<ShipModuleFactViewDto> Facts);
+    IReadOnlyList<ShipModuleFactViewDto> Facts,
+    IReadOnlyList<int> AmmunitionIds);
 
 /// <summary>
 /// One characteristic of a module that the plaque of a project adds up.

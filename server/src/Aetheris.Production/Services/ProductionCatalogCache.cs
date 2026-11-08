@@ -141,6 +141,12 @@ public sealed class ProductionCatalogCache
             .ThenBy(link => link.HullPartTypeId)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
+        List<PartAmmunitionCompatibilityEntity> ammunitionLinks = await dbContext.PartAmmunitionCompatibilities.AsNoTracking()
+            .Where(link => !link.IsArchived)
+            .OrderBy(link => link.PartTypeId)
+            .ThenBy(link => link.AmmunitionPartTypeId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
         List<PartRaceCompatibilityEntity> raceLinks = await dbContext.PartRaceCompatibilities.AsNoTracking()
             .Where(link => !link.IsArchived)
             .OrderBy(link => link.PartTypeId)
@@ -213,6 +219,13 @@ public sealed class ProductionCatalogCache
                     part => part.Key,
                     part => (IReadOnlyList<int>)[.. part.Select(link => link.HullPartTypeId)]);
 
+        Dictionary<int, IReadOnlyList<int>> ammunitionIds =
+            ammunitionLinks
+                .GroupBy(link => link.PartTypeId)
+                .ToDictionary(
+                    part => part.Key,
+                    part => (IReadOnlyList<int>)[.. part.Select(link => link.AmmunitionPartTypeId)]);
+
         Dictionary<int, IReadOnlyList<int>> raceIds =
             raceLinks
                 .GroupBy(link => link.PartTypeId)
@@ -255,7 +268,8 @@ public sealed class ProductionCatalogCache
                     part.Weight,
                     partCharacteristicInfos.GetValueOrDefault(part.Id, new Dictionary<int, PartCharacteristicInfo>()),
                     compatibleHullIds.GetValueOrDefault(part.Id, []),
-                    raceIds.GetValueOrDefault(part.Id, []))),
+                    raceIds.GetValueOrDefault(part.Id, []),
+                    ammunitionIds.GetValueOrDefault(part.Id, []))),
             ],
             [
                 .. recipes.Select(recipe => new RecipeInfo(

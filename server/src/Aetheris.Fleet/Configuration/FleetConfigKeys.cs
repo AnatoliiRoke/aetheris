@@ -61,6 +61,11 @@ public static class FleetConfigKeys
     public const string MaterialShare = "fleet.shipyard.material_share";
 
     /// <summary>
+    /// The share of the credit price of the fitted modules that a finished ship takes as credits per hour.
+    /// </summary>
+    public const string UpkeepShare = "fleet.shipyard.upkeep_share";
+
+    /// <summary>
     /// Kept in the catalog. A dismantling does not read it: the project returns every component
     /// and the crew, and the resources stay.
     /// </summary>
@@ -85,8 +90,9 @@ public static class FleetConfigKeys
         new(MassPerSlot, "25", "0.000001", "1000000", "Скільки тонн маси рахуються як один слот розміру при складанні."),
         new(CreditsPerSlot, "20", "0", "1000000000", "Кредити складання за один слот корпусу."),
         new(CreditsPerTonne, "2", "0", "1000000000", "Кредити складання за одну тонну проєкту."),
-        new(CreditShare, "0.05", "0", "1", "Частка кредитів, витрачених на модулі проєкту, яку складання бере кредитами. Орієнтир — від п'яти до десяти відсотків."),
-        new(MaterialShare, "0.05", "0", "1", "Частка ресурсів, витрачених на модулі проєкту, яку складання бере матеріалами планети. Орієнтир — від п'яти до десяти відсотків."),
+        new(CreditShare, "0.5", "0", "1", "Частка кредитів, витрачених на модулі проєкту, яку складання бере кредитами."),
+        new(MaterialShare, "0.1", "0", "1", "Частка ресурсів, витрачених на модулі проєкту, яку складання бере матеріалами планети."),
+        new(UpkeepShare, "0.1", "0", "1", "Частка кредитної ціни модулів проєкту, яку готовий корабель бере кредитами за годину. Корпус не входить."),
         new(FleetNameMaxLength, "64", "1", "128", "Найбільша кількість символів у назві флоту."),
         new(HullReturnShare, "0.5", "0", "1", "Не застосовується. Розбір повертає всі компоненти проєкту й екіпаж і не повертає ресурси на склад."),
     ];

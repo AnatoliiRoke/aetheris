@@ -20,6 +20,7 @@ import { installedModules, designProblem, factLabel, formatCombatDamage, formatF
  * @param onAssembly What to do when the player sends the project to the assembly.
  * @param onArchive What to do when the player archives the project.
  * @param costs The resources the assembly of this project takes, with what the player has.
+ * @param upkeepPerHour The credits one finished ship of this project costs per hour, or `null` when the quote is not loaded.
  */
 export const ShipDesignCard = memo(function ShipDesignCard({
   design,
@@ -27,6 +28,7 @@ export const ShipDesignCard = memo(function ShipDesignCard({
   modules,
   busy,
   costs,
+  upkeepPerHour,
   onEdit,
   onAssembly,
   onArchive,
@@ -36,6 +38,7 @@ export const ShipDesignCard = memo(function ShipDesignCard({
   modules: ShipModule[];
   busy: boolean;
   costs: readonly ShipyardCost[];
+  upkeepPerHour: number | null;
   onEdit: (design: ShipDesign) => void;
   onAssembly: (design: ShipDesign) => void;
   onArchive: (design: ShipDesign) => void;
@@ -119,6 +122,12 @@ export const ShipDesignCard = memo(function ShipDesignCard({
           <dt className="sh-facts__term">{t('shipyard.crew')}</dt>
           <dd className="sh-facts__value">{formatAmount(summary.crew, language)}</dd>
         </div>
+        {upkeepPerHour !== null ? (
+          <div>
+            <dt className="sh-facts__term">{t('shipyard.upkeepLabel')}</dt>
+            <dd className="sh-facts__value">{t('fleets.upkeepValue', { amount: formatAmount(upkeepPerHour, language) })}</dd>
+          </div>
+        ) : null}
         <div>
           <dt className="sh-facts__term">{t('shipyard.drivePush')}</dt>
           <dd className="sh-facts__value">{formatAmount(summary.drivePush, language)} кН</dd>
