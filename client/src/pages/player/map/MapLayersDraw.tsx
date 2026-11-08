@@ -6,6 +6,7 @@ import { useI18n } from '../../../i18n/useI18n';
 import { clusterPoints, orbitPlace, orbitRadius, systemWorldSize } from './mapGeometry';
 import { objectClasses, type MapLayers } from './mapLayers';
 import { MapMarker } from './MapMarker';
+import { sectorClipPath, sectorPath } from './mapSectorShape';
 import { worldStyle } from './mapStyle';
 import { useMapZoom } from './mapZoom';
 
@@ -33,12 +34,34 @@ export interface LayerContext {
  * The sectors of the galaxy as areas of the world with a name, the badge of the sector of the
  * newcomers and the number of the bodies of the player.
  */
+/**
+ * The sectors of the galaxy as areas of the world with a name, the badge of the sector of the
+ * newcomers and the number of the bodies of the player.
+ *
+ * The new design draws the outline of a sector as a shape of the world (an irregular curve, as if
+ * a cloud of dust had settled there) and puts the name over it. The shape is drawn once, as an
+ * SVG, and the button over it is transparent and only takes the click.
+ */
 export const GalaxyLayer = memo(function GalaxyLayer({ galaxy, context }: { galaxy: MapGalaxy; context: LayerContext }) {
   const { t } = useI18n();
   const size = galaxy.sectorSize * sectorCover;
+  const radius = size / 2;
 
   return (
     <>
+      <svg aria-hidden="true" className="map-shapes">
+        <g className="map-shapes__world">
+          <ellipse className="map-galaxy__core" cx={0} cy={0} rx={radius * 7} ry={radius * 7} />
+          {galaxy.sectors.map((sector: MapSector) => (
+            <path
+              className={`map-sector__edge${sector.ownPlanetCount > 0 ? ' is-mine' : ''}${context.selectedKey === `sector:${sector.id}` ? ' is-selected' : ''}`}
+              d={sectorPath(sector.id, radius)}
+              key={`e${sector.id}`}
+              transform={`translate(${sector.x} ${sector.y})`}
+            />
+          ))}
+        </g>
+      </svg>
       {galaxy.sectors.map((sector: MapSector) => {
         const key = `sector:${sector.id}`;
         const name = [
@@ -57,7 +80,7 @@ export const GalaxyLayer = memo(function GalaxyLayer({ galaxy, context }: { gala
             className={`map-sector${context.selectedKey === key ? ' is-selected' : ''}${sector.ownPlanetCount > 0 ? ' is-mine' : ''}`}
             data-map-hit=""
             key={sector.id}
-            style={worldStyle(sector.x, sector.y, size, size)}
+            style={{ ...worldStyle(sector.x, sector.y, size, size), clipPath: sectorClipPath(sector.id) }}
             type="button"
             onClick={() => context.onSelect(key)}
             onDoubleClick={() => context.onOpen(key)}
@@ -66,7 +89,7 @@ export const GalaxyLayer = memo(function GalaxyLayer({ galaxy, context }: { gala
               <span className="map-sector__name">{sector.name}</span>
               <span className="map-sector__badges">
                 {sector.isNewbie ? (
-                  <span className="map-badge">
+                  <span className="map-badge map-badge--newbie">
                     <GameIcon name="star" size={12} />
                     {t('map.newbies')}
                   </span>

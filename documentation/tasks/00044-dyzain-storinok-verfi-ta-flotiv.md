@@ -1,6 +1,6 @@
 # Задача 00044 — Дизайн сторінок «Верф» (проектування й складання кораблів) і «Флоти»
 
-> **Статус:** 🔒 затверджено автором 04.11.2026 (запит автора: «задача для генерації дизайну сторінки: 1) проектування, складання кораблів; 2) керування флотами»), чекає виконання автором у Claude Design.
+> **Статус:** ✅ ВИКОНАНО (запит автора 04.11.2026: «задача для генерації дизайну сторінки: 1) проектування, складання кораблів; 2) керування флотами»). Макети: `documentation/design/AETHERIS_shipyard` і `documentation/design/AETHERIS_fleets`.
 > **Інструмент:** Claude Design (тип «Design»; візуальний макет на полотні). Два промпти, по одному на сторінку; макети кладуться в `documentation/design/aetheris-shipyard` і `documentation/design/aetheris-fleets`.
 > **Спільно з:** та сама оболонка й стиль, що в [00016](00016-dyzain-storinky-planety.md)–[00019](00019-dyzain-ekrana-skladu.md), [00025](00025-dyzain-storinky-torhivli.md), [00033](00033-dyzain-storinky-karty.md).
 > **Основа правил:** [game-design/05 Флот і кораблі](../game-design/05-flot-ta-korabli.md) (розділи 3 і 6), [game-design/05a Модулі](../game-design/05a-moduli-ta-komponenty.md), задачі [00038](00038-proektuvannia-korabliv.md) (проєкти), [00039](00039-skladannia-korabliv.md) (верф), [00040](00040-formuvannia-flotiv.md) (флоти), [00041](00041-modeliuvannia-korabliv.md) (числа слотів і трюма), [00042](00042-rozkladka-moduliv-po-korpusakh.md) (приналежність модулів до корпусів).

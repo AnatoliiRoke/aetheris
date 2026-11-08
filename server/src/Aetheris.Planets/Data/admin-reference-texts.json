@@ -51,6 +51,7 @@
   "admin.reference.building_effect.hull_class_limit": { "uk": "Ліміт класів корпусів", "en": "Limit of the hull classes" },
   "admin.reference.building_effect.design_queue_slots": { "uk": "Місця в черзі дизайнів", "en": "Places in the design queue" },
   "admin.reference.building_effect.production_speed_bonus": { "uk": "Швидкість виробництва", "en": "Production speed" },
+  "admin.reference.building_effect.shipyard_queue_slots": { "uk": "Місця в черзі верфі", "en": "Places in the shipyard queue" },
   "admin.reference.requirement.building_level": { "uk": "Будівля рівня", "en": "Building of a level" },
   "admin.reference.requirement.technology_level": { "uk": "Технологія рівня", "en": "Technology of a level" },
   "admin.reference.requirement.deposit": { "uk": "Родовище ресурсу на планеті", "en": "Deposit of a resource on the planet" }

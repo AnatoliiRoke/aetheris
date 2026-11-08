@@ -15,16 +15,20 @@ namespace Aetheris.Economy;
 public sealed class EconomyModule : IEconomyModule
 {
     private readonly EconomyService _service;
+    private readonly IShipUpkeepLedger _shipUpkeep;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EconomyModule"/> class.
     /// </summary>
     /// <param name="service">The service of the population and the balances.</param>
-    public EconomyModule(EconomyService service)
+    /// <param name="shipUpkeep">The upkeep of the ships, written by the fleet.</param>
+    public EconomyModule(EconomyService service, IShipUpkeepLedger shipUpkeep)
     {
         ArgumentNullException.ThrowIfNull(service);
+        ArgumentNullException.ThrowIfNull(shipUpkeep);
 
         _service = service;
+        _shipUpkeep = shipUpkeep;
     }
 
     /// <inheritdoc />
@@ -73,4 +77,8 @@ public sealed class EconomyModule : IEconomyModule
     /// <inheritdoc />
     public Task FixPlayerAsync(string playerId, DateTimeOffset moment, CancellationToken cancellationToken = default) =>
         _service.FixPlayerAsync(playerId, moment, cancellationToken);
+
+    /// <inheritdoc />
+    public Task SetShipUpkeepPerHourAsync(string playerId, decimal perHour, CancellationToken cancellationToken = default) =>
+        _shipUpkeep.SetPerHourAsync(playerId, perHour, cancellationToken);
 }

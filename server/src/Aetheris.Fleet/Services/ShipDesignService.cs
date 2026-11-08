@@ -165,6 +165,7 @@ public sealed class ShipDesignService
             {
                 ShipCatalogDto catalog = await _production.GetShipCatalogAsync(cancellationToken).ConfigureAwait(false);
                 ShipDesignEntity design = await OwnedDesignAsync(playerId, designId, cancellationToken).ConfigureAwait(false);
+                await RefuseBuiltAsync(design.Id, cancellationToken).ConfigureAwait(false);
 
                 design.Name = CheckedName(name);
                 design.UpdatedAt = _clock.GameNow;
@@ -202,6 +203,7 @@ public sealed class ShipDesignService
 
                 ShipCatalogDto catalog = await _production.GetShipCatalogAsync(cancellationToken).ConfigureAwait(false);
                 ShipDesignEntity design = await OwnedDesignAsync(playerId, designId, cancellationToken).ConfigureAwait(false);
+                await RefuseBuiltAsync(design.Id, cancellationToken).ConfigureAwait(false);
 
                 ShipHullDto hull = FindHull(catalog, hullPartTypeId);
                 CheckRaceBonusSlot(hull, hasRaceBonusSlot);
@@ -229,8 +231,8 @@ public sealed class ShipDesignService
             cancellationToken);
 
     /// <summary>
-    /// Archives a project of a ship: it is kept, so a ship already built of it does not lose
-    /// its link (task 00023).
+    /// Archives a project of a ship. A project that already has a finished ship is refused:
+    /// the ship keeps the link, and the project stays until that ship is taken apart.
     /// </summary>
     /// <param name="playerId">The owner of the project.</param>
     /// <param name="designId">The project.</param>
@@ -246,6 +248,7 @@ public sealed class ShipDesignService
             {
                 ShipCatalogDto catalog = await _production.GetShipCatalogAsync(cancellationToken).ConfigureAwait(false);
                 ShipDesignEntity design = await OwnedDesignAsync(playerId, designId, cancellationToken).ConfigureAwait(false);
+                await RefuseBuiltAsync(design.Id, cancellationToken).ConfigureAwait(false);
 
                 if (design.IsArchived)
                 {
@@ -374,7 +377,7 @@ public sealed class ShipDesignService
         List<ShipModuleViewDto> modules =
         [
             .. catalog.Modules
-                .Where(module => IsShipModule(module.Role))
+                .Where(module => IsShipModule(module.Role) && !module.IsAmmunition && !module.IsCapsule)
                 .Select(module => new ShipModuleViewDto(
                     module.Id,
                     module.Code,
@@ -397,7 +400,21 @@ public sealed class ShipDesignService
                     module.Weight,
                     module.MarkLevels,
                     module.IsAmmunition,
-                    module.IsCapsule))
+                    module.IsCapsule,
+                    module.CargoCapacity,
+                    module.Armor,
+                    module.ShieldRegen,
+                    module.ShieldRestore,
+                    module.Rate,
+                    module.LauncherSize,
+                    [
+                        .. (module.Facts ?? []).Select(fact => new ShipModuleFactViewDto(
+                            fact.Kind,
+                            fact.NameKey,
+                            fact.UnitKey,
+                            fact.Amount,
+                            fact.SortOrder))
+                    ]))
         ];
 
         // The types of the modules that go into a ship: the counts are of the modules the builder
@@ -424,7 +441,16 @@ public sealed class ShipDesignService
                     countsByGroup[group.Code]))
         ];
 
-        return new ShipCatalogViewDto(hulls, modules, moduleGroups, limit, count);
+        List<ShipAmmunitionViewDto> ammunition =
+        [
+            .. catalog.Ammunition.Select(round => new ShipAmmunitionViewDto(
+                round.Id,
+                round.Damage,
+                round.DamageKind,
+                round.LauncherSize))
+        ];
+
+        return new ShipCatalogViewDto(hulls, modules, moduleGroups, limit, count, ammunition);
     }
 
     /// <summary>
@@ -845,7 +871,11 @@ public sealed class ShipDesignService
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        return Build(design, rows, catalog);
+        bool built = await _dbContext.Ships.AsNoTracking()
+            .AnyAsync(ship => ship.ShipDesignId == design.Id, cancellationToken)
+            .ConfigureAwait(false);
+
+        return Build(design, rows, catalog, built);
     }
 
     /// <summary>
@@ -877,11 +907,47 @@ public sealed class ShipDesignService
         Dictionary<long, List<ShipDesignSlotEntity>> rowsByDesign = rows
             .GroupBy(row => row.DesignId)
             .ToDictionary(group => group.Key, group => group.ToList());
+        HashSet<long> builtIds = await BuiltDesignIdsAsync(ids, cancellationToken).ConfigureAwait(false);
 
         return
         [
-            .. designs.Select(design => Build(design, rowsByDesign.GetValueOrDefault(design.Id) ?? [], catalog))
+            .. designs.Select(design => Build(design, rowsByDesign.GetValueOrDefault(design.Id) ?? [], catalog, builtIds.Contains(design.Id)))
         ];
+    }
+
+    /// <summary>
+    /// The projects among the given ones that already have a finished ship.
+    /// </summary>
+    private async Task<HashSet<long>> BuiltDesignIdsAsync(IReadOnlyCollection<long> designIds, CancellationToken cancellationToken)
+    {
+        if (designIds.Count == 0)
+        {
+            return [];
+        }
+
+        List<long> built = await _dbContext.Ships.AsNoTracking()
+            .Where(ship => designIds.Contains(ship.ShipDesignId))
+            .Select(ship => ship.ShipDesignId)
+            .Distinct()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return [.. built];
+    }
+
+    /// <summary>
+    /// Refuses a change of a project that already has a finished ship.
+    /// </summary>
+    private async Task RefuseBuiltAsync(long designId, CancellationToken cancellationToken)
+    {
+        bool built = await _dbContext.Ships.AsNoTracking()
+            .AnyAsync(ship => ship.ShipDesignId == designId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (built)
+        {
+            throw new GameException(FleetErrorCodes.DesignBuilt, "A ship of this project already exists.");
+        }
     }
 
     /// <summary>
@@ -890,11 +956,13 @@ public sealed class ShipDesignService
     /// <param name="design">The project.</param>
     /// <param name="rows">The slots of the project.</param>
     /// <param name="catalog">The catalog of the ships.</param>
+    /// <param name="hasBuiltShips">Whether a finished ship of the project exists.</param>
     /// <returns>The answer.</returns>
     private static ShipDesignDto Build(
         ShipDesignEntity design,
         IReadOnlyList<ShipDesignSlotEntity> rows,
-        ShipCatalogDto catalog)
+        ShipCatalogDto catalog,
+        bool hasBuiltShips)
     {
         ShipHullDto? hull = catalog.Hulls.FirstOrDefault(entry => entry.Id == design.HullPartTypeId);
 
@@ -909,10 +977,16 @@ public sealed class ShipDesignService
         decimal weight = hull?.Weight ?? 0m;
         decimal drivePush = 0m;
         decimal energyDamage = 0m;
-        decimal kineticDamage = 0m;
+        decimal kineticDamageMin = 0m;
+        decimal kineticDamageMax = 0m;
         decimal shieldCapacity = 0m;
+        decimal shieldRegen = 0m;
+        decimal armor = 0m;
+        decimal cargo = 0m;
         bool hasDrive = false;
         bool hasReactor = false;
+        Dictionary<string, ShipDesignFactDto> factsByKind = [];
+        Dictionary<string, int> factOrder = [];
 
         foreach (ShipDesignSlotEntity row in rows)
         {
@@ -929,14 +1003,21 @@ public sealed class ShipDesignService
             weight += module.Weight;
             drivePush += module.DrivePush;
             shieldCapacity += module.ShieldCapacity;
+            shieldRegen += module.ShieldRegen + module.ShieldRestore;
+            armor += module.Armor;
+            cargo += module.CargoCapacity;
+            AddFacts(module.Facts, factsByKind, factOrder);
 
-            if (string.Equals(module.DamageKind, PartDamageKinds.Energy, StringComparison.Ordinal))
+            if (string.Equals(module.DamageKind, PartDamageKinds.Energy, StringComparison.Ordinal) && module.Damage > 0m)
             {
-                energyDamage += module.Damage;
+                energyDamage += module.Damage * ShotsPerRound(module.Rate);
             }
             else if (string.Equals(module.DamageKind, PartDamageKinds.Kinetic, StringComparison.Ordinal))
             {
-                kineticDamage += module.Damage;
+                (decimal least, decimal greatest) = KineticRound(module, catalog.Ammunition);
+
+                kineticDamageMin += least;
+                kineticDamageMax += greatest;
             }
 
             hasDrive |= string.Equals(module.Component, DriveComponent, StringComparison.Ordinal);
@@ -953,14 +1034,24 @@ public sealed class ShipDesignService
             energyUse,
             power,
             crew,
-            hull?.HoldCapacity ?? 0m,
+            (hull?.HoldCapacity ?? 0m) + cargo,
             hull?.Integrity ?? 0m,
             drivePush,
             energyDamage,
-            kineticDamage,
+            kineticDamageMax,
             shieldCapacity,
             hasDrive,
-            hasReactor);
+            hasReactor,
+            armor,
+            shieldRegen,
+            kineticDamageMin,
+            kineticDamageMax,
+            [
+                .. factsByKind
+                    .OrderBy(pair => factOrder.GetValueOrDefault(pair.Key))
+                    .ThenBy(pair => pair.Key, StringComparer.Ordinal)
+                    .Select(pair => pair.Value)
+            ]);
 
         return new ShipDesignDto(
             design.Id,
@@ -973,6 +1064,91 @@ public sealed class ShipDesignService
             design.UpdatedAt,
             design.Version,
             slots,
-            summary);
+            summary,
+            hasBuiltShips);
+    }
+
+    /// <summary>
+    /// The shots a weapon makes in one round. A weapon without a rate still fires once.
+    /// </summary>
+    /// <param name="rate">The rate of fire of the weapon.</param>
+    /// <returns>The shots in one round.</returns>
+    /// <summary>
+    /// Adds the characteristics of one fitted module to the sums of the project.
+    /// </summary>
+    /// <param name="facts">The characteristics of the module.</param>
+    /// <param name="factsByKind">The sums, by the kind of the characteristic.</param>
+    /// <param name="factOrder">The order of the characteristic in the lists, by its kind.</param>
+    private static void AddFacts(
+        IReadOnlyList<ShipModuleFactDto>? facts,
+        Dictionary<string, ShipDesignFactDto> factsByKind,
+        Dictionary<string, int> factOrder)
+    {
+        if (facts is null)
+        {
+            return;
+        }
+
+        foreach (ShipModuleFactDto fact in facts)
+        {
+            if (fact.Amount == 0m)
+            {
+                continue;
+            }
+
+            if (factsByKind.TryGetValue(fact.Kind, out ShipDesignFactDto? current))
+            {
+                factsByKind[fact.Kind] = current with { Amount = current.Amount + fact.Amount };
+            }
+            else
+            {
+                factsByKind[fact.Kind] = new ShipDesignFactDto(fact.Kind, fact.NameKey, fact.UnitKey, fact.Amount);
+                factOrder[fact.Kind] = fact.SortOrder;
+            }
+        }
+    }
+
+    private static decimal ShotsPerRound(decimal rate) => rate > 0m ? rate : 1m;
+
+    /// <summary>
+    /// The least and the greatest kinetic damage one weapon makes in a round.
+    /// </summary>
+    /// <param name="weapon">The fitted kinetic weapon.</param>
+    /// <param name="ammunition">The ammunition of the catalog.</param>
+    /// <returns>
+    /// The range, or zeros when no kinetic round fits the weapon. A launcher takes the kinetic
+    /// rounds of its size. A weapon without a size takes the kinetic rounds that have no size.
+    /// </returns>
+    private static (decimal Least, decimal Greatest) KineticRound(
+        ShipModuleDto weapon,
+        IReadOnlyList<ShipAmmunitionDto> ammunition)
+    {
+        List<decimal> roundDamage = [];
+
+        foreach (ShipAmmunitionDto round in ammunition)
+        {
+            if (!string.Equals(round.DamageKind, PartDamageKinds.Kinetic, StringComparison.Ordinal) || round.Damage <= 0m)
+            {
+                continue;
+            }
+
+            bool sameSize = weapon.LauncherSize > 0m
+                ? round.LauncherSize == weapon.LauncherSize
+                : round.LauncherSize == 0m;
+
+            if (sameSize)
+            {
+                roundDamage.Add(round.Damage);
+            }
+        }
+
+        if (roundDamage.Count == 0)
+        {
+            return (0m, 0m);
+        }
+
+        decimal shots = ShotsPerRound(weapon.Rate);
+
+        return (roundDamage.Min() * shots, roundDamage.Max() * shots);
     }
 }

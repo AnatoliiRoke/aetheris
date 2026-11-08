@@ -57,6 +57,13 @@ public static class TechnologyEffectTypes
     public const string CreditIncomeBonus = Aetheris.Economy.Services.EconomyCodes.CreditIncomeBonusEffect;
 
     /// <summary>
+    /// The technology shortens the assembly of a ship, the same way the production time is
+    /// shortened (task 00039). A value below one makes the assembly faster. No technology has
+    /// this effect until the modelling gives it, so the assembly keeps its own time.
+    /// </summary>
+    public const string ShipyardTime = "shipyard_time";
+
+    /// <summary>
     /// Gets every effect kind, in the order of the form of the admin panel (task 00023).
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -72,6 +79,7 @@ public static class TechnologyEffectTypes
         PopulationMax,
         PopulationGrowthBonus,
         CreditIncomeBonus,
+        ShipyardTime,
     ];
 }
 

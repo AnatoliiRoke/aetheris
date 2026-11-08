@@ -787,15 +787,54 @@ public sealed class EconomyService
         // population; the other currencies of the civilization are left as they are.
         HashSet<int> incomeCurrencyIds = [.. await IncomeCurrencyIdsAsync(cancellationToken).ConfigureAwait(false)];
 
+        // The ships cost credits once, on the income currency with the smallest identifier.
+        // The rate is the one stored before this count, so a ship that appears after the count
+        // is charged from the next one (task 00039).
+        decimal shipUpkeepPerHour = await ShipUpkeepPerHourAsync(playerId, cancellationToken).ConfigureAwait(false);
+        int? shipUpkeepCurrencyId = incomeCurrencyIds.Count == 0 ? null : incomeCurrencyIds.Min();
+
         foreach (CivilizationBalanceEntity row in locked.Balances)
         {
             decimal exact = row.Amount + row.AmountFraction + (incomeCurrencyIds.Contains(row.ResourceTypeId) ? earned : 0m);
+
+            if (shipUpkeepCurrencyId == row.ResourceTypeId && shipUpkeepPerHour > 0m)
+            {
+                exact -= shipUpkeepPerHour * PopulationRules.Hours(row.UpdatedAt, target);
+            }
+
+            // Credits never go below zero: an upkeep the balance cannot pay is dropped.
+            if (exact < 0m)
+            {
+                exact = 0m;
+            }
+
             long amount = (long)decimal.Floor(exact);
 
             row.Amount = amount;
             row.AmountFraction = exact - amount;
             row.UpdatedAt = row.UpdatedAt > target ? row.UpdatedAt : target;
         }
+    }
+
+    /// <summary>
+    /// Reads the credits the ships of a player cost per hour. A player with no row pays nothing.
+    /// </summary>
+    private async Task<decimal> ShipUpkeepPerHourAsync(string playerId, CancellationToken cancellationToken)
+    {
+        ShipUpkeepEntity? tracked = _dbContext.ShipUpkeeps.Local.FirstOrDefault(row => row.PlayerId == playerId);
+
+        if (tracked is not null)
+        {
+            return tracked.PerHour > 0m ? tracked.PerHour : 0m;
+        }
+
+        decimal perHour = await _dbContext.ShipUpkeeps.AsNoTracking()
+            .Where(row => row.PlayerId == playerId)
+            .Select(row => row.PerHour)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return perHour > 0m ? perHour : 0m;
     }
 
     /// <summary>
@@ -845,8 +884,15 @@ public sealed class EconomyService
         List<int> currencyIds = await CurrencyIdsAsync(cancellationToken).ConfigureAwait(false);
 
         List<int> incomeCurrencyIds = await IncomeCurrencyIdsAsync(cancellationToken).ConfigureAwait(false);
+        decimal shipUpkeepPerHour = await ShipUpkeepPerHourAsync(playerId, cancellationToken).ConfigureAwait(false);
 
-        return new Snapshot([.. populations.Select(row => View(row, rates, now))], rows, currencyIds, incomeCurrencyIds);
+        return new Snapshot(
+            [.. populations.Select(row => View(row, rates, now))],
+            rows,
+            currencyIds,
+            incomeCurrencyIds,
+            shipUpkeepPerHour,
+            now);
     }
 
     private Task<List<PlanetPopulationEntity>> ReadPopulationsAsync(string playerId, CancellationToken cancellationToken) =>
@@ -990,11 +1036,13 @@ public sealed class EconomyService
         IReadOnlyList<PopulationView> Views,
         IReadOnlyList<CivilizationBalanceEntity> Rows,
         IReadOnlyList<int> CurrencyIds,
-        IReadOnlyList<int> IncomeCurrencyIds)
+        IReadOnlyList<int> IncomeCurrencyIds,
+        decimal ShipUpkeepPerHour,
+        DateTimeOffset Now)
     {
         /// <summary>
         /// Gets the balance of a currency: the stored amount and the credits every body earned since its
-        /// own count.
+        /// own count, minus the upkeep of the ships on the income currency.
         /// </summary>
         /// <param name="playerId">The player.</param>
         /// <param name="currencyId">The currency.</param>
@@ -1004,8 +1052,26 @@ public sealed class EconomyService
             CivilizationBalanceEntity? row = Rows.FirstOrDefault(entry => entry.ResourceTypeId == currencyId);
             bool earns = IncomeCurrencyIds.Contains(currencyId);
             decimal exact = (row?.Amount ?? 0) + (row?.AmountFraction ?? 0m) + (earns ? Views.Sum(view => view.Earned) : 0m);
+            int? chargeCurrencyId = IncomeCurrencyIds.Count == 0 ? null : IncomeCurrencyIds.Min();
 
-            return new CurrencyBalanceFacts(playerId, currencyId, (long)decimal.Floor(exact), earns ? Views.Sum(view => view.Income) : 0m);
+            if (chargeCurrencyId == currencyId && ShipUpkeepPerHour > 0m && row is not null)
+            {
+                exact -= ShipUpkeepPerHour * PopulationRules.Hours(row.UpdatedAt, Now);
+            }
+
+            if (exact < 0m)
+            {
+                exact = 0m;
+            }
+
+            decimal income = earns ? Views.Sum(view => view.Income) : 0m;
+
+            if (chargeCurrencyId == currencyId && ShipUpkeepPerHour > 0m)
+            {
+                income = income > ShipUpkeepPerHour ? income - ShipUpkeepPerHour : 0m;
+            }
+
+            return new CurrencyBalanceFacts(playerId, currencyId, (long)decimal.Floor(exact), income);
         }
     }
 }

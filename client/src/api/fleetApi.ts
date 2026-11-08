@@ -28,6 +28,36 @@ export interface ShipHull {
 }
 
 /**
+ * One characteristic of a module that the plaque of a project adds up.
+ */
+export interface ShipModuleFact {
+  /** The kind of the characteristic. */
+  kind: string;
+  /** The localisation key of the name of the characteristic. */
+  nameKey: string;
+  /** The localisation key of the unit, or `null`. */
+  unitKey: string | null;
+  /** The amount the module adds. */
+  amount: number;
+  /** The order of the characteristic in the lists. */
+  sortOrder: number;
+}
+
+/**
+ * One summed characteristic of the fitted modules.
+ */
+export interface ShipDesignFact {
+  /** The kind of the characteristic. */
+  kind: string;
+  /** The localisation key of the name of the characteristic. */
+  nameKey: string;
+  /** The localisation key of the unit, or `null`. */
+  unitKey: string | null;
+  /** The amount the fitted modules add together. */
+  amount: number;
+}
+
+/**
  * A module of the catalog of the ships (task 00038).
  */
 export interface ShipModule {
@@ -62,6 +92,20 @@ export interface ShipModule {
   damageKind: string | null;
   /** The capacity of the shield of the module, for a shield. */
   shieldCapacity: number;
+  /** How much cargo the module adds to the hold, in tonnes. */
+  cargoCapacity?: number;
+  /** How much integrity the armor of the module adds. */
+  armor?: number;
+  /** How fast the shield of the module recovers. */
+  shieldRegen?: number;
+  /** How many shield units the module restores over time. */
+  shieldRestore?: number;
+  /** How many shots the weapon makes in one round. */
+  rate?: number;
+  /** The size of the launcher, or zero when the weapon has none. */
+  launcherSize?: number;
+  /** The characteristics the plaque adds up. */
+  facts?: ShipModuleFact[];
   /** The weight of one module in tonnes. */
   weight: number;
   /** The marks of the module that the catalog holds. */
@@ -70,6 +114,19 @@ export interface ShipModule {
   isAmmunition: boolean;
   /** Whether the module is a capsule of inhabitants: it is used on a body, not fitted. */
   isCapsule: boolean;
+}
+
+/**
+ * One round of ammunition a kinetic weapon may fire. It is not a module of a ship.
+ */
+export interface ShipAmmunition {
+  id: number;
+  /** The damage of one round. */
+  damage: number;
+  /** The kind of the damage: the energy or the kinetic one. */
+  damageKind: string | null;
+  /** The size of the launcher the round fits, or zero when it has none. */
+  launcherSize: number;
 }
 
 /**
@@ -84,6 +141,8 @@ export interface ShipCatalog {
   designLimit: number;
   /** How many projects the player has. */
   designCount: number;
+  /** The ammunition a kinetic weapon may fire. */
+  ammunition?: ShipAmmunition[];
 }
 
 /**
@@ -124,14 +183,24 @@ export interface ShipDesignSummary {
   integrity: number;
   /** The push the drives of the ship give. */
   drivePush: number;
-  /** The energy damage the weapons of the ship make. */
+  /** The energy damage the weapons of the ship make in one round. */
   energyDamage: number;
-  /** The kinetic damage the weapons of the ship make. */
+  /** The greatest kinetic damage the weapons make in one round. */
   kineticDamage: number;
   /** The capacity of the shields of the ship. */
   shieldCapacity: number;
   hasDrive: boolean;
   hasReactor: boolean;
+  /** How much integrity the fitted armor adds. */
+  armor?: number;
+  /** How fast the shields recover, with the shield restorers. */
+  shieldRegen?: number;
+  /** The least kinetic damage the weapons make in one round. */
+  kineticDamageMin?: number;
+  /** The greatest kinetic damage the weapons make in one round. */
+  kineticDamageMax?: number;
+  /** The characteristics of the fitted modules that the plaque adds up. */
+  facts?: ShipDesignFact[];
 }
 
 /**
@@ -149,6 +218,8 @@ export interface ShipDesign {
   version: number;
   slots: ShipDesignSlot[];
   summary: ShipDesignSummary;
+  /** Whether a finished ship of this project exists. The project then cannot be edited or archived. */
+  hasBuiltShips?: boolean;
 }
 
 /**
@@ -184,6 +255,194 @@ export interface FleetApi {
   }): Promise<ShipDesign>;
   /** Archives a project of a ship. */
   archiveDesign(designId: number): Promise<ShipDesign>;
+  /** The shipyard of a body: the queue, the projects and the finished ships (task 00039). */
+  shipyard(planetId: number): Promise<ShipyardView>;
+  /** Puts a project into the shipyard queue of a body. */
+  enqueueShipyard(request: { planetId: number; planetBuildingId?: number | null; designId: number; quantity: number }): Promise<ShipyardView>;
+  /** Cancels a record of a shipyard queue and returns what it paid. */
+  cancelShipyard(orderId: number): Promise<ShipyardView>;
+  /** The finished ships of a body. */
+  ships(planetId: number): Promise<FinishedShip[]>;
+  /** Takes a finished ship apart on the shipyard of its body. */
+  disassembleShip(shipId: number): Promise<ShipyardView>;
+  /** The fleets of the player and the ships that are in no fleet (task 00040). */
+  fleets(): Promise<FleetsView>;
+  /** Forms a fleet of free ships that stand on one body; the body is the home of the fleet. */
+  createFleet(request: { planetId: number; name: string; shipIds: number[] }): Promise<FleetsView>;
+  /** Puts free ships into a fleet. */
+  addFleetShips(request: { fleetId: number; shipIds: number[] }): Promise<FleetsView>;
+  /** Takes ships out of a fleet; they stay on the body as free ships. */
+  removeFleetShips(request: { fleetId: number; shipIds: number[] }): Promise<FleetsView>;
+  /** Moves ships to another fleet that stands on the same body. */
+  transferFleetShips(request: { fleetId: number; targetFleetId: number; shipIds: number[] }): Promise<FleetsView>;
+  /** Renames a fleet. */
+  renameFleet(request: { fleetId: number; name: string }): Promise<FleetsView>;
+  /** Disbands a fleet; its ships stay on the body as free ships. */
+  dissolveFleet(fleetId: number): Promise<FleetsView>;
+}
+
+/**
+ * A finished ship as the fleets show it (task 00040).
+ */
+export interface FleetShip {
+  id: number;
+  /** The body the ship stands on. */
+  planetId: number;
+  designId: number;
+  /** The name of the project the ship was built from. */
+  name: string;
+  /** The localisation key of the name of the hull. */
+  hullNameKey: string;
+  /** The localisation key of the class of the hull. */
+  classNameKey: string;
+  /** The worst condition of the parts of the ship, in per cent. */
+  conditionPercent: number;
+  crew: number;
+  upkeepPerHour: number;
+  /** The fleet the ship is in, or `null` when it is free. */
+  fleetId: number | null;
+}
+
+/**
+ * A fleet with its ships (task 00040).
+ */
+export interface Fleet {
+  id: number;
+  name: string;
+  /** The home body of the fleet: its base. */
+  homePlanetId: number;
+  /** The body whose orbit the fleet stands on now. */
+  planetId: number;
+  sectorId: number;
+  /** The state of the fleet; the client turns the code into a word. */
+  stateCode: string;
+  crew: number;
+  upkeepPerHour: number;
+  createdAt: string;
+  ships: FleetShip[];
+  /** The hold of all the ships, as the projects of the ships give it. */
+  holdCapacity: number;
+  /** The integrity of all the ships. */
+  integrity: number;
+  /** The energy damage all the weapons make in one round. */
+  energyDamage: number;
+  /** The kinetic damage all the weapons make in one round. */
+  kineticDamage: number;
+  /** The capacity of all the shields. */
+  shieldCapacity: number;
+}
+
+/**
+ * The fleets of the player (task 00040).
+ */
+export interface FleetsView {
+  /** How many fleets the spaceports of the player allow. */
+  limit: number;
+  /** How many fleets the player has. */
+  used: number;
+  /** Whether the civilization has credits: without them a fleet does not fly. */
+  hasCredits: boolean;
+  upkeepPerHour: number;
+  fleets: Fleet[];
+  /** The finished ships that are in no fleet. */
+  freeShips: FleetShip[];
+}
+
+/**
+ * A resource of an assembly.
+ */
+export interface ShipyardCost {
+  resourceTypeId: number;
+  amount: number;
+  nameKey: string | null;
+  /** How much the player has. Absent on a paid queue record. */
+  available?: number | null;
+}
+
+/**
+ * A stack of parts an assembly takes, or a stack on a finished ship.
+ */
+export interface ShipyardPart {
+  partTypeId: number;
+  nameKey: string;
+  markLevel: number;
+  hasRaceBonus: boolean;
+  quantity: number;
+  available: number;
+  isHull: boolean;
+}
+
+/**
+ * A record of a shipyard queue.
+ */
+export interface ShipyardOrder {
+  id: number;
+  designId: number;
+  title: string;
+  position: number;
+  underWay: boolean;
+  finishesAt: string | null;
+  durationSeconds: number;
+  costs: ShipyardCost[];
+  /** How many ships the record assembles. */
+  quantity: number;
+  /** How many ships of the record are already finished. */
+  producedQuantity: number;
+}
+
+/**
+ * A project as the shipyard shows it.
+ */
+export interface ShipyardDesign {
+  designId: number;
+  name: string;
+  hullPartTypeId: number;
+  hullNameKey: string;
+  canEnqueue: boolean;
+  reasonCode: string | null;
+  requirementNameKey: string | null;
+  requirementLevel: number | null;
+  crew: number;
+  credits: number;
+  durationSeconds: number;
+  costs: ShipyardCost[];
+  parts: ShipyardPart[];
+}
+
+/**
+ * A finished ship.
+ */
+export interface FinishedShip {
+  id: number;
+  planetId: number;
+  designId: number;
+  name: string;
+  /** The localisation key of the name of the hull. */
+  hullNameKey: string;
+  /** The localisation key of the class of the hull: the group of the hull. */
+  classNameKey: string;
+  stateCode: string;
+  crew: number;
+  upkeepPerHour: number;
+  modules: ShipyardPart[];
+  /** The fleet the ship is in, or `null`/absent when it is free (task 00040). */
+  fleetId?: number | null;
+}
+
+/**
+ * A shipyard of a body with its queue, the projects and the finished ships.
+ */
+export interface ShipyardView {
+  planetId: number;
+  planetBuildingId: number | null;
+  level: number;
+  used: number;
+  total: number;
+  gameNow: string;
+  timeMultiplier: number;
+  orders: ShipyardOrder[];
+  designs: ShipyardDesign[];
+  ships: FinishedShip[];
 }
 
 const prefix = '/api/v1/fleet';
@@ -241,6 +500,61 @@ export function createFleetApi(http: HttpClient): FleetApi {
     },
     async archiveDesign(designId) {
       return camelize<ShipDesign>(await http.command<unknown>(`${prefix}/designs/archive`, { design_id: designId }));
+    },
+    async shipyard(planetId) {
+      return camelize<ShipyardView>(await http.get<unknown>(`${prefix}/shipyards?planet_id=${planetId}`));
+    },
+    async enqueueShipyard(request) {
+      return camelize<ShipyardView>(
+        await http.command<unknown>(`${prefix}/shipyard/enqueue`, {
+          planet_id: request.planetId,
+          planet_building_id: request.planetBuildingId ?? null,
+          design_id: request.designId,
+          quantity: request.quantity,
+        }),
+      );
+    },
+    async cancelShipyard(orderId) {
+      return camelize<ShipyardView>(await http.command<unknown>(`${prefix}/shipyard/cancel`, { order_id: orderId }));
+    },
+    async ships(planetId) {
+      return camelize<FinishedShip[]>(await http.get<unknown>(`${prefix}/ships?planet_id=${planetId}`));
+    },
+    async disassembleShip(shipId) {
+      return camelize<ShipyardView>(await http.command<unknown>(`${prefix}/ship/disassemble`, { ship_id: shipId }));
+    },
+    async fleets() {
+      return camelize<FleetsView>(await http.get<unknown>(`${prefix}/fleets`));
+    },
+    async createFleet(request) {
+      return camelize<FleetsView>(
+        await http.command<unknown>(`${prefix}/fleets`, { planet_id: request.planetId, name: request.name, ship_ids: request.shipIds }),
+      );
+    },
+    async addFleetShips(request) {
+      return camelize<FleetsView>(
+        await http.command<unknown>(`${prefix}/fleets/add-ships`, { fleet_id: request.fleetId, ship_ids: request.shipIds }),
+      );
+    },
+    async removeFleetShips(request) {
+      return camelize<FleetsView>(
+        await http.command<unknown>(`${prefix}/fleets/remove-ships`, { fleet_id: request.fleetId, ship_ids: request.shipIds }),
+      );
+    },
+    async transferFleetShips(request) {
+      return camelize<FleetsView>(
+        await http.command<unknown>(`${prefix}/fleets/transfer-ships`, {
+          fleet_id: request.fleetId,
+          target_fleet_id: request.targetFleetId,
+          ship_ids: request.shipIds,
+        }),
+      );
+    },
+    async renameFleet(request) {
+      return camelize<FleetsView>(await http.command<unknown>(`${prefix}/fleets/rename`, { fleet_id: request.fleetId, name: request.name }));
+    },
+    async dissolveFleet(fleetId) {
+      return camelize<FleetsView>(await http.command<unknown>(`${prefix}/fleets/dissolve`, { fleet_id: fleetId }));
     },
   };
 }

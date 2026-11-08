@@ -82,4 +82,20 @@ public interface IRequirementsModule
         string subjectType,
         IReadOnlyList<SubjectLevel> subjects,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds the building level that opens a module when that row is missing (task 00039).
+    /// A row that already names the same building is left as it is, so an edit of the admin
+    /// panel stays. A deleted row is written again.
+    /// </summary>
+    /// <param name="partTypeId">The module.</param>
+    /// <param name="buildingTypeId">The building that opens it.</param>
+    /// <param name="buildingLevel">The level of that building.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when the row was added.</returns>
+    Task<bool> EnsureModuleBuildingLevelAsync(
+        int partTypeId,
+        int buildingTypeId,
+        int buildingLevel,
+        CancellationToken cancellationToken = default);
 }

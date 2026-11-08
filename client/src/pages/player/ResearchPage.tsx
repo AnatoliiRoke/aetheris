@@ -17,7 +17,7 @@ import { useResearch } from './useResearch';
 import { useCurrentPlanetId } from './useShell';
 import { useResearchCommands } from './useResearchCommands';
 import { useResourceGroups } from './useResourceGroups';
-import { useResourceNames } from './useResourceNames';
+import { useResourceCodes, useResourceNames } from './useResourceNames';
 import { useWorldReference } from './useWorldReference';
 
 /**
@@ -42,6 +42,7 @@ export function ResearchPage() {
   const { busy, notice, enqueue, cancel } = useResearchCommands(state, currentPlanetId ?? 0);
   const reference = useWorldReference();
   const resourceName = useResourceNames(reference, text);
+  const resourceCode = useResourceCodes(reference);
   const resourceGroup = useResourceGroups(reference);
   const [branchId, setBranchId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -126,6 +127,7 @@ export function ResearchPage() {
             onCancel={cancel}
             onFinished={() => void reload()}
             receivedAt={receivedAt}
+            resourceCode={resourceCode}
             resourceName={resourceName}
             slotsText={t('research.queueSlots', { used: tree.queueUsedSlots, total: tree.queueSlots })}
             technologyName={(key) => text(key) ?? key}
@@ -172,6 +174,7 @@ export function ResearchPage() {
                       deadline={deadlines.get(technology.id) ?? null}
                       name={text(technology.nameKey) ?? technology.nameKey}
                       onResearch={startResearch}
+                      resourceCode={resourceCode}
                       resourceGroupCode={resourceGroup}
                       entityText={text}
                       resourceName={resourceName}

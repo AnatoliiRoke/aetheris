@@ -7,7 +7,7 @@ import type { Api } from '../api/context';
 import type { ContentApi } from '../api/contentApi';
 import type { CurrencyBalanceFacts, EconomyApi, EconomyOverview, PopulationFacts } from '../api/economyApi';
 import type { GameApi, Race } from '../api/gameApi';
-import type { FleetApi, ShipCatalog, ShipDesign, ShipHull, ShipModule } from '../api/fleetApi';
+import type { Fleet, FleetApi, FleetShip, FleetsView, FinishedShip, ShipCatalog, ShipDesign, ShipHull, ShipModule, ShipyardView } from '../api/fleetApi';
 import type { MarketApi, MarketLot, MarketOverview, MyLot } from '../api/marketApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
@@ -659,7 +659,95 @@ export function fakeFleetApi(overrides: Partial<FleetApi> = {}): FleetApi {
     renameDesign: vi.fn().mockResolvedValue(sampleShipDesign({ name: 'Новий' })),
     saveDesign: vi.fn().mockResolvedValue(sampleShipDesign()),
     archiveDesign: vi.fn().mockResolvedValue(sampleShipDesign({ isArchived: true })),
+    shipyard: vi.fn(async (planetId: number) => emptyShipyard(planetId)),
+    enqueueShipyard: vi.fn(async () => emptyShipyard()),
+    cancelShipyard: vi.fn(async () => emptyShipyard()),
+    ships: vi.fn(async () => [] as FinishedShip[]),
+    disassembleShip: vi.fn(async () => emptyShipyard()),
+    fleets: vi.fn(async () => sampleFleetsView()),
+    createFleet: vi.fn(async () => sampleFleetsView()),
+    addFleetShips: vi.fn(async () => sampleFleetsView()),
+    removeFleetShips: vi.fn(async () => sampleFleetsView()),
+    transferFleetShips: vi.fn(async () => sampleFleetsView()),
+    renameFleet: vi.fn(async () => sampleFleetsView()),
+    dissolveFleet: vi.fn(async () => sampleFleetsView()),
     ...overrides,
+  };
+}
+
+/**
+ * A ship of the fleets for the tests (task 00040).
+ */
+export function sampleFleetShip(overrides: Partial<FleetShip> = {}): FleetShip {
+  return {
+    id: 1,
+    planetId: 10,
+    designId: 7,
+    name: 'Barracuda',
+    hullNameKey: 'production.part_type.part_84.name',
+    classNameKey: 'production.part_group.part_group_12.name',
+    conditionPercent: 100,
+    crew: 12,
+    upkeepPerHour: 2,
+    fleetId: null,
+    ...overrides,
+  };
+}
+
+/**
+ * A fleet for the tests (task 00040).
+ */
+export function sampleFleet(overrides: Partial<Fleet> = {}): Fleet {
+  return {
+    id: 1,
+    name: 'Перший ескадрон',
+    homePlanetId: 10,
+    planetId: 10,
+    sectorId: 1,
+    stateCode: 'stationed',
+    crew: 12,
+    upkeepPerHour: 2,
+    createdAt: '2026-11-07T00:00:00Z',
+    ships: [sampleFleetShip({ id: 1, fleetId: 1 })],
+    holdCapacity: 1200,
+    integrity: 15300,
+    energyDamage: 264,
+    kineticDamage: 420,
+    shieldCapacity: 3200,
+    ...overrides,
+  };
+}
+
+/**
+ * The fleets of the player for the tests (task 00040): the limit of two, one fleet and no free ship.
+ */
+export function sampleFleetsView(overrides: Partial<FleetsView> = {}): FleetsView {
+  return {
+    limit: 2,
+    used: 1,
+    hasCredits: true,
+    upkeepPerHour: 2,
+    fleets: [sampleFleet()],
+    freeShips: [],
+    ...overrides,
+  };
+}
+
+/**
+ * An empty shipyard, so a screen that does not open the assembly still satisfies the fleet API.
+ */
+export function emptyShipyard(planetId = 0): ShipyardView {
+  return {
+    planetId,
+    planetBuildingId: null,
+    level: 0,
+    used: 0,
+    total: 0,
+    gameNow: '2026-11-07T00:00:00Z',
+    timeMultiplier: 1,
+    orders: [],
+    designs: [],
+    ships: [],
   };
 }
 

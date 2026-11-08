@@ -20,6 +20,7 @@ export const routes = {
   map: '/map',
   market: '/market',
   shipyard: '/shipyard',
+  fleets: '/fleets',
   civilization: '/civilization',
   account: '/account',
 } as const;

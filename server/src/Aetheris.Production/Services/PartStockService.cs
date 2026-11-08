@@ -1,4 +1,5 @@
 using Aetheris.Core.Errors;
+using Aetheris.Production.Api;
 using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Requirements;
@@ -23,7 +24,7 @@ namespace Aetheris.Production.Services;
 /// building, the storage of the parts, the balance of the resources.
 /// </para>
 /// </remarks>
-public sealed class PartStockService
+public sealed class PartStockService : IPartStock
 {
     private readonly ProductionDbContext _dbContext;
     private readonly ProductionUnitOfWork _unitOfWork;
@@ -125,6 +126,50 @@ public sealed class PartStockService
         _unitOfWork.RunAsync(
             async () => await TakeStacksAsync(planetId, partTypeId, conditionPercent, quantity, cancellationToken).ConfigureAwait(false),
             cancellationToken);
+
+    /// <summary>
+    /// Takes new parts of exact stacks: the type, the mark and the bonus of the race the caller
+    /// names. A stack with the bonus and a stack without it are never mixed (task 00039).
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="needed">The stacks to take.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the stacks are taken.</returns>
+    /// <exception cref="GameException">The body lacks one of the stacks.</exception>
+    public Task TakeMarkedAsync(
+        long planetId,
+        IReadOnlyList<PartStackRequest> needed,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(needed);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                List<PartStackRequest> grouped =
+                [
+                    .. needed
+                        .Where(stack => stack.Quantity > 0)
+                        .GroupBy(stack => (stack.PartTypeId, stack.MarkLevel, stack.HasRaceBonus))
+                        .Select(group => new PartStackRequest(
+                            group.Key.PartTypeId,
+                            group.Key.MarkLevel,
+                            group.Key.HasRaceBonus,
+                            group.Sum(stack => stack.Quantity)))
+                        .OrderBy(stack => stack.PartTypeId)
+                        .ThenBy(stack => stack.MarkLevel)
+                        .ThenBy(stack => stack.HasRaceBonus),
+                ];
+
+                foreach (PartStackRequest stack in grouped)
+                {
+                    await TakeMarkedStackAsync(planetId, stack, cancellationToken).ConfigureAwait(false);
+                }
+
+                return true;
+            },
+            cancellationToken);
+    }
 
     /// <summary>
     /// Puts the parts into the storage of a body, each to the stack of its own kind, mark, bonus
@@ -367,6 +412,44 @@ public sealed class PartStockService
     }
 
     /// <summary>
+    /// Takes one exact stack of new parts from the locked storage of a body.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="needed">The stack to take.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the stack is taken.</returns>
+    /// <exception cref="GameException">The body lacks the stack.</exception>
+    private async Task TakeMarkedStackAsync(long planetId, PartStackRequest needed, CancellationToken cancellationToken)
+    {
+        await LockedStorageAsync(planetId, cancellationToken).ConfigureAwait(false);
+
+        // One key is one row. Two rows of the same key are broken data, so the read refuses them
+        // instead of spending a stack the project did not name.
+        PartStockEntity? stack = await _dbContext.PartStocks
+            .Where(entry => entry.PlanetId == planetId
+                && entry.PartTypeId == needed.PartTypeId
+                && entry.MarkLevel == needed.MarkLevel
+                && entry.HasRaceBonus == needed.HasRaceBonus
+                && entry.ConditionPercent == PartCondition.Full)
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (stack is null || stack.Quantity < needed.Quantity)
+        {
+            throw new GameException(ProductionErrorCodes.PartMissing, "The body lacks the parts.");
+        }
+
+        stack.Quantity -= needed.Quantity;
+
+        if (stack.Quantity == 0)
+        {
+            _dbContext.PartStocks.Remove(stack);
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Creates the storage of a body when it has none and locks its row.
     /// </summary>
     /// <param name="planetId">The body.</param>
@@ -400,6 +483,69 @@ public sealed class PartStockService
 
         return storage ?? throw new GameException(ProductionErrorCodes.PartMissing, "The body has no storage of the parts.");
     }
+
+    /// <inheritdoc />
+    Task IPartStock.LockAsync(long planetId, int sectorId, CancellationToken cancellationToken) =>
+        LockAsync(planetId, sectorId, cancellationToken);
+
+    /// <inheritdoc />
+    Task IPartStock.TakeMarkedAsync(long planetId, IReadOnlyList<ShipPartRequest> needed, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(needed);
+
+        return TakeMarkedAsync(
+            planetId,
+            [.. needed.Select(line => new PartStackRequest(line.PartTypeId, line.MarkLevel, line.HasRaceBonus, line.Quantity))],
+            cancellationToken);
+    }
+
+    /// <inheritdoc />
+    Task IPartStock.AddAsync(long planetId, IReadOnlyList<ShipPartStack> parts, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(parts);
+
+        return AddAsync(
+            planetId,
+            [.. parts.Select(part => new PartStackAdded(part.PartTypeId, part.MarkLevel, part.HasRaceBonus, part.ConditionPercent, part.Quantity))],
+            cancellationToken);
+    }
+
+    /// <inheritdoc />
+    async Task<IReadOnlyList<ShipPartStack>> IPartStock.ReadAsync(
+        long planetId,
+        IReadOnlyCollection<int> partTypeIds,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyList<PartStackInfo> stacks = await ReadAsync(planetId, partTypeIds, cancellationToken).ConfigureAwait(false);
+
+        return
+        [
+            .. stacks.Select(stack => new ShipPartStack(
+                stack.PartTypeId,
+                stack.MarkLevel,
+                stack.HasRaceBonus,
+                stack.ConditionPercent,
+                stack.Quantity)),
+        ];
+    }
+
+    /// <inheritdoc />
+    async Task<IReadOnlyDictionary<int, PartRecipeFacts>> IPartStock.GetPartFactsAsync(CancellationToken cancellationToken)
+    {
+        IReadOnlyDictionary<int, PartFacts> facts = await GetPartFactsAsync(cancellationToken).ConfigureAwait(false);
+
+        return facts.ToDictionary(
+            entry => entry.Key,
+            entry => new PartRecipeFacts(
+                entry.Value.PartTypeId,
+                entry.Value.Code,
+                entry.Value.NameKey,
+                entry.Value.MarkLevel,
+                entry.Value.IsArchived,
+                entry.Value.ResourceCost,
+                entry.Value.IsTerraformingDevice,
+                entry.Value.Weight));
+    }
 }
 
 /// <summary>
@@ -411,6 +557,15 @@ public sealed class PartStockService
 /// <param name="ConditionPercent">The condition of the part in per cent.</param>
 /// <param name="Quantity">How many parts were taken.</param>
 public sealed record PartStackTaken(int PartTypeId, int MarkLevel, bool HasRaceBonus, int ConditionPercent, long Quantity);
+
+/// <summary>
+/// A stack of new parts named by the type, the mark and the bonus of the race (task 00039).
+/// </summary>
+/// <param name="PartTypeId">The kind of the part.</param>
+/// <param name="MarkLevel">The mark level of the part.</param>
+/// <param name="HasRaceBonus">Whether the part carries the bonus of the race that made it.</param>
+/// <param name="Quantity">How many parts.</param>
+public sealed record PartStackRequest(int PartTypeId, int MarkLevel, bool HasRaceBonus, long Quantity);
 
 /// <summary>
 /// A stack of the parts that goes into the storage of a body.

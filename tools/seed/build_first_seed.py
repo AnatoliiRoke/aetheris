@@ -456,6 +456,7 @@ CHARACTERISTICS = [
     ("char_jump_prep", "Час підготовки стрибка", "Jump preparation", "Скільки триває підготовка стрибка.", "How long a jump takes to prepare.", {"uk": "с", "en": "s"}),
     ("char_hull_size", "Розмір", "Size", "Розмір корпусу.", "Size of the hull."),
     ("char_hull_capacity", "Вмістимість", "Capacity", "Скільки модуль місць має корпус.", "How much the hull holds."),
+    ("char_upkeep", "Утримання", "Upkeep", "Скільки кредитів корпус або модуль вимагає за годину.", "How many credits a hull or a module costs per hour.", {"uk": "кредитів/год", "en": "credits/h"}),
 ]
 
 
@@ -804,6 +805,51 @@ def launcher_size(name: str) -> int | None:
     return int(match.group(1))
 
 
+# The size of a launcher is data on the weapon, the same number the ammunition of that size carries.
+LAUNCHER_SIZES = {
+    "РПУ-X1": 1,
+    "РПУ-X2": 2,
+    "РПУ-X3": 3,
+}
+
+# The logical kind the program reads. A characteristic without a kind is not read by its kind.
+CHARACTERISTIC_KINDS = {
+    "char_thrust": "drive_push",
+    "char_energy_use": "energy_use",
+    "char_power": "power",
+    "char_damage": "damage",
+    "char_rate": "rate",
+    "char_integrity": "integrity",
+    "char_shield_capacity": "shield_capacity",
+    "char_shield_regen": "shield_regen",
+    "char_launcher_size": "launcher_size",
+    "char_shield_restore": "shield_restore",
+    "char_crew": "crew",
+    "char_cargo": "cargo",
+    "char_hull_capacity": "hull_capacity",
+    "char_yield": "yield",
+    "char_scan_radius": "scan_radius",
+    "char_scan_speed": "scan_speed",
+    "char_detection": "detection",
+    "char_dig_speed": "dig_speed",
+    "char_speed": "speed",
+    "char_collect_speed": "collect_speed",
+    "char_fuel_use": "fuel_use",
+    "char_missiles": "missiles",
+    "char_transfer_speed": "transfer_speed",
+    "char_transfer_volume": "transfer_volume",
+    "char_deploy_time": "deploy_time",
+    "char_colonists": "colonists",
+    "char_population": "population",
+    "char_storage": "storage",
+    "char_repair_speed": "repair_speed",
+    "char_training_speed": "training_speed",
+    "char_trade_lots": "trade_lots",
+    "char_jump_prep": "jump_prep",
+    "char_upkeep": "upkeep",
+}
+
+
 def flies(name: str) -> bool:
     return "торпеда" in name or "-X" in name
 
@@ -1008,6 +1054,9 @@ def module_characteristics(name: str, group: str, index: int, cost_base: Decimal
         attributes["damage_type"] = {"code": "energy" if group == "Енергетична зброя" else "kinetic"}
         if group == "Кінетична зброя":
             put("char_magazine")
+            size = LAUNCHER_SIZES.get(name)
+            if size is not None:
+                stats["char_launcher_size"] = value_row(Decimal(size))
     elif group == "Броня":
         put("char_integrity")
     elif group == "Щити":
@@ -1566,6 +1615,9 @@ def main() -> None:
         }
         if unit:
             row["unit"] = unit[0]
+        kind = CHARACTERISTIC_KINDS.get(code)
+        if kind is not None:
+            row["kind"] = kind
         characteristics.append(row)
 
     module_group_names = list(dict.fromkeys(row["group"] for row in modules))
@@ -1612,7 +1664,7 @@ def main() -> None:
         links.extend(group_links(group_code[name], codes_of_group, required_by_group.get(name, set())))
     for name in hull_group_names:
         links.extend(group_links(group_code[name], ["char_hull_size", "char_hull_capacity", "char_integrity"], {"char_hull_size", "char_hull_capacity", "char_integrity"}))
-    notes.append("Magazine is on every kinetic weapon, including cannons. Launcher size and flight speed stay on the ammunition that names them. Survey radius and dig speed are group columns with values only on the matching module.")
+    notes.append("Magazine is on every kinetic weapon, including cannons. Flight speed stays on the ammunition. A launcher also carries the launcher size of the ammunition it accepts: X1, X2 and X3. A cannon has no launcher size, so it accepts the kinetic ammunition that has none. Survey radius and dig speed are group columns with values only on the matching module.")
     notes.append("Damage type is the part attribute damage_type with the code energy or kinetic. Energy ammunition: Lightning X1, Proton torpedo, Fusion torpedo. The other ammunition is kinetic.")
     notes.append("Hull size, capacity and integrity share the cost curve. The hull list left the real numbers open. Hull weight stays the loader default.")
     notes.append("Trade-center lot levels follow the trade-center building maximum. Onboard-computer figures are positive starting numbers; the list does not say which of them reduce a value.")

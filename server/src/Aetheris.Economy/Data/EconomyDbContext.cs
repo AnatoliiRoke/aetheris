@@ -31,6 +31,9 @@ public sealed class EconomyDbContext : DbContext
     /// <summary>Gets the balances of the civilizations.</summary>
     public DbSet<CivilizationBalanceEntity> CivilizationBalances => Set<CivilizationBalanceEntity>();
 
+    /// <summary>Gets the upkeep of the ships of the civilizations.</summary>
+    public DbSet<ShipUpkeepEntity> ShipUpkeeps => Set<ShipUpkeepEntity>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -68,6 +71,17 @@ public sealed class EconomyDbContext : DbContext
             // of the debt in the reference table of the world (task 00024, decision 8). The flag
             // lives in another table, so the database cannot check it here; the rule lives in the
             // economy service, which is the only writer of the balance, and a test holds it.
+        });
+
+        modelBuilder.Entity<ShipUpkeepEntity>(entity =>
+        {
+            const int playerIdLength = 450;
+
+            entity.ToTable("ship_upkeep");
+            entity.HasKey(e => e.PlayerId);
+            entity.Property(e => e.PlayerId).HasColumnName("player_id").HasMaxLength(playerIdLength);
+            entity.Property(e => e.PerHour).HasColumnName("per_hour");
+            entity.ToTable(table => table.HasCheckConstraint("ck_ship_upkeep_per_hour", "per_hour >= 0"));
         });
     }
 }

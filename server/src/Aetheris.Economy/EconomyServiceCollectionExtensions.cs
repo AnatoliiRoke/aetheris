@@ -31,6 +31,7 @@ public static class EconomyServiceCollectionExtensions
         services.AddScoped<IColonyRegistry>(serviceProvider => serviceProvider.GetRequiredService<ColonyRegistry>());
         services.AddScoped<EconomyService>();
         services.AddScoped<CostSplitter>();
+        services.AddScoped<IShipUpkeepLedger, ShipUpkeepLedger>();
 
         // The world asks before the scope of a resource changes whether a balance names it.
         services.AddScoped<IResourceUsage, EconomyResourceUsage>();

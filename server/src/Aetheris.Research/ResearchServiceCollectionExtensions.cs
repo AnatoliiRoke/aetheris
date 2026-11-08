@@ -67,6 +67,7 @@ public static class ResearchServiceCollectionExtensions
         // The multipliers of the production are a rule of the research, so the production
         // module reads them through this contract (task 00013, decision 14).
         services.AddScoped<IProductionMultipliers, ProductionMultipliersService>();
+        services.AddScoped<IShipyardTime, ShipyardTimeService>();
 
         return services;
     }

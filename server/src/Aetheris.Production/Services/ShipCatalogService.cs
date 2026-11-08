@@ -47,8 +47,29 @@ public sealed class ShipCatalogService
     /// <summary>The kind of the characteristic that holds the capacity of a shield.</summary>
     public const string ShieldCapacityCharacteristic = CharacteristicKinds.ShieldCapacity;
 
+    /// <summary>The kind of the characteristic that holds the cargo a module adds to the hold.</summary>
+    public const string CargoCharacteristic = CharacteristicKinds.Cargo;
+
+    /// <summary>The kind of the characteristic that holds how fast a shield recovers.</summary>
+    public const string ShieldRegenCharacteristic = CharacteristicKinds.ShieldRegen;
+
+    /// <summary>The kind of the characteristic that holds how many shield units a module restores.</summary>
+    public const string ShieldRestoreCharacteristic = CharacteristicKinds.ShieldRestore;
+
+    /// <summary>The kind of the characteristic that holds the shots a weapon makes in one round.</summary>
+    public const string RateCharacteristic = CharacteristicKinds.Rate;
+
+    /// <summary>The kind of the characteristic that holds the size of a launcher.</summary>
+    public const string LauncherSizeCharacteristic = CharacteristicKinds.LauncherSize;
+
     /// <summary>The kind of the characteristic that holds the extra slots the race gives a hull.</summary>
     public const string RaceBonusSlotsCharacteristic = CharacteristicKinds.HullRaceSlot;
+
+    /// <summary>The kind of the characteristic that holds the upkeep of a hull or a module, in credits per hour.</summary>
+    public const string UpkeepCharacteristic = CharacteristicKinds.Upkeep;
+
+    /// <summary>The kind of the characteristic that holds the assembly time of a hull, in game seconds.</summary>
+    public const string AssemblyTimeCharacteristic = CharacteristicKinds.AssemblyTime;
 
     private readonly ProductionCatalogCache _catalog;
     private readonly ProductionDbContext _dbContext;
@@ -145,7 +166,10 @@ public sealed class ShipCatalogService
                     ValueOf(part, characteristicIds, HoldCharacteristic),
                     ValueOf(part, characteristicIds, IntegrityCharacteristic),
                     part.Weight,
-                    part.IsArchived)),
+                    part.IsArchived,
+                    ValueOf(part, characteristicIds, UpkeepCharacteristic),
+                    ValueOf(part, characteristicIds, CrewCharacteristic),
+                    AssemblySecondsOf(part, characteristicIds))),
         ];
 
         List<ShipModuleDto> modules =
@@ -178,7 +202,28 @@ public sealed class ShipCatalogService
                     [part.MarkLevel],
                     part.IsArchived,
                     IsAmmunition(part),
-                    IsCapsule(part))),
+                    IsCapsule(part),
+                    ValueOf(part, characteristicIds, CargoCharacteristic),
+                    ValueOf(part, characteristicIds, IntegrityCharacteristic),
+                    ValueOf(part, characteristicIds, ShieldRegenCharacteristic),
+                    ValueOf(part, characteristicIds, ShieldRestoreCharacteristic),
+                    ValueOf(part, characteristicIds, RateCharacteristic),
+                    ValueOf(part, characteristicIds, LauncherSizeCharacteristic),
+                    FactsOf(part, catalog),
+                    ValueOf(part, characteristicIds, UpkeepCharacteristic))),
+        ];
+
+        // The ammunition is not a module of a ship: the constructor does not offer it, and the
+        // kinetic damage of a project is the damage of the rounds the fitted weapon accepts.
+        List<ShipAmmunitionDto> ammunition =
+        [
+            .. catalog.Parts
+                .Where(part => IsAmmunition(part) && !part.IsArchived)
+                .Select(part => new ShipAmmunitionDto(
+                    part.Id,
+                    ValueOf(part, characteristicIds, DamageCharacteristic),
+                    RoleOf(part, PartAttributeKeys.DamageKind),
+                    ValueOf(part, characteristicIds, LauncherSizeCharacteristic))),
         ];
 
         // The types of the modules: the groups of the parts are the types, so the picker of the
@@ -197,7 +242,7 @@ public sealed class ShipCatalogService
                 .OrderBy(group => group.Code, StringComparer.Ordinal),
         ];
 
-        return new ShipCatalogDto(hulls, modules, moduleGroups);
+        return new ShipCatalogDto(hulls, modules, moduleGroups, ammunition);
     }
 
     /// <summary>
@@ -233,6 +278,16 @@ public sealed class ShipCatalogService
     }
 
     /// <summary>
+    /// Reads the assembly time of a hull. A hull without the characteristic has no time yet.
+    /// </summary>
+    private static long AssemblySecondsOf(PartTypeInfo part, IReadOnlyDictionary<string, int> characteristicIds)
+    {
+        decimal seconds = ValueOf(part, characteristicIds, AssemblyTimeCharacteristic);
+
+        return seconds < 1m ? 0 : (long)decimal.Ceiling(seconds);
+    }
+
+    /// <summary>
     /// Reads the value of a characteristic of a part.
     /// </summary>
     private static decimal ValueOf(PartTypeInfo part, IReadOnlyDictionary<string, int> characteristicIds, string characteristic)
@@ -245,6 +300,40 @@ public sealed class ShipCatalogService
         return part.Characteristics.TryGetValue(characteristicId, out PartCharacteristicInfo? value)
             ? value.NumberValue
             : 0m;
+    }
+
+    /// <summary>
+    /// Reads the characteristics the plaque of a project adds up.
+    /// </summary>
+    /// <param name="part">The module.</param>
+    /// <param name="catalog">The catalog of the production.</param>
+    /// <returns>The characteristics, in the order of the lists. A zero amount is left out.</returns>
+    private static List<ShipModuleFactDto> FactsOf(PartTypeInfo part, ProductionCatalog catalog)
+    {
+        List<ShipModuleFactDto> facts = [];
+
+        foreach (PartCharacteristicInfo entry in part.Characteristics.Values)
+        {
+            CharacteristicInfo? characteristic = catalog.FindCharacteristic(entry.CharacteristicId);
+
+            if (characteristic?.Kind is not string kind
+                || !CharacteristicKinds.IsPlaqueFact(kind)
+                || entry.NumberValue == 0m)
+            {
+                continue;
+            }
+
+            facts.Add(new ShipModuleFactDto(
+                kind,
+                characteristic.NameKey,
+                characteristic.UnitKey,
+                entry.NumberValue,
+                characteristic.SortOrder));
+        }
+
+        facts.Sort(static (left, right) => left.SortOrder.CompareTo(right.SortOrder));
+
+        return facts;
     }
 
     /// <summary>

@@ -290,6 +290,12 @@ export function MapViewportArea({
 
   const zoom = useMemo<MapZoom>(() => ({ scale: fitScale * 2 ** (step / stepsPerDoubling), fit: fitScale }), [step, fitScale]);
 
+  // The scale of the map and the width it shows now, in the units of the world (light years).
+  const readout = useMemo(
+    () => t('map.zoomScale', { scale: zoom.scale.toFixed(1).replace('.', ','), width: Math.round(size.current.width / view.current.k) }),
+    [t, zoom.scale],
+  );
+
   return (
     <div className={picking ? 'map-area is-picking' : 'map-area'}>
       <div
@@ -304,7 +310,13 @@ export function MapViewportArea({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
       >
-        <div className="map-area__stars" aria-hidden="true" />
+        <div aria-hidden="true" className="map-area__nebula" />
+        <div aria-hidden="true" className="map-area__veil" />
+        <div aria-hidden="true" className="map-area__stars map-area__stars--far" />
+        <div aria-hidden="true" className="map-area__stars map-area__stars--mid" />
+        <div aria-hidden="true" className="map-area__stars map-area__stars--near" />
+        <div aria-hidden="true" className="map-area__stars map-area__stars--bright" />
+        <div aria-hidden="true" className="map-area__stars map-area__stars--twinkle" />
         <div className="map-world" ref={worldRef}>
           <MapZoomContext.Provider value={zoom}>{children}</MapZoomContext.Provider>
         </div>
@@ -318,6 +330,9 @@ export function MapViewportArea({
         {overlay}
       </div>
       <div className="map-area__controls" data-map-ui="" role="group" aria-label={t('map.zoomControls')}>
+        <span aria-hidden="true" className="map-area__scale">
+          {readout}
+        </span>
         {controls}
         <button aria-label={t('map.zoomIn')} className="map-round" type="button" onClick={() => zoomBy(zoomStep)}>
           <GameIcon name="mapPlus" size={20} />

@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import type { ShipDesign, ShipDesignSlotInput, ShipHull, ShipModule } from '../../../api/fleetApi';
+import type { ShipAmmunition, ShipDesign, ShipDesignSlotInput, ShipHull, ShipModule } from '../../../api/fleetApi';
 import { CardArt } from '../../../components/CardArt';
 import { useI18n } from '../../../i18n/useI18n';
 import { useTexts } from '../../../texts/useTexts';
 import { formatAmount } from '../planetText';
 import { ShipyardDialog } from './ShipyardDialog';
-import { mainTrait } from './shipyardParts';
+import { factLabel, fittedCombat, fittedFacts, formatCombatDamage, formatFactAmount, formatShield, mainTrait } from './shipyardParts';
 
 /**
  * The second step of a design: the window with the slots of the hull, the name of the design,
@@ -18,6 +18,7 @@ import { mainTrait } from './shipyardParts';
  * @param hasRaceBonusSlot Whether the design takes the extra slot of the race.
  * @param slots The slots of the design as they stand.
  * @param modules The modules of the catalog.
+ * @param ammunition The ammunition a kinetic weapon may fire.
  * @param busy Whether a command is running.
  * @param onName What to do when the player changes the name.
  * @param onChangeHull What to do when the player wants another hull.
@@ -33,6 +34,7 @@ export function DesignWindow({
   hasRaceBonusSlot,
   slots,
   modules,
+  ammunition = [],
   busy,
   onName,
   onChangeHull,
@@ -47,6 +49,7 @@ export function DesignWindow({
   hasRaceBonusSlot: boolean;
   slots: ShipDesignSlotInput[];
   modules: ShipModule[];
+  ammunition?: ShipAmmunition[];
   busy: boolean;
   onName: (name: string) => void;
   onChangeHull: () => void;
@@ -67,8 +70,6 @@ export function DesignWindow({
     let crew = 0;
     let weight = hull.weight;
     let drivePush = 0;
-    let energyDamage = 0;
-    let kineticDamage = 0;
     let shield = 0;
     let hasDrive = false;
     let hasReactor = false;
@@ -86,19 +87,29 @@ export function DesignWindow({
       weight += module.weight;
       drivePush += module.drivePush;
       shield += module.shieldCapacity;
-
-      if (module.damageKind === 'energy') {
-        energyDamage += module.damage;
-      } else if (module.damageKind === 'kinetic') {
-        kineticDamage += module.damage;
-      }
-
       hasDrive ||= module.component === 'drive';
       hasReactor ||= module.component === 'reactor';
     }
 
-    return { use, power, crew, weight, drivePush, energyDamage, kineticDamage, shield, hasDrive, hasReactor };
-  }, [byId, hull.weight, slots]);
+    const combat = fittedCombat(slots, byId, ammunition);
+
+    return {
+      use,
+      power,
+      crew,
+      weight,
+      drivePush,
+      shield,
+      hasDrive,
+      hasReactor,
+      cargo: combat.cargo,
+      armor: combat.armor,
+      shieldRegen: combat.shieldRegen,
+      energyDamage: combat.energyDamage,
+      kineticMin: combat.kineticMin,
+      kineticMax: combat.kineticMax,
+    };
+  }, [ammunition, byId, hull.weight, slots]);
 
   const checks = [
     { ok: energy.hasDrive, text: t('shipyard.checkNoDrive') },
@@ -107,6 +118,8 @@ export function DesignWindow({
   ];
 
   const ready = checks.every((check) => check.ok);
+  const facts = useMemo(() => fittedFacts(slots, byId), [byId, slots]);
+  const damage = formatCombatDamage(energy.energyDamage, energy.kineticMin, energy.kineticMax, t, language);
 
   return (
     <ShipyardDialog
@@ -182,7 +195,7 @@ export function DesignWindow({
               <div className="sh-slot sh-slot--filled" key={index}>
                 <span className="sh-slot__index">{t('shipyard.slot', { index: index + 1 })}</span>
                 <span className="sh-slot__name">{text(module.nameKey) ?? module.nameKey}</span>
-                <span className="sh-slot__mark">{t('shipyard.mark', { mark: slot.markLevel })}</span>
+                {slot.markLevel > 1 ? <span className="sh-slot__mark">{t('shipyard.mark', { mark: slot.markLevel })}</span> : null}
                 {trait ? <span className="sh-slot__fact">{t(`shipyard.trait.${trait.label}` as never)}: {trait.value}</span> : null}
                 <button className="sh-slot__remove" onClick={() => onRemove(index)} type="button">
                   {t('shipyard.remove')}
@@ -218,20 +231,28 @@ export function DesignWindow({
             <dt className="sh-facts__term">{t('shipyard.drivePush')}</dt>
             <dd className="sh-facts__value">{formatAmount(energy.drivePush, language)} кН</dd>
           </div>
-          <div>
-            <dt className="sh-facts__term">{t('shipyard.damage')}</dt>
-            <dd className="sh-facts__value">
-              {formatAmount(energy.energyDamage, language)} {t('shipyard.energyDamage')} · {formatAmount(energy.kineticDamage, language)} {t('shipyard.kineticDamage')}
-            </dd>
-          </div>
+          {damage ? (
+            <div>
+              <dt className="sh-facts__term">{t('shipyard.damage')}</dt>
+              <dd className="sh-facts__value">{damage}</dd>
+            </div>
+          ) : null}
           <div>
             <dt className="sh-facts__term">{t('shipyard.integrity')}</dt>
             <dd className="sh-facts__value">{formatAmount(hull.integrity, language)}</dd>
           </div>
-          <div>
-            <dt className="sh-facts__term">{t('shipyard.shield')}</dt>
-            <dd className="sh-facts__value">{formatAmount(energy.shield, language)}</dd>
-          </div>
+          {energy.armor > 0 ? (
+            <div>
+              <dt className="sh-facts__term">{t('shipyard.armor')}</dt>
+              <dd className="sh-facts__value">{formatAmount(energy.armor, language)}</dd>
+            </div>
+          ) : null}
+          {energy.shield > 0 || energy.shieldRegen > 0 ? (
+            <div>
+              <dt className="sh-facts__term">{t('shipyard.shield')}</dt>
+              <dd className="sh-facts__value">{formatShield(energy.shield, energy.shieldRegen, t, language)}</dd>
+            </div>
+          ) : null}
           <div>
             <dt className="sh-facts__term">{t('shipyard.energy')}</dt>
             <dd className="sh-facts__value">
@@ -240,8 +261,14 @@ export function DesignWindow({
           </div>
           <div>
             <dt className="sh-facts__term">{t('shipyard.hold')}</dt>
-            <dd className="sh-facts__value">{formatAmount(hull.holdCapacity, language)} т</dd>
+            <dd className="sh-facts__value">{formatAmount(hull.holdCapacity + energy.cargo, language)} т</dd>
           </div>
+          {facts.map((fact) => (
+            <div key={fact.kind}>
+              <dt className="sh-facts__term">{factLabel(fact, t, text)}</dt>
+              <dd className="sh-facts__value">{formatFactAmount(fact, text, language)}</dd>
+            </div>
+          ))}
         </dl>
       </section>
 

@@ -446,6 +446,8 @@ export const adminUk = {
   'admin.players.crew': 'Екіпаж',
   'admin.players.hold': 'Трюм',
   'admin.players.integrity': 'Міцність',
+  'admin.players.armor': 'Броня',
+  'admin.players.yield': 'Видобуток за годину',
   'admin.players.energyUse': 'Споживання енергії',
   'admin.players.energyPower': 'Потужність',
   'admin.players.drive': 'Тяга',

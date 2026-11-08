@@ -65,4 +65,13 @@ public interface IResearchModule
         string playerId,
         int queueItemId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the multiplier the technologies of one body give the assembly of a ship (task 00039).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body the shipyard stands on.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The multiplier. One changes nothing. It is never negative.</returns>
+    Task<decimal> ShipyardTimeMultiplierAsync(string playerId, long planetId, CancellationToken cancellationToken = default);
 }

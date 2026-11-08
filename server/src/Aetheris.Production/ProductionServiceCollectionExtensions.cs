@@ -43,6 +43,7 @@ public static class ProductionServiceCollectionExtensions
         services.AddScoped<ShipCatalogService>();
         services.AddScoped<CharacteristicQueryService>();
         services.AddScoped<PartStockService>();
+        services.AddScoped<IPartStock>(provider => provider.GetRequiredService<PartStockService>());
         services.AddScoped<PopulationCapsuleService>();
         services.AddScoped<IResourceUsage, ProductionResourceUsage>();
         services.AddScoped<IProductionModule, ProductionModule>();

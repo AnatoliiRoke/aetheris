@@ -6,7 +6,7 @@ import { useTexts } from '../../texts/useTexts';
 import { ResearchQueue } from './ResearchQueue';
 import { useResearch } from './useResearch';
 import { useResearchCommands } from './useResearchCommands';
-import { useResourceNames } from './useResourceNames';
+import { useResourceCodes, useResourceNames } from './useResourceNames';
 import { useShellActions } from './useShell';
 import { useWorldReference } from './useWorldReference';
 
@@ -25,6 +25,7 @@ export function ResearchPanel({ planetId }: { planetId: number }) {
   const { selectPlanet } = useShellActions();
   const reference = useWorldReference();
   const resourceName = useResourceNames(reference, text);
+  const resourceCode = useResourceCodes(reference);
 
   if (!tree) {
     return (
@@ -51,6 +52,7 @@ export function ResearchPanel({ planetId }: { planetId: number }) {
         onCancel={cancel}
         onFinished={() => void reload()}
         receivedAt={receivedAt}
+        resourceCode={resourceCode}
         resourceName={resourceName}
         technologyName={(key) => text(key) ?? key}
         title={t('player.game.research')}

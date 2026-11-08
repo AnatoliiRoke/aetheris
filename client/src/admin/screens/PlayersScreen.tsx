@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { Fragment, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from '../../router/Router';
 import { useRouter } from '../../router/useRouter';
@@ -22,6 +22,7 @@ import type {
   ProductionOrderRow,
   ProductionView,
   ResearchRow,
+  DesignSummary,
   ShipDesign,
   StockRow,
   TechnologyRow,
@@ -1172,6 +1173,21 @@ function DesignsSection({
   );
 }
 
+function kineticDamageText(summary: DesignSummary, language: 'uk' | 'en'): string | null {
+  const least = summary.kinetic_damage_min ?? 0;
+  const greatest = summary.kinetic_damage_max ?? summary.kinetic_damage;
+
+  if (least <= 0 && greatest <= 0) {
+    return null;
+  }
+
+  if (least > 0 && greatest > least) {
+    return `${formatNumber(least, language, 2)}–${formatNumber(greatest, language, 2)}`;
+  }
+
+  return formatNumber(greatest > 0 ? greatest : least, language, 2);
+}
+
 function DesignCard({
   design,
   language,
@@ -1188,8 +1204,15 @@ function DesignCard({
   onArchive: () => void;
 }) {
   const { t } = useAdminText();
+  const { text } = useTexts();
   const [designName, setDesignName] = useState(design.name);
   const summary = design.summary;
+  const armor = summary.armor ?? 0;
+  const shieldRegen = summary.shield_regen ?? 0;
+  const kinetic = kineticDamageText(summary, language);
+  const shieldText = shieldRegen > 0
+    ? `${formatNumber(summary.shield_capacity, language, 2)} (${formatNumber(shieldRegen, language, 2)})`
+    : formatNumber(summary.shield_capacity, language, 2);
 
   return (
     <article className="admin-card__group">
@@ -1213,18 +1236,47 @@ function DesignCard({
         <dd>{formatNumber(summary.hold_capacity, language, 2)}</dd>
         <dt>{t('admin.players.integrity')}</dt>
         <dd>{formatNumber(summary.integrity, language, 2)}</dd>
+        {armor > 0 ? (
+          <>
+            <dt>{t('admin.players.armor')}</dt>
+            <dd>{formatNumber(armor, language, 2)}</dd>
+          </>
+        ) : null}
         <dt>{t('admin.players.energyUse')}</dt>
         <dd>{formatNumber(summary.energy_use, language, 2)}</dd>
         <dt>{t('admin.players.energyPower')}</dt>
         <dd>{formatNumber(summary.energy_power, language, 2)}</dd>
         <dt>{t('admin.players.drive')}</dt>
         <dd>{formatNumber(summary.drive_push, language, 2)}</dd>
-        <dt>{t('admin.players.energyDamage')}</dt>
-        <dd>{formatNumber(summary.energy_damage, language, 2)}</dd>
-        <dt>{t('admin.players.kineticDamage')}</dt>
-        <dd>{formatNumber(summary.kinetic_damage, language, 2)}</dd>
-        <dt>{t('admin.players.shield')}</dt>
-        <dd>{formatNumber(summary.shield_capacity, language, 2)}</dd>
+        {summary.energy_damage > 0 ? (
+          <>
+            <dt>{t('admin.players.energyDamage')}</dt>
+            <dd>{formatNumber(summary.energy_damage, language, 2)}</dd>
+          </>
+        ) : null}
+        {kinetic ? (
+          <>
+            <dt>{t('admin.players.kineticDamage')}</dt>
+            <dd>{kinetic}</dd>
+          </>
+        ) : null}
+        {summary.shield_capacity > 0 || shieldRegen > 0 ? (
+          <>
+            <dt>{t('admin.players.shield')}</dt>
+            <dd>{shieldText}</dd>
+          </>
+        ) : null}
+        {(summary.facts ?? []).filter((fact) => fact.amount !== 0).map((fact) => {
+          const unit = fact.unit_key ? text(fact.unit_key) : null;
+          const amountText = formatNumber(fact.amount, language, 2);
+
+          return (
+            <Fragment key={fact.kind}>
+              <dt>{fact.kind === 'yield' ? t('admin.players.yield') : (text(fact.name_key) ?? fact.name_key)}</dt>
+              <dd>{unit ? `${amountText} ${unit}` : amountText}</dd>
+            </Fragment>
+          );
+        })}
         <dt>{t('admin.players.hasDrive')}</dt>
         <dd>{summary.has_drive ? t('admin.table.yes') : t('admin.table.no')}</dd>
         <dt>{t('admin.players.hasReactor')}</dt>

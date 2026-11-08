@@ -57,9 +57,92 @@ export function availableAmounts(source: BodyAvailability): { resources: Map<num
   return { resources, parts };
 }
 
+/** Credits stand first on every recipe plaque. */
+const creditsCode = 'resource_27';
+
+/** Population stands second, after the credits. */
+const populationCode = 'resource_30';
+
+/**
+ * The catalog code carried by a localisation key, such as `resource_27` or `part_3`.
+ *
+ * @param nameKey The localisation key of the ingredient.
+ * @returns The code, or `null` when the key has none.
+ */
+function catalogCode(nameKey: string): string | null {
+  const matched = /((?:resource|part)_\d+)/.exec(nameKey);
+
+  return matched?.[1] ?? null;
+}
+
+/**
+ * Where an ingredient stands on a recipe plaque: credits, then population, then the other
+ * resources in the order of the catalog, then the parts.
+ *
+ * @param code The catalog code of the ingredient, or `null` for a part named only by its id.
+ * @param partTypeId The part, or `null` when the ingredient is a resource.
+ * @returns The group and the place inside the group. A smaller pair stands higher.
+ */
+function ingredientPlace(code: string | null, partTypeId: number | null): readonly [number, number] {
+  if (code === creditsCode) {
+    return [0, 0];
+  }
+
+  if (code === populationCode) {
+    return [1, 0];
+  }
+
+  const resourceNumber = code === null ? null : /^resource_(\d+)$/.exec(code);
+
+  if (resourceNumber) {
+    return [2, Number(resourceNumber[1])];
+  }
+
+  const partNumber = code === null ? null : /^part_(\d+)$/.exec(code);
+
+  return [3, partNumber ? Number(partNumber[1]) : (partTypeId ?? 0)];
+}
+
+/**
+ * Compares two ingredients for the one order of every recipe plaque.
+ *
+ * @param left The first ingredient.
+ * @param right The second ingredient.
+ * @returns A negative number when the first stands higher.
+ */
+export function compareRecipeIngredients(
+  left: { nameKey?: string | null; code?: string | null; partTypeId: number | null },
+  right: { nameKey?: string | null; code?: string | null; partTypeId: number | null },
+): number {
+  const leftPlace = ingredientPlace(left.code ?? (left.nameKey ? catalogCode(left.nameKey) : null), left.partTypeId);
+  const rightPlace = ingredientPlace(right.code ?? (right.nameKey ? catalogCode(right.nameKey) : null), right.partTypeId);
+
+  return leftPlace[0] - rightPlace[0] || leftPlace[1] - rightPlace[1];
+}
+
+/**
+ * Puts resource costs in the one plaque order: credits, population, then the catalog code.
+ * Display only. The list the server sent stays as it was.
+ *
+ * @param costs The costs to show.
+ * @param codeByResourceId The catalog code of a resource, or `null` when the catalog has none.
+ * @returns A copy of the costs in the plaque order.
+ */
+export function orderCatalogCosts<T extends { resourceTypeId: number }>(
+  costs: readonly T[],
+  codeByResourceId: (resourceTypeId: number) => string | null,
+): T[] {
+  return [...costs].sort((left, right) =>
+    compareRecipeIngredients(
+      { code: codeByResourceId(left.resourceTypeId), partTypeId: null },
+      { code: codeByResourceId(right.resourceTypeId), partTypeId: null },
+    ),
+  );
+}
+
 /**
  * What every ingredient of a recipe needs and what the body has, for the number of units the
- * player chose.
+ * player chose. The rows stand in one order: credits, population, the other resources, the parts.
  *
  * @param recipe The recipe.
  * @param quantity How many units the player chose.
@@ -70,16 +153,18 @@ export function ingredientAvailability(recipe: { ingredients: ProductionIngredie
   const { resources, parts } = availableAmounts(source);
   const units = Number.isFinite(quantity) && quantity > 0 ? quantity : 0;
 
-  return recipe.ingredients.map((ingredient) => {
-    const required = ingredient.amount * units;
-    const available =
-      ingredient.resourceTypeId !== null ? (resources.get(ingredient.resourceTypeId) ?? 0) : (parts.get(ingredient.partTypeId ?? 0) ?? 0);
+  return recipe.ingredients
+    .map((ingredient) => {
+      const required = ingredient.amount * units;
+      const available =
+        ingredient.resourceTypeId !== null ? (resources.get(ingredient.resourceTypeId) ?? 0) : (parts.get(ingredient.partTypeId ?? 0) ?? 0);
 
-    return {
-      ingredient,
-      required,
-      available,
-      missing: Math.max(0, required - available),
-    };
-  });
+      return {
+        ingredient,
+        required,
+        available,
+        missing: Math.max(0, required - available),
+      };
+    })
+    .sort((left, right) => compareRecipeIngredients(left.ingredient, right.ingredient));
 }

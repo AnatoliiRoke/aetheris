@@ -22433,7 +22433,37 @@
       "is_start_building": false,
       "building_class": "shipyard",
       "category": "group_8",
-      "max_level": 20
+      "max_level": 20,
+      "effects": [
+        {
+          "type": "shipyard_queue_slots",
+          "base": 2,
+          "growth": 1,
+          "step": 0,
+          "values": [
+            2,
+            3,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ]
+        }
+      ]
     },
     {
       "code": "building_52",

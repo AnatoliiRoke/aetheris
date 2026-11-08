@@ -55,6 +55,7 @@ const MapPage = lazy(() => import('./pages/player/map/MapPage').then((module) =>
 const ResearchPage = lazy(() => import('./pages/player/ResearchPage').then((module) => ({ default: module.ResearchPage })));
 const StoragePage = lazy(() => import('./pages/player/StoragePage').then((module) => ({ default: module.StoragePage })));
 const ShipyardPage = lazy(() => import('./pages/player/ShipyardPage').then((module) => ({ default: module.ShipyardPage })));
+const FleetsPage = lazy(() => import('./pages/player/FleetsPage').then((module) => ({ default: module.FleetsPage })));
 
 const pages: Record<string, () => ReactNode> = {
   [routes.home]: () => <LandingPage />,
@@ -79,6 +80,7 @@ const playerPages: Record<string, () => ReactNode> = {
   [routes.planetStorage]: () => <StoragePage />,
   [routes.market]: () => <MarketPage />,
   [routes.shipyard]: () => <ShipyardPage />,
+  [routes.fleets]: () => <FleetsPage />,
   [routes.civilization]: () => <CivilizationPage />,
   [routes.account]: () => <AccountPage />,
 };
@@ -88,7 +90,7 @@ const playerPages: Record<string, () => ReactNode> = {
  * frame is one element above them, so it stays mounted when the player goes from one of them to
  * another: its data is not read again and its blocks are not drawn again.
  */
-const framedPaths: ReadonlySet<string> = new Set([routes.game, routes.planet, routes.planetBuild, routes.planetProduction, routes.planetResearch, routes.planetStorage, routes.map, routes.market, routes.shipyard]);
+const framedPaths: ReadonlySet<string> = new Set([routes.game, routes.planet, routes.planetBuild, routes.planetProduction, routes.planetResearch, routes.planetStorage, routes.map, routes.market, routes.shipyard, routes.fleets]);
 
 /**
  * Shows the page of the current address.

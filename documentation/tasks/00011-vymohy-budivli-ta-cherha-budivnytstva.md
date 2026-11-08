@@ -1,6 +1,6 @@
 # Задача 00011 — Вимоги, будівлі, склад і черга будівництва
 
-> **Статус:** ВИКОНАНО агентом 26.10.2026 (затверджено автором 26.10.2026), чекає приймання.
+> **Статус:** ✅ ВИКОНАНО агентом 26.10.2026 (затверджено автором 26.10.2026).
 > **Етап:** 1 (production/01)
 > **Документи:** [game-design/03 Розвиток планет](../game-design/03-rozvytok-planet.md), [game-design/02 Економіка](../game-design/02-ekonomika-ta-resursy.md), [game-design/12 Монетизація](../game-design/12-monetyzatsiia.md), [tech/07 Планувальник](../tech/07-planuvalnyk-podii.md), [tech/08 Правила коду](../tech/08-pravyla-kodu-dlia-ahentiv.md), [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md), задачі [00004](00004-heneratsiia-vsesvitu.md), [00006](00006-reiestratsiia-ta-avtoryzatsiia-hravtsia.md)
 > **Наступна:** [00012 Науковий центр і дослідження](00012-naukovyi-tsentr-ta-cherha-doslidzhen.md)

@@ -265,6 +265,8 @@ export const configDescriptionsUk: Record<string, string> = {
     'Найменший боєкомплект, який має вмістити базовий трюм корпусу.',
   'config.fleet.design.name_max_length.description':
     'Найбільша кількість символів у назві проєкту корабля.',
+  'config.fleet.formation.name_max_length.description':
+    'Найбільша кількість символів у назві флоту.',
 
   'config.economy.population.growth_percent.description':
     'Відсоток від найбільшого населення, на який населення зростає за годину.',

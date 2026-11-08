@@ -99,6 +99,25 @@ namespace Aetheris.Economy.Data.Migrations
                             t.HasCheckConstraint("ck_planet_population_amount", "amount >= 0");
                         });
                 });
+
+            modelBuilder.Entity("Aetheris.Economy.Data.Entities.ShipUpkeepEntity", b =>
+                {
+                    b.Property<string>("PlayerId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("player_id");
+
+                    b.Property<decimal>("PerHour")
+                        .HasColumnType("numeric")
+                        .HasColumnName("per_hour");
+
+                    b.HasKey("PlayerId");
+
+                    b.ToTable("ship_upkeep", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_ship_upkeep_per_hour", "per_hour >= 0");
+                        });
+                });
 #pragma warning restore 612, 618
         }
     }

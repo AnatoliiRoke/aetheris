@@ -76,6 +76,38 @@ public sealed class ProductionModule : IProductionModule
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<string, int>> FindPartIdsByFileCodeAsync(
+        IReadOnlyCollection<string> fileCodes,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(fileCodes);
+
+        if (fileCodes.Count == 0)
+        {
+            return new Dictionary<string, int>(StringComparer.Ordinal);
+        }
+
+        HashSet<string> wanted = new(fileCodes, StringComparer.Ordinal);
+        Dictionary<string, string> databaseCodes = ProductionSeedAdditions.DatabaseCodes(
+            ProductionReferenceSeed.Load().Parts.Select(part => part.Code),
+            ProductionTextKeys.PartTypeCodeGroup);
+        IReadOnlyList<ProductionPartSummaryDto> parts = await GetPartsAsync(cancellationToken).ConfigureAwait(false);
+        Dictionary<string, int> idsByDatabaseCode = parts.ToDictionary(part => part.Code, part => part.Id, StringComparer.Ordinal);
+        Dictionary<string, int> resolved = new(StringComparer.Ordinal);
+
+        foreach (string fileCode in wanted)
+        {
+            if (databaseCodes.TryGetValue(fileCode, out string? databaseCode)
+                && idsByDatabaseCode.TryGetValue(databaseCode, out int partTypeId))
+            {
+                resolved[fileCode] = partTypeId;
+            }
+        }
+
+        return resolved;
+    }
+
+    /// <inheritdoc />
     public Task<ShipCatalogDto> GetShipCatalogAsync(CancellationToken cancellationToken = default) =>
         _shipCatalog.GetAsync(cancellationToken);
 

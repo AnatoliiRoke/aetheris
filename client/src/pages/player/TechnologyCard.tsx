@@ -5,6 +5,7 @@ import { GameIcon, ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 import type { EntityText } from '../../texts/context';
 import { formatAmount, formatDuration, formatSigned, lookup, reasonText, requirementText } from './planetText';
+import { orderCatalogCosts } from './productionStock';
 import { ResearchProgress } from './QueueItem';
 import { reportRender } from './renderProbe';
 
@@ -27,6 +28,7 @@ const percentFactor = 100;
  * @param name The name of the technology.
  * @param branchName The name of the branch of the technology.
  * @param resourceName The name of a resource by its identifier.
+ * @param resourceCode The catalog code of a resource, so the costs stand in the one plaque order.
  * @param resourceGroupCode The code of the group of a resource, for its icon.
  * @param timeMultiplier How many game seconds pass in a real second.
  * @param deadline The moment the research under way ends on the clock of the browser, or `null`.
@@ -39,6 +41,7 @@ export const TechnologyCard = memo(function TechnologyCard({
   name,
   branchName,
   resourceName,
+  resourceCode,
   resourceGroupCode,
   timeMultiplier,
   deadline,
@@ -50,6 +53,7 @@ export const TechnologyCard = memo(function TechnologyCard({
   name: string;
   branchName: string;
   resourceName: (id: number) => string;
+  resourceCode: (resourceTypeId: number) => string | null;
   resourceGroupCode: (id: number) => string | null;
   timeMultiplier: number;
   deadline: number | null;
@@ -167,7 +171,7 @@ export const TechnologyCard = memo(function TechnologyCard({
         <div className="building-card__next">
           <span className="meta">{plateLabel}</span>
           <ul aria-label={t('build.requiredResources')} className="cost-list cost-list--stock">
-            {next.costs.map((cost) => {
+            {orderCatalogCosts(next.costs, resourceCode).map((cost) => {
               const short = missing.get(cost.resourceTypeId);
               // What the player has of the resource: the server sends it, because a currency lies
               // in the balance of the civilization and not in the stock of the body.

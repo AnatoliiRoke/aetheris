@@ -105,6 +105,17 @@ const paths = {
   info: 'M12 21a9 9 0 1 0 0-18a9 9 0 1 0 0 18z M12 11v6 M12 7.5v.01',
   close: 'M6 6l12 12 M18 6L6 18',
   check: 'M5 12l5 5L20 7',
+
+  // The marks of the screen of the fleets (task 00040); the contours come from the mock-up
+  // `documentation/design/AETHERIS_fleets`.
+  pencil: 'M4 20h4L19 9l-4-4L4 16z M13 7l4 4',
+  transfer: 'M4 8h14 M14 4l4 4-4 4 M20 16H6 M10 12l-4 4 4 4',
+  orderFly: 'M3 12l18-8-6 16-3-7z',
+  orderMine: 'M12 3v10 M8 9l4 4 4-4 M5 21h14 M7 17h10',
+  orderAttack: 'M14.5 17.5L3 6V3h3l11.5 11.5 M13 19l6-6 M16 16l4 4 M19 21l2-2',
+  orderEscort: 'M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z',
+  orderColonize: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M3 12h18 M12 3c3 3 3 15 0 18 M12 3c-3 3-3 15 0 18',
+  orderHome: 'M3 11l9-8 9 8 M5 10v10h14V10',
   chevronDown: 'M6 9l6 6 6-6',
   sortBoth: 'M7 9l5-5 5 5 M7 15l5 5 5-5',
   arrowUp: 'M12 19V5 M6 11l6-6 6 6',

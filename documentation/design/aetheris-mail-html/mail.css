@@ -1,0 +1,283 @@
+/* AETHERIS — Map screen. Exported from the design canvas.
+   Tokens in :root; .mN classes are generated from the design. */
+:root{
+  --bg-0: #070B16;
+  --bg-1: #0B1020;
+  --bg-2: #141B33;
+  --bg-3: #1C2544;
+  --border: rgba(160,190,255,0.16);
+  --border-strong: rgba(160,190,255,0.28);
+  --text-1: #E8EEFF;
+  --text-2: #9AA7C7;
+  --text-soft: #C3CCE4;
+  --accent: #2EC4C4;
+  --accent-hover: #4FDADA;
+  --danger-text: #FF8A66;
+  --warning: #F2C14E;
+  --success: #4CD08A;
+  --nebula-label: #C9B8FF;
+  --res-metal: #B4BFD3;
+  --res-fuel: #FF9F4A;
+  --danger: #FF6B3D;
+  --on-accent: #070B16;
+  --font: Inter, Roboto, system-ui, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#070B16}
+[data-btn]:hover{filter:brightness(1.18)}
+[data-btn]:active{filter:brightness(0.88)}
+button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid #4FDADA;outline-offset:2px}
+input::placeholder{color:#8E9BBB}
+[data-pulse]{animation:mapPulse 1.6s ease-in-out infinite}
+[data-spin]{animation:mapSpin 0.9s linear infinite}
+[data-twinkle]{animation:mapTwinkle 4s ease-in-out infinite}
+[data-sweep]{animation:mapSpin 9s linear infinite}
+[data-sweep-slow]{animation:mapSpin 60s linear infinite}
+@keyframes mapTwinkle{0%,100%{opacity:.55}50%{opacity:1}}
+[data-nebula]{background-image:url(/_blob/3dc44f2e3c616dab38e160f6eddb7b6f)}
+@keyframes mapPulse{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes mapSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+
+/* generated */
+.m1{font-family: Inter, Roboto, system-ui, Arial, sans-serif; color: var(--text-1); font-size: 16px; line-height: 1.5; background-color: var(--bg-0); background-image: radial-gradient(ellipse 60% 40% at 75% 0%, rgba(46,196,196,0.06), rgba(46,196,196,0) 70%), radial-gradient(ellipse 50% 40% at 30% 100%, rgba(142,107,255,0.06), rgba(142,107,255,0) 70%); min-height: 100vh; display: flex; flex-direction: column}
+.m2{position: sticky; top: 0; z-index: 50; height: 64px; display: flex; align-items: center; gap: 14px; padding: 0 20px; background: rgba(7,11,22,0.92); border-bottom: 1px solid var(--border); backdrop-filter: blur(10px)}
+.m3{display: flex; align-items: center; gap: 10px; flex: 0 0 auto}
+.m4{width: 28px; height: 28px; border-radius: 7px; background: var(--accent); color: var(--bg-0); display: flex; align-items: center; justify-content: center}
+.m5{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.m6{font-weight: 700; font-size: 18px; letter-spacing: 0.04em; line-height: 1.2}
+.m7{display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px 0 5px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--border); flex: 0 0 auto}
+.m8{width: 26px; height: 26px; border-radius: 50%; background: rgba(108,141,184,0.18); color: #6C8DB8; display: flex; align-items: center; justify-content: center}
+.m9{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.m10{font-size: 14px; font-weight: 600; white-space: nowrap}
+.m11{padding: 2px 8px; border-radius: 6px; border: 1px solid var(--border-strong); color: var(--text-2); font-size: 12px; font-weight: 600; flex: 0 0 auto}
+.m12{display: flex; justify-content: center; gap: 8px; flex: 1 1 auto; min-width: 0}
+.m13{display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 10px; background: var(--bg-2); border: 1px solid var(--border)}
+.m14{color: #3DD9A6; display: flex}
+.m15{position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap}
+.m16{font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m17{color: var(--text-soft); display: flex}
+.m18{color: #FFE066; display: flex}
+.m19{display: flex; align-items: center; gap: 8px; flex: 0 0 auto}
+.m20{display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,107,61,0.45); background: rgba(255,107,61,0.10); color: var(--danger-text); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap}
+.m21{font-variant-numeric: tabular-nums}
+.m22{display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(242,193,78,0.45); background: rgba(242,193,78,0.10); color: var(--warning); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap}
+.m23{width: 1px; height: 28px; background: var(--border); margin: 0 4px}
+.m24{position: relative; width: 44px; height: 44px; border-radius: 10px; border: 1px solid rgba(46,196,196,0.5); background: rgba(46,196,196,0.12); color: var(--accent-hover); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m25{position: absolute; top: 5px; right: 3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: var(--bg-0); font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; font-variant-numeric: tabular-nums}
+.m26{width: 44px; height: 44px; border-radius: 10px; border: 0; background: transparent; color: var(--text-soft); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m27{flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: stretch}
+.m28{flex: 0 0 220px; padding: 12px; background: rgba(11,16,32,0.6); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px}
+.m29{position: relative; display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px 0 16px; border-radius: 10px; background: transparent; color: var(--text-soft); font-size: 15px; font-weight: 500; text-decoration: none}
+.m30{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.m31{flex: 1 1 auto}
+.m32{position: relative; display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px 0 16px; border-radius: 10px; background: rgba(46,196,196,0.12); color: var(--accent-hover); font-size: 15px; font-weight: 600; text-decoration: none}
+.m33{position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 8px rgba(46,196,196,0.7)}
+.m34{min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(46,196,196,0.18); color: var(--accent-hover); font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; font-variant-numeric: tabular-nums}
+.m35{flex: 999 1 560px; min-width: 0; padding: 16px 24px 24px; display: flex; flex-direction: column; gap: 14px}
+.m36{display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px}
+.m37{min-width: 0}
+.m38{margin: 0; font-size: 56px; font-weight: 700; line-height: 1.2}
+.m39{font-size: 14px; color: var(--text-2); font-variant-numeric: tabular-nums}
+.m40{display: flex; gap: 8px}
+.m41{display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer}
+.m42{display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: var(--accent); color: var(--bg-0); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 0 20px rgba(46,196,196,0.25)}
+.m43{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.m44{display: flex; flex-direction: column; gap: 10px}
+.m45{display: flex; gap: 2px; padding: 3px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--border); align-self: flex-start; max-width: 100%; overflow-x: auto}
+.m46{display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border: 0; border-radius: 9px; background: rgba(46,196,196,0.16); color: var(--accent-hover); font-family: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer}
+.m47{display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent; color: var(--text-soft); font-family: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer}
+.m48{display: flex; flex-wrap: wrap; gap: 6px}
+.m49{flex: 0 0 auto; display: flex; align-items: center; gap: 7px; height: 44px; padding: 0 12px 0 10px; border-radius: 999px; border: 1px solid var(--accent); background: rgba(46,196,196,0.14); color: var(--text-1); font-family: inherit; font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer}
+.m50{font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums}
+.m51{flex: 0 0 auto; display: flex; align-items: center; gap: 7px; height: 44px; padding: 0 12px 0 10px; border-radius: 999px; border: 1px solid rgba(160,190,255,0.20); background: var(--bg-2); color: var(--text-1); font-family: inherit; font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer}
+.m52{color: var(--accent-hover); display: flex}
+.m53{color: var(--danger-text); display: flex}
+.m54{display: grid; grid-template-columns: minmax(340px, 420px) minmax(0, 1fr); gap: 16px; align-items: start}
+.m55{background: rgba(20,27,51,0.86); border: 1px solid var(--border); border-radius: 16px; overflow: hidden}
+.m56{position: relative; padding: 12px; border-bottom: 1px solid rgba(160,190,255,0.12)}
+.m57{position: absolute; left: 26px; top: 24px; color: var(--text-2); display: flex}
+.m58{width: 100%; height: 44px; padding: 0 14px 0 44px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 15px}
+.m59{padding: 12px 16px 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2)}
+.m60{position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 12px 8px 12px 14px; border-top: 1px solid rgba(160,190,255,0.08); background: rgba(46,196,196,0.10)}
+.m61{position: relative; width: 40px; height: 40px; border-radius: 10px; background: rgba(255,107,61,0.12); border: 1px solid rgba(255,107,61,0.40); color: var(--danger-text); display: flex; align-items: center; justify-content: center}
+.m62{min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--text-1); font-family: inherit; text-align: left; cursor: pointer}
+.m63{display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; color: var(--text-soft); font-weight: 500}
+.m64{white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
+.m65{font-size: 15px; font-weight: 500; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
+.m66{font-size: 13px; color: var(--text-2); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
+.m67{display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px}
+.m68{padding: 1px 8px; border-radius: 999px; background: rgba(255,107,61,0.12); border: 1px solid rgba(255,107,61,0.40); color: var(--danger-text); font-size: 11px; font-weight: 600}
+.m69{display: flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; background: var(--bg-3); color: var(--text-soft); font-size: 11px; font-weight: 600}
+.m70{display: flex; flex-direction: column; align-items: flex-end; gap: 0}
+.m71{font-size: 12px; color: var(--text-2); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; padding-right: 8px}
+.m72{width: 44px; height: 44px; margin-top: -2px; border: 0; border-radius: 10px; background: transparent; color: var(--text-2); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m73{position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 12px 8px 12px 14px; border-top: 1px solid rgba(160,190,255,0.08); background: rgba(28,37,68,0.55)}
+.m74{position: relative; width: 40px; height: 40px; border-radius: 10px; background: rgba(46,196,196,0.12); border: 1px solid rgba(46,196,196,0.35); color: var(--accent-hover); display: flex; align-items: center; justify-content: center}
+.m75{position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg-2)}
+.m76{display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; color: var(--text-1); font-weight: 700}
+.m77{color: #E0584F; display: flex}
+.m78{font-size: 15px; font-weight: 700; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
+.m79{padding: 1px 8px; border-radius: 999px; background: rgba(46,196,196,0.12); border: 1px solid rgba(46,196,196,0.35); color: var(--accent-hover); font-size: 11px; font-weight: 600}
+.m80{font-size: 12px; color: var(--accent-hover); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; padding-right: 8px}
+.m81{position: relative; width: 40px; height: 40px; border-radius: 10px; background: rgba(61,217,166,0.10); border: 1px solid rgba(61,217,166,0.35); color: #3DD9A6; display: flex; align-items: center; justify-content: center}
+.m82{color: #7FE0EE; display: flex}
+.m83{padding: 1px 8px; border-radius: 999px; background: rgba(61,217,166,0.10); border: 1px solid rgba(61,217,166,0.35); color: #3DD9A6; font-size: 11px; font-weight: 600}
+.m84{display: flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; background: rgba(242,193,78,0.12); color: var(--warning); font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums}
+.m85{position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 12px 8px 12px 14px; border-top: 1px solid rgba(160,190,255,0.08); background: transparent}
+.m86{position: relative; width: 40px; height: 40px; border-radius: 10px; background: rgba(160,190,255,0.10); border: 1px solid var(--border-strong); color: var(--text-soft); display: flex; align-items: center; justify-content: center}
+.m87{padding: 1px 8px; border-radius: 999px; background: rgba(160,190,255,0.10); border: 1px solid var(--border-strong); color: var(--text-soft); font-size: 11px; font-weight: 600}
+.m88{position: relative; width: 40px; height: 40px; border-radius: 10px; background: rgba(127,224,238,0.10); border: 1px solid rgba(127,224,238,0.35); color: #7FE0EE; display: flex; align-items: center; justify-content: center}
+.m89{padding: 1px 8px; border-radius: 999px; background: rgba(127,224,238,0.10); border: 1px solid rgba(127,224,238,0.35); color: #7FE0EE; font-size: 11px; font-weight: 600}
+.m90{color: #D08A4E; display: flex}
+.m91{width: 44px; height: 44px; margin-top: -2px; border: 0; border-radius: 10px; background: transparent; color: var(--warning); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m92{fill:var(--warning);stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.m93{padding: 20px 24px 24px; background: rgba(20,27,51,0.86); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.35); min-height: 600px}
+.m94{display: flex; flex-direction: column; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid rgba(160,190,255,0.12)}
+.m95{align-self: flex-start; display: flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: rgba(255,107,61,0.12); border: 1px solid rgba(255,107,61,0.40); color: var(--danger-text); font-size: 12px; font-weight: 600}
+.m96{margin: 0; font-size: 26px; font-weight: 600; line-height: 1.2}
+.m97{display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 13px; color: var(--text-2)}
+.m98{display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px 0 6px; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border-strong); color: var(--text-1); font-size: 14px; font-weight: 600}
+.m99{display: flex; align-items: center; gap: 6px; height: 40px; min-width: 44px; justify-content: center; padding: 0 12px; border-radius: 10px; border: 1px solid var(--accent); background: var(--accent); color: var(--bg-0); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer}
+.m100{display: flex; align-items: center; gap: 6px; height: 40px; min-width: 44px; justify-content: center; padding: 0 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer}
+.m101{margin-top: 16px; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; background: rgba(76,208,138,0.10); border: 1px solid rgba(76,208,138,0.45)}
+.m102{width: 48px; height: 48px; border-radius: 12px; background: rgba(7,11,22,0.5); color: var(--success); display: flex; align-items: center; justify-content: center; flex: 0 0 auto}
+.m103{font-size: 18px; font-weight: 700; color: var(--success)}
+.m104{font-size: 13px; color: var(--text-soft); font-variant-numeric: tabular-nums}
+.m105{margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px}
+.m106{padding: 14px; border-radius: 12px; background: var(--bg-1); border: 1px solid rgba(46,196,196,0.35)}
+.m107{display: flex; align-items: center; gap: 8px; margin-bottom: 10px}
+.m108{width: 30px; height: 30px; border-radius: 50%; background: var(--bg-3); color: #6C8DB8; display: flex; align-items: center; justify-content: center}
+.m109{font-size: 15px; font-weight: 600}
+.m110{font-size: 12px; color: var(--text-2)}
+.m111{display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px 12px; font-size: 13px; align-items: center}
+.m112{color: var(--text-2); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em}
+.m113{color: var(--text-2); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; text-align: right}
+.m114{text-align: right; font-variant-numeric: tabular-nums}
+.m115{text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--danger-text)}
+.m116{text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--warning)}
+.m117{text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-2)}
+.m118{padding: 14px; border-radius: 12px; background: var(--bg-1); border: 1px solid rgba(255,107,61,0.35)}
+.m119{width: 30px; height: 30px; border-radius: 50%; background: var(--bg-3); color: #E0584F; display: flex; align-items: center; justify-content: center}
+.m120{text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--success)}
+.m121{margin-top: 16px; display: grid; gap: 10px}
+.m122{display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px}
+.m123{color: var(--text-soft)}
+.m124{font-weight: 600; font-variant-numeric: tabular-nums}
+.m125{height: 8px; border-radius: 4px; background: rgba(160,190,255,0.14)}
+.m126{height: 100%; width: 100%; border-radius: 4px; background: var(--accent)}
+.m127{height: 100%; width: 41%; border-radius: 4px; background: #FF6B3D}
+.m128{margin-top: 16px; padding: 14px; border-radius: 12px; background: var(--bg-1); border: 1px solid var(--border)}
+.m129{font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px}
+.m130{display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 6px; border-radius: 8px; background: var(--bg-3); font-size: 13px}
+.m131{color: var(--res-metal); display: flex}
+.m132{margin-top: 8px; font-size: 12px; color: var(--text-2)}
+.m133{position: sticky; bottom: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding: 8px 20px; background: rgba(7,11,22,0.92); border-top: 1px solid var(--border); backdrop-filter: blur(10px)}
+.m134{display: flex; gap: 8px; overflow-x: auto; flex: 1 1 420px; min-width: 0; padding: 2px}
+.m135{flex: 0 0 auto; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 4px; border-radius: 999px; border: 1px solid var(--accent); background: rgba(46,196,196,0.12); color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer}
+.m136{width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #C4F2D8 0%, #3FA37A 36%, #1F5F6B 70%, #0B2433 100%)}
+.m137{flex: 0 0 auto; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 4px; border-radius: 999px; border: 1px solid var(--border); background: rgba(20,27,51,0.8); color: var(--text-1); font-family: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer}
+.m138{width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #A9DDF2 36%, #4F8DB0 70%, #1A3550 100%)}
+.m139{width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFC48A 0%, #E0592E 36%, #7A1F14 70%, #2A0A08 100%)}
+.m140{width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FBE3A6 0%, #D9A350 38%, #8A5A26 72%, #2E1C0C 100%)}
+.m141{display: flex; align-items: center; gap: 8px; flex: 0 1 480px; min-width: 260px}
+.m142{flex: 1 1 auto; min-width: 0; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 15px}
+.m143{flex: 0 0 auto; width: 44px; height: 44px; border-radius: 10px; border: 0; background: var(--accent); color: var(--bg-0); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m144{align-self: flex-start; display: flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: rgba(46,196,196,0.12); border: 1px solid rgba(46,196,196,0.35); color: var(--accent-hover); font-size: 12px; font-weight: 600}
+.m145{font-weight: 400; color: var(--text-2)}
+.m146{display: flex; align-items: center; gap: 6px; height: 40px; min-width: 44px; justify-content: center; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,107,61,0.4); background: transparent; color: var(--danger-text); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer}
+.m147{margin-top: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 16px; line-height: 1.6; color: var(--text-1); max-width: 640px}
+.m148{margin: 0}
+.m149{margin-top: 20px; padding: 14px; border-radius: 12px; background: var(--bg-1); border: 1px solid var(--border)}
+.m150{display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--text-soft)}
+.m151{width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 15px; line-height: 1.5; resize: vertical}
+.m152{display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px}
+.m153{display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: var(--accent); color: var(--bg-0); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer}
+.m154{align-self: flex-start; display: flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: rgba(61,217,166,0.10); border: 1px solid rgba(61,217,166,0.35); color: #3DD9A6; font-size: 12px; font-weight: 600}
+.m155{margin: 16px 0 0; font-size: 16px; line-height: 1.6; max-width: 640px}
+.m156{margin-top: 16px; padding: 16px; border-radius: 14px; background: var(--bg-1); border: 1px solid rgba(61,217,166,0.35)}
+.m157{display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: center}
+.m158{padding: 14px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--border)}
+.m159{font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2)}
+.m160{display: flex; align-items: center; gap: 10px; margin-top: 8px}
+.m161{width: 40px; height: 40px; border-radius: 10px; background: var(--bg-3); color: #7DB2FF; display: flex; align-items: center; justify-content: center}
+.m162{font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums}
+.m163{font-size: 13px; color: var(--text-soft)}
+.m164{justify-self: center; width: 40px; height: 40px; border-radius: 50%; background: var(--bg-3); border: 1px solid var(--border-strong); color: var(--text-soft); display: flex; align-items: center; justify-content: center; transform: rotate(0deg)}
+.m165{width: 40px; height: 40px; border-radius: 10px; background: var(--bg-3); color: #3DD9A6; display: flex; align-items: center; justify-content: center}
+.m166{margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px}
+.m167{display: flex; align-items: center; gap: 6px; color: var(--success); font-weight: 600}
+.m168{color: var(--text-2); font-variant-numeric: tabular-nums}
+.m169{display: flex; align-items: center; gap: 6px; color: var(--warning); font-weight: 600; font-variant-numeric: tabular-nums}
+.m170{margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px}
+.m171{display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 10px; border: 0; background: var(--accent); color: var(--bg-0); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer}
+.m172{height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer}
+.m173{height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid rgba(255,107,61,0.4); background: transparent; color: var(--danger-text); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer}
+.m174{margin: 10px 0 0; font-size: 12px; color: var(--text-2)}
+.m175{align-self: flex-start; display: flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: rgba(127,224,238,0.10); border: 1px solid rgba(127,224,238,0.35); color: #7FE0EE; font-size: 12px; font-weight: 600}
+.m176{margin-top: 16px; display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 16px; align-items: start}
+.m177{aspect-ratio: 1 / 1; border-radius: 50%; border: 1.5px dashed rgba(160,190,255,0.4); background: radial-gradient(circle at 35% 30%, #4A5675, var(--bg-3) 70%); box-shadow: 0 0 0 6px rgba(190,235,255,0.06), 0 0 36px rgba(190,235,255,0.25); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; max-width: 180px}
+.m178{font-weight: 700; font-size: 14px}
+.m179{font-size: 11px; color: var(--text-soft)}
+.m180{display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; font-size: 14px}
+.m181{color: var(--text-2)}
+.m182{margin-top: 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2)}
+.m183{display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px}
+.m184{display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 6px; border-radius: 8px; background: var(--bg-3); font-size: 13px; color: var(--text-soft)}
+.m185{color: #7DB2FF; display: flex}
+.m186{display: flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 8px; border: 1px dashed rgba(160,190,255,0.35); font-size: 13px; color: var(--text-2)}
+.m187{margin-top: 16px; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px; background: rgba(46,196,196,0.08); border: 1px solid rgba(46,196,196,0.25); font-size: 13px; color: var(--text-soft)}
+.m188{display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px}
+.m189{margin: 0; font-size: 22px; font-weight: 600; line-height: 1.2}
+.m190{width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-strong); background: transparent; color: var(--text-1); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m191{display: flex; flex-direction: column; gap: 16px}
+.m192{position: relative}
+.m193{display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 44px; padding: 5px 8px; border-radius: 10px; border: 1px solid var(--accent); background: var(--bg-3); box-shadow: 0 0 0 3px rgba(46,196,196,0.15)}
+.m194{display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 4px 0 8px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--border-strong); font-size: 14px; font-weight: 600}
+.m195{width: 26px; height: 26px; border: 0; border-radius: 50%; background: transparent; color: var(--text-2); display: flex; align-items: center; justify-content: center; cursor: pointer}
+.m196{flex: 1 1 120px; min-width: 80px; height: 32px; border: 0; background: transparent; color: var(--text-1); font-family: inherit; font-size: 15px; outline-offset: 4px}
+.m197{position: absolute; left: 0; right: 0; top: 80px; z-index: 20; padding: 6px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--border-strong); box-shadow: 0 16px 40px rgba(0,0,0,0.55)}
+.m198{display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 0 10px; border: 0; border-radius: 8px; background: rgba(46,196,196,0.12); color: var(--text-1); font-family: inherit; text-align: left; cursor: pointer}
+.m199{width: 30px; height: 30px; border-radius: 50%; background: var(--bg-3); color: #D08A4E; display: flex; align-items: center; justify-content: center}
+.m200{display: block; font-size: 15px; font-weight: 600}
+.m201{display: block; font-size: 12px; color: var(--text-2)}
+.m202{display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text-1); font-family: inherit; text-align: left; cursor: pointer}
+.m203{width: 100%; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 15px}
+.m204{width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-3); color: var(--text-1); font-family: inherit; font-size: 15px; line-height: 1.5; resize: vertical}
+.m205{display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; font-size: 12px; color: var(--text-2)}
+.m206{display: flex; flex-wrap: wrap; align-items: center; gap: 10px}
+.m207{display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px dashed rgba(160,190,255,0.4); background: transparent; color: var(--text-1); font-family: inherit; font-size: 14px; font-weight: 600; opacity: 0.45; cursor: not-allowed}
+.m208{display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2)}
+.m209{display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding-top: 16px; border-top: 1px solid rgba(160,190,255,0.12)}
+.m210{height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: transparent; color: var(--text-soft); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer}
+.m211{display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 10px; border: 0; background: var(--accent); color: var(--bg-0); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 0 20px rgba(46,196,196,0.25)}
+.m212{padding: 48px 24px 56px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center}
+.m213{width: 72px; height: 72px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, rgba(46,196,196,0.18), rgba(28,37,68,0.9) 70%); border: 1px solid var(--border-strong); color: var(--accent-hover); display: flex; align-items: center; justify-content: center}
+.m214{margin: 0; font-size: 20px; font-weight: 600; line-height: 1.2}
+.m215{margin: 0; max-width: 300px; font-size: 14px; color: var(--text-soft)}
+.m216{min-height: 520px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center}
+.m217{width: 88px; height: 88px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, rgba(46,196,196,0.16), rgba(28,37,68,0.9) 70%); border: 1px solid var(--border-strong); color: var(--text-2); display: flex; align-items: center; justify-content: center}
+.m218{margin: 0; font-size: 20px; font-weight: 600}
+.m219{margin: 0; font-size: 14px; color: var(--text-soft); max-width: 340px}
+.m220{font-family: Inter, Roboto, system-ui, Arial, sans-serif; color: var(--text-1); font-size: 16px; line-height: 1.5; background-color: var(--bg-0); background-image: radial-gradient(ellipse 60% 40% at 75% 0%, rgba(46,196,196,0.06), rgba(46,196,196,0) 70%), radial-gradient(ellipse 50% 40% at 30% 100%, rgba(142,107,255,0.06), rgba(142,107,255,0) 70%); width: 100%; max-width: 430px; height: 100vh; height: 100dvh; margin: 0 auto; position: relative; overflow: hidden; display: flex; flex-direction: column}
+.m221{position: relative; z-index: 50; height: 56px; flex: 0 0 auto; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 12px; background: rgba(7,11,22,0.92); border-bottom: 1px solid var(--border)}
+.m222{width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: var(--bg-0); display: flex; align-items: center; justify-content: center}
+.m223{font-weight: 700; font-size: 16px; letter-spacing: 0.04em; margin-left: 6px; flex: 1 1 auto}
+.m224{width: 44px; height: 44px; border-radius: 10px; border: 1px solid rgba(255,107,61,0.45); background: rgba(255,107,61,0.10); color: var(--danger-text); display: flex; align-items: center; justify-content: center}
+.m225{width: 44px; height: 44px; border-radius: 10px; border: 1px solid rgba(242,193,78,0.45); background: rgba(242,193,78,0.10); color: var(--warning); display: flex; align-items: center; justify-content: center}
+.m226{position: relative; width: 44px; height: 44px; border-radius: 10px; border: 1px solid rgba(46,196,196,0.5); background: rgba(46,196,196,0.12); color: var(--accent-hover); display: flex; align-items: center; justify-content: center}
+.m227{position: absolute; top: 5px; right: 3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: var(--bg-0); font-size: 11px; font-weight: 700; line-height: 18px; text-align: center}
+.m228{position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow-y: auto}
+.m229{flex: 1 1 auto; min-width: 0; padding: 12px 12px 16px; display: flex; flex-direction: column; gap: 12px}
+.m230{margin: 0; font-size: 34px; font-weight: 700; line-height: 1.2}
+.m231{display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 13px; border-radius: 10px; border: 0; background: var(--accent); color: var(--bg-0); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 0 20px rgba(46,196,196,0.25)}
+.m232{display: flex; gap: 6px; overflow-x: auto; margin: 0 -12px; padding: 0 12px 2px}
+.m233{display: flex; flex-direction: column; gap: 12px}
+.m234{position: relative; z-index: 60; flex: 0 0 auto; height: 60px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: rgba(7,11,22,0.96); border-top: 1px solid var(--border)}
+.m235{position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--text-2); font-size: 11px; font-weight: 500; text-decoration: none}
+.m236{padding: 4px 4px 8px}
+.m237{display: flex; align-items: center; gap: 6px; height: 44px; margin: -8px 0 6px -8px; padding: 0 10px 0 4px; border: 0; border-radius: 10px; background: transparent; color: var(--accent-hover); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer}
+.m238{margin-top: 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px}
+.m239{position: relative; z-index: 60; flex: 0 0 auto; height: 64px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: rgba(7,11,22,0.96); border-top: 1px solid var(--border)}
+.m240{display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: var(--accent-hover); font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer}
+.m241{display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: var(--text-1); font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer}

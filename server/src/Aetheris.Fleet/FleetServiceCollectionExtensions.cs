@@ -1,7 +1,9 @@
 using Aetheris.Core.Commands;
 using Aetheris.Core.Data;
+using Aetheris.Core.Scheduling;
 using Aetheris.Fleet.Api;
 using Aetheris.Fleet.Data;
+using Aetheris.Fleet.Events;
 using Aetheris.Fleet.Services;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,11 +34,24 @@ public static class FleetServiceCollectionExtensions
 
         services.AddScoped<FleetUnitOfWork>();
         services.AddScoped<ShipDesignService>();
+        services.AddScoped<ShipyardQueueService>();
+        services.AddScoped<FleetFormationService>();
+        services.AddScoped<FleetBootstrapService>();
+        services.AddScoped<IScheduledEventHandler, ShipyardCompleteHandler>();
 
         services.AddCommand<CreateShipDesignCommand>();
         services.AddCommand<RenameShipDesignCommand>();
         services.AddCommand<SaveShipDesignCommand>();
         services.AddCommand<ArchiveShipDesignCommand>();
+        services.AddCommand<EnqueueShipyardCommand>();
+        services.AddCommand<CancelShipyardCommand>();
+        services.AddCommand<DisassembleShipCommand>();
+        services.AddCommand<CreateFleetCommand>();
+        services.AddCommand<AddFleetShipsCommand>();
+        services.AddCommand<RemoveFleetShipsCommand>();
+        services.AddCommand<TransferFleetShipsCommand>();
+        services.AddCommand<RenameFleetCommand>();
+        services.AddCommand<DissolveFleetCommand>();
 
         // The module keeps tables of its own, so it works on the context of the request, which
         // lives in the scope.

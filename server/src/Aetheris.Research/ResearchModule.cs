@@ -12,6 +12,7 @@ public sealed class ResearchModule : IResearchModule
     private readonly ResearchBootstrapService _bootstrap;
     private readonly ResearchQueueService _queue;
     private readonly ResearchTreeBuilder _builder;
+    private readonly IShipyardTime _shipyardTime;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResearchModule"/> class.
@@ -19,18 +20,22 @@ public sealed class ResearchModule : IResearchModule
     /// <param name="bootstrap">The preparation of the module.</param>
     /// <param name="queue">The queue of the researches.</param>
     /// <param name="builder">The builder of the tree of the technologies.</param>
+    /// <param name="shipyardTime">The multiplier of the assembly time.</param>
     public ResearchModule(
         ResearchBootstrapService bootstrap,
         ResearchQueueService queue,
-        ResearchTreeBuilder builder)
+        ResearchTreeBuilder builder,
+        IShipyardTime shipyardTime)
     {
         ArgumentNullException.ThrowIfNull(bootstrap);
         ArgumentNullException.ThrowIfNull(queue);
         ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(shipyardTime);
 
         _bootstrap = bootstrap;
         _queue = queue;
         _builder = builder;
+        _shipyardTime = shipyardTime;
     }
 
     /// <inheritdoc />
@@ -71,4 +76,8 @@ public sealed class ResearchModule : IResearchModule
 
         return _builder.Build(snapshot);
     }
+
+    /// <inheritdoc />
+    public Task<decimal> ShipyardTimeMultiplierAsync(string playerId, long planetId, CancellationToken cancellationToken = default) =>
+        _shipyardTime.MultiplierAsync(playerId, planetId, cancellationToken);
 }

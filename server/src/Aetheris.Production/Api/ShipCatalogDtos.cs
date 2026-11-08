@@ -11,10 +11,13 @@ namespace Aetheris.Production.Api;
 /// </remarks>
 /// <param name="Hulls">The hulls of the catalog.</param>
 /// <param name="Modules">The modules of the catalog.</param>
+/// <param name="ModuleGroups">The types of the modules.</param>
+/// <param name="Ammunition">The ammunition a kinetic weapon may fire. It is not fitted to a hull.</param>
 public sealed record ShipCatalogDto(
     IReadOnlyList<ShipHullDto> Hulls,
     IReadOnlyList<ShipModuleDto> Modules,
-    IReadOnlyList<ShipModuleGroupDto> ModuleGroups);
+    IReadOnlyList<ShipModuleGroupDto> ModuleGroups,
+    IReadOnlyList<ShipAmmunitionDto> Ammunition);
 
 /// <summary>
 /// A hull of the catalog of the ships.
@@ -34,6 +37,9 @@ public sealed record ShipCatalogDto(
 /// <param name="Integrity">How strong the hull is.</param>
 /// <param name="Weight">The weight of the hull in tonnes.</param>
 /// <param name="IsArchived">Whether the hull is archived: it is not offered for new designs (task 00023).</param>
+/// <param name="Upkeep">How many credits the hull costs per hour. Zero until the directory fills the characteristic.</param>
+/// <param name="Crew">How many people the hull needs. Zero until the directory fills the characteristic.</param>
+/// <param name="AssemblySeconds">The assembly time of the hull without a technology, in game seconds. It is its own characteristic, not the time to manufacture the hull. Zero until the directory fills the value.</param>
 public sealed record ShipHullDto(
     int Id,
     string Code,
@@ -49,7 +55,10 @@ public sealed record ShipHullDto(
     decimal HoldCapacity,
     decimal Integrity,
     decimal Weight,
-    bool IsArchived);
+    bool IsArchived,
+    decimal Upkeep = 0m,
+    decimal Crew = 0m,
+    long AssemblySeconds = 0);
 
 /// <summary>
 /// A module of the catalog of the ships.
@@ -78,6 +87,13 @@ public sealed record ShipHullDto(
 /// <param name="IsArchived">Whether the module is archived: it is not offered for new designs (task 00023).</param>
 /// <param name="IsAmmunition">Whether the module is ammunition of a weapon: it is loaded, not fitted.</param>
 /// <param name="IsCapsule">Whether the module is a capsule of inhabitants: it is used on a body, not fitted.</param>
+/// <param name="CargoCapacity">How much cargo the module adds to the hold, in tonnes.</param>
+/// <param name="Armor">How much integrity the armor of the module adds.</param>
+/// <param name="ShieldRegen">How fast the shield of the module recovers.</param>
+/// <param name="ShieldRestore">How many shield units the module restores over time.</param>
+/// <param name="Rate">How many shots the weapon makes in one round.</param>
+/// <param name="LauncherSize">The size of the launcher, or zero when the weapon has none.</param>
+/// <param name="Facts">The characteristics the plaque adds up. A characteristic the plaque already shows on its own row is not here.</param>
 public sealed record ShipModuleDto(
     int Id,
     string Code,
@@ -102,7 +118,43 @@ public sealed record ShipModuleDto(
     IReadOnlyList<int> MarkLevels,
     bool IsArchived,
     bool IsAmmunition = false,
-    bool IsCapsule = false);
+    bool IsCapsule = false,
+    decimal CargoCapacity = 0m,
+    decimal Armor = 0m,
+    decimal ShieldRegen = 0m,
+    decimal ShieldRestore = 0m,
+    decimal Rate = 0m,
+    decimal LauncherSize = 0m,
+    IReadOnlyList<ShipModuleFactDto>? Facts = null,
+    decimal Upkeep = 0m);
+
+/// <summary>
+/// One characteristic of a module that the plaque of a project adds up.
+/// </summary>
+/// <param name="Kind">The kind of the characteristic.</param>
+/// <param name="NameKey">The localisation key of the name of the characteristic.</param>
+/// <param name="UnitKey">The localisation key of the unit, or <see langword="null"/>.</param>
+/// <param name="Amount">The amount the module adds.</param>
+/// <param name="SortOrder">The order of the characteristic in the lists.</param>
+public sealed record ShipModuleFactDto(
+    string Kind,
+    string NameKey,
+    string? UnitKey,
+    decimal Amount,
+    int SortOrder);
+
+/// <summary>
+/// One round of ammunition a kinetic weapon may fire.
+/// </summary>
+/// <param name="Id">The ammunition.</param>
+/// <param name="Damage">The damage of one round.</param>
+/// <param name="DamageKind">The kind of the damage: the energy or the kinetic one.</param>
+/// <param name="LauncherSize">The size of the launcher the round fits, or zero when it has none.</param>
+public sealed record ShipAmmunitionDto(
+    int Id,
+    decimal Damage,
+    string? DamageKind,
+    decimal LauncherSize);
 
 /// <summary>
 /// A group of the modules of the catalog: the type of a module, with the name of the group and

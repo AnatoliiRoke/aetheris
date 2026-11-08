@@ -2121,7 +2121,7 @@
       },
       "chars": {
         "char_energy_use": 12,
-        "char_yield": 5,
+        "char_yield": 0,
         "char_scan_radius": 100,
         "char_scan_speed": 100
       },
@@ -2157,7 +2157,7 @@
       },
       "chars": {
         "char_energy_use": 12,
-        "char_yield": 140
+        "char_yield": 1400
       },
       "hulls": [
         "part_h_21",
@@ -2191,7 +2191,7 @@
       },
       "chars": {
         "char_energy_use": 12,
-        "char_yield": 10
+        "char_yield": 240
       },
       "hulls": [
         "part_h_21",
@@ -2225,7 +2225,7 @@
       },
       "chars": {
         "char_energy_use": 72,
-        "char_yield": 30
+        "char_yield": 2800
       },
       "hulls": [
         "part_h_22",
@@ -2262,8 +2262,8 @@
         "role": "civil"
       },
       "chars": {
-        "char_energy_use": 36,
-        "char_yield": 15
+        "char_energy_use": 55,
+        "char_yield": 2500
       },
       "hulls": [
         "part_h_23",
@@ -3372,7 +3372,7 @@
       "mark": 1,
       "role": "transport",
       "chars": {
-        "char_integrity": 50,
+        "char_integrity": 500,
         "char_hull_size": 100,
         "char_hull_capacity": 100,
         "char_hull_slots": 8
@@ -3394,7 +3394,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 50,
+        "char_integrity": 1000,
         "char_hull_size": 100,
         "char_hull_capacity": 100,
         "char_hull_slots": 8
@@ -3416,7 +3416,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 60,
+        "char_integrity": 1450,
         "char_hull_size": 110,
         "char_hull_capacity": 110,
         "char_hull_slots": 10
@@ -3438,7 +3438,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 50,
+        "char_integrity": 2200,
         "char_hull_size": 121,
         "char_hull_capacity": 121,
         "char_hull_slots": 10
@@ -3460,7 +3460,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 60,
+        "char_integrity": 3000,
         "char_hull_size": 133.1,
         "char_hull_capacity": 133.1,
         "char_hull_slots": 12
@@ -3483,7 +3483,7 @@
       "mark": 1,
       "role": "transport",
       "chars": {
-        "char_integrity": 50,
+        "char_integrity": 2500,
         "char_hull_size": 110,
         "char_hull_capacity": 110,
         "char_hull_slots": 16
@@ -3506,7 +3506,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 150,
+        "char_integrity": 4000,
         "char_hull_size": 100,
         "char_hull_capacity": 100,
         "char_hull_slots": 16
@@ -3530,7 +3530,7 @@
       "mark": 1,
       "role": "drone",
       "chars": {
-        "char_integrity": 150,
+        "char_integrity": 250,
         "char_hull_size": 100,
         "char_hull_capacity": 100
       },
@@ -3552,7 +3552,7 @@
       "mark": 1,
       "role": "drone",
       "chars": {
-        "char_integrity": 150,
+        "char_integrity": 250,
         "char_hull_size": 110,
         "char_hull_capacity": 110
       },
@@ -3575,7 +3575,7 @@
       "mark": 1,
       "role": "drone",
       "chars": {
-        "char_integrity": 150,
+        "char_integrity": 250,
         "char_hull_size": 121,
         "char_hull_capacity": 121
       },
@@ -3597,7 +3597,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 150,
+        "char_integrity": 4450,
         "char_hull_size": 110,
         "char_hull_capacity": 110,
         "char_hull_slots": 18
@@ -3621,7 +3621,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 150,
+        "char_integrity": 4900,
         "char_hull_size": 121,
         "char_hull_capacity": 121,
         "char_hull_slots": 22
@@ -3646,7 +3646,7 @@
       "mark": 1,
       "role": "transport",
       "chars": {
-        "char_integrity": 180,
+        "char_integrity": 3700,
         "char_hull_size": 133.1,
         "char_hull_capacity": 133.1,
         "char_hull_slots": 20
@@ -3672,7 +3672,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 150,
+        "char_integrity": 5400,
         "char_hull_size": 133.1,
         "char_hull_capacity": 133.1,
         "char_hull_slots": 24
@@ -3697,7 +3697,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 150,
+        "char_integrity": 6000,
         "char_hull_size": 146.41,
         "char_hull_capacity": 146.41,
         "char_hull_slots": 26
@@ -3722,7 +3722,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 360,
+        "char_integrity": 6700,
         "char_hull_size": 161.051,
         "char_hull_capacity": 161.051,
         "char_hull_slots": 30
@@ -3748,7 +3748,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 300,
+        "char_integrity": 7300,
         "char_hull_size": 100,
         "char_hull_capacity": 100,
         "char_hull_slots": 32,
@@ -3774,7 +3774,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 300,
+        "char_integrity": 8000,
         "char_hull_size": 110,
         "char_hull_capacity": 110,
         "char_hull_slots": 34,
@@ -3802,7 +3802,7 @@
       "mark": 1,
       "role": "transport",
       "chars": {
-        "char_integrity": 300,
+        "char_integrity": 5100,
         "char_hull_size": 121,
         "char_hull_capacity": 121,
         "char_hull_slots": 24
@@ -3828,7 +3828,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 600,
+        "char_integrity": 10000,
         "char_hull_size": 121,
         "char_hull_capacity": 121,
         "char_hull_slots": 38,
@@ -3856,7 +3856,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 500,
+        "char_integrity": 11500,
         "char_hull_size": 133.1,
         "char_hull_capacity": 133.1,
         "char_hull_slots": 40,
@@ -3884,7 +3884,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 500,
+        "char_integrity": 12750,
         "char_hull_size": 100,
         "char_hull_capacity": 100,
         "char_hull_slots": 44,
@@ -3912,7 +3912,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 600,
+        "char_integrity": 14000,
         "char_hull_size": 110,
         "char_hull_capacity": 110,
         "char_hull_slots": 47,
@@ -3940,7 +3940,7 @@
       "mark": 1,
       "role": "combat",
       "chars": {
-        "char_integrity": 600,
+        "char_integrity": 16000,
         "char_hull_size": 121,
         "char_hull_capacity": 121,
         "char_hull_slots": 50,

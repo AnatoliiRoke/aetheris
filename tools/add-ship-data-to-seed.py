@@ -115,6 +115,18 @@ def main() -> None:
                 "en": "How many extra slots the race gives the ship.",
             }),
         ]))
+    if not any(row["code"] == "char_assembly_time" for row in characteristics):
+        characteristics.append(collections.OrderedDict([
+            ("code", "char_assembly_time"),
+            ("kind", "assembly_time"),
+            ("sort_order", 43),
+            ("name", {"uk": "Час складання", "en": "Assembly time"}),
+            ("description", {
+                "uk": "Базові секунди складання корабля з цього корпусу, без технології. Це не час виробництва деталі корпусу.",
+                "en": "Base seconds to assemble a ship of this hull, without a technology. It is not the time to manufacture the hull part.",
+            }),
+            ("unit", {"uk": "с", "en": "s"}),
+        ]))
 
     groups = data["group_characteristics"]
     existing = {(row["group"], row["characteristic"]) for row in groups}
@@ -133,6 +145,29 @@ def main() -> None:
                 ("group", group),
                 ("characteristic", "char_hull_race_slot"),
                 ("sort_order", 5),
+                ("is_required", False),
+            ]))
+
+    for group in sorted(HULL_GROUP_ROLES):
+        if (group, "char_crew") not in existing:
+            groups.append(collections.OrderedDict([
+                ("group", group),
+                ("characteristic", "char_crew"),
+                ("sort_order", 6),
+                ("is_required", False),
+            ]))
+        if (group, "char_upkeep") not in existing:
+            groups.append(collections.OrderedDict([
+                ("group", group),
+                ("characteristic", "char_upkeep"),
+                ("sort_order", 7),
+                ("is_required", False),
+            ]))
+        if (group, "char_assembly_time") not in existing:
+            groups.append(collections.OrderedDict([
+                ("group", group),
+                ("characteristic", "char_assembly_time"),
+                ("sort_order", 8),
                 ("is_required", False),
             ]))
 

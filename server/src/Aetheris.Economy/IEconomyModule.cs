@@ -131,4 +131,14 @@ public interface IEconomyModule
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the balances are fixed.</returns>
     Task FixPlayerAsync(string playerId, DateTimeOffset moment, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets the credits the ships of a player cost per hour. The caller brings the balances to
+    /// the moment first, with the rate that was already stored (task 00039).
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="perHour">The rate. Zero clears the charge.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the rate is stored.</returns>
+    Task SetShipUpkeepPerHourAsync(string playerId, decimal perHour, CancellationToken cancellationToken = default);
 }

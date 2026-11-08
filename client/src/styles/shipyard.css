@@ -30,7 +30,9 @@
 .sh-card__badges { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .sh-card__title { margin: 0; font-size: var(--fs-card); font-weight: 700; line-height: 1.25; }
 .sh-card__hull { margin: 0; color: var(--text-2); font-size: var(--fs-small); }
-.sh-card__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.sh-card__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: auto; }
+.sh-card__foot { margin-top: auto; display: flex; flex-direction: column; gap: var(--space-2); }
+.sh-card__foot .sh-card__actions { margin-top: 0; }
 .sh-card__actions .btn { flex: 1 1 auto; }
 
 .sh-modules { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1); }
@@ -42,8 +44,11 @@
 /* ---------- сітка характеристик ---------- */
 .sh-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-2) var(--space-4); margin: 0; }
 .sh-facts--tight { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: var(--space-2) var(--space-3); }
-.sh-facts__term { color: var(--text-2); font-size: var(--fs-tiny); }
-.sh-facts__value { margin: 0; font-variant-numeric: tabular-nums; }
+.sh-card .sh-facts { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+.sh-card .sh-facts > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
+.sh-facts__term { margin: 0; color: var(--text-2); font-size: var(--fs-tiny); }
+.sh-facts__value { margin: 0; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.sh-costs { display: flex; flex-direction: column; gap: var(--space-1); }
 
 /* ---------- діалог ---------- */
 .sh-dialog {
@@ -111,6 +116,37 @@
 
 .sh-empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-6) var(--space-4); text-align: center; }
 .sh-empty__text { margin: 0; color: var(--text-2); }
+
+/* ---------- збірка і розбирання (задача 00039) ---------- */
+.sh-work { display: flex; flex-direction: column; gap: var(--space-4); }
+.sh-parts { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1); color: var(--text-2); font-size: var(--fs-small); }
+.sh-parts__short { color: var(--warning); }
+
+/* ---------- готові кораблі: класи корпусів і проєкти з кількістю ---------- */
+.sh-groups { display: flex; flex-direction: column; gap: var(--space-3); }
+.sh-group { display: flex; flex-direction: column; gap: var(--space-2); }
+.sh-group__head { margin: 0; font-size: var(--fs-ui); }
+.sh-class {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  padding: 1px var(--space-2); border-radius: var(--r-full);
+  border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent);
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  color: var(--tone); font-size: var(--fs-small); font-weight: 600;
+}
+.sh-projects { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
+.sh-project {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--r-md);
+  background: var(--bg-card-in);
+}
+.sh-project__text { display: flex; flex-direction: column; min-width: 0; flex: 1 1 180px; }
+.sh-project__name { font-size: var(--fs-game); font-weight: 600; overflow-wrap: anywhere; }
+.sh-project__sub { color: var(--text-2); font-size: var(--fs-small); overflow-wrap: anywhere; }
+.sh-project__facts { display: flex; align-items: baseline; gap: var(--space-2); flex: 0 0 auto; }
+.sh-project__count { font-size: var(--fs-game); font-variant-numeric: tabular-nums; }
+.sh-project__upkeep { color: var(--text-2); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.sh-project__actions { display: flex; flex-wrap: wrap; gap: var(--space-1); flex: 0 0 auto; }
+.sh-project__actions .btn { min-height: 32px; padding: 0 var(--space-2); font-size: var(--fs-small); }
 
 /* ---------- вузькі екрани ---------- */
 @media (max-width: 720px) {

@@ -1,10 +1,11 @@
 import { memo } from 'react';
-import type { ShipDesign, ShipHull, ShipModule } from '../../../api/fleetApi';
+import type { ShipDesign, ShipHull, ShipModule, ShipyardCost } from '../../../api/fleetApi';
 import { CardArt } from '../../../components/CardArt';
 import { useI18n } from '../../../i18n/useI18n';
 import { useTexts } from '../../../texts/useTexts';
 import { formatAmount } from '../planetText';
-import { installedModules, designProblem } from './shipyardParts';
+import { AssemblyCosts } from './AssemblyCosts';
+import { installedModules, designProblem, factLabel, formatCombatDamage, formatFactAmount, formatShield } from './shipyardParts';
 
 /**
  * The card of a project of a ship on the design tab of the shipyard (task 00038): the picture of
@@ -18,12 +19,14 @@ import { installedModules, designProblem } from './shipyardParts';
  * @param onEdit What to do when the player edits the project.
  * @param onAssembly What to do when the player sends the project to the assembly.
  * @param onArchive What to do when the player archives the project.
+ * @param costs The resources the assembly of this project takes, with what the player has.
  */
 export const ShipDesignCard = memo(function ShipDesignCard({
   design,
   hull,
   modules,
   busy,
+  costs,
   onEdit,
   onAssembly,
   onArchive,
@@ -32,6 +35,7 @@ export const ShipDesignCard = memo(function ShipDesignCard({
   hull: ShipHull | null;
   modules: ShipModule[];
   busy: boolean;
+  costs: readonly ShipyardCost[];
   onEdit: (design: ShipDesign) => void;
   onAssembly: (design: ShipDesign) => void;
   onArchive: (design: ShipDesign) => void;
@@ -44,6 +48,11 @@ export const ShipDesignCard = memo(function ShipDesignCard({
   const installed = installedModules(design.slots, modules);
   const summary = design.summary;
   const problem = designProblem(summary, t, language);
+  const kineticMin = summary.kineticDamageMin ?? 0;
+  const kineticMax = summary.kineticDamageMax ?? summary.kineticDamage;
+  const damage = formatCombatDamage(summary.energyDamage, kineticMin, kineticMax, t, language);
+  const armor = summary.armor ?? 0;
+  const shieldRegen = summary.shieldRegen ?? 0;
 
   return (
     <article className="sh-card">
@@ -75,7 +84,9 @@ export const ShipDesignCard = memo(function ShipDesignCard({
             {installed.map((entry) => (
               <li className="sh-modules__row" key={entry.module.id}>
                 <span className="sh-modules__name">{text(entry.module.nameKey) ?? entry.module.nameKey}</span>
-                <span className="sh-modules__mark">{t('shipyard.mark', { mark: entry.markLevel })}</span>
+                {entry.markLevel > 1 ? (
+                  <span className="sh-modules__mark">{t('shipyard.mark', { mark: entry.markLevel })}</span>
+                ) : null}
                 {entry.count > 1 ? <span className="sh-modules__count">×{entry.count}</span> : null}
               </li>
             ))}
@@ -116,27 +127,43 @@ export const ShipDesignCard = memo(function ShipDesignCard({
           <dt className="sh-facts__term">{t('shipyard.integrity')}</dt>
           <dd className="sh-facts__value">{formatAmount(summary.integrity, language)}</dd>
         </div>
-        <div>
-          <dt className="sh-facts__term">{t('shipyard.shield')}</dt>
-          <dd className="sh-facts__value">{formatAmount(summary.shieldCapacity, language)}</dd>
-        </div>
-        <div>
-          <dt className="sh-facts__term">{t('shipyard.damage')}</dt>
-          <dd className="sh-facts__value">
-            {formatAmount(summary.energyDamage, language)} {t('shipyard.energyDamage')} · {formatAmount(summary.kineticDamage, language)}{' '}
-            {t('shipyard.kineticDamage')}
-          </dd>
-        </div>
+        {armor > 0 ? (
+          <div>
+            <dt className="sh-facts__term">{t('shipyard.armor')}</dt>
+            <dd className="sh-facts__value">{formatAmount(armor, language)}</dd>
+          </div>
+        ) : null}
+        {summary.shieldCapacity > 0 || shieldRegen > 0 ? (
+          <div>
+            <dt className="sh-facts__term">{t('shipyard.shield')}</dt>
+            <dd className="sh-facts__value">{formatShield(summary.shieldCapacity, shieldRegen, t, language)}</dd>
+          </div>
+        ) : null}
+        {damage ? (
+          <div>
+            <dt className="sh-facts__term">{t('shipyard.damage')}</dt>
+            <dd className="sh-facts__value">{damage}</dd>
+          </div>
+        ) : null}
+        {(summary.facts ?? []).filter((fact) => fact.amount !== 0).map((fact) => (
+          <div key={fact.kind}>
+            <dt className="sh-facts__term">{factLabel(fact, t, text)}</dt>
+            <dd className="sh-facts__value">{formatFactAmount(fact, text, language)}</dd>
+          </div>
+        ))}
       </dl>
 
+      <AssemblyCosts costs={costs} />
+
+      {design.hasBuiltShips ? <p className="sh-note">{t('shipyard.designBuilt')}</p> : null}
       <div className="sh-card__actions">
-        <button className="btn btn--secondary" disabled={busy} onClick={() => onEdit(design)} type="button">
+        <button className="btn btn--secondary" disabled={busy || design.hasBuiltShips === true} onClick={() => onEdit(design)} type="button">
           {t('shipyard.edit')}
         </button>
         <button className="btn btn--primary" disabled={busy} onClick={() => onAssembly(design)} type="button">
           {t('shipyard.toAssembly')}
         </button>
-        <button className="btn btn--danger" disabled={busy} onClick={() => onArchive(design)} type="button">
+        <button className="btn btn--danger" disabled={busy || design.hasBuiltShips === true} onClick={() => onArchive(design)} type="button">
           {t('shipyard.archive')}
         </button>
       </div>

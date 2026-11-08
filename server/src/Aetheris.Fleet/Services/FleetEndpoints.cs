@@ -70,8 +70,53 @@ public static class FleetEndpoints
                 await designs.ReadCatalogAsync(PlayerId(user), planetId ?? 0, cancellationToken).ConfigureAwait(false),
                 FleetJson.Options));
 
+        fleet.MapGet("/shipyards", async (
+            HttpContext context,
+            ClaimsPrincipal user,
+            ShipyardQueueService queue,
+            CancellationToken cancellationToken) =>
+            Results.Json(
+                await queue.ReadAsync(PlayerId(user), RequiredBody(context.Request.Query), null, cancellationToken).ConfigureAwait(false),
+                FleetJson.Options));
+
+        fleet.MapGet("/shipyards/{planetBuildingId:long}", async (
+            long planetBuildingId,
+            HttpContext context,
+            ClaimsPrincipal user,
+            ShipyardQueueService queue,
+            CancellationToken cancellationToken) =>
+            Results.Json(
+                await queue.ReadAsync(PlayerId(user), RequiredBody(context.Request.Query), planetBuildingId, cancellationToken).ConfigureAwait(false),
+                FleetJson.Options));
+
+        fleet.MapGet("/ships", async (
+            HttpContext context,
+            ClaimsPrincipal user,
+            ShipyardQueueService queue,
+            CancellationToken cancellationToken) =>
+            Results.Json(
+                await queue
+                    .ReadShipsAsync(
+                        PlayerId(user),
+                        Body(context.Request.Query),
+                        ReadFlag(context.Request.Query, "free"),
+                        cancellationToken)
+                    .ConfigureAwait(false),
+                FleetJson.Options));
+
+        fleet.MapGet("/fleets", async (
+            ClaimsPrincipal user,
+            FleetFormationService fleets,
+            CancellationToken cancellationToken) =>
+            Results.Json(
+                await fleets.ReadAsync(PlayerId(user), cancellationToken).ConfigureAwait(false),
+                FleetJson.Options));
+
         return endpoints;
     }
+
+    private static long RequiredBody(IQueryCollection query) =>
+        Body(query) ?? throw new GameException(FleetErrorCodes.PlanetUnknown, "The body is missing.");
 
     /// <summary>
     /// Reads the body whose projects are wanted from the query of a request.

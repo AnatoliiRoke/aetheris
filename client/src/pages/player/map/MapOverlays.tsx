@@ -81,29 +81,28 @@ const legendItems: { icon: GameIconName; key: string }[] = [
   { icon: 'mapRoute', key: 'route' },
 ];
 
-/** The legend of the signs of the map, folded until the player opens it. */
+/** The legend of the signs of the map: a plate that opens above the button of the legend. */
 export function MapLegend() {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
   return (
-    <section aria-label={t('map.legend')} className="map-panel map-legend">
-      <button aria-expanded={open} className="map-panel__head" type="button" onClick={() => setOpen((value) => !value)}>
-        <GameIcon name="mapInfo" size={18} />
-        <span>{t('map.legend')}</span>
-        <GameIcon className={open ? 'map-panel__chevron is-open' : 'map-panel__chevron'} name="mapChevron" size={16} />
-      </button>
+    <div className="map-legend">
       {open ? (
-        <ul className="map-legend__list">
+        <ul aria-label={t('map.legend')} className="map-legend__list">
           {legendItems.map((item) => (
             <li key={item.key}>
-              <GameIcon name={item.icon} size={16} />
-              {t(`map.legendItem.${item.key}` as never)}
+              <GameIcon name={item.icon} size={18} />
+              <span>{t(`map.legendItem.${item.key}` as never)}</span>
             </li>
           ))}
         </ul>
       ) : null}
-    </section>
+      <button aria-expanded={open} className="map-legend__button" type="button" onClick={() => setOpen((value) => !value)}>
+        <GameIcon name="mapInfo" size={18} />
+        <span>{t('map.legend')}</span>
+      </button>
+    </div>
   );
 }
 

@@ -88,12 +88,20 @@ export function balanceResourceIds(planet: Planet): Set<number> {
 }
 
 /**
+ * A speed bonus is a share of the time the building takes off (0.05 is five percent). The other
+ * effects stay in the units the catalog stores.
+ */
+const speedShareEffects = new Set(['construction_speed_bonus', 'research_speed_bonus', 'production_speed_bonus']);
+const percentShare = 100;
+
+/**
  * The text of an effect of a building level.
  */
 export function effectText(language: Language, effect: BuildingEffect, names: ReturnType<typeof namer>): string {
   const name = effect.resourceTypeId !== null ? names.resource(effect.resourceTypeId) : names.group(effect.resourceGroupId);
+  const shown = speedShareEffects.has(effect.effectType) ? effect.value * percentShare : effect.value;
 
-  return lookup(language, `planet.effect.${effect.effectType}`, effect.effectType, { name, value: formatNumber(effect.value, language) });
+  return lookup(language, `planet.effect.${effect.effectType}`, effect.effectType, { name, value: formatNumber(shown, language) });
 }
 
 /**

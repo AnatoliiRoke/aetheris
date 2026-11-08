@@ -18,6 +18,7 @@ import { useI18n } from '../../i18n/useI18n';
 import type { EntityText } from '../../texts/context';
 import { useTexts } from '../../texts/useTexts';
 import { formatDuration, formatNumber, lookup } from './planetText';
+import { compareRecipeIngredients } from './productionStock';
 import { usePlanet } from './usePlanet';
 import { useProcesses } from './useProcesses';
 import { useShellActions } from './useShell';
@@ -309,6 +310,8 @@ function ProcessRecipes({
     return t('processes.ingredient');
   };
 
+  const codeByResource = new Map(resources.map((resource) => [resource.id, resource.code]));
+
   if (recipes.length === 0) {
     return (
       <div className="processes-block">
@@ -336,6 +339,12 @@ function ProcessRecipes({
             (recipe.targetGroupId === null || form.targetResourceTypeId !== '') &&
             (recipe.partSubject === 'none' || choice !== null);
           const reasons = recipe.reasons.map((reason) => reasonText(language, reason, text));
+          const orderedIngredients = [...recipe.ingredients].sort((left, right) =>
+            compareRecipeIngredients(
+              { code: left.resourceTypeId === null ? null : (codeByResource.get(left.resourceTypeId) ?? null), partTypeId: left.partTypeId },
+              { code: right.resourceTypeId === null ? null : (codeByResource.get(right.resourceTypeId) ?? null), partTypeId: right.partTypeId },
+            ),
+          );
 
           // The hint of the balance: the ingredients of every unit, and one unit of the source
           // for every unit of a recipe that names a source group. The server checks it anyway.
@@ -410,7 +419,7 @@ function ProcessRecipes({
               {recipe.ingredients.length > 0 ? (
                 <span className="building-card__text num">
                   {t('processes.ingredients', {
-                    list: recipe.ingredients
+                    list: orderedIngredients
                       .map((ingredient) => `${ingredientLabel(ingredient)} ${formatNumber(ingredient.amount, language)}`)
                       .join(', '),
                   })}

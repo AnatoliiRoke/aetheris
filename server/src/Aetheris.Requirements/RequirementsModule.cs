@@ -58,4 +58,30 @@ public sealed class RequirementsModule : IRequirementsModule
         IReadOnlyList<SubjectLevel> subjects,
         CancellationToken cancellationToken = default) =>
         _requirements.GetManyAsync(subjectType, subjects, cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<bool> EnsureModuleBuildingLevelAsync(
+        int partTypeId,
+        int buildingTypeId,
+        int buildingLevel,
+        CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<RequirementDefinition> existing = await _requirements
+            .GetAsync(RequirementSubjectTypes.Module, partTypeId, int.MaxValue, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (existing.Any(requirement => requirement.RequirementType == RequirementTypes.BuildingLevel && requirement.TargetId == buildingTypeId))
+        {
+            return false;
+        }
+
+        await _requirements.AddAsync(
+            RequirementSubjectTypes.Module,
+            partTypeId,
+            1,
+            [new RequirementDefinition(RequirementTypes.BuildingLevel, buildingTypeId, buildingLevel)],
+            cancellationToken).ConfigureAwait(false);
+
+        return true;
+    }
 }

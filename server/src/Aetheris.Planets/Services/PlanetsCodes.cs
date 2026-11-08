@@ -135,6 +135,12 @@ public static class BuildingEffectTypes
     public const string ProductionSpeedBonus = "production_speed_bonus";
 
     /// <summary>
+    /// Adds places to the queue of the shipyard of the body: the level of the shipyard gives
+    /// the number (task 00039). The base is two and the number does not grow past four.
+    /// </summary>
+    public const string ShipyardQueueSlots = "shipyard_queue_slots";
+
+    /// <summary>
     /// Gets every effect type, in the order of the form of the admin panel (task 00023).
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -164,6 +170,7 @@ public static class BuildingEffectTypes
         HullClassLimit,
         DesignQueueSlots,
         ProductionSpeedBonus,
+        ShipyardQueueSlots,
     ];
 
     /// <summary>

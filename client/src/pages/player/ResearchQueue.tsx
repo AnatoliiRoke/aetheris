@@ -5,6 +5,7 @@ import { useI18n } from '../../i18n/useI18n';
 import { QueuePanel } from './QueuePanel';
 import type { QueueEntry } from './QueueItem';
 import { deadlineFor, formatNumber } from './planetText';
+import { orderCatalogCosts } from './productionStock';
 
 /**
  * The research queue of the player in the standard queue panel (task 00020, section 8.1): the
@@ -15,6 +16,7 @@ import { deadlineFor, formatNumber } from './planetText';
  * @param receivedAt The moment the answer of the server came.
  * @param technologyName The name of a technology by its localisation key.
  * @param resourceName The name of a resource by its identifier.
+ * @param resourceCode The catalog code of a resource, so the costs stand in the one plaque order.
  * @param busy Whether a command is running.
  * @param onCancel What to do when the player cancels a record.
  * @param onFinished What to do when the timer of a record runs out.
@@ -26,6 +28,7 @@ export function ResearchQueue({
   receivedAt,
   technologyName,
   resourceName,
+  resourceCode,
   busy,
   onCancel,
   onFinished,
@@ -41,6 +44,7 @@ export function ResearchQueue({
   receivedAt: number;
   technologyName: (key: string) => string;
   resourceName: (id: number) => string;
+  resourceCode: (resourceTypeId: number) => string | null;
   busy: boolean;
   onCancel: (item: ResearchQueueItem) => void;
   onFinished: () => void;
@@ -60,18 +64,18 @@ export function ResearchQueue({
   const { t, language } = useI18n();
   const multiplier = tree.timeMultiplier > 0 ? tree.timeMultiplier : 1;
 
-  const entries: QueueEntry[] = tree.queue.map((item) => {
-    const name = technologyName(item.technologyNameKey);
-    const level = tree.technologies.find((technology) => technology.id === item.technologyId)?.levels.find((candidate) => candidate.level === item.targetLevel);
+  const entries: QueueEntry[] = tree.queue.map((queueItem) => {
+    const name = technologyName(queueItem.technologyNameKey);
+    const level = tree.technologies.find((technology) => technology.id === queueItem.technologyId)?.levels.find((candidate) => candidate.level === queueItem.targetLevel);
 
     return {
-      id: item.id,
-      title: t(marked ? 'research.queueItemDot' : 'research.queueItem', { name, level: item.targetLevel }),
-      underWay: item.finishesAt !== null,
-      deadline: deadlineFor(tree.gameNow, tree.timeMultiplier, item.finishesAt, receivedAt),
+      id: queueItem.id,
+      title: t(marked ? 'research.queueItemDot' : 'research.queueItem', { name, level: queueItem.targetLevel }),
+      underWay: queueItem.finishesAt !== null,
+      deadline: deadlineFor(tree.gameNow, tree.timeMultiplier, queueItem.finishesAt, receivedAt),
       durationSeconds: (level?.durationSeconds ?? 0) / multiplier,
-      details: item.costs.map((cost) => `${resourceName(cost.resourceTypeId)} ${formatNumber(cost.amount, language)}`).join(', '),
-      cancelLabel: t('research.cancelLabel', { name, level: item.targetLevel }),
+      details: orderCatalogCosts(queueItem.costs, resourceCode).map((cost) => `${resourceName(cost.resourceTypeId)} ${formatNumber(cost.amount, language)}`).join(', '),
+      cancelLabel: t('research.cancelLabel', { name, level: queueItem.targetLevel }),
       locksCancelWhenDue: true,
     };
   });

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вхід — AETHERIS</title>
+  <meta name="description" content="Увійди або створи акаунт AETHERIS — безкоштовної онлайн-стратегії в космосі.">
+  <meta name="theme-color" content="#070B16">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <div class="auth">
+    <!-- Side art (desktop) -->
+    <aside class="auth__side" aria-hidden="true">
+      <img src="assets/img/auth-side.webp" alt="" width="1200" height="896">
+      <div class="auth__side-logo logo">
+        <img class="logo__mark" src="assets/img/logo-mark.webp" alt="" width="32" height="32">
+        <span class="logo__text">AETHERIS</span>
+      </div>
+      <div class="auth__side-copy">
+        <p class="auth__side-title">Флот чекає на свого командира.</p>
+        <p class="lead">Один спільний всесвіт. Чотири раси. Твої рішення.</p>
+      </div>
+    </aside>
+
+    <main class="auth__main">
+      <div class="auth__top">
+        <a class="back-link" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          <span data-i18n="home">На головну</span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Мова / Language">
+          <button type="button" data-lang="uk" aria-pressed="true">UA</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+      </div>
+
+      <!-- Banner (mobile only) -->
+      <div class="auth__banner" aria-hidden="true">
+        <img src="assets/img/auth-side.webp" alt="" width="1200" height="896">
+        <span class="logo__text">AETHERIS</span>
+      </div>
+
+      <div class="auth__content">
+
+        <!-- ========== SIGN IN ========== -->
+        <section class="auth__view" data-view="signin" aria-labelledby="signin-title">
+          <div>
+            <h1 class="auth__title" id="signin-title">З поверненням, командире</h1>
+            <p class="lead">Увійди, щоб продовжити гру.</p>
+          </div>
+
+          <div class="alert alert--error" role="alert" data-signin-error hidden>
+            <span class="alert__icon" aria-hidden="true">!</span>
+            <div class="alert__body">
+              <strong>Не вдалося увійти</strong>
+              <span>Пошта або пароль не підходять. Перевір їх ще раз або віднови пароль.</span>
+            </div>
+          </div>
+          <div class="alert alert--success" role="status" data-signin-ok hidden>
+            <span class="alert__icon" aria-hidden="true">✓</span>
+            <div class="alert__body"><strong>Вхід виконано</strong><span>Завантажуємо твій всесвіт…</span></div>
+          </div>
+
+          <form class="form" id="signin-form" novalidate>
+            <div class="field">
+              <label class="field__label" for="si-email">Електронна пошта</label>
+              <input class="input" id="si-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="name@mail.com" aria-describedby="si-email-err" required>
+              <p class="error-text" id="si-email-err" hidden></p>
+            </div>
+            <div class="field">
+              <div class="field__head">
+                <label class="field__label" for="si-pw">Пароль</label>
+                <a class="field__link" href="#forgot" data-i18n="forgot">Забули пароль?</a>
+              </div>
+              <div class="field__control">
+                <input class="input input--pw" id="si-pw" name="password" type="password" autocomplete="current-password" placeholder="Твій пароль" aria-describedby="si-pw-err" required>
+                <button class="pw-toggle" type="button" data-pw-toggle="si-pw" aria-pressed="false" data-i18n="show">Показати</button>
+              </div>
+              <p class="error-text" id="si-pw-err" hidden></p>
+            </div>
+            <button class="btn btn--primary btn--lg btn--block" type="submit" data-i18n="signin">Увійти</button>
+          </form>
+
+          <div class="divider">або</div>
+          <button class="btn btn--secondary btn--lg btn--block" type="button" data-oauth="google">
+            <span class="provider-mark" aria-hidden="true">G</span><span data-i18n="google">Продовжити з Google</span>
+          </button>
+          <p class="auth__switch">Немає акаунта? <a class="text-btn" href="#signup" data-i18n="toSignup">Зареєструватися</a></p>
+        </section>
+
+        <!-- ========== SIGN UP ========== -->
+        <section class="auth__view" data-view="signup" aria-labelledby="signup-title" hidden>
+          <div>
+            <h1 class="auth__title" id="signup-title">Створи акаунт</h1>
+            <p class="lead">Це безкоштовно й займе хвилину.</p>
+          </div>
+          <form class="form" id="signup-form" novalidate>
+            <div class="field">
+              <label class="field__label" for="su-email">Електронна пошта</label>
+              <input class="input" id="su-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="name@mail.com" aria-describedby="su-email-err" required>
+              <p class="error-text" id="su-email-err" hidden></p>
+            </div>
+            <div class="field">
+              <label class="field__label" for="su-pw">Пароль</label>
+              <div class="field__control">
+                <input class="input input--pw" id="su-pw" name="password" type="password" autocomplete="new-password" placeholder="Придумай пароль" aria-describedby="su-pw-hint" minlength="8" required>
+                <button class="pw-toggle" type="button" data-pw-toggle="su-pw" aria-pressed="false" data-i18n="show">Показати</button>
+              </div>
+              <p class="hint" id="su-pw-hint" data-default="Щонайменше 8 символів і одна цифра.">Щонайменше 8 символів і одна цифра.</p>
+            </div>
+            <div class="field">
+              <label class="field__label" for="su-name">Ім’я командира</label>
+              <input class="input" id="su-name" name="displayName" type="text" autocomplete="nickname" placeholder="Напр. Kapitan_Zoria" aria-describedby="su-name-hint" minlength="3" maxlength="16" required>
+              <p class="hint" id="su-name-hint" data-default="Його бачитимуть інші гравці. 3–16 символів.">Його бачитимуть інші гравці. 3–16 символів.</p>
+            </div>
+            <div class="field">
+              <label class="check">
+                <input type="checkbox" id="su-terms" name="terms" aria-describedby="su-terms-err" required>
+                <span>Я приймаю <a href="#terms">Умови використання</a> та <a href="#privacy">Політику конфіденційності</a></span>
+              </label>
+              <p class="error-text" id="su-terms-err" hidden></p>
+            </div>
+            <button class="btn btn--primary btn--lg btn--block" type="submit" data-i18n="create">Створити акаунт</button>
+          </form>
+          <div class="divider">або</div>
+          <button class="btn btn--secondary btn--lg btn--block" type="button" data-oauth="google">
+            <span class="provider-mark" aria-hidden="true">G</span><span data-i18n="google">Продовжити з Google</span>
+          </button>
+          <p class="auth__switch">Уже є акаунт? <a class="text-btn" href="#signin" data-i18n="signin">Увійти</a></p>
+        </section>
+
+        <!-- ========== CHECK EMAIL ========== -->
+        <section class="auth__view" data-view="check" aria-labelledby="check-title" hidden>
+          <span class="mail-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg>
+          </span>
+          <div>
+            <h1 class="auth__title" id="check-title" tabindex="-1">Перевір пошту</h1>
+            <p class="lead">Ми надіслали лист на <span class="email-out" data-email-out>твою пошту</span>. Натисни посилання в листі, щоб підтвердити акаунт.</p>
+          </div>
+          <div class="alert alert--info">
+            <span class="alert__icon" aria-hidden="true">i</span>
+            <span>Не бачиш листа? Зазирни в «Спам» або «Промоакції» і зачекай кілька хвилин.</span>
+          </div>
+          <button class="btn btn--primary btn--lg btn--block" type="button" data-resend disabled>
+            <span data-i18n="resend">Надіслати лист ще раз</span><span data-resend-timer> · 1:00</span>
+          </button>
+          <p class="meta" role="status" data-resend-status></p>
+          <div class="row-between">
+            <a class="text-btn" href="#signup">Змінити адресу</a>
+            <a class="text-btn text-btn--muted" href="#signin" data-i18n="back">Повернутися до входу</a>
+          </div>
+        </section>
+      </div>
+
+      <p class="auth__legal">© <span data-year>2026</span> [STUDIO NAME] · <a href="index.html#terms">Умови</a> · <a href="index.html#privacy">Конфіденційність</a></p>
+    </main>
+  </div>
+
+  <script src="assets/js/i18n.js" defer></script>
+  <script src="assets/js/auth.js" defer></script>
+</body>
+</html>

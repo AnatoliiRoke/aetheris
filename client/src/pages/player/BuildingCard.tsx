@@ -3,6 +3,7 @@ import { CardArt } from '../../components/CardArt';
 import { ResourceIcon } from '../../components/GameIcon';
 import { useI18n } from '../../i18n/useI18n';
 import { effectText, formatAmount, formatDuration, lookup, namer, reasonText, requirementText } from './planetText';
+import { orderCatalogCosts } from './productionStock';
 
 type Names = ReturnType<typeof namer>;
 
@@ -33,6 +34,9 @@ export function BuildingCard({
   const { t, language } = useI18n();
   const { next } = building;
   const name = names.building(building.buildingTypeId);
+  const codeByResource = new Map(planet.resourceTypes.map((resource) => [resource.id, resource.code]));
+  const codeOf = (resourceTypeId: number) => codeByResource.get(resourceTypeId) ?? null;
+  const orderedCosts = orderCatalogCosts(next.costs, codeOf);
   const missing = new Map(next.missingResources.map((entry) => [entry.resourceTypeId, entry.amount]));
   // What the body has of every resource of the cost: the server sends it, because a currency
   // lies in the balance of the civilization and not in the stock of the body.
@@ -48,7 +52,7 @@ export function BuildingCard({
     ),
     ...next.reasonCodes.filter((code) => code !== 'planets_requirement_unmet' && code !== 'planets_resources_short').map((code) => reasonText(language, code)),
   ];
-  const hint = [...reasons, ...(next.missingResources.length > 0 && !isClosed ? [t('planet.missing', { list: names.amounts(next.missingResources) })] : [])].join('. ');
+  const hint = [...reasons, ...(next.missingResources.length > 0 && !isClosed ? [t('planet.missing', { list: names.amounts(orderCatalogCosts(next.missingResources, codeOf)) })] : [])].join('. ');
   const reasonsId = `building-${building.buildingTypeId}-reasons`;
   const isTopLevel = building.level >= building.maxLevel;
   const energyShort = next.energyBalanceAfter < 0;
@@ -78,7 +82,7 @@ export function BuildingCard({
           <span className="meta">{t('planet.nextLevel', { level: next.level })}</span>
           <span className="civ-label">{t('build.requiredResources')}</span>
           <ul aria-label={t('build.requiredResources')} className="cost-list cost-list--stock">
-            {next.costs.map((cost) => {
+            {orderedCosts.map((cost) => {
               const short = missing.get(cost.resourceTypeId);
               const available = availableResources.get(cost.resourceTypeId) ?? 0;
 

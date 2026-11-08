@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  emptyShipyard,
   fakeAuthApi,
   fakeFleetApi,
   renderPage,
@@ -499,5 +500,147 @@ describe('the shipyard screen (task 00038)', () => {
       hullPartTypeId: 84,
       hasRaceBonusSlot: false,
     });
+  });
+
+  it('assembles a project, names a closed hull and dismantles a finished ship', async () => {
+    const user = userEvent.setup();
+    const yard = {
+      planetId: 10,
+      planetBuildingId: 51,
+      level: 1,
+      used: 1,
+      total: 2,
+      gameNow: '2026-11-07T00:00:00Z',
+      timeMultiplier: 1,
+      orders: [
+        {
+          id: 3,
+          designId: 7,
+          title: 'Барракуда',
+          position: 1,
+          underWay: true,
+          finishesAt: '2026-11-07T01:00:00Z',
+          durationSeconds: 3600,
+          costs: [],
+          quantity: 1,
+          producedQuantity: 0,
+        },
+      ],
+      designs: [
+        {
+          designId: 7,
+          name: 'Барракуда',
+          hullPartTypeId: 21,
+          hullNameKey: 'production.part.part_h_21.name',
+          canEnqueue: true,
+          reasonCode: null,
+          requirementNameKey: null,
+          requirementLevel: null,
+          crew: 4,
+          credits: 20,
+          durationSeconds: 1800,
+          costs: [{ resourceTypeId: 1, amount: 4, nameKey: 'world.resource.resource_30.name' }],
+          parts: [
+            {
+              partTypeId: 21,
+              nameKey: 'production.part.part_h_21.name',
+              markLevel: 1,
+              hasRaceBonus: false,
+              quantity: 1,
+              available: 2,
+              isHull: true,
+            },
+          ],
+        },
+        {
+          designId: 8,
+          name: 'Сапсан',
+          hullPartTypeId: 1,
+          hullNameKey: 'production.part.part_h_1.name',
+          canEnqueue: false,
+          reasonCode: 'planets_requirement_building_level',
+          requirementNameKey: 'planets.building.building_51.name',
+          requirementLevel: 2,
+          crew: 0,
+          credits: 0,
+          durationSeconds: 1800,
+          costs: [],
+          parts: [],
+        },
+      ],
+      ships: [
+        {
+          id: 4,
+          planetId: 10,
+          designId: 7,
+          name: 'Барракуда',
+          hullNameKey: 'production.part.part_h_2.name',
+          classNameKey: 'production.part_group.pg_2.name',
+          stateCode: 'ready',
+          crew: 4,
+          upkeepPerHour: 0,
+          modules: [],
+        },
+      ],
+    };
+    const fleet = fakeFleetApi({
+      shipCatalog: vi.fn().mockResolvedValue(catalog()),
+      designs: vi.fn().mockResolvedValue([design()]),
+      shipyard: vi.fn().mockResolvedValue(yard),
+      enqueueShipyard: vi.fn().mockResolvedValue(yard),
+      disassembleShip: vi.fn().mockResolvedValue({ ...yard, ships: [] }),
+    });
+
+    renderPage('/shipyard', { auth: signedIn(), fleet });
+
+    await user.click(await screen.findByRole('tab', { name: 'Збірка' }));
+
+    expect(await screen.findByRole('heading', { name: 'Черга збірки' })).toBeInTheDocument();
+    expect(screen.getByText('Потрібно: planets.building.building_51.name, рівень 2')).toBeInTheDocument();
+    expect(screen.getByText('0/год')).toBeInTheDocument();
+
+    const buildButtons = screen.getAllByRole('button', { name: 'Побудувати' });
+    const openBuild = buildButtons.find((button) => !button.hasAttribute('disabled'));
+
+    expect(openBuild).toBeDefined();
+    await user.click(openBuild!);
+    expect(fleet.enqueueShipyard).toHaveBeenCalledWith({ planetId: 10, planetBuildingId: 51, designId: 7, quantity: 1 });
+
+    await user.click(screen.getByRole('tab', { name: 'Розбирання' }));
+    await user.click(await screen.findByRole('button', { name: 'Розібрати Барракуда' }));
+    expect(fleet.disassembleShip).toHaveBeenCalledWith(4);
+  });
+
+  it('shows the finished ships by the class of the hull and with how many ships each project has', async () => {
+    const user = userEvent.setup();
+    const yard = {
+      ...emptyShipyard(10),
+      planetBuildingId: 51,
+      level: 1,
+      ships: [
+        { id: 4, planetId: 10, designId: 7, name: 'Барракуда', hullNameKey: 'production.part.part_h_2.name', classNameKey: 'production.part_group.pg_2.name', stateCode: 'ready', crew: 4, upkeepPerHour: 3, modules: [] },
+        { id: 5, planetId: 10, designId: 7, name: 'Барракуда', hullNameKey: 'production.part.part_h_2.name', classNameKey: 'production.part_group.pg_2.name', stateCode: 'ready', crew: 4, upkeepPerHour: 3, modules: [] },
+        { id: 6, planetId: 10, designId: 8, name: 'Жук', hullNameKey: 'production.part.part_h_21.name', classNameKey: 'production.part_group.pg_1.name', stateCode: 'ready', crew: 2, upkeepPerHour: 1, modules: [] },
+      ],
+    };
+    const fleet = fakeFleetApi({
+      shipCatalog: vi.fn().mockResolvedValue(catalog()),
+      designs: vi.fn().mockResolvedValue([]),
+      shipyard: vi.fn().mockResolvedValue(yard),
+    });
+
+    renderPage('/shipyard', { auth: signedIn(), fleet });
+
+    await user.click(await screen.findByRole('tab', { name: 'Збірка' }));
+
+    // The class of the hull is the head of a group, and the ships of a project are a count.
+    expect(await screen.findByText('production.part_group.pg_2.name')).toBeInTheDocument();
+    expect(screen.getByText('production.part_group.pg_1.name')).toBeInTheDocument();
+    expect(screen.getByText('× 2')).toBeInTheDocument();
+    expect(screen.getByText('× 1')).toBeInTheDocument();
+
+    // The upkeep of the group is the sum of the upkeep of its ships.
+    expect(screen.getByText('6/год')).toBeInTheDocument();
+    expect(screen.getByText('1/год')).toBeInTheDocument();
   });
 });

@@ -21,3 +21,17 @@ export function useResourceNames(reference: { resources: { id: number; nameKey: 
     };
   }, [reference, entities]);
 }
+
+/**
+ * The catalog codes of the resources, so a cost list can stand in the one plaque order.
+ *
+ * @param reference The reference tables of the world.
+ * @returns A function that gives the catalog code of a resource by its identifier.
+ */
+export function useResourceCodes(reference: { resources: { id: number; code: string }[] } | null) {
+  return useMemo(() => {
+    const byId = new Map((reference?.resources ?? []).map((resource) => [resource.id, resource.code]));
+
+    return (resourceTypeId: number): string | null => byId.get(resourceTypeId) ?? null;
+  }, [reference]);
+}

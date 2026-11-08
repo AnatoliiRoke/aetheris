@@ -194,6 +194,24 @@ export interface DesignSummary {
   shield_capacity: number;
   has_drive: boolean;
   has_reactor: boolean;
+  /** How much integrity the fitted armor adds. */
+  armor?: number;
+  /** How fast the shields recover, with the shield restorers. */
+  shield_regen?: number;
+  /** The least kinetic damage the weapons make in one round. */
+  kinetic_damage_min?: number;
+  /** The greatest kinetic damage the weapons make in one round. */
+  kinetic_damage_max?: number;
+  /** The characteristics of the fitted modules that the plaque adds up. */
+  facts?: DesignFact[];
+}
+
+/** One summed characteristic of the fitted modules. */
+export interface DesignFact {
+  kind: string;
+  name_key: string;
+  unit_key: string | null;
+  amount: number;
 }
 
 /** A slot of a ship project, shown and not edited. */

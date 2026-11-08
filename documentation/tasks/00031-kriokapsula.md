@@ -1,6 +1,6 @@
 # Задача 00031 — Кріокапсула
 
-> **Статус:** ◐ ВИКОНАНО 01.11.2026, чекає приймання автором (значення за замовчуванням і що агент не міг перевірити: [00031-pytannia.md](00031-pytannia.md)).
+> **Статус:** ✅ ВИКОНАНО 01.11.2026 (значення за замовчуванням і що агент не міг перевірити: [00031-pytannia.md](00031-pytannia.md)).
 > **Етап:** 1 (production/01)
 > **Документи:** [references/perelik-3-moduli.md](../references/perelik-3-moduli.md), [references/zalezhnosti-rozklad.json](../references/zalezhnosti-rozklad.json), [game-design/05a Модулі](../game-design/05a-moduli-ta-komponenty.md).
 

@@ -184,125 +184,1698 @@
   <div class="m44">
     <label for="map-search" class="m15">Пошук на карті</label>
     <span aria-hidden="true" class="m45"><svg viewBox="0 0 24 24" width="20" height="20" class="m9"><path d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13z M15.5 15.5L20 20"></path></svg></span>
-    <input id="map-search" type="search" autocomplete="off" value="Лі" placeholder="Система, планета або гравець" aria-expanded="true" aria-controls="map-search-results" class="m46">
-    <button type="button" data-btn="" aria-label="Очистити" class="m47"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M6 6l12 12 M18 6L6 18"></path></svg></button>
+    <input id="map-search" type="search" autocomplete="off" value="" placeholder="Система, планета або гравець" aria-expanded="false" aria-controls="map-search-results" class="m46">
     
-      <div id="map-search-results" role="listbox" aria-label="Результати" class="m48">
-        <div class="m49">Результати · <span class="m21">6</span></div>
-        
-          <button type="button" data-btn="" role="option" aria-selected="false" class="m50">
-            <span class="m51"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4z M12 5a7 7 0 1 0 0 14a7 7 0 1 0 0-14z"></path></svg></span>
-            <span class="m52"><span class="m53">Ліра <span class="m54">· Зоряна система</span></span><span class="m55">Сектор 3 · Система Ліра</span></span>
-          </button>
-        
-          <button type="button" data-btn="" role="option" aria-selected="false" class="m50">
-            <span class="m51"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4z M12 5a7 7 0 1 0 0 14a7 7 0 1 0 0-14z"></path></svg></span>
-            <span class="m52"><span class="m53">Каліста <span class="m54">· Зоряна система</span></span><span class="m55">Сектор 3 · Система Каліста</span></span>
-          </button>
-        
-          <button type="button" data-btn="" role="option" aria-selected="false" class="m50">
-            <span class="m51"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4z M12 5a7 7 0 1 0 0 14a7 7 0 1 0 0-14z"></path></svg></span>
-            <span class="m52"><span class="m53">Тау-Ліри <span class="m54">· Зоряна система</span></span><span class="m55">Сектор 3 · Система Тау-Ліри</span></span>
-          </button>
-        
-          <button type="button" data-btn="" role="option" aria-selected="false" class="m50">
-            <span class="m56"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 6a6 6 0 1 0 0 12a6 6 0 1 0 0-12z M3 14c2 1.5 6 2 9 1.5s7-2 9-4.5"></path></svg></span>
-            <span class="m52"><span class="m53">Ліра-3 <span class="m54">· Вулканічна</span></span><span class="m55">Сектор 3 · Система Ліра · Орбіта 3</span></span>
-          </button>
-        
-          <button type="button" data-btn="" role="option" aria-selected="false" class="m50">
-            <span class="m56"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 6a6 6 0 1 0 0 12a6 6 0 1 0 0-12z M3 14c2 1.5 6 2 9 1.5s7-2 9-4.5"></path></svg></span>
-            <span class="m52"><span class="m53">Ліра-6 <span class="m54">· Пустельна</span></span><span class="m55">Сектор 3 · Система Ліра · Орбіта 6</span></span>
-          </button>
-        
-          <button type="button" data-btn="" role="option" aria-selected="false" class="m50">
-            <span class="m56"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M6 8h.01 M12 6h.01 M17.5 9h.01 M8 14h.01 M14 13h.01 M18.5 16h.01 M11 18.5h.01"></path></svg></span>
-            <span class="m52"><span class="m53">Пояс Ліри <span class="m54">· Поле астероїдів</span></span><span class="m55">Сектор 3 · Система Ліра · Орбіта 12</span></span>
-          </button>
-        
-        
-      </div>
     
   </div>
 
   
   
-  <div class="m57">
-    <div aria-hidden="true" class="m58"></div>
+  <div class="m47">
+    <div aria-hidden="true" data-nebula="" class="m48"></div>
+    <div aria-hidden="true" class="m49"></div>
+    <div aria-hidden="true" class="m50"></div>
+    <div aria-hidden="true" class="m51"></div>
+    <div aria-hidden="true" class="m52"></div>
+    <div aria-hidden="true" data-twinkle="" class="m53"></div>
 
     
-    <div tabindex="0" role="application" aria-label="Карта. Стрілки — рух, + і − — масштаб, Esc — закрити картку" class="m59">
-      <div class="m60">
+    <div tabindex="0" role="application" aria-label="Карта. Стрілки — рух, + і − — масштаб, Esc — закрити картку" class="m54">
+      <div class="m55">
 
         
         
-          <div aria-hidden="true" class="m61"></div>
+          <div aria-hidden="true" class="m56"></div>
           
-            <button type="button" data-btn="" aria-label="Сектор 1, 96 систем, Новачки" aria-pressed="false" class="m62">
-              <span class="m63">Сектор 1</span>
-              <span class="m64">
-                <span class="m65"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m9"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.1 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7z"></path></svg>Новачки</span>
+            <span aria-hidden="true" class="m57"></span>
+          
+            <span aria-hidden="true" class="m58"></span>
+          
+            <span aria-hidden="true" class="m59"></span>
+          
+            <span aria-hidden="true" class="m60"></span>
+          
+            <span aria-hidden="true" class="m61"></span>
+          
+            <span aria-hidden="true" class="m62"></span>
+          
+            <span aria-hidden="true" class="m63"></span>
+          
+            <span aria-hidden="true" class="m64"></span>
+          
+            <span aria-hidden="true" class="m65"></span>
+          
+            <span aria-hidden="true" class="m66"></span>
+          
+            <span aria-hidden="true" class="m67"></span>
+          
+            <span aria-hidden="true" class="m68"></span>
+          
+            <span aria-hidden="true" class="m69"></span>
+          
+            <span aria-hidden="true" class="m70"></span>
+          
+            <span aria-hidden="true" class="m71"></span>
+          
+            <span aria-hidden="true" class="m72"></span>
+          
+            <span aria-hidden="true" class="m73"></span>
+          
+            <span aria-hidden="true" class="m74"></span>
+          
+            <span aria-hidden="true" class="m75"></span>
+          
+            <span aria-hidden="true" class="m76"></span>
+          
+            <span aria-hidden="true" class="m77"></span>
+          
+            <span aria-hidden="true" class="m78"></span>
+          
+            <span aria-hidden="true" class="m79"></span>
+          
+            <span aria-hidden="true" class="m80"></span>
+          
+            <span aria-hidden="true" class="m81"></span>
+          
+            <span aria-hidden="true" class="m82"></span>
+          
+            <span aria-hidden="true" class="m83"></span>
+          
+            <span aria-hidden="true" class="m84"></span>
+          
+            <span aria-hidden="true" class="m85"></span>
+          
+            <span aria-hidden="true" class="m86"></span>
+          
+            <span aria-hidden="true" class="m87"></span>
+          
+            <span aria-hidden="true" class="m88"></span>
+          
+          
+            <span aria-hidden="true" class="m89"></span>
+          
+            <span aria-hidden="true" class="m90"></span>
+          
+            <span aria-hidden="true" class="m91"></span>
+          
+            <span aria-hidden="true" class="m92"></span>
+          
+            <span aria-hidden="true" class="m93"></span>
+          
+            <span aria-hidden="true" class="m94"></span>
+          
+            <span aria-hidden="true" class="m95"></span>
+          
+            <span aria-hidden="true" class="m96"></span>
+          
+            <span aria-hidden="true" class="m97"></span>
+          
+            <span aria-hidden="true" class="m98"></span>
+          
+            <span aria-hidden="true" class="m99"></span>
+          
+            <span aria-hidden="true" class="m100"></span>
+          
+            <span aria-hidden="true" class="m101"></span>
+          
+            <span aria-hidden="true" class="m102"></span>
+          
+            <span aria-hidden="true" class="m103"></span>
+          
+            <span aria-hidden="true" class="m104"></span>
+          
+            <span aria-hidden="true" class="m105"></span>
+          
+            <span aria-hidden="true" class="m106"></span>
+          
+            <span aria-hidden="true" class="m107"></span>
+          
+            <span aria-hidden="true" class="m108"></span>
+          
+            <span aria-hidden="true" class="m109"></span>
+          
+            <span aria-hidden="true" class="m110"></span>
+          
+            <span aria-hidden="true" class="m111"></span>
+          
+            <span aria-hidden="true" class="m112"></span>
+          
+            <span aria-hidden="true" class="m113"></span>
+          
+            <span aria-hidden="true" class="m114"></span>
+          
+            <span aria-hidden="true" class="m115"></span>
+          
+            <span aria-hidden="true" class="m116"></span>
+          
+            <span aria-hidden="true" class="m117"></span>
+          
+            <span aria-hidden="true" class="m118"></span>
+          
+            <span aria-hidden="true" class="m119"></span>
+          
+            <span aria-hidden="true" class="m120"></span>
+          
+            <span aria-hidden="true" class="m121"></span>
+          
+            <span aria-hidden="true" class="m122"></span>
+          
+            <span aria-hidden="true" class="m123"></span>
+          
+            <span aria-hidden="true" class="m124"></span>
+          
+            <span aria-hidden="true" class="m125"></span>
+          
+            <span aria-hidden="true" class="m126"></span>
+          
+            <span aria-hidden="true" class="m127"></span>
+          
+            <span aria-hidden="true" class="m128"></span>
+          
+            <span aria-hidden="true" class="m129"></span>
+          
+            <span aria-hidden="true" class="m130"></span>
+          
+            <span aria-hidden="true" class="m131"></span>
+          
+            <span aria-hidden="true" class="m132"></span>
+          
+            <span aria-hidden="true" class="m133"></span>
+          
+            <span aria-hidden="true" class="m134"></span>
+          
+            <span aria-hidden="true" class="m135"></span>
+          
+            <span aria-hidden="true" class="m136"></span>
+          
+            <span aria-hidden="true" class="m137"></span>
+          
+            <span aria-hidden="true" class="m138"></span>
+          
+            <span aria-hidden="true" class="m139"></span>
+          
+            <span aria-hidden="true" class="m140"></span>
+          
+            <span aria-hidden="true" class="m141"></span>
+          
+            <span aria-hidden="true" class="m142"></span>
+          
+            <span aria-hidden="true" class="m143"></span>
+          
+            <span aria-hidden="true" class="m144"></span>
+          
+            <span aria-hidden="true" class="m145"></span>
+          
+            <span aria-hidden="true" class="m146"></span>
+          
+            <span aria-hidden="true" class="m147"></span>
+          
+            <span aria-hidden="true" class="m148"></span>
+          
+            <span aria-hidden="true" class="m149"></span>
+          
+            <span aria-hidden="true" class="m150"></span>
+          
+            <span aria-hidden="true" class="m151"></span>
+          
+            <span aria-hidden="true" class="m152"></span>
+          
+            <span aria-hidden="true" class="m153"></span>
+          
+            <span aria-hidden="true" class="m154"></span>
+          
+            <span aria-hidden="true" class="m155"></span>
+          
+            <span aria-hidden="true" class="m156"></span>
+          
+            <span aria-hidden="true" class="m157"></span>
+          
+            <span aria-hidden="true" class="m158"></span>
+          
+            <span aria-hidden="true" class="m159"></span>
+          
+            <span aria-hidden="true" class="m160"></span>
+          
+            <span aria-hidden="true" class="m161"></span>
+          
+            <span aria-hidden="true" class="m162"></span>
+          
+            <span aria-hidden="true" class="m163"></span>
+          
+            <span aria-hidden="true" class="m164"></span>
+          
+            <span aria-hidden="true" class="m165"></span>
+          
+            <span aria-hidden="true" class="m166"></span>
+          
+            <span aria-hidden="true" class="m167"></span>
+          
+            <span aria-hidden="true" class="m168"></span>
+          
+            <span aria-hidden="true" class="m169"></span>
+          
+            <span aria-hidden="true" class="m170"></span>
+          
+            <span aria-hidden="true" class="m171"></span>
+          
+            <span aria-hidden="true" class="m172"></span>
+          
+            <span aria-hidden="true" class="m173"></span>
+          
+            <span aria-hidden="true" class="m174"></span>
+          
+            <span aria-hidden="true" class="m175"></span>
+          
+            <span aria-hidden="true" class="m176"></span>
+          
+            <span aria-hidden="true" class="m177"></span>
+          
+            <span aria-hidden="true" class="m178"></span>
+          
+            <span aria-hidden="true" class="m179"></span>
+          
+            <span aria-hidden="true" class="m180"></span>
+          
+            <span aria-hidden="true" class="m181"></span>
+          
+            <span aria-hidden="true" class="m182"></span>
+          
+            <span aria-hidden="true" class="m183"></span>
+          
+            <span aria-hidden="true" class="m184"></span>
+          
+            <span aria-hidden="true" class="m185"></span>
+          
+            <span aria-hidden="true" class="m186"></span>
+          
+            <span aria-hidden="true" class="m187"></span>
+          
+            <span aria-hidden="true" class="m188"></span>
+          
+            <span aria-hidden="true" class="m189"></span>
+          
+            <span aria-hidden="true" class="m190"></span>
+          
+            <span aria-hidden="true" class="m191"></span>
+          
+            <span aria-hidden="true" class="m192"></span>
+          
+            <span aria-hidden="true" class="m193"></span>
+          
+            <span aria-hidden="true" class="m194"></span>
+          
+            <span aria-hidden="true" class="m195"></span>
+          
+            <span aria-hidden="true" class="m196"></span>
+          
+            <span aria-hidden="true" class="m197"></span>
+          
+            <span aria-hidden="true" class="m198"></span>
+          
+            <span aria-hidden="true" class="m199"></span>
+          
+            <span aria-hidden="true" class="m200"></span>
+          
+            <span aria-hidden="true" class="m201"></span>
+          
+            <span aria-hidden="true" class="m202"></span>
+          
+            <span aria-hidden="true" class="m203"></span>
+          
+            <span aria-hidden="true" class="m204"></span>
+          
+            <span aria-hidden="true" class="m205"></span>
+          
+            <span aria-hidden="true" class="m206"></span>
+          
+            <span aria-hidden="true" class="m207"></span>
+          
+            <span aria-hidden="true" class="m208"></span>
+          
+            <span aria-hidden="true" class="m209"></span>
+          
+            <span aria-hidden="true" class="m210"></span>
+          
+            <span aria-hidden="true" class="m211"></span>
+          
+            <span aria-hidden="true" class="m212"></span>
+          
+            <span aria-hidden="true" class="m213"></span>
+          
+            <span aria-hidden="true" class="m214"></span>
+          
+            <span aria-hidden="true" class="m215"></span>
+          
+            <span aria-hidden="true" class="m216"></span>
+          
+            <span aria-hidden="true" class="m217"></span>
+          
+            <span aria-hidden="true" class="m218"></span>
+          
+            <span aria-hidden="true" class="m219"></span>
+          
+            <span aria-hidden="true" class="m220"></span>
+          
+            <span aria-hidden="true" class="m221"></span>
+          
+            <span aria-hidden="true" class="m222"></span>
+          
+            <span aria-hidden="true" class="m223"></span>
+          
+            <span aria-hidden="true" class="m224"></span>
+          
+            <span aria-hidden="true" class="m225"></span>
+          
+            <span aria-hidden="true" class="m226"></span>
+          
+            <span aria-hidden="true" class="m227"></span>
+          
+            <span aria-hidden="true" class="m228"></span>
+          
+            <span aria-hidden="true" class="m229"></span>
+          
+            <span aria-hidden="true" class="m230"></span>
+          
+            <span aria-hidden="true" class="m231"></span>
+          
+            <span aria-hidden="true" class="m232"></span>
+          
+            <span aria-hidden="true" class="m233"></span>
+          
+            <span aria-hidden="true" class="m234"></span>
+          
+            <span aria-hidden="true" class="m235"></span>
+          
+            <span aria-hidden="true" class="m236"></span>
+          
+            <span aria-hidden="true" class="m237"></span>
+          
+            <span aria-hidden="true" class="m238"></span>
+          
+            <span aria-hidden="true" class="m239"></span>
+          
+            <span aria-hidden="true" class="m240"></span>
+          
+            <span aria-hidden="true" class="m241"></span>
+          
+            <span aria-hidden="true" class="m242"></span>
+          
+            <span aria-hidden="true" class="m243"></span>
+          
+            <span aria-hidden="true" class="m244"></span>
+          
+            <span aria-hidden="true" class="m245"></span>
+          
+            <span aria-hidden="true" class="m246"></span>
+          
+            <span aria-hidden="true" class="m247"></span>
+          
+            <span aria-hidden="true" class="m248"></span>
+          
+            <span aria-hidden="true" class="m249"></span>
+          
+            <span aria-hidden="true" class="m250"></span>
+          
+            <span aria-hidden="true" class="m251"></span>
+          
+            <span aria-hidden="true" class="m252"></span>
+          
+            <span aria-hidden="true" class="m253"></span>
+          
+            <span aria-hidden="true" class="m254"></span>
+          
+            <span aria-hidden="true" class="m255"></span>
+          
+            <span aria-hidden="true" class="m256"></span>
+          
+            <span aria-hidden="true" class="m257"></span>
+          
+            <span aria-hidden="true" class="m258"></span>
+          
+            <span aria-hidden="true" class="m259"></span>
+          
+            <span aria-hidden="true" class="m260"></span>
+          
+            <span aria-hidden="true" class="m261"></span>
+          
+            <span aria-hidden="true" class="m262"></span>
+          
+            <span aria-hidden="true" class="m263"></span>
+          
+            <span aria-hidden="true" class="m264"></span>
+          
+            <span aria-hidden="true" class="m265"></span>
+          
+            <span aria-hidden="true" class="m266"></span>
+          
+            <span aria-hidden="true" class="m267"></span>
+          
+            <span aria-hidden="true" class="m268"></span>
+          
+            <span aria-hidden="true" class="m269"></span>
+          
+            <span aria-hidden="true" class="m270"></span>
+          
+            <span aria-hidden="true" class="m271"></span>
+          
+            <span aria-hidden="true" class="m272"></span>
+          
+            <span aria-hidden="true" class="m273"></span>
+          
+            <span aria-hidden="true" class="m274"></span>
+          
+            <span aria-hidden="true" class="m275"></span>
+          
+            <span aria-hidden="true" class="m276"></span>
+          
+            <span aria-hidden="true" class="m277"></span>
+          
+            <span aria-hidden="true" class="m278"></span>
+          
+            <span aria-hidden="true" class="m279"></span>
+          
+            <span aria-hidden="true" class="m280"></span>
+          
+            <span aria-hidden="true" class="m281"></span>
+          
+            <span aria-hidden="true" class="m282"></span>
+          
+            <span aria-hidden="true" class="m283"></span>
+          
+            <span aria-hidden="true" class="m284"></span>
+          
+            <span aria-hidden="true" class="m285"></span>
+          
+            <span aria-hidden="true" class="m286"></span>
+          
+            <span aria-hidden="true" class="m287"></span>
+          
+            <span aria-hidden="true" class="m288"></span>
+          
+            <span aria-hidden="true" class="m289"></span>
+          
+            <span aria-hidden="true" class="m290"></span>
+          
+            <span aria-hidden="true" class="m291"></span>
+          
+            <span aria-hidden="true" class="m292"></span>
+          
+            <span aria-hidden="true" class="m293"></span>
+          
+            <span aria-hidden="true" class="m294"></span>
+          
+            <span aria-hidden="true" class="m295"></span>
+          
+            <span aria-hidden="true" class="m296"></span>
+          
+            <span aria-hidden="true" class="m297"></span>
+          
+            <span aria-hidden="true" class="m298"></span>
+          
+            <span aria-hidden="true" class="m299"></span>
+          
+            <span aria-hidden="true" class="m300"></span>
+          
+            <span aria-hidden="true" class="m301"></span>
+          
+            <span aria-hidden="true" class="m302"></span>
+          
+            <span aria-hidden="true" class="m303"></span>
+          
+            <span aria-hidden="true" class="m304"></span>
+          
+            <span aria-hidden="true" class="m305"></span>
+          
+            <span aria-hidden="true" class="m306"></span>
+          
+            <span aria-hidden="true" class="m307"></span>
+          
+            <span aria-hidden="true" class="m308"></span>
+          
+            <span aria-hidden="true" class="m309"></span>
+          
+            <span aria-hidden="true" class="m310"></span>
+          
+            <span aria-hidden="true" class="m311"></span>
+          
+            <span aria-hidden="true" class="m312"></span>
+          
+            <span aria-hidden="true" class="m313"></span>
+          
+            <span aria-hidden="true" class="m314"></span>
+          
+            <span aria-hidden="true" class="m315"></span>
+          
+            <span aria-hidden="true" class="m316"></span>
+          
+            <span aria-hidden="true" class="m317"></span>
+          
+            <span aria-hidden="true" class="m318"></span>
+          
+            <span aria-hidden="true" class="m319"></span>
+          
+            <span aria-hidden="true" class="m320"></span>
+          
+            <span aria-hidden="true" class="m321"></span>
+          
+            <span aria-hidden="true" class="m322"></span>
+          
+            <span aria-hidden="true" class="m323"></span>
+          
+            <span aria-hidden="true" class="m324"></span>
+          
+            <span aria-hidden="true" class="m325"></span>
+          
+            <span aria-hidden="true" class="m326"></span>
+          
+            <span aria-hidden="true" class="m327"></span>
+          
+            <span aria-hidden="true" class="m328"></span>
+          
+            <span aria-hidden="true" class="m329"></span>
+          
+            <span aria-hidden="true" class="m330"></span>
+          
+            <span aria-hidden="true" class="m331"></span>
+          
+            <span aria-hidden="true" class="m332"></span>
+          
+            <span aria-hidden="true" class="m333"></span>
+          
+            <span aria-hidden="true" class="m334"></span>
+          
+            <span aria-hidden="true" class="m335"></span>
+          
+            <span aria-hidden="true" class="m336"></span>
+          
+            <span aria-hidden="true" class="m337"></span>
+          
+            <span aria-hidden="true" class="m338"></span>
+          
+            <span aria-hidden="true" class="m339"></span>
+          
+            <span aria-hidden="true" class="m340"></span>
+          
+            <span aria-hidden="true" class="m341"></span>
+          
+            <span aria-hidden="true" class="m342"></span>
+          
+            <span aria-hidden="true" class="m343"></span>
+          
+            <span aria-hidden="true" class="m344"></span>
+          
+            <span aria-hidden="true" class="m345"></span>
+          
+            <span aria-hidden="true" class="m346"></span>
+          
+            <span aria-hidden="true" class="m347"></span>
+          
+            <span aria-hidden="true" class="m348"></span>
+          
+            <span aria-hidden="true" class="m349"></span>
+          
+            <span aria-hidden="true" class="m350"></span>
+          
+            <span aria-hidden="true" class="m351"></span>
+          
+            <span aria-hidden="true" class="m352"></span>
+          
+            <span aria-hidden="true" class="m353"></span>
+          
+            <span aria-hidden="true" class="m354"></span>
+          
+            <span aria-hidden="true" class="m355"></span>
+          
+            <span aria-hidden="true" class="m356"></span>
+          
+            <span aria-hidden="true" class="m357"></span>
+          
+            <span aria-hidden="true" class="m358"></span>
+          
+            <span aria-hidden="true" class="m359"></span>
+          
+            <span aria-hidden="true" class="m360"></span>
+          
+            <span aria-hidden="true" class="m361"></span>
+          
+            <span aria-hidden="true" class="m362"></span>
+          
+            <span aria-hidden="true" class="m363"></span>
+          
+            <span aria-hidden="true" class="m364"></span>
+          
+            <span aria-hidden="true" class="m365"></span>
+          
+            <span aria-hidden="true" class="m366"></span>
+          
+            <span aria-hidden="true" class="m367"></span>
+          
+            <span aria-hidden="true" class="m368"></span>
+          
+            <span aria-hidden="true" class="m369"></span>
+          
+            <span aria-hidden="true" class="m370"></span>
+          
+            <span aria-hidden="true" class="m371"></span>
+          
+            <span aria-hidden="true" class="m372"></span>
+          
+            <span aria-hidden="true" class="m373"></span>
+          
+            <span aria-hidden="true" class="m374"></span>
+          
+            <span aria-hidden="true" class="m375"></span>
+          
+            <span aria-hidden="true" class="m376"></span>
+          
+            <span aria-hidden="true" class="m377"></span>
+          
+            <span aria-hidden="true" class="m378"></span>
+          
+            <span aria-hidden="true" class="m379"></span>
+          
+            <span aria-hidden="true" class="m380"></span>
+          
+            <span aria-hidden="true" class="m381"></span>
+          
+            <span aria-hidden="true" class="m382"></span>
+          
+            <span aria-hidden="true" class="m383"></span>
+          
+            <span aria-hidden="true" class="m384"></span>
+          
+            <span aria-hidden="true" class="m385"></span>
+          
+            <span aria-hidden="true" class="m386"></span>
+          
+            <span aria-hidden="true" class="m387"></span>
+          
+            <span aria-hidden="true" class="m388"></span>
+          
+            <span aria-hidden="true" class="m389"></span>
+          
+            <span aria-hidden="true" class="m390"></span>
+          
+            <span aria-hidden="true" class="m391"></span>
+          
+            <span aria-hidden="true" class="m392"></span>
+          
+            <span aria-hidden="true" class="m393"></span>
+          
+            <span aria-hidden="true" class="m394"></span>
+          
+            <span aria-hidden="true" class="m395"></span>
+          
+            <span aria-hidden="true" class="m396"></span>
+          
+            <span aria-hidden="true" class="m397"></span>
+          
+            <span aria-hidden="true" class="m398"></span>
+          
+            <span aria-hidden="true" class="m399"></span>
+          
+            <span aria-hidden="true" class="m400"></span>
+          
+            <span aria-hidden="true" class="m401"></span>
+          
+            <span aria-hidden="true" class="m402"></span>
+          
+            <span aria-hidden="true" class="m403"></span>
+          
+            <span aria-hidden="true" class="m404"></span>
+          
+            <span aria-hidden="true" class="m405"></span>
+          
+            <span aria-hidden="true" class="m406"></span>
+          
+            <span aria-hidden="true" class="m407"></span>
+          
+            <span aria-hidden="true" class="m408"></span>
+          
+            <span aria-hidden="true" class="m409"></span>
+          
+            <span aria-hidden="true" class="m410"></span>
+          
+            <span aria-hidden="true" class="m411"></span>
+          
+            <span aria-hidden="true" class="m412"></span>
+          
+            <span aria-hidden="true" class="m413"></span>
+          
+            <span aria-hidden="true" class="m414"></span>
+          
+            <span aria-hidden="true" class="m415"></span>
+          
+            <span aria-hidden="true" class="m416"></span>
+          
+            <span aria-hidden="true" class="m417"></span>
+          
+            <span aria-hidden="true" class="m418"></span>
+          
+            <span aria-hidden="true" class="m419"></span>
+          
+            <span aria-hidden="true" class="m420"></span>
+          
+            <span aria-hidden="true" class="m421"></span>
+          
+            <span aria-hidden="true" class="m422"></span>
+          
+            <span aria-hidden="true" class="m423"></span>
+          
+            <span aria-hidden="true" class="m424"></span>
+          
+            <span aria-hidden="true" class="m425"></span>
+          
+            <span aria-hidden="true" class="m426"></span>
+          
+            <span aria-hidden="true" class="m427"></span>
+          
+            <span aria-hidden="true" class="m428"></span>
+          
+            <span aria-hidden="true" class="m429"></span>
+          
+            <span aria-hidden="true" class="m430"></span>
+          
+            <span aria-hidden="true" class="m431"></span>
+          
+            <span aria-hidden="true" class="m432"></span>
+          
+            <span aria-hidden="true" class="m433"></span>
+          
+            <span aria-hidden="true" class="m434"></span>
+          
+            <span aria-hidden="true" class="m435"></span>
+          
+            <span aria-hidden="true" class="m436"></span>
+          
+            <span aria-hidden="true" class="m437"></span>
+          
+            <span aria-hidden="true" class="m438"></span>
+          
+            <span aria-hidden="true" class="m439"></span>
+          
+            <span aria-hidden="true" class="m440"></span>
+          
+            <span aria-hidden="true" class="m441"></span>
+          
+            <span aria-hidden="true" class="m442"></span>
+          
+            <span aria-hidden="true" class="m443"></span>
+          
+            <span aria-hidden="true" class="m444"></span>
+          
+            <span aria-hidden="true" class="m445"></span>
+          
+            <span aria-hidden="true" class="m446"></span>
+          
+            <span aria-hidden="true" class="m447"></span>
+          
+            <span aria-hidden="true" class="m448"></span>
+          
+            <span aria-hidden="true" class="m449"></span>
+          
+            <span aria-hidden="true" class="m450"></span>
+          
+            <span aria-hidden="true" class="m451"></span>
+          
+            <span aria-hidden="true" class="m452"></span>
+          
+            <span aria-hidden="true" class="m453"></span>
+          
+            <span aria-hidden="true" class="m454"></span>
+          
+            <span aria-hidden="true" class="m455"></span>
+          
+            <span aria-hidden="true" class="m456"></span>
+          
+            <span aria-hidden="true" class="m457"></span>
+          
+            <span aria-hidden="true" class="m458"></span>
+          
+            <span aria-hidden="true" class="m459"></span>
+          
+            <span aria-hidden="true" class="m460"></span>
+          
+            <span aria-hidden="true" class="m461"></span>
+          
+            <span aria-hidden="true" class="m462"></span>
+          
+            <span aria-hidden="true" class="m463"></span>
+          
+            <span aria-hidden="true" class="m464"></span>
+          
+            <span aria-hidden="true" class="m465"></span>
+          
+            <span aria-hidden="true" class="m466"></span>
+          
+            <span aria-hidden="true" class="m467"></span>
+          
+            <span aria-hidden="true" class="m468"></span>
+          
+            <span aria-hidden="true" class="m469"></span>
+          
+            <span aria-hidden="true" class="m470"></span>
+          
+            <span aria-hidden="true" class="m471"></span>
+          
+            <span aria-hidden="true" class="m472"></span>
+          
+            <span aria-hidden="true" class="m473"></span>
+          
+            <span aria-hidden="true" class="m474"></span>
+          
+            <span aria-hidden="true" class="m475"></span>
+          
+            <span aria-hidden="true" class="m476"></span>
+          
+            <span aria-hidden="true" class="m477"></span>
+          
+            <span aria-hidden="true" class="m478"></span>
+          
+            <span aria-hidden="true" class="m479"></span>
+          
+            <span aria-hidden="true" class="m480"></span>
+          
+            <span aria-hidden="true" class="m481"></span>
+          
+            <span aria-hidden="true" class="m482"></span>
+          
+            <span aria-hidden="true" class="m483"></span>
+          
+            <span aria-hidden="true" class="m484"></span>
+          
+            <span aria-hidden="true" class="m485"></span>
+          
+            <span aria-hidden="true" class="m486"></span>
+          
+            <span aria-hidden="true" class="m487"></span>
+          
+            <span aria-hidden="true" class="m488"></span>
+          
+            <span aria-hidden="true" class="m489"></span>
+          
+            <span aria-hidden="true" class="m490"></span>
+          
+            <span aria-hidden="true" class="m491"></span>
+          
+            <span aria-hidden="true" class="m492"></span>
+          
+            <span aria-hidden="true" class="m493"></span>
+          
+            <span aria-hidden="true" class="m494"></span>
+          
+            <span aria-hidden="true" class="m495"></span>
+          
+            <span aria-hidden="true" class="m496"></span>
+          
+            <span aria-hidden="true" class="m497"></span>
+          
+            <span aria-hidden="true" class="m498"></span>
+          
+            <span aria-hidden="true" class="m499"></span>
+          
+            <span aria-hidden="true" class="m500"></span>
+          
+            <span aria-hidden="true" class="m501"></span>
+          
+            <span aria-hidden="true" class="m502"></span>
+          
+            <span aria-hidden="true" class="m503"></span>
+          
+            <span aria-hidden="true" class="m504"></span>
+          
+            <span aria-hidden="true" class="m505"></span>
+          
+            <span aria-hidden="true" class="m506"></span>
+          
+            <span aria-hidden="true" class="m507"></span>
+          
+            <span aria-hidden="true" class="m508"></span>
+          
+            <span aria-hidden="true" class="m509"></span>
+          
+            <span aria-hidden="true" class="m510"></span>
+          
+            <span aria-hidden="true" class="m511"></span>
+          
+            <span aria-hidden="true" class="m512"></span>
+          
+            <span aria-hidden="true" class="m513"></span>
+          
+            <span aria-hidden="true" class="m514"></span>
+          
+            <span aria-hidden="true" class="m515"></span>
+          
+            <span aria-hidden="true" class="m516"></span>
+          
+            <span aria-hidden="true" class="m517"></span>
+          
+            <span aria-hidden="true" class="m518"></span>
+          
+            <span aria-hidden="true" class="m519"></span>
+          
+            <span aria-hidden="true" class="m520"></span>
+          
+            <span aria-hidden="true" class="m521"></span>
+          
+            <span aria-hidden="true" class="m522"></span>
+          
+            <span aria-hidden="true" class="m523"></span>
+          
+            <span aria-hidden="true" class="m524"></span>
+          
+            <span aria-hidden="true" class="m525"></span>
+          
+            <span aria-hidden="true" class="m526"></span>
+          
+            <span aria-hidden="true" class="m527"></span>
+          
+            <span aria-hidden="true" class="m528"></span>
+          
+            <span aria-hidden="true" class="m529"></span>
+          
+            <span aria-hidden="true" class="m530"></span>
+          
+            <span aria-hidden="true" class="m531"></span>
+          
+            <span aria-hidden="true" class="m532"></span>
+          
+            <span aria-hidden="true" class="m533"></span>
+          
+            <span aria-hidden="true" class="m534"></span>
+          
+            <span aria-hidden="true" class="m535"></span>
+          
+            <span aria-hidden="true" class="m536"></span>
+          
+            <span aria-hidden="true" class="m537"></span>
+          
+            <span aria-hidden="true" class="m538"></span>
+          
+            <span aria-hidden="true" class="m539"></span>
+          
+            <span aria-hidden="true" class="m540"></span>
+          
+            <span aria-hidden="true" class="m541"></span>
+          
+            <span aria-hidden="true" class="m542"></span>
+          
+            <span aria-hidden="true" class="m543"></span>
+          
+            <span aria-hidden="true" class="m544"></span>
+          
+            <span aria-hidden="true" class="m545"></span>
+          
+            <span aria-hidden="true" class="m546"></span>
+          
+            <span aria-hidden="true" class="m547"></span>
+          
+            <span aria-hidden="true" class="m548"></span>
+          
+            <span aria-hidden="true" class="m549"></span>
+          
+            <span aria-hidden="true" class="m550"></span>
+          
+            <span aria-hidden="true" class="m551"></span>
+          
+            <span aria-hidden="true" class="m552"></span>
+          
+            <span aria-hidden="true" class="m553"></span>
+          
+            <span aria-hidden="true" class="m554"></span>
+          
+            <span aria-hidden="true" class="m555"></span>
+          
+            <span aria-hidden="true" class="m556"></span>
+          
+            <span aria-hidden="true" class="m557"></span>
+          
+            <span aria-hidden="true" class="m558"></span>
+          
+            <span aria-hidden="true" class="m559"></span>
+          
+            <span aria-hidden="true" class="m560"></span>
+          
+            <span aria-hidden="true" class="m561"></span>
+          
+            <span aria-hidden="true" class="m562"></span>
+          
+            <span aria-hidden="true" class="m563"></span>
+          
+            <span aria-hidden="true" class="m564"></span>
+          
+            <span aria-hidden="true" class="m565"></span>
+          
+            <span aria-hidden="true" class="m566"></span>
+          
+            <span aria-hidden="true" class="m567"></span>
+          
+            <span aria-hidden="true" class="m568"></span>
+          
+            <span aria-hidden="true" class="m569"></span>
+          
+            <span aria-hidden="true" class="m570"></span>
+          
+            <span aria-hidden="true" class="m571"></span>
+          
+            <span aria-hidden="true" class="m572"></span>
+          
+            <span aria-hidden="true" class="m573"></span>
+          
+            <span aria-hidden="true" class="m574"></span>
+          
+            <span aria-hidden="true" class="m575"></span>
+          
+            <span aria-hidden="true" class="m576"></span>
+          
+            <span aria-hidden="true" class="m577"></span>
+          
+            <span aria-hidden="true" class="m578"></span>
+          
+            <span aria-hidden="true" class="m579"></span>
+          
+            <span aria-hidden="true" class="m580"></span>
+          
+            <span aria-hidden="true" class="m581"></span>
+          
+            <span aria-hidden="true" class="m582"></span>
+          
+            <span aria-hidden="true" class="m583"></span>
+          
+            <span aria-hidden="true" class="m584"></span>
+          
+            <span aria-hidden="true" class="m585"></span>
+          
+            <span aria-hidden="true" class="m586"></span>
+          
+            <span aria-hidden="true" class="m587"></span>
+          
+            <span aria-hidden="true" class="m588"></span>
+          
+            <span aria-hidden="true" class="m589"></span>
+          
+            <span aria-hidden="true" class="m590"></span>
+          
+            <span aria-hidden="true" class="m591"></span>
+          
+            <span aria-hidden="true" class="m592"></span>
+          
+            <span aria-hidden="true" class="m593"></span>
+          
+            <span aria-hidden="true" class="m594"></span>
+          
+            <span aria-hidden="true" class="m595"></span>
+          
+            <span aria-hidden="true" class="m596"></span>
+          
+            <span aria-hidden="true" class="m597"></span>
+          
+            <span aria-hidden="true" class="m598"></span>
+          
+            <span aria-hidden="true" class="m599"></span>
+          
+            <span aria-hidden="true" class="m600"></span>
+          
+            <span aria-hidden="true" class="m601"></span>
+          
+            <span aria-hidden="true" class="m602"></span>
+          
+            <span aria-hidden="true" class="m603"></span>
+          
+            <span aria-hidden="true" class="m604"></span>
+          
+            <span aria-hidden="true" class="m605"></span>
+          
+            <span aria-hidden="true" class="m606"></span>
+          
+            <span aria-hidden="true" class="m607"></span>
+          
+            <span aria-hidden="true" class="m608"></span>
+          
+            <span aria-hidden="true" class="m609"></span>
+          
+            <span aria-hidden="true" class="m610"></span>
+          
+            <span aria-hidden="true" class="m611"></span>
+          
+            <span aria-hidden="true" class="m612"></span>
+          
+            <span aria-hidden="true" class="m613"></span>
+          
+            <span aria-hidden="true" class="m614"></span>
+          
+            <span aria-hidden="true" class="m615"></span>
+          
+            <span aria-hidden="true" class="m616"></span>
+          
+            <span aria-hidden="true" class="m617"></span>
+          
+            <span aria-hidden="true" class="m618"></span>
+          
+            <span aria-hidden="true" class="m619"></span>
+          
+            <span aria-hidden="true" class="m620"></span>
+          
+            <span aria-hidden="true" class="m621"></span>
+          
+            <span aria-hidden="true" class="m622"></span>
+          
+            <span aria-hidden="true" class="m623"></span>
+          
+            <span aria-hidden="true" class="m624"></span>
+          
+            <span aria-hidden="true" class="m625"></span>
+          
+            <span aria-hidden="true" class="m626"></span>
+          
+            <span aria-hidden="true" class="m627"></span>
+          
+            <span aria-hidden="true" class="m628"></span>
+          
+            <span aria-hidden="true" class="m629"></span>
+          
+            <span aria-hidden="true" class="m630"></span>
+          
+            <span aria-hidden="true" class="m631"></span>
+          
+            <span aria-hidden="true" class="m632"></span>
+          
+            <span aria-hidden="true" class="m633"></span>
+          
+            <span aria-hidden="true" class="m634"></span>
+          
+            <span aria-hidden="true" class="m635"></span>
+          
+            <span aria-hidden="true" class="m636"></span>
+          
+            <span aria-hidden="true" class="m637"></span>
+          
+            <span aria-hidden="true" class="m638"></span>
+          
+            <span aria-hidden="true" class="m639"></span>
+          
+            <span aria-hidden="true" class="m640"></span>
+          
+            <span aria-hidden="true" class="m641"></span>
+          
+            <span aria-hidden="true" class="m642"></span>
+          
+            <span aria-hidden="true" class="m643"></span>
+          
+            <span aria-hidden="true" class="m644"></span>
+          
+            <span aria-hidden="true" class="m645"></span>
+          
+            <span aria-hidden="true" class="m646"></span>
+          
+            <span aria-hidden="true" class="m647"></span>
+          
+            <span aria-hidden="true" class="m648"></span>
+          
+            <span aria-hidden="true" class="m649"></span>
+          
+            <span aria-hidden="true" class="m650"></span>
+          
+            <span aria-hidden="true" class="m651"></span>
+          
+            <span aria-hidden="true" class="m652"></span>
+          
+            <span aria-hidden="true" class="m653"></span>
+          
+            <span aria-hidden="true" class="m654"></span>
+          
+            <span aria-hidden="true" class="m655"></span>
+          
+            <span aria-hidden="true" class="m656"></span>
+          
+            <span aria-hidden="true" class="m657"></span>
+          
+            <span aria-hidden="true" class="m658"></span>
+          
+            <span aria-hidden="true" class="m659"></span>
+          
+            <span aria-hidden="true" class="m660"></span>
+          
+            <span aria-hidden="true" class="m661"></span>
+          
+            <span aria-hidden="true" class="m662"></span>
+          
+            <span aria-hidden="true" class="m663"></span>
+          
+            <span aria-hidden="true" class="m664"></span>
+          
+            <span aria-hidden="true" class="m665"></span>
+          
+            <span aria-hidden="true" class="m666"></span>
+          
+            <span aria-hidden="true" class="m667"></span>
+          
+            <span aria-hidden="true" class="m668"></span>
+          
+            <span aria-hidden="true" class="m669"></span>
+          
+            <span aria-hidden="true" class="m670"></span>
+          
+            <span aria-hidden="true" class="m671"></span>
+          
+            <span aria-hidden="true" class="m672"></span>
+          
+            <span aria-hidden="true" class="m673"></span>
+          
+            <span aria-hidden="true" class="m674"></span>
+          
+            <span aria-hidden="true" class="m675"></span>
+          
+            <span aria-hidden="true" class="m676"></span>
+          
+            <span aria-hidden="true" class="m677"></span>
+          
+            <span aria-hidden="true" class="m678"></span>
+          
+            <span aria-hidden="true" class="m679"></span>
+          
+            <span aria-hidden="true" class="m680"></span>
+          
+            <span aria-hidden="true" class="m681"></span>
+          
+            <span aria-hidden="true" class="m682"></span>
+          
+            <span aria-hidden="true" class="m683"></span>
+          
+            <span aria-hidden="true" class="m684"></span>
+          
+            <span aria-hidden="true" class="m685"></span>
+          
+            <span aria-hidden="true" class="m686"></span>
+          
+            <span aria-hidden="true" class="m687"></span>
+          
+            <span aria-hidden="true" class="m688"></span>
+          
+            <span aria-hidden="true" class="m689"></span>
+          
+            <span aria-hidden="true" class="m690"></span>
+          
+            <span aria-hidden="true" class="m691"></span>
+          
+            <span aria-hidden="true" class="m692"></span>
+          
+            <span aria-hidden="true" class="m693"></span>
+          
+            <span aria-hidden="true" class="m694"></span>
+          
+            <span aria-hidden="true" class="m695"></span>
+          
+            <span aria-hidden="true" class="m696"></span>
+          
+            <span aria-hidden="true" class="m697"></span>
+          
+            <span aria-hidden="true" class="m698"></span>
+          
+            <span aria-hidden="true" class="m699"></span>
+          
+            <span aria-hidden="true" class="m700"></span>
+          
+            <span aria-hidden="true" class="m701"></span>
+          
+            <span aria-hidden="true" class="m702"></span>
+          
+            <span aria-hidden="true" class="m703"></span>
+          
+            <span aria-hidden="true" class="m704"></span>
+          
+            <span aria-hidden="true" class="m705"></span>
+          
+            <span aria-hidden="true" class="m706"></span>
+          
+            <span aria-hidden="true" class="m707"></span>
+          
+            <span aria-hidden="true" class="m708"></span>
+          
+            <span aria-hidden="true" class="m709"></span>
+          
+            <span aria-hidden="true" class="m710"></span>
+          
+            <span aria-hidden="true" class="m711"></span>
+          
+            <span aria-hidden="true" class="m712"></span>
+          
+            <span aria-hidden="true" class="m713"></span>
+          
+            <span aria-hidden="true" class="m714"></span>
+          
+            <span aria-hidden="true" class="m715"></span>
+          
+            <span aria-hidden="true" class="m716"></span>
+          
+            <span aria-hidden="true" class="m717"></span>
+          
+            <span aria-hidden="true" class="m718"></span>
+          
+            <span aria-hidden="true" class="m719"></span>
+          
+            <span aria-hidden="true" class="m720"></span>
+          
+            <span aria-hidden="true" class="m721"></span>
+          
+            <span aria-hidden="true" class="m722"></span>
+          
+            <span aria-hidden="true" class="m723"></span>
+          
+            <span aria-hidden="true" class="m724"></span>
+          
+            <span aria-hidden="true" class="m725"></span>
+          
+            <span aria-hidden="true" class="m726"></span>
+          
+            <span aria-hidden="true" class="m727"></span>
+          
+            <span aria-hidden="true" class="m728"></span>
+          
+            <span aria-hidden="true" class="m729"></span>
+          
+            <span aria-hidden="true" class="m730"></span>
+          
+            <span aria-hidden="true" class="m731"></span>
+          
+            <span aria-hidden="true" class="m732"></span>
+          
+            <span aria-hidden="true" class="m733"></span>
+          
+            <span aria-hidden="true" class="m734"></span>
+          
+            <span aria-hidden="true" class="m735"></span>
+          
+            <span aria-hidden="true" class="m736"></span>
+          
+            <span aria-hidden="true" class="m737"></span>
+          
+            <span aria-hidden="true" class="m738"></span>
+          
+            <span aria-hidden="true" class="m739"></span>
+          
+            <span aria-hidden="true" class="m740"></span>
+          
+            <span aria-hidden="true" class="m741"></span>
+          
+            <span aria-hidden="true" class="m742"></span>
+          
+            <span aria-hidden="true" class="m743"></span>
+          
+            <span aria-hidden="true" class="m744"></span>
+          
+            <span aria-hidden="true" class="m745"></span>
+          
+            <span aria-hidden="true" class="m746"></span>
+          
+            <span aria-hidden="true" class="m747"></span>
+          
+            <span aria-hidden="true" class="m748"></span>
+          
+            <span aria-hidden="true" class="m749"></span>
+          
+            <span aria-hidden="true" class="m750"></span>
+          
+            <span aria-hidden="true" class="m751"></span>
+          
+            <span aria-hidden="true" class="m752"></span>
+          
+            <span aria-hidden="true" class="m753"></span>
+          
+            <span aria-hidden="true" class="m754"></span>
+          
+            <span aria-hidden="true" class="m755"></span>
+          
+            <span aria-hidden="true" class="m756"></span>
+          
+            <span aria-hidden="true" class="m757"></span>
+          
+            <span aria-hidden="true" class="m758"></span>
+          
+            <span aria-hidden="true" class="m759"></span>
+          
+            <span aria-hidden="true" class="m760"></span>
+          
+            <span aria-hidden="true" class="m761"></span>
+          
+            <span aria-hidden="true" class="m762"></span>
+          
+            <span aria-hidden="true" class="m763"></span>
+          
+            <span aria-hidden="true" class="m764"></span>
+          
+            <span aria-hidden="true" class="m765"></span>
+          
+            <span aria-hidden="true" class="m766"></span>
+          
+            <span aria-hidden="true" class="m767"></span>
+          
+            <span aria-hidden="true" class="m768"></span>
+          
+            <span aria-hidden="true" class="m769"></span>
+          
+            <span aria-hidden="true" class="m770"></span>
+          
+            <span aria-hidden="true" class="m771"></span>
+          
+            <span aria-hidden="true" class="m772"></span>
+          
+            <span aria-hidden="true" class="m773"></span>
+          
+            <span aria-hidden="true" class="m774"></span>
+          
+            <span aria-hidden="true" class="m775"></span>
+          
+            <span aria-hidden="true" class="m776"></span>
+          
+            <span aria-hidden="true" class="m777"></span>
+          
+            <span aria-hidden="true" class="m778"></span>
+          
+            <span aria-hidden="true" class="m779"></span>
+          
+            <span aria-hidden="true" class="m780"></span>
+          
+            <span aria-hidden="true" class="m781"></span>
+          
+            <span aria-hidden="true" class="m782"></span>
+          
+            <span aria-hidden="true" class="m783"></span>
+          
+            <span aria-hidden="true" class="m784"></span>
+          
+            <span aria-hidden="true" class="m785"></span>
+          
+            <span aria-hidden="true" class="m786"></span>
+          
+            <span aria-hidden="true" class="m787"></span>
+          
+            <span aria-hidden="true" class="m788"></span>
+          
+            <span aria-hidden="true" class="m789"></span>
+          
+            <span aria-hidden="true" class="m790"></span>
+          
+            <span aria-hidden="true" class="m791"></span>
+          
+            <span aria-hidden="true" class="m792"></span>
+          
+            <span aria-hidden="true" class="m793"></span>
+          
+            <span aria-hidden="true" class="m794"></span>
+          
+            <span aria-hidden="true" class="m795"></span>
+          
+            <span aria-hidden="true" class="m796"></span>
+          
+            <span aria-hidden="true" class="m797"></span>
+          
+            <span aria-hidden="true" class="m798"></span>
+          
+            <span aria-hidden="true" class="m799"></span>
+          
+            <span aria-hidden="true" class="m800"></span>
+          
+            <span aria-hidden="true" class="m801"></span>
+          
+            <span aria-hidden="true" class="m802"></span>
+          
+            <span aria-hidden="true" class="m803"></span>
+          
+            <span aria-hidden="true" class="m804"></span>
+          
+            <span aria-hidden="true" class="m805"></span>
+          
+            <span aria-hidden="true" class="m806"></span>
+          
+            <span aria-hidden="true" class="m807"></span>
+          
+            <span aria-hidden="true" class="m808"></span>
+          
+            <span aria-hidden="true" class="m809"></span>
+          
+            <span aria-hidden="true" class="m810"></span>
+          
+            <span aria-hidden="true" class="m811"></span>
+          
+            <span aria-hidden="true" class="m812"></span>
+          
+            <span aria-hidden="true" class="m813"></span>
+          
+            <span aria-hidden="true" class="m814"></span>
+          
+            <span aria-hidden="true" class="m815"></span>
+          
+            <span aria-hidden="true" class="m816"></span>
+          
+            <span aria-hidden="true" class="m817"></span>
+          
+            <span aria-hidden="true" class="m818"></span>
+          
+            <span aria-hidden="true" class="m819"></span>
+          
+            <span aria-hidden="true" class="m820"></span>
+          
+            <span aria-hidden="true" class="m821"></span>
+          
+            <span aria-hidden="true" class="m822"></span>
+          
+            <span aria-hidden="true" class="m823"></span>
+          
+            <span aria-hidden="true" class="m824"></span>
+          
+            <span aria-hidden="true" class="m825"></span>
+          
+            <span aria-hidden="true" class="m826"></span>
+          
+            <span aria-hidden="true" class="m827"></span>
+          
+            <span aria-hidden="true" class="m828"></span>
+          
+            <span aria-hidden="true" class="m829"></span>
+          
+            <span aria-hidden="true" class="m830"></span>
+          
+            <span aria-hidden="true" class="m831"></span>
+          
+            <span aria-hidden="true" class="m832"></span>
+          
+            <span aria-hidden="true" class="m833"></span>
+          
+            <span aria-hidden="true" class="m834"></span>
+          
+            <span aria-hidden="true" class="m835"></span>
+          
+            <span aria-hidden="true" class="m836"></span>
+          
+            <span aria-hidden="true" class="m837"></span>
+          
+            <span aria-hidden="true" class="m838"></span>
+          
+            <span aria-hidden="true" class="m839"></span>
+          
+            <span aria-hidden="true" class="m840"></span>
+          
+            <span aria-hidden="true" class="m841"></span>
+          
+            <span aria-hidden="true" class="m842"></span>
+          
+            <span aria-hidden="true" class="m843"></span>
+          
+            <span aria-hidden="true" class="m844"></span>
+          
+            <span aria-hidden="true" class="m845"></span>
+          
+            <span aria-hidden="true" class="m846"></span>
+          
+          <div aria-hidden="true" class="m847"></div>
+          
+            <button type="button" data-btn="" aria-label="Сектор 1, 96 систем, Новачки" aria-pressed="false" class="m848">
+              <span class="m849">
+              <span class="m850">Сектор 1</span>
+              <span class="m851">
+                <span class="m852"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" class="m9"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.1 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7z"></path></svg>Новачки</span>
                 
               </span>
-              <span class="m66">96 систем</span>
+              <span class="m853">96 систем</span>
+              </span>
             </button>
           
-            <button type="button" data-btn="" aria-label="Сектор 2, 124 систем" aria-pressed="false" class="m67">
-              <span class="m63">Сектор 2</span>
-              <span class="m64">
+            <button type="button" data-btn="" aria-label="Сектор 2, 124 систем" aria-pressed="false" class="m854">
+              <span class="m855">
+              <span class="m850">Сектор 2</span>
+              <span class="m851">
                 
                 
               </span>
-              <span class="m66">124 систем</span>
-            </button>
-          
-            <button type="button" data-btn="" aria-label="Сектор 3, 112 систем, Мої планети 3" aria-pressed="true" class="m68">
-              <span class="m63">Сектор 3</span>
-              <span class="m64">
-                
-                <span class="m69"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m9"><path d="M5 20V10l7-5 7 5v10z M10 20v-5h4v5"></path></svg>3</span>
+              <span class="m853">124 систем</span>
               </span>
-              <span class="m66">112 систем</span>
             </button>
           
-            <button type="button" data-btn="" aria-label="Сектор 4, 138 систем" aria-pressed="false" class="m70">
-              <span class="m63">Сектор 4</span>
-              <span class="m64">
+            <button type="button" data-btn="" aria-label="Сектор 3, 112 систем, Мої планети 3" aria-pressed="true" class="m856">
+              <span class="m857">
+              <span class="m850">Сектор 3</span>
+              <span class="m851">
                 
-                
+                <span class="m858"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" class="m9"><path d="M5 20V10l7-5 7 5v10z M10 20v-5h4v5"></path></svg>3</span>
               </span>
-              <span class="m66">138 систем</span>
+              <span class="m853">112 систем</span>
+              </span>
             </button>
           
-            <button type="button" data-btn="" aria-label="Сектор 5, 87 систем" aria-pressed="false" class="m71">
-              <span class="m63">Сектор 5</span>
-              <span class="m64">
+            <button type="button" data-btn="" aria-label="Сектор 4, 138 систем" aria-pressed="false" class="m859">
+              <span class="m860">
+              <span class="m850">Сектор 4</span>
+              <span class="m851">
                 
                 
               </span>
-              <span class="m66">87 систем</span>
-            </button>
-          
-            <button type="button" data-btn="" aria-label="Сектор 6, 131 систем, Мої планети 1" aria-pressed="false" class="m72">
-              <span class="m63">Сектор 6</span>
-              <span class="m64">
-                
-                <span class="m69"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m9"><path d="M5 20V10l7-5 7 5v10z M10 20v-5h4v5"></path></svg>1</span>
+              <span class="m853">138 систем</span>
               </span>
-              <span class="m66">131 систем</span>
             </button>
           
-            <button type="button" data-btn="" aria-label="Сектор 7, 64 систем" aria-pressed="false" class="m73">
-              <span class="m63">Сектор 7</span>
-              <span class="m64">
+            <button type="button" data-btn="" aria-label="Сектор 5, 87 систем" aria-pressed="false" class="m861">
+              <span class="m862">
+              <span class="m850">Сектор 5</span>
+              <span class="m851">
                 
                 
               </span>
-              <span class="m66">64 систем</span>
+              <span class="m853">87 систем</span>
+              </span>
             </button>
           
+            <button type="button" data-btn="" aria-label="Сектор 6, 131 систем, Мої планети 1" aria-pressed="false" class="m863">
+              <span class="m864">
+              <span class="m850">Сектор 6</span>
+              <span class="m851">
+                
+                <span class="m858"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" class="m9"><path d="M5 20V10l7-5 7 5v10z M10 20v-5h4v5"></path></svg>1</span>
+              </span>
+              <span class="m853">131 систем</span>
+              </span>
+            </button>
           
-            <button type="button" data-btn="" class="m74"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13z M15.5 15.5L20 20 M10.5 8v5 M8 10.5h5"></path></svg>Відкрити</button>
+            <button type="button" data-btn="" aria-label="Сектор 7, 184 систем" aria-pressed="false" class="m865">
+              <span class="m866">
+              <span class="m850">Сектор 7</span>
+              <span class="m851">
+                
+                
+              </span>
+              <span class="m853">184 систем</span>
+              </span>
+            </button>
+          
+          <svg width="1100" height="640" viewBox="0 0 1100 640" aria-hidden="true" class="m867">
+            <path d="M539.2 241.1 L553.1 225.4 L566.5 211.1 L586.4 199.6 L593.7 189.5 L587.5 178.8 L600.8 168.8 L633.3 164.3 L652.6 158.5 L659.3 149.3 L669.6 140.9 L676.7 131.7 L688.8 123.6 L726.5 123.6 L752.3 133.2 L757.8 117.9 L761.0 102.3 L782.4 110.7 L816.8 142.4 M679.7 287.0 L700.7 297.8 L720.3 293.8 L743.0 295.2 L766.7 296.9 L788.8 297.1 L811.4 298.0 L825.3 290.1 L840.8 272.1 L859.8 266.0 L882.9 274.5 L903.2 274.7 L923.0 265.9 L943.3 264.5 L963.4 268.0 L983.8 278.3 L1025.4 308.3 L1042.1 342.0 L1058.8 346.8 M665.4 350.8 L694.2 353.2 L697.6 362.2 L706.9 376.5 L716.3 389.6 L732.8 394.5 L748.0 400.8 L748.3 415.0 L751.7 425.0 L779.1 426.8 L808.6 426.0 L833.7 427.4 L857.4 429.2 L864.6 440.4 L852.0 458.3 L858.2 468.0 L877.9 472.3 L863.7 488.1 L837.6 498.6 M545.1 405.8 L545.4 413.6 L520.5 417.0 L508.9 422.9 L496.6 429.1 L471.6 431.7 L442.3 438.8 L412.6 449.8 L382.4 460.0 L377.0 469.4 L396.5 475.5 L378.5 485.7 L312.6 496.9 L263.0 499.2 L225.7 503.7 L178.1 500.3 L149.3 485.7 L135.0 467.5 L116.4 472.4 M436.8 345.1 L416.1 348.6 L405.1 354.7 L391.7 361.8 L364.6 361.4 L326.5 353.4 L299.1 335.3 L296.0 308.4 L283.3 290.9 L264.9 294.6 L247.6 302.0 L231.7 298.3 L215.9 296.2 L199.6 298.0 L184.9 289.8 L176.9 274.6 L169.6 252.6 L185.1 210.9 L180.7 203.7 M425.4 277.2 L449.0 270.0 L434.2 264.3 L413.0 259.5 L384.5 257.1 L366.8 253.9 L356.5 248.7 L346.9 243.1 L358.0 228.7 L375.8 192.7 L400.2 167.9 L393.6 158.6 L363.9 152.3 L330.5 155.8 L307.9 167.9 L297.9 156.0 L307.5 120.2 L335.6 104.7 L365.7 93.4 M556.0 234.8 L564.0 232.0 L572.3 230.7 L580.5 231.0 L588.5 232.0 L596.5 232.9 L604.5 233.9 L611.9 236.0 L617.5 240.2 L620.5 246.7 L621.3 254.3 L621.5 261.2 L623.3 265.8 L627.8 268.1 L634.5 268.9 L641.7 269.7 L647.9 271.4 L652.7 273.9 L657.1 276.6 L662.6 279.0 L669.2 281.2 L675.5 283.7 L679.7 287.0 L680.7 291.0 L679.7 295.4 L679.6 299.3 L683.3 302.8 L691.3 305.9 L701.9 309.4 L711.4 313.4 L717.1 318.0 L718.4 322.8 L716.7 327.5 L714.0 332.1 L711.1 336.6 L707.1 340.8 L700.4 344.4 L690.4 347.1 L678.7 348.8 L668.2 350.2 L661.4 352.3 L658.9 355.6 L658.6 360.0 L657.8 364.4 L654.3 367.9 L648.1 369.9 L640.7 371.0 L633.8 372.1 L628.1 373.9 L623.1 376.2 L617.7 378.2 L611.6 379.4 L605.1 380.1 L599.3 381.5 L594.6 385.0 L590.7 390.9 L586.2 398.1 L580.4 404.7 L572.9 408.7 L564.5 409.7 L556.0 408.4 L547.8 406.4 L539.8 404.6 L532.1 403.1 L524.7 401.0 L518.1 397.6 L512.6 393.2 L507.6 389.1 L501.9 386.5 L494.8 385.7 L486.6 385.7 L478.7 385.0 L473.1 382.3 L470.6 377.4 L470.6 371.4 L470.9 365.9 L469.9 361.7 L466.9 358.7 L462.8 356.2 L458.9 353.5 L455.3 350.8 L450.8 348.2 L443.6 346.2 L432.9 344.6 L420.3 342.8 L409.0 340.2 L402.1 336.4 L400.8 331.8 L403.6 327.0 L407.2 322.4 L409.0 318.0 L408.7 313.7 L407.9 309.2 L408.4 304.8 L411.1 300.6 L414.7 296.7 L417.5 292.7 L418.6 288.3 L419.1 283.7 L421.5 279.4 L428.1 276.4 L439.0 275.2 L451.9 275.4 L463.8 275.9 L472.3 275.6 L477.4 273.7 L480.4 270.7 L483.3 267.4 L486.9 264.4 L490.8 261.5 L494.3 257.8 L497.1 252.9 L500.0 247.1 L504.2 241.9 L510.3 238.8 L518.1 238.4 L526.5 239.7 L534.4 241.0 L541.6 240.7 L548.6 238.3 L556.0 234.8 Z M556.0 44.8 L581.4 45.0 L607.1 44.4 L633.1 43.7 L658.4 46.6 L681.7 53.8 L703.7 61.9 L726.8 67.4 L750.8 71.5 L772.0 79.2 L786.6 93.0 L795.7 110.1 L803.7 126.0 L813.6 138.8 L823.8 150.5 L832.5 162.3 L842.9 172.5 L861.8 178.5 L891.8 180.6 L926.8 182.4 L957.4 187.4 L980.4 196.2 L999.8 206.7 L1019.4 217.8 L1036.0 230.1 L1043.9 244.4 L1043.4 259.6 L1042.8 274.6 L1049.5 288.8 L1061.3 303.1 L1068.8 318.0 L1066.6 333.1 L1058.3 347.7 L1050.8 362.1 L1044.6 376.5 L1033.9 390.1 L1015.8 402.2 L995.8 413.1 L982.3 424.9 L976.5 438.7 L971.0 453.0 L958.1 465.1 L937.7 474.2 L915.5 482.0 L894.5 489.7 L871.9 495.9 L844.5 498.5 L814.9 498.1 L789.7 499.2 L772.3 505.6 L759.2 516.3 L745.0 526.9 L727.3 534.8 L708.1 541.2 L688.8 548.3 L668.6 554.8 L645.9 556.3 L621.6 551.3 L598.1 543.7 L576.6 539.3 L556.0 539.9 L535.2 541.9 L514.2 541.9 L493.4 540.7 L471.6 541.7 L447.7 545.8 L422.6 549.3 L398.7 548.8 L376.1 545.6 L351.1 544.5 L320.4 547.9 L284.8 553.2 L249.4 555.7 L217.0 553.8 L186.5 549.2 L156.1 543.3 L129.3 534.4 L113.1 520.0 L110.3 500.4 L114.8 479.4 L117.7 460.6 L115.6 444.4 L112.8 429.1 L113.1 413.8 L113.6 399.0 L108.5 385.5 L98.1 372.8 L90.8 359.5 L94.0 345.4 L105.5 331.3 L115.7 318.0 L119.2 305.1 L119.6 292.2 L123.6 279.4 L131.6 267.2 L137.7 254.9 L138.7 241.6 L140.2 228.1 L150.3 216.2 L170.2 207.3 L192.1 199.6 L208.2 190.8 L218.5 179.9 L228.4 168.6 L240.8 158.1 L252.8 147.2 L261.2 133.5 L268.3 117.9 L280.7 104.6 L301.8 97.5 L328.1 95.6 L353.9 94.6 L377.1 91.7 L399.4 88.2 L422.4 86.4 L445.1 84.9 L466.0 79.4 L485.8 68.3 L507.0 55.5 L530.8 47.1 L556.0 44.8 Z" class="m868"></path>
+            <path d="M539.2 241.1 L553.1 225.4 L566.5 211.1 L586.4 199.6 L593.7 189.5 L587.5 178.8 L600.8 168.8 L633.3 164.3 L652.6 158.5 L659.3 149.3 L669.6 140.9 L676.7 131.7 L688.8 123.6 L726.5 123.6 L752.3 133.2 L757.8 117.9 L761.0 102.3 L782.4 110.7 L816.8 142.4 M679.7 287.0 L700.7 297.8 L720.3 293.8 L743.0 295.2 L766.7 296.9 L788.8 297.1 L811.4 298.0 L825.3 290.1 L840.8 272.1 L859.8 266.0 L882.9 274.5 L903.2 274.7 L923.0 265.9 L943.3 264.5 L963.4 268.0 L983.8 278.3 L1025.4 308.3 L1042.1 342.0 L1058.8 346.8 M665.4 350.8 L694.2 353.2 L697.6 362.2 L706.9 376.5 L716.3 389.6 L732.8 394.5 L748.0 400.8 L748.3 415.0 L751.7 425.0 L779.1 426.8 L808.6 426.0 L833.7 427.4 L857.4 429.2 L864.6 440.4 L852.0 458.3 L858.2 468.0 L877.9 472.3 L863.7 488.1 L837.6 498.6 M545.1 405.8 L545.4 413.6 L520.5 417.0 L508.9 422.9 L496.6 429.1 L471.6 431.7 L442.3 438.8 L412.6 449.8 L382.4 460.0 L377.0 469.4 L396.5 475.5 L378.5 485.7 L312.6 496.9 L263.0 499.2 L225.7 503.7 L178.1 500.3 L149.3 485.7 L135.0 467.5 L116.4 472.4 M436.8 345.1 L416.1 348.6 L405.1 354.7 L391.7 361.8 L364.6 361.4 L326.5 353.4 L299.1 335.3 L296.0 308.4 L283.3 290.9 L264.9 294.6 L247.6 302.0 L231.7 298.3 L215.9 296.2 L199.6 298.0 L184.9 289.8 L176.9 274.6 L169.6 252.6 L185.1 210.9 L180.7 203.7 M425.4 277.2 L449.0 270.0 L434.2 264.3 L413.0 259.5 L384.5 257.1 L366.8 253.9 L356.5 248.7 L346.9 243.1 L358.0 228.7 L375.8 192.7 L400.2 167.9 L393.6 158.6 L363.9 152.3 L330.5 155.8 L307.9 167.9 L297.9 156.0 L307.5 120.2 L335.6 104.7 L365.7 93.4 M556.0 234.8 L564.0 232.0 L572.3 230.7 L580.5 231.0 L588.5 232.0 L596.5 232.9 L604.5 233.9 L611.9 236.0 L617.5 240.2 L620.5 246.7 L621.3 254.3 L621.5 261.2 L623.3 265.8 L627.8 268.1 L634.5 268.9 L641.7 269.7 L647.9 271.4 L652.7 273.9 L657.1 276.6 L662.6 279.0 L669.2 281.2 L675.5 283.7 L679.7 287.0 L680.7 291.0 L679.7 295.4 L679.6 299.3 L683.3 302.8 L691.3 305.9 L701.9 309.4 L711.4 313.4 L717.1 318.0 L718.4 322.8 L716.7 327.5 L714.0 332.1 L711.1 336.6 L707.1 340.8 L700.4 344.4 L690.4 347.1 L678.7 348.8 L668.2 350.2 L661.4 352.3 L658.9 355.6 L658.6 360.0 L657.8 364.4 L654.3 367.9 L648.1 369.9 L640.7 371.0 L633.8 372.1 L628.1 373.9 L623.1 376.2 L617.7 378.2 L611.6 379.4 L605.1 380.1 L599.3 381.5 L594.6 385.0 L590.7 390.9 L586.2 398.1 L580.4 404.7 L572.9 408.7 L564.5 409.7 L556.0 408.4 L547.8 406.4 L539.8 404.6 L532.1 403.1 L524.7 401.0 L518.1 397.6 L512.6 393.2 L507.6 389.1 L501.9 386.5 L494.8 385.7 L486.6 385.7 L478.7 385.0 L473.1 382.3 L470.6 377.4 L470.6 371.4 L470.9 365.9 L469.9 361.7 L466.9 358.7 L462.8 356.2 L458.9 353.5 L455.3 350.8 L450.8 348.2 L443.6 346.2 L432.9 344.6 L420.3 342.8 L409.0 340.2 L402.1 336.4 L400.8 331.8 L403.6 327.0 L407.2 322.4 L409.0 318.0 L408.7 313.7 L407.9 309.2 L408.4 304.8 L411.1 300.6 L414.7 296.7 L417.5 292.7 L418.6 288.3 L419.1 283.7 L421.5 279.4 L428.1 276.4 L439.0 275.2 L451.9 275.4 L463.8 275.9 L472.3 275.6 L477.4 273.7 L480.4 270.7 L483.3 267.4 L486.9 264.4 L490.8 261.5 L494.3 257.8 L497.1 252.9 L500.0 247.1 L504.2 241.9 L510.3 238.8 L518.1 238.4 L526.5 239.7 L534.4 241.0 L541.6 240.7 L548.6 238.3 L556.0 234.8 Z M556.0 44.8 L581.4 45.0 L607.1 44.4 L633.1 43.7 L658.4 46.6 L681.7 53.8 L703.7 61.9 L726.8 67.4 L750.8 71.5 L772.0 79.2 L786.6 93.0 L795.7 110.1 L803.7 126.0 L813.6 138.8 L823.8 150.5 L832.5 162.3 L842.9 172.5 L861.8 178.5 L891.8 180.6 L926.8 182.4 L957.4 187.4 L980.4 196.2 L999.8 206.7 L1019.4 217.8 L1036.0 230.1 L1043.9 244.4 L1043.4 259.6 L1042.8 274.6 L1049.5 288.8 L1061.3 303.1 L1068.8 318.0 L1066.6 333.1 L1058.3 347.7 L1050.8 362.1 L1044.6 376.5 L1033.9 390.1 L1015.8 402.2 L995.8 413.1 L982.3 424.9 L976.5 438.7 L971.0 453.0 L958.1 465.1 L937.7 474.2 L915.5 482.0 L894.5 489.7 L871.9 495.9 L844.5 498.5 L814.9 498.1 L789.7 499.2 L772.3 505.6 L759.2 516.3 L745.0 526.9 L727.3 534.8 L708.1 541.2 L688.8 548.3 L668.6 554.8 L645.9 556.3 L621.6 551.3 L598.1 543.7 L576.6 539.3 L556.0 539.9 L535.2 541.9 L514.2 541.9 L493.4 540.7 L471.6 541.7 L447.7 545.8 L422.6 549.3 L398.7 548.8 L376.1 545.6 L351.1 544.5 L320.4 547.9 L284.8 553.2 L249.4 555.7 L217.0 553.8 L186.5 549.2 L156.1 543.3 L129.3 534.4 L113.1 520.0 L110.3 500.4 L114.8 479.4 L117.7 460.6 L115.6 444.4 L112.8 429.1 L113.1 413.8 L113.6 399.0 L108.5 385.5 L98.1 372.8 L90.8 359.5 L94.0 345.4 L105.5 331.3 L115.7 318.0 L119.2 305.1 L119.6 292.2 L123.6 279.4 L131.6 267.2 L137.7 254.9 L138.7 241.6 L140.2 228.1 L150.3 216.2 L170.2 207.3 L192.1 199.6 L208.2 190.8 L218.5 179.9 L228.4 168.6 L240.8 158.1 L252.8 147.2 L261.2 133.5 L268.3 117.9 L280.7 104.6 L301.8 97.5 L328.1 95.6 L353.9 94.6 L377.1 91.7 L399.4 88.2 L422.4 86.4 L445.1 84.9 L466.0 79.4 L485.8 68.3 L507.0 55.5 L530.8 47.1 L556.0 44.8 Z" class="m869"></path>
+            <path d="M0 0" class="m870"></path>
+            <path d="M665.4 350.8 L694.2 353.2 L697.6 362.2 L706.9 376.5 L716.3 389.6 L732.8 394.5 L748.0 400.8 L748.3 415.0 L751.7 425.0 L779.1 426.8 L808.6 426.0 L833.7 427.4 L857.4 429.2 L864.6 440.4 L852.0 458.3 L858.2 468.0 L877.9 472.3 L863.7 488.1 L837.6 498.6 L808.5 498.1 L785.0 500.2 L769.1 507.8 L756.2 518.9 L741.2 529.0 L722.9 536.3 L703.6 542.7 L684.3 550.0 L663.6 555.7 L640.3 555.7 L616.0 549.5 L592.9 542.2 L571.8 539.0 L551.2 540.4 L530.3 542.2 L509.4 541.6 L488.5 540.6 L466.2 542.4 L441.9 546.8 L416.9 549.6 L393.4 548.2 L370.7 545.0 L344.6 544.9 L312.4 549.1 L276.4 554.2 L241.6 555.7 L209.9 552.9 L179.4 547.9 L149.3 541.6 L124.4 531.6 L111.4 515.8 L111.0 495.5 L115.9 474.8 L116.4 472.4 L135.0 467.5 L149.3 485.7 L178.1 500.3 L225.7 503.7 L263.0 499.2 L312.6 496.9 L378.5 485.7 L396.5 475.5 L377.0 469.4 L382.4 460.0 L412.6 449.8 L442.3 438.8 L471.6 431.7 L496.6 429.1 L508.9 422.9 L520.5 417.0 L545.4 413.6 L545.1 405.8 L553.2 407.7 L561.7 409.4 L570.2 409.4 L578.1 406.4 L584.5 400.5 L589.3 393.2 L593.3 386.7 L597.6 382.4 L603.0 380.4 L609.4 379.7 L615.8 378.7 L621.4 377.0 L626.4 374.6 L631.8 372.6 L638.3 371.3 L645.7 370.3 L652.5 368.7 L657.0 365.7 L658.5 361.5 L658.7 357.0 L660.1 353.3 Z" class="m871"></path>
+            <path d="M665.4 350.8 L694.2 353.2 L697.6 362.2 L706.9 376.5 L716.3 389.6 L732.8 394.5 L748.0 400.8 L748.3 415.0 L751.7 425.0 L779.1 426.8 L808.6 426.0 L833.7 427.4 L857.4 429.2 L864.6 440.4 L852.0 458.3 L858.2 468.0 L877.9 472.3 L863.7 488.1 L837.6 498.6 L808.5 498.1 L785.0 500.2 L769.1 507.8 L756.2 518.9 L741.2 529.0 L722.9 536.3 L703.6 542.7 L684.3 550.0 L663.6 555.7 L640.3 555.7 L616.0 549.5 L592.9 542.2 L571.8 539.0 L551.2 540.4 L530.3 542.2 L509.4 541.6 L488.5 540.6 L466.2 542.4 L441.9 546.8 L416.9 549.6 L393.4 548.2 L370.7 545.0 L344.6 544.9 L312.4 549.1 L276.4 554.2 L241.6 555.7 L209.9 552.9 L179.4 547.9 L149.3 541.6 L124.4 531.6 L111.4 515.8 L111.0 495.5 L115.9 474.8 L116.4 472.4 L135.0 467.5 L149.3 485.7 L178.1 500.3 L225.7 503.7 L263.0 499.2 L312.6 496.9 L378.5 485.7 L396.5 475.5 L377.0 469.4 L382.4 460.0 L412.6 449.8 L442.3 438.8 L471.6 431.7 L496.6 429.1 L508.9 422.9 L520.5 417.0 L545.4 413.6 L545.1 405.8 L553.2 407.7 L561.7 409.4 L570.2 409.4 L578.1 406.4 L584.5 400.5 L589.3 393.2 L593.3 386.7 L597.6 382.4 L603.0 380.4 L609.4 379.7 L615.8 378.7 L621.4 377.0 L626.4 374.6 L631.8 372.6 L638.3 371.3 L645.7 370.3 L652.5 368.7 L657.0 365.7 L658.5 361.5 L658.7 357.0 L660.1 353.3 Z" class="m872"></path>
+          </svg>
+          
+            <button type="button" data-btn="" class="m873"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13z M15.5 15.5L20 20 M10.5 8v5 M8 10.5h5"></path></svg>Відкрити</button>
           
         
 
@@ -319,109 +1892,48 @@
 
     
     
-      <div role="group" aria-label="Шари" class="m75">
+      <div role="group" aria-label="Шари" class="m874">
         
-          <button type="button" data-btn="" aria-expanded="true" class="m76"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3l9 5-9 5-9-5z M3 13l9 5 9-5"></path></svg><span class="m77">Шари</span><span class="m78">6 / 6</span><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m79"><path d="M6 9l6 6 6-6"></path></svg></button>
+          <button type="button" data-btn="" aria-expanded="false" class="m875"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3l9 5-9 5-9-5z M3 13l9 5 9-5"></path></svg><span class="m876">Шари</span><span class="m877">6 / 6</span><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m878"><path d="M6 9l6 6 6-6"></path></svg></button>
         
-        
-          <div class="m80">
-            
-              <button type="button" data-btn="" aria-pressed="true" class="m81">
-                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
-                <span class="m84"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M5 20V10l7-5 7 5v10z M10 20v-5h4v5"></path></svg></span>
-                <span>Мої</span>
-              </button>
-            
-              <button type="button" data-btn="" aria-pressed="true" class="m81">
-                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
-                <span class="m17"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M5 21V4 M5 4h12l-2 4 2 4H5"></path></svg></span>
-                <span>Інші колонії</span>
-              </button>
-            
-              <button type="button" data-btn="" aria-pressed="true" class="m81">
-                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
-                <span class="m85"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 5v14 M5 12h14"></path></svg></span>
-                <span>Вільні планети</span>
-              </button>
-            
-              <button type="button" data-btn="" aria-pressed="true" class="m81">
-                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
-                <span class="m86"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M6 8h.01 M12 6h.01 M17.5 9h.01 M8 14h.01 M14 13h.01 M18.5 16h.01 M11 18.5h.01"></path></svg></span>
-                <span>Поля астероїдів</span>
-              </button>
-            
-              <button type="button" data-btn="" aria-pressed="true" class="m81">
-                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
-                <span class="m87"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M7 18a4 4 0 0 1-.6-8A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 .5 9.5z"></path></svg></span>
-                <span>Туманності</span>
-              </button>
-            
-              <button type="button" data-btn="" aria-pressed="true" class="m81">
-                <span class="m82"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m83"><path d="M5 12l4 4 10-10"></path></svg></span>
-                <span class="m88"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M4 9h16 M3.2 13h17.6 M5 17h14"></path></svg></span>
-                <span>Газові гіганти</span>
-              </button>
-            
-            
-              <button type="button" disabled="" aria-disabled="true" title="Незабаром" class="m89">
-                <span class="m90"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
-                <span>Флоти</span>
-              </button>
-            
-              <button type="button" disabled="" aria-disabled="true" title="Незабаром" class="m89">
-                <span class="m90"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
-                <span>Клан</span>
-              </button>
-            
-              <button type="button" disabled="" aria-disabled="true" title="Незабаром" class="m89">
-                <span class="m90"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
-                <span>Вороги</span>
-              </button>
-            
-              <button type="button" disabled="" aria-disabled="true" title="Незабаром" class="m89">
-                <span class="m90"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
-                <span>Пірати</span>
-              </button>
-            
-          </div>
         
       </div>
     
 
     
     
-      <div role="img" aria-label="Мінікарта: рамка показує видиму частину" class="m91">
+      <div role="img" aria-label="Мінікарта: рамка показує видиму частину" class="m879">
         
-          <span class="m92"></span>
+          <span class="m880"></span>
         
-          <span class="m93"></span>
+          <span class="m881"></span>
         
-          <span class="m94"></span>
+          <span class="m882"></span>
         
-          <span class="m95"></span>
+          <span class="m883"></span>
         
-          <span class="m96"></span>
+          <span class="m884"></span>
         
-          <span class="m97"></span>
+          <span class="m885"></span>
         
-          <span class="m98"></span>
+          <span class="m886"></span>
         
-        <span class="m99"></span>
-        <span class="m100">Галактика</span>
+        <span class="m887"></span>
+        <span class="m888">Галактика</span>
       </div>
 
       
-      <div class="m101">
+      <div class="m889">
         
-        <button type="button" data-btn="" aria-expanded="false" aria-controls="map-legend" class="m102"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 11v6 M12 7.5v.01"></path></svg>Легенда</button>
+        <button type="button" data-btn="" aria-expanded="false" aria-controls="map-legend" class="m890"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 11v6 M12 7.5v.01"></path></svg>Легенда</button>
       </div>
 
       
-      <div class="m103">
-        <span class="m104">×0,9 · 100 св. р.</span>
-        <button type="button" data-btn="" aria-label="Наблизити" class="m105"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M12 5v14 M5 12h14"></path></svg></button>
-        <button type="button" data-btn="" aria-label="Віддалити" class="m105"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M5 12h14"></path></svg></button>
-        <button type="button" data-btn="" aria-label="Моя планета" title="Моя планета" class="m106"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M12 3v3 M12 18v3 M3 12h3 M18 12h3 M12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10z M12 11.5v1"></path></svg></button>
+      <div class="m891">
+        <span class="m892">×0,7 · 100 св. р.</span>
+        <button type="button" data-btn="" aria-label="Наблизити" class="m893"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M12 5v14 M5 12h14"></path></svg></button>
+        <button type="button" data-btn="" aria-label="Віддалити" class="m893"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M5 12h14"></path></svg></button>
+        <button type="button" data-btn="" aria-label="Моя планета" title="Моя планета" class="m894"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M12 3v3 M12 18v3 M3 12h3 M18 12h3 M12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10z M12 11.5v1"></path></svg></button>
       </div>
     
 
@@ -442,31 +1954,31 @@
 
 
 
-<aside aria-label="Картка об’єкта" class="m107">
+<aside aria-label="Картка об’єкта" class="m895">
   
-  <div class="m108">
-    <div role="img" aria-label="Зображення немає" class="m109">
+  <div class="m896">
+    <div role="img" aria-label="Зображення немає" class="m897">
       
-      <span class="m110"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" class="m9"><path d="M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4z M4 12c0-5 6-8 10-6 M20 12c0 5-6 8-10 6"></path></svg></span><span class="m111">Зображення немає</span>
+      <span class="m898"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" class="m9"><path d="M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4z M4 12c0-5 6-8 10-6 M20 12c0 5-6 8-10 6"></path></svg></span><span class="m899">Зображення немає</span>
     </div>
-    <button type="button" data-btn="" aria-label="Закрити" class="m112"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M6 6l12 12 M18 6L6 18"></path></svg></button>
+    <button type="button" data-btn="" aria-label="Закрити" class="m900"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M6 6l12 12 M18 6L6 18"></path></svg></button>
   </div>
-  <div class="m113">
-    <h2 class="m114">Сектор 3</h2>
-    <span class="m115"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m116"><path d="M4 6l8-3 8 3v12l-8 3-8-3z M12 3v18"></path></svg>Сектор</span>
+  <div class="m901">
+    <h2 class="m902">Сектор 3</h2>
+    <span class="m903"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" class="m904"><path d="M4 6l8-3 8 3v12l-8 3-8-3z M12 3v18"></path></svg>Сектор</span>
   </div>
-  <div class="m117">
+  <div class="m905">
     
-      <span class="m118">Систем</span>
-      <span class="m119">112</span>
+      <span class="m906">Систем</span>
+      <span class="m907">112</span>
     
-      <span class="m118">Мої планети</span>
-      <span class="m119">3</span>
+      <span class="m906">Мої планети</span>
+      <span class="m907">3</span>
     
-    <span class="m118">Власник</span>
-    <span class="m120">
+    <span class="m906">Власник</span>
+    <span class="m908">
       
-      <span class="m121"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="m116"><path d="M5 20V10l7-5 7 5v10z M10 20v-5h4v5"></path></svg>Ви</span>
+      <span class="m909"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" class="m904"><path d="M5 20V10l7-5 7 5v10z M10 20v-5h4v5"></path></svg>Ви</span>
       
       
     </span>
@@ -476,15 +1988,15 @@
 
   
 
-  <div class="m122">
-    <span class="m84"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
-    <span class="m123">Час польоту</span>
-    <span class="m124">Ви тут</span>
+  <div class="m910">
+    <span class="m911"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2"></path></svg></span>
+    <span class="m912">Час польоту</span>
+    <span class="m913">Ви тут</span>
   </div>
 
-  <div class="m125">
+  <div class="m914">
     
-      <button type="button" data-btn="" class="m126"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13z M15.5 15.5L20 20 M10.5 8v5 M8 10.5h5"></path></svg>Відкрити сектор</button>
+      <button type="button" data-btn="" class="m915"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="m9"><path d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13z M15.5 15.5L20 20 M10.5 8v5 M8 10.5h5"></path></svg>Відкрити сектор</button>
       
     
     
@@ -495,34 +2007,34 @@
 
 
 
-<footer class="m127">
-  <div role="group" aria-label="Перемикач планет" class="m128">
+<footer class="m916">
+  <div role="group" aria-label="Перемикач планет" class="m917">
     
-      <button type="button" data-btn="" aria-pressed="true" class="m129">
-        <span class="m130"></span>Аврора
+      <button type="button" data-btn="" aria-pressed="true" class="m918">
+        <span class="m919"></span>Аврора
       </button>
     
-      <button type="button" data-btn="" aria-pressed="false" class="m131">
-        <span class="m132"></span>Борей
+      <button type="button" data-btn="" aria-pressed="false" class="m920">
+        <span class="m921"></span>Борей
       </button>
     
-      <button type="button" data-btn="" aria-pressed="false" class="m131">
-        <span class="m133"></span>Ігніс-9
+      <button type="button" data-btn="" aria-pressed="false" class="m920">
+        <span class="m922"></span>Ігніс-9
       </button>
     
-      <button type="button" data-btn="" aria-pressed="false" class="m131">
-        <span class="m134"></span>Дюна-Сет
+      <button type="button" data-btn="" aria-pressed="false" class="m920">
+        <span class="m923"></span>Дюна-Сет
       </button>
     
-      <button type="button" data-btn="" aria-pressed="false" class="m131">
-        <span class="m135"></span>Орфей
+      <button type="button" data-btn="" aria-pressed="false" class="m920">
+        <span class="m924"></span>Орфей
       </button>
     
   </div>
-  <div class="m136">
+  <div class="m925">
     <label for="map-chat" class="m15">Загальний чат</label>
-    <input id="map-chat" type="text" placeholder="Написати всім гравцям…" class="m137">
-    <button type="button" data-btn="" aria-label="Надіслати" class="m138"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M4 12l16-8-6 16-2-7z"></path></svg></button>
+    <input id="map-chat" type="text" placeholder="Написати всім гравцям…" class="m926">
+    <button type="button" data-btn="" aria-label="Надіслати" class="m927"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="m9"><path d="M4 12l16-8-6 16-2-7z"></path></svg></button>
   </div>
 </footer>
 

@@ -1141,6 +1141,9 @@
         },
         "char_magazine": {
           "number": 133.1
+        },
+        "char_launcher_size": {
+          "number": 1
         }
       }
     },
@@ -1182,6 +1185,9 @@
         },
         "char_magazine": {
           "number": 146.41
+        },
+        "char_launcher_size": {
+          "number": 2
         }
       }
     },
@@ -1223,6 +1229,9 @@
         },
         "char_magazine": {
           "number": 161.051
+        },
+        "char_launcher_size": {
+          "number": 3
         }
       }
     },
@@ -2146,7 +2155,7 @@
           "number": 12
         },
         "char_yield": {
-          "number": 5
+          "number": 0
         },
         "char_scan_radius": {
           "number": 100
@@ -2181,7 +2190,7 @@
           "number": 12
         },
         "char_yield": {
-          "number": 140
+          "number": 1400
         }
       }
     },
@@ -2210,7 +2219,7 @@
           "number": 12
         },
         "char_yield": {
-          "number": 10
+          "number": 240
         }
       }
     },
@@ -2239,7 +2248,7 @@
           "number": 72
         },
         "char_yield": {
-          "number": 30
+          "number": 2800
         }
       }
     },
@@ -2265,10 +2274,10 @@
       "weight": 207.965057,
       "characteristics": {
         "char_energy_use": {
-          "number": 36
+          "number": 55
         },
         "char_yield": {
-          "number": 15
+          "number": 2500
         }
       }
     },
@@ -3121,7 +3130,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 50
+          "number": 1000
         },
         "char_hull_size": {
           "number": 100
@@ -3131,6 +3140,12 @@
         },
         "char_hull_slots": {
           "number": 8
+        },
+        "char_crew": {
+          "number": 8
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3155,7 +3170,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 60
+          "number": 1450
         },
         "char_hull_size": {
           "number": 110
@@ -3165,6 +3180,12 @@
         },
         "char_hull_slots": {
           "number": 10
+        },
+        "char_crew": {
+          "number": 10
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3189,7 +3210,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 50
+          "number": 2200
         },
         "char_hull_size": {
           "number": 121
@@ -3199,6 +3220,12 @@
         },
         "char_hull_slots": {
           "number": 10
+        },
+        "char_crew": {
+          "number": 10
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3223,7 +3250,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 60
+          "number": 3000
         },
         "char_hull_size": {
           "number": 133.1
@@ -3233,6 +3260,12 @@
         },
         "char_hull_slots": {
           "number": 12
+        },
+        "char_crew": {
+          "number": 12
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3257,13 +3290,19 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 150
+          "number": 250
         },
         "char_hull_size": {
           "number": 100
         },
         "char_hull_capacity": {
           "number": 100
+        },
+        "char_crew": {
+          "number": 0
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3288,13 +3327,19 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 150
+          "number": 250
         },
         "char_hull_size": {
           "number": 110
         },
         "char_hull_capacity": {
           "number": 110
+        },
+        "char_crew": {
+          "number": 0
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3319,13 +3364,19 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 150
+          "number": 250
         },
         "char_hull_size": {
           "number": 121
         },
         "char_hull_capacity": {
           "number": 121
+        },
+        "char_crew": {
+          "number": 0
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3350,7 +3401,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 150
+          "number": 4000
         },
         "char_hull_size": {
           "number": 100
@@ -3360,6 +3411,12 @@
         },
         "char_hull_slots": {
           "number": 16
+        },
+        "char_crew": {
+          "number": 16
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3384,7 +3441,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 150
+          "number": 4450
         },
         "char_hull_size": {
           "number": 110
@@ -3394,6 +3451,12 @@
         },
         "char_hull_slots": {
           "number": 18
+        },
+        "char_crew": {
+          "number": 18
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3418,7 +3481,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 150
+          "number": 4900
         },
         "char_hull_size": {
           "number": 121
@@ -3428,6 +3491,12 @@
         },
         "char_hull_slots": {
           "number": 22
+        },
+        "char_crew": {
+          "number": 22
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3452,7 +3521,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 150
+          "number": 5400
         },
         "char_hull_size": {
           "number": 133.1
@@ -3462,6 +3531,12 @@
         },
         "char_hull_slots": {
           "number": 24
+        },
+        "char_crew": {
+          "number": 24
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3486,7 +3561,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 150
+          "number": 6000
         },
         "char_hull_size": {
           "number": 146.41
@@ -3496,6 +3571,12 @@
         },
         "char_hull_slots": {
           "number": 26
+        },
+        "char_crew": {
+          "number": 26
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3520,7 +3601,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 360
+          "number": 6700
         },
         "char_hull_size": {
           "number": 161.051
@@ -3530,6 +3611,12 @@
         },
         "char_hull_slots": {
           "number": 30
+        },
+        "char_crew": {
+          "number": 30
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3554,7 +3641,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 300
+          "number": 7300
         },
         "char_hull_size": {
           "number": 100
@@ -3567,6 +3654,12 @@
         },
         "char_hull_race_slot": {
           "number": 1
+        },
+        "char_crew": {
+          "number": 32
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3591,7 +3684,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 300
+          "number": 8000
         },
         "char_hull_size": {
           "number": 110
@@ -3604,6 +3697,12 @@
         },
         "char_hull_race_slot": {
           "number": 1
+        },
+        "char_crew": {
+          "number": 34
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3628,7 +3727,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 600
+          "number": 10000
         },
         "char_hull_size": {
           "number": 121
@@ -3641,6 +3740,12 @@
         },
         "char_hull_race_slot": {
           "number": 1
+        },
+        "char_crew": {
+          "number": 38
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3665,7 +3770,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 500
+          "number": 11500
         },
         "char_hull_size": {
           "number": 133.1
@@ -3678,6 +3783,12 @@
         },
         "char_hull_race_slot": {
           "number": 1
+        },
+        "char_crew": {
+          "number": 40
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3702,7 +3813,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 500
+          "number": 12750
         },
         "char_hull_size": {
           "number": 100
@@ -3715,6 +3826,12 @@
         },
         "char_hull_race_slot": {
           "number": 1
+        },
+        "char_crew": {
+          "number": 44
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3739,7 +3856,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 600
+          "number": 14000
         },
         "char_hull_size": {
           "number": 110
@@ -3752,6 +3869,12 @@
         },
         "char_hull_race_slot": {
           "number": 1
+        },
+        "char_crew": {
+          "number": 47
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3776,7 +3899,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 600
+          "number": 16000
         },
         "char_hull_size": {
           "number": 121
@@ -3789,6 +3912,12 @@
         },
         "char_hull_race_slot": {
           "number": 1
+        },
+        "char_crew": {
+          "number": 50
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3813,7 +3942,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 50
+          "number": 500
         },
         "char_hull_size": {
           "number": 100
@@ -3823,6 +3952,12 @@
         },
         "char_hull_slots": {
           "number": 8
+        },
+        "char_crew": {
+          "number": 8
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3847,7 +3982,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 50
+          "number": 2500
         },
         "char_hull_size": {
           "number": 110
@@ -3857,6 +3992,12 @@
         },
         "char_hull_slots": {
           "number": 16
+        },
+        "char_crew": {
+          "number": 16
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3881,7 +4022,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 300
+          "number": 5100
         },
         "char_hull_size": {
           "number": 133.1
@@ -3891,6 +4032,12 @@
         },
         "char_hull_slots": {
           "number": 24
+        },
+        "char_crew": {
+          "number": 24
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3915,7 +4062,7 @@
       },
       "characteristics": {
         "char_integrity": {
-          "number": 180
+          "number": 3700
         },
         "char_hull_size": {
           "number": 121
@@ -3925,6 +4072,12 @@
         },
         "char_hull_slots": {
           "number": 20
+        },
+        "char_crew": {
+          "number": 20
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3956,6 +4109,12 @@
         },
         "char_integrity": {
           "number": 100
+        },
+        "char_crew": {
+          "number": 8
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -3987,6 +4146,12 @@
         },
         "char_integrity": {
           "number": 110
+        },
+        "char_crew": {
+          "number": 8
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -4018,6 +4183,12 @@
         },
         "char_integrity": {
           "number": 121
+        },
+        "char_crew": {
+          "number": 8
+        },
+        "char_assembly_time": {
+          "number": 300
         }
       }
     },
@@ -4059,6 +4230,9 @@
         },
         "char_magazine": {
           "number": 146.41
+        },
+        "char_launcher_size": {
+          "number": 1
         }
       }
     }
@@ -11152,6 +11326,7 @@
     },
     {
       "code": "char_fuel_use",
+      "kind": "fuel_use",
       "sort_order": 2,
       "name": {
         "uk": "Витрата пального",
@@ -11203,6 +11378,7 @@
     },
     {
       "code": "char_rate",
+      "kind": "rate",
       "sort_order": 6,
       "name": {
         "uk": "Скорострільність",
@@ -11265,6 +11441,7 @@
     },
     {
       "code": "char_shield_regen",
+      "kind": "shield_regen",
       "sort_order": 11,
       "name": {
         "uk": "Відновлення щита",
@@ -11313,6 +11490,7 @@
     },
     {
       "code": "char_launcher_size",
+      "kind": "launcher_size",
       "sort_order": 15,
       "name": {
         "uk": "Розмір пускової",
@@ -11325,6 +11503,7 @@
     },
     {
       "code": "char_yield",
+      "kind": "yield",
       "sort_order": 16,
       "name": {
         "uk": "Виробіток",
@@ -11337,6 +11516,7 @@
     },
     {
       "code": "char_scan_radius",
+      "kind": "scan_radius",
       "sort_order": 17,
       "name": {
         "uk": "Радіус сканування",
@@ -11349,6 +11529,7 @@
     },
     {
       "code": "char_scan_speed",
+      "kind": "scan_speed",
       "sort_order": 18,
       "name": {
         "uk": "Швидкість сканування",
@@ -11361,6 +11542,7 @@
     },
     {
       "code": "char_detection",
+      "kind": "detection",
       "sort_order": 19,
       "name": {
         "uk": "Дальність виявлення",
@@ -11373,6 +11555,7 @@
     },
     {
       "code": "char_dig_speed",
+      "kind": "dig_speed",
       "sort_order": 20,
       "name": {
         "uk": "Швидкість розкопок",
@@ -11385,6 +11568,7 @@
     },
     {
       "code": "char_shield_restore",
+      "kind": "shield_restore",
       "sort_order": 21,
       "name": {
         "uk": "Відновлення щитів",
@@ -11397,6 +11581,7 @@
     },
     {
       "code": "char_speed",
+      "kind": "speed",
       "sort_order": 22,
       "name": {
         "uk": "Швидкість",
@@ -11422,6 +11607,7 @@
     },
     {
       "code": "char_collect_speed",
+      "kind": "collect_speed",
       "sort_order": 24,
       "name": {
         "uk": "Швидкість збору",
@@ -11434,6 +11620,7 @@
     },
     {
       "code": "char_cargo",
+      "kind": "cargo",
       "sort_order": 25,
       "name": {
         "uk": "Місткість вантажу",
@@ -11450,6 +11637,7 @@
     },
     {
       "code": "char_missiles",
+      "kind": "missiles",
       "sort_order": 26,
       "name": {
         "uk": "Знищені ракети",
@@ -11462,6 +11650,7 @@
     },
     {
       "code": "char_transfer_speed",
+      "kind": "transfer_speed",
       "sort_order": 27,
       "name": {
         "uk": "Швидкість передачі",
@@ -11474,6 +11663,7 @@
     },
     {
       "code": "char_transfer_volume",
+      "kind": "transfer_volume",
       "sort_order": 28,
       "name": {
         "uk": "Обсяг передачі",
@@ -11486,6 +11676,7 @@
     },
     {
       "code": "char_deploy_time",
+      "kind": "deploy_time",
       "sort_order": 29,
       "name": {
         "uk": "Час розгортання",
@@ -11502,6 +11693,7 @@
     },
     {
       "code": "char_colonists",
+      "kind": "colonists",
       "sort_order": 30,
       "name": {
         "uk": "Місткість колоністів",
@@ -11526,6 +11718,7 @@
     },
     {
       "code": "char_population",
+      "kind": "population",
       "sort_order": 32,
       "name": {
         "uk": "Місткість населення",
@@ -11538,6 +11731,7 @@
     },
     {
       "code": "char_storage",
+      "kind": "storage",
       "sort_order": 33,
       "name": {
         "uk": "Місткість складу",
@@ -11554,6 +11748,7 @@
     },
     {
       "code": "char_repair_speed",
+      "kind": "repair_speed",
       "sort_order": 34,
       "name": {
         "uk": "Швидкість ремонту",
@@ -11566,6 +11761,7 @@
     },
     {
       "code": "char_training_speed",
+      "kind": "training_speed",
       "sort_order": 35,
       "name": {
         "uk": "Швидкість навчання",
@@ -11578,6 +11774,7 @@
     },
     {
       "code": "char_trade_lots",
+      "kind": "trade_lots",
       "sort_order": 36,
       "name": {
         "uk": "Кількість лотів",
@@ -11590,6 +11787,7 @@
     },
     {
       "code": "char_jump_prep",
+      "kind": "jump_prep",
       "sort_order": 37,
       "name": {
         "uk": "Час підготовки стрибка",
@@ -11653,6 +11851,40 @@
       "description": {
         "uk": "Скільки додаткових слотів дає рас кораблю.",
         "en": "How many extra slots the race gives the ship."
+      }
+    },
+    {
+      "code": "char_upkeep",
+      "kind": "upkeep",
+      "sort_order": 42,
+      "name": {
+        "uk": "Утримання",
+        "en": "Upkeep"
+      },
+      "description": {
+        "uk": "Скільки кредитів корпус вимагає за годину.",
+        "en": "How many credits the hull costs per hour."
+      },
+      "unit": {
+        "uk": "кредитів/год",
+        "en": "credits/h"
+      }
+    },
+    {
+      "code": "char_assembly_time",
+      "kind": "assembly_time",
+      "sort_order": 43,
+      "name": {
+        "uk": "Час складання",
+        "en": "Assembly time"
+      },
+      "description": {
+        "uk": "Базові секунди складання корабля з цього корпусу, без технології. Це не час виробництва деталі корпусу.",
+        "en": "Base seconds to assemble a ship of this hull, without a technology. It is not the time to manufacture the hull part."
+      },
+      "unit": {
+        "uk": "с",
+        "en": "s"
       }
     }
   ],
@@ -12141,6 +12373,132 @@
       "group": "pg_18",
       "characteristic": "char_hull_slots",
       "sort_order": 4,
+      "is_required": false
+    },
+    {
+      "group": "pg_12",
+      "characteristic": "char_crew",
+      "sort_order": 6,
+      "is_required": false
+    },
+    {
+      "group": "pg_13",
+      "characteristic": "char_crew",
+      "sort_order": 6,
+      "is_required": false
+    },
+    {
+      "group": "pg_14",
+      "characteristic": "char_crew",
+      "sort_order": 6,
+      "is_required": false
+    },
+    {
+      "group": "pg_15",
+      "characteristic": "char_crew",
+      "sort_order": 6,
+      "is_required": false
+    },
+    {
+      "group": "pg_16",
+      "characteristic": "char_crew",
+      "sort_order": 6,
+      "is_required": false
+    },
+    {
+      "group": "pg_17",
+      "characteristic": "char_crew",
+      "sort_order": 6,
+      "is_required": false
+    },
+    {
+      "group": "pg_18",
+      "characteristic": "char_crew",
+      "sort_order": 6,
+      "is_required": false
+    },
+    {
+      "group": "pg_12",
+      "characteristic": "char_upkeep",
+      "sort_order": 7,
+      "is_required": false
+    },
+    {
+      "group": "pg_13",
+      "characteristic": "char_upkeep",
+      "sort_order": 7,
+      "is_required": false
+    },
+    {
+      "group": "pg_14",
+      "characteristic": "char_upkeep",
+      "sort_order": 7,
+      "is_required": false
+    },
+    {
+      "group": "pg_15",
+      "characteristic": "char_upkeep",
+      "sort_order": 7,
+      "is_required": false
+    },
+    {
+      "group": "pg_16",
+      "characteristic": "char_upkeep",
+      "sort_order": 7,
+      "is_required": false
+    },
+    {
+      "group": "pg_17",
+      "characteristic": "char_upkeep",
+      "sort_order": 7,
+      "is_required": false
+    },
+    {
+      "group": "pg_18",
+      "characteristic": "char_upkeep",
+      "sort_order": 7,
+      "is_required": false
+    },
+    {
+      "group": "pg_12",
+      "characteristic": "char_assembly_time",
+      "sort_order": 8,
+      "is_required": false
+    },
+    {
+      "group": "pg_13",
+      "characteristic": "char_assembly_time",
+      "sort_order": 8,
+      "is_required": false
+    },
+    {
+      "group": "pg_14",
+      "characteristic": "char_assembly_time",
+      "sort_order": 8,
+      "is_required": false
+    },
+    {
+      "group": "pg_15",
+      "characteristic": "char_assembly_time",
+      "sort_order": 8,
+      "is_required": false
+    },
+    {
+      "group": "pg_16",
+      "characteristic": "char_assembly_time",
+      "sort_order": 8,
+      "is_required": false
+    },
+    {
+      "group": "pg_17",
+      "characteristic": "char_assembly_time",
+      "sort_order": 8,
+      "is_required": false
+    },
+    {
+      "group": "pg_18",
+      "characteristic": "char_assembly_time",
+      "sort_order": 8,
       "is_required": false
     },
     {

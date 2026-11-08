@@ -1,6 +1,6 @@
 # Задача 00032 — Сторінка «Виробництво», сітка плашок, правки досліджень
 
-> **Статус:** ◐ ВИКОНАНО 01.11.2026, чекає приймання автором (ручна перевірка в Chrome і CI: [00032-pytannia.md](00032-pytannia.md)).
+> **Статус:** ✅ ВИКОНАНО 01.11.2026 (ручна перевірка в Chrome і CI — за автором: [00032-pytannia.md](00032-pytannia.md)).
 > **Етап:** 1 (production/01)
 > **Документи:** [ui-art/05 Єдиний стиль](../ui-art/05-yedynyi-styl-interfeisu.md), [задача 00020](00020-perenesty-chotyry-novi-storinky-hry.md), [задача 00013](00013-vyrobnytstvo-retsepty-zavody-sklad-detalei.md).
 

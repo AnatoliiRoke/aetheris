@@ -309,6 +309,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
         // The Production module fills its tables once the bodies and the research modules have
         // their own reference data, because a factory stands on a body (task 00013).
         await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IProductionModule), () => scope.ServiceProvider.GetRequiredService<IProductionModule>().EnsureAsync()).ConfigureAwait(false);
+        await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IFleetModule), () => scope.ServiceProvider.GetRequiredService<IFleetModule>().EnsureAsync()).ConfigureAwait(false);
 
         // The Processes module fills its tables once the bodies, the research and the production
         // modules have their own reference data, because a process runs on a body and works with

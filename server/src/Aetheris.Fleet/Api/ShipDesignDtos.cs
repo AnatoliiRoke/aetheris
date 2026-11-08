@@ -33,6 +33,7 @@ public sealed record ShipDesignSlotInput(
 /// <param name="Version">The version of the project; a change with an older version is refused.</param>
 /// <param name="Slots">The slots of the project, in the order of their numbers.</param>
 /// <param name="Summary">What the project gives.</param>
+/// <param name="HasBuiltShips">Whether a finished ship of this project exists. Such a project is not changed or archived until that ship is taken apart.</param>
 public sealed record ShipDesignDto(
     long Id,
     string Name,
@@ -44,7 +45,8 @@ public sealed record ShipDesignDto(
     DateTimeOffset UpdatedAt,
     int Version,
     IReadOnlyList<ShipDesignSlotDto> Slots,
-    ShipDesignSummaryDto Summary);
+    ShipDesignSummaryDto Summary,
+    bool HasBuiltShips);
 
 /// <summary>
 /// A slot of a project of a ship (task 00038, section 3.2).
@@ -72,11 +74,16 @@ public sealed record ShipDesignSlotDto(
 /// <param name="HoldCapacity">How much the hold of the hull takes.</param>
 /// <param name="Integrity">How strong the hull is.</param>
 /// <param name="DrivePush">How much push the drives of the ship give.</param>
-/// <param name="EnergyDamage">How much energy damage the weapons of the ship make.</param>
-/// <param name="KineticDamage">How much kinetic damage the weapons of the ship make.</param>
+/// <param name="EnergyDamage">How much energy damage the weapons of the ship make in one round.</param>
+/// <param name="KineticDamage">The greatest kinetic damage the weapons make in one round, from the ammunition they accept.</param>
 /// <param name="ShieldCapacity">How much the shields of the ship take.</param>
 /// <param name="HasDrive">Whether the project has a drive.</param>
 /// <param name="HasReactor">Whether the project has a reactor.</param>
+/// <param name="Armor">How much integrity the fitted armor adds.</param>
+/// <param name="ShieldRegen">How fast the shields of the ship recover, with the shield restorers.</param>
+/// <param name="KineticDamageMin">The least kinetic damage the weapons make in one round, from the ammunition they accept.</param>
+/// <param name="KineticDamageMax">The greatest kinetic damage the weapons make in one round, from the ammunition they accept.</param>
+/// <param name="Facts">The characteristics of the fitted modules that the plaque adds up. A zero amount is left out.</param>
 public sealed record ShipDesignSummaryDto(
     int TotalSlots,
     int UsedSlots,
@@ -92,7 +99,25 @@ public sealed record ShipDesignSummaryDto(
     decimal KineticDamage,
     decimal ShieldCapacity,
     bool HasDrive,
-    bool HasReactor);
+    bool HasReactor,
+    decimal Armor,
+    decimal ShieldRegen,
+    decimal KineticDamageMin,
+    decimal KineticDamageMax,
+    IReadOnlyList<ShipDesignFactDto> Facts);
+
+/// <summary>
+/// One summed characteristic of the fitted modules.
+/// </summary>
+/// <param name="Kind">The kind of the characteristic.</param>
+/// <param name="NameKey">The localisation key of the name of the characteristic.</param>
+/// <param name="UnitKey">The localisation key of the unit, or <see langword="null"/>.</param>
+/// <param name="Amount">The amount the fitted modules add together.</param>
+public sealed record ShipDesignFactDto(
+    string Kind,
+    string NameKey,
+    string? UnitKey,
+    decimal Amount);
 
 /// <summary>
 /// The catalog of the ships as the builder reads it (task 00038, section 3.2).
@@ -102,12 +127,14 @@ public sealed record ShipDesignSummaryDto(
 /// <param name="ModuleGroups">The types of the modules, for the filters of the picker.</param>
 /// <param name="DesignLimit">How many projects the player may keep.</param>
 /// <param name="DesignCount">How many projects the player has.</param>
+/// <param name="Ammunition">The ammunition a kinetic weapon may fire. It is not offered as a module.</param>
 public sealed record ShipCatalogViewDto(
     IReadOnlyList<ShipHullViewDto> Hulls,
     IReadOnlyList<ShipModuleViewDto> Modules,
     IReadOnlyList<ShipModuleGroupViewDto> ModuleGroups,
     int DesignLimit,
-    int DesignCount);
+    int DesignCount,
+    IReadOnlyList<ShipAmmunitionViewDto> Ammunition);
 
 /// <summary>
 /// A hull of the catalog of the ships for the builder (task 00038, section 3.3).
@@ -164,6 +191,13 @@ public sealed record ShipHullViewDto(
 /// <param name="MarkLevels">The marks of the module that the catalog holds.</param>
 /// <param name="IsAmmunition">Whether the module is ammunition of a weapon: it is loaded, not fitted.</param>
 /// <param name="IsCapsule">Whether the module is a capsule of inhabitants: it is used on a body, not fitted.</param>
+/// <param name="CargoCapacity">How much cargo the module adds to the hold, in tonnes.</param>
+/// <param name="Armor">How much integrity the armor of the module adds.</param>
+/// <param name="ShieldRegen">How fast the shield of the module recovers.</param>
+/// <param name="ShieldRestore">How many shield units the module restores over time.</param>
+/// <param name="Rate">How many shots the weapon makes in one round.</param>
+/// <param name="LauncherSize">The size of the launcher, or zero when the weapon has none.</param>
+/// <param name="Facts">The characteristics the plaque adds up.</param>
 public sealed record ShipModuleViewDto(
     int Id,
     string Code,
@@ -186,7 +220,42 @@ public sealed record ShipModuleViewDto(
     decimal Weight,
     IReadOnlyList<int> MarkLevels,
     bool IsAmmunition,
-    bool IsCapsule);
+    bool IsCapsule,
+    decimal CargoCapacity,
+    decimal Armor,
+    decimal ShieldRegen,
+    decimal ShieldRestore,
+    decimal Rate,
+    decimal LauncherSize,
+    IReadOnlyList<ShipModuleFactViewDto> Facts);
+
+/// <summary>
+/// One characteristic of a module that the plaque of a project adds up.
+/// </summary>
+/// <param name="Kind">The kind of the characteristic.</param>
+/// <param name="NameKey">The localisation key of the name of the characteristic.</param>
+/// <param name="UnitKey">The localisation key of the unit, or <see langword="null"/>.</param>
+/// <param name="Amount">The amount the module adds.</param>
+/// <param name="SortOrder">The order of the characteristic in the lists.</param>
+public sealed record ShipModuleFactViewDto(
+    string Kind,
+    string NameKey,
+    string? UnitKey,
+    decimal Amount,
+    int SortOrder);
+
+/// <summary>
+/// One round of ammunition the builder uses to count the kinetic damage of a project.
+/// </summary>
+/// <param name="Id">The ammunition.</param>
+/// <param name="Damage">The damage of one round.</param>
+/// <param name="DamageKind">The kind of the damage: the energy or the kinetic one.</param>
+/// <param name="LauncherSize">The size of the launcher the round fits, or zero when it has none.</param>
+public sealed record ShipAmmunitionViewDto(
+    int Id,
+    decimal Damage,
+    string? DamageKind,
+    decimal LauncherSize);
 
 /// <summary>
 /// A type of the modules of the catalog: the group of a module, with the name of the group and

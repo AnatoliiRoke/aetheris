@@ -1,0 +1,112 @@
+{
+  "hulls": [
+    {
+      "code": "part_h_21",
+      "shipyard_level": 1
+    },
+    {
+      "code": "part_h_1",
+      "shipyard_level": 2
+    },
+    {
+      "code": "part_h_2",
+      "shipyard_level": 3
+    },
+    {
+      "code": "part_h_3",
+      "shipyard_level": 3
+    },
+    {
+      "code": "part_h_4",
+      "shipyard_level": 4
+    },
+    {
+      "code": "part_h_22",
+      "shipyard_level": 5
+    },
+    {
+      "code": "part_h_27",
+      "shipyard_level": 6
+    },
+    {
+      "code": "part_h_8",
+      "shipyard_level": 7
+    },
+    {
+      "code": "part_h_5",
+      "shipyard_level": 7
+    },
+    {
+      "code": "part_h_6",
+      "shipyard_level": 7
+    },
+    {
+      "code": "part_h_7",
+      "shipyard_level": 7
+    },
+    {
+      "code": "part_h_9",
+      "shipyard_level": 8
+    },
+    {
+      "code": "part_h_10",
+      "shipyard_level": 8
+    },
+    {
+      "code": "part_h_24",
+      "shipyard_level": 9
+    },
+    {
+      "code": "part_h_25",
+      "shipyard_level": 10
+    },
+    {
+      "code": "part_h_11",
+      "shipyard_level": 11
+    },
+    {
+      "code": "part_h_12",
+      "shipyard_level": 12
+    },
+    {
+      "code": "part_h_13",
+      "shipyard_level": 13
+    },
+    {
+      "code": "part_h_14",
+      "shipyard_level": 13
+    },
+    {
+      "code": "part_h_15",
+      "shipyard_level": 14
+    },
+    {
+      "code": "part_h_23",
+      "shipyard_level": 15
+    },
+    {
+      "code": "part_h_26",
+      "shipyard_level": 16
+    },
+    {
+      "code": "part_h_16",
+      "shipyard_level": 17
+    },
+    {
+      "code": "part_h_17",
+      "shipyard_level": 18
+    },
+    {
+      "code": "part_h_18",
+      "shipyard_level": 18
+    },
+    {
+      "code": "part_h_19",
+      "shipyard_level": 19
+    },
+    {
+      "code": "part_h_20",
+      "shipyard_level": 20
+    }
+  ]
+}

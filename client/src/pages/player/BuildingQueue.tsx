@@ -4,6 +4,7 @@ import { useI18n } from '../../i18n/useI18n';
 import { QueuePanel } from './QueuePanel';
 import type { QueueEntry } from './QueueItem';
 import { deadlineFor, type namer } from './planetText';
+import { orderCatalogCosts } from './productionStock';
 
 /**
  * The construction queue of a body in the standard queue panel (task 00020, section 8.1): what
@@ -51,17 +52,19 @@ export function BuildingQueue({
   const { items, slotCount } = planet.queue;
   const multiplier = planet.timeMultiplier > 0 ? planet.timeMultiplier : 1;
 
-  const entries: QueueEntry[] = items.map((item) => {
-    const name = names.building(item.buildingTypeId);
+  const codeByResource = new Map(planet.resourceTypes.map((resource) => [resource.id, resource.code]));
+  const codeOf = (resourceTypeId: number) => codeByResource.get(resourceTypeId) ?? null;
+  const entries: QueueEntry[] = items.map((queueItem) => {
+    const name = names.building(queueItem.buildingTypeId);
 
     return {
-      id: item.id,
-      title: t('planet.queueItem', { name, level: item.targetLevel }),
-      underWay: item.finishesAt !== null,
-      deadline: deadlineFor(planet.gameNow, planet.timeMultiplier, item.finishesAt, receivedAt),
-      durationSeconds: item.durationSeconds / multiplier,
-      details: names.amounts(item.costs),
-      cancelLabel: t('planet.queueCancelLabel', { name, level: item.targetLevel }),
+      id: queueItem.id,
+      title: t('planet.queueItem', { name, level: queueItem.targetLevel }),
+      underWay: queueItem.finishesAt !== null,
+      deadline: deadlineFor(planet.gameNow, planet.timeMultiplier, queueItem.finishesAt, receivedAt),
+      durationSeconds: queueItem.durationSeconds / multiplier,
+      details: names.amounts(orderCatalogCosts(queueItem.costs, codeOf)),
+      cancelLabel: t('planet.queueCancelLabel', { name, level: queueItem.targetLevel }),
       locksCancelWhenDue: true,
     };
   });

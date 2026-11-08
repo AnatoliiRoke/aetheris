@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { ShipCatalog, ShipDesign, ShipDesignSlotInput, ShipHull, ShipModule } from '../../api/fleetApi';
+import type { ShipCatalog, ShipDesign, ShipDesignSlotInput, ShipHull, ShipModule, ShipyardCost } from '../../api/fleetApi';
 import { useApi } from '../../api/useApi';
 import { Alert } from '../../components/Alert';
 import { useDocumentTitle } from '../../components/useDocumentTitle';
@@ -16,12 +16,15 @@ import { DesignWindow } from './shipyard/DesignWindow';
 import { HullPicker } from './shipyard/HullPicker';
 import { ModulePicker } from './shipyard/ModulePicker';
 import { ShipDesignCard } from './shipyard/ShipDesignCard';
+import { ShipyardWork } from './shipyard/ShipyardWork';
 import { hullClasses } from './shipyard/shipyardParts';
 
 /**
  * The prefixes of the refusals of the server that have their own text for the player here.
  */
 const reasonPrefixes = ['fleet_'];
+
+const noCosts: readonly ShipyardCost[] = [];
 
 /**
  * The screen of the shipyard (task 00038): the tabs Design, Assembly and Dismantle, the list of
@@ -50,12 +53,24 @@ export function ShipyardPage() {
 
   const loadCatalog = useCallback(() => fleet.shipCatalog(planetId ?? 0), [fleet, planetId]);
   const loadDesigns = useCallback(() => fleet.designs(planetId ?? undefined), [fleet, planetId]);
+  const loadShipyard = useCallback(() => fleet.shipyard(planetId ?? 0), [fleet, planetId]);
 
   const catalogState = useRead(loadCatalog, Boolean(planetId));
   const designsState = useRead(loadDesigns, Boolean(planetId));
+  const shipyardState = useRead(loadShipyard, Boolean(planetId));
 
   const reloadCatalog = catalogState.reload;
   const reloadDesigns = designsState.reload;
+  const reloadShipyard = shipyardState.reload;
+  const costsByDesign = useMemo(() => {
+    const byDesignId = new Map<number, readonly ShipyardCost[]>();
+
+    for (const project of shipyardState.data?.designs ?? []) {
+      byDesignId.set(project.designId, project.costs);
+    }
+
+    return byDesignId;
+  }, [shipyardState.data]);
 
   const catalog: ShipCatalog | null = catalogState.data;
   const designs = useMemo(() => designsState.data ?? [], [designsState.data]);
@@ -106,13 +121,13 @@ export function ShipyardPage() {
 
       setWorking(null);
       setEditing(null);
-      await Promise.all([reloadCatalog(), reloadDesigns()]);
+      await Promise.all([reloadCatalog(), reloadDesigns(), reloadShipyard()]);
     } catch (error) {
       setNotice(noticeFromError(error, language, t('shipyard.failed'), reasonPrefixes));
     } finally {
       setBusy(false);
     }
-  }, [editing, fleet, language, planetId, reloadCatalog, reloadDesigns, t, working]);
+  }, [editing, fleet, language, planetId, reloadCatalog, reloadDesigns, reloadShipyard, t, working]);
 
   const archive = useCallback(
     async (design: ShipDesign) => {
@@ -120,14 +135,14 @@ export function ShipyardPage() {
       try {
         await fleet.archiveDesign(design.id);
         setNotice({ kind: 'success', text: t('shipyard.archived') });
-        await reloadDesigns();
+        await Promise.all([reloadDesigns(), reloadShipyard()]);
       } catch (error) {
         setNotice(noticeFromError(error, language, t('shipyard.failed'), reasonPrefixes));
       } finally {
         setBusy(false);
       }
     },
-    [fleet, language, reloadDesigns, t],
+    [fleet, language, reloadDesigns, reloadShipyard, t],
   );
 
   const openDesign = useCallback((design: ShipDesign) => {
@@ -271,6 +286,7 @@ export function ShipyardPage() {
               {visible.map((design) => (
                 <ShipDesignCard
                   busy={busy}
+                  costs={costsByDesign.get(design.id) ?? noCosts}
                   design={design}
                   hull={hulls.find((hull) => hull.id === design.hullPartTypeId) ?? null}
                   key={design.id}
@@ -289,6 +305,16 @@ export function ShipyardPage() {
             </button>
           </div>
         </>
+      ) : planetId ? (
+        <ShipyardWork
+          failed={shipyardState.failed}
+          hulls={hulls}
+          mode={tab === 'dismantle' ? 'dismantle' : 'assembly'}
+          planetId={planetId}
+          receivedAt={shipyardState.receivedAt}
+          reload={reloadShipyard}
+          yard={shipyardState.data}
+        />
       ) : (
         <div className="sh-empty">
           <p className="sh-empty__text">{t(tab === 'assembly' ? 'shipyard.assemblySoon' : 'shipyard.dismantleSoon')}</p>
@@ -307,6 +333,7 @@ export function ShipyardPage() {
           design={editing}
           hasRaceBonusSlot={working.hasRaceBonusSlot}
           hull={working.hull}
+          ammunition={catalog?.ammunition ?? []}
           modules={modules}
           name={working.name}
           onClose={() => {

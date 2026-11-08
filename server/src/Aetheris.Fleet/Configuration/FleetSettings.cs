@@ -22,6 +22,42 @@ public sealed record FleetSettings
     /// </summary>
     public int DesignNameMaxLength { get; init; }
 
+    /// <summary>Gets the places of a shipyard queue when the building has no effect yet.</summary>
+    public int QueueBaseSlots { get; init; }
+
+    /// <summary>Gets the most places a shipyard queue may have.</summary>
+    public int QueueMaxSlots { get; init; }
+
+    /// <summary>Gets the shortest assembly, in game seconds.</summary>
+    public long AssemblyMinSeconds { get; init; }
+
+    /// <summary>Gets the longest assembly, in game seconds.</summary>
+    public long AssemblyMaxSeconds { get; init; }
+
+    /// <summary>Gets the size that gets the shortest assembly.</summary>
+    public decimal SizeMin { get; init; }
+
+    /// <summary>Gets the size that gets the longest assembly.</summary>
+    public decimal SizeMax { get; init; }
+
+    /// <summary>Gets how many tonnes count as one slot of size.</summary>
+    public decimal MassPerSlot { get; init; }
+
+    /// <summary>Gets the credits of the assembly for one slot.</summary>
+    public decimal CreditsPerSlot { get; init; }
+
+    /// <summary>Gets the credits of the assembly for one tonne.</summary>
+    public decimal CreditsPerTonne { get; init; }
+
+    /// <summary>Gets the share of the credits spent on the modules that the assembly takes.</summary>
+    public decimal CreditShare { get; init; }
+
+    /// <summary>Gets the share of the resources spent on the modules that the assembly takes.</summary>
+    public decimal MaterialShare { get; init; }
+
+    /// <summary>Gets the largest number of the characters of the name of a fleet.</summary>
+    public int FleetNameMaxLength { get; init; }
+
     /// <summary>
     /// Reads the parameters.
     /// </summary>
@@ -35,8 +71,25 @@ public sealed record FleetSettings
         {
             MinimumAmmunition = ReadDecimal(config, FleetConfigKeys.MinimumAmmunition),
             DesignNameMaxLength = ReadInt32(config, FleetConfigKeys.DesignNameMaxLength),
+            QueueBaseSlots = ReadInt32(config, FleetConfigKeys.QueueBaseSlots),
+            QueueMaxSlots = ReadInt32(config, FleetConfigKeys.QueueMaxSlots),
+            AssemblyMinSeconds = ReadInt64(config, FleetConfigKeys.AssemblyMinSeconds),
+            AssemblyMaxSeconds = ReadInt64(config, FleetConfigKeys.AssemblyMaxSeconds),
+            SizeMin = ReadDecimal(config, FleetConfigKeys.SizeMin),
+            SizeMax = ReadDecimal(config, FleetConfigKeys.SizeMax),
+            MassPerSlot = ReadDecimal(config, FleetConfigKeys.MassPerSlot),
+            CreditsPerSlot = ReadDecimal(config, FleetConfigKeys.CreditsPerSlot),
+            CreditsPerTonne = ReadDecimal(config, FleetConfigKeys.CreditsPerTonne),
+            CreditShare = ReadDecimal(config, FleetConfigKeys.CreditShare),
+            MaterialShare = ReadDecimal(config, FleetConfigKeys.MaterialShare),
+            FleetNameMaxLength = ReadInt32(config, FleetConfigKeys.FleetNameMaxLength),
         };
     }
+
+    private static long ReadInt64(IGameConfig config, string key) =>
+        long.TryParse(config.GetRaw(key), NumberStyles.Integer, CultureInfo.InvariantCulture, out long whole)
+            ? whole
+            : long.Parse(Default(key), NumberStyles.Integer, CultureInfo.InvariantCulture);
 
     private static decimal ReadDecimal(IGameConfig config, string key) =>
         decimal.TryParse(config.GetRaw(key), NumberStyles.Number, CultureInfo.InvariantCulture, out decimal value)

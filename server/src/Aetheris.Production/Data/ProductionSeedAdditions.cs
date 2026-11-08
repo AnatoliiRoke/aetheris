@@ -97,10 +97,16 @@ public static class ProductionSeedAdditions
             DatabaseCodes((data.Characteristics ?? []).Select(characteristic => characteristic.Code), ProductionTextKeys.CharacteristicCodeGroup),
             cancellationToken).ConfigureAwait(false);
 
+        // A characteristic that already has a row keeps an empty kind: the program reads the
+        // cargo, the shield recovery, the rate of fire and the launcher size by their kind, so
+        // an empty kind is filled from the starting data and a kind the admin panel has set stays.
+        added |= await FillMissingCharacteristicKindsAsync(dbContext, data, characteristicIds, cancellationToken).ConfigureAwait(false);
+
         // The attributes and the values of the characteristics of the parts may be missing as
         // well: the role of a hull and of a module and the kind of the component joined the
         // data later (task 00038).
         added |= await AddMissingPartDetailsAsync(dbContext, data, partIds, characteristicIds, cancellationToken).ConfigureAwait(false);
+        added |= await AddMissingGroupCharacteristicsAsync(dbContext, data, groupIds, characteristicIds, cancellationToken).ConfigureAwait(false);
 
         if (missingParts.Count == 0 && missingRecipes.Count == 0 && !missingLinks)
         {
@@ -430,6 +436,69 @@ public static class ProductionSeedAdditions
     }
 
     /// <summary>
+    /// Fills the kind of a characteristic that has none, from the starting data.
+    /// </summary>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="data">The starting data.</param>
+    /// <param name="characteristicIds">The identifiers of the characteristics, by the codes of the file.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when a kind was filled.</returns>
+    /// <remarks>
+    /// The step only fills an empty kind. A kind the admin panel has already set stays, so a
+    /// change of the panel survives the update of the starting data.
+    /// </remarks>
+    private static async Task<bool> FillMissingCharacteristicKindsAsync(
+        ProductionDbContext dbContext,
+        ProductionSeedData data,
+        IReadOnlyDictionary<string, int> characteristicIds,
+        CancellationToken cancellationToken)
+    {
+        List<int> ids = [.. characteristicIds.Values];
+
+        if (ids.Count == 0)
+        {
+            return false;
+        }
+
+        List<CharacteristicEntity> rows = await dbContext.Characteristics
+            .Where(characteristic => ids.Contains(characteristic.Id) && characteristic.Kind == null)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (rows.Count == 0)
+        {
+            return false;
+        }
+
+        Dictionary<int, CharacteristicEntity> byId = rows.ToDictionary(row => row.Id);
+        bool filled = false;
+
+        foreach (SeedCharacteristic characteristic in data.Characteristics ?? [])
+        {
+            if (string.IsNullOrEmpty(characteristic.Kind) || !CharacteristicKinds.IsKnown(characteristic.Kind))
+            {
+                continue;
+            }
+
+            if (!characteristicIds.TryGetValue(characteristic.Code, out int characteristicId)
+                || !byId.TryGetValue(characteristicId, out CharacteristicEntity? row))
+            {
+                continue;
+            }
+
+            row.Kind = characteristic.Kind;
+            filled = true;
+        }
+
+        if (filled)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return filled;
+    }
+
+    /// <summary>
     /// Adds the characteristics of the starting data whose rows are missing.
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
@@ -502,6 +571,65 @@ public static class ProductionSeedAdditions
             cancellationToken).ConfigureAwait(false);
 
         return true;
+    }
+
+    /// <summary>
+    /// Adds a characteristic of a group that the starting data names and the database does not
+    /// have yet. A link that is already there stays, so a later change in the admin panel is kept.
+    /// </summary>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="data">The starting data.</param>
+    /// <param name="groupIds">The groups by the code of the starting data.</param>
+    /// <param name="characteristicIds">The characteristics by the code of the starting data.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when a link was added.</returns>
+    private static async Task<bool> AddMissingGroupCharacteristicsAsync(
+        ProductionDbContext dbContext,
+        ProductionSeedData data,
+        IReadOnlyDictionary<string, int> groupIds,
+        IReadOnlyDictionary<string, int> characteristicIds,
+        CancellationToken cancellationToken)
+    {
+        if (data.GroupCharacteristics is not { Count: > 0 } links)
+        {
+            return false;
+        }
+
+        HashSet<(int GroupId, int CharacteristicId)> present = (await dbContext.PartGroupCharacteristics
+            .AsNoTracking()
+            .Select(link => new { link.PartGroupId, link.CharacteristicId })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false))
+            .Select(link => (link.PartGroupId, link.CharacteristicId))
+            .ToHashSet();
+
+        bool added = false;
+
+        foreach (SeedGroupCharacteristic link in links)
+        {
+            if (!groupIds.TryGetValue(link.Group, out int groupId)
+                || !characteristicIds.TryGetValue(link.Characteristic, out int characteristicId)
+                || !present.Add((groupId, characteristicId)))
+            {
+                continue;
+            }
+
+            dbContext.PartGroupCharacteristics.Add(new PartGroupCharacteristicEntity
+            {
+                PartGroupId = groupId,
+                CharacteristicId = characteristicId,
+                SortOrder = link.SortOrder,
+                IsRequired = link.IsRequired,
+            });
+            added = true;
+        }
+
+        if (added)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return added;
     }
 
     private static async Task<bool> HasMissingCompatibilityLinksAsync(
@@ -658,7 +786,7 @@ public static class ProductionSeedAdditions
     /// <summary>
     /// Gives every code of the file the code the first run of the seed gave its row.
     /// </summary>
-    private static Dictionary<string, string> DatabaseCodes(IEnumerable<string> fileCodes, string group) =>
+    internal static Dictionary<string, string> DatabaseCodes(IEnumerable<string> fileCodes, string group) =>
         fileCodes
             .Select((code, index) => (code, index))
             .ToDictionary(pair => pair.code, pair => $"{group}_{pair.index + 1}", StringComparer.Ordinal);

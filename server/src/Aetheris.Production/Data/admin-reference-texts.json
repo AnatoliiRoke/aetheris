@@ -215,6 +215,110 @@
     "uk": "Місткість щита",
     "en": "Capacity of the shield"
   },
+  "admin.reference.kind.cargo": {
+    "uk": "Місткість вантажу",
+    "en": "Cargo capacity"
+  },
+  "admin.reference.kind.shield_regen": {
+    "uk": "Відновлення щита",
+    "en": "Shield regeneration"
+  },
+  "admin.reference.kind.shield_restore": {
+    "uk": "Відновлення щитів",
+    "en": "Shield restore"
+  },
+  "admin.reference.kind.rate": {
+    "uk": "Скорострільність",
+    "en": "Rate of fire"
+  },
+  "admin.reference.kind.launcher_size": {
+    "uk": "Розмір пускової",
+    "en": "Launcher size"
+  },
+  "admin.reference.kind.yield": {
+    "uk": "Видобуток за годину",
+    "en": "Extraction per hour"
+  },
+  "admin.reference.kind.scan_radius": {
+    "uk": "Радіус сканування",
+    "en": "Scan radius"
+  },
+  "admin.reference.kind.scan_speed": {
+    "uk": "Швидкість сканування",
+    "en": "Scan speed"
+  },
+  "admin.reference.kind.detection": {
+    "uk": "Дальність виявлення",
+    "en": "Detection range"
+  },
+  "admin.reference.kind.dig_speed": {
+    "uk": "Швидкість розкопок",
+    "en": "Dig speed"
+  },
+  "admin.reference.kind.speed": {
+    "uk": "Швидкість",
+    "en": "Speed"
+  },
+  "admin.reference.kind.collect_speed": {
+    "uk": "Швидкість збору",
+    "en": "Collection speed"
+  },
+  "admin.reference.kind.fuel_use": {
+    "uk": "Витрата пального",
+    "en": "Fuel use"
+  },
+  "admin.reference.kind.missiles": {
+    "uk": "Знищені ракети",
+    "en": "Missiles destroyed"
+  },
+  "admin.reference.kind.transfer_speed": {
+    "uk": "Швидкість передачі",
+    "en": "Transfer speed"
+  },
+  "admin.reference.kind.transfer_volume": {
+    "uk": "Обсяг передачі",
+    "en": "Transfer volume"
+  },
+  "admin.reference.kind.deploy_time": {
+    "uk": "Час розгортання",
+    "en": "Deployment time"
+  },
+  "admin.reference.kind.colonists": {
+    "uk": "Місткість колоністів",
+    "en": "Colonist capacity"
+  },
+  "admin.reference.kind.population": {
+    "uk": "Місткість населення",
+    "en": "Population capacity"
+  },
+  "admin.reference.kind.storage": {
+    "uk": "Місткість складу",
+    "en": "Storage capacity"
+  },
+  "admin.reference.kind.repair_speed": {
+    "uk": "Швидкість ремонту",
+    "en": "Repair speed"
+  },
+  "admin.reference.kind.training_speed": {
+    "uk": "Швидкість навчання",
+    "en": "Training speed"
+  },
+  "admin.reference.kind.trade_lots": {
+    "uk": "Кількість лотів",
+    "en": "Lot count"
+  },
+  "admin.reference.kind.jump_prep": {
+    "uk": "Час підготовки стрибка",
+    "en": "Jump preparation"
+  },
+  "admin.reference.kind.upkeep": {
+    "uk": "Утримання",
+    "en": "Upkeep"
+  },
+  "admin.reference.kind.assembly_time": {
+    "uk": "Час складання",
+    "en": "Assembly time"
+  },
   "admin.reference.attribute.role": {
     "uk": "Роль",
     "en": "Role"

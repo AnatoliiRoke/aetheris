@@ -447,6 +447,8 @@ export const adminEn: AdminMessages = {
   'admin.players.crew': 'Crew',
   'admin.players.hold': 'Hold',
   'admin.players.integrity': 'Integrity',
+  'admin.players.armor': 'Armor',
+  'admin.players.yield': 'Extraction per hour',
   'admin.players.energyUse': 'Energy use',
   'admin.players.energyPower': 'Power',
   'admin.players.drive': 'Drive',

@@ -270,8 +270,64 @@ public static class PlanetsReferenceSeed
         await WorldReferenceSeed.RaiseAsync(codes, PlanetsTextKeys.CategoryCodeGroup, seed.Categories.Select(category => category.Code), cancellationToken).ConfigureAwait(false);
 
         bool populationAdded = await AddMissingPopulationCostsAsync(dbContext, seed, resources, typeIds, cancellationToken).ConfigureAwait(false);
+        bool slotsAdded = await AddMissingShipyardSlotsAsync(dbContext, seed, cancellationToken).ConfigureAwait(false);
 
-        return missingTypes.Count > 0 || missingCategories.Count > 0 || populationAdded;
+        return missingTypes.Count > 0 || missingCategories.Count > 0 || populationAdded || slotsAdded;
+    }
+
+    /// <summary>
+    /// Adds the queue places of the shipyard to a level that does not have them yet. An effect
+    /// that is already there is left as it is, so a later change of that amount stays (task 00039).
+    /// </summary>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="seed">The starting data.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when an effect was added.</returns>
+    private static async Task<bool> AddMissingShipyardSlotsAsync(
+        PlanetsDbContext dbContext,
+        PlanetsSeedData seed,
+        CancellationToken cancellationToken)
+    {
+        SeedEffect? slots = seed.BuildingTypes
+            .Where(type => type.BuildingClass == BuildingClasses.Shipyard)
+            .SelectMany(type => type.Effects)
+            .FirstOrDefault(effect => effect.Type == BuildingEffectTypes.ShipyardQueueSlots);
+
+        if (slots is null)
+        {
+            return false;
+        }
+
+        List<BuildingTypeEntity> yards = await dbContext.BuildingTypes
+            .Include(type => type.LevelIds)
+            .ThenInclude(level => level.EffectIds)
+            .Where(type => type.BuildingClass == BuildingClasses.Shipyard)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        bool added = false;
+
+        foreach (BuildingLevelEntity level in yards.SelectMany(type => type.LevelIds))
+        {
+            if (level.EffectIds.Any(effect => effect.EffectType == BuildingEffectTypes.ShipyardQueueSlots))
+            {
+                continue;
+            }
+
+            level.EffectIds.Add(new BuildingLevelEffectEntity
+            {
+                EffectType = BuildingEffectTypes.ShipyardQueueSlots,
+                Value = EffectValueAt(slots, level.Level),
+            });
+            added = true;
+        }
+
+        if (added)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return added;
     }
 
     /// <summary>

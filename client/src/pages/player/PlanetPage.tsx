@@ -21,7 +21,7 @@ import { useProcessOrders, useProductionOrders } from './useActiveOrders';
 import { useResearch } from './useResearch';
 import { useResearchCommands } from './useResearchCommands';
 import { useResourceGroups } from './useResourceGroups';
-import { useResourceNames } from './useResourceNames';
+import { useResourceCodes, useResourceNames } from './useResourceNames';
 import { usePlanetScreen } from './usePlanetScreen';
 import { useWorldReference } from './useWorldReference';
 
@@ -51,6 +51,7 @@ export function PlanetPage() {
   const productionOrders = useProductionOrders(planetId, () => setProductionRevision((revision) => revision + 1));
   const processOrders = useProcessOrders(planetId, () => setProcessesRevision((revision) => revision + 1));
   const resourceName = useResourceNames(reference, text);
+  const resourceCode = useResourceCodes(reference);
   const resourceGroup = useResourceGroups(reference);
   const objectType = useMemo(() => reference?.objectTypes.find((type) => type.id === planet?.typeId) ?? null, [reference, planet?.typeId]);
 
@@ -132,6 +133,7 @@ export function PlanetPage() {
                   onCancel={research.cancel}
                   onFinished={() => void researchState.reload()}
                   receivedAt={researchState.receivedAt}
+                  resourceCode={resourceCode}
                   resourceName={resourceName}
                   technologyName={(key) => text(key) ?? key}
                   tree={researchState.tree}
