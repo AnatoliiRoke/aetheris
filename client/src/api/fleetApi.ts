@@ -287,6 +287,93 @@ export interface FleetApi {
   renameFleet(request: { fleetId: number; name: string }): Promise<FleetsView>;
   /** Disbands a fleet; its ships stay on the body as free ships. */
   dissolveFleet(fleetId: number): Promise<FleetsView>;
+  /** The flight plans of the player (task 00050). */
+  flightPlans(): Promise<FlightPlan[]>;
+  /** Writes a flight plan for a fleet; the fleet has none yet. */
+  createFlightPlan(request: { fleetId: number; orders: FlightPlanOrderInput[] }): Promise<FlightPlan>;
+  /** Changes the orders of the flight plan of a fleet. */
+  saveFlightPlan(request: { fleetId: number; orders: FlightPlanOrderInput[] }): Promise<FlightPlan>;
+  /** Deletes the flight plan of a fleet. */
+  deleteFlightPlan(fleetId: number): Promise<void>;
+  /** Stops the flight plan of a fleet: the fleet waits where it is. */
+  stopFlightPlan(fleetId: number): Promise<FlightPlan>;
+  /** Puts the flight plan of a fleet under way. */
+  executeFlightPlan(fleetId: number): Promise<FlightPlan>;
+  /** Estimates what the extraction of a fleet at a place will take (task 00050). */
+  extractionEstimate(fleetId: number, objectId: number): Promise<ExtractionEstimate>;
+}
+
+/**
+ * A flight plan of a fleet with its orders (task 00050).
+ */
+export interface FlightPlan {
+  id: number;
+  /** The fleet the plan is made for. */
+  fleetId: number;
+  /** The state of the plan: the client turns the code into a word. */
+  stateCode: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+  orders: FlightPlanOrder[];
+}
+
+/**
+ * An order of a flight plan (task 00050).
+ */
+export interface FlightPlanOrder {
+  id: number;
+  /** The position of the order in the plan, from one. */
+  position: number;
+  /** The type of the order: `fly`, `mine`, `scan`, `load`, `unload`, `wait` or `return`. */
+  typeCode: string;
+  /** The kind of the target: `none`, `system`, `object`, `point` or `planet`. */
+  targetKind: string;
+  targetSectorId: number;
+  targetSystemId: number;
+  targetObjectId: number;
+  targetX: number;
+  targetY: number;
+  targetZ: number;
+  durationSeconds: number;
+  /** The parameters of the order as a document. */
+  parameters: string;
+}
+
+/**
+ * An order of a flight plan as the client sends it (task 00050).
+ */
+export interface FlightPlanOrderInput {
+  typeCode: string;
+  targetKind: string;
+  targetSectorId: number;
+  targetSystemId: number;
+  targetObjectId: number;
+  targetX: number;
+  targetY: number;
+  targetZ: number;
+  durationSeconds: number;
+  parameters: string;
+}
+
+/**
+ * What the extraction of a fleet at a place will take (task 00050).
+ */
+export interface ExtractionEstimate {
+  /** The length of a cycle of extraction, in game seconds. */
+  cycleSeconds: number;
+  /** The yield of the fleet in one cycle, in tonnes. */
+  resourceTonsPerCycle: number;
+  /** The mass the fleet takes from the place in one cycle, in tonnes. */
+  processedTonsPerCycle: number;
+  /** The room that is left in the holds of the fleet, in tonnes. */
+  freeHoldTons: number;
+  /** The mass that is left in the place, in tonnes. */
+  placeMassTons: number;
+  /** How long the holds of the fleet will hold the yield, in game seconds. */
+  holdFullSeconds: number;
+  /** How long the place will last, in game seconds. */
+  placeEmptySeconds: number;
 }
 
 /**
@@ -566,5 +653,59 @@ export function createFleetApi(http: HttpClient): FleetApi {
     async dissolveFleet(fleetId) {
       return camelize<FleetsView>(await http.command<unknown>(`${prefix}/fleets/dissolve`, { fleet_id: fleetId }));
     },
+    async flightPlans() {
+      return camelize<FlightPlan[]>(await http.get<unknown>(`${prefix}/flight-plans`));
+    },
+    async createFlightPlan(request) {
+      return camelize<FlightPlan>(
+        await http.command<unknown>(`${prefix}/flight-plans`, {
+          fleet_id: request.fleetId,
+          orders: request.orders.map((order) => toOrderPayload(order)),
+        }),
+      );
+    },
+    async saveFlightPlan(request) {
+      return camelize<FlightPlan>(
+        await http.command<unknown>(`${prefix}/flight-plans/save`, {
+          fleet_id: request.fleetId,
+          orders: request.orders.map((order) => toOrderPayload(order)),
+        }),
+      );
+    },
+    async deleteFlightPlan(fleetId) {
+      await http.command<unknown>(`${prefix}/flight-plans/delete`, { fleet_id: fleetId });
+    },
+    async stopFlightPlan(fleetId) {
+      return camelize<FlightPlan>(await http.command<unknown>(`${prefix}/flight-plans/stop`, { fleet_id: fleetId }));
+    },
+    async executeFlightPlan(fleetId) {
+      return camelize<FlightPlan>(await http.command<unknown>(`${prefix}/flight-plans/execute`, { fleet_id: fleetId }));
+    },
+    async extractionEstimate(fleetId, objectId) {
+      return camelize<ExtractionEstimate>(
+        await http.get<unknown>(`${prefix}/extraction/estimate?fleet_id=${fleetId}&object_id=${objectId}`),
+      );
+    },
+  };
+}
+
+/**
+ * Turns an order of a flight plan into the fields the server reads (task 00050).
+ *
+ * @param order The order.
+ * @returns The fields of the request.
+ */
+function toOrderPayload(order: FlightPlanOrderInput) {
+  return {
+    type_code: order.typeCode,
+    target_kind: order.targetKind,
+    target_sector_id: order.targetSectorId,
+    target_system_id: order.targetSystemId,
+    target_object_id: order.targetObjectId,
+    target_x: order.targetX,
+    target_y: order.targetY,
+    target_z: order.targetZ,
+    duration_seconds: order.durationSeconds,
+    parameters: order.parameters,
   };
 }

@@ -101,23 +101,19 @@ describe('the fleets screen (task 00040)', () => {
 
     expect(within(panel).getByText('1 200 т')).toBeInTheDocument();
     expect(within(panel).getByText('264–420')).toBeInTheDocument();
-    expect(within(panel).getByText('15 300')).toBeInTheDocument();
     expect(within(panel).getByText('3 200')).toBeInTheDocument();
   });
 
-  it('shows the commander and the orders switched off with the reason', async () => {
+  it('shows the commander switched off with the reason, and the flight plan of the fleet', async () => {
     renderPage('/fleets', apis());
 
     const panel = await screen.findByRole('complementary', { name: 'Деталі флоту' });
 
-    expect(within(panel).getByRole('button', { name: 'Призначити командира' })).toBeDisabled();
-    expect(within(panel).getByText('Скоро: командири з’являться пізніше', { selector: 'p' })).toBeInTheDocument();
+    // The block of the orders is the flight plan of the fleet (task 00050): the fleet has none
+    // yet, so the window that writes it is offered.
+    const plan = within(panel).getByRole('region', { name: 'Політний лист' });
 
-    for (const order of ['Летіти', 'Видобувати', 'Атакувати', 'Ескортувати', 'Колонізувати', 'Додому']) {
-      expect(within(panel).getByRole('button', { name: order })).toBeDisabled();
-    }
-
-    expect(within(panel).getByText('Польоти з’являться пізніше', { selector: 'p' })).toBeInTheDocument();
+    expect(within(plan).getByRole('button', { name: 'Створити лист' })).toBeInTheDocument();
     expect(within(panel).getByRole('link', { name: 'Показати на карті' })).toHaveAttribute('href', '/map?sector=1&system=3&object=10');
   });
 

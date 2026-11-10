@@ -33,7 +33,7 @@ public sealed class ProcessActiveOrdersTests
 
     private const string ConversionTechnology = "tech_18";
 
-    private const string Hull = "part_1";
+    private const string Hull = "part_m_1";
 
     private readonly AetherisTestFactory _factory;
 

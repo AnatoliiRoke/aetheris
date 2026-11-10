@@ -45,6 +45,7 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<IStartBuildingPlacer, PendingStartBuildingPlacer>();
         services.AddScoped<IHomePlanetStore, LegacyHomePlanetStore>();
         services.AddScoped<FieldService>();
+        services.AddScoped<NebulaExtractionService>();
         services.AddScoped<WorldQueryService>();
         services.AddScoped<IWorldVisibility, RadarVisibility>();
         services.AddScoped<WorldMapService>();

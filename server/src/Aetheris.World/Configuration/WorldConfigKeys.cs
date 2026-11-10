@@ -82,6 +82,12 @@ public static class WorldConfigKeys
     /// <summary>The multiplier of the radar range inside a nebula.</summary>
     public const string NebulaRadarMultiplier = "world.nebula.radar_multiplier";
 
+    /// <summary>The smallest mass of a nebula.</summary>
+    public const string NebulaMassMin = "world.nebula.mass_min";
+
+    /// <summary>The largest mass of a nebula.</summary>
+    public const string NebulaMassMax = "world.nebula.mass_max";
+
     /// <summary>Whether a nebula forbids the jump drive.</summary>
     public const string NebulaBlocksJumpDrive = "world.nebula.blocks_jump_drive";
 
@@ -221,6 +227,8 @@ public static class WorldConfigKeys
         new(NebulaRadiusMin, "40", "0", "1000000", "Smallest radius of a nebula."),
         new(NebulaRadiusMax, "120", "0", "1000000", "Largest radius of a nebula."),
         new(NebulaRadarMultiplier, "0.5", "0", "10", "Multiplier of the radar range inside a nebula."),
+        new(NebulaMassMin, "2000000", "0", "1000000000", "Smallest mass of a nebula, in tonnes; the extractors take a part of it every cycle."),
+        new(NebulaMassMax, "6000000", "0", "1000000000", "Largest mass of a nebula, in tonnes."),
         new(NebulaBlocksJumpDrive, "true", null, null, "Whether a nebula forbids the jump drive."),
         new(FieldMaxCompositionShare, "0.95", "0", "1", "Largest share of a field composition; the rest is empty rock."),
         new(FieldMinCompositionShare, "0.7", "0", "1", "Smallest share of a field composition; the empty rock is at most the rest."),

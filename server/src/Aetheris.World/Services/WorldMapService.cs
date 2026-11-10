@@ -71,6 +71,11 @@ public sealed class WorldMapService
             .ToDictionaryAsync(row => row.SectorId, row => row.Count, cancellationToken).ConfigureAwait(false);
         List<(int SectorId, long ObjectId)> own = await OwnPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
+        // What the player knows of every sector (task 00050): a sector the radar reaches is open, a
+        // sector with a body of the player in it is open too, a sector the player has a known place in
+        // is known, and a sector nothing of is unknown.
+        Dictionary<int, string> sectorStates = await SectorStatesAsync(scope, own, cancellationToken).ConfigureAwait(false);
+
         return new MapGalaxyDto(
             [.. sectors.Select(sector => new MapSectorDto(
                 sector.Id,
@@ -80,9 +85,62 @@ public sealed class WorldMapService
                 sector.Z,
                 sector.IsNewbie,
                 systemCounts.GetValueOrDefault(sector.Id),
-                own.Count(entry => entry.SectorId == sector.Id)))],
+                own.Count(entry => entry.SectorId == sector.Id),
+                sectorStates.GetValueOrDefault(sector.Id, MapStates.Unknown)))],
             _reference.Settings.SectorSize,
             SeesOnlyOwn(scope, own));
+    }
+
+    /// <summary>
+    /// Tells what the player knows of every sector (task 00050). A sector is open when a radar of the
+    /// player reaches it or a body of the player stands in it, known when the player has a place in it
+    /// that is only known, and unknown when the player knows nothing of it.
+    /// </summary>
+    /// <param name="scope">What the player sees.</param>
+    /// <param name="own">The bodies of the player with their sectors.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The state of every sector the player knows of.</returns>
+    private async Task<Dictionary<int, string>> SectorStatesAsync(
+        VisibilityScope scope,
+        List<(int SectorId, long ObjectId)> own,
+        CancellationToken cancellationToken)
+    {
+        Dictionary<int, string> states = [];
+
+        // The sectors the radars of the player reach are open.
+        foreach (RadarCircle circle in scope.RadarCircles ?? [])
+        {
+            states[circle.SectorId] = MapStates.Open;
+        }
+
+        // The sectors with a body of the player in them are open: the player stands there.
+        foreach ((int sectorId, _) in own)
+        {
+            states[sectorId] = MapStates.Open;
+        }
+
+        if (scope.SeesEverything)
+        {
+            return states;
+        }
+
+        // The sectors with a known place of the player in them are known.
+        long[] visible = [.. scope.VisibleObjectIds];
+        long[] visibleSystems = [.. scope.VisibleSystemIds];
+
+        List<int> knownSectors = await (
+                from entry in _dbContext.Objects.AsNoTracking()
+                where visible.Contains(entry.Id) || (entry.SystemId != null && visibleSystems.Contains(entry.SystemId.Value))
+                select entry.SectorId)
+            .Distinct()
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        foreach (int sectorId in knownSectors)
+        {
+            states.TryAdd(sectorId, MapStates.Known);
+        }
+
+        return states;
     }
 
     /// <summary>
@@ -131,7 +189,11 @@ public sealed class WorldMapService
         [
             .. systems.Select(system =>
             {
-                bool open = scope.SeesEverything || openIds.Contains(system.Id);
+                // A system is open when a radar of the player reaches it or a body of the player
+                // stands in it. A system the player knows nothing of is unknown (task 00050): the
+                // player may not name it as the target of a flight.
+                bool own = ownCounts.GetValueOrDefault(system.Id) > 0;
+                bool open = scope.SeesEverything || openIds.Contains(system.Id) || own;
                 (double? distance, long? seconds) = Travel(settings, origin, sector, new Point3(system.X, system.Y, system.Z), system.Id, null);
 
                 return new MapSystemDto(
@@ -142,7 +204,7 @@ public sealed class WorldMapService
                     system.Y,
                     system.Z,
                     system.InNebula,
-                    open ? MapStates.Open : MapStates.Known,
+                    open ? MapStates.Open : MapStates.Unknown,
                     seenCounts.GetValueOrDefault(system.Id),
                     ownCounts.GetValueOrDefault(system.Id),
                     distance,
@@ -439,7 +501,8 @@ public sealed class WorldMapService
             name = open ? nearestSystem.Name : null;
             place = new Point3(nearestSystem.X, nearestSystem.Y, nearestSystem.Z);
             inNebula = nearestSystem.InNebula;
-            state = open ? MapStates.Open : MapStates.Known;
+            // A system the radar does not reach is unknown (task 00050).
+            state = open ? MapStates.Open : MapStates.Unknown;
         }
         else if (errors.Count == 0 && nearestField is not null && fieldGap <= settings.MapSnapRadius)
         {

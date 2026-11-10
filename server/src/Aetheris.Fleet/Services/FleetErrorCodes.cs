@@ -116,4 +116,28 @@ public static class FleetErrorCodes
 
     /// <summary>The two fleets of a transfer do not stand on the same body, or are the same fleet (task 00040).</summary>
     public const string FleetsApart = "fleet_fleets_apart";
+
+    /// <summary>The fleet has no flight plan (task 00050).</summary>
+    public const string FlightPlanUnknown = "fleet_flight_plan_unknown";
+
+    /// <summary>The fleet already has a flight plan: it has one at most (task 00050).</summary>
+    public const string FlightPlanExists = "fleet_flight_plan_exists";
+
+    /// <summary>The plan of the fleet is under way, so it is not changed nor deleted (task 00050).</summary>
+    public const string FlightPlanUnderWay = "fleet_flight_plan_under_way";
+
+    /// <summary>The plan of the fleet is not under way, so it cannot be stopped (task 00050).</summary>
+    public const string FlightPlanNotUnderWay = "fleet_flight_plan_not_under_way";
+
+    /// <summary>The plan has more orders than a plan may hold (task 00050).</summary>
+    public const string FlightPlanTooManyOrders = "fleet_flight_plan_too_many_orders";
+
+    /// <summary>The order of the plan names no type, or a type that does not exist (task 00050).</summary>
+    public const string FlightOrderTypeUnknown = "fleet_flight_order_type_unknown";
+
+    /// <summary>The order of the plan names a target that does not exist (task 00050).</summary>
+    public const string FlightOrderTargetUnknown = "fleet_flight_order_target_unknown";
+
+    /// <summary>The estimate of the extraction names no fleet or no place (task 00050).</summary>
+    public const string ExtractionTargetUnknown = "fleet_extraction_target_unknown";
 }

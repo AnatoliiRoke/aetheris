@@ -33,6 +33,10 @@ export interface MapCardContext {
   onOpenPlanet: (planetId: number) => void;
   onSetTarget: () => void;
   onClearTarget: () => void;
+  /** Opens the window that writes the flight plan for the fleet the player chooses. */
+  onSendFleet: () => void;
+  /** Whether the player has a fleet that may take the flight: without one the button is off. */
+  canSendFleet: boolean;
 }
 
 const futureActions: { icon: GameIconName; key: 'colonize' | 'mine' | 'scout' | 'attack' | 'escort' }[] = [
@@ -272,7 +276,14 @@ export function MapCard({ selection, context }: { selection: MapSelection; conte
         ) : null}
         {showFlight ? (
           <>
-            <button aria-describedby="map-fleet-note" className="btn btn--secondary" disabled type="button">
+            <button
+              aria-describedby="map-fleet-note"
+              className="btn btn--secondary"
+              disabled={!context.canSendFleet}
+              onClick={context.onSendFleet}
+              title={context.canSendFleet ? undefined : t('map.needFleet')}
+              type="button"
+            >
               <GameIcon name="mapRoute" size={18} />
               {t('map.sendFleet')}
             </button>

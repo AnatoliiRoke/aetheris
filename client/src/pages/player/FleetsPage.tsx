@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { Fleet, FleetsView } from '../../api/fleetApi';
+import type { Fleet, FleetsView, FlightPlan } from '../../api/fleetApi';
 import { useApi } from '../../api/useApi';
 import { Alert } from '../../components/Alert';
 import { GameIcon } from '../../components/GameIcon';
@@ -12,6 +12,7 @@ import { ScreenHead } from './ScreenHead';
 import { noticeFromError, type Notice } from './screenNotice';
 import { FleetCard } from './fleets/FleetCard';
 import { ConfirmDialog, CreateFleetDialog, ShipQuantityDialog } from './fleets/FleetDialogs';
+import { FlightPlanDialog, type FlightPlanSeed } from './fleets/FlightPlanDialog';
 import { FleetPanel } from './fleets/FleetPanel';
 import { FreeShipsPanel } from './fleets/FreeShipsPanel';
 import { fleetsOn, passesState, type StateFilter } from './fleets/fleetsParts';
@@ -31,7 +32,9 @@ type Dialog =
   | { kind: 'disband'; fleetId: number }
   | { kind: 'add'; planetId: number; fleetId: number | null }
   | { kind: 'remove'; fleetId: number }
-  | { kind: 'move'; fleetId: number };
+  | { kind: 'move'; fleetId: number }
+  | { kind: 'plan'; fleetId: number | null; seed: FlightPlanSeed | null }
+  | { kind: 'planDelete'; fleetId: number };
 
 /**
  * The screen of the fleets (task 00040, mock-up `documentation/design/AETHERIS_fleets`): the list of
@@ -49,6 +52,8 @@ export function FleetsPage() {
 
   const load = useCallback(() => fleetApi.fleets(), [fleetApi]);
   const read = useRead(load);
+  const loadPlans = useCallback(() => fleetApi.flightPlans(), [fleetApi]);
+  const plansRead = useRead(loadPlans);
   const [fresh, setFresh] = useState<{ view: FleetsView; at: number } | null>(null);
   const [notice, setNotice] = useState<Notice>(null);
   const [dialogError, setDialogError] = useState<string | null>(null);
@@ -57,6 +62,7 @@ export function FleetsPage() {
 
   // An answer of a command is newer than the last read until a read arrives after it.
   const view: FleetsView | null = fresh && (read.receivedAt === null || fresh.at > read.receivedAt) ? fresh.view : read.data;
+  const plans: FlightPlan[] = plansRead.data ?? [];
 
   const run = useCallback(
     async (command: () => Promise<FleetsView>, done: string): Promise<boolean> => {
@@ -85,6 +91,38 @@ export function FleetsPage() {
       }
     },
     [dialog, language, t],
+  );
+
+  /**
+   * Runs a command of a flight plan and reads the plans again, so the screen shows the new state.
+   */
+  const runPlan = useCallback(
+    async (command: () => Promise<unknown>, done: string): Promise<boolean> => {
+      setBusy(true);
+      try {
+        await command();
+
+        await plansRead.reload();
+        setNotice({ kind: 'success', text: done });
+        setDialogError(null);
+        setDialog(null);
+
+        return true;
+      } catch (error) {
+        const refusal = noticeFromError(error, language, t('fleets.failed'), reasonPrefixes);
+
+        if (dialog) {
+          setDialogError(refusal?.text ?? null);
+        } else {
+          setNotice(refusal);
+        }
+
+        return false;
+      } finally {
+        setBusy(false);
+      }
+    },
+    [dialog, language, plansRead, t],
   );
 
   const openDialog = useCallback((next: Dialog | null) => {
@@ -116,6 +154,8 @@ export function FleetsPage() {
         dialogError={dialogError}
         notice={notice}
         onDialog={openDialog}
+        onPlan={runPlan}
+        plans={plans}
         run={run}
         view={view}
       />
@@ -127,28 +167,34 @@ export function FleetsPage() {
  * The content of the screen once the fleets have arrived.
  *
  * @param view The fleets of the player.
+ * @param plans The flight plans of the player.
  * @param busy Whether a command is under way.
  * @param dialog The window that is open, or `null`.
  * @param dialogError The refusal shown in the window, or `null`.
  * @param notice The message above the content.
  * @param onDialog Opens a window or closes the open one.
+ * @param onPlan Runs a command of a flight plan.
  * @param run Runs a command and keeps its answer.
  */
 function FleetsContent({
   view,
+  plans,
   busy,
   dialog,
   dialogError,
   notice,
   onDialog,
+  onPlan,
   run,
 }: {
   view: FleetsView;
+  plans: readonly FlightPlan[];
   busy: boolean;
   dialog: Dialog | null;
   dialogError: string | null;
   notice: Notice;
   onDialog: (dialog: Dialog | null) => void;
+  onPlan: (command: () => Promise<unknown>, done: string) => Promise<boolean>;
   run: (command: () => Promise<FleetsView>, done: string) => Promise<boolean>;
 }) {
   const { t, language } = useI18n();
@@ -176,6 +222,11 @@ function FleetsContent({
   const createBlocked = limitReached || view.freeShips.length === 0;
   const dialogFleet = dialog && 'fleetId' in dialog ? (view.fleets.find((fleet) => fleet.id === dialog.fleetId) ?? null) : null;
   const noShipsAtAll = view.fleets.length === 0 && view.freeShips.length === 0;
+  const planOf = useCallback((fleetId: number): FlightPlan | null => plans.find((plan) => plan.fleetId === fleetId) ?? null, [plans]);
+  const planDialog = dialog?.kind === 'plan' ? dialog : null;
+  const planOfDialog = planDialog?.fleetId === null || planDialog === null ? null : planOf(planDialog.fleetId);
+  // The places of the sector of the fleet may be named as targets of the plan.
+  const sectorId = dialogFleet?.sectorId ?? selected?.sectorId ?? view.fleets[0]?.sectorId ?? null;
 
   return (
     <div className="civ-main__in">
@@ -309,6 +360,11 @@ function FleetsContent({
                 onMove={() => onDialog({ kind: 'move', fleetId: selected.id })}
                 onRemove={() => onDialog({ kind: 'remove', fleetId: selected.id })}
                 onRename={(name) => run(() => fleetApi.renameFleet({ fleetId: selected.id, name }), t('fleets.renamed'))}
+                plan={planOf(selected.id)}
+                onPlanCreate={() => onDialog({ kind: 'plan', fleetId: selected.id, seed: null })}
+                onPlanDelete={() => onDialog({ kind: 'planDelete', fleetId: selected.id })}
+                onPlanEdit={() => onDialog({ kind: 'plan', fleetId: selected.id, seed: null })}
+                onPlanStop={() => void onPlan(() => fleetApi.stopFlightPlan(selected.id), t('plan.stopped'))}
               />
             ) : null}
           </div>
@@ -385,6 +441,38 @@ function FleetsContent({
           }
           ships={dialogFleet.ships}
           title={`${t('fleets.moveTitle')}: ${dialogFleet.name}`}
+        />
+      ) : null}
+
+      {planDialog ? (
+        <FlightPlanDialog
+          busy={busy}
+          error={dialogError}
+          fleets={view.fleets}
+          onClose={() => onDialog(null)}
+          onExecute={(_fleetId, _orders) => void onPlan(() => fleetApi.executeFlightPlan(_fleetId), t('plan.saved'))}
+          onSave={(fleetId, orders) =>
+            void onPlan(
+              () => (planOfDialog ? fleetApi.saveFlightPlan({ fleetId, orders }) : fleetApi.createFlightPlan({ fleetId, orders })),
+              t('plan.saved'),
+            )
+          }
+          plan={planOfDialog}
+          seed={planDialog.seed}
+          sectorId={sectorId}
+        />
+      ) : null}
+
+      {dialog?.kind === 'planDelete' && dialogFleet ? (
+        <ConfirmDialog
+          body={t('plan.deleteText')}
+          busy={busy}
+          confirmLabel={t('plan.delete')}
+          error={dialogError}
+          onClose={() => onDialog(null)}
+          onConfirm={() => void onPlan(() => fleetApi.deleteFlightPlan(dialogFleet.id), t('plan.deleted'))}
+          subject={dialogFleet.name}
+          title={t('plan.deleteTitle')}
         />
       ) : null}
     </div>

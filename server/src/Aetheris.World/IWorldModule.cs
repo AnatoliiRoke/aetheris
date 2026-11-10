@@ -129,6 +129,16 @@ public interface IWorldModule
     Task<ExtractionResult> ExtractFromFieldAsync(long fieldId, long processingMass, long freeHold, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Processes one cycle on a nebula.
+    /// </summary>
+    /// <param name="nebulaId">The nebula.</param>
+    /// <param name="processingMass">The mass the module processes per cycle.</param>
+    /// <param name="freeHold">The free room of the hold.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The yield.</returns>
+    Task<ExtractionResult> ExtractFromNebulaAsync(long nebulaId, long processingMass, long freeHold, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the distance between two star systems.
     /// </summary>
     /// <param name="fromSystemId">The first system.</param>
@@ -144,6 +154,15 @@ public interface IWorldModule
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The content, or <see langword="null"/>.</returns>
     Task<SystemContentDto?> GetSystemContentAsync(long systemId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the place of the map by its identifier, without the visibility filter, for the server
+    /// itself: a field of a sector, a field of a system, a gas giant or a nebula (task 00050).
+    /// </summary>
+    /// <param name="objectId">The object of the map.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place, or <see langword="null"/> when the object is unknown.</returns>
+    Task<PlaceContentDto?> GetPlaceContentAsync(long objectId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the facts of a body for another module: the sector, the owner and the deposits.

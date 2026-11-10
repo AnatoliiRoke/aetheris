@@ -24,7 +24,7 @@ namespace Aetheris.Tests.Processes;
 [Collection(DatabaseCollection.Name)]
 public sealed class ProcessStubTests
 {
-    private const string Engine = "part_4";
+    private const string Engine = "part_m_4";
 
     private readonly AetherisTestFactory _factory;
 

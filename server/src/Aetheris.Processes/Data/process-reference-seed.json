@@ -1,6 +1,7 @@
 {
   "types": [
     {
+      "code": "process_type_1",
       "key": "recycling",
       "handler": "recycling",
       "refunds_input": true,
@@ -15,6 +16,7 @@
       }
     },
     {
+      "code": "process_type_2",
       "key": "matter_conversion",
       "handler": "matter_conversion",
       "refunds_input": true,
@@ -29,6 +31,7 @@
       }
     },
     {
+      "code": "process_type_3",
       "key": "ship_repair",
       "handler": "ship_repair",
       "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
@@ -45,6 +48,7 @@
       }
     },
     {
+      "code": "process_type_4",
       "key": "module_replacement",
       "handler": "module_replacement",
       "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
@@ -61,6 +65,7 @@
       }
     },
     {
+      "code": "process_type_5",
       "key": "module_repair",
       "handler": "module_repair",
       "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
@@ -79,6 +84,7 @@
   ],
   "recipes": [
     {
+      "code": "process_recipe_1",
       "key": "recycle_part",
       "type": "recycling",
       "building_class": "recycling",
@@ -99,6 +105,7 @@
       "requirements": []
     },
     {
+      "code": "process_recipe_2",
       "key": "convert_metals",
       "type": "matter_conversion",
       "building_class": "converter",
@@ -119,6 +126,7 @@
       "requirements": []
     },
     {
+      "code": "process_recipe_3",
       "key": "convert_minerals",
       "type": "matter_conversion",
       "building_class": "converter",
@@ -139,6 +147,7 @@
       "requirements": []
     },
     {
+      "code": "process_recipe_4",
       "key": "repair_ship",
       "type": "ship_repair",
       "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
@@ -161,6 +170,7 @@
       "requirements": []
     },
     {
+      "code": "process_recipe_5",
       "key": "replace_module",
       "type": "module_replacement",
       "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
@@ -183,6 +193,7 @@
       "requirements": []
     },
     {
+      "code": "process_recipe_6",
       "key": "repair_module",
       "type": "module_repair",
       "stub_note": "Stub: not offered until the fleet and its parts exist (author decision 31.10.2026); archived in the seed.",
@@ -207,6 +218,7 @@
   ],
   "params": [
     {
+      "code": "process_param_1",
       "type": "matter_conversion",
       "kind": "value_by_level",
       "level_source": "technology",
@@ -225,6 +237,7 @@
       }
     },
     {
+      "code": "process_param_2",
       "type": "matter_conversion",
       "kind": "duration_factor",
       "level_source": "building",
@@ -243,6 +256,7 @@
       }
     },
     {
+      "code": "process_param_3",
       "type": "matter_conversion",
       "kind": "duration_factor",
       "level_source": "building",
@@ -261,6 +275,7 @@
       }
     },
     {
+      "code": "process_param_4",
       "type": "matter_conversion",
       "kind": "duration_factor",
       "level_source": "building",
@@ -279,6 +294,7 @@
       }
     },
     {
+      "code": "process_param_5",
       "type": "matter_conversion",
       "kind": "duration_factor",
       "level_source": "building",
@@ -297,6 +313,7 @@
       }
     },
     {
+      "code": "process_param_6",
       "type": "matter_conversion",
       "kind": "duration_factor",
       "level_source": "building",
@@ -315,6 +332,7 @@
       }
     },
     {
+      "code": "process_param_7",
       "type": "ship_repair",
       "kind": "value_by_level",
       "level_source": "building",
@@ -333,6 +351,7 @@
       }
     },
     {
+      "code": "process_param_8",
       "type": "module_repair",
       "kind": "value_by_level",
       "level_source": "building",

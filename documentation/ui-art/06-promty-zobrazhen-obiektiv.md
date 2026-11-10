@@ -1035,10 +1035,10 @@ A uranium torpedo, a heavy dark torpedo with green glowing warhead sections. A h
 
 ### Видобуток
 
-**53. Модуль геологорозвідки** — Survey module (`part_m_53`, файл `part_m_53.webp`)
+**53. Екстрактор гелію** — Helium extractor (`part_m_53`, файл `part_m_53.webp`)
 
 ```
-A survey module, a scanning pod with a slim antenna array and a ground-scanning cone of light. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized.
+A helium extractor, a heavy cryogenic intake manifold with frosted cold-blue condenser coils and a glowing pale-blue helium tank. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized.
 ```
 
 **54. Бурова установка** — Drill rig (`part_m_54`, файл `part_m_54.webp`)
@@ -1053,16 +1053,16 @@ A drill rig, a robust drilling head with rotating teeth and sparks. A hard-surfa
 A crystal extractor, a precise claw-and-laser tool holding a glowing blue crystal. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized.
 ```
 
-**56. Збирач ефіру** — Ether collector (`part_m_56`, файл `part_m_56.webp`)
+**56. Екстрактор ефіру** — Ether extractor (`part_m_56`, файл `part_m_56.webp`)
 
 ```
-An ether collector, a funnel-shaped collector drawing golden ether mist into a container. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized.
+An ether extractor, a funnel-shaped collector drawing golden ether mist into a container. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized.
 ```
 
-**57. Туманнісний збирач** — Nebula collector (`part_m_57`, файл `part_m_57.webp`)
+**57. Екстрактор матерії** — Matter extractor (`part_m_57`, файл `part_m_57.webp`)
 
 ```
-A nebula collector, a wide net-like scoop trailing violet-teal nebula gas. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized.
+A matter extractor, a wide net-like scoop trailing violet-teal nebula gas. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized.
 ```
 
 ### Розвідка й маскування

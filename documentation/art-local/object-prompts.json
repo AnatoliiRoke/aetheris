@@ -1595,9 +1595,9 @@
     "file": "part_m_53.webp",
     "size": "1280x720",
     "group": "Видобуток",
-    "name_uk": "Модуль геологорозвідки",
-    "name_en": "Survey module",
-    "prompt": "A survey module, a scanning pod with a slim antenna array and a ground-scanning cone of light. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized."
+    "name_uk": "Екстрактор гелію",
+    "name_en": "Helium extractor",
+    "prompt": "A helium extractor, a heavy cryogenic intake manifold with frosted cold-blue condenser coils and a glowing pale-blue helium tank. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized."
   },
   {
     "kind": "module",
@@ -1625,9 +1625,9 @@
     "file": "part_m_56.webp",
     "size": "1280x720",
     "group": "Видобуток",
-    "name_uk": "Збирач ефіру",
-    "name_en": "Ether collector",
-    "prompt": "An ether collector, a funnel-shaped collector drawing golden ether mist into a container. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized."
+    "name_uk": "Екстрактор ефіру",
+    "name_en": "Ether extractor",
+    "prompt": "An ether extractor, a funnel-shaped collector drawing golden ether mist into a container. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized."
   },
   {
     "kind": "module",
@@ -1635,9 +1635,9 @@
     "file": "part_m_57.webp",
     "size": "1280x720",
     "group": "Видобуток",
-    "name_uk": "Туманнісний збирач",
-    "name_en": "Nebula collector",
-    "prompt": "A nebula collector, a wide net-like scoop trailing violet-teal nebula gas. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized."
+    "name_uk": "Екстрактор матерії",
+    "name_en": "Matter extractor",
+    "prompt": "A matter extractor, a wide net-like scoop trailing violet-teal nebula gas. A hard-surface photorealistic render of a single ship module shown alone on a dark pedestal, three-quarter view, real metal, panel lines, bolts, cables and slight wear, soft rim light, no ship hull around it. 16:9 frame, 1280x720; the subject stays inside the middle 60% of the frame so the picture survives a crop to 4:3 or 1:1. photorealistic cinematic render, physically accurate materials and lighting, fine surface detail, realistic scale and proportions, sharp focus, dark space atmosphere with a deep navy background (#0B1020), subtle volumetric glow, no text, no letters, no numbers, no watermark, not a cartoon, not stylized."
   },
   {
     "kind": "module",

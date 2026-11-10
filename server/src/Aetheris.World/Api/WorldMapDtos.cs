@@ -47,7 +47,8 @@ public static class MapTargetErrors
 /// <param name="IsNewbie">Whether newcomers start there.</param>
 /// <param name="SystemCount">How many star systems the sector has.</param>
 /// <param name="OwnPlanetCount">How many bodies of the player lie in the sector.</param>
-public sealed record MapSectorDto(int Id, string Name, double X, double Y, double Z, bool IsNewbie, int SystemCount, int OwnPlanetCount);
+/// <param name="State">One of <see cref="MapStates"/>: what the player knows of the sector.</param>
+public sealed record MapSectorDto(int Id, string Name, double X, double Y, double Z, bool IsNewbie, int SystemCount, int OwnPlanetCount, string State);
 
 /// <summary>The map of the galaxy: the sectors with what the player has in them.</summary>
 /// <param name="Sectors">The sectors.</param>

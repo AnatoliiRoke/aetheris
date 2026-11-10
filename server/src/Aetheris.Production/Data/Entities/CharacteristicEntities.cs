@@ -1,3 +1,5 @@
+using Aetheris.Production.Api;
+
 namespace Aetheris.Production.Data.Entities;
 
 /// <summary>

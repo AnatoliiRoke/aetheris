@@ -75,6 +75,11 @@ public static class FleetConfigKeys
     public const string FleetNameMaxLength = "fleet.formation.name_max_length";
 
     /// <summary>
+    /// The most orders a flight plan of a fleet may hold (task 00050).
+    /// </summary>
+    public const string FlightPlanMaxOrders = "fleet.flight_plan.max_orders";
+
+    /// <summary>
     /// Gets the definitions of the parameters with their starting values and bounds.
     /// </summary>
     public static IReadOnlyList<ConfigParameterDefinition> Definitions { get; } =
@@ -94,6 +99,7 @@ public static class FleetConfigKeys
         new(MaterialShare, "0.1", "0", "1", "Частка ресурсів, витрачених на модулі проєкту, яку складання бере матеріалами планети."),
         new(UpkeepShare, "0.1", "0", "1", "Частка кредитної ціни модулів проєкту, яку готовий корабель бере кредитами за годину. Корпус не входить."),
         new(FleetNameMaxLength, "64", "1", "128", "Найбільша кількість символів у назві флоту."),
+        new(FlightPlanMaxOrders, "32", "1", "256", "Найбільша кількість наказів у політному листі флоту."),
         new(HullReturnShare, "0.5", "0", "1", "Не застосовується. Розбір повертає всі компоненти проєкту й екіпаж і не повертає ресурси на склад."),
     ];
 }

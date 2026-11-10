@@ -7,7 +7,15 @@ import { useI18n } from '../../i18n/useI18n';
 import { useTexts } from '../../texts/useTexts';
 import { formatAmount, formatDuration } from './planetText';
 import { reasonText } from './productionRecipes';
-import { type BodyAvailability, ingredientAvailability } from './productionStock';
+import { type BodyAvailability, ingredientAvailability, outputQuantity } from './productionStock';
+import { CharacteristicList } from './StorageBlocks';
+import { useCharacteristics } from './useCharacteristics';
+
+/**
+ * How many characteristics of a part a plaque shows (task 00049). The rows come in the order of
+ * the group of the part, so the first ones are the key ones.
+ */
+const keyCharacteristics = 4;
 
 /**
  * The tile of a recipe on the production screen, drawn like the tile of a building or of a
@@ -40,11 +48,18 @@ export const RecipeCard = memo(function RecipeCard({
 }) {
   const { t, language } = useI18n();
   const { text } = useTexts();
+  const characteristics = useCharacteristics();
   const [typed, setTyped] = useState('1');
   const quantity = Number(typed);
   const valid = Number.isInteger(quantity) && quantity > 0;
   // The ingredients of the batch of the number the player chose, with what the body has.
   const ingredients = ingredientAvailability(recipe, valid ? quantity : 0, availability);
+  // The amount of the part or of the resource on the stock of the body and the key characteristics
+  // of the part (task 00049). The server leaves out a field that is null, so a recipe of a resource
+  // has no part at all: neither null nor undefined.
+  const partId = recipe.partTypeId ?? null;
+  const inStock = outputQuantity(availability, recipe);
+  const characteristicRows = partId === null ? [] : characteristics.rows(partId).slice(0, keyCharacteristics);
 
   return (
     <li className="building-card">
@@ -54,6 +69,12 @@ export const RecipeCard = memo(function RecipeCard({
         {recipe.isAvailable ? <span className="badge">{t('production.available')}</span> : <span className="badge badge--warning">{t('production.closed')}</span>}
       </div>
       {factoryName ? <p className="meta">{t('production.madeAt', { name: factoryName })}</p> : null}
+      {inStock === null ? null : (
+        <p className="production-card__stock meta">
+          {t('production.inStorage', { quantity: formatAmount(inStock, language) })}
+        </p>
+      )}
+      {characteristicRows.length > 0 ? <CharacteristicList language={language} rows={characteristicRows} /> : null}
       <div className="building-card__next">
         <span className="civ-label">{t('build.requiredResources')}</span>
         <ul aria-label={t('build.requiredResources')} className="cost-list cost-list--stock">

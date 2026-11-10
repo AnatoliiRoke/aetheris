@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Aetheris.Core.Data;
 using Aetheris.Core.Text;
 using Aetheris.Market.Data;
 using Aetheris.Market.Data.Entities;
@@ -11,10 +12,10 @@ namespace Aetheris.Market.Data;
 /// (task 00024, section 4.1).
 /// </summary>
 /// <remarks>
-/// Every row takes the next code of the counter of the server, and the keys of its texts are
-/// built from that code (documentation/tech/09, sections 3.2 and 4.1). The seed writes only
-/// while the tables are empty, so it never overwrites a change of the admin panel
-/// (task 00023, decision 7).
+/// Every row keeps the code of the file, and the keys of its texts are built from that code
+/// (documentation/tech/09, sections 3.2 and 4.1); the counter of the server only gives codes to
+/// the rows of the admin panel (task 00052). The seed writes only while the tables are empty, so
+/// it never overwrites a change of the admin panel (task 00023, decision 7).
 /// </remarks>
 public static class MarketReferenceSeed
 {
@@ -43,6 +44,20 @@ public static class MarketReferenceSeed
     }
 
     /// <summary>
+    /// Checks the codes of the file: the code of the file is the code of the row, so every row
+    /// must have one, in the form the keys of the texts allow, and no two rows may share it. A
+    /// file that breaks this stops the seed (task 00052).
+    /// </summary>
+    /// <param name="seed">The starting data.</param>
+    /// <exception cref="InvalidOperationException">A code is missing, malformed or repeated.</exception>
+    public static void ValidateCodes(MarketSeedData seed)
+    {
+        ArgumentNullException.ThrowIfNull(seed);
+
+        SeedCodeRules.Validate(seed.MarketLevels.Select(level => level.Code), "level of the market");
+    }
+
+    /// <summary>
     /// Writes the starting data into the tables of the module.
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
@@ -68,9 +83,11 @@ public static class MarketReferenceSeed
 
         MarketSeedData seed = Load();
 
+        ValidateCodes(seed);
+
         foreach (SeedMarketLevel level in seed.MarketLevels)
         {
-            string code = await codes.NextAsync(MarketCodeGroups.MarketLevel, cancellationToken).ConfigureAwait(false);
+            string code = level.Code;
 
             MarketLevelEntity entity = new()
             {
@@ -95,7 +112,7 @@ public static class MarketReferenceSeed
                 cancellationToken).ConfigureAwait(false);
         }
 
-        await codes.RaiseAsync(MarketCodeGroups.MarketLevel, seed.MarketLevels.Count, cancellationToken).ConfigureAwait(false);
+        await SeedCodeRules.RaiseAsync(codes, MarketCodeGroups.MarketLevel, seed.MarketLevels.Select(level => level.Code), cancellationToken).ConfigureAwait(false);
 
         return true;
     }

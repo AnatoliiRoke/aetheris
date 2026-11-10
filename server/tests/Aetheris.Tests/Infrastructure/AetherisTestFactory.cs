@@ -5,6 +5,7 @@ using Aetheris.Economy.Data;
 using Aetheris.Host.Auth;
 using Aetheris.Host.Configuration;
 using Aetheris.Host.Data;
+using Aetheris.Host.Localization;
 using Aetheris.Host.Observability;
 using Aetheris.Host.Security;
 using Aetheris.Planets;
@@ -74,6 +75,10 @@ public class AetherisTestFactory : WebApplicationFactory<Program>, IAsyncLifetim
         // them is not kept in memory; the cost tests keep it for the default time, as a running
         // server does.
         [WorldConfigKeys.CatalogCacheSeconds] = "0",
+
+        // The tests rename the keys of the texts directly in the table, so the pack of the texts is
+        // read again at every request; the cost test and the cache test keep it for themselves.
+        [TextKeys.PackCacheSeconds] = "0",
     };
 
     /// <summary>

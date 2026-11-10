@@ -309,7 +309,7 @@ FIXED_MODULE_MINERALS = {
 # as the obsidian and the orex of the engines and the arms.
 EXTRA_MODULE_MINERAL = {
     "Бурова установка",
-    "Збирач ефіру",
+    "Екстрактор ефіру",
     "Радіооптичне маскування",
     "Детектор маскування",
     "Бортовий комп'ютер",
@@ -319,7 +319,7 @@ EXTRA_MODULE_MINERAL = {
 
 # The list of the modules of the author (perelik-3) names the tumanium for the nebula collector;
 # the dependency file lacks it, and the tumanium has no other module.
-MODULE_CRYSTAL = {"Туманнісний збирач": "Туманій"}
+MODULE_CRYSTAL = {"Екстрактор матерії": "Туманій"}
 
 
 def load_coefficients() -> dict[str, float]:

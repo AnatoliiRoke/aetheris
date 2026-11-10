@@ -122,6 +122,7 @@ const paths = {
   arrowDown: 'M12 5v14 M6 13l6 6 6-6',
   clock: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z M12 7v5l3 2',
   history: 'M12 8v4l3 2 M3 12a9 9 0 1 0 3-6.7 M3 4v5h5',
+  trash: 'M4 7h16 M9 7V5h6v2 M6 7l1 13h10l1-13 M10 11v6 M14 11v6',
 } as const;
 
 /**

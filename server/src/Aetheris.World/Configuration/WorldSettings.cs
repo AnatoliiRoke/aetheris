@@ -82,6 +82,12 @@ public sealed record WorldSettings
     /// <summary>Gets the multiplier of the radar range inside a nebula.</summary>
     public double NebulaRadarMultiplier { get; init; }
 
+    /// <summary>Gets the smallest mass of a nebula, in tonnes.</summary>
+    public long NebulaMassMin { get; init; }
+
+    /// <summary>Gets the largest mass of a nebula, in tonnes.</summary>
+    public long NebulaMassMax { get; init; }
+
     /// <summary>Gets a value indicating whether a nebula forbids the jump drive.</summary>
     public bool NebulaBlocksJumpDrive { get; init; }
 
@@ -206,6 +212,8 @@ public sealed record WorldSettings
             NebulaRadiusMin = ReadDouble(config, WorldConfigKeys.NebulaRadiusMin),
             NebulaRadiusMax = ReadDouble(config, WorldConfigKeys.NebulaRadiusMax),
             NebulaRadarMultiplier = ReadDouble(config, WorldConfigKeys.NebulaRadarMultiplier),
+            NebulaMassMin = ReadInt64(config, WorldConfigKeys.NebulaMassMin),
+            NebulaMassMax = ReadInt64(config, WorldConfigKeys.NebulaMassMax),
             NebulaBlocksJumpDrive = ReadBoolean(config, WorldConfigKeys.NebulaBlocksJumpDrive),
             FieldMaxCompositionShare = (decimal)ReadDouble(config, WorldConfigKeys.FieldMaxCompositionShare),
             FieldMinCompositionShare = (decimal)ReadDouble(config, WorldConfigKeys.FieldMinCompositionShare),

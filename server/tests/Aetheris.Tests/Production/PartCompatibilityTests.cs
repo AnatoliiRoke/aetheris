@@ -58,7 +58,7 @@ public sealed class PartCompatibilityTests
         ProductionDbContext dbContext = services.GetRequiredService<ProductionDbContext>();
 
         PartTypeInfo? engine = (await CatalogAsync(services, dbContext)).Parts
-            .FirstOrDefault(part => part.Code == "part_1");
+            .FirstOrDefault(part => part.Code == "part_m_1");
 
         Assert.NotNull(engine);
         Assert.NotEmpty(engine.CompatibleHullIds);
@@ -84,10 +84,10 @@ public sealed class PartCompatibilityTests
 
         ProductionDbContext dbContext = services.GetRequiredService<ProductionDbContext>();
 
-        PartTypeInfo part = (await CatalogAsync(services, dbContext)).Parts.First(entry => entry.Code == "part_10");
+        PartTypeInfo part = (await CatalogAsync(services, dbContext)).Parts.First(entry => entry.Code == "part_m_10");
 
         // A hull the starting data does not fit the part to, so the link is new.
-        PartTypeInfo hull = (await CatalogAsync(services, dbContext)).Parts.First(entry => entry.Code == "part_110");
+        PartTypeInfo hull = (await CatalogAsync(services, dbContext)).Parts.First(entry => entry.Code == "part_h_27");
 
         Assert.DoesNotContain(hull.Id, part.CompatibleHullIds);
         Assert.DoesNotContain(1, part.RaceIds);
@@ -108,7 +108,7 @@ public sealed class PartCompatibilityTests
 
         services.GetRequiredService<ProductionCatalogCache>().Invalidate();
 
-        PartTypeInfo stored = (await CatalogAsync(services, dbContext)).Parts.First(entry => entry.Code == "part_10");
+        PartTypeInfo stored = (await CatalogAsync(services, dbContext)).Parts.First(entry => entry.Code == "part_m_10");
 
         Assert.Contains(hull.Id, stored.CompatibleHullIds);
         Assert.Contains(1, stored.RaceIds);
@@ -128,8 +128,8 @@ public sealed class PartCompatibilityTests
         using IServiceScope scope = _factory.Services.CreateScope();
         ProductionDbContext dbContext = scope.ServiceProvider.GetRequiredService<ProductionDbContext>();
 
-        PartTypeEntity part = await dbContext.PartTypes.AsNoTracking().SingleAsync(entry => entry.Code == "part_2", Token);
-        PartTypeEntity hull = await dbContext.PartTypes.AsNoTracking().SingleAsync(entry => entry.Code == "part_84", Token);
+        PartTypeEntity part = await dbContext.PartTypes.AsNoTracking().SingleAsync(entry => entry.Code == "part_m_2", Token);
+        PartTypeEntity hull = await dbContext.PartTypes.AsNoTracking().SingleAsync(entry => entry.Code == "part_h_1", Token);
 
         (int id, int version) = await ReferenceAdmin.ChangedAsync(await ReferenceAdmin.CreateAsync(
             admin,
@@ -178,7 +178,7 @@ public sealed class PartCompatibilityTests
         using IServiceScope scope = _factory.Services.CreateScope();
         ProductionDbContext dbContext = scope.ServiceProvider.GetRequiredService<ProductionDbContext>();
 
-        PartTypeEntity part = await dbContext.PartTypes.AsNoTracking().SingleAsync(entry => entry.Code == "part_2", Token);
+        PartTypeEntity part = await dbContext.PartTypes.AsNoTracking().SingleAsync(entry => entry.Code == "part_m_2", Token);
 
         // A part that is not a hull: the engine itself is not a hull.
         await ReferenceAdmin.AssertFieldAsync(

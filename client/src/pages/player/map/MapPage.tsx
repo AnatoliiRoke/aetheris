@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { MapField, MapGalaxy, MapObject, MapSearchResult, MapSectorView, MapSystem, MapSystemView } from '../../../api/mapApi';
 import { ApiError } from '../../../api/http';
+import type { FleetsView } from '../../../api/fleetApi';
 import { useApi } from '../../../api/useApi';
 import { Alert } from '../../../components/Alert';
 import { GameIcon, type GameIconName } from '../../../components/GameIcon';
@@ -13,6 +14,8 @@ import { useRouter } from '../../../router/useRouter';
 import { useTexts } from '../../../texts/useTexts';
 import { ScreenHead } from '../ScreenHead';
 import { formatCoefficient, formatDuration } from '../planetText';
+import { FlightPlanDialog, type FlightPlanSeed } from '../fleets/FlightPlanDialog';
+import { noticeFromError } from '../screenNotice';
 import { usePlanet } from '../usePlanet';
 import { useResourceGroups } from '../useResourceGroups';
 import { useResourceNames } from '../useResourceNames';
@@ -50,6 +53,7 @@ export function MapPage() {
   useDocumentTitle(t('meta.map.title'));
 
   const { map } = useApi();
+  const { fleet: fleetApi } = useApi();
   const { query, navigate } = useRouter();
   const planetId = useCurrentPlanetId();
   const { planet } = usePlanet(planetId);
@@ -65,6 +69,33 @@ export function MapPage() {
   const [focus, setFocus] = useState<MapFocus | null>(null);
   const miniUpdate = useRef<((view: MapView, viewport: Viewport) => void) | null>(null);
   const focusToken = useRef(0);
+  const [planOpen, setPlanOpen] = useState(false);
+  const [planBusy, setPlanBusy] = useState(false);
+  const [planError, setPlanError] = useState<string | null>(null);
+
+  // The fleets of the player: a flight plan is made for one of them, so the card of the map needs
+  // to know whether there is a fleet at all (task 00050).
+  const [fleets, setFleets] = useState<FleetsView | null>(null);
+
+  const loadFleets = useCallback(() => fleetApi.fleets(), [fleetApi]);
+
+  useEffect(() => {
+    let alive = true;
+
+    void loadFleets()
+      .then((answer) => {
+        if (alive) {
+          setFleets(answer);
+        }
+      })
+      .catch(() => {
+        // The card of the map stays without fleets: the button of the flight stays off.
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [loadFleets]);
 
   const level: Level = location.systemId !== null ? 'system' : location.sectorId !== null ? 'sector' : 'galaxy';
   const levelKey = `${level}:${location.sectorId ?? ''}:${location.systemId ?? ''}`;
@@ -239,6 +270,57 @@ export function MapPage() {
 
   const isTarget = selectionTarget !== null && addressTarget !== null && targetToText(selectionTarget) === addressTarget;
 
+  // The target of the flight the card of the map gives to the window of the flight plan.
+  const planSeed = useMemo<FlightPlanSeed | null>(() => {
+    if (!selectionTarget) {
+      return null;
+    }
+
+    if (selectionTarget.kind === 'system') {
+      return { targetKind: 'planet', targetSystemId: selectionTarget.systemId };
+    }
+
+    if (selectionTarget.kind === 'object') {
+      return {
+        targetKind: selectionTarget.systemId === null ? 'object' : 'planet',
+        targetObjectId: selectionTarget.objectId,
+        targetSystemId: selectionTarget.systemId ?? undefined,
+        targetSectorId: selectionTarget.sectorId ?? undefined,
+      };
+    }
+
+    return {
+      targetKind: 'point',
+      targetSectorId: selectionTarget.sectorId,
+      targetX: selectionTarget.x,
+      targetY: selectionTarget.y,
+      targetZ: selectionTarget.z,
+    };
+  }, [selectionTarget]);
+
+  /**
+   * Writes the flight plan and closes the window of the map.
+   */
+  const writePlan = useCallback(
+    async (command: () => Promise<unknown>, _done: string) => {
+      setPlanBusy(true);
+
+      try {
+        await command();
+
+        setPlanError(null);
+        setPlanOpen(false);
+      } catch (error) {
+        const refusal = noticeFromError(error, language, t('fleets.failed'), ['fleet_']);
+
+        setPlanError(refusal?.text ?? null);
+      } finally {
+        setPlanBusy(false);
+      }
+    },
+    [language, t],
+  );
+
   const onSelect = (key: string) => {
     setSelectedKey(key);
 
@@ -309,6 +391,11 @@ export function MapPage() {
     },
     onSetTarget: () => selectionTarget && setTarget(selectionTarget),
     onClearTarget: () => setTarget(null),
+    onSendFleet: () => {
+      setPlanError(null);
+      setPlanOpen(true);
+    },
+    canSendFleet: (fleets?.fleets.length ?? 0) > 0,
   };
 
   const layerContext: LayerContext = { typeName, typeImage, selectedKey, onSelect, onOpen };
@@ -536,6 +623,20 @@ export function MapPage() {
       ) : (
         drawn
       )}
+
+      {planOpen && fleets ? (
+        <FlightPlanDialog
+          busy={planBusy}
+          error={planError}
+          fleets={fleets.fleets}
+          onClose={() => setPlanOpen(false)}
+          onExecute={(_fleetId, _orders) => void writePlan(() => fleetApi.executeFlightPlan(_fleetId), t('plan.saved'))}
+          onSave={(fleetId, orders) => void writePlan(() => fleetApi.createFlightPlan({ fleetId, orders }), t('plan.saved'))}
+          plan={null}
+          seed={planSeed}
+          sectorId={sector?.sectorId ?? location.sectorId}
+        />
+      ) : null}
     </div>
   );
 }

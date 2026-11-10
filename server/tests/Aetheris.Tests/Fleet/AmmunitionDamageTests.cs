@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using Aetheris.Production;
+using Aetheris.Production.Api;
 using Aetheris.Production.Configuration;
 using Aetheris.Production.Data;
 using Aetheris.Production.Services;
@@ -260,7 +261,7 @@ public sealed class AmmunitionDamageTests
 
         return await production.PartCharacteristicValues.AsNoTracking()
             .Where(value => value.PartTypeId == ids[fileCode])
-            .Join(production.Characteristics.Where(characteristic => characteristic.Code == "characteristic_6"), value => value.CharacteristicId, characteristic => characteristic.Id, (value, _) => value.NumberValue)
+            .Join(production.Characteristics.Where(characteristic => characteristic.Code == "char_rate"), value => value.CharacteristicId, characteristic => characteristic.Id, (value, _) => value.NumberValue)
             .SingleAsync(Token);
     }
 

@@ -40,6 +40,10 @@ public static class ProcessesServiceCollectionExtensions
         services.TryAddSingleton<IShipsOnOrbit>(serviceProvider => serviceProvider.GetRequiredService<ShipsOnOrbitStub>());
         services.AddScoped<ProcessesUnitOfWork>();
         services.AddScoped<ProcessesBootstrapService>();
+
+        // The tables the starting data fills, for the command reconcile-seed-codes (task 00052).
+        services.AddScoped<ISeedCodeSource, ProcessSeedCodeSource>();
+
         services.AddScoped<ProcessQueueService>();
         services.AddScoped<ProcessPlayerAdminService>();
         services.AddScoped<IResourceUsage, ProcessesResourceUsage>();

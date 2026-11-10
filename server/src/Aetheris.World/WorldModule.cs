@@ -15,6 +15,7 @@ public sealed class WorldModule : IWorldModule
     private readonly StartPlanetAllocator _allocator;
     private readonly CivilizationService _civilizations;
     private readonly FieldService _fields;
+    private readonly NebulaExtractionService _nebulae;
     private readonly WorldQueryService _queries;
     private readonly GenerationRunService _runs;
     private readonly DepositRichnessService _deposits;
@@ -35,6 +36,7 @@ public sealed class WorldModule : IWorldModule
         StartPlanetAllocator allocator,
         CivilizationService civilizations,
         FieldService fields,
+        NebulaExtractionService nebulae,
         WorldQueryService queries,
         GenerationRunService runs,
         DepositRichnessService deposits,
@@ -44,6 +46,7 @@ public sealed class WorldModule : IWorldModule
         ArgumentNullException.ThrowIfNull(allocator);
         ArgumentNullException.ThrowIfNull(civilizations);
         ArgumentNullException.ThrowIfNull(fields);
+        ArgumentNullException.ThrowIfNull(nebulae);
         ArgumentNullException.ThrowIfNull(queries);
         ArgumentNullException.ThrowIfNull(runs);
         ArgumentNullException.ThrowIfNull(deposits);
@@ -53,6 +56,7 @@ public sealed class WorldModule : IWorldModule
         _allocator = allocator;
         _civilizations = civilizations;
         _fields = fields;
+        _nebulae = nebulae;
         _queries = queries;
         _runs = runs;
         _deposits = deposits;
@@ -114,12 +118,20 @@ public sealed class WorldModule : IWorldModule
         _fields.ExtractAsync(fieldId, processingMass, freeHold, cancellationToken);
 
     /// <inheritdoc />
+    public Task<ExtractionResult> ExtractFromNebulaAsync(long nebulaId, long processingMass, long freeHold, CancellationToken cancellationToken = default) =>
+        _nebulae.ExtractAsync(nebulaId, processingMass, freeHold, cancellationToken);
+
+    /// <inheritdoc />
     public Task<double?> GetSystemDistanceAsync(long fromSystemId, long toSystemId, CancellationToken cancellationToken = default) =>
         _queries.GetSystemDistanceAsync(fromSystemId, toSystemId, cancellationToken);
 
     /// <inheritdoc />
     public Task<SystemContentDto?> GetSystemContentAsync(long systemId, CancellationToken cancellationToken = default) =>
         _queries.GetSystemContentAsync(null, systemId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<PlaceContentDto?> GetPlaceContentAsync(long objectId, CancellationToken cancellationToken = default) =>
+        _queries.GetPlaceContentAsync(objectId, cancellationToken);
 
     /// <inheritdoc />
     public Task<PlanetFacts?> GetPlanetFactsAsync(long planetId, CancellationToken cancellationToken = default) =>

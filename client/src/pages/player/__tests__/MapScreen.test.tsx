@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { fakeAuthApi, fakeMapApi, renderPage, sampleMapGalaxy, sampleMapSector, signedInMe } from '../../../test/renderPage';
+import { fakeAuthApi, fakeFleetApi, fakeMapApi, renderPage, sampleFleetsView, sampleMapGalaxy, sampleMapSector, signedInMe } from '../../../test/renderPage';
 
 /**
  * A signed-in player with a civilization and a confirmed address.
@@ -47,7 +47,7 @@ describe('the map screen (task 00034)', () => {
     expect(screen.getByRole('button', { name: /^Vega\./ })).toBeInTheDocument();
   });
 
-  it('opens the card of a star with the distance and the time of the flight and the actions that need a fleet off', async () => {
+  it('opens the card of a star with the distance and the time of the flight and the actions that need a fleet', async () => {
     const user = userEvent.setup();
     renderPage('/map?sector=1', { auth: signedIn() });
 
@@ -57,11 +57,26 @@ describe('the map screen (task 00034)', () => {
     expect(within(card).getByRole('heading', { name: 'Vega' })).toBeInTheDocument();
     expect(within(card).getByText(/230 св\. р\./)).toBeInTheDocument();
     expect(within(card).getByText(/~2:18:00/)).toBeInTheDocument();
-    // The actions that need a fleet are finished buttons that are off, with the reason.
-    for (const name of ['Відправити флот', 'Колонізувати', 'Видобувати', 'Розвідати', 'Атакувати', 'Супровід']) {
+    // The flight of a fleet is written in a window (task 00050), so the button works; the actions
+    // of a battle are still off, with the reason.
+    expect(within(card).getByRole('button', { name: 'Відправити флот' })).toBeEnabled();
+    for (const name of ['Колонізувати', 'Видобувати', 'Розвідати', 'Атакувати', 'Супровід']) {
       expect(within(card).getByRole('button', { name })).toBeDisabled();
     }
     expect(within(card).getByText('Потрібен флот: флоти з’являться пізніше')).toBeInTheDocument();
+  });
+
+  it('keeps the button of the flight off when the player has no fleet', async () => {
+    const user = userEvent.setup();
+    const fleet = fakeFleetApi({ fleets: vi.fn().mockResolvedValue(sampleFleetsView({ fleets: [], freeShips: [] })) });
+
+    renderPage('/map?sector=1', { auth: signedIn(), fleet });
+
+    await user.click(await screen.findByRole('button', { name: /^Vega\./ }));
+
+    const card = await screen.findByRole('complementary', { name: 'Картка об’єкта' });
+
+    expect(within(card).getByRole('button', { name: 'Відправити флот' })).toBeDisabled();
   });
 
   it('refuses to open a star the player only knows of', async () => {
@@ -157,7 +172,7 @@ describe('the map screen (task 00034)', () => {
     expect(within(card).getByRole('heading', { name: 'Точка в просторі' })).toBeInTheDocument();
     expect(within(card).getByText(/420,5 св\. р\./)).toBeInTheDocument();
     expect(within(card).getByText('Невідомо: потрібен радар')).toBeInTheDocument();
-    expect(within(card).getByRole('button', { name: 'Відправити флот' })).toBeDisabled();
+    expect(within(card).getByRole('button', { name: 'Відправити флот' })).toBeEnabled();
     expect(window.location.search).toContain('target=point%3A1%3A500%3A500%3A0');
     expect(screen.getByRole('img', { name: 'Ціль польоту' })).toBeInTheDocument();
 

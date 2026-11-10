@@ -38,6 +38,10 @@ public static class ProductionServiceCollectionExtensions
         services.AddSingleton<ProductionCatalogCache>();
         services.AddScoped<ProductionUnitOfWork>();
         services.AddScoped<ProductionBootstrapService>();
+
+        // The tables the starting data fills, for the command reconcile-seed-codes (task 00052).
+        services.AddScoped<ISeedCodeSource, ProductionSeedCodeSource>();
+
         services.AddScoped<ProductionQueueService>();
         services.AddScoped<ProductionPlayerAdminService>();
         services.AddScoped<ShipCatalogService>();

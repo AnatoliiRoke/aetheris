@@ -61,6 +61,9 @@ public sealed record FleetSettings
     /// <summary>Gets the largest number of the characters of the name of a fleet.</summary>
     public int FleetNameMaxLength { get; init; }
 
+    /// <summary>Gets the most orders a flight plan of a fleet may hold.</summary>
+    public int FlightPlanMaxOrders { get; init; }
+
     /// <summary>
     /// Reads the parameters.
     /// </summary>
@@ -87,6 +90,7 @@ public sealed record FleetSettings
             MaterialShare = ReadDecimal(config, FleetConfigKeys.MaterialShare),
             UpkeepShare = ReadDecimal(config, FleetConfigKeys.UpkeepShare),
             FleetNameMaxLength = ReadInt32(config, FleetConfigKeys.FleetNameMaxLength),
+            FlightPlanMaxOrders = ReadInt32(config, FleetConfigKeys.FlightPlanMaxOrders),
         };
     }
 

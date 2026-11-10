@@ -88,6 +88,7 @@ export const configDescriptionsUk: Record<string, string> = {
 
   'config.admin.texts.languages.description': 'Мови текстів ігрових даних через кому; перша з них запасна.',
   'config.admin.texts.max_length.description': 'Найбільша довжина одного тексту ігрових даних.',
+  'config.texts.pack_cache_seconds.description': 'Скільки секунд сервер тримає зібраний пакет текстів у пам’яті перед повторним читанням з бази; 0 вимикає кеш.',
   'config.admin.reference.image_types.description': 'Дозволені типи зображення запису довідника через кому: image/png, image/webp.',
   'config.admin.reference.image_max_bytes.description': 'Найбільший розмір зображення запису довідника, у байтах.',
   'config.admin.reference.image_directory.description': 'Каталог зображень довідників на сервері; відносний шлях рахується від каталогу сервера.',
@@ -115,6 +116,8 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.world.nebula.radius_min.description': 'Найменший радіус туманності.',
   'config.world.nebula.radius_max.description': 'Найбільший радіус туманності.',
   'config.world.nebula.radar_multiplier.description': 'Множник дальності радара всередині туманності.',
+  'config.world.nebula.mass_min.description': 'Найменша маса туманності, у тоннах; екстрактори беруть частину її щоколу.',
+  'config.world.nebula.mass_max.description': 'Найбільша маса туманності, у тоннах.',
   'config.world.nebula.blocks_jump_drive.description': 'Чи забороняє туманність стрибковий двигун.',
   'config.world.field.max_composition_share.description': 'Найбільша сумарна частка ресурсів у складі поля; решта завжди порожня порода.',
   'config.world.planet.rich_probability.description': 'Імовірність, що нова планета багата: усі її родовища беруть «багатий» діапазон правила.',
@@ -267,6 +270,8 @@ export const configDescriptionsUk: Record<string, string> = {
     'Найбільша кількість символів у назві проєкту корабля.',
   'config.fleet.formation.name_max_length.description':
     'Найбільша кількість символів у назві флоту.',
+  'config.fleet.flight_plan.max_orders.description':
+    'Найбільша кількість наказів у політному листі флоту.',
   'config.fleet.shipyard.queue_base_slots.description':
     'Місця черги верфі, коли в будівлі ще немає ефекту місць.',
   'config.fleet.shipyard.queue_max_slots.description':

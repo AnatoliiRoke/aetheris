@@ -63,7 +63,7 @@
         },
         {
           "part": "part_m_53",
-          "name": "Модуль геологорозвідки",
+          "name": "Екстрактор гелію",
           "factory": "building_47",
           "requirements": [
             {
@@ -710,7 +710,7 @@
         },
         {
           "part": "part_m_57",
-          "name": "Туманнісний збирач",
+          "name": "Екстрактор матерії",
           "factory": "building_47",
           "requirements": [
             {
@@ -1156,7 +1156,7 @@
       "modules": [
         {
           "part": "part_m_56",
-          "name": "Збирач ефіру",
+          "name": "Екстрактор ефіру",
           "factory": "building_47",
           "requirements": [
             {

@@ -36,8 +36,13 @@ public static class FleetServiceCollectionExtensions
         services.AddScoped<ShipDesignService>();
         services.AddScoped<ShipyardQueueService>();
         services.AddScoped<FleetFormationService>();
+        services.AddScoped<FlightPlanService>();
         services.AddScoped<FleetBootstrapService>();
+        services.AddScoped<FleetExtractionService>();
+        services.AddScoped<FleetExtractionCycleService>();
+        services.AddScoped<FleetExtractionEstimateService>();
         services.AddScoped<IScheduledEventHandler, ShipyardCompleteHandler>();
+        services.AddScoped<IScheduledEventHandler, FleetExtractionCycleHandler>();
 
         services.AddCommand<CreateShipDesignCommand>();
         services.AddCommand<RenameShipDesignCommand>();
@@ -52,6 +57,11 @@ public static class FleetServiceCollectionExtensions
         services.AddCommand<TransferFleetShipsCommand>();
         services.AddCommand<RenameFleetCommand>();
         services.AddCommand<DissolveFleetCommand>();
+        services.AddCommand<CreateFlightPlanCommand>();
+        services.AddCommand<SaveFlightPlanCommand>();
+        services.AddCommand<DeleteFlightPlanCommand>();
+        services.AddCommand<StopFlightPlanCommand>();
+        services.AddCommand<ExecuteFlightPlanCommand>();
 
         // The module keeps tables of its own, so it works on the context of the request, which
         // lives in the scope.

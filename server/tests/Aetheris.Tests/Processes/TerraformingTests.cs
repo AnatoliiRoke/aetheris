@@ -28,7 +28,7 @@ namespace Aetheris.Tests.Processes;
 [Collection(DatabaseCollection.Name)]
 public sealed class TerraformingTests
 {
-    private const string TerraformingDevice = "part_34";
+    private const string TerraformingDevice = "part_m_34";
 
     private const string Iron = "resource_1";
 
@@ -390,7 +390,7 @@ public sealed class TerraformingTests
 
         long targetId = await FreeBodyAsync(services, owner);
         PartFacts device = await ProcessesTestData.WithAttributeAsync(services, TerraformingDevice, PartAttributeKeys.TerraformingDevice);
-        PartFacts hull = await ProcessesTestData.PartAsync(services, "part_1");
+        PartFacts hull = await ProcessesTestData.PartAsync(services, "part_m_1");
         PlaceShip(services, owner, targetId, ShipId, device.PartTypeId, 1);
         Ships.Place(stranger.Account.UserId, targetId, new ShipOnOrbit([]) { ShipId = ShipId + 1, Cargo = [new ShipCargoPart(device.PartTypeId, 1), new ShipCargoPart(hull.PartTypeId, 1)] });
         IProcessesModule processes = services.GetRequiredService<IProcessesModule>();

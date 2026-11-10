@@ -102,8 +102,8 @@ public sealed class UpgradedLauncherTests
         IRequirementsModule requirements = services.GetRequiredService<IRequirementsModule>();
         await services.GetRequiredService<Aetheris.Research.IResearchModule>().EnsureAsync(Token);
         ProductionSeedData data = ProductionReferenceSeed.Load();
-        string partCode = $"part_{data.Parts.Count}";
-        string recipeCode = $"recipe_{data.Recipes.Count}";
+        string partCode = data.Parts[^1].Code;
+        string recipeCode = data.Recipes[^1].Code;
 
         PartTypeEntity upgrade = await dbContext.PartTypes.AsNoTracking().SingleAsync(part => part.Code == partCode, Token);
         RecipeEntity upgradeRecipe = await dbContext.Recipes.AsNoTracking().SingleAsync(recipe => recipe.Code == recipeCode, Token);
@@ -181,7 +181,7 @@ public sealed class UpgradedLauncherTests
         IServiceProvider services = scope.ServiceProvider;
         ProductionDbContext dbContext = services.GetRequiredService<ProductionDbContext>();
         ProductionSeedData data = ProductionReferenceSeed.Load();
-        string recipeCode = $"recipe_{data.Recipes.Count}";
+        string recipeCode = data.Recipes[^1].Code;
 
         ProductionCatalog catalog = await services.GetRequiredService<ProductionCatalogCache>()
             .GetAsync(dbContext, services.GetRequiredService<IRequirementsModule>(), Token);

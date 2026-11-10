@@ -1,28 +1,7 @@
+using Aetheris.World.Api;
 using Aetheris.World.Generation;
 
 namespace Aetheris.World.Extraction;
-
-/// <summary>
-/// The yield of one processing cycle on a field.
-/// </summary>
-/// <param name="ProcessedMass">The mass taken from the field, rock included.</param>
-/// <param name="YieldIds">The resources that go to the hold.</param>
-/// <param name="RockMass">The processed mass that stays behind as empty rock, rounding included.</param>
-/// <param name="RemainingMass">The mass of the field after the cycle.</param>
-/// <param name="Depleted">Whether the field is empty and disappears.</param>
-public sealed record ExtractionResult(
-    long ProcessedMass,
-    IReadOnlyList<ResourceAmount> YieldIds,
-    long RockMass,
-    long RemainingMass,
-    bool Depleted);
-
-/// <summary>
-/// An amount of one resource.
-/// </summary>
-/// <param name="ResourceId">The resource.</param>
-/// <param name="Amount">The amount, a whole number.</param>
-public sealed record ResourceAmount(int ResourceId, long Amount);
 
 /// <summary>
 /// The pure rule of processing an asteroid field (task 00004, decisions 14 and 18).

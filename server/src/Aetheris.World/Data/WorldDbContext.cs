@@ -341,6 +341,7 @@ public sealed class WorldDbContext : DbContext
             entity.HasIndex(e => e.CelestialObjectId).IsUnique();
             entity.HasOne(e => e.CelestialObject).WithOne().HasForeignKey<NebulaEntity>(e => e.CelestialObjectId).OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(e => e.CompositionIds).WithOne().HasForeignKey(share => share.NebulaId).OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint("ck_nebula_mass", "mass >= 0"));
         });
 
         modelBuilder.Entity<NebulaCompositionEntity>(entity =>

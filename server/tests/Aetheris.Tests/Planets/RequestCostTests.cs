@@ -3,6 +3,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using Aetheris.Core.Security;
+using Aetheris.Host.Localization;
 using Aetheris.Host.Observability;
 using Aetheris.Market;
 using Aetheris.Planets;
@@ -344,6 +345,7 @@ public sealed partial class RequestCostTests
             ProductionConfigKeys.CatalogCacheSeconds,
             ProcessesConfigKeys.CatalogCacheSeconds,
             WorldConfigKeys.CatalogCacheSeconds,
+            TextKeys.PackCacheSeconds,
         })
         {
             await AetherisTestFactory.SetParameterAsync(services, key, CatalogCacheDefaultSeconds);

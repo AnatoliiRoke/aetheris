@@ -22,6 +22,47 @@ namespace Aetheris.Fleet.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FleetCargoEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount");
+
+                    b.Property<long>("FleetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fleet_id");
+
+                    b.Property<int>("ResourceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_fleet_cargo");
+
+                    b.HasIndex("FleetId")
+                        .HasDatabaseName("ix_fleet_cargo_fleet_id");
+
+                    b.HasIndex("FleetId", "ResourceId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_fleet_cargo_fleet_id_resource_id");
+
+                    b.ToTable("fleet_cargo", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_fleet_cargo_amount", "amount >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FleetEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -128,6 +169,177 @@ namespace Aetheris.Fleet.Data.Migrations
                     b.ToTable("fleet_ship", null, t =>
                         {
                             t.HasCheckConstraint("ck_fleet_ship_position", "position >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FlightPlanEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<long>("FleetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fleet_id");
+
+                    b.Property<string>("PlayerId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("player_id");
+
+                    b.Property<string>("StateCode")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("state_code");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_flight_plan");
+
+                    b.HasIndex("FleetId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_flight_plan_fleet_id");
+
+                    b.HasIndex("PlayerId")
+                        .HasDatabaseName("ix_flight_plan_player_id");
+
+                    b.ToTable("flight_plan", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FlightPlanOrderEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("DurationSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("duration_seconds");
+
+                    b.Property<long>("FlightPlanId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("flight_plan_id");
+
+                    b.Property<string>("Parameters")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("parameters");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.Property<string>("TargetKind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("target_kind");
+
+                    b.Property<long>("TargetObjectId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("target_object_id");
+
+                    b.Property<int>("TargetSectorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("target_sector_id");
+
+                    b.Property<long>("TargetSystemId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("target_system_id");
+
+                    b.Property<decimal>("TargetX")
+                        .HasColumnType("numeric")
+                        .HasColumnName("target_x");
+
+                    b.Property<decimal>("TargetY")
+                        .HasColumnType("numeric")
+                        .HasColumnName("target_y");
+
+                    b.Property<decimal>("TargetZ")
+                        .HasColumnType("numeric")
+                        .HasColumnName("target_z");
+
+                    b.Property<string>("TypeCode")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("type_code");
+
+                    b.HasKey("Id")
+                        .HasName("pk_flight_plan_order");
+
+                    b.HasIndex("FlightPlanId")
+                        .HasDatabaseName("ix_flight_plan_order_flight_plan_id");
+
+                    b.HasIndex("FlightPlanId", "Position")
+                        .IsUnique()
+                        .HasDatabaseName("ix_flight_plan_order_flight_plan_id_position");
+
+                    b.ToTable("flight_plan_order", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_flight_plan_order_duration", "duration_seconds >= 0");
+
+                            t.HasCheckConstraint("ck_flight_plan_order_position", "position >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.ShipCargoEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("amount");
+
+                    b.Property<int>("ResourceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<long>("ShipId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("ship_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ship_cargo");
+
+                    b.HasIndex("ShipId")
+                        .HasDatabaseName("ix_ship_cargo_ship_id");
+
+                    b.HasIndex("ShipId", "ResourceId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_ship_cargo_ship_id_resource_id");
+
+                    b.ToTable("ship_cargo", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_ship_cargo_amount", "amount >= 0");
                         });
                 });
 
@@ -575,6 +787,16 @@ namespace Aetheris.Fleet.Data.Migrations
                     b.ToTable("shipyard_queue_state", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FleetCargoEntity", b =>
+                {
+                    b.HasOne("Aetheris.Fleet.Data.Entities.FleetEntity", null)
+                        .WithMany()
+                        .HasForeignKey("FleetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_fleet_cargo_fleet_fleet_id");
+                });
+
             modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FleetShipEntity", b =>
                 {
                     b.HasOne("Aetheris.Fleet.Data.Entities.FleetEntity", null)
@@ -590,6 +812,36 @@ namespace Aetheris.Fleet.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_fleet_ship_ship_ship_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FlightPlanEntity", b =>
+                {
+                    b.HasOne("Aetheris.Fleet.Data.Entities.FleetEntity", null)
+                        .WithMany()
+                        .HasForeignKey("FleetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_flight_plan_fleet_fleet_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FlightPlanOrderEntity", b =>
+                {
+                    b.HasOne("Aetheris.Fleet.Data.Entities.FlightPlanEntity", null)
+                        .WithMany("OrderIds")
+                        .HasForeignKey("FlightPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_flight_plan_order_flight_plan_flight_plan_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.ShipCargoEntity", b =>
+                {
+                    b.HasOne("Aetheris.Fleet.Data.Entities.ShipEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ShipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_ship_cargo_ship_ship_id");
                 });
 
             modelBuilder.Entity("Aetheris.Fleet.Data.Entities.ShipCostEntity", b =>
@@ -665,6 +917,11 @@ namespace Aetheris.Fleet.Data.Migrations
             modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FleetEntity", b =>
                 {
                     b.Navigation("ShipIds");
+                });
+
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FlightPlanEntity", b =>
+                {
+                    b.Navigation("OrderIds");
                 });
 
             modelBuilder.Entity("Aetheris.Fleet.Data.Entities.ShipEntity", b =>

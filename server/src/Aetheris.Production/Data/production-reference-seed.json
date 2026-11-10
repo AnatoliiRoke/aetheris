@@ -2118,8 +2118,8 @@
       "mark_level": 1,
       "sort_order": 53,
       "name": {
-        "uk": "Модуль геологорозвідки",
-        "en": "Survey module"
+        "uk": "Екстрактор гелію",
+        "en": "Helium extractor"
       },
       "description": {
         "uk": "Модуль групи «Видобуток».",
@@ -2137,13 +2137,7 @@
           "number": 12
         },
         "char_yield": {
-          "number": 0
-        },
-        "char_scan_radius": {
-          "number": 100
-        },
-        "char_scan_speed": {
-          "number": 100
+          "number": 1400
         }
       }
     },
@@ -2201,7 +2195,7 @@
           "number": 12
         },
         "char_yield": {
-          "number": 240
+          "number": 150
         }
       }
     },
@@ -2211,8 +2205,8 @@
       "mark_level": 1,
       "sort_order": 56,
       "name": {
-        "uk": "Збирач ефіру",
-        "en": "Ether collector"
+        "uk": "Екстрактор ефіру",
+        "en": "Ether extractor"
       },
       "description": {
         "uk": "Модуль групи «Видобуток».",
@@ -2230,7 +2224,7 @@
           "number": 72
         },
         "char_yield": {
-          "number": 2800
+          "number": 290
         }
       }
     },
@@ -2240,8 +2234,8 @@
       "mark_level": 1,
       "sort_order": 57,
       "name": {
-        "uk": "Туманнісний збирач",
-        "en": "Nebula collector"
+        "uk": "Екстрактор матерії",
+        "en": "Matter extractor"
       },
       "description": {
         "uk": "Модуль групи «Видобуток».",
@@ -2259,7 +2253,7 @@
           "number": 55
         },
         "char_yield": {
-          "number": 2500
+          "number": 220
         }
       }
     },
@@ -4680,6 +4674,11 @@
           "resource": "resource_27",
           "part": null,
           "amount": 5
+        },
+        {
+          "resource": "resource_12",
+          "part": null,
+          "amount": 25
         }
       ],
       "requirements": [
@@ -7408,11 +7407,11 @@
       "duration_seconds": 300,
       "sort_order": 53,
       "name": {
-        "uk": "Модуль геологорозвідки",
-        "en": "Survey module"
+        "uk": "Екстрактор гелію",
+        "en": "Helium extractor"
       },
       "description": {
-        "uk": "Виробництво «Модуль геологорозвідки».",
+        "uk": "Виробництво «Екстрактор гелію».",
         "en": "Production of the part."
       },
       "ingredients": [
@@ -7442,7 +7441,13 @@
           "amount": 5
         }
       ],
-      "requirements": [],
+      "requirements": [
+        {
+          "type": "building_level",
+          "target": "building_47",
+          "target_level": 5
+        }
+      ],
       "race": null
     },
     {
@@ -7538,7 +7543,7 @@
         {
           "type": "building_level",
           "target": "building_47",
-          "target_level": 5
+          "target_level": 3
         }
       ],
       "race": null
@@ -7552,11 +7557,11 @@
       "duration_seconds": 520,
       "sort_order": 56,
       "name": {
-        "uk": "Збирач ефіру",
-        "en": "Ether collector"
+        "uk": "Екстрактор ефіру",
+        "en": "Ether extractor"
       },
       "description": {
-        "uk": "Виробництво «Збирач ефіру».",
+        "uk": "Виробництво «Екстрактор ефіру».",
         "en": "Production of the part."
       },
       "ingredients": [
@@ -7610,7 +7615,7 @@
         {
           "type": "building_level",
           "target": "building_47",
-          "target_level": 15
+          "target_level": 7
         }
       ],
       "race": null
@@ -7624,11 +7629,11 @@
       "duration_seconds": 620,
       "sort_order": 57,
       "name": {
-        "uk": "Туманнісний збирач",
-        "en": "Nebula collector"
+        "uk": "Екстрактор матерії",
+        "en": "Matter extractor"
       },
       "description": {
-        "uk": "Виробництво «Туманнісний збирач».",
+        "uk": "Виробництво «Екстрактор матерії».",
         "en": "Production of the part."
       },
       "ingredients": [

@@ -49,8 +49,15 @@ public static class PlanetsReferenceSeed
         using Stream stream = typeof(PlanetsReferenceSeed).Assembly.GetManifestResourceStream(ResourceName)
             ?? throw new InvalidOperationException($"The embedded starting data {ResourceName} is missing.");
 
-        return JsonSerializer.Deserialize<PlanetsSeedData>(stream, JsonOptions)
+        PlanetsSeedData seed = JsonSerializer.Deserialize<PlanetsSeedData>(stream, JsonOptions)
             ?? throw new InvalidOperationException($"The embedded starting data {ResourceName} is empty.");
+
+        // The code of the file is the code of the row (task 00052): every row has one, in the
+        // form the keys of the texts allow, and no two rows of a kind share it.
+        SeedCodeRules.Validate(seed.Categories.Select(category => category.Code), "building category");
+        SeedCodeRules.Validate(seed.BuildingTypes.Select(type => type.Code), "building type");
+
+        return seed;
     }
 
     /// <summary>

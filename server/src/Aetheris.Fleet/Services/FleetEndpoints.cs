@@ -112,8 +112,72 @@ public static class FleetEndpoints
                 await fleets.ReadAsync(PlayerId(user), cancellationToken).ConfigureAwait(false),
                 FleetJson.Options));
 
+        fleet.MapGet("/flight-plans", async (
+            ClaimsPrincipal user,
+            FlightPlanService plans,
+            CancellationToken cancellationToken) =>
+            Results.Json(
+                await plans.ReadAsync(PlayerId(user), cancellationToken).ConfigureAwait(false),
+                FleetJson.Options));
+
+        fleet.MapGet("/flight-plans/fleet/{fleetId:long}", async (
+            long fleetId,
+            ClaimsPrincipal user,
+            FlightPlanService plans,
+            CancellationToken cancellationToken) =>
+        {
+            FlightPlanDto? plan = await plans.ReadForFleetAsync(PlayerId(user), fleetId, cancellationToken).ConfigureAwait(false);
+
+            return plan is null
+                ? Results.NotFound()
+                : Results.Json(plan, FleetJson.Options);
+        });
+
+        fleet.MapGet("/extraction/estimate", async (
+            HttpContext context,
+            ClaimsPrincipal user,
+            FleetExtractionEstimateService estimates,
+            CancellationToken cancellationToken) =>
+        {
+            long? fleetId = Number(context.Request.Query, "fleet_id");
+            long? objectId = Number(context.Request.Query, "object_id");
+
+            if (fleetId is null || objectId is null)
+            {
+                throw new GameException(FleetErrorCodes.ExtractionTargetUnknown, "The fleet or the place of the extraction is missing.");
+            }
+
+            FleetExtractionService.ExtractionEstimate? estimate = await estimates
+                .EstimateAsync(fleetId.Value, objectId.Value, cancellationToken)
+                .ConfigureAwait(false);
+
+            return estimate is null
+                ? Results.NotFound()
+                : Results.Json(
+                    new ExtractionEstimateDto(
+                        estimate.CycleSeconds,
+                        estimate.ResourceTonsPerCycle,
+                        estimate.ProcessedTonsPerCycle,
+                        estimate.FreeHoldTons,
+                        estimate.PlaceMassTons,
+                        estimate.HoldFullSeconds,
+                        estimate.PlaceEmptySeconds),
+                    FleetJson.Options);
+        });
+
         return endpoints;
     }
+
+    /// <summary>
+    /// Reads a number out of the query of a request.
+    /// </summary>
+    /// <param name="query">The query.</param>
+    /// <param name="name">The name of the parameter.</param>
+    /// <returns>The number, or <see langword="null"/> when the parameter is missing or not a number.</returns>
+    private static long? Number(IQueryCollection query, string name) =>
+        long.TryParse(query[name], NumberStyles.Integer, CultureInfo.InvariantCulture, out long value)
+            ? value
+            : null;
 
     private static long RequiredBody(IQueryCollection query) =>
         Body(query) ?? throw new GameException(FleetErrorCodes.PlanetUnknown, "The body is missing.");

@@ -74,7 +74,32 @@ public sealed class WorldMapTests
         Assert.Equal(player.PlanetId, radar.PlanetId);
         Assert.Contains(sector.Systems, system => system.State == MapStates.Open && system.Name is not null);
         Assert.All(sector.Systems, system => Assert.NotNull(system.Distance));
-        Assert.All(sector.Systems.Where(system => system.State == MapStates.Known), system => Assert.Null(system.Name));
+        // A system the radar does not reach is unknown: the player may not name it (task 00050).
+        Assert.All(sector.Systems.Where(system => system.State == MapStates.Unknown), system => Assert.Null(system.Name));
+    }
+
+    /// <summary>
+    /// The galaxy tells what the player knows of every sector (task 00050): the sector with a body
+    /// of the player in it is open, and a sector nothing of is unknown.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_galaxy_tells_what_the_player_knows_of_every_sector()
+    {
+        using PlanetsTestPlayer player = await StartAsync(stub: false);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        WorldMapService map = scope.ServiceProvider.GetRequiredService<WorldMapService>();
+        int sectorId = await SectorOfAsync(scope.ServiceProvider, player.PlanetId);
+
+        MapGalaxyDto galaxy = await map.GetGalaxyAsync(player.Account.UserId, Token);
+
+        // The sector the player stands in is open: the body of the player is in it.
+        Assert.Equal(MapStates.Open, galaxy.Sectors.Single(entry => entry.Id == sectorId).State);
+
+        // The sectors nothing of are unknown: the player may not fly to them.
+        Assert.All(
+            galaxy.Sectors.Where(entry => entry.OwnPlanetCount == 0 && entry.Id != sectorId),
+            entry => Assert.Equal(MapStates.Unknown, entry.State));
     }
 
     /// <summary>
@@ -99,7 +124,7 @@ public sealed class WorldMapTests
         Assert.NotNull(own.Name);
         Assert.Equal(1, own.OwnPlanetCount);
         Assert.True(sector.Systems.Count > 1);
-        Assert.All(sector.Systems.Where(system => system.State == MapStates.Known), system => Assert.Null(system.Name));
+        Assert.All(sector.Systems.Where(system => system.State == MapStates.Unknown), system => Assert.Null(system.Name));
 
         MapSystemViewDto view = await map.GetSystemAsync(player.Account.UserId, own.Id, player.PlanetId, Token);
 
@@ -108,7 +133,8 @@ public sealed class WorldMapTests
         Assert.All(view.Objects.Where(entry => entry.State == MapStates.Known), entry => Assert.Equal("unknown", entry.ObjectClass));
         Assert.All(view.Objects.Where(entry => entry.State == MapStates.Known), entry => Assert.Null(entry.Name));
 
-        long closed = sector.Systems.First(system => system.State == MapStates.Known).Id;
+        // A system the radar does not reach is unknown and may not be opened (task 00050).
+        long closed = sector.Systems.First(system => system.State == MapStates.Unknown).Id;
         GameException refused = await Assert.ThrowsAsync<GameException>(() => map.GetSystemAsync(player.Account.UserId, closed, null, Token));
         Assert.Equal(GameErrorCodes.NotFound, refused.Code);
     }

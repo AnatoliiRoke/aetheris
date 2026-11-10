@@ -19,8 +19,10 @@ namespace Aetheris.Production.Data;
 /// The starting data lives in the embedded file <c>Data/production-reference-seed.json</c>:
 /// the groups of the parts, the parts with their attributes, the recipes with their
 /// ingredients and the bonuses of the races. Every row has a neutral code and its texts in
-/// every language (task 00022). The seed runs only while the tables are empty, so it never
-/// overwrites a change of the admin panel (task 00023, decision 7).
+/// every language (task 00022). The code of a row is the code of the file and the keys of its
+/// texts are built from it; the counter of the server only gives codes to the rows of the admin
+/// panel (task 00052). The seed runs only while the tables are empty, so it never overwrites a
+/// change of the admin panel (task 00023, decision 7).
 /// </remarks>
 public static class ProductionReferenceSeed
 {
@@ -113,23 +115,21 @@ public static class ProductionReferenceSeed
             factoryIds[factory] = buildingTypeId;
         }
 
-        // The codes of the file only link the rows of the file, so each must name one row.
-        EnsureUnique(data.PartGroups.Select(group => group.Code), "group of the parts");
-        EnsureUnique(data.Parts.Select(part => part.Code), "part");
-        EnsureUnique(data.Recipes.Select(recipe => recipe.Code), "recipe");
+        ValidateCodes(data);
 
         Dictionary<string, int> partGroupIds = [];
         Dictionary<string, int> partTypeIds = [];
         Dictionary<string, int> characteristicIds = [];
 
-        // Every row takes the next code of the counter of the server, and the keys of its texts
-        // are built from that code (documentation/tech/09, sections 3.2 and 4.1).
+        // Every row keeps the code of the file, and the keys of its texts are built from that
+        // code (documentation/tech/09, sections 3.2 and 4.1). The counters are raised after the
+        // rows are written, so a code of the admin panel never meets a code of the file.
 
         // The characteristics come first: the groups of the parts point at them, and the parts
         // keep their values (task 00027).
         foreach (SeedCharacteristic characteristic in data.Characteristics ?? [])
         {
-            string code = await codes.NextAsync(ProductionTextKeys.CharacteristicCodeGroup, cancellationToken).ConfigureAwait(false);
+            string code = characteristic.Code;
 
             CharacteristicEntity entity = new()
             {
@@ -159,7 +159,7 @@ public static class ProductionReferenceSeed
 
         foreach (SeedPartGroup group in data.PartGroups)
         {
-            string code = await codes.NextAsync(ProductionTextKeys.PartGroupCodeGroup, cancellationToken).ConfigureAwait(false);
+            string code = group.Code;
 
             PartGroupEntity entity = new()
             {
@@ -222,7 +222,7 @@ public static class ProductionReferenceSeed
 
         foreach (SeedPart part in data.Parts)
         {
-            string code = await codes.NextAsync(ProductionTextKeys.PartTypeCodeGroup, cancellationToken).ConfigureAwait(false);
+            string code = part.Code;
 
             PartTypeEntity entity = new()
             {
@@ -335,7 +335,7 @@ public static class ProductionReferenceSeed
 
         foreach (SeedRecipe recipe in data.Recipes)
         {
-            string code = await codes.NextAsync(ProductionTextKeys.RecipeCodeGroup, cancellationToken).ConfigureAwait(false);
+            string code = recipe.Code;
 
             RecipeEntity entity = new()
             {
@@ -438,15 +438,45 @@ public static class ProductionReferenceSeed
                 cancellationToken).ConfigureAwait(false);
         }
 
+        await RaiseCountersAsync(codes, data, cancellationToken).ConfigureAwait(false);
+
         return true;
     }
 
-    private static void EnsureUnique(IEnumerable<string> codes, string kind)
+    /// <summary>
+    /// Checks the codes of the file: the code of the file is the code of the row, so every row
+    /// must have one, in the form the keys of the texts allow, and no two rows of a kind may share
+    /// it. A file that breaks this stops the seed (task 00052).
+    /// </summary>
+    /// <param name="data">The starting data.</param>
+    /// <exception cref="InvalidOperationException">A code is missing, malformed or repeated.</exception>
+    public static void ValidateCodes(ProductionSeedData data)
     {
-        if (codes.GroupBy(code => code, StringComparer.Ordinal).FirstOrDefault(group => group.Count() > 1) is { } duplicate)
-        {
-            throw new InvalidOperationException($"The starting data names the {kind} '{duplicate.Key}' twice.");
-        }
+        ArgumentNullException.ThrowIfNull(data);
+
+        SeedCodeRules.Validate((data.Characteristics ?? []).Select(characteristic => characteristic.Code), "characteristic");
+        SeedCodeRules.Validate(data.PartGroups.Select(group => group.Code), "group of the parts");
+        SeedCodeRules.Validate(data.Parts.Select(part => part.Code), "part");
+        SeedCodeRules.Validate(data.Recipes.Select(recipe => recipe.Code), "recipe");
+    }
+
+    /// <summary>
+    /// Raises the counters of the four groups of codes above the codes of the file, so a row of
+    /// the admin panel never gets a code the file already uses (task 00052).
+    /// </summary>
+    /// <param name="codes">The counters of the neutral codes.</param>
+    /// <param name="data">The starting data.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the counters are raised.</returns>
+    public static async Task RaiseCountersAsync(ICodeSequence codes, ProductionSeedData data, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(codes);
+        ArgumentNullException.ThrowIfNull(data);
+
+        await SeedCodeRules.RaiseAsync(codes, ProductionTextKeys.CharacteristicCodeGroup, (data.Characteristics ?? []).Select(characteristic => characteristic.Code), cancellationToken).ConfigureAwait(false);
+        await SeedCodeRules.RaiseAsync(codes, ProductionTextKeys.PartGroupCodeGroup, data.PartGroups.Select(group => group.Code), cancellationToken).ConfigureAwait(false);
+        await SeedCodeRules.RaiseAsync(codes, ProductionTextKeys.PartTypeCodeGroup, data.Parts.Select(part => part.Code), cancellationToken).ConfigureAwait(false);
+        await SeedCodeRules.RaiseAsync(codes, ProductionTextKeys.RecipeCodeGroup, data.Recipes.Select(recipe => recipe.Code), cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

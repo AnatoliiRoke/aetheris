@@ -1,3 +1,5 @@
+using Aetheris.World.Api;
+
 namespace Aetheris.World.Data.Entities;
 
 /// <summary>

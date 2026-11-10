@@ -38,8 +38,19 @@ public static class WorldReferenceSeed
         using Stream stream = typeof(WorldReferenceSeed).Assembly.GetManifestResourceStream(ResourceName)
             ?? throw new InvalidOperationException($"The embedded starting data {ResourceName} is missing.");
 
-        return JsonSerializer.Deserialize<ReferenceSeedData>(stream, JsonOptions)
+        ReferenceSeedData seed = JsonSerializer.Deserialize<ReferenceSeedData>(stream, JsonOptions)
             ?? throw new InvalidOperationException($"The embedded starting data {ResourceName} is empty.");
+
+        // The code of the file is the code of the row (task 00052): every row has one, in the
+        // form the keys of the texts allow, and no two rows of a kind share it.
+        SeedCodeRules.Validate(seed.ResourceGroups.Select(group => group.Code), "group of the resources");
+        SeedCodeRules.Validate(seed.Resources.Select(resource => resource.Code), "resource");
+        SeedCodeRules.Validate(seed.ObjectTypes.Select(type => type.Code), "object type");
+        SeedCodeRules.Validate(seed.SizeClasses.Select(size => size.Code), "size class");
+        SeedCodeRules.Validate(seed.RuleGroups.Select(group => group.Code), "rule group");
+        SeedCodeRules.Validate((seed.Races ?? []).Select(race => race.Code), "race");
+
+        return seed;
     }
 
     /// <summary>

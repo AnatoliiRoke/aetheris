@@ -13,9 +13,15 @@
 .fl-btn[disabled] { background: transparent; border-color: var(--border-strong); color: var(--text-1); opacity: 0.45; }
 .fl-btn--small { min-height: 44px; padding: 0 var(--space-3); font-size: var(--fs-ui); }
 .fl-btn--block { width: 100%; }
+/* Кнопка лише з іконкою: знаряддя політного листа стоять у рядку. */
+.fl-btn--icon { flex: 1 1 0; min-width: 44px; min-height: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .fl-btn--order { flex-direction: column; gap: var(--space-1); min-height: 64px; padding: var(--space-2); font-size: var(--fs-ui); }
 .fl-btn--danger { border-color: color-mix(in srgb, var(--danger) 60%, transparent); color: var(--danger-text); }
 .fl-btn--danger:hover { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); color: var(--danger-text); }
+/* Кнопка «Виконати» — зелена: вона запускає політний лист. */
+.fl-btn--go { border-color: color-mix(in srgb, var(--success) 60%, transparent); color: var(--success); }
+.fl-btn--go:hover { border-color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); color: var(--success); }
+.fl-btn--go[disabled] { border-color: var(--border-strong); color: var(--text-1); }
 .fl-btn--danger-solid {
   display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 var(--space-4);
   border: 0; border-radius: var(--r-md); background: var(--danger); color: var(--on-accent);
@@ -125,7 +131,7 @@
 /* ---------- рядки вибору: планети й флоти ---------- */
 .fl-picks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
 .fl-row-pick {
-  position: relative; display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 52px; padding: 6px var(--space-3);
+  position: relative; display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 34px; padding: 2px var(--space-3);
   box-sizing: border-box; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-card-in); color: var(--text-1); cursor: pointer;
 }
 .fl-row-pick:hover { border-color: var(--border-strong); }
@@ -177,12 +183,13 @@
 .fl-row--between { justify-content: space-between; }
 
 .fl-facts {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; margin: 0; padding: var(--space-3);
+  display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: var(--space-3);
   border: 1px solid var(--border-soft); border-radius: var(--r-lg); background: var(--bg-card-in);
 }
-.fl-facts > div { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.fl-facts dt { margin: 0; color: var(--text-2); font-size: var(--fs-small); }
-.fl-facts dd { margin: 0; font-size: var(--fs-game); font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+/* Кожна характеристика — окремим рядком: напис ліворуч, значення праворуч від нього. */
+.fl-facts > div { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; }
+.fl-facts dt { margin: 0; color: var(--text-2); font-size: var(--fs-small); white-space: nowrap; }
+.fl-facts dd { margin: 0; font-size: var(--fs-small); font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 
 .fl-section { display: flex; flex-direction: column; gap: var(--space-2); }
 .fl-section__title { margin: 0; font-size: var(--fs-section); font-weight: 600; }
@@ -193,11 +200,15 @@
 /* ---------- поля форм ---------- */
 .fl-fieldset legend { padding: 0; }
 .fl-field { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; margin: 0; padding: 0; border: 0; }
+/* Напис і поле в одному рядку. */
+.fl-field--row { flex-direction: row; align-items: center; gap: var(--space-3); }
+.fl-field--row .fl-label { flex: 0 0 auto; min-width: 120px; }
+.fl-field--row .fl-input { flex: 1 1 auto; }
 .fl-label { font-size: var(--fs-ui); font-weight: 600; color: var(--text-soft); }
 .fl-input {
-  width: 100%; height: 44px; padding: 0 var(--space-3); box-sizing: border-box; min-width: 0;
+  width: 100%; height: 26px; padding: 0 var(--space-2); box-sizing: border-box; min-width: 0;
   border: 1px solid var(--border-strong); border-radius: var(--r-md); background: var(--bg-3); color: var(--text-1);
-  font: inherit; font-size: var(--fs-section);
+  font: inherit; font-size: var(--fs-ui);
 }
 .fl-input::placeholder { color: var(--text-2); opacity: 1; }
 .fl-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
@@ -217,7 +228,7 @@
   padding: 56px var(--space-5) var(--space-5); background: rgba(4, 7, 14, 0.72); overflow-y: auto;
 }
 .fl-dialog__box {
-  display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 560px; box-sizing: border-box; padding: 20px;
+  display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 760px; box-sizing: border-box; padding: 20px;
   border: 1px solid var(--border-strong); border-radius: var(--r-xl); background: var(--bg-2); box-shadow: var(--shadow-lg);
   max-height: calc(100vh - 80px); overflow-y: auto;
 }
@@ -244,3 +255,33 @@
   .fl-dialog { padding: var(--space-4) var(--space-3); }
   .fl-dialog__actions .btn, .fl-dialog__actions .fl-btn--danger-solid { flex: 1 1 auto; }
 }
+
+/* ---------- політний лист флоту (задача 00050) ---------- */
+.pl-orders { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
+.pl-orders--plain { gap: var(--space-1); }
+.pl-order {
+  position: relative; display: flex; flex-direction: row; align-items: flex-start; gap: var(--space-2);
+  padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-card-in);
+}
+.pl-order--plain { flex-direction: row; align-items: center; padding: var(--space-1) var(--space-2); }
+/* Поля наказу займають місце ліворуч, знаряддя — праворуч від них. */
+.pl-order__fields { display: flex; flex-direction: column; gap: var(--space-2); flex: 1 1 auto; min-width: 0; }
+/* Напис і поле стоять в одному рядку: підпис ліворуч, поле праворуч. */
+.pl-order__row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: center; gap: var(--space-2); }
+/* Три поля місця цілі стоять в один ряд: підпис і поле сектора, підпис і поле системи, підпис і поле планети. */
+.pl-order__row--places { grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); }
+/* Два поля місця цілі — сектор і поле об'єкта: підпис і поле, підпис і поле. */
+.pl-order__row--places-2 { grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); }
+.pl-order__row--places .fl-label { white-space: nowrap; }
+.pl-order__text { color: var(--text-1); font-size: var(--fs-game); }
+/* Час польоту — діапазон від порожнього трюма до повного. */
+.pl-order__time { color: var(--text-soft); font-size: var(--fs-small); }
+/* Місце наказу — праворуч від його назви: ціль перельоту або планета приписки. */
+.pl-order__place { color: var(--text-soft); font-size: var(--fs-small); overflow-wrap: anywhere; }
+/* Знаряддя наказу — у правому верхньому кутку блоку, в рядку з полями. */
+.pl-order__tools { display: flex; flex: 0 0 auto; gap: var(--space-1); align-self: flex-start; padding-top: 1px; }
+/* Знаряддя політного листа — чотири кнопки в одному рядку, кожна лише з іконкою. */
+.pl-tools { display: flex; gap: var(--space-2); }
+/* Знаряддя наказу маленьке: правило йде після .fl-btn--small і знімає його мінімальну висоту. */
+.pl-order__tools .pl-tool { min-width: 22px; min-height: 22px; width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.pl-error { margin: 0; color: var(--danger-text); font-size: var(--fs-ui); }

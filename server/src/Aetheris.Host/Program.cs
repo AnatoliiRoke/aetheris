@@ -132,6 +132,7 @@ builder.Services.AddScoped<IDatabaseSession, EfDatabaseSession>();
 
 // The neutral codes of the reference rows and the texts of the game data (task 00022).
 builder.Services.AddScoped<ICodeSequence, EfCodeSequence>();
+builder.Services.AddScoped<SeedCodeReconciliation>();
 builder.Services.AddSingleton<LocalizationTextCache>();
 builder.Services.AddSingleton<TextSettings>();
 builder.Services.AddScoped<ILocalizationTexts, LocalizationTextStore>();
@@ -282,6 +283,14 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     // The protection limits are read from the configuration, so it is loaded before the
     // first request instead of waiting for the background reload.
     await StartupTimer.RunAsync(startupLogger, "config:reload", () => scope.ServiceProvider.GetRequiredService<ConfigReloader>().ReloadAsync()).ConfigureAwait(false);
+
+    // The command that brings the codes of a database to the codes of the starting data runs on
+    // the migrated schema and before the seeders, because a seeder stops on a table whose codes
+    // are not the codes of the file (task 00052). It does not start the web server.
+    if (SeedCodeCommandLine.IsCommand(args))
+    {
+        return await SeedCodeCommandLine.RunAsync(app.Services, args, Console.Out).ConfigureAwait(false);
+    }
 
     // A generation run of the admin panel that was running when the server stopped is marked
     // failed, so the next run is not blocked (task 00007, decision 3).

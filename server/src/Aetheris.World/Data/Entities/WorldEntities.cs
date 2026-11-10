@@ -292,6 +292,11 @@ public sealed class FieldCompositionEntity
 /// <summary>
 /// A nebula: a zone of the sector with its own sources and effects.
 /// </summary>
+/// <remarks>
+/// A nebula has a mass like a field has: the extractors of ether and of matter take a part of it
+/// every cycle, and what is left is the mass of the nebula. The mass never runs out to the end,
+/// because a nebula is a zone of space and not a heap of ore (task 00050).
+/// </remarks>
 public sealed class NebulaEntity
 {
     /// <summary>Gets or sets the primary key.</summary>
@@ -308,6 +313,12 @@ public sealed class NebulaEntity
 
     /// <summary>Gets or sets a value indicating whether the jump drive is forbidden inside.</summary>
     public bool BlocksJumpDrive { get; set; }
+
+    /// <summary>Gets or sets the mass the nebula had when it was made.</summary>
+    public long InitialMass { get; set; }
+
+    /// <summary>Gets or sets the mass the nebula has now; it falls with every extraction cycle.</summary>
+    public long Mass { get; set; }
 
     /// <summary>Gets or sets the celestial object.</summary>
     public CelestialObjectEntity? CelestialObject { get; set; }

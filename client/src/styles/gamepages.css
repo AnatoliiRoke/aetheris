@@ -244,6 +244,19 @@
 .civ__main--production .cost-list__row--short .num { color: var(--text-soft); }
 .civ__main--research .cost-list__missing,
 .civ__main--production .cost-list__missing { color: var(--danger-text); font-size: var(--fs-small); font-weight: 700; }
+/* the amount of the part on the stock of the body and its key characteristics (task 00049) */
+.production-card__stock { margin: 0; color: var(--text-soft); font-size: var(--fs-small); }
+.civ__main--production .storage-chars {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-1) var(--space-2);
+  margin: 0; padding: 0; list-style: none;
+}
+.civ__main--production .storage-char {
+  display: flex; flex-direction: row; align-items: baseline; justify-content: space-between; gap: var(--space-2);
+  padding: 0; border: 0; background: transparent; font-size: var(--fs-small);
+}
+.civ__main--production .storage-char__name { color: var(--text-2); font-size: var(--fs-small); }
+.civ__main--production .storage-char__value { color: var(--text-1); font-size: var(--fs-small); white-space: nowrap; }
+.civ__main--production .storage-char__level { display: none; }
 .civ__main--research .tabs { gap: var(--space-1); }
 .civ__main--research .tabs__tab {
   border-bottom: 0; border-radius: 10px 10px 0 0; color: var(--text-soft); font-weight: 500;
@@ -393,5 +406,6 @@
   .filter-chips { flex-wrap: nowrap; overflow-x: auto; }
   .filter-chips .chip { flex: 0 0 auto; }
   .storage-chars { grid-template-columns: minmax(0, 1fr); }
+  .civ__main--production .storage-chars { grid-template-columns: minmax(0, 1fr); }
   .fill-cell { min-width: 0; }
 }

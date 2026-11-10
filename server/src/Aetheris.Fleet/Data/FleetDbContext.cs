@@ -76,6 +76,18 @@ public sealed class FleetDbContext : DbContext
     /// <summary>Gets the lock rows of the fleets of the players (task 00040).</summary>
     public DbSet<FleetPlayerStateEntity> FleetPlayerStates => Set<FleetPlayerStateEntity>();
 
+    /// <summary>Gets the flight plans of the fleets (task 00050).</summary>
+    public DbSet<FlightPlanEntity> FlightPlans => Set<FlightPlanEntity>();
+
+    /// <summary>Gets the orders of the flight plans (task 00050).</summary>
+    public DbSet<FlightPlanOrderEntity> FlightPlanOrders => Set<FlightPlanOrderEntity>();
+
+    /// <summary>Gets the cargo of the ships (task 00050).</summary>
+    public DbSet<ShipCargoEntity> ShipCargos => Set<ShipCargoEntity>();
+
+    /// <summary>Gets the cargo of the fleets (task 00050).</summary>
+    public DbSet<FleetCargoEntity> FleetCargos => Set<FleetCargoEntity>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -200,6 +212,46 @@ public sealed class FleetDbContext : DbContext
             entity.HasOne<FleetEntity>().WithMany(e => e.ShipIds).HasForeignKey(e => e.FleetId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne<ShipEntity>().WithMany().HasForeignKey(e => e.ShipId).OnDelete(DeleteBehavior.Restrict);
             entity.ToTable(table => table.HasCheckConstraint("ck_fleet_ship_position", "position >= 1"));
+        });
+
+        modelBuilder.Entity<FlightPlanEntity>(entity =>
+        {
+            entity.ToTable("flight_plan");
+            entity.Property(e => e.PlayerId).HasMaxLength(PlayerIdLength);
+            entity.Property(e => e.StateCode).HasMaxLength(CodeLength);
+            entity.HasIndex(e => e.PlayerId);
+            entity.HasIndex(e => e.FleetId).IsUnique();
+            entity.HasOne<FleetEntity>().WithMany().HasForeignKey(e => e.FleetId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<FlightPlanOrderEntity>(entity =>
+        {
+            entity.ToTable("flight_plan_order");
+            entity.Property(e => e.TypeCode).HasMaxLength(CodeLength);
+            entity.Property(e => e.TargetKind).HasMaxLength(CodeLength);
+            entity.HasIndex(e => e.FlightPlanId);
+            entity.HasIndex(e => new { e.FlightPlanId, e.Position }).IsUnique();
+            entity.HasOne<FlightPlanEntity>().WithMany(e => e.OrderIds).HasForeignKey(e => e.FlightPlanId).OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint("ck_flight_plan_order_position", "position >= 1"));
+            entity.ToTable(table => table.HasCheckConstraint("ck_flight_plan_order_duration", "duration_seconds >= 0"));
+        });
+
+        modelBuilder.Entity<ShipCargoEntity>(entity =>
+        {
+            entity.ToTable("ship_cargo");
+            entity.HasIndex(e => e.ShipId);
+            entity.HasIndex(e => new { e.ShipId, e.ResourceId }).IsUnique();
+            entity.HasOne<ShipEntity>().WithMany().HasForeignKey(e => e.ShipId).OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint("ck_ship_cargo_amount", "amount >= 0"));
+        });
+
+        modelBuilder.Entity<FleetCargoEntity>(entity =>
+        {
+            entity.ToTable("fleet_cargo");
+            entity.HasIndex(e => e.FleetId);
+            entity.HasIndex(e => new { e.FleetId, e.ResourceId }).IsUnique();
+            entity.HasOne<FleetEntity>().WithMany().HasForeignKey(e => e.FleetId).OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint("ck_fleet_cargo_amount", "amount >= 0"));
         });
     }
 }

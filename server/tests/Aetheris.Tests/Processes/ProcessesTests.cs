@@ -46,11 +46,11 @@ public sealed partial class ProcessesTests
 
     private const string ConversionTechnology = "tech_18";
 
-    private const string Hull = "part_1";
+    private const string Hull = "part_m_1";
 
-    private const string Engine = "part_4";
+    private const string Engine = "part_m_4";
 
-    private const string LifeSupport = "part_10";
+    private const string LifeSupport = "part_m_10";
 
     private readonly AetherisTestFactory _factory;
 

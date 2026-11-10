@@ -36,6 +36,10 @@ public static class MarketServiceCollectionExtensions
 
         services.AddScoped<MarketUnitOfWork>();
         services.AddScoped<MarketBootstrapService>();
+
+        // The tables the starting data fills, for the command reconcile-seed-codes (task 00052).
+        services.AddScoped<ISeedCodeSource, MarketSeedCodeSource>();
+
         services.AddScoped<MarketCatalog>();
         services.TryAddScoped<IMarketEvents, NullMarketEvents>();
         services.AddScoped<MarketTradeService>();

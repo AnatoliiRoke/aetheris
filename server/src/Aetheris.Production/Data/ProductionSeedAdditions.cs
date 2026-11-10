@@ -1,6 +1,7 @@
 using Aetheris.Core.Data;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
+using Aetheris.Production.Api;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
 using Aetheris.Requirements;
@@ -16,10 +17,10 @@ namespace Aetheris.Production.Data;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The first run of the seed gives the rows of the file the codes of the server counters in the
-/// order of the file: the n-th part becomes <c>part_n</c>, the n-th recipe <c>recipe_n</c>, the
-/// n-th group <c>part_group_n</c> and the n-th characteristic <c>characteristic_n</c>. A row that
-/// joins the file is appended at its end, so in a filled database it is the code that is missing.
+/// A row of the file has the code of the file in the database (task 00052), so a row that joins
+/// the file is a row whose code the database does not have yet. A database whose rows carry no
+/// code of the file at all was made by an older seeder: the step stops there and asks for the
+/// command <c>reconcile-seed-codes</c>, instead of adding every row a second time.
 /// </para>
 /// <para>
 /// The step only adds: a row whose code is already there is not touched, so a change of the admin
@@ -70,11 +71,22 @@ public static class ProductionSeedAdditions
 
         ProductionSeedData data = ProductionReferenceSeed.Load();
 
-        Dictionary<string, string> partCodes = DatabaseCodes(data.Parts.Select(part => part.Code), ProductionTextKeys.PartTypeCodeGroup);
-        Dictionary<string, string> recipeCodes = DatabaseCodes(data.Recipes.Select(recipe => recipe.Code), ProductionTextKeys.RecipeCodeGroup);
+        // The codes of the file are the codes of the rows, so they are checked once and the
+        // counters stand above them, even for a row that joined the file after the first run.
+        ProductionReferenceSeed.ValidateCodes(data);
+
+        List<string> partCodes = [.. data.Parts.Select(part => part.Code)];
+        List<string> recipeCodes = [.. data.Recipes.Select(recipe => recipe.Code)];
 
         Dictionary<string, int> partIds = await IdsAsync(dbContext.PartTypes.Select(part => new CodeId { Code = part.Code, Id = part.Id }), partCodes, cancellationToken).ConfigureAwait(false);
         Dictionary<string, int> recipeIds = await IdsAsync(dbContext.Recipes.Select(recipe => new CodeId { Code = recipe.Code, Id = recipe.Id }), recipeCodes, cancellationToken).ConfigureAwait(false);
+
+        // A table that holds rows but none of the codes of the file was written by an older
+        // seeder with the codes of the counter; adding the file again would double every row.
+        SeedCodeRules.EnsureAligned("part_type", partIds.Count, partIds.Count > 0 || await dbContext.PartTypes.AnyAsync(cancellationToken).ConfigureAwait(false));
+        SeedCodeRules.EnsureAligned("recipe", recipeIds.Count, recipeIds.Count > 0 || await dbContext.Recipes.AnyAsync(cancellationToken).ConfigureAwait(false));
+
+        await ProductionReferenceSeed.RaiseCountersAsync(codes, data, cancellationToken).ConfigureAwait(false);
 
         List<SeedPart> missingParts = [.. data.Parts.Where(part => !partIds.ContainsKey(part.Code))];
         List<SeedRecipe> missingRecipes = [.. data.Recipes.Where(recipe => !recipeIds.ContainsKey(recipe.Code))];
@@ -82,7 +94,7 @@ public static class ProductionSeedAdditions
 
         // The characteristics of the starting data may be missing as well: the number of the
         // slots of a hull and the extra slot of the race joined the data later (task 00038).
-        bool added = await AddMissingCharacteristicsAsync(dbContext, data, texts, codes, cancellationToken).ConfigureAwait(false);
+        bool added = await AddMissingCharacteristicsAsync(dbContext, data, texts, cancellationToken).ConfigureAwait(false);
 
         // The links of the parts to the hulls and to the races may be missing even when every
         // part and every recipe is already there (task 00042), so the step looks for them too.
@@ -90,11 +102,11 @@ public static class ProductionSeedAdditions
 
         Dictionary<string, int> groupIds = await IdsAsync(
             dbContext.PartGroups.Select(group => new CodeId { Code = group.Code, Id = group.Id }),
-            DatabaseCodes(data.PartGroups.Select(group => group.Code), ProductionTextKeys.PartGroupCodeGroup),
+            [.. data.PartGroups.Select(group => group.Code)],
             cancellationToken).ConfigureAwait(false);
         Dictionary<string, int> characteristicIds = await IdsAsync(
             dbContext.Characteristics.Select(characteristic => new CodeId { Code = characteristic.Code, Id = characteristic.Id }),
-            DatabaseCodes((data.Characteristics ?? []).Select(characteristic => characteristic.Code), ProductionTextKeys.CharacteristicCodeGroup),
+            [.. (data.Characteristics ?? []).Select(characteristic => characteristic.Code)],
             cancellationToken).ConfigureAwait(false);
 
         // A characteristic that already has a row keeps an empty kind: the program reads the
@@ -120,9 +132,9 @@ public static class ProductionSeedAdditions
         {
             PartTypeEntity entity = new()
             {
-                Code = partCodes[part.Code],
-                NameKey = ProductionTextKeys.PartName(partCodes[part.Code]),
-                DescriptionKey = ProductionTextKeys.PartDescription(partCodes[part.Code]),
+                Code = part.Code,
+                NameKey = ProductionTextKeys.PartName(part.Code),
+                DescriptionKey = ProductionTextKeys.PartDescription(part.Code),
                 PartGroupId = groupIds[part.Group],
                 MarkLevel = part.MarkLevel,
                 SortOrder = part.SortOrder,
@@ -189,7 +201,6 @@ public static class ProductionSeedAdditions
                 ProductionReferenceSeed.ProductionSeedActor,
                 cancellationToken).ConfigureAwait(false);
 
-            await RaiseAsync(codes, ProductionTextKeys.PartTypeCodeGroup, newParts.Select(part => part.Code), cancellationToken).ConfigureAwait(false);
             added = true;
         }
 
@@ -237,9 +248,9 @@ public static class ProductionSeedAdditions
         {
             RecipeEntity entity = new()
             {
-                Code = recipeCodes[recipe.Code],
-                NameKey = ProductionTextKeys.RecipeName(recipeCodes[recipe.Code]),
-                DescriptionKey = ProductionTextKeys.RecipeDescription(recipeCodes[recipe.Code]),
+                Code = recipe.Code,
+                NameKey = ProductionTextKeys.RecipeName(recipe.Code),
+                DescriptionKey = ProductionTextKeys.RecipeDescription(recipe.Code),
                 OutputQuantity = recipe.OutputQuantity,
                 DurationSeconds = recipe.DurationSeconds,
                 SortOrder = recipe.SortOrder,
@@ -312,7 +323,6 @@ public static class ProductionSeedAdditions
                 cancellationToken).ConfigureAwait(false);
         }
 
-        await RaiseAsync(codes, ProductionTextKeys.RecipeCodeGroup, newRecipes.Select(recipe => recipe.Code), cancellationToken).ConfigureAwait(false);
 
         return true;
     }
@@ -504,32 +514,26 @@ public static class ProductionSeedAdditions
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="data">The starting data.</param>
     /// <param name="texts">The texts of the game data.</param>
-    /// <param name="codes">The counters of the neutral codes.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns><see langword="true"/> when a row was added.</returns>
     /// <remarks>
-    /// A characteristic that joins the starting data later takes the next code of the counter
-    /// of the server, like the parts and the recipes do. The step only adds: a characteristic
-    /// whose row is already there keeps the kind and the texts the admin panel has given it.
+    /// A characteristic that joins the starting data later keeps the code of the file, like the
+    /// parts and the recipes do. The step only adds: a characteristic whose row is already
+    /// there keeps the kind and the texts the admin panel has given it.
     /// </remarks>
     private static async Task<bool> AddMissingCharacteristicsAsync(
         ProductionDbContext dbContext,
         ProductionSeedData data,
         ILocalizationTexts texts,
-        ICodeSequence codes,
         CancellationToken cancellationToken)
     {
-        Dictionary<string, string> databaseCodes = DatabaseCodes(
-            (data.Characteristics ?? []).Select(characteristic => characteristic.Code),
-            ProductionTextKeys.CharacteristicCodeGroup);
-
         HashSet<string> existing = await dbContext.Characteristics.AsNoTracking()
             .Select(characteristic => characteristic.Code)
             .ToHashSetAsync(cancellationToken)
             .ConfigureAwait(false);
 
         List<SeedCharacteristic> missing = [.. (data.Characteristics ?? [])
-            .Where(characteristic => !existing.Contains(databaseCodes[characteristic.Code]))];
+            .Where(characteristic => !existing.Contains(characteristic.Code))];
 
         if (missing.Count == 0)
         {
@@ -540,7 +544,7 @@ public static class ProductionSeedAdditions
 
         foreach (SeedCharacteristic characteristic in missing)
         {
-            string code = await codes.NextAsync(ProductionTextKeys.CharacteristicCodeGroup, cancellationToken).ConfigureAwait(false);
+            string code = characteristic.Code;
 
             CharacteristicEntity entity = new()
             {
@@ -838,49 +842,16 @@ public static class ProductionSeedAdditions
     }
 
     /// <summary>
-    /// Gives every code of the file the code the first run of the seed gave its row.
-    /// </summary>
-    internal static Dictionary<string, string> DatabaseCodes(IEnumerable<string> fileCodes, string group) =>
-        fileCodes
-            .Select((code, index) => (code, index))
-            .ToDictionary(pair => pair.code, pair => $"{group}_{pair.index + 1}", StringComparer.Ordinal);
-
-    /// <summary>
     /// Reads the identifiers of the rows of the database by the codes of the file, in one query.
     /// </summary>
     private static async Task<Dictionary<string, int>> IdsAsync(
         IQueryable<CodeId> rows,
-        Dictionary<string, string> databaseCodes,
-        CancellationToken cancellationToken)
-    {
-        List<string> wanted = [.. databaseCodes.Values];
-
-        Dictionary<string, int> idsByDatabaseCode = await rows
+        List<string> wanted,
+        CancellationToken cancellationToken) =>
+        await rows
             .Where(row => wanted.Contains(row.Code))
             .ToDictionaryAsync(row => row.Code, row => row.Id, StringComparer.Ordinal, cancellationToken)
             .ConfigureAwait(false);
-
-        return databaseCodes
-            .Where(pair => idsByDatabaseCode.ContainsKey(pair.Value))
-            .ToDictionary(pair => pair.Key, pair => idsByDatabaseCode[pair.Value], StringComparer.Ordinal);
-    }
-
-    /// <summary>
-    /// Lifts the counter of a group above the codes the step wrote, so the next row of the admin
-    /// panel gets a free code.
-    /// </summary>
-    private static async Task RaiseAsync(ICodeSequence codes, string group, IEnumerable<string> written, CancellationToken cancellationToken)
-    {
-        int largest = written
-            .Select(code => int.Parse(code.AsSpan(group.Length + 1), System.Globalization.CultureInfo.InvariantCulture))
-            .DefaultIfEmpty(0)
-            .Max();
-
-        if (largest > 0)
-        {
-            await codes.RaiseAsync(group, largest, cancellationToken).ConfigureAwait(false);
-        }
-    }
 
     /// <summary>The code and the identifier of a row.</summary>
     private sealed class CodeId

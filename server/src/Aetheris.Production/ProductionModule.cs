@@ -88,23 +88,13 @@ public sealed class ProductionModule : IProductionModule
         }
 
         HashSet<string> wanted = new(fileCodes, StringComparer.Ordinal);
-        Dictionary<string, string> databaseCodes = ProductionSeedAdditions.DatabaseCodes(
-            ProductionReferenceSeed.Load().Parts.Select(part => part.Code),
-            ProductionTextKeys.PartTypeCodeGroup);
+
+        // The code of a row is the code of the file (task 00052), so the rows are found by it.
         IReadOnlyList<ProductionPartSummaryDto> parts = await GetPartsAsync(cancellationToken).ConfigureAwait(false);
-        Dictionary<string, int> idsByDatabaseCode = parts.ToDictionary(part => part.Code, part => part.Id, StringComparer.Ordinal);
-        Dictionary<string, int> resolved = new(StringComparer.Ordinal);
 
-        foreach (string fileCode in wanted)
-        {
-            if (databaseCodes.TryGetValue(fileCode, out string? databaseCode)
-                && idsByDatabaseCode.TryGetValue(databaseCode, out int partTypeId))
-            {
-                resolved[fileCode] = partTypeId;
-            }
-        }
-
-        return resolved;
+        return parts
+            .Where(part => wanted.Contains(part.Code))
+            .ToDictionary(part => part.Code, part => part.Id, StringComparer.Ordinal);
     }
 
     /// <inheritdoc />

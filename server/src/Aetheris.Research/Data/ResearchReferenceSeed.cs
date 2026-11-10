@@ -53,8 +53,15 @@ public static class ResearchReferenceSeed
         using Stream stream = typeof(ResearchReferenceSeed).Assembly.GetManifestResourceStream(ResourceName)
             ?? throw new InvalidOperationException($"The embedded starting data {ResourceName} is missing.");
 
-        return JsonSerializer.Deserialize<ResearchSeedData>(stream, JsonOptions)
+        ResearchSeedData seed = JsonSerializer.Deserialize<ResearchSeedData>(stream, JsonOptions)
             ?? throw new InvalidOperationException($"The embedded starting data {ResourceName} is empty.");
+
+        // The code of the file is the code of the row (task 00052): every row has one, in the
+        // form the keys of the texts allow, and no two rows of a kind share it.
+        SeedCodeRules.Validate(seed.Branches.Select(branch => branch.Code), "technology branch");
+        SeedCodeRules.Validate(seed.Technologies.Select(technology => technology.Code), "technology");
+
+        return seed;
     }
 
     /// <summary>

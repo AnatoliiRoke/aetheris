@@ -1,0 +1,528 @@
+import { useCallback, useMemo, useState } from 'react';
+import type { FlightPlan, FlightPlanOrder, FlightPlanOrderInput, Fleet } from '../../../api/fleetApi';
+import { useApi } from '../../../api/useApi';
+import { Alert } from '../../../components/Alert';
+import { GameIcon } from '../../../components/GameIcon';
+import { useI18n } from '../../../i18n/useI18n';
+import type { MessageKey } from '../../../i18n/uk';
+import { useRead } from '../market/useRead';
+import { useBodies } from '../useBodies';
+import { FleetDialog } from './FleetDialog';
+import { FlightMineTarget } from './FlightMineTarget';
+import { FlightMineTime } from './FlightMineTime';
+import { FlightPlanTime } from './FlightPlanTime';
+import { FlightTargetFields } from './FlightTargetFields';
+import { fleetExtracts } from './fleetExtraction';
+import { readAxes, toOrderInputs, type DraftOrder, type TargetKind } from './flightPlanParts';
+
+/**
+ * The types of an order of a flight plan, as the client sends them (task 00050). Only the type of
+ * an order decides what the player has to fill in: the flights name a target and last a while,
+ * and the return names the home body of the fleet and lasts a while.
+ *
+ * The order of extraction is offered only to a fleet that may extract: one of its ships has a
+ * module of extraction.
+ */
+const orderTypes: readonly { code: string; label: MessageKey; fields: OrderFields }[] = [
+  { code: 'fly', label: 'plan.order.fly', fields: { target: true, duration: true } },
+  { code: 'hyperfly', label: 'plan.order.hyperfly', fields: { target: true, duration: true } },
+  { code: 'jump', label: 'plan.order.jump', fields: { target: true, duration: true } },
+  { code: 'mine', label: 'plan.order.mine', fields: { target: true, duration: true } },
+  { code: 'scan', label: 'plan.order.scan', fields: {} },
+  { code: 'load', label: 'plan.order.load', fields: {} },
+  { code: 'unload', label: 'plan.order.unload', fields: {} },
+  { code: 'wait', label: 'plan.order.wait', fields: {} },
+  { code: 'return', label: 'plan.order.return', fields: { duration: true } },
+];
+
+/**
+ * What the player has to fill in for an order (task 00050): a field that is not named is not shown.
+ */
+interface OrderFields {
+  /** Whether the order names a target. */
+  target?: boolean;
+  /** Whether the order lasts a while. */
+  duration?: boolean;
+}
+
+/**
+ * The target the map gave to the window of the flight plan (task 00050).
+ */
+export interface FlightPlanSeed {
+  /** The kind of the target the map gave: `point`, `planet` or `object`. */
+  targetKind?: TargetKind;
+  /** The sector of the target, when the map gave one. */
+  targetSectorId?: number;
+  /** The system of the target, when the map gave one. */
+  targetSystemId?: number;
+  /** The object of the target, when the map gave one. */
+  targetObjectId?: number;
+  /** The first axis of the target, when the map gave a point. */
+  targetX?: number;
+  /** The second axis of the target, when the map gave a point. */
+  targetY?: number;
+  /** The third axis of the target, when the map gave a point. */
+  targetZ?: number;
+}
+
+/**
+ * The window that writes the flight plan of a fleet (task 00050): the fleet the plan is made for,
+ * the orders of the plan with their type, their target and how long they last. The window is
+ * opened from the screen of the fleets and from the card of the map, and it is the same window in
+ * both places.
+ *
+ * @param fleets The fleets of the player; the plan is made for one of them.
+ * @param sectorId The sector the fleets stand in; the places of the sector may be named as targets.
+ * @param plan The plan that is being changed, or `null` when a new one is written.
+ * @param seed The target the map gave, or `null`.
+ * @param busy Whether a command is under way.
+ * @param error The refusal of the last attempt, or `null`.
+ * @param onSave Writes the plan.
+ * @param onExecute Puts the plan under way.
+ * @param onClose Closes the window.
+ */
+export function FlightPlanDialog({
+  fleets,
+  sectorId,
+  plan,
+  seed,
+  busy,
+  error,
+  onSave,
+  onExecute,
+  onClose,
+}: {
+  fleets: readonly Fleet[];
+  sectorId: number | null;
+  plan: FlightPlan | null;
+  seed: FlightPlanSeed | null;
+  busy: boolean;
+  error: string | null;
+  onSave: (fleetId: number, orders: FlightPlanOrderInput[]) => void;
+  onExecute: (fleetId: number, orders: FlightPlanOrderInput[]) => void;
+  onClose: () => void;
+}) {
+  const { t } = useI18n();
+  const { map, fleet: fleetApi } = useApi();
+  const { bodies } = useBodies();
+  const [fleetId, setFleetId] = useState<number | null>(plan?.fleetId ?? fleets.length === 1 ? (plan?.fleetId ?? fleets[0]?.id ?? null) : null);
+  const [coordinatesBad, setCoordinatesBad] = useState(false);
+  const [targetBad, setTargetBad] = useState(false);
+
+  // The sectors of the galaxy, so the player may choose the sector of the target. The list of the
+  // sectors does not change, so the tab of the browser does not read it again.
+  const loadGalaxy = useCallback(() => map.galaxy(), [map]);
+  const galaxyRead = useRead(loadGalaxy, true, false);
+
+  // The fleet the plan is made for: its ships give the speed of the flight.
+  const chosenFleet = useMemo(() => fleets.find((entry) => entry.id === fleetId) ?? null, [fleets, fleetId]);
+
+  // The projects of the ships of the fleet: they give the mass and the push of every ship, and so
+  // the speed of the fleet. The list of the projects does not change, so the tab of the browser does
+  // not read it again.
+  const loadDesigns = useCallback(() => fleetApi.designs(), [fleetApi]);
+  const designsRead = useRead(loadDesigns, chosenFleet !== null, false);
+
+  // The catalog of the ships: it names the group of every module, and so it tells whether a ship
+  // of the fleet carries a module of extraction. The catalog does not change, so the tab of the
+  // browser does not read it again.
+  const loadCatalog = useCallback(
+    () => (chosenFleet === null ? Promise.resolve(null) : fleetApi.shipCatalog(chosenFleet.homePlanetId)),
+    [fleetApi, chosenFleet],
+  );
+  const catalogRead = useRead(loadCatalog, chosenFleet !== null, false);
+
+  // Whether the fleet may extract: one of its ships has a module of extraction. The order of
+  // extraction is offered only then.
+  const mayExtract = useMemo(
+    () => fleetExtracts(chosenFleet, designsRead.data ?? [], catalogRead.data),
+    [chosenFleet, designsRead.data, catalogRead.data],
+  );
+
+  // The sector the fleet stands in: it is the sector of the target of every new order.
+  const fleetSectorId = useMemo(() => chosenFleet?.sectorId ?? sectorId, [chosenFleet, sectorId]);
+
+  const [orders, setOrders] = useState<DraftOrder[]>(() => draftOf(plan, seed, fleetSectorId));
+
+  // The types of the orders the player may choose: the order of extraction is hidden from a fleet
+  // that may not extract. A plan that is being changed keeps the type of an order it holds, so the
+  // order of extraction stays in the list as long as the plan holds one.
+  const offeredTypes = useMemo(() => {
+    if (mayExtract) {
+      return orderTypes;
+    }
+
+    const keeps = orders.some((order) => order.typeCode === 'mine');
+
+    return keeps ? orderTypes : orderTypes.filter((type) => type.code !== 'mine');
+  }, [mayExtract, orders]);
+
+  // The home body of the fleet: the return of the fleet goes back to it.
+  const homeName = useMemo(() => {
+    const entry = fleets.find((item) => item.id === fleetId);
+    const home = entry === undefined ? undefined : bodies.find((item) => item.planetId === entry.homePlanetId);
+
+    return home?.name?.trim() || (entry === undefined ? null : String(entry.homePlanetId));
+  }, [bodies, fleetId, fleets]);
+
+  // The home body of the fleet with its place: the time of the return is counted to it.
+  const home = useMemo(() => {
+    const entry = fleets.find((item) => item.id === fleetId);
+
+    return entry === undefined ? null : bodies.find((item) => item.planetId === entry.homePlanetId) ?? null;
+  }, [bodies, fleetId, fleets]);
+
+  const needsFleet = fleetId === null;
+  const ready = fleetId !== null && orders.length > 0;
+
+  const addOrder = () => {
+    setOrders((current) => [
+      ...current,
+      {
+        typeCode: 'fly',
+        targetKind: 'point',
+        // The sector of the fleet is the sector of the target by default.
+        targetSectorId: fleetSectorId,
+        targetSystemId: null,
+        targetObjectId: null,
+        target: '',
+        durationMinutes: '',
+      },
+    ]);
+  };
+
+  const changeOrder = (index: number, patch: Partial<DraftOrder>) => {
+    setOrders((current) =>
+      current.map((order, place) => {
+        if (place !== index) {
+          return order;
+        }
+
+        const next = { ...order, ...patch };
+        const fields = orderTypes.find((type) => type.code === next.typeCode)?.fields;
+
+        // The fields of the type that are gone carry nothing: an order of a type without a target
+        // names no target, and an order that does not last has no duration.
+        if (fields && !fields.target) {
+          next.targetKind = 'point';
+          next.target = '';
+          next.targetSectorId = null;
+          next.targetSystemId = null;
+          next.targetObjectId = null;
+        }
+
+        // An order of extraction always names a place of the map, never a point of the space.
+        if (next.typeCode === 'mine' && next.targetKind !== 'object') {
+          next.targetKind = 'object';
+          next.target = '';
+          next.targetSystemId = null;
+          next.targetObjectId = null;
+        }
+
+        if (fields && !fields.duration) {
+          next.durationMinutes = '';
+        }
+
+        return next;
+      }),
+    );
+  };
+
+  const removeOrder = (index: number) => {
+    setOrders((current) => current.filter((_, place) => place !== index));
+  };
+
+  const moveOrder = (index: number, step: number) => {
+    setOrders((current) => {
+      const next = [...current];
+      const to = index + step;
+
+      if (to < 0 || to >= next.length) {
+        return current;
+      }
+
+      const moved = next[index]!;
+
+      next[index] = next[to]!;
+      next[to] = moved;
+
+      return next;
+    });
+  };
+
+  const write = (done: (fleetId: number, orders: FlightPlanOrderInput[]) => void) => {
+    if (fleetId === null) {
+      return;
+    }
+
+    // Only the type of an order decides what is checked: a type without a target names none.
+    const needsTarget = (order: DraftOrder): boolean => orderTypes.find((type) => type.code === order.typeCode)?.fields.target ?? true;
+
+    // A point of the space is written as three numbers, so the text is read before the plan is sent.
+    const bad = orders.some(
+      (order) => needsTarget(order) && order.targetKind === 'point' && order.target !== '' && readAxes(order.target) === null,
+    );
+
+    // A target of a place names the place: a planet needs a sector, a system and a body, and an
+    // object needs a sector and a body.
+    const unknown = orders.some((order) => {
+      if (!needsTarget(order) || order.targetKind === 'point') {
+        return false;
+      }
+
+      if (order.targetKind === 'planet') {
+        return order.targetSectorId === null || order.targetSystemId === null || order.targetObjectId === null;
+      }
+
+      return order.targetSectorId === null || order.targetObjectId === null;
+    });
+
+    setCoordinatesBad(bad);
+    setTargetBad(unknown);
+
+    if (!bad && !unknown) {
+      done(fleetId, toOrderInputs(orders));
+    }
+  };
+
+  const orderRows = useMemo(
+    () =>
+      orders.map((order, index) => {
+        // The fields of the type of the order are looked up in the whole list of the types, not in
+        // the offered ones: a plan that is being changed may hold an order of extraction even when
+        // the fleet may not extract now.
+        const type = orderTypes.find((entry) => entry.code === order.typeCode);
+
+        return {
+          order,
+          index,
+          fields: type?.fields ?? { target: true },
+        };
+      }),
+    [orders],
+  );
+
+  return (
+    <FleetDialog
+      actions={
+        <>
+          <button className="btn fl-btn" onClick={onClose} type="button">
+            {t('fleets.cancel')}
+          </button>
+          <button className="btn btn--secondary" disabled={busy || !ready} onClick={() => write(onExecute)} title={ready ? undefined : t('plan.executeSoon')} type="button">
+            {t('plan.execute')}
+          </button>
+          <button className="btn btn--primary" disabled={busy || !ready} onClick={() => write(onSave)} type="button">
+            {plan === null ? t('plan.save') : t('plan.edit')}
+          </button>
+        </>
+      }
+      onClose={onClose}
+      title={plan ? t('plan.editTitle') : t('plan.createTitle')}
+    >
+      <div className="fl-field fl-field--row">
+        <label className="fl-label" htmlFor="plan-fleet">
+          {t('plan.chooseFleet')}
+        </label>
+        {fleets.length === 0 ? (
+          <p className="fl-note">{t('plan.noFleets')}</p>
+        ) : (
+          <select
+            className="fl-input"
+            id="plan-fleet"
+            onChange={(event) => setFleetId(Number(event.target.value))}
+            value={fleetId ?? ''}
+          >
+            {fleets.map((fleet) => (
+              <option key={fleet.id} value={fleet.id}>
+                {fleet.name} · {t('fleets.shipsCount', { count: fleet.ships.length })}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      <div className="fl-field">
+        <span className="fl-label">{t('plan.orders')}</span>
+        {orders.length === 0 ? (
+          <p className="fl-note">{t('plan.noOrders')}</p>
+        ) : (
+          <ul className="pl-orders">
+            {orderRows.map(({ order, index, fields }) => (
+              <li className="pl-order" key={index}>
+                <div className="pl-order__fields">
+                  <div className="pl-order__row">
+                    <label className="fl-label" htmlFor={`plan-order-type-${index}`}>
+                      {t('plan.orderType')}
+                    </label>
+                    <select
+                      className="fl-input"
+                      id={`plan-order-type-${index}`}
+                      onChange={(event) => changeOrder(index, { typeCode: event.target.value })}
+                      value={order.typeCode}
+                    >
+                      {offeredTypes.map((type) => (
+                        <option key={type.code} value={type.code}>
+                          {t(type.label)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {order.typeCode === 'return' ? (
+                    <div className="pl-order__row">
+                      <label className="fl-label" htmlFor={`plan-order-home-${index}`}>
+                        {t('plan.home')}
+                      </label>
+                      <input
+                        className="fl-input"
+                        id={`plan-order-home-${index}`}
+                        readOnly
+                        value={homeName ?? ''}
+                      />
+                    </div>
+                  ) : null}
+
+                  {order.typeCode === 'return' ? (
+                    <FlightPlanTime
+                      designs={designsRead.data ?? []}
+                      fleet={chosenFleet}
+                      target={{
+                        kind: 'planet',
+                        sectorId: home?.sectorId ?? null,
+                        systemId: home?.systemId ?? null,
+                        objectId: null,
+                        planetId: chosenFleet?.homePlanetId ?? null,
+                        point: '',
+                      }}
+                    />
+                  ) : null}
+
+                  {order.typeCode === 'mine' ? (
+                    <>
+                      <FlightMineTarget
+                        id={String(index)}
+                        onChange={(patch) => changeOrder(index, patch)}
+                        sectors={galaxyRead.data?.sectors ?? []}
+                        value={{
+                          targetSectorId: order.targetSectorId,
+                          targetSystemId: order.targetSystemId,
+                          targetObjectId: order.targetObjectId,
+                        }}
+                      />
+
+                      <FlightMineTime
+                        durationMinutes={order.durationMinutes}
+                        fleet={chosenFleet}
+                        id={String(index)}
+                        objectId={order.targetObjectId}
+                        onChange={(durationMinutes) => changeOrder(index, { durationMinutes })}
+                      />
+                    </>
+                  ) : null}
+
+                  {fields.target && order.typeCode !== 'mine' ? (
+                    <FlightTargetFields
+                      designs={designsRead.data ?? []}
+                      fleet={chosenFleet}
+                      id={String(index)}
+                      onChange={(patch) => changeOrder(index, patch)}
+                      sectors={galaxyRead.data?.sectors ?? []}
+                      value={{
+                        targetKind: order.targetKind,
+                        targetSectorId: order.targetSectorId,
+                        targetSystemId: order.targetSystemId,
+                        targetObjectId: order.targetObjectId,
+                        target: order.target,
+                      }}
+                    />
+                  ) : null}
+                </div>
+
+                <div className="pl-order__tools">
+                  <button
+                    aria-label={t('plan.moveUp')}
+                    className="btn fl-btn fl-btn--small pl-tool"
+                    disabled={index === 0}
+                    onClick={() => moveOrder(index, -1)}
+                    type="button"
+                  >
+                    <GameIcon name="arrowUp" size={14} />
+                  </button>
+                  <button
+                    aria-label={t('plan.moveDown')}
+                    className="btn fl-btn fl-btn--small pl-tool"
+                    disabled={index === orders.length - 1}
+                    onClick={() => moveOrder(index, 1)}
+                    type="button"
+                  >
+                    <GameIcon name="arrowDown" size={14} />
+                  </button>
+                  <button
+                    aria-label={t('plan.removeOrder')}
+                    className="btn fl-btn fl-btn--small pl-tool fl-btn--danger-solid"
+                    onClick={() => removeOrder(index)}
+                    type="button"
+                  >
+                    <GameIcon name="close" size={14} />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        <button className="btn fl-btn fl-btn--small" onClick={addOrder} type="button">
+          <GameIcon name="mapPlus" size={16} />
+          {t('plan.addOrder')}
+        </button>
+        {coordinatesBad ? <p className="pl-error">{t('plan.coordinatesBad')}</p> : null}
+        {targetBad ? <p className="pl-error">{t('plan.targetUnknown')}</p> : null}
+      </div>
+
+      {needsFleet ? <p className="fl-note">{t('plan.fleetRequired')}</p> : null}
+      {error ? <Alert kind="error">{error}</Alert> : null}
+    </FleetDialog>
+  );
+}
+
+/**
+ * The orders the window starts with: the orders of the plan that is being changed, or the one
+ * order the map gave.
+ *
+ * @param plan The plan that is being changed, or `null`.
+ * @param seed The target the map gave, or `null`.
+ * @param sectorId The sector the fleets stand in; it is the sector of the target by default.
+ * @returns The orders the window holds.
+ */
+function draftOf(plan: FlightPlan | null, seed: FlightPlanSeed | null, sectorId: number | null): DraftOrder[] {
+  if (plan) {
+    return plan.orders.map((order: FlightPlanOrder) => ({
+      typeCode: order.typeCode,
+      targetKind: order.targetKind === 'point' ? 'point' : order.targetKind === 'planet' ? 'planet' : 'object',
+      targetSectorId: order.targetSectorId > 0 ? order.targetSectorId : sectorId,
+      targetSystemId: order.targetSystemId > 0 ? order.targetSystemId : null,
+      targetObjectId: order.targetObjectId > 0 ? order.targetObjectId : null,
+      target: order.targetKind === 'point' ? `${order.targetX}, ${order.targetY}, ${order.targetZ}` : '',
+      durationMinutes: order.durationSeconds > 0 ? String(Math.round(order.durationSeconds / 60)) : '',
+    }));
+  }
+
+  if (seed) {
+    const isPoint = seed.targetObjectId === undefined && seed.targetSystemId === undefined;
+    const kind: TargetKind = seed.targetKind ?? (isPoint ? 'point' : seed.targetSystemId === undefined ? 'object' : 'planet');
+
+    return [
+      {
+        typeCode: 'fly',
+        targetKind: kind,
+        targetSectorId: seed.targetSectorId ?? sectorId,
+        targetSystemId: seed.targetSystemId ?? null,
+        targetObjectId: seed.targetObjectId ?? null,
+        target: isPoint ? `${seed.targetX ?? 0}, ${seed.targetY ?? 0}, ${seed.targetZ ?? 0}` : '',
+        durationMinutes: '',
+      },
+    ];
+  }
+
+  return [];
+}

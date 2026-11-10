@@ -295,4 +295,39 @@ describe('the production screen (task 00032)', () => {
 
     expect(await screen.findByRole('region', { name: 'Рецепти' })).toBeInTheDocument();
   });
+
+  it('shows how many parts of the body it has and the characteristics of the part on the tile of a recipe (task 00049)', async () => {
+    const user = userEvent.setup();
+    renderPage('/planet/production', { auth: signedIn() });
+
+    const recipes = await screen.findByRole('region', { name: 'Рецепти' });
+    await within(recipes).findByText('Будматеріали');
+    await user.click(within(recipes).getByRole('tab', { name: 'Модулі кораблів' }));
+
+    // The recipe of the hull module makes the part 3, and the stock of the body holds four of them.
+    const card = (await within(recipes).findByText('Корпусний модуль')).closest('li')!;
+
+    // The amount of the part on the stock of the body.
+    expect(within(card).getByText('На складі: 4')).toBeInTheDocument();
+    // The key characteristics of the part, with their names and their values.
+    expect(within(card).getByText('Тяга')).toBeInTheDocument();
+    expect(within(card).getByText('120')).toBeInTheDocument();
+  });
+
+  it('shows how many of the resource the body has on the tile of a recipe of a resource (task 00049)', async () => {
+    const base = sampleProductionRecipes();
+    const production = fakeProductionApi({
+      recipes: vi.fn().mockResolvedValue({
+        ...base,
+        recipes: base.recipes.map((recipe) => (recipe.recipeId === 1 ? { ...recipe, resourceTypeId: 3 } : recipe)),
+      }),
+    });
+    renderPage('/planet/production', { auth: signedIn(), production });
+
+    const recipes = await screen.findByRole('region', { name: 'Рецепти' });
+    const card = (await within(recipes).findByText('Будматеріали')).closest('li')!;
+
+    // The body holds five hundred of the third resource.
+    expect(within(card).getByText('На складі: 500')).toBeInTheDocument();
+  });
 });

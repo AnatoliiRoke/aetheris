@@ -98,7 +98,7 @@ public static partial class TextEndpoints
         }
 
         LocalizationPack pack = await texts.GetPackAsync(language, cancellationToken).ConfigureAwait(false);
-        string etag = string.Create(CultureInfo.InvariantCulture, $"\"{pack.Language}-{pack.Version}\"");
+        string etag = string.Create(CultureInfo.InvariantCulture, $"\"{pack.Language}-{pack.Version}-{pack.ContentHash}\"");
 
         // The client asks again whenever it comes back to the page; an unchanged pack costs a
         // short answer only.

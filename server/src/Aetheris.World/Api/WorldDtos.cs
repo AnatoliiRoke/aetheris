@@ -161,6 +161,22 @@ public sealed record SystemContentDto(
     IReadOnlyList<DepositDto> Deposits,
     IReadOnlyList<CompositionDto> Compositions);
 
+/// <summary>
+/// The place of the map a fleet may work at (task 00050): a field of a sector, a field of a
+/// system, a gas giant or a nebula.
+/// </summary>
+/// <remarks>
+/// The place is read without the visibility filter, for the server itself: the fleet that works
+/// at the place stands there, so it sees it.
+/// </remarks>
+/// <param name="Object">The object of the map.</param>
+/// <param name="Compositions">The composition shares of the place, for a field or a nebula.</param>
+/// <param name="Mass">The mass that is left in the place, in tonnes: the mass of a field or of a nebula.</param>
+public sealed record PlaceContentDto(
+    ObjectDto Object,
+    IReadOnlyList<CompositionDto> Compositions,
+    long Mass);
+
 /// <summary>A free body that a player may take.</summary>
 /// <param name="PlanetId">The body.</param>
 /// <param name="CelestialObjectId">Its celestial object.</param>

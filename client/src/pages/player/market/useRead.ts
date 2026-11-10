@@ -20,8 +20,10 @@ export interface ReadState<T> {
  *
  * @param load The read; it must be stable, so it changes only when what is read changes.
  * @param enabled Whether to read at all; a page that waits for a choice passes `false`.
+ * @param reloadOnVisible Whether to read again when the tab of the browser becomes visible. A read
+ * of the data that never changes passes `false`, so the server is not asked for it again and again.
  */
-export function useRead<T>(load: () => Promise<T>, enabled = true): ReadState<T> {
+export function useRead<T>(load: () => Promise<T>, enabled = true, reloadOnVisible = true): ReadState<T> {
   const [state, setState] = useState<{ data: T | null; receivedAt: number | null; failed: boolean }>({ data: null, receivedAt: null, failed: false });
   const sequence = useRef(0);
 
@@ -54,7 +56,7 @@ export function useRead<T>(load: () => Promise<T>, enabled = true): ReadState<T>
     };
   }, [apply, load, enabled]);
 
-  useReloadOnVisible(enabled ? run : noop);
+  useReloadOnVisible(enabled && reloadOnVisible ? run : noop);
 
   return { ...state, loading: enabled && state.data === null && !state.failed, reload: run };
 }

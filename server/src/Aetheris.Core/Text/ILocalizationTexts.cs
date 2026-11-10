@@ -12,9 +12,10 @@ public sealed record LocalizationTextEntry(string Key, string Language, string T
 /// The texts of one language as the client gets them.
 /// </summary>
 /// <param name="Language">The language.</param>
-/// <param name="Version">The version of the pack; it grows with every added or changed text of the language.</param>
+/// <param name="Version">The version of the pack: the sum of the versions of its texts; it grows with every added or changed text of the language.</param>
 /// <param name="Texts">The texts by localisation key.</param>
-public sealed record LocalizationPack(string Language, long Version, IReadOnlyDictionary<string, string> Texts);
+/// <param name="ContentHash">A short hash of the sorted keys, texts and versions of the pack, so a pack whose keys changed without a change of any version still gets a new tag (task 00052).</param>
+public sealed record LocalizationPack(string Language, long Version, IReadOnlyDictionary<string, string> Texts, string ContentHash = "");
 
 /// <summary>
 /// The texts of the game data: the names and the descriptions of the reference rows (task 00022,

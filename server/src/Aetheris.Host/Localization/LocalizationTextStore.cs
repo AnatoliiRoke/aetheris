@@ -1,4 +1,7 @@
 using System.Collections.Concurrent;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using Aetheris.Core.Text;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
@@ -10,13 +13,13 @@ namespace Aetheris.Host.Localization;
 /// The texts of every language kept in memory (task 00022, section 3.1).
 /// </summary>
 /// <remarks>
-/// A pack is read from the database once and served from memory until a change of the texts
-/// drops it. A pack read while a change was being committed is not kept, so a dropped copy never
-/// comes back with the old texts.
+/// A pack is read from the database and served from memory until a change of the texts drops it
+/// or it is older than <c>texts.pack_cache_seconds</c>. A pack read while a change was being
+/// committed is not kept, so a dropped copy never comes back with the old texts.
 /// </remarks>
 public sealed class LocalizationTextCache
 {
-    private readonly ConcurrentDictionary<string, LocalizationPack> _packs = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, CachedPack> _packs = new(StringComparer.Ordinal);
     private long _generation;
 
     /// <summary>
@@ -25,25 +28,48 @@ public sealed class LocalizationTextCache
     public long Generation => Interlocked.Read(ref _generation);
 
     /// <summary>
-    /// Finds the pack of a language in memory.
+    /// Finds the pack of a language in memory, when it is younger than its lifetime.
     /// </summary>
     /// <param name="language">The language.</param>
+    /// <param name="lifetime">How long a pack stays in memory; zero keeps none.</param>
+    /// <param name="timeProvider">The clock.</param>
     /// <param name="pack">The pack, when it is in memory.</param>
-    /// <returns><see langword="true"/> when the pack is in memory.</returns>
-    public bool TryGet(string language, out LocalizationPack pack) => _packs.TryGetValue(language, out pack!);
+    /// <returns><see langword="true"/> when the pack is in memory and still valid.</returns>
+    /// <remarks>
+    /// An old pack is not served: it is read from the database again, so a change made outside the
+    /// application reaches the clients without a restart (task 00052).
+    /// </remarks>
+    public bool TryGet(string language, TimeSpan lifetime, TimeProvider timeProvider, out LocalizationPack pack)
+    {
+        ArgumentNullException.ThrowIfNull(timeProvider);
+
+        if (lifetime > TimeSpan.Zero
+            && _packs.TryGetValue(language, out CachedPack? cached)
+            && timeProvider.GetElapsedTime(cached.Timestamp) < lifetime)
+        {
+            pack = cached.Pack;
+
+            return true;
+        }
+
+        pack = null!;
+
+        return false;
+    }
 
     /// <summary>
     /// Keeps a pack read in a generation, unless the texts changed since.
     /// </summary>
     /// <param name="pack">The pack.</param>
     /// <param name="generation">The generation at the start of the read.</param>
-    public void Keep(LocalizationPack pack, long generation)
+    /// <param name="timestamp">The moment the pack was read, from the clock of the store.</param>
+    public void Keep(LocalizationPack pack, long generation, long timestamp)
     {
         ArgumentNullException.ThrowIfNull(pack);
 
         if (generation == Generation)
         {
-            _packs[pack.Language] = pack;
+            _packs[pack.Language] = new CachedPack(pack, timestamp);
         }
     }
 
@@ -55,6 +81,8 @@ public sealed class LocalizationTextCache
         Interlocked.Increment(ref _generation);
         _packs.Clear();
     }
+
+    private sealed record CachedPack(LocalizationPack Pack, long Timestamp);
 }
 
 /// <summary>
@@ -70,6 +98,9 @@ public sealed class LocalizationTextStore : ILocalizationTexts
     private readonly LocalizationTextCache _cache;
     private readonly TextSettings _settings;
     private readonly TimeProvider _timeProvider;
+
+    /// <summary>The number of bytes of the hash kept in the tag of the pack.</summary>
+    private const int HashByteCount = 6;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalizationTextStore"/> class.
@@ -102,26 +133,50 @@ public sealed class LocalizationTextStore : ILocalizationTexts
     {
         ArgumentNullException.ThrowIfNull(language);
 
-        if (_cache.TryGet(language, out LocalizationPack cached))
+        if (_cache.TryGet(language, _settings.PackCacheDuration, _timeProvider, out LocalizationPack cached))
         {
             return cached;
         }
 
         long generation = _cache.Generation;
+        long readAt = _timeProvider.GetTimestamp();
         List<LocalizationTextEntity> texts = await _dbContext.LocalizationTexts.AsNoTracking()
             .Where(text => text.Language == language)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         // Texts are only added or raised to a new version, so the sum of the versions grows with
-        // every change of the language and serves as the version of the pack.
+        // every change of the language and serves as the version of the pack. A key renamed in the
+        // database without a new version leaves the sum as it was, so the hash of the content
+        // gives the pack its new tag (task 00052).
         LocalizationPack pack = new(
             language,
             texts.Sum(text => (long)text.Version),
-            texts.ToDictionary(text => text.Key, text => text.Text, StringComparer.Ordinal));
+            texts.ToDictionary(text => text.Key, text => text.Text, StringComparer.Ordinal),
+            ContentHash(texts));
 
-        _cache.Keep(pack, generation);
+        _cache.Keep(pack, generation, readAt);
 
         return pack;
+    }
+
+    /// <summary>
+    /// Builds the short hash of the content of a pack: its keys, texts and versions in the order of
+    /// the keys.
+    /// </summary>
+    /// <param name="texts">The texts of one language.</param>
+    /// <returns>The hash, in lower-case hexadecimal.</returns>
+    public static string ContentHash(IEnumerable<LocalizationTextEntity> texts)
+    {
+        ArgumentNullException.ThrowIfNull(texts);
+
+        using IncrementalHash hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+
+        foreach (LocalizationTextEntity text in texts.OrderBy(entry => entry.Key, StringComparer.Ordinal))
+        {
+            hash.AppendData(Encoding.UTF8.GetBytes(string.Create(CultureInfo.InvariantCulture, $"{text.Key}\0{text.Text}\0{text.Version}\0")));
+        }
+
+        return Convert.ToHexStringLower(hash.GetCurrentHash().AsSpan(0, HashByteCount));
     }
 
     /// <inheritdoc />

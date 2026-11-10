@@ -17,6 +17,8 @@ export interface MapSector {
   isNewbie: boolean;
   systemCount: number;
   ownPlanetCount: number;
+  /** What the player knows of the sector: `open`, `known` or `unknown`. */
+  state: MapState;
 }
 
 /** The map of the galaxy. */

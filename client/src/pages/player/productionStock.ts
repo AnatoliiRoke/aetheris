@@ -64,13 +64,15 @@ const creditsCode = 'resource_27';
 const populationCode = 'resource_30';
 
 /**
- * The catalog code carried by a localisation key, such as `resource_27` or `part_3`.
+ * The catalog code of a resource carried by a localisation key, such as `resource_27`. A part
+ * has no code here: the codes of the parts come from the starting data and carry no order
+ * (`part_m_5`, `part_h_2`), so a part stands by its identifier, which follows the catalog.
  *
  * @param nameKey The localisation key of the ingredient.
  * @returns The code, or `null` when the key has none.
  */
 function catalogCode(nameKey: string): string | null {
-  const matched = /((?:resource|part)_\d+)/.exec(nameKey);
+  const matched = /(resource_\d+)/.exec(nameKey);
 
   return matched?.[1] ?? null;
 }
@@ -79,7 +81,7 @@ function catalogCode(nameKey: string): string | null {
  * Where an ingredient stands on a recipe plaque: credits, then population, then the other
  * resources in the order of the catalog, then the parts.
  *
- * @param code The catalog code of the ingredient, or `null` for a part named only by its id.
+ * @param code The catalog code of the ingredient, or `null` for a part, which stands by its id.
  * @param partTypeId The part, or `null` when the ingredient is a resource.
  * @returns The group and the place inside the group. A smaller pair stands higher.
  */
@@ -98,9 +100,7 @@ function ingredientPlace(code: string | null, partTypeId: number | null): readon
     return [2, Number(resourceNumber[1])];
   }
 
-  const partNumber = code === null ? null : /^part_(\d+)$/.exec(code);
-
-  return [3, partNumber ? Number(partNumber[1]) : (partTypeId ?? 0)];
+  return [3, partTypeId ?? 0];
 }
 
 /**
@@ -167,4 +167,47 @@ export function ingredientAvailability(recipe: { ingredients: ProductionIngredie
       };
     })
     .sort((left, right) => compareRecipeIngredients(left.ingredient, right.ingredient));
+}
+
+/**
+ * How many parts of one kind the body has on its stock: every stack of that kind adds up, whatever
+ * the mark of the race and the condition of the part is. The kind of a part is its type, and every
+ * mark of it is a type of its own, so the mark is already in the type.
+ *
+ * @param stock The stock of the parts of the body.
+ * @param partTypeId The part.
+ * @returns How many such parts the body has.
+ */
+export function partQuantity(stock: ProductionStock | null, partTypeId: number): number {
+  if (!stock) {
+    return 0;
+  }
+
+  return stock.stacks.filter((stack) => stack.partTypeId === partTypeId).reduce((sum, stack) => sum + stack.quantity, 0);
+}
+
+/**
+ * How many of the thing a recipe makes the body has: the part the recipe makes, or the resource
+ * it makes. The parts lie in the stacks of the stock of the body, the resources in the resources of
+ * the body and in the balances of the civilization, so the same order as for the ingredients of a
+ * recipe holds here (task 00049).
+ *
+ * @param source The balances, the resources of the body and the stock of its parts.
+ * @param recipe The recipe.
+ * @returns How many the body has, or `null` when the recipe makes neither a part nor a resource.
+ */
+export function outputQuantity(source: BodyAvailability, recipe: { partTypeId?: number | null; resourceTypeId?: number | null }): number | null {
+  // The server leaves out a field whose value is null, so a recipe of a resource has no part field
+  // at all: it is missing, not null. Both mean the same thing here.
+  if (recipe.partTypeId !== null && recipe.partTypeId !== undefined) {
+    return partQuantity(source.stock, recipe.partTypeId);
+  }
+
+  if (recipe.resourceTypeId !== null && recipe.resourceTypeId !== undefined) {
+    const { resources } = availableAmounts(source);
+
+    return resources.get(recipe.resourceTypeId) ?? 0;
+  }
+
+  return null;
 }

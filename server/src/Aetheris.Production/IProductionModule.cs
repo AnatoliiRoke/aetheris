@@ -39,16 +39,15 @@ public interface IProductionModule
     Task<IReadOnlyList<ProductionPartSummaryDto>> GetPartsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Resolves the codes of the starting file to the parts the first seed wrote.
+    /// Resolves the codes of the starting file to the parts of the database.
     /// </summary>
     /// <param name="fileCodes">The codes of the file. A code the catalog does not have is absent.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The identifiers of the parts, keyed by the code of the file.</returns>
     /// <remarks>
-    /// The codes of the file only link the rows of the file. The first seed gives the n-th part
-    /// the code <c>part_n</c>, and a later start keeps that code (task 00043). Another module
-    /// that names a part by the file, the ladder of the hulls for example, resolves it here and
-    /// never reads the tables.
+    /// The seed gives a part the code of the file and a later start keeps it (task 00052), so the
+    /// codes of the file are the codes of the rows. Another module that names a part by the file,
+    /// the ladder of the hulls for example, resolves it here and never reads the tables.
     /// </remarks>
     Task<IReadOnlyDictionary<string, int>> FindPartIdsByFileCodeAsync(
         IReadOnlyCollection<string> fileCodes,

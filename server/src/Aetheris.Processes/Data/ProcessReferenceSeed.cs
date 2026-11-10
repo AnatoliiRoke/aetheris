@@ -17,9 +17,10 @@ namespace Aetheris.Processes.Data;
 /// <remarks>
 /// The starting data lives in the embedded file <c>Data/process-reference-seed.json</c>: the
 /// kinds of the processes, their recipes with their ingredients and their parameters. Every
-/// row has a neutral code and its texts in every language (task 00022). The seed runs only
-/// while the tables are empty, so it never overwrites a change of the admin panel (task
-/// 00023, decision 7).
+/// row has a neutral code and its texts in every language (task 00022). The code of a row is the
+/// code of the file and the keys of its texts are built from it; the counter of the server only
+/// gives codes to the rows of the admin panel (task 00052). The seed runs only while the tables
+/// are empty, so it never overwrites a change of the admin panel (task 00023, decision 7).
 /// </remarks>
 public static class ProcessReferenceSeed
 {
@@ -92,6 +93,8 @@ public static class ProcessReferenceSeed
 
         ProcessSeedData data = Load();
 
+        ValidateCodes(data);
+
         Dictionary<string, int> resourceIds = resources.Resources.ToDictionary(resource => resource.Code, resource => resource.Id);
         Dictionary<string, int> groupIds = resources.Groups.ToDictionary(group => group.Code, group => group.Id);
 
@@ -127,7 +130,7 @@ public static class ProcessReferenceSeed
 
         foreach (SeedProcessType type in data.Types)
         {
-            string code = await codes.NextAsync(ProcessTextKeys.ProcessTypeCodeGroup, cancellationToken).ConfigureAwait(false);
+            string code = type.Code;
 
             ProcessTypeEntity entity = new()
             {
@@ -166,7 +169,7 @@ public static class ProcessReferenceSeed
 
         foreach (SeedProcessRecipe recipe in data.Recipes)
         {
-            string code = await codes.NextAsync(ProcessTextKeys.ProcessRecipeCodeGroup, cancellationToken).ConfigureAwait(false);
+            string code = recipe.Code;
 
             ProcessRecipeEntity entity = new()
             {
@@ -226,7 +229,7 @@ public static class ProcessReferenceSeed
 
         foreach (SeedProcessParam parameter in data.Params)
         {
-            string code = await codes.NextAsync(ProcessTextKeys.ProcessParamCodeGroup, cancellationToken).ConfigureAwait(false);
+            string code = parameter.Code;
 
             ProcessParamEntity entity = new()
             {
@@ -278,7 +281,29 @@ public static class ProcessReferenceSeed
                 cancellationToken).ConfigureAwait(false);
         }
 
+        // The counters stand above the codes of the file, so a row of the admin panel never gets
+        // a code the file already uses.
+        await SeedCodeRules.RaiseAsync(codes, ProcessTextKeys.ProcessTypeCodeGroup, data.Types.Select(type => type.Code), cancellationToken).ConfigureAwait(false);
+        await SeedCodeRules.RaiseAsync(codes, ProcessTextKeys.ProcessRecipeCodeGroup, data.Recipes.Select(recipe => recipe.Code), cancellationToken).ConfigureAwait(false);
+        await SeedCodeRules.RaiseAsync(codes, ProcessTextKeys.ProcessParamCodeGroup, data.Params.Select(parameter => parameter.Code), cancellationToken).ConfigureAwait(false);
+
         return true;
+    }
+
+    /// <summary>
+    /// Checks the codes of the file: the code of the file is the code of the row, so every row
+    /// must have one, in the form the keys of the texts allow, and no two rows of a kind may share
+    /// it. A file that breaks this stops the seed (task 00052).
+    /// </summary>
+    /// <param name="data">The starting data.</param>
+    /// <exception cref="InvalidOperationException">A code is missing, malformed or repeated.</exception>
+    public static void ValidateCodes(ProcessSeedData data)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+
+        SeedCodeRules.Validate(data.Types.Select(type => type.Code), "kind of a process");
+        SeedCodeRules.Validate(data.Recipes.Select(recipe => recipe.Code), "recipe of a process");
+        SeedCodeRules.Validate(data.Params.Select(parameter => parameter.Code), "parameter of a process");
     }
 
     /// <summary>
@@ -318,6 +343,7 @@ public sealed record ProcessSeedData(
 /// <summary>
 /// A kind of a process in the starting data.
 /// </summary>
+/// <param name="Code">The neutral code of the kind; it is the code of the row and builds the keys of its texts.</param>
 /// <param name="Key">The key of the kind inside the starting data.</param>
 /// <param name="Handler">The logical code of the handler of the kind.</param>
 /// <param name="RefundsInput">Whether cancelling an order of the kind returns its input.</param>
@@ -326,6 +352,7 @@ public sealed record ProcessSeedData(
 /// <param name="Description">The description of the kind by language.</param>
 /// <param name="IsArchived">Whether the seed writes the kind archived: a stub that is not offered (the note of the stub is the field <c>stub_note</c> of the file).</param>
 public sealed record SeedProcessType(
+    string Code,
     string Key,
     string Handler,
     bool RefundsInput,
@@ -337,6 +364,7 @@ public sealed record SeedProcessType(
 /// <summary>
 /// A recipe of a process in the starting data.
 /// </summary>
+/// <param name="Code">The neutral code of the recipe; it is the code of the row and builds the keys of its texts.</param>
 /// <param name="Key">The key of the recipe inside the starting data.</param>
 /// <param name="Type">The key of the kind of the process.</param>
 /// <param name="BuildingClass">The class of the building the process runs in.</param>
@@ -351,6 +379,7 @@ public sealed record SeedProcessType(
 /// <param name="Requirements">The requirements of the recipe.</param>
 /// <param name="IsArchived">Whether the seed writes the recipe archived: a stub that is not offered.</param>
 public sealed record SeedProcessRecipe(
+    string Code,
     string Key,
     string Type,
     string? BuildingClass,
@@ -384,6 +413,7 @@ public sealed record SeedRequirement(string Type, int TargetId, int TargetLevel)
 /// <summary>
 /// A parameter of a process in the starting data.
 /// </summary>
+/// <param name="Code">The neutral code of the parameter; it is the code of the row and builds the keys of its texts.</param>
 /// <param name="Type">The key of the kind of the process.</param>
 /// <param name="Kind">The logical kind of the parameter.</param>
 /// <param name="LevelSource">The source of the level the parameter follows.</param>
@@ -395,6 +425,7 @@ public sealed record SeedRequirement(string Type, int TargetId, int TargetLevel)
 /// <param name="Name">The name of the parameter by language.</param>
 /// <param name="Description">The description of the parameter by language.</param>
 public sealed record SeedProcessParam(
+    string Code,
     string Type,
     string Kind,
     string LevelSource,

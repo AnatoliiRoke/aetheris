@@ -6,6 +6,7 @@ using Aetheris.Host.Admin;
 using Aetheris.Host.Data;
 using Aetheris.Host.Data.Entities;
 using Aetheris.Tests.Infrastructure;
+using Aetheris.World.Api;
 using Aetheris.World.Configuration;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;

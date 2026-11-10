@@ -2,6 +2,7 @@ using Aetheris.Core.Configuration;
 using Aetheris.Host.Configuration;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.World;
+using Aetheris.World.Api;
 using Aetheris.World.Configuration;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;

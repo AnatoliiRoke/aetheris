@@ -7,7 +7,7 @@ import type { Api } from '../api/context';
 import type { ContentApi } from '../api/contentApi';
 import type { CurrencyBalanceFacts, EconomyApi, EconomyOverview, PopulationFacts } from '../api/economyApi';
 import type { GameApi, Race } from '../api/gameApi';
-import type { Fleet, FleetApi, FleetShip, FleetsView, FinishedShip, ShipCatalog, ShipDesign, ShipHull, ShipModule, ShipyardView } from '../api/fleetApi';
+import type { ExtractionEstimate, Fleet, FleetApi, FleetShip, FleetsView, FinishedShip, FlightPlan, ShipCatalog, ShipDesign, ShipHull, ShipModule, ShipyardView } from '../api/fleetApi';
 import type { MarketApi, MarketLot, MarketOverview, MyLot } from '../api/marketApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
@@ -672,7 +672,29 @@ export function fakeFleetApi(overrides: Partial<FleetApi> = {}): FleetApi {
     transferFleetShips: vi.fn(async () => sampleFleetsView()),
     renameFleet: vi.fn(async () => sampleFleetsView()),
     dissolveFleet: vi.fn(async () => sampleFleetsView()),
+    flightPlans: vi.fn(async () => [] as FlightPlan[]),
+    createFlightPlan: vi.fn(async () => sampleFlightPlan()),
+    saveFlightPlan: vi.fn(async () => sampleFlightPlan()),
+    deleteFlightPlan: vi.fn(async () => undefined),
+    stopFlightPlan: vi.fn(async () => sampleFlightPlan()),
+    executeFlightPlan: vi.fn(async () => sampleFlightPlan()),
+    extractionEstimate: vi.fn(async () => sampleExtractionEstimate()),
     ...overrides,
+  };
+}
+
+/**
+ * The estimate of the extraction of a fleet at a place (task 00050).
+ */
+export function sampleExtractionEstimate(): ExtractionEstimate {
+  return {
+    cycleSeconds: 900,
+    resourceTonsPerCycle: 350,
+    processedTonsPerCycle: 350,
+    freeHoldTons: 1000,
+    placeMassTons: 500000,
+    holdFullSeconds: 2700,
+    placeEmptySeconds: 2142000,
   };
 }
 
@@ -730,6 +752,37 @@ export function sampleFleetsView(overrides: Partial<FleetsView> = {}): FleetsVie
     upkeepPerHour: 2,
     fleets: [sampleFleet()],
     freeShips: [],
+    ...overrides,
+  };
+}
+
+/**
+ * A flight plan of a fleet for the tests (task 00050): one order of a flight to a system.
+ */
+export function sampleFlightPlan(overrides: Partial<FlightPlan> = {}): FlightPlan {
+  return {
+    id: 1,
+    fleetId: 1,
+    stateCode: 'draft',
+    createdAt: '2026-11-09T00:00:00Z',
+    updatedAt: '2026-11-09T00:00:00Z',
+    version: 1,
+    orders: [
+      {
+        id: 1,
+        position: 1,
+        typeCode: 'fly',
+        targetKind: 'object',
+        targetSectorId: 1,
+        targetSystemId: 3,
+        targetObjectId: 101,
+        targetX: 0,
+        targetY: 0,
+        targetZ: 0,
+        durationSeconds: 0,
+        parameters: '{}',
+      },
+    ],
     ...overrides,
   };
 }
@@ -1275,8 +1328,9 @@ export function fakeWorldApi(overrides: Partial<WorldApi> = {}): WorldApi {
 export function sampleMapGalaxy(overrides: Partial<MapGalaxy> = {}): MapGalaxy {
   return {
     sectors: [
-      { id: 1, name: 'Aldara', x: 0, y: 0, z: 0, isNewbie: true, systemCount: 4, ownPlanetCount: 1 },
-      { id: 2, name: 'Borea', x: 1500, y: 0, z: 0, isNewbie: false, systemCount: 6, ownPlanetCount: 0 },
+      { id: 1, name: 'Aldara', x: 0, y: 0, z: 0, isNewbie: true, systemCount: 4, ownPlanetCount: 1, state: 'open' },
+      { id: 2, name: 'Borea', x: 1500, y: 0, z: 0, isNewbie: false, systemCount: 6, ownPlanetCount: 0, state: 'known' },
+      { id: 3, name: 'Cygnus', x: 0, y: 1500, z: 0, isNewbie: false, systemCount: 3, ownPlanetCount: 0, state: 'unknown' },
     ],
     sectorSize: 1000,
     seesOnlyOwn: false,
@@ -1296,8 +1350,8 @@ export function sampleMapSector(overrides: Partial<MapSectorView> = {}): MapSect
     systems: [
       { id: 3, number: 1, name: 'Lyra', x: 200, y: 200, z: 0, inNebula: false, state: 'open', objectCount: 4, ownPlanetCount: 1, distance: 0, travelSeconds: 600 },
       { id: 4, number: 2, name: 'Vega', x: 420, y: 260, z: 0, inNebula: true, state: 'open', objectCount: 2, ownPlanetCount: 0, distance: 230, travelSeconds: 8280 },
-      { id: 5, number: 3, name: null, x: 700, y: 640, z: 0, inNebula: false, state: 'known', objectCount: 0, ownPlanetCount: 0, distance: 640, travelSeconds: 23040 },
-      { id: 6, number: 4, name: null, x: 760, y: 700, z: 0, inNebula: false, state: 'known', objectCount: 0, ownPlanetCount: 0, distance: 700, travelSeconds: 25200 },
+      { id: 5, number: 3, name: null, x: 700, y: 640, z: 0, inNebula: false, state: 'unknown', objectCount: 0, ownPlanetCount: 0, distance: 640, travelSeconds: 23040 },
+      { id: 6, number: 4, name: null, x: 760, y: 700, z: 0, inNebula: false, state: 'unknown', objectCount: 0, ownPlanetCount: 0, distance: 700, travelSeconds: 25200 },
     ],
     nebulas: [{ id: 1, objectId: 90, name: 'Arena', x: 450, y: 250, z: 0, radius: 120, blocksJumpDrive: true }],
     fields: [{ objectId: 91, objectTypeId: 10, name: 'Field A-12', x: 300, y: 500, z: 0, mass: 1200000, distance: 300, travelSeconds: 10800 }],

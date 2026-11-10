@@ -224,11 +224,11 @@ MODULES_EN = {
     "Термоядерна торпеда": "Fusion torpedo",
     "Протонна торпеда": "Proton torpedo",
     "Уранова торпеда": "Uranium torpedo",
-    "Модуль геологорозвідки": "Survey module",
+    "Екстрактор гелію": "Helium extractor",
     "Бурова установка": "Drill rig",
     "Кристалічний екстрактор": "Crystal extractor",
-    "Збирач ефіру": "Ether collector",
-    "Туманнісний збирач": "Nebula collector",
+    "Екстрактор ефіру": "Ether extractor",
+    "Екстрактор матерії": "Matter extractor",
     "Астросканер": "Astroscanner",
     "Корабельний радар": "Ship radar",
     "Археологічний модуль": "Archaeology module",
@@ -364,7 +364,7 @@ UNSPENT_ENERGY = POWER_PLANTS | {"Склад"}
 
 ENERGY_AMMO = {"Блискавка-X1", "Протонна торпеда", "Термоядерна торпеда"}
 COSMIC = {"Гелій-3", "Темна матерія", "Ефір"}
-COLLECTORS = {"Збирач ефіру", "Туманнісний збирач", "Екстрактор темної матерії"}
+COLLECTORS = {"Екстрактор ефіру", "Екстрактор матерії", "Екстрактор темної матерії"}
 DEPOSIT_NAMES = {
     "Залізна руда", "Титанова руда", "Іридієва руда", "Кобальтова руда", "Уранова руда",
     "Силікорова руда", "Тектонітова руда", "Кварцит", "Обсидіан", "Лінтрій", "Орекс",
@@ -955,7 +955,7 @@ def build_world(world: dict, codes: dict[str, str], cost_base: Decimal, race_bon
     race_rows = {
         "race_1": ("Террани", "Terrans", "Двигуни", "Engines", [("Колоніальний модуль", "Colony module"), ("Вантажний відсік", "Cargo hold")], "Рівні", "Steady"),
         "race_2": ("Літаріони", "Litari", "Броня", "Armor", [("Бурова установка", "Drill rig"), ("Астросканер", "Astroscanner")], "Холодні", "Cold"),
-        "race_3": ("Драккури", "Drakkuri", "Зброя", "Weapons", [("Вантажний відсік", "Cargo hold"), ("Туманнісний збирач", "Nebula collector")], "Гарячі", "Hot"),
+        "race_3": ("Драккури", "Drakkuri", "Зброя", "Weapons", [("Вантажний відсік", "Cargo hold"), ("Екстрактор матерії", "Matter extractor")], "Гарячі", "Hot"),
         "race_4": ("Вейрани", "Veirani", "Щити", "Shields", [("Корабельний радар", "Ship radar"), ("Бортовий комп'ютер", "Onboard computer")], "Сухі", "Dry"),
     }
     percent = (race_bonus * Decimal(100)).quantize(ONE, rounding=ROUND_HALF_UP)
@@ -1077,9 +1077,6 @@ def module_characteristics(name: str, group: str, index: int, cost_base: Decimal
     elif group == "Видобуток":
         put("char_yield")
         put("char_energy_use")
-        if name == "Модуль геологорозвідки":
-            put("char_scan_radius")
-            put("char_scan_speed")
     elif group == "Розвідка й маскування":
         put("char_energy_use")
         if name in {"Астросканер", "Корабельний радар"}:
@@ -1654,7 +1651,7 @@ def main() -> None:
         "Броня": ["char_integrity"],
         "Щити": ["char_shield_capacity", "char_shield_regen", "char_energy_block", "char_kinetic_block", "char_energy_use"],
         "Боєприпаси": ["char_damage", "char_range", "char_flight_speed", "char_launcher_size"],
-        "Видобуток": ["char_yield", "char_energy_use", "char_scan_radius", "char_scan_speed"],
+        "Видобуток": ["char_yield", "char_energy_use"],
         "Розвідка й маскування": ["char_energy_use", "char_detection", "char_dig_speed"],
         "Інші корабельні": sorted({code for codes_of_part in OTHER_STATS.values() for code in codes_of_part}),
         "Модулі бази": sorted({code for codes_of_part in BASE_STATS.values() for code in codes_of_part}),

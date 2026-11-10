@@ -197,6 +197,106 @@ public sealed class WorldQueryService
     }
 
     /// <summary>
+    /// Gets the place of the map by its identifier, without the visibility filter, for the server
+    /// itself (task 00050): a field of a sector, a field of a system, a gas giant or a nebula.
+    /// </summary>
+    /// <param name="objectId">The object of the map.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place, or <see langword="null"/> when the object is unknown.</returns>
+    public async Task<PlaceContentDto?> GetPlaceContentAsync(long objectId, CancellationToken cancellationToken)
+    {
+        CelestialObjectEntity? entry = await _dbContext.Objects.AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Id == objectId, cancellationToken).ConfigureAwait(false);
+
+        if (entry is null)
+        {
+            return null;
+        }
+
+        CelestialObjectTypeEntity? type = await _dbContext.ObjectTypes.AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Id == entry.ObjectTypeId, cancellationToken).ConfigureAwait(false);
+
+        if (type is null)
+        {
+            return null;
+        }
+
+        int stationLimit = _reference.Settings.GasGiantStationLimit;
+
+        PlanetEntity? planet = await _dbContext.Planets.AsNoTracking()
+            .Include(item => item.DepositIds)
+            .SingleOrDefaultAsync(item => item.CelestialObjectId == objectId, cancellationToken).ConfigureAwait(false);
+
+        AsteroidFieldEntity? field = await _dbContext.Fields.AsNoTracking()
+            .Include(item => item.CompositionIds)
+            .SingleOrDefaultAsync(item => item.CelestialObjectId == objectId, cancellationToken).ConfigureAwait(false);
+
+        NebulaEntity? nebula = await _dbContext.Nebulae.AsNoTracking()
+            .SingleOrDefaultAsync(item => item.CelestialObjectId == objectId, cancellationToken).ConfigureAwait(false);
+
+        // A depleted field has disappeared from the map.
+        if (type.ObjectClass == WorldObjectClasses.AsteroidField && (field is null || field.DepletedAt is not null))
+        {
+            return null;
+        }
+
+        IReadOnlyList<long> compositionIds = field is null
+            ? []
+            : [.. field.CompositionIds.OrderBy(share => share.Id).Select(share => share.Id)];
+
+        ObjectDto dto = new(
+            entry.Id,
+            entry.SectorId,
+            entry.SystemId,
+            entry.ObjectTypeId,
+            type.ObjectClass,
+            entry.Orbit,
+            entry.Name,
+            entry.X,
+            entry.Y,
+            entry.Z,
+            planet?.Id,
+            planet?.SizeClassId,
+            planet?.Size,
+            planet?.OwnerPlayerId,
+            type.ObjectClass == WorldObjectClasses.GasGiant ? stationLimit : null,
+            planet is null ? [] : [.. planet.DepositIds.OrderBy(deposit => deposit.Id).Select(deposit => deposit.Id)],
+            field?.Id,
+            field?.Mass,
+            nebula?.Id,
+            nebula?.Radius,
+            compositionIds);
+
+        List<CompositionDto> compositions =
+        [
+            .. field?.CompositionIds
+                .OrderBy(share => share.Id)
+                .Select(share => new CompositionDto(share.Id, share.AsteroidFieldId, null, share.ResourceId, share.Coefficient))
+                ?? [],
+        ];
+
+        // The shares of a nebula are the shares of the place, just as the shares of a field are.
+        if (nebula is not null)
+        {
+            List<NebulaCompositionEntity> shares = await _dbContext.NebulaCompositions.AsNoTracking()
+                .Where(share => share.NebulaId == nebula.Id)
+                .OrderBy(share => share.Id)
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+            compositions =
+            [
+                .. compositions,
+                .. shares.Select(share => new CompositionDto(share.Id, null, share.NebulaId, share.ResourceId, share.Coefficient)),
+            ];
+        }
+
+        // The mass of the place: the mass of a field or of a nebula. A gas giant has no mass at all.
+        long mass = field?.Mass ?? nebula?.Mass ?? 0;
+
+        return new PlaceContentDto(dto, compositions, mass);
+    }
+
+    /// <summary>
     /// Gets the bodies among the given ones that are free and may be colonized.
     /// </summary>
     /// <param name="planetIds">The bodies.</param>

@@ -64,15 +64,15 @@ public sealed class PartGroupTreeTests
 
         // The three sections of the screen are the groups of the top level, without parts.
         List<PartGroupEntity> sections = [.. groups.Where(group => group.ParentGroupId is null)];
-        Assert.Equal(["part_group_19", "part_group_20", "part_group_21"], sections.Select(group => group.Code).Order(StringComparer.Ordinal));
+        Assert.Equal(["pg_19", "pg_20", "pg_21"], sections.Select(group => group.Code).Order(StringComparer.Ordinal));
         Assert.All(sections, section => Assert.DoesNotContain(section.Id, groupsWithParts));
 
         // The weapons lie in the ship modules and hold the energy weapons, the kinetic weapons and
         // the ammunition.
-        PartGroupEntity weapons = byCode["part_group_22"];
-        Assert.Equal(byCode["part_group_19"].Id, weapons.ParentGroupId);
+        PartGroupEntity weapons = byCode["pg_22"];
+        Assert.Equal(byCode["pg_19"].Id, weapons.ParentGroupId);
         Assert.Equal(
-            ["part_group_3", "part_group_4", "part_group_7"],
+            ["pg_3", "pg_4", "pg_7"],
             groups.Where(group => group.ParentGroupId == weapons.Id).Select(group => group.Code).Order(StringComparer.Ordinal));
         Assert.DoesNotContain(weapons.Id, groupsWithParts);
 
