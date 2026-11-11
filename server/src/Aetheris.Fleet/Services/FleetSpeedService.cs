@@ -126,6 +126,13 @@ public sealed class FleetSpeedService
         Dictionary<long, ShipHold> holds = (await _holds.ReadAsync(fleetId, cancellationToken).ConfigureAwait(false))
             .ToDictionary(hold => hold.ShipId);
 
+        // The cargo belongs to the fleet: the holds are filled one after another, but the fleet is
+        // as loaded as its whole hold is, so for the speed the cargo is spread over the ships by
+        // the room of their holds. A ship that happens to be filled first does not slow the fleet
+        // down as a ship with a full hold.
+        decimal fleetCapacity = holds.Values.Sum(hold => (decimal)hold.Capacity);
+        decimal fleetCarried = holds.Values.Sum(hold => (decimal)hold.Carried);
+
         List<decimal> empty = [];
         List<decimal> current = [];
         List<decimal> full = [];
@@ -142,8 +149,8 @@ public sealed class FleetSpeedService
             }
 
             ShipHold? hold = holds.GetValueOrDefault(ship.Id);
-            decimal carried = hold?.Carried ?? 0m;
-            decimal capacity = Math.Max(hold?.Capacity ?? 0m, carried);
+            decimal capacity = hold?.Capacity ?? 0m;
+            decimal carried = fleetCapacity > 0m ? Math.Min(capacity, fleetCarried * capacity / fleetCapacity) : 0m;
 
             empty.Add(ShipSpeed(summary.DrivePush, summary.Weight, settings));
             current.Add(ShipSpeed(summary.DrivePush, summary.Weight + carried, settings));
