@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ціни будівель і наук</title>
+<style>
+  body { margin: 0; font: 13px/1.35 system-ui, sans-serif; color: #1c1915; background: #fff; }
+  header { position: sticky; top: 0; z-index: 3; background: #f7f4ee; border-bottom: 1px solid #ccc; padding: 6px 10px; }
+  h1 { margin: 0 0 4px; font-size: 16px; }
+  header p { margin: 0 0 4px; color: #555; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  main { padding: 6px 10px 40px; }
+  button, select, input { font: inherit; }
+  input[type="number"] { width: 6.5em; }
+  input.values { width: 22em; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; vertical-align: top; padding: 2px 4px; border: 1px solid #ddd; }
+  th { background: #f3f3f3; font-weight: 600; position: sticky; top: var(--head, 0); }
+  tr.tech td.kind { background: #eef3fb; }
+  tr.building td.kind { background: #f3f7ee; }
+  .bad { color: #9b2c1f; background: #fbeae7; }
+  .new { font-weight: 700; }
+  .muted { color: #777; }
+  .changed { background: #fff3a8 !important; }
+  td[contenteditable] { cursor: text; }
+  td[contenteditable]:focus { outline: 2px solid #0f6b4c; }
+  .hidden { display: none; }
+  #tab-totals th { position: static; }
+  .deposits label { margin-right: 8px; white-space: nowrap; }
+  .subject { border: 1px solid #ccc; margin: 0 0 8px; padding: 4px 6px; }
+  .subject h3 { margin: 0 0 4px; font-size: 14px; }
+  .subject table { width: auto; margin-bottom: 4px; }
+  details table { width: auto; }
+  .nowrap { white-space: nowrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Ціни будівель і наук</h1>
+  <p>Дані сіду сервера. Кроки рахує модель гравця з драбини корпусів: кожен крок піднімає найнижчий рівень, який дозволяють вимоги сіду (науки раніше за будівлі, далі за порядком сіду); будівля не вища за будівлю з ефектом «межа рівня» (Адміністративний центр); шахта лише там, де є поклад. Одна планета, множник родовища 1,0. Усі ціни, час і показники цілі числа: значення формули сіду заокруглюється до цілого. Правки зберігаються в цьому браузері.</p>
+  <div class="bar">
+    <button class="tab" data-tab="steps" type="button">Кроки</button>
+    <button class="tab" data-tab="buildings" type="button">Будівлі</button>
+    <button class="tab" data-tab="technologies" type="button">Науки</button>
+    <button class="tab" data-tab="charts" type="button">Графіки</button>
+    <button class="tab" data-tab="totals" type="button">Підсумок</button>
+    <b id="count">Змін: 0</b>
+    <button id="download" type="button">Завантажити</button>
+    <button id="upload" type="button">Відкрити</button>
+    <input id="upload-file" type="file" accept="application/json" hidden>
+    <button id="reset" type="button">Скинути до сіду</button>
+    <button id="parabola" type="button" title="Ціна по кроках іде плавною параболою, з невеликою гойдалкою за вагою предмета; параметри у вкладці «Графіки», підвкладка «Парабола»">Вирівняти параболою</button>
+    <b id="variant-name"></b>
+    <input id="filter" type="search" placeholder="Фільтр за назвою">
+    <label><input id="first-levels" type="checkbox"> лише 1-ші рівні</label>
+  </div>
+  <div class="deposits" id="deposits"></div>
+</header>
+<main>
+  <section id="tab-steps"></section>
+  <section id="tab-buildings" class="hidden"></section>
+  <section id="tab-technologies" class="hidden"></section>
+  <section id="tab-charts" class="hidden"></section>
+  <section id="tab-totals" class="hidden"></section>
+</main>
+<script id="seed" type="application/json">__SEED_DATA__</script>
+<script>
+const seed = JSON.parse(document.getElementById("seed").textContent);
+const storageKey = "aetheris-prices-v1";
+const resourceByCode = Object.fromEntries(seed.resources.map((resource) => [resource.code, resource]));
+const resourceGroupName = Object.fromEntries(seed.resource_groups.map((group) => [group.code, group.name]));
+const clone = (source) => JSON.parse(JSON.stringify(source));
+const editableFields = ["duration_seconds", "costs", "effects"];
+
+function editablePart(subjects) {
+  return Object.fromEntries(subjects.map((subject) => [subject.code, Object.fromEntries(editableFields.map((field) => [field, clone(subject[field])]))]));
+}
+
+// Mines need a deposit; the default planet has every deposit except the crystals (author, 11.11.2026).
+const depositTargets = [...new Set(seed.buildings.flatMap((building) => building.requirements.filter((requirement) => requirement.type === "deposit").map((requirement) => requirement.target)))];
+const defaultDeposits = depositTargets.filter((code) => resourceByCode[code].group !== "resource_group_4");
+
+const original = { buildings: editablePart(seed.buildings), technologies: editablePart(seed.technologies), deposits: defaultDeposits };
+let state = clone(original);
+let activeTab = "steps";
+
+try {
+  const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+  if (saved && saved.buildings && saved.technologies) {
+    state = saved;
+  }
+} catch (error) {
+  state = clone(original);
+}
+
+function save() {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(state));
+  } catch (error) {
+    // The page keeps working without the storage.
+  }
+}
+
+const esc = (text) => String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const format = (number) => Math.round(Number(number)).toLocaleString("uk-UA");
+const resourceName = (code) => resourceByCode[code] ? resourceByCode[code].name : code;
+
+// The formula of the seed without its rounding: a listed value wins over the formula.
+function formulaAt(formula, level) {
+  if (formula.values && formula.values.length) {
+    return formula.values[Math.min(level, formula.values.length) - 1];
+  }
+  const steps = level - 1;
+  return formula.base * Math.pow(formula.growth, steps) + (formula.step || 0) * steps;
+}
+
+// A building cost carries its formula itself; a technology cost keeps it under "growth".
+const costFormula = (kind, cost) => kind === "technologies" ? cost.growth : cost;
+const effectFormula = (kind, effect) => kind === "technologies" ? effect.growth : effect;
+
+function costsAt(kind, code, level, source = state) {
+  const costs = {};
+  for (const cost of source[kind][code].costs) {
+    if (level >= cost.from_level) {
+      const amount = Math.round(formulaAt(costFormula(kind, cost), level));
+      if (amount) {
+        costs[cost.resource] = (costs[cost.resource] || 0) + amount;
+      }
+    }
+  }
+  return costs;
+}
+
+const durationAt = (kind, code, level, source = state) => Math.round(formulaAt(source[kind][code].duration_seconds, level));
+
+// A value typed into the table of steps: the formula turns into a list of values by level, so
+// the other levels keep what the formula gave them.
+function valuesOf(formula, maxLevel) {
+  if (!formula.values || !formula.values.length) {
+    formula.values = Array.from({ length: maxLevel }, (unused, index) => Math.round(formulaAt(formula, index + 1)));
+  }
+  while (formula.values.length < maxLevel) {
+    formula.values.push(formula.values[formula.values.length - 1]);
+  }
+  return formula.values;
+}
+
+function setCost(kind, code, level, resource, amount) {
+  const maxLevel = subjectByCode[code].max;
+  const costs = state[kind][code].costs;
+  let cost = costs.find((entry) => entry.resource === resource);
+  if (!cost) {
+    if (!amount) {
+      return;
+    }
+    const formula = { base: 0, growth: 1, step: 0, significant: 2, values: Array(maxLevel).fill(0) };
+    cost = kind === "technologies" ? { resource, growth: formula, from_level: level } : { resource, ...formula, from_level: level };
+    costs.push(cost);
+  }
+  const values = valuesOf(costFormula(kind, cost), maxLevel);
+  if (level < cost.from_level) {
+    for (let index = level; index < cost.from_level - 1; index += 1) {
+      values[index] = 0;
+    }
+    cost.from_level = level;
+  }
+  values[level - 1] = amount;
+}
+
+function setDuration(kind, code, level, seconds) {
+  valuesOf(state[kind][code].duration_seconds, subjectByCode[code].max)[level - 1] = seconds;
+}
+
+const parseTyped = (text) => Math.round(Number(text.replace(/[\s\u00a0\u202f]/g, "").replace(",", ".")));
+
+const subjects = [
+  ...seed.technologies.map((technology) => ({ kind: "technologies", code: technology.code, name: technology.name, sort: technology.sort_order, max: technology.max_level, requirements: technology.requirements })),
+  ...seed.buildings.map((building) => ({ kind: "buildings", code: building.code, name: building.name, sort: building.sort_order, max: building.max_level, requirements: building.requirements, start: building.is_start_building }))];
+const subjectByCode = Object.fromEntries(subjects.map((subject) => [subject.code, subject]));
+
+// The buildings with a level cap effect limit every other building (the code of the server does the same).
+const cappingBuildings = () => seed.buildings.filter((building) => state.buildings[building.code].effects.some((effect) => effect.type === "level_cap")).map((building) => building.code);
+
+function planetFigures(levels) {
+  const multipliers = {};
+  for (const technology of seed.technologies) {
+    const level = levels[technology.code];
+    if (!level) {
+      continue;
+    }
+    for (const effect of state.technologies[technology.code].effects) {
+      if (effect.type !== "unlocks" && effect.growth) {
+        multipliers[effect.type] = (multipliers[effect.type] || 1) * formulaAt(effect.growth, level);
+      }
+    }
+  }
+  const sums = {};
+  const production = {};
+  for (const building of seed.buildings) {
+    const level = levels[building.code];
+    if (!level) {
+      continue;
+    }
+    for (const effect of state.buildings[building.code].effects) {
+      const value = formulaAt(effect, level) * (multipliers[effect.type] || 1);
+      if (effect.resource) {
+        if (state.deposits.includes(effect.resource)) {
+          production[effect.resource] = (production[effect.resource] || 0) + value;
+        }
+      } else if (!effect.group) {
+        sums[effect.type] = (sums[effect.type] || 0) + value;
+      }
+    }
+  }
+  return { multipliers, sums, production };
+}
+
+function simulate() {
+  const levels = {};
+  for (const subject of subjects) {
+    levels[subject.code] = subject.start ? seed.start_building_level : 0;
+  }
+  const needs = {};
+  for (const subject of subjects) {
+    for (const requirement of subject.requirements) {
+      const key = subject.code + ":" + requirement.subject_level;
+      (needs[key] = needs[key] || []).push(requirement);
+    }
+  }
+  const capping = cappingBuildings();
+  const levelCap = () => Math.max(0, ...capping.filter((code) => levels[code] > 0).map((code) => Math.max(...state.buildings[code].effects.filter((effect) => effect.type === "level_cap").map((effect) => Math.floor(formulaAt(effect, levels[code]))))));
+  const met = (requirement) => {
+    if (requirement.type === "deposit") {
+      return state.deposits.includes(requirement.target);
+    }
+    return (levels[requirement.target] || 0) >= requirement.target_level;
+  };
+  const steps = [];
+  for (;;) {
+    let best = null;
+    const cap = levelCap();
+    for (const subject of subjects) {
+      const level = levels[subject.code] + 1;
+      if (level > subject.max) {
+        continue;
+      }
+      if (subject.kind === "buildings" && !capping.includes(subject.code) && level > cap) {
+        continue;
+      }
+      if (!(needs[subject.code + ":" + level] || []).every(met)) {
+        continue;
+      }
+      const rank = [level, subject.kind === "technologies" ? 0 : 1, subject.sort];
+      if (!best || rank[0] < best.rank[0] || (rank[0] === best.rank[0] && (rank[1] < best.rank[1] || (rank[1] === best.rank[1] && rank[2] < best.rank[2])))) {
+        best = { rank, subject, level };
+      }
+    }
+    if (!best) {
+      break;
+    }
+    levels[best.subject.code] = best.level;
+    steps.push({ subject: best.subject, level: best.level, costs: costsAt(best.subject.kind, best.subject.code, best.level), duration: durationAt(best.subject.kind, best.subject.code, best.level), figures: planetFigures(levels) });
+  }
+  const unreached = subjects.filter((subject) => levels[subject.code] < subject.max).map((subject) => {
+    const level = levels[subject.code] + 1;
+    const unmet = (needs[subject.code + ":" + level] || []).filter((requirement) => !met(requirement));
+    return { subject, level, unmet };
+  });
+  return { steps, unreached, start: planetFigures(Object.fromEntries(subjects.map((subject) => [subject.code, subject.start ? seed.start_building_level : 0]))) };
+}
+
+function renderSteps() {
+  const result = simulate();
+  const filter = document.getElementById("filter").value.trim().toLowerCase();
+  const firstOnly = document.getElementById("first-levels").checked;
+  const populationResource = seed.resources.find((resource) => resource.paid_by_population);
+  // One column per resource that any step pays, in the order of the resource catalog.
+  // Credits and population come first, right after the time (author, 11.11.2026).
+  const leading = (resource) => resource.earns_population_income ? 0 : resource.paid_by_population ? 1 : 2;
+  const paidResources = seed.resources.filter((resource) => result.steps.some((step) => step.costs[resource.code] !== undefined)).sort((first, second) => leading(first) - leading(second)).map((resource) => resource.code);
+  let previous = result.start;
+  const rows = result.steps.map((step, index) => {
+    const figures = step.figures;
+    const populationMax = figures.sums.population_max || 0;
+    const energyOutput = figures.sums.energy_output || 0;
+    const energyUse = figures.sums.energy_consumption || 0;
+    const energyBalance = energyOutput - energyUse;
+    const costHtml = paidResources.map((code) => {
+      const amount = step.costs[code];
+      const tooMuch = populationResource && code === populationResource.code && amount > populationMax;
+      const changed = (costsAt(step.subject.kind, step.subject.code, step.level, original)[code] || 0) !== (amount || 0);
+      return `<td contenteditable="true" data-cell="${step.subject.kind}|${step.subject.code}|${step.level}|${code}" class="${tooMuch ? "bad" : ""} ${changed ? "changed" : ""}">${amount === undefined ? "" : format(amount)}</td>`;
+    }).join("");
+    const productionHtml = Object.entries(figures.production).map(([code, amount]) => `<span class="nowrap ${amount !== (previous.production[code] || 0) ? "new" : ""}">${esc(resourceName(code))} ${format(amount)}</span>`).join(" · ");
+    const changedPopulation = populationMax !== (previous.sums.population_max || 0);
+    previous = figures;
+    if (firstOnly && step.level !== 1) {
+      return "";
+    }
+    if (filter && !step.subject.name.toLowerCase().includes(filter)) {
+      return "";
+    }
+    const isTech = step.subject.kind === "technologies";
+    return `<tr class="${isTech ? "tech" : "building"}"><td>${index + 1}</td><td class="kind">${isTech ? "Дослідження" : "Будівництво"}</td><td class="nowrap"><b>${esc(step.subject.name)}</b></td><td>${step.level}</td><td contenteditable="true" data-cell="${step.subject.kind}|${step.subject.code}|${step.level}|" class="${durationAt(step.subject.kind, step.subject.code, step.level, original) !== step.duration ? "changed" : ""}">${format(step.duration)}</td>${costHtml}<td class="${changedPopulation ? "new" : ""}">${format(populationMax)}</td><td class="nowrap ${energyBalance < 0 ? "bad" : ""}">${format(energyOutput)} − ${format(energyUse)} = ${format(energyBalance)}</td><td>${productionHtml}</td></tr>`;
+  }).join("");
+  const unreachedHtml = result.unreached.length ? `<h3>Не досягається (${result.unreached.length})</h3><table><thead><tr><th>Що</th><th>Рівень</th><th>Чого бракує</th></tr></thead><tbody>${result.unreached.map((item) => `<tr><td>${esc(item.subject.name)}</td><td>${item.level}</td><td>${item.unmet.map((requirement) => requirement.type === "deposit" ? `поклад: ${esc(resourceName(requirement.target))}` : `${esc(subjectByCode[requirement.target] ? subjectByCode[requirement.target].name : requirement.target)} ${requirement.target_level}`).join(", ") || "межа рівня"}</td></tr>`).join("")}</tbody></table>` : "";
+  document.getElementById("tab-steps").innerHTML = `<p>Кроків: <b>${result.steps.length}</b>. Час і ціни правляться прямо в клітинках (Enter або клік поза клітинкою зберігає; пусто означає без цього ресурсу). Правка клітинки робить із формули список значень по рівнях. Жирним виділено те, що змінилося на цьому кроці. Червоним: населення в ціні більше за максимум або енергії бракує.</p><table><thead><tr><th>Крок</th><th>Дія</th><th>Що</th><th>Рівень</th><th>Час, с (сід)</th>${paidResources.map((code) => `<th>${esc(resourceName(code))}</th>`).join("")}<th>Населення макс.</th><th>Енергія: вироблено − спожито</th><th>Видобуток планети за годину (з множниками наук)</th></tr></thead><tbody>${rows}</tbody></table>${unreachedHtml}`;
+}
+
+let logScale = false;
+
+// A line chart over the steps; a step without a value is skipped (author, 11.11.2026).
+function chartSvg(title, series) {
+  const width = Math.max(600, document.querySelector("main").clientWidth - 4);
+  const height = 380;
+  const left = 70;
+  const right = 10;
+  const top = 24;
+  const bottom = 30;
+  const points = series.flatMap((line) => line.points);
+  if (!points.length) {
+    return `<h3>${esc(title)}</h3><p class="muted">Немає значень.</p>`;
+  }
+  const maxX = Math.max(...points.map((point) => point.x));
+  const positive = points.map((point) => point.y).filter((value) => value > 0);
+  const maxY = Math.max(...points.map((point) => point.y), 1);
+  const minY = logScale ? Math.min(...positive, maxY) : 0;
+  const scaleX = (x) => left + (x / maxX) * (width - left - right);
+  const scaleY = (y) => {
+    if (logScale) {
+      const low = Math.log10(minY);
+      const high = Math.log10(maxY);
+      return top + (1 - (Math.log10(Math.max(y, minY)) - low) / Math.max(high - low, 1e-9)) * (height - top - bottom);
+    }
+    return top + (1 - y / maxY) * (height - top - bottom);
+  };
+  const ticks = [];
+  for (let index = 0; index <= 5; index += 1) {
+    const value = logScale ? Math.pow(10, Math.log10(minY) + (Math.log10(maxY) - Math.log10(minY)) * index / 5) : maxY * index / 5;
+    ticks.push(`<line x1="${left}" x2="${width - right}" y1="${scaleY(value)}" y2="${scaleY(value)}" stroke="#eee"/><text x="${left - 4}" y="${scaleY(value) + 4}" text-anchor="end" font-size="11">${format(value)}</text>`);
+  }
+  for (let index = 0; index <= 10; index += 1) {
+    const step = Math.round(maxX * index / 10);
+    ticks.push(`<text x="${scaleX(step)}" y="${height - 10}" text-anchor="middle" font-size="11">${step}</text>`);
+  }
+  const lines = series.map((line) => {
+    const path = line.points.map((point, index) => `${index ? "L" : "M"}${scaleX(point.x).toFixed(1)},${scaleY(point.y).toFixed(1)}`).join("");
+    const dots = line.dots ? line.points.map((point) => `<circle cx="${scaleX(point.x).toFixed(1)}" cy="${scaleY(point.y).toFixed(1)}" r="2.5" fill="${point.color || line.color}"><title>${esc(point.label)}</title></circle>`).join("") : "";
+    return `<path d="${path}" fill="none" stroke="${line.color}" stroke-width="1.2"/>${dots}`;
+  }).join("");
+  const legend = series.map((line, index) => `<text x="${left + 10 + index * 220}" y="16" font-size="12" fill="${line.color}">■ ${esc(line.name)}</text>`).join("");
+  return `<h3>${esc(title)}</h3><svg width="${width}" height="${height}" style="border:1px solid #ddd">${ticks.join("")}<line x1="${left}" x2="${left}" y1="${top}" y2="${height - bottom}" stroke="#999"/><line x1="${left}" x2="${width - right}" y1="${height - bottom}" y2="${height - bottom}" stroke="#999"/>${legend}${lines}</svg>`;
+}
+
+// Produced resources broken down into what they are made of (author, 11.11.2026): one unit of a
+// produced resource costs its recipe divided by the output, recipe by recipe down to the raw
+// resources; every ingredient on the way, produced or raw, counts as spent "through production".
+// A resource with several recipes takes the first by the order of the seed.
+const recipeOf = Object.fromEntries([...seed.resource_recipes].sort((first, second) => first.sort_order - second.sort_order).reverse().map((recipe) => [recipe.resource, recipe]));
+
+function spendIngredients(resource, amount, into, depth = 0) {
+  const recipe = recipeOf[resource];
+  if (!recipe || depth > 10) {
+    return;
+  }
+  for (const ingredient of recipe.ingredients) {
+    const used = amount * ingredient.amount / recipe.output_quantity;
+    into[ingredient.resource] = (into[ingredient.resource] || 0) + used;
+    spendIngredients(ingredient.resource, used, into, depth + 1);
+  }
+}
+
+function throughProduction(direct) {
+  const spent = {};
+  for (const [resource, amount] of Object.entries(direct)) {
+    spendIngredients(resource, amount, spent);
+  }
+  return spent;
+}
+
+// The sums of the whole chain of development, before and after the changes: every resource paid
+// directly by the buildings and the technologies, what went into the produced resources of those
+// prices, and the time.
+function renderTotals() {
+  const result = simulate();
+  const sums = { now: {}, before: {} };
+  const add = (bucket, kind, key, amount) => {
+    bucket[key] = bucket[key] || { buildings: 0, technologies: 0 };
+    bucket[key][kind] += amount;
+  };
+  for (const step of result.steps) {
+    const kind = step.subject.kind;
+    for (const [resource, amount] of Object.entries(step.costs)) {
+      add(sums.now, kind, resource, amount);
+    }
+    for (const [resource, amount] of Object.entries(costsAt(kind, step.subject.code, step.level, original))) {
+      add(sums.before, kind, resource, amount);
+    }
+    add(sums.now, kind, "seconds", step.duration);
+    add(sums.before, kind, "seconds", durationAt(kind, step.subject.code, step.level, original));
+  }
+  const directOf = (bucket) => Object.fromEntries(Object.entries(bucket).filter(([key]) => key !== "seconds").map(([key, value]) => [key, value.buildings + value.technologies]));
+  const via = { now: throughProduction(directOf(sums.now)), before: throughProduction(directOf(sums.before)) };
+  const used = (code) => sums.now[code] || sums.before[code] || via.now[code] || via.before[code];
+  const keys = [...seed.resources.map((resource) => resource.code).filter(used), "seconds"];
+  const cell = (value) => `<td>${value === undefined ? "" : format(value)}</td>`;
+  const half = (state, key) => {
+    const direct = sums[state][key] || { buildings: 0, technologies: 0 };
+    const directAll = direct.buildings + direct.technologies;
+    if (key === "seconds") {
+      return { html: `${cell(direct.buildings)}${cell(direct.technologies)}${cell(directAll)}<td></td><td><b>${format(directAll)}</b></td>`, total: directAll };
+    }
+    const through = via[state][key] || 0;
+    return { html: `${cell(direct.buildings)}${cell(direct.technologies)}${cell(directAll)}${cell(through)}<td><b>${format(directAll + through)}</b></td>`, total: directAll + through };
+  };
+  const rows = keys.map((key) => {
+    const now = half("now", key);
+    const before = half("before", key);
+    const name = key === "seconds" ? "Час, с" : resourceName(key);
+    const changed = before.total && Math.abs(now.total / before.total - 1) > 0.005;
+    return `<tr><td class="nowrap"><b>${esc(name)}</b>${recipeOf[key] ? ` <span class="muted">(вироблений)</span>` : ""}</td>${now.html}${before.html}<td class="${changed ? "changed" : ""}">${before.total ? Math.round(now.total / before.total * 100) + "%" : ""}</td></tr>`;
+  }).join("");
+  const time = sums.now.seconds || { buildings: 0, technologies: 0 };
+  const days = (seconds) => format(seconds / 86400);
+  const recipeText = Object.values(recipeOf).map((recipe) => `${esc(resourceName(recipe.resource))} ${recipe.output_quantity} = ${recipe.ingredients.map((ingredient) => `${esc(resourceName(ingredient.resource))} ${ingredient.amount}`).join(" + ")}`).join("; ");
+  const columns = "<th>Будівлі</th><th>Науки</th><th>Напряму разом</th><th>Через виробництво</th><th>Разом</th>";
+  document.getElementById("tab-totals").innerHTML = `<p>Сума витрат за весь ланцюг розвитку: ${result.steps.length} кроків (будівництво ${result.steps.filter((step) => step.subject.kind === "buildings").length}, дослідження ${result.steps.filter((step) => step.subject.kind === "technologies").length}). ${state.variant ? "Після змін: " + esc(state.variant) + "." : ""} Час після змін: будівництво ${days(time.buildings)} діб, дослідження ${days(time.technologies)} діб (час із цін, без бонусів і без паралельних черг).</p><p>«Через виробництво»: скільки ресурсу пішло на вироблені ресурси в ціні кроків, за рецептами сіду (${recipeText}). «Разом» = напряму + через виробництво; «Після / до» рахується з «Разом».</p><table><thead><tr><th rowspan="2">Ресурс</th><th colspan="5">Після змін</th><th colspan="5">До змін (сід)</th><th rowspan="2">Після / до, %</th></tr><tr>${columns}${columns}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+let chartTab = "population";
+
+function renderCharts() {
+  const result = simulate();
+  const creditResource = seed.resources.find((resource) => resource.earns_population_income);
+  const populationResource = seed.resources.find((resource) => resource.paid_by_population);
+  const techColor = "#2a5db0";
+  const buildingColor = "#3d8b3d";
+  const seedColor = "#c8c8c8";
+  const stepsOf = (kind) => result.steps.map((step, index) => ({ step, x: index + 1 })).filter(({ step }) => !kind || step.subject.kind === kind);
+  const costLine = (resource, kind, source) => stepsOf(kind).map(({ step, x }) => ({ step, x, y: source ? costsAt(step.subject.kind, step.subject.code, step.level, source)[resource.code] : step.costs[resource.code] })).filter((point) => resource && point.y !== undefined).map(({ step, x, y }) => ({
+    x,
+    y,
+    color: step.subject.kind === "technologies" ? techColor : buildingColor,
+    label: `Крок ${x}: ${step.subject.name} ${step.level} — ${format(y)}` }));
+  const durationLine = (kind, source) => stepsOf(kind).map(({ step, x }) => {
+    const seconds = source ? durationAt(step.subject.kind, step.subject.code, step.level, source) : step.duration;
+    return { x, y: seconds, label: `Крок ${x}: ${step.subject.name} ${step.level} — ${format(seconds)} с` };
+  });
+  const seedLine = (points) => ({ name: "Сід (як було)", color: seedColor, dots: false, points });
+  const kinds = [["buildings", "будівлі", buildingColor], ["technologies", "науки", techColor]];
+  const resourceCharts = (resource, extra) => kinds.map(([kind, label, color]) => {
+    const points = costLine(resource, kind);
+    const seedPoints = costLine(resource, kind, original);
+    if (!points.length && !seedPoints.length) {
+      return "";
+    }
+    return chartSvg(`${resource.name} в ціні кроку: ${label}`, [seedLine(seedPoints), { name: `${resource.name} в ціні`, color, dots: true, points }, ...(extra || [])]);
+  }).join("");
+  const paid = seed.resources.filter((resource) => resource !== creditResource && resource !== populationResource && result.steps.some((step) => costsAt(step.subject.kind, step.subject.code, step.level, original)[resource.code] !== undefined || step.costs[resource.code] !== undefined));
+  const tabs = [["curve", "Парабола"], ["population", populationResource ? populationResource.name : ""], ["credits", creditResource ? creditResource.name : ""], ["time", "Час"], ...paid.map((resource) => [resource.code, resource.name])];
+  let content = "";
+  if (chartTab === "curve") {
+    content = curveTable();
+  } else if (chartTab === "population") {
+    const populationMaxLine = result.steps.map((step, index) => ({ x: index + 1, y: step.figures.sums.population_max || 0, label: `Крок ${index + 1}: ${format(step.figures.sums.population_max || 0)}` }));
+    content = resourceCharts(populationResource, [{ name: "Населення макс.", color: "#999", dots: false, points: populationMaxLine }]);
+  } else if (chartTab === "credits") {
+    content = resourceCharts(creditResource);
+  } else if (chartTab === "time") {
+    content = kinds.map(([kind, label, color]) => chartSvg(`Час кроку, с: ${label}`, [seedLine(durationLine(kind, original)), { name: "Час", color, dots: true, points: durationLine(kind) }])).join("");
+  } else {
+    content = resourceCharts(resourceByCode[chartTab]);
+  }
+  const tabButtons = tabs.map(([code, label]) => `<button type="button" data-chart-tab="${code}" style="font-weight:${code === chartTab ? 700 : 400}">${esc(label)}</button>`).join(" ");
+  const legendNote = `<p>Точки: <span style="color:${buildingColor}">■ будівництво</span>, <span style="color:${techColor}">■ дослідження</span>; сіра лінія: ціни сіду без правок. Кроки без цього ресурсу в ціні пропущено. Наведіть на точку, щоб побачити крок.</p>`;
+  document.getElementById("tab-charts").innerHTML = `<div class="bar" style="margin-bottom:6px">${tabButtons}</div><label><input id="log-scale" type="checkbox" ${logScale ? "checked" : ""}> логарифмічна шкала</label>${legendNote}${content}`;
+}
+
+const median = (numbers) => {
+  const sorted = [...numbers].sort((first, second) => first - second);
+  return sorted.length ? sorted[Math.floor((sorted.length - 1) / 2)] : 0;
+};
+
+function seedTotal(kind, code, level, ...skipped) {
+  return Object.entries(costsAt(kind, code, level, original)).filter(([resource]) => !skipped.includes(resource)).reduce((sum, [, amount]) => sum + amount, 0);
+}
+
+function defaultWeights() {
+  const populationCode = (seed.resources.find((resource) => resource.paid_by_population) || {}).code;
+  const weights = {};
+  for (const kind of ["buildings", "technologies"]) {
+    const ranked = seed[kind].map((subject) => ({ code: subject.code, total: seedTotal(kind, subject.code, 1, populationCode) })).sort((first, second) => first.total - second.total);
+    ranked.forEach((entry, index) => { weights[entry.code] = Math.round((0.8 + 0.5 * index / Math.max(ranked.length - 1, 1)) * 100) / 100; });
+  }
+  return weights;
+}
+
+function weightOf(code) {
+  if (!state.weights) {
+    state.weights = defaultWeights();
+  }
+  return state.weights[code] ?? 1;
+}
+
+// Writes the target of every reached level into the prices; levels the player does not reach
+// keep the seed. Every variant keeps the maxima of the seed afterwards.
+function writeTargets(targets, variant) {
+  for (const subject of subjects) {
+    const current = state[subject.kind][subject.code];
+    for (const cost of current.costs) {
+      const formula = costFormula(subject.kind, cost);
+      const seedValues = Array.from({ length: subject.max }, (unused, index) => formulaAt(formula, index + 1));
+      formula.values = seedValues.map((amount, index) => {
+        const target = targets[subject.code + ":" + (index + 1)];
+        return Math.round(target && target.values[cost.resource] !== undefined ? target.values[cost.resource] : amount);
+      });
+    }
+    const duration = current.duration_seconds;
+    const seedSeconds = Array.from({ length: subject.max }, (unused, index) => formulaAt(duration, index + 1));
+    duration.values = seedSeconds.map((amount, index) => {
+      const target = targets[subject.code + ":" + (index + 1)];
+      return Math.round(target ? target.seconds : amount);
+    });
+  }
+  keepSeedMaxima(simulate());
+  state.variant = variant;
+  save();
+  render();
+}
+
+// Every variant keeps the largest value of the seed (author, 11.11.2026): for every resource and
+// for the time, separately for the buildings and the technologies, the values over the reached
+// steps are scaled so their maximum equals the maximum of the seed.
+function keepSeedMaxima(result) {
+  for (const kind of ["buildings", "technologies"]) {
+    const steps = result.steps.filter((step) => step.subject.kind === kind);
+    const maxima = (source) => {
+      const found = { seconds: 0 };
+      for (const step of steps) {
+        for (const [resource, amount] of Object.entries(costsAt(kind, step.subject.code, step.level, source))) {
+          found[resource] = Math.max(found[resource] || 0, amount);
+        }
+        found.seconds = Math.max(found.seconds, durationAt(kind, step.subject.code, step.level, source));
+      }
+      return found;
+    };
+    const before = maxima(original);
+    const after = maxima(state);
+    for (const subject of seed[kind]) {
+      const current = state[kind][subject.code];
+      for (const cost of current.costs) {
+        const ratio = before[cost.resource] && after[cost.resource] ? before[cost.resource] * maxShare(kind, cost.resource) / after[cost.resource] : 1;
+        if (ratio !== 1) {
+          const values = valuesOf(costFormula(kind, cost), subject.max_level);
+          values.forEach((amount, index) => { values[index] = Math.round(amount * ratio); });
+        }
+      }
+      const ratio = before.seconds && after.seconds ? before.seconds * maxShare(kind, "seconds") / after.seconds : 1;
+      if (ratio !== 1) {
+        const values = valuesOf(current.duration_seconds, subject.max_level);
+        values.forEach((amount, index) => { values[index] = Math.round(amount * ratio); });
+      }
+    }
+  }
+}
+
+const curveVersion = 8;
+
+// Author's trials (11.11.2026), the share of the seed maximum by kind and resource; every curve
+// not named here ends at 100%, the population at 150%.
+const curveMaxPercents = { buildings: { resource_1: 70, resource_22: 50, resource_23: 600 }, technologies: { resource_1: 50, resource_8: 40, resource_22: 60, resource_23: 50 } };
+
+// The share of the seed maximum a curve ends at: 100% keeps the seed maximum, the population
+// ends 50% higher (author, 11.11.2026). Editable on the page.
+function maxShare(kind, metric) {
+  const line = state.curve && state.curve[kind] && state.curve[kind][metric];
+  return line && line.max_percent ? line.max_percent / 100 : 1;
+}
+
+// The default parabola of every resource and of the time, per kind: it starts at the median of
+// the first 15 steps that pay the resource and ends at the maximum of the seed less the swing.
+function defaultCurve(result) {
+  const curve = { version: curveVersion, swing: 0.1, buildings: {}, technologies: {} };
+  for (const kind of ["buildings", "technologies"]) {
+    const steps = result.steps.filter((step) => step.subject.kind === kind);
+    const series = { seconds: steps.map((step) => durationAt(kind, step.subject.code, step.level, original)) };
+    for (const step of steps) {
+      for (const [resource, amount] of Object.entries(costsAt(kind, step.subject.code, step.level, original))) {
+        (series[resource] = series[resource] || []).push(amount);
+      }
+    }
+    for (const [metric, values] of Object.entries(series)) {
+      const positive = values.filter((value) => value > 0);
+      if (positive.length) {
+        const maxPercent = curveMaxPercents[kind][metric] || (resourceByCode[metric] && resourceByCode[metric].paid_by_population ? 150 : 100);
+        curve[kind][metric] = { start: Math.round(median(positive.slice(0, 15))), end: Math.round(Math.max(...positive) * maxPercent / 100 / (1 + curve.swing)), power: 2, max_percent: maxPercent };
+      }
+    }
+  }
+  return curve;
+}
+
+// Variant 4 (author, 11.11.2026): every resource and the time follow their own smooth parabola
+// over the steps that pay them, start + (end - start) * (position / last position) ^ power, with
+// a small swing by the weight of the subject.
+function applyParabola() {
+  const kept = { deposits: state.deposits, weights: state.weights, curve: state.curve };
+  state = { ...clone(original), ...kept };
+  const result = simulate();
+  if (!state.curve || state.curve.version !== curveVersion) {
+    state.curve = defaultCurve(result);
+  }
+  const lastStep = Math.max(result.steps.length - 1, 1);
+  const curveAt = (kind, metric, index) => {
+    const line = state.curve[kind][metric];
+    return line ? line.start + (line.end - line.start) * Math.pow(index / lastStep, line.power) : undefined;
+  };
+  const targets = {};
+  result.steps.forEach((step, index) => {
+    const kind = step.subject.kind;
+    const swing = 1 + state.curve.swing * (weightOf(step.subject.code) - 1.05) / 0.25;
+    const values = {};
+    for (const resource of Object.keys(step.costs)) {
+      const target = curveAt(kind, resource, index);
+      if (target !== undefined) {
+        values[resource] = target * swing;
+      }
+    }
+    targets[step.subject.code + ":" + step.level] = { values, seconds: curveAt(kind, "seconds", index) * swing };
+  });
+  writeTargets(targets, "Парабола");
+}
+
+function curveTable() {
+  if (!state.curve || state.curve.version !== curveVersion) {
+    return `<p>Параметри параболи з'являться після першого натискання «Вирівняти параболою».</p>`;
+  }
+  const metricName = (metric) => metric === "seconds" ? "Час, с" : resourceName(metric);
+  const rows = ["buildings", "technologies"].flatMap((kind) => Object.entries(state.curve[kind]).map(([metric, line]) => `<tr><td>${kind === "buildings" ? "Будівлі" : "Науки"}</td><td>${esc(metricName(metric))}</td>${["start", "end", "power", "max_percent"].map((field) => `<td><input type="number" step="any" data-curve="${kind}|${metric}|${field}" value="${line[field]}"></td>`).join("")}</tr>`)).join("");
+  return `<p>Ціна кроку = початок + (кінець − початок) × (крок / останній крок)^степінь, × (1 ± гойдалка за вагою предмета). Степінь 2 це парабола, 1 пряма. Кожен ресурс і час мають свою криву. Зміни одразу перераховують ціни, якщо парабола застосована.</p><p>Гойдалка ± <input type="number" step="0.01" data-curve="swing" value="${state.curve.swing}"> (0,1 = ±10%)</p><table style="width:auto"><thead><tr><th>Що</th><th>Показник</th><th>Початок (крок 1)</th><th>Кінець (останній крок)</th><th>Степінь</th><th>Максимум, % від сіду</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function resourceOptions(selected) {
+  return seed.resource_groups.map((group) => `<optgroup label="${esc(group.name)}">${seed.resources.filter((resource) => resource.group === group.code).map((resource) => `<option value="${resource.code}" ${resource.code === selected ? "selected" : ""}>${esc(resource.name)}</option>`).join("")}</optgroup>`).join("");
+}
+
+// The path of a field in the state, so one handler edits every input.
+function numberInput(path, value, originalValue) {
+  const changed = originalValue === undefined || Number(originalValue) !== Number(value);
+  return `<input type="number" step="any" data-path="${path}" value="${value ?? ""}" class="${changed ? "changed" : ""}">`;
+}
+
+function valuesInput(path, values, originalValues) {
+  const text = (values || []).join(", ");
+  const changed = text !== (originalValues || []).join(", ");
+  return `<input class="values ${changed ? "changed" : ""}" data-values="${path}" value="${text}" placeholder="по рівнях через кому">`;
+}
+
+function effectLabel(effect) {
+  if (effect.resource) {
+    return `${effect.type} (${esc(resourceName(effect.resource))})`;
+  }
+  if (effect.group) {
+    return `${effect.type} (${esc(resourceGroupName[effect.group] || effect.group)})`;
+  }
+  return effect.type;
+}
+
+function renderSubjects(kind) {
+  const filter = document.getElementById("filter").value.trim().toLowerCase();
+  const rows = seed[kind].filter((subject) => !filter || subject.name.toLowerCase().includes(filter)).map((subject) => {
+    const current = state[kind][subject.code];
+    const base = original[kind][subject.code];
+    const costRows = current.costs.map((cost, index) => {
+      const formula = costFormula(kind, cost);
+      const baseCost = base.costs[index];
+      const baseFormula = baseCost ? costFormula(kind, baseCost) : {};
+      const prefix = `${kind}|${subject.code}|costs|${index}`;
+      const formulaPrefix = kind === "technologies" ? prefix + "|growth" : prefix;
+      return `<tr><td><select data-resource="${prefix}" class="${baseCost && baseCost.resource === cost.resource ? "" : "changed"}">${resourceOptions(cost.resource)}</select></td><td>${numberInput(prefix + "|from_level", cost.from_level, baseCost && baseCost.from_level)}</td><td>${numberInput(formulaPrefix + "|base", formula.base, baseFormula.base)}</td><td>${numberInput(formulaPrefix + "|growth", formula.growth, baseFormula.growth)}</td><td>${numberInput(formulaPrefix + "|step", formula.step, baseFormula.step)}</td><td>${valuesInput(formulaPrefix, formula.values, baseFormula.values)}</td><td><button type="button" data-remove="${prefix}">×</button></td></tr>`;
+    }).join("");
+    const effectRows = current.effects.filter((effect) => effect.type !== "unlocks").map((effect) => {
+      const index = current.effects.indexOf(effect);
+      const formula = effectFormula(kind, effect);
+      const baseEffect = base.effects[index];
+      const baseFormula = baseEffect ? effectFormula(kind, baseEffect) : {};
+      const prefix = `${kind}|${subject.code}|effects|${index}` + (kind === "technologies" ? "|growth" : "");
+      return `<tr><td>${effectLabel(effect)}</td><td></td><td>${numberInput(prefix + "|base", formula.base, baseFormula.base)}</td><td>${numberInput(prefix + "|growth", formula.growth, baseFormula.growth)}</td><td>${numberInput(prefix + "|step", formula.step, baseFormula.step)}</td><td>${valuesInput(prefix, formula.values, baseFormula.values)}</td><td></td></tr>`;
+    }).join("");
+    const duration = current.duration_seconds;
+    const durationPrefix = `${kind}|${subject.code}|duration_seconds`;
+    const durationRow = `<tr><td>час, с</td><td></td><td>${numberInput(durationPrefix + "|base", duration.base, base.duration_seconds.base)}</td><td>${numberInput(durationPrefix + "|growth", duration.growth, base.duration_seconds.growth)}</td><td>${numberInput(durationPrefix + "|step", duration.step, base.duration_seconds.step)}</td><td></td><td></td></tr>`;
+    return `<div class="subject"><h3>${esc(subject.name)} <span class="muted">${subject.code}, рівнів ${subject.max_level}</span> <label class="muted">вага для «Ціна від рівня відкриття» <input type="number" step="0.01" data-weight="${subject.code}" value="${weightOf(subject.code)}"></label></h3><table><thead><tr><th>Ціна / ефект</th><th>З рівня</th><th>База</th><th>Ріст</th><th>Крок</th><th>Значення по рівнях</th><th></th></tr></thead><tbody>${costRows}<tr><td colspan="7"><button type="button" data-add="${kind}|${subject.code}">+ ціна</button></td></tr>${effectRows}${durationRow}</tbody></table><details data-levels="${kind}|${subject.code}"><summary>Ціни за рівнями</summary><div></div></details></div>`;
+  }).join("");
+  document.getElementById("tab-" + kind).innerHTML = rows;
+}
+
+function levelTable(kind, code) {
+  const subject = subjectByCode[code];
+  const resources = [...new Set(state[kind][code].costs.map((cost) => cost.resource))];
+  const rows = [];
+  for (let level = 1; level <= subject.max; level += 1) {
+    const costs = costsAt(kind, code, level);
+    rows.push(`<tr><td>${level}</td>${resources.map((resource) => `<td>${costs[resource] === undefined ? "" : format(costs[resource])}</td>`).join("")}<td>${format(durationAt(kind, code, level))}</td></tr>`);
+  }
+  return `<table><thead><tr><th>Рівень</th>${resources.map((resource) => `<th>${esc(resourceName(resource))}</th>`).join("")}<th>Час, с</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
+}
+
+const manualMark = " + ручні правки";
+
+function markManual() {
+  if (state.variant && !state.variant.endsWith(manualMark)) {
+    state.variant += manualMark;
+  }
+}
+
+function countChangesOnly() {
+  let changes = 0;
+  for (const kind of ["buildings", "technologies"]) {
+    for (const code of Object.keys(original[kind])) {
+      if (JSON.stringify(original[kind][code]) !== JSON.stringify(state[kind][code])) {
+        changes += 1;
+      }
+    }
+  }
+  return changes;
+}
+
+function countChanges() {
+  document.getElementById("variant-name").textContent = state.variant ? "Застосовано: " + state.variant : "";
+  let changes = 0;
+  for (const kind of ["buildings", "technologies"]) {
+    for (const code of Object.keys(original[kind])) {
+      if (JSON.stringify(original[kind][code]) !== JSON.stringify(state[kind][code])) {
+        changes += 1;
+      }
+    }
+  }
+  if (JSON.stringify([...state.deposits].sort()) !== JSON.stringify([...original.deposits].sort())) {
+    changes += 1;
+  }
+  document.getElementById("count").textContent = "Змін: " + changes;
+}
+
+function renderDeposits() {
+  document.getElementById("deposits").innerHTML = "Поклади на планеті: " + depositTargets.map((code) => `<label><input type="checkbox" data-deposit="${code}" ${state.deposits.includes(code) ? "checked" : ""}> ${esc(resourceName(code))}</label>`).join("");
+}
+
+function render() {
+  for (const tab of ["steps", "buildings", "technologies", "charts", "totals"]) {
+    document.getElementById("tab-" + tab).classList.toggle("hidden", tab !== activeTab);
+  }
+  document.querySelectorAll("button.tab").forEach((button) => { button.style.fontWeight = button.dataset.tab === activeTab ? "700" : "400"; });
+  document.getElementById("first-levels").parentElement.classList.toggle("hidden", activeTab !== "steps");
+  document.getElementById("deposits").classList.toggle("hidden", activeTab === "buildings" || activeTab === "technologies");
+  if (activeTab === "steps") {
+    renderSteps();
+  } else if (activeTab === "charts") {
+    renderCharts();
+  } else if (activeTab === "totals") {
+    renderTotals();
+  } else {
+    renderSubjects(activeTab);
+  }
+  document.documentElement.style.setProperty("--head", document.querySelector("header").offsetHeight + "px");
+  countChanges();
+}
+
+function target(path) {
+  const parts = path.split("|");
+  let node = state[parts[0]];
+  for (const part of parts.slice(1, -1)) {
+    node = node[part];
+  }
+  return { node, key: parts[parts.length - 1] };
+}
+
+document.addEventListener("click", (event) => {
+  const element = event.target;
+  if (element.dataset.chartTab) {
+    chartTab = element.dataset.chartTab;
+    render();
+  } else if (element.dataset.tab) {
+    activeTab = element.dataset.tab;
+    render();
+  } else if (element.dataset.remove) {
+    const parts = element.dataset.remove.split("|");
+    state[parts[0]][parts[1]].costs.splice(Number(parts[3]), 1);
+    save();
+    render();
+  } else if (element.dataset.add) {
+    const [kind, code] = element.dataset.add.split("|");
+    const formula = { base: 0, growth: 1.5, step: 0, significant: 2 };
+    state[kind][code].costs.push(kind === "technologies" ? { resource: seed.resources[0].code, growth: formula, from_level: 1 } : { resource: seed.resources[0].code, ...formula, from_level: 1 });
+    save();
+    render();
+  }
+});
+
+// The cells of the table of steps: Enter or leaving the cell saves the value.
+document.addEventListener("keydown", (event) => {
+  if (event.target.dataset && event.target.dataset.cell !== undefined && event.key === "Enter") {
+    event.preventDefault();
+    event.target.blur();
+  }
+});
+
+document.addEventListener("focusout", (event) => {
+  const element = event.target;
+  if (!element.dataset || element.dataset.cell === undefined) {
+    return;
+  }
+  const [kind, code, levelText, resource] = element.dataset.cell.split("|");
+  const level = Number(levelText);
+  const text = element.textContent.trim();
+  const amount = text === "" ? 0 : parseTyped(text);
+  if (Number.isNaN(amount)) {
+    render();
+    return;
+  }
+  const current = resource ? (costsAt(kind, code, level)[resource] || 0) : durationAt(kind, code, level);
+  if (amount === current) {
+    return;
+  }
+  if (resource) {
+    setCost(kind, code, level, resource, amount);
+  } else {
+    setDuration(kind, code, level, amount);
+  }
+  markManual();
+  save();
+  const scroll = window.scrollY;
+  render();
+  window.scrollTo(0, scroll);
+});
+
+document.addEventListener("change", (event) => {
+  const element = event.target;
+  if (element.dataset.path) {
+    const { node, key } = target(element.dataset.path);
+    node[key] = element.value === "" ? 0 : Number(element.value);
+    markManual();
+  } else if (element.dataset.values) {
+    const node = target(element.dataset.values + "|values").node;
+    const values = element.value.split(",").map((text) => text.trim()).filter((text) => text !== "").map(Number);
+    if (values.length) {
+      node.values = values;
+    } else {
+      delete node.values;
+    }
+  } else if (element.dataset.resource) {
+    const { node } = target(element.dataset.resource + "|resource");
+    node.resource = element.value;
+  } else if (element.dataset.weight) {
+    weightOf(element.dataset.weight);
+    state.weights[element.dataset.weight] = Number(element.value) || 1;
+  } else if (element.dataset.deposit) {
+    state.deposits = element.checked ? [...state.deposits, element.dataset.deposit] : state.deposits.filter((code) => code !== element.dataset.deposit);
+  } else if (element.dataset.curve) {
+    const parts = element.dataset.curve.split("|");
+    if (parts.length === 1) {
+      state.curve.swing = Number(element.value) || 0;
+    } else {
+      state.curve[parts[0]][parts[1]][parts[2]] = Number(element.value) || 0;
+    }
+    if (state.variant && state.variant.startsWith("Парабола")) {
+      applyParabola();
+    } else {
+      save();
+      render();
+    }
+    return;
+  } else if (element.id === "log-scale") {
+    logScale = element.checked;
+    render();
+    return;
+  } else if (element.id === "first-levels") {
+    render();
+    return;
+  } else {
+    return;
+  }
+  save();
+  render();
+});
+
+document.addEventListener("toggle", (event) => {
+  const element = event.target;
+  if (element.dataset && element.dataset.levels && element.open) {
+    const [kind, code] = element.dataset.levels.split("|");
+    element.querySelector("div").innerHTML = levelTable(kind, code);
+  }
+}, true);
+
+let filterTimer = null;
+document.getElementById("filter").addEventListener("input", () => {
+  clearTimeout(filterTimer);
+  filterTimer = setTimeout(render, 250);
+});
+
+document.getElementById("download").addEventListener("click", () => {
+  const exported = {
+    building_types: seed.buildings.map((building) => ({ code: building.code, ...state.buildings[building.code] })),
+    technologies: seed.technologies.map((technology) => ({ code: technology.code, ...state.technologies[technology.code] })),
+    deposits: state.deposits,
+    weights: state.weights,
+    curve: state.curve };
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([JSON.stringify(exported, null, 2)], { type: "application/json" }));
+  link.download = "tsiny-budivel-i-nauk.json";
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
+document.getElementById("upload").addEventListener("click", () => document.getElementById("upload-file").click());
+document.getElementById("upload-file").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    return;
+  }
+  try {
+    const loaded = JSON.parse(await file.text());
+    for (const [listName, kind] of [["building_types", "buildings"], ["technologies", "technologies"]]) {
+      for (const row of loaded[listName] || []) {
+        if (state[kind][row.code]) {
+          for (const field of editableFields) {
+            if (row[field]) {
+              state[kind][row.code][field] = row[field];
+            }
+          }
+        }
+      }
+    }
+    if (Array.isArray(loaded.deposits)) {
+      state.deposits = loaded.deposits;
+    }
+    if (loaded.weights) {
+      state.weights = loaded.weights;
+    }
+    if (loaded.curve) {
+      state.curve = loaded.curve;
+    }
+    save();
+    render();
+  } catch (error) {
+    alert("Не вдалося прочитати файл: " + error.message);
+  }
+  event.target.value = "";
+});
+
+document.getElementById("parabola").addEventListener("click", () => {
+  if (countChangesOnly() === 0 || (state.variant && !state.variant.endsWith(manualMark)) || confirm("Ручні правки цін заміняться цінами параболи (ваги й поклади лишаються). Продовжити?")) {
+    applyParabola();
+  }
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  if (confirm("Скинути всі правки до сіду?")) {
+    state = clone(original);
+    save();
+    renderDeposits();
+    render();
+  }
+});
+
+renderDeposits();
+render();
+</script>
+</body>
+</html>

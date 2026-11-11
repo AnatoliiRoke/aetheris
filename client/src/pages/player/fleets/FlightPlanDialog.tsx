@@ -12,7 +12,7 @@ import { FlightMineTime } from './FlightMineTime';
 import { FlightPlanTime } from './FlightPlanTime';
 import { FlightTargetFields } from './FlightTargetFields';
 import { FlightCargoFields } from './FlightCargoFields';
-import { fleetExtracts } from './fleetExtraction';
+import { fleetExtracts, fleetOpenedOrders } from './fleetExtraction';
 import { cargoItemsValid, cargoMass, holdBefore, holdContentOf, holdMass, readCargoItems, unloadDefaults } from './flightPlanCargo';
 import { readAxes, toOrderInputs, type DraftOrder, type FlightTimeTarget, type TargetKind } from './flightPlanParts';
 
@@ -36,6 +36,11 @@ const orderTypes: readonly { code: string; label: MessageKey; fields: OrderField
   { code: 'wait', label: 'plan.order.wait', fields: {} },
   { code: 'return', label: 'plan.order.return', fields: { duration: true } },
 ];
+
+/**
+ * The orders that a module of the fleet opens: the fleet is offered them only when it has the module (task 00058).
+ */
+const moduleOrders: readonly string[] = ['hyperfly', 'jump', 'scan'];
 
 /**
  * What the player has to fill in for an order (task 00050): a field that is not named is not shown.
@@ -161,18 +166,31 @@ export function FlightPlanDialog({
 
   const [orders, setOrders] = useState<DraftOrder[]>(() => draftOf(plan, seed, fleetSectorId));
 
-  // The types of the orders the player may choose: the order of extraction is hidden from a fleet
-  // that may not extract. A plan that is being changed keeps the type of an order it holds, so the
-  // order of extraction stays in the list as long as the plan holds one.
-  const offeredTypes = useMemo(() => {
-    if (mayExtract) {
-      return orderTypes;
-    }
+  // The orders the modules of the fleet open: the hyperflight, the jump and the scan are offered only to a fleet that
+  // has the module (task 00058).
+  const openedOrders = useMemo(
+    () => fleetOpenedOrders(chosenFleet, designsRead.data ?? [], catalogRead.data),
+    [chosenFleet, designsRead.data, catalogRead.data],
+  );
 
-    const keeps = orders.some((order) => order.typeCode === 'mine');
+  // The types of the orders the player may choose: the order of extraction is hidden from a fleet that may not
+  // extract, and an order a module opens is hidden from a fleet without the module. A plan that is being changed
+  // keeps the type of an order it holds, so a type stays in the list as long as the plan holds an order of it.
+  const offeredTypes = useMemo(
+    () =>
+      orderTypes.filter((type) => {
+        if (orders.some((order) => order.typeCode === type.code)) {
+          return true;
+        }
 
-    return keeps ? orderTypes : orderTypes.filter((type) => type.code !== 'mine');
-  }, [mayExtract, orders]);
+        if (type.code === 'mine') {
+          return mayExtract;
+        }
+
+        return !moduleOrders.includes(type.code) || openedOrders.has(type.code);
+      }),
+    [mayExtract, openedOrders, orders],
+  );
 
   // The home body of the fleet: the return of the fleet goes back to it.
   const homeName = useMemo(() => {

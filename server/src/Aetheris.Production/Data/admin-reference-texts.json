@@ -355,6 +355,10 @@
     "uk": "Дрон",
     "en": "Drone"
   },
+  "admin.reference.attribute.flight_order": { "uk": "Відкриває наказ листа", "en": "Opens an order of the plan" },
+  "admin.reference.flight_order.hyperfly": { "uk": "Гіперперліт", "en": "Hyperflight" },
+  "admin.reference.flight_order.jump": { "uk": "Стрибок", "en": "Jump" },
+  "admin.reference.flight_order.scan": { "uk": "Сканування", "en": "Scan" },
   "admin.reference.component.drive": {
     "uk": "Двигун",
     "en": "Drive"

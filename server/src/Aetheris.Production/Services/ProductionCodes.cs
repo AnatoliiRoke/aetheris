@@ -192,6 +192,12 @@ public static class PartAttributeKeys
     public const string Component = "component";
 
     /// <summary>
+    /// The order of a flight plan the part opens for a fleet, one of <see cref="PartFlightOrders"/>: a fleet may be
+    /// given the order only when a ship of it carries a part with this attribute (task 00058).
+    /// </summary>
+    public const string FlightOrder = "flight_order";
+
+    /// <summary>
     /// The mark of a part that is not a module of a ship: the ammunition and the capsules of
     /// inhabitants are carried in the hold or used on a body, so they are never fitted to a
     /// hull and never show in the constructor (the decision of the author, task 00038).
@@ -216,8 +222,30 @@ public static class PartAttributeKeys
         Role,
         HullRole,
         Component,
+        FlightOrder,
         NotAShipModule,
     ];
+}
+
+/// <summary>
+/// The orders of a flight plan that a part opens (task 00058). They are logical codes; the plan names the same
+/// codes (<c>FlightOrderTypes</c> of the fleet module).
+/// </summary>
+public static class PartFlightOrders
+{
+    /// <summary>The fleet may fly faster than a plain flight.</summary>
+    public const string Hyperfly = "hyperfly";
+
+    /// <summary>The fleet may jump to a target without the flight of the space between.</summary>
+    public const string Jump = "jump";
+
+    /// <summary>The fleet may scan.</summary>
+    public const string Scan = "scan";
+
+    /// <summary>
+    /// Gets every order a part may open, in the order of the form of the admin panel.
+    /// </summary>
+    public static IReadOnlyList<string> All { get; } = [Hyperfly, Jump, Scan];
 }
 
 /// <summary>

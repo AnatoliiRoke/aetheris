@@ -317,7 +317,7 @@
       "weight": 1,
       "characteristics": {
         "char_thrust": {
-          "number": 100
+          "number": 125
         },
         "char_fuel_use": {
           "number": 100
@@ -352,7 +352,7 @@
       "weight": 1.1,
       "characteristics": {
         "char_thrust": {
-          "number": 100
+          "number": 200
         },
         "char_fuel_use": {
           "number": 110
@@ -387,7 +387,7 @@
       "weight": 1.21,
       "characteristics": {
         "char_thrust": {
-          "number": 300
+          "number": 350
         },
         "char_fuel_use": {
           "number": 121
@@ -422,7 +422,7 @@
       "weight": 1.331,
       "characteristics": {
         "char_thrust": {
-          "number": 300
+          "number": 500
         },
         "char_fuel_use": {
           "number": 133.1
@@ -452,12 +452,15 @@
         },
         "component": {
           "code": "drive"
+        },
+        "flight_order": {
+          "code": "hyperfly"
         }
       },
       "weight": 1.4641,
       "characteristics": {
         "char_thrust": {
-          "number": 600
+          "number": 1200
         },
         "char_fuel_use": {
           "number": 146.41
@@ -487,12 +490,15 @@
         },
         "component": {
           "code": "drive"
+        },
+        "flight_order": {
+          "code": "jump"
         }
       },
       "weight": 1.61051,
       "characteristics": {
         "char_thrust": {
-          "number": 1000
+          "number": 5000
         },
         "char_fuel_use": {
           "number": 161.051
@@ -2274,6 +2280,9 @@
       "attributes": {
         "role": {
           "code": "universal"
+        },
+        "flight_order": {
+          "code": "scan"
         }
       },
       "weight": 228.761562,
@@ -2306,6 +2315,9 @@
       "attributes": {
         "role": {
           "code": "universal"
+        },
+        "flight_order": {
+          "code": "scan"
         }
       },
       "weight": 251.637719,
@@ -12979,7 +12991,9 @@
       "part": "part_m_53",
       "hulls": [
         "part_h_21",
-        "part_h_22"
+        "part_h_22",
+        "part_h_23",
+        "part_h_24"
       ]
     },
     {
@@ -13000,12 +13014,14 @@
       "part": "part_m_56",
       "hulls": [
         "part_h_22",
-        "part_h_23"
+        "part_h_23",
+        "part_h_24"
       ]
     },
     {
       "part": "part_m_57",
       "hulls": [
+        "part_h_22",
         "part_h_23",
         "part_h_24"
       ]

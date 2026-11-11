@@ -115,6 +115,8 @@ export interface ShipModule {
   ammunitionIds?: number[];
   /** The kinds of the places the module takes from (task 00055); a module that takes from none is not a module of extraction. */
   extractionPlaceKinds?: string[];
+  /** The order of a flight plan the module opens for a fleet: `hyperfly`, `jump` or `scan`; absent for a module that opens none (task 00058). */
+  flightOrder?: string | null;
   /** The characteristics the plaque adds up. */
   facts?: ShipModuleFact[];
   /** The weight of one module in tonnes. */

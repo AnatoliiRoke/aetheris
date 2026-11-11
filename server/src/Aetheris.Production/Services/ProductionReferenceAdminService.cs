@@ -293,6 +293,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             .. PartRoles.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "role." + value)),
                             new AdminReferenceOption(HullRoles.Drone, LabelPrefix + "role." + HullRoles.Drone),
                             .. PartComponents.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "component." + value)),
+                            .. PartFlightOrders.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "flight_order." + value)),
                         ]),
                     new("text_value", AdminReferenceFieldTypes.Text, LabelPrefix + "field.attribute_text"),
                 ]),
