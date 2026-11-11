@@ -71,6 +71,19 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
 
     private const string RaceField = "race_id";
 
+    /// <summary>The field of what a module of extraction takes and where (task 00055).</summary>
+    private const string ExtractionField = "extraction";
+
+    private const string ExtractionPlaceKindField = "place_kind";
+
+    private const string ExtractionModeField = "mode";
+
+    private const string ExtractionResourceField = "resource_id";
+
+    private const string ExtractionResourceGroupField = "resource_group_id";
+
+    private const string ExtractionReducesMassField = "reduces_mass";
+
     private const string FactoryField = "building_type_id";
 
     private const string PartField = "part_type_id";
@@ -309,6 +322,39 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                         IsRequired: true,
                         ReferenceKind: RaceReferenceKind),
                 ]),
+            new(
+                ExtractionField,
+                AdminReferenceFieldTypes.Effects,
+                LabelPrefix + "field.extraction",
+                Fields:
+                [
+                    new(
+                        ExtractionPlaceKindField,
+                        AdminReferenceFieldTypes.Select,
+                        LabelPrefix + "field.extraction_place_kind",
+                        IsRequired: true,
+                        Options: [.. ExtractionPlaceKinds.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "extraction_place_kind." + value))]),
+                    new(
+                        ExtractionModeField,
+                        AdminReferenceFieldTypes.Select,
+                        LabelPrefix + "field.extraction_mode",
+                        IsRequired: true,
+                        Options: [.. ExtractionModes.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "extraction_mode." + value))]),
+                    new(
+                        ExtractionResourceField,
+                        AdminReferenceFieldTypes.Reference,
+                        LabelPrefix + "field.resource",
+                        ReferenceKind: "resource"),
+                    new(
+                        ExtractionResourceGroupField,
+                        AdminReferenceFieldTypes.Reference,
+                        LabelPrefix + "field.resource_group",
+                        ReferenceKind: "resource_group"),
+                    new(
+                        ExtractionReducesMassField,
+                        AdminReferenceFieldTypes.Flag,
+                        LabelPrefix + "field.extraction_reduces_mass"),
+                ]),
         ]);
 
     /// <summary>
@@ -495,6 +541,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                         .Include(entry => entry.AttributeIds)
                         .Include(entry => entry.HullCompatibilityIds)
                         .Include(entry => entry.RaceCompatibilityIds)
+                        .Include(entry => entry.ExtractionIds)
                         .SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false);
 
                     if (part is null)
@@ -522,6 +569,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             [AttributesField] = AttributesOf(part),
                             [CompatibleHullsField] = HullsOf(part),
                             [RacesField] = RacesOf(part),
+                            [ExtractionField] = ExtractionOf(part),
                         });
                 }
 
@@ -750,6 +798,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                                 [SortOrderField] = part.SortOrder,
                                 [WeightField] = part.Weight,
                                 [AttributesField] = AttributesOf(part),
+                                [ExtractionField] = ExtractionOf(part),
                             };
 
                             Apply(part, values);
@@ -1046,8 +1095,133 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         }
 
         await CheckCompatibilityAsync(failures, values, cancellationToken).ConfigureAwait(false);
+        await CheckExtractionAsync(failures, values, stored, cancellationToken).ConfigureAwait(false);
 
         AdminReferenceRules.ThrowIfInvalid(failures);
+    }
+
+    /// <summary>
+    /// Checks what a module of extraction takes and where (task 00055): the kind of the place and the way
+    /// are known, the way names the resource or the group of the resources it needs and nothing else, a
+    /// resource and a group are rows of the world, an archived one is refused as a new choice, a gas giant
+    /// has no composition so only a named resource is taken from it, only the drilling of a field takes
+    /// mass from it, and a row is never sent twice.
+    /// </summary>
+    private async Task CheckExtractionAsync(
+        Dictionary<string, List<string>> failures,
+        PartValues values,
+        PartTypeEntity? stored,
+        CancellationToken cancellationToken)
+    {
+        if (values.Extraction is not { Count: > 0 } rows)
+        {
+            return;
+        }
+
+        ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
+        Dictionary<int, ResourceTypeFact> resourcesById = catalog.Resources.ToDictionary(resource => resource.Id);
+        Dictionary<int, ResourceGroupFact> groupsById = catalog.Groups.ToDictionary(group => group.Id);
+
+        // An archived row keeps working where it is already used, but a new choice of it is refused
+        // (task 00023, decision 5).
+        HashSet<int> storedResourceIds = [.. stored?.ExtractionIds.Select(row => row.ResourceId ?? 0) ?? []];
+        HashSet<int> storedGroupIds = [.. stored?.ExtractionIds.Select(row => row.ResourceGroupId ?? 0) ?? []];
+        HashSet<(string?, string?, int?, int?)> seen = [];
+        int index = 0;
+
+        foreach (ExtractionValues row in rows)
+        {
+            string kindPath = AdminReferenceRules.PathOf(ExtractionField, index, ExtractionPlaceKindField);
+            string modePath = AdminReferenceRules.PathOf(ExtractionField, index, ExtractionModeField);
+            string resourcePath = AdminReferenceRules.PathOf(ExtractionField, index, ExtractionResourceField);
+            string groupPath = AdminReferenceRules.PathOf(ExtractionField, index, ExtractionResourceGroupField);
+            string massPath = AdminReferenceRules.PathOf(ExtractionField, index, ExtractionReducesMassField);
+
+            bool kindKnown = row.PlaceKind is not null && ExtractionPlaceKinds.All.Contains(row.PlaceKind);
+            bool modeKnown = row.Mode is not null && ExtractionModes.All.Contains(row.Mode);
+
+            if (row.PlaceKind is null)
+            {
+                AdminReferenceRules.Fail(failures, kindPath, AdminReferenceErrors.Required);
+            }
+            else if (!kindKnown)
+            {
+                AdminReferenceRules.Fail(failures, kindPath, AdminReferenceErrors.Unknown);
+            }
+
+            if (row.Mode is null)
+            {
+                AdminReferenceRules.Fail(failures, modePath, AdminReferenceErrors.Required);
+            }
+            else if (!modeKnown)
+            {
+                AdminReferenceRules.Fail(failures, modePath, AdminReferenceErrors.Unknown);
+            }
+
+            // The way decides what the row names: a resource, a group, or nothing.
+            bool needsResource = row.Mode == ExtractionModes.Listed;
+            bool needsGroup = row.Mode == ExtractionModes.GroupEven;
+
+            if (modeKnown && row.ResourceId is null && needsResource)
+            {
+                AdminReferenceRules.Fail(failures, resourcePath, AdminReferenceErrors.Required);
+            }
+            else if (modeKnown && row.ResourceId is not null && !needsResource)
+            {
+                AdminReferenceRules.Fail(failures, resourcePath, AdminReferenceErrors.NotApplicable);
+            }
+            else if (row.ResourceId is { } resourceId)
+            {
+                if (!resourcesById.TryGetValue(resourceId, out ResourceTypeFact? resource))
+                {
+                    AdminReferenceRules.Fail(failures, resourcePath, AdminReferenceErrors.Unknown);
+                }
+                else if (resource.IsArchived && !storedResourceIds.Contains(resourceId))
+                {
+                    AdminReferenceRules.Fail(failures, resourcePath, AdminReferenceErrors.Archived);
+                }
+            }
+
+            if (modeKnown && row.ResourceGroupId is null && needsGroup)
+            {
+                AdminReferenceRules.Fail(failures, groupPath, AdminReferenceErrors.Required);
+            }
+            else if (modeKnown && row.ResourceGroupId is not null && !needsGroup)
+            {
+                AdminReferenceRules.Fail(failures, groupPath, AdminReferenceErrors.NotApplicable);
+            }
+            else if (row.ResourceGroupId is { } groupId)
+            {
+                if (!groupsById.TryGetValue(groupId, out ResourceGroupFact? group))
+                {
+                    AdminReferenceRules.Fail(failures, groupPath, AdminReferenceErrors.Unknown);
+                }
+                else if (group.IsArchived && !storedGroupIds.Contains(groupId))
+                {
+                    AdminReferenceRules.Fail(failures, groupPath, AdminReferenceErrors.Archived);
+                }
+            }
+
+            // A gas giant has no composition: the shares and the group of the resources mean nothing there.
+            if (kindKnown && modeKnown && row.PlaceKind == ExtractionPlaceKinds.GasGiant && row.Mode != ExtractionModes.Listed)
+            {
+                AdminReferenceRules.Fail(failures, modePath, AdminReferenceErrors.NotApplicable);
+            }
+
+            // Only a field has a mass to take, and only the way «all shares» processes it.
+            if (row.ReducesMass == true
+                && !(row.PlaceKind == ExtractionPlaceKinds.AsteroidField && row.Mode == ExtractionModes.AllShares))
+            {
+                AdminReferenceRules.Fail(failures, massPath, AdminReferenceErrors.NotApplicable);
+            }
+
+            if (kindKnown && modeKnown && !seen.Add((row.PlaceKind, row.Mode, row.ResourceId, row.ResourceGroupId)))
+            {
+                AdminReferenceRules.Fail(failures, kindPath, AdminReferenceErrors.Duplicate);
+            }
+
+            index++;
+        }
     }
 
     /// <summary>
@@ -1363,6 +1537,32 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             }
         }
 
+        // What a module of extraction takes is written the same way: a row that is not sent is gone,
+        // a row that is sent and is already there keeps its identity and takes the flag of the form
+        // (task 00055).
+        part.ExtractionIds.RemoveAll(row => !(values.Extraction ?? []).Any(sent => SameExtraction(sent, row)));
+
+        foreach (ExtractionValues sent in values.Extraction ?? [])
+        {
+            PartExtractionEntity? kept = part.ExtractionIds.Find(row => SameExtraction(sent, row));
+
+            if (kept is null)
+            {
+                part.ExtractionIds.Add(new PartExtractionEntity
+                {
+                    PlaceKind = sent.PlaceKind!,
+                    Mode = sent.Mode!,
+                    ResourceId = sent.ResourceId,
+                    ResourceGroupId = sent.ResourceGroupId,
+                    ReducesMass = sent.ReducesMass == true,
+                });
+            }
+            else
+            {
+                kept.ReducesMass = sent.ReducesMass == true;
+            }
+        }
+
         part.RaceCompatibilityIds.RemoveAll(link => !(values.Races ?? []).Any(sent => sent.RaceId == link.RaceId));
 
         foreach (RaceValues sent in values.Races ?? [])
@@ -1440,6 +1640,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             .Include(entry => entry.AttributeIds)
             .Include(entry => entry.HullCompatibilityIds)
             .Include(entry => entry.RaceCompatibilityIds)
+            .Include(entry => entry.ExtractionIds)
             .SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false)
             ?? throw new AdminReferenceException(GameErrorCodes.NotFound);
     }
@@ -1496,6 +1697,26 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             .Select(link => (object?)new Dictionary<string, object?>
             {
                 [RaceField] = link.RaceId,
+            }),
+    ];
+
+    private static bool SameExtraction(ExtractionValues sent, PartExtractionEntity row) =>
+        sent.PlaceKind == row.PlaceKind
+        && sent.Mode == row.Mode
+        && sent.ResourceId == row.ResourceId
+        && sent.ResourceGroupId == row.ResourceGroupId;
+
+    private static List<object?> ExtractionOf(PartTypeEntity part) =>
+    [
+        .. part.ExtractionIds
+            .OrderBy(row => row.Id)
+            .Select(row => (object?)new Dictionary<string, object?>
+            {
+                [ExtractionPlaceKindField] = row.PlaceKind,
+                [ExtractionModeField] = row.Mode,
+                [ExtractionResourceField] = row.ResourceId,
+                [ExtractionResourceGroupField] = row.ResourceGroupId,
+                [ExtractionReducesMassField] = row.ReducesMass,
             }),
     ];
 
@@ -1568,7 +1789,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         List<AttributeValues>? Attributes,
         List<HullValues>? CompatibleHulls = null,
         List<RaceValues>? Races = null,
-        decimal? Weight = null)
+        decimal? Weight = null,
+        List<ExtractionValues>? Extraction = null)
     {
         public PartValues Trimmed(ILocalizationTexts texts) => this with
         {
@@ -1588,6 +1810,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             [AttributesField] = Attributes,
             [CompatibleHullsField] = CompatibleHulls,
             [RacesField] = Races,
+            [ExtractionField] = Extraction,
         };
     }
 
@@ -1602,6 +1825,16 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     /// </summary>
     /// <param name="RaceId">The race.</param>
     private sealed record RaceValues(int? RaceId);
+
+    /// <summary>
+    /// What a module of extraction takes from one kind of place: the row of the list of the form (task 00055).
+    /// </summary>
+    /// <param name="PlaceKind">The kind of the place.</param>
+    /// <param name="Mode">The way the module takes.</param>
+    /// <param name="ResourceId">The resource, for the way «listed».</param>
+    /// <param name="ResourceGroupId">The group of the resources, for the way «group evenly».</param>
+    /// <param name="ReducesMass">Whether the module takes the mass it processes from the place.</param>
+    private sealed record ExtractionValues(string? PlaceKind, string? Mode, int? ResourceId, int? ResourceGroupId, bool? ReducesMass);
 
     private sealed record RecipeValues(
         Dictionary<string, string>? Name,

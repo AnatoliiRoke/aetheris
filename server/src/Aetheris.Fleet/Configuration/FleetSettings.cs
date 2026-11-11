@@ -64,6 +64,21 @@ public sealed record FleetSettings
     /// <summary>Gets the most orders a flight plan of a fleet may hold.</summary>
     public int FlightPlanMaxOrders { get; init; }
 
+    /// <summary>Gets the length of a cycle of extraction, in game seconds.</summary>
+    public int ExtractionCycleSeconds { get; init; }
+
+    /// <summary>Gets how far a fleet may be from the point of a free asteroid field and still be at it, in the units of the map.</summary>
+    public double ExtractionPlaceTolerance { get; init; }
+
+    /// <summary>Gets the push of the reference point of the speed, in kilonewtons.</summary>
+    public decimal SpeedReferencePush { get; init; }
+
+    /// <summary>Gets the mass of the reference point of the speed, in tonnes.</summary>
+    public decimal SpeedReferenceMass { get; init; }
+
+    /// <summary>Gets the speed of the reference point, in light-years per hour.</summary>
+    public decimal SpeedReferenceSpeed { get; init; }
+
     /// <summary>
     /// Reads the parameters.
     /// </summary>
@@ -91,6 +106,11 @@ public sealed record FleetSettings
             UpkeepShare = ReadDecimal(config, FleetConfigKeys.UpkeepShare),
             FleetNameMaxLength = ReadInt32(config, FleetConfigKeys.FleetNameMaxLength),
             FlightPlanMaxOrders = ReadInt32(config, FleetConfigKeys.FlightPlanMaxOrders),
+            ExtractionCycleSeconds = ReadInt32(config, FleetConfigKeys.ExtractionCycleSeconds),
+            ExtractionPlaceTolerance = (double)ReadDecimal(config, FleetConfigKeys.ExtractionPlaceTolerance),
+            SpeedReferencePush = ReadDecimal(config, FleetConfigKeys.SpeedReferencePush),
+            SpeedReferenceMass = ReadDecimal(config, FleetConfigKeys.SpeedReferenceMass),
+            SpeedReferenceSpeed = ReadDecimal(config, FleetConfigKeys.SpeedReferenceSpeed),
         };
     }
 

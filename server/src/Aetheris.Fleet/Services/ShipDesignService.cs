@@ -304,6 +304,36 @@ public sealed class ShipDesignService
     }
 
     /// <summary>
+    /// Reads the summaries of several projects at once, by their identifiers (task 00053): the mass
+    /// and the push of the drives of a ship come from the summary of its project.
+    /// </summary>
+    /// <param name="designIds">The projects.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The summary of every project that exists, by the identifier of the project.</returns>
+    public async Task<IReadOnlyDictionary<long, ShipDesignSummaryDto>> ReadSummariesAsync(
+        IReadOnlyCollection<long> designIds,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(designIds);
+
+        if (designIds.Count == 0)
+        {
+            return new Dictionary<long, ShipDesignSummaryDto>();
+        }
+
+        long[] ids = [.. designIds.Distinct()];
+        ShipCatalogDto catalog = await _production.GetShipCatalogAsync(cancellationToken).ConfigureAwait(false);
+        List<ShipDesignEntity> designs = await _dbContext.ShipDesigns.AsNoTracking()
+            .Where(design => ids.Contains(design.Id))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        IReadOnlyList<ShipDesignDto> built = await BuildAllAsync(designs, catalog, cancellationToken).ConfigureAwait(false);
+
+        return built.ToDictionary(design => design.Id, design => design.Summary);
+    }
+
+    /// <summary>
     /// Reads one project of a player.
     /// </summary>
     /// <param name="playerId">The owner of the project.</param>
@@ -416,7 +446,12 @@ public sealed class ShipDesignService
                             fact.Amount,
                             fact.SortOrder))
                     ],
-                    module.AmmunitionIds ?? []))
+                    module.AmmunitionIds ?? [],
+                    [
+                        .. (module.Extraction ?? [])
+                            .Select(row => row.PlaceKind)
+                            .Distinct(StringComparer.Ordinal),
+                    ]))
         ];
 
         // The types of the modules that go into a ship: the counts are of the modules the builder

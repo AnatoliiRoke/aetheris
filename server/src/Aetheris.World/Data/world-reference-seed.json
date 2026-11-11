@@ -1478,36 +1478,38 @@
     {
       "object_type": "object_type_13",
       "code": "rule_group_18",
-      "min_picks": 1,
+      "min_picks": 2,
       "max_picks": 2,
-      "extra_pick_probability": 0.3,
+      "extra_pick_probability": 0,
+      "picks_all": true,
       "rules": [
         {
           "resource": "resource_12",
           "weight": 70,
-          "coefficient_min": 0.2,
-          "coefficient_max": 0.5
+          "coefficient_min": 0.05,
+          "coefficient_max": 0.1
         },
         {
           "resource": "resource_14",
           "weight": 30,
-          "coefficient_min": 0.2,
-          "coefficient_max": 0.5
+          "coefficient_min": 0.3,
+          "coefficient_max": 0.4
         }
       ]
     },
     {
       "object_type": "object_type_13",
       "code": "rule_group_19",
-      "min_picks": 0,
+      "min_picks": 1,
       "max_picks": 1,
-      "extra_pick_probability": 0.1,
+      "extra_pick_probability": 0,
+      "picks_all": true,
       "rules": [
         {
           "resource": "resource_15",
           "weight": 1,
-          "coefficient_min": 0.01,
-          "coefficient_max": 0.05
+          "coefficient_min": 0.35,
+          "coefficient_max": 0.45
         }
       ]
     },

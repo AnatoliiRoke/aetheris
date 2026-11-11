@@ -2224,7 +2224,7 @@
           "number": 72
         },
         "char_yield": {
-          "number": 290
+          "number": 1300
         }
       }
     },
@@ -2253,7 +2253,7 @@
           "number": 55
         },
         "char_yield": {
-          "number": 220
+          "number": 1100
         }
       }
     },
@@ -14065,6 +14065,50 @@
         "part_m_51",
         "part_m_52"
       ]
+    }
+  ],
+  "part_extractions": [
+    {
+      "part": "part_m_54",
+      "place_kind": "asteroid_field",
+      "mode": "all_shares",
+      "reduces_mass": true
+    },
+    {
+      "part": "part_m_55",
+      "place_kind": "asteroid_field",
+      "mode": "group_even",
+      "resource_group": "resource_group_4"
+    },
+    {
+      "part": "part_m_53",
+      "place_kind": "gas_giant",
+      "mode": "listed",
+      "resource": "resource_13"
+    },
+    {
+      "part": "part_m_56",
+      "place_kind": "nebula",
+      "mode": "listed",
+      "resource": "resource_15"
+    },
+    {
+      "part": "part_m_56",
+      "place_kind": "nebula",
+      "mode": "listed",
+      "resource": "resource_12"
+    },
+    {
+      "part": "part_m_57",
+      "place_kind": "nebula",
+      "mode": "listed",
+      "resource": "resource_14"
+    },
+    {
+      "part": "part_m_57",
+      "place_kind": "nebula",
+      "mode": "listed",
+      "resource": "resource_12"
     }
   ]
 }

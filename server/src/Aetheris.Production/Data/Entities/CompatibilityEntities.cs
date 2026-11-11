@@ -99,3 +99,55 @@ public sealed class PartAmmunitionCompatibilityEntity
     /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
     public int Version { get; set; } = 1;
 }
+
+/// <summary>
+/// What a module of extraction takes and where it takes it from (task 00055): one row is one way the
+/// module takes from one kind of place.
+/// </summary>
+/// <remarks>
+/// <para>
+/// The row is data, so a new module of extraction, or a new resource a module takes, arrives as a row
+/// in the admin panel and not as a change of the code of the fleet (documentation/tech/08, rules 1
+/// and 2). The fleet reads the rows through the catalog of the ships.
+/// </para>
+/// <para>
+/// The kind of the place is one of <see cref="Api.ExtractionPlaceKinds"/> and the way is one of
+/// <see cref="Api.ExtractionModes"/>. The way «all shares» names no resource, the way «listed»
+/// names one resource, and the way «group evenly» names a group of the resources. The resource and the
+/// group live in the world module, so this module keeps their identifiers and its table carries no
+/// foreign key into the tables of the other modules.
+/// </para>
+/// </remarks>
+public sealed class PartExtractionEntity
+{
+    /// <summary>Gets or sets the primary key.</summary>
+    public int Id { get; set; }
+
+    /// <summary>Gets or sets the module of extraction.</summary>
+    public int PartTypeId { get; set; }
+
+    /// <summary>Gets or sets the kind of the place the module takes from.</summary>
+    public string PlaceKind { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the way the module takes from the place.</summary>
+    public string Mode { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the resource the module takes, for the way «listed».</summary>
+    public int? ResourceId { get; set; }
+
+    /// <summary>Gets or sets the group of the resources the module takes, for the way «group evenly».</summary>
+    public int? ResourceGroupId { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the module takes the mass it processes from the place:
+    /// the yield of the module is the mass the place loses, and the part that does not become a
+    /// resource is the waste. Only a place that has a mass, an asteroid field, loses it.
+    /// </summary>
+    public bool ReducesMass { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the row is archived (task 00023, decision 5).</summary>
+    public bool IsArchived { get; set; }
+
+    /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
+    public int Version { get; set; } = 1;
+}

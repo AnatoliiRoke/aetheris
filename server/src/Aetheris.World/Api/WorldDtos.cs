@@ -171,11 +171,42 @@ public sealed record SystemContentDto(
 /// </remarks>
 /// <param name="Object">The object of the map.</param>
 /// <param name="Compositions">The composition shares of the place, for a field or a nebula.</param>
-/// <param name="Mass">The mass that is left in the place, in tonnes: the mass of a field or of a nebula.</param>
+/// <param name="Mass">The mass that is left in the place, in tonnes: the mass of a field; zero for a gas giant and a nebula, which have none.</param>
 public sealed record PlaceContentDto(
     ObjectDto Object,
     IReadOnlyList<CompositionDto> Compositions,
     long Mass);
+
+/// <summary>
+/// A place of the map in the coordinates of the galaxy (task 00053): the orbit of a body, a field, a
+/// nebula or a point of open space. A fleet stands at a place and flies from one place to another.
+/// </summary>
+/// <remarks>
+/// The coordinates are absolute: the origin of the sector plus the position inside it, three axes as
+/// everywhere in the game. A place of a star system carries the system and the orbit, because the
+/// distance inside a system is counted by the orbits and not by the coordinates.
+/// </remarks>
+/// <param name="SectorId">The sector of the place.</param>
+/// <param name="SystemId">The star system of the place, or <see langword="null"/> in open space.</param>
+/// <param name="ObjectId">The object of the map the place is, or <see langword="null"/> for a point of open space.</param>
+/// <param name="PlanetId">The body, when the object is a body on an orbit (a planet or a gas giant).</param>
+/// <param name="Orbit">The orbit inside the system, or <see langword="null"/> when the place has none.</param>
+/// <param name="ObjectClass">The class of the object, or an empty text for a point of open space.</param>
+/// <param name="OwnerPlayerId">The owner of the body, or <see langword="null"/> when the place is not an owned body.</param>
+/// <param name="X">The first axis in the galaxy.</param>
+/// <param name="Y">The second axis in the galaxy.</param>
+/// <param name="Z">The third axis in the galaxy.</param>
+public sealed record WorldPlaceDto(
+    int SectorId,
+    long? SystemId,
+    long? ObjectId,
+    long? PlanetId,
+    int? Orbit,
+    string ObjectClass,
+    string? OwnerPlayerId,
+    double X,
+    double Y,
+    double Z);
 
 /// <summary>A free body that a player may take.</summary>
 /// <param name="PlanetId">The body.</param>

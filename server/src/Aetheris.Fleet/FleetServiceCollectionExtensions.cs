@@ -39,10 +39,16 @@ public static class FleetServiceCollectionExtensions
         services.AddScoped<FlightPlanService>();
         services.AddScoped<FleetBootstrapService>();
         services.AddScoped<FleetExtractionService>();
+        services.AddScoped<FleetHoldService>();
+        services.AddScoped<FleetSpeedService>();
+        services.AddScoped<FleetFlightService>();
         services.AddScoped<FleetExtractionCycleService>();
-        services.AddScoped<FleetExtractionEstimateService>();
+        services.AddScoped<FleetMinePlaceService>();
+        services.AddScoped<FlightPlanRunner>();
         services.AddScoped<IScheduledEventHandler, ShipyardCompleteHandler>();
         services.AddScoped<IScheduledEventHandler, FleetExtractionCycleHandler>();
+        services.AddScoped<IScheduledEventHandler, FleetArrivalHandler>();
+        services.AddScoped<IScheduledEventHandler, FleetWaitHandler>();
 
         services.AddCommand<CreateShipDesignCommand>();
         services.AddCommand<RenameShipDesignCommand>();

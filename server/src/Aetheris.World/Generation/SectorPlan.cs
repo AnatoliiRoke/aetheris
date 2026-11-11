@@ -42,7 +42,6 @@ public sealed record FieldPlan(
 /// <param name="Name">The name.</param>
 /// <param name="Position">The centre within the sector.</param>
 /// <param name="Radius">The radius.</param>
-/// <param name="Mass">The mass of the nebula, in tonnes.</param>
 /// <param name="BlocksJumpDrive">Whether the jump drive is forbidden inside.</param>
 /// <param name="CompositionIds">The composition.</param>
 public sealed record NebulaPlan(
@@ -50,7 +49,6 @@ public sealed record NebulaPlan(
     string Name,
     Point3 Position,
     double Radius,
-    long Mass,
     bool BlocksJumpDrive,
     IReadOnlyList<ResourceShare> CompositionIds);
 

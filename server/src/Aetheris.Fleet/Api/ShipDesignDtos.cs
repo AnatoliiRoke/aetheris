@@ -205,6 +205,7 @@ public sealed record ShipHullViewDto(
 /// <param name="LauncherSize">The size of the launcher, or zero when the weapon has none.</param>
 /// <param name="Facts">The characteristics the plaque adds up.</param>
 /// <param name="AmmunitionIds">The ammunition the weapon fires; a weapon that fires ammunition has no damage of its own (task 00040).</param>
+/// <param name="ExtractionPlaceKinds">The kinds of the places the module takes from (task 00055): the classes of the objects of the map. A module that takes from none is not a module of extraction.</param>
 public sealed record ShipModuleViewDto(
     int Id,
     string Code,
@@ -235,7 +236,8 @@ public sealed record ShipModuleViewDto(
     decimal Rate,
     decimal LauncherSize,
     IReadOnlyList<ShipModuleFactViewDto> Facts,
-    IReadOnlyList<int> AmmunitionIds);
+    IReadOnlyList<int> AmmunitionIds,
+    IReadOnlyList<string> ExtractionPlaceKinds);
 
 /// <summary>
 /// One characteristic of a module that the plaque of a project adds up.

@@ -35,11 +35,18 @@ export function FlightPlanPlace({ sectorId, systemId, objectId }: { sectorId: nu
     return system === undefined || system.name === null ? null : system.name;
   }, [sectorRead.data, systemId]);
 
+  // The name of a free field or of a nebula of the sector: both belong to no system.
   const fieldName = useMemo(() => {
     const fields = sectorRead.data?.fields ?? [];
     const field = fields.find((entry) => entry.objectId === objectId);
 
-    return field === undefined ? null : field.name;
+    if (field !== undefined) {
+      return field.name;
+    }
+
+    const nebula = (sectorRead.data?.nebulas ?? []).find((entry) => entry.objectId === objectId);
+
+    return nebula === undefined ? null : nebula.name;
   }, [sectorRead.data, objectId]);
 
   // The system of the target, so the name of its body may be read.

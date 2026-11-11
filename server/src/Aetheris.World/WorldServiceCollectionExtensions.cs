@@ -47,6 +47,7 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<FieldService>();
         services.AddScoped<NebulaExtractionService>();
         services.AddScoped<WorldQueryService>();
+        services.AddScoped<WorldPlaceService>();
         services.AddScoped<IWorldVisibility, RadarVisibility>();
         services.AddScoped<WorldMapService>();
         services.AddScoped<IWorldModule, WorldModule>();

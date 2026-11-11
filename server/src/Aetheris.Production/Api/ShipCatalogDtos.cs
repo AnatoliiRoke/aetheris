@@ -95,6 +95,7 @@ public sealed record ShipHullDto(
 /// <param name="LauncherSize">The size of the launcher, or zero when the weapon has none.</param>
 /// <param name="Facts">The characteristics the plaque adds up. A characteristic the plaque already shows on its own row is not here.</param>
 /// <param name="AmmunitionIds">The ammunition the weapon fires, by their identifier (task 00040). A weapon that fires ammunition has no damage of its own.</param>
+/// <param name="Extraction">What the module takes and where, when it is a module of extraction (task 00055). A module without rows takes nothing.</param>
 public sealed record ShipModuleDto(
     int Id,
     string Code,
@@ -128,7 +129,23 @@ public sealed record ShipModuleDto(
     decimal LauncherSize = 0m,
     IReadOnlyList<ShipModuleFactDto>? Facts = null,
     decimal Upkeep = 0m,
-    IReadOnlyList<int>? AmmunitionIds = null);
+    IReadOnlyList<int>? AmmunitionIds = null,
+    IReadOnlyList<ShipModuleExtractionDto>? Extraction = null);
+
+/// <summary>
+/// One way a module of extraction takes from one kind of place (task 00055).
+/// </summary>
+/// <param name="PlaceKind">The kind of the place, one of <see cref="ExtractionPlaceKinds"/>.</param>
+/// <param name="Mode">The way the module takes, one of <see cref="ExtractionModes"/>.</param>
+/// <param name="ResourceId">The resource the module takes, for the way «listed», or <see langword="null"/>.</param>
+/// <param name="ResourceGroupId">The group of the resources the module takes, for the way «group evenly», or <see langword="null"/>.</param>
+/// <param name="ReducesMass">Whether the module takes the mass it processes from the place.</param>
+public sealed record ShipModuleExtractionDto(
+    string PlaceKind,
+    string Mode,
+    int? ResourceId,
+    int? ResourceGroupId,
+    bool ReducesMass);
 
 /// <summary>
 /// One characteristic of a module that the plaque of a project adds up.

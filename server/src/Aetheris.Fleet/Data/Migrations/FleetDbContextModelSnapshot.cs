@@ -86,6 +86,14 @@ namespace Aetheris.Fleet.Data.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("name");
 
+                    b.Property<long?>("ObjectId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("object_id");
+
+                    b.Property<int?>("Orbit")
+                        .HasColumnType("integer")
+                        .HasColumnName("orbit");
+
                     b.Property<long>("PlanetId")
                         .HasColumnType("bigint")
                         .HasColumnName("planet_id");
@@ -95,6 +103,18 @@ namespace Aetheris.Fleet.Data.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)")
                         .HasColumnName("player_id");
+
+                    b.Property<double?>("PositionX")
+                        .HasColumnType("double precision")
+                        .HasColumnName("position_x");
+
+                    b.Property<double?>("PositionY")
+                        .HasColumnType("double precision")
+                        .HasColumnName("position_y");
+
+                    b.Property<double?>("PositionZ")
+                        .HasColumnType("double precision")
+                        .HasColumnName("position_z");
 
                     b.Property<int>("SectorId")
                         .HasColumnType("integer")
@@ -106,11 +126,18 @@ namespace Aetheris.Fleet.Data.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("state_code");
 
+                    b.Property<long?>("SystemId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("system_id");
+
                     b.HasKey("Id")
                         .HasName("pk_fleet");
 
                     b.HasIndex("HomePlanetId")
                         .HasDatabaseName("ix_fleet_home_planet_id");
+
+                    b.HasIndex("ObjectId")
+                        .HasDatabaseName("ix_fleet_object_id");
 
                     b.HasIndex("PlayerId")
                         .HasDatabaseName("ix_fleet_player_id");
@@ -119,6 +146,111 @@ namespace Aetheris.Fleet.Data.Migrations
                         .HasDatabaseName("ix_fleet_player_id_planet_id");
 
                     b.ToTable("fleet", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FleetFlightEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("ArrivesAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("arrives_at");
+
+                    b.Property<double>("Distance")
+                        .HasColumnType("double precision")
+                        .HasColumnName("distance");
+
+                    b.Property<long>("FleetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fleet_id");
+
+                    b.Property<long>("FlightPlanOrderId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("flight_plan_order_id");
+
+                    b.Property<int?>("FromOrbit")
+                        .HasColumnType("integer")
+                        .HasColumnName("from_orbit");
+
+                    b.Property<int>("FromSectorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("from_sector_id");
+
+                    b.Property<long?>("FromSystemId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("from_system_id");
+
+                    b.Property<double>("FromX")
+                        .HasColumnType("double precision")
+                        .HasColumnName("from_x");
+
+                    b.Property<double>("FromY")
+                        .HasColumnType("double precision")
+                        .HasColumnName("from_y");
+
+                    b.Property<double>("FromZ")
+                        .HasColumnType("double precision")
+                        .HasColumnName("from_z");
+
+                    b.Property<decimal>("Speed")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("speed");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<long?>("ToObjectId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("to_object_id");
+
+                    b.Property<int?>("ToOrbit")
+                        .HasColumnType("integer")
+                        .HasColumnName("to_orbit");
+
+                    b.Property<long?>("ToPlanetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("to_planet_id");
+
+                    b.Property<int>("ToSectorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("to_sector_id");
+
+                    b.Property<long?>("ToSystemId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("to_system_id");
+
+                    b.Property<double>("ToX")
+                        .HasColumnType("double precision")
+                        .HasColumnName("to_x");
+
+                    b.Property<double>("ToY")
+                        .HasColumnType("double precision")
+                        .HasColumnName("to_y");
+
+                    b.Property<double>("ToZ")
+                        .HasColumnType("double precision")
+                        .HasColumnName("to_z");
+
+                    b.HasKey("Id")
+                        .HasName("pk_fleet_flight");
+
+                    b.HasIndex("FleetId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_fleet_flight_fleet_id");
+
+                    b.ToTable("fleet_flight", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_fleet_flight_distance", "distance >= 0");
+
+                            t.HasCheckConstraint("ck_fleet_flight_time", "arrives_at >= started_at");
+                        });
                 });
 
             modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FleetPlayerStateEntity", b =>
@@ -185,9 +317,18 @@ namespace Aetheris.Fleet.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<int>("CurrentPosition")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_position");
+
                     b.Property<long>("FleetId")
                         .HasColumnType("bigint")
                         .HasColumnName("fleet_id");
+
+                    b.Property<string>("PauseCode")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("pause_code");
 
                     b.Property<string>("PlayerId")
                         .IsRequired()
@@ -795,6 +936,16 @@ namespace Aetheris.Fleet.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_fleet_cargo_fleet_fleet_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FleetFlightEntity", b =>
+                {
+                    b.HasOne("Aetheris.Fleet.Data.Entities.FleetEntity", null)
+                        .WithMany()
+                        .HasForeignKey("FleetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_fleet_flight_fleet_fleet_id");
                 });
 
             modelBuilder.Entity("Aetheris.Fleet.Data.Entities.FleetShipEntity", b =>

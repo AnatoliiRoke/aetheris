@@ -211,7 +211,15 @@ public sealed class ShipCatalogService
                     ValueOf(part, characteristicIds, LauncherSizeCharacteristic),
                     FactsOf(part, catalog),
                     ValueOf(part, characteristicIds, UpkeepCharacteristic),
-                    part.AmmunitionIds ?? [])),
+                    part.AmmunitionIds ?? [],
+                    [
+                        .. (part.Extraction ?? []).Select(row => new ShipModuleExtractionDto(
+                            row.PlaceKind,
+                            row.Mode,
+                            row.ResourceId,
+                            row.ResourceGroupId,
+                            row.ReducesMass)),
+                    ])),
         ];
 
         // The ammunition is not a module of a ship: the constructor does not offer it, and the

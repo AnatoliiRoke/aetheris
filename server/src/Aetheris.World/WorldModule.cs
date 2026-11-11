@@ -17,6 +17,7 @@ public sealed class WorldModule : IWorldModule
     private readonly FieldService _fields;
     private readonly NebulaExtractionService _nebulae;
     private readonly WorldQueryService _queries;
+    private readonly WorldPlaceService _places;
     private readonly GenerationRunService _runs;
     private readonly DepositRichnessService _deposits;
     private readonly IGameConfig _config;
@@ -29,6 +30,7 @@ public sealed class WorldModule : IWorldModule
     /// <param name="civilizations">The civilization service.</param>
     /// <param name="fields">The field service.</param>
     /// <param name="queries">The read service.</param>
+    /// <param name="places">The places of the map for the flights.</param>
     /// <param name="runs">The generation runs of the admin panel.</param>
     /// <param name="config">The game configuration.</param>
     public WorldModule(
@@ -38,6 +40,7 @@ public sealed class WorldModule : IWorldModule
         FieldService fields,
         NebulaExtractionService nebulae,
         WorldQueryService queries,
+        WorldPlaceService places,
         GenerationRunService runs,
         DepositRichnessService deposits,
         IGameConfig config)
@@ -48,6 +51,7 @@ public sealed class WorldModule : IWorldModule
         ArgumentNullException.ThrowIfNull(fields);
         ArgumentNullException.ThrowIfNull(nebulae);
         ArgumentNullException.ThrowIfNull(queries);
+        ArgumentNullException.ThrowIfNull(places);
         ArgumentNullException.ThrowIfNull(runs);
         ArgumentNullException.ThrowIfNull(deposits);
         ArgumentNullException.ThrowIfNull(config);
@@ -58,6 +62,7 @@ public sealed class WorldModule : IWorldModule
         _fields = fields;
         _nebulae = nebulae;
         _queries = queries;
+        _places = places;
         _runs = runs;
         _deposits = deposits;
         _config = config;
@@ -132,6 +137,26 @@ public sealed class WorldModule : IWorldModule
     /// <inheritdoc />
     public Task<PlaceContentDto?> GetPlaceContentAsync(long objectId, CancellationToken cancellationToken = default) =>
         _queries.GetPlaceContentAsync(objectId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<WorldPlaceDto?> GetObjectPlaceAsync(long objectId, CancellationToken cancellationToken = default) =>
+        _places.GetObjectPlaceAsync(objectId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<WorldPlaceDto?> GetPlanetPlaceAsync(long planetId, CancellationToken cancellationToken = default) =>
+        _places.GetPlanetPlaceAsync(planetId, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<WorldPlaceDto?> GetPointPlaceAsync(int sectorId, double x, double y, double z, CancellationToken cancellationToken = default) =>
+        _places.GetPointPlaceAsync(sectorId, x, y, z, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<WorldPlaceDto?> FindExtractionPlaceAsync(double x, double y, double z, double tolerance, CancellationToken cancellationToken = default) =>
+        _places.FindExtractionPlaceAsync(x, y, z, tolerance, cancellationToken);
+
+    /// <inheritdoc />
+    public double GetTravelDistance(WorldPlaceDto from, WorldPlaceDto to) =>
+        _places.GetTravelDistance(from, to);
 
     /// <inheritdoc />
     public Task<PlanetFacts?> GetPlanetFactsAsync(long planetId, CancellationToken cancellationToken = default) =>

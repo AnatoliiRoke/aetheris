@@ -153,6 +153,13 @@ public sealed class ProductionCatalogCache
             .ThenBy(link => link.RaceId)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
+        // What the modules of extraction take is read in one query too (task 00055).
+        List<PartExtractionEntity> extractionRows = await dbContext.PartExtractions.AsNoTracking()
+            .Where(row => !row.IsArchived)
+            .OrderBy(row => row.PartTypeId)
+            .ThenBy(row => row.Id)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
         List<RecipeEntity> recipes = await dbContext.Recipes.AsNoTracking()
             .Include(recipe => recipe.IngredientIds)
             .OrderBy(recipe => recipe.SortOrder)
@@ -233,6 +240,20 @@ public sealed class ProductionCatalogCache
                     part => part.Key,
                     part => (IReadOnlyList<int>)[.. part.Select(link => link.RaceId)]);
 
+        Dictionary<int, IReadOnlyList<PartExtractionInfo>> extractionInfos =
+            extractionRows
+                .GroupBy(row => row.PartTypeId)
+                .ToDictionary(
+                    part => part.Key,
+                    part => (IReadOnlyList<PartExtractionInfo>)[
+                        .. part.Select(row => new PartExtractionInfo(
+                            row.PlaceKind,
+                            row.Mode,
+                            row.ResourceId,
+                            row.ResourceGroupId,
+                            row.ReducesMass))
+                    ]);
+
         return new ProductionCatalog(
             [
                 .. groups.Select(group => new PartGroupInfo(
@@ -269,7 +290,8 @@ public sealed class ProductionCatalogCache
                     partCharacteristicInfos.GetValueOrDefault(part.Id, new Dictionary<int, PartCharacteristicInfo>()),
                     compatibleHullIds.GetValueOrDefault(part.Id, []),
                     raceIds.GetValueOrDefault(part.Id, []),
-                    ammunitionIds.GetValueOrDefault(part.Id, []))),
+                    ammunitionIds.GetValueOrDefault(part.Id, []),
+                    extractionInfos.GetValueOrDefault(part.Id, []))),
             ],
             [
                 .. recipes.Select(recipe => new RecipeInfo(

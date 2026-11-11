@@ -120,6 +120,9 @@ public static class ProductionSeedAdditions
         added |= await AddMissingPartDetailsAsync(dbContext, data, partIds, characteristicIds, cancellationToken).ConfigureAwait(false);
         added |= await AddMissingGroupCharacteristicsAsync(dbContext, data, groupIds, characteristicIds, cancellationToken).ConfigureAwait(false);
 
+        // What the modules of extraction take and where joined the starting data later (task 00055).
+        added |= await AddMissingExtractionsAsync(dbContext, data, resources, partIds, cancellationToken).ConfigureAwait(false);
+
         if (missingParts.Count == 0 && missingRecipes.Count == 0 && !missingLinks)
         {
             return added;
@@ -210,6 +213,12 @@ public static class ProductionSeedAdditions
         // (task 00042), so the step adds the ones that are missing and leaves the others as the
         // admin panel has them.
         added |= await AddCompatibilityLinksAsync(dbContext, data, partIds, raceIds, cancellationToken).ConfigureAwait(false);
+
+        // A module that was added just now has its rows too; the step is the same and adds only what is missing.
+        if (newParts.Count > 0)
+        {
+            added |= await AddMissingExtractionsAsync(dbContext, data, resources, partIds, cancellationToken).ConfigureAwait(false);
+        }
 
         // A recipe is added when its product, its ingredients and the technologies of its gates
         // are all in the database; a recipe without its gate would be free, so it waits instead.
@@ -839,6 +848,82 @@ public static class ProductionSeedAdditions
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return true;
+    }
+
+    /// <summary>
+    /// Adds what the modules of extraction take and where, for the rows of the starting data that are
+    /// missing (task 00055).
+    /// </summary>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="data">The starting data.</param>
+    /// <param name="resources">The resource catalog of the world.</param>
+    /// <param name="partIds">The identifiers of the parts of the database, by the codes of the file.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when a row was added.</returns>
+    /// <remarks>
+    /// The step only adds: a row whose module, kind of place, way, resource and group are already there
+    /// is not touched, so a change of the admin panel stays. A row whose module, resource or group is not
+    /// in the database waits for a later start.
+    /// </remarks>
+    private static async Task<bool> AddMissingExtractionsAsync(
+        ProductionDbContext dbContext,
+        ProductionSeedData data,
+        ResourceCatalog resources,
+        IReadOnlyDictionary<string, int> partIds,
+        CancellationToken cancellationToken)
+    {
+        if (data.PartExtractions is not { Count: > 0 } wanted)
+        {
+            return false;
+        }
+
+        Dictionary<string, int> resourceIds = resources.Resources.ToDictionary(resource => resource.Code, resource => resource.Id);
+        Dictionary<string, int> resourceGroupIds = resources.Groups.ToDictionary(group => group.Code, group => group.Id);
+
+        // The rows that are there, in one query, so the table is not walked row by row.
+        HashSet<(int PartTypeId, string PlaceKind, string Mode, int? ResourceId, int? ResourceGroupId)> existing =
+        [
+            .. (await dbContext.PartExtractions.AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false))
+                .Select(row => (row.PartTypeId, row.PlaceKind, row.Mode, row.ResourceId, row.ResourceGroupId)),
+        ];
+
+        bool added = false;
+
+        foreach (SeedPartExtraction row in wanted)
+        {
+            if (!partIds.TryGetValue(row.Part, out int partId)
+                || (row.Resource is not null && !resourceIds.ContainsKey(row.Resource))
+                || (row.ResourceGroup is not null && !resourceGroupIds.ContainsKey(row.ResourceGroup)))
+            {
+                continue;
+            }
+
+            int? resourceId = row.Resource is null ? null : resourceIds[row.Resource];
+            int? resourceGroupId = row.ResourceGroup is null ? null : resourceGroupIds[row.ResourceGroup];
+
+            if (!existing.Add((partId, row.PlaceKind, row.Mode, resourceId, resourceGroupId)))
+            {
+                continue;
+            }
+
+            dbContext.PartExtractions.Add(new PartExtractionEntity
+            {
+                PartTypeId = partId,
+                PlaceKind = row.PlaceKind,
+                Mode = row.Mode,
+                ResourceId = resourceId,
+                ResourceGroupId = resourceGroupId,
+                ReducesMass = row.ReducesMass,
+            });
+            added = true;
+        }
+
+        if (added)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return added;
     }
 
     /// <summary>

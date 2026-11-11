@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Fleet, FleetsView, FlightPlan } from '../../api/fleetApi';
 import { useApi } from '../../api/useApi';
 import { Alert } from '../../components/Alert';
@@ -12,7 +12,9 @@ import { ScreenHead } from './ScreenHead';
 import { noticeFromError, type Notice } from './screenNotice';
 import { FleetCard } from './fleets/FleetCard';
 import { ConfirmDialog, CreateFleetDialog, ShipQuantityDialog } from './fleets/FleetDialogs';
+import type { FleetsClock } from './fleets/FleetFlightStatus';
 import { FlightPlanDialog, type FlightPlanSeed } from './fleets/FlightPlanDialog';
+import { writeFlightPlan } from './fleets/flightPlanParts';
 import { FleetPanel } from './fleets/FleetPanel';
 import { FreeShipsPanel } from './fleets/FreeShipsPanel';
 import { fleetsOn, passesState, type StateFilter } from './fleets/fleetsParts';
@@ -23,6 +25,12 @@ import { useFleetsScene } from './fleets/useFleetsScene';
  * The prefixes of the refusals of the server that have their own text for the player here.
  */
 const reasonPrefixes = ['fleet_'];
+
+/**
+ * How long the screen waits before it reads the fleets again after the time of a flight ran out: the server
+ * handles the arrival as an event of its scheduler, so the first read may come a moment too early.
+ */
+const arrivalRetryMs = 5000;
 
 /**
  * The window that is open on the screen of the fleets, if one is.
@@ -59,6 +67,7 @@ export function FleetsPage() {
   const [dialogError, setDialogError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [dialog, setDialog] = useState<Dialog | null>(null);
+  const lastArrivalRead = useRef(0);
 
   // An answer of a command is newer than the last read until a read arrives after it.
   const view: FleetsView | null = fresh && (read.receivedAt === null || fresh.at > read.receivedAt) ? fresh.view : read.data;
@@ -102,7 +111,8 @@ export function FleetsPage() {
       try {
         await command();
 
-        await plansRead.reload();
+        // A command of a plan changes the fleet too: it leaves, it stops, it waits where it is.
+        await Promise.all([plansRead.reload(), read.reload()]);
         setNotice({ kind: 'success', text: done });
         setDialogError(null);
         setDialog(null);
@@ -122,13 +132,38 @@ export function FleetsPage() {
         setBusy(false);
       }
     },
-    [dialog, language, plansRead, t],
+    [dialog, language, plansRead, read, t],
   );
 
   const openDialog = useCallback((next: Dialog | null) => {
     setDialogError(null);
     setDialog(next);
   }, []);
+
+  // The clock of the game as the answer of the server gave it, for the time left of a flight.
+  const receivedAt = fresh && (read.receivedAt === null || fresh.at > read.receivedAt) ? fresh.at : read.receivedAt;
+  const clock: FleetsClock | null =
+    view?.gameNow !== undefined && receivedAt !== null
+      ? { gameNow: view.gameNow, timeMultiplier: view.timeMultiplier ?? 1, receivedAt }
+      : null;
+
+  // Reads the fleets and the plans again: the arrival of a fleet changes both. The server handles the arrival as an
+  // event of its scheduler a moment after the time ran out, so the read is repeated once, and a flight whose time
+  // is out and that the server has not finished yet does not make the screen read in a loop.
+  const reloadAll = useCallback(() => {
+    const now = Date.now();
+
+    if (now - lastArrivalRead.current < arrivalRetryMs) {
+      return;
+    }
+
+    lastArrivalRead.current = now;
+
+    const again = () => void Promise.all([read.reload(), plansRead.reload()]);
+
+    again();
+    window.setTimeout(again, arrivalRetryMs);
+  }, [plansRead, read]);
 
   if (read.failed && !view) {
     return (
@@ -150,6 +185,8 @@ export function FleetsPage() {
     <FleetsSceneProvider view={view}>
       <FleetsContent
         busy={busy}
+        clock={clock}
+        onReload={reloadAll}
         dialog={dialog}
         dialogError={dialogError}
         notice={notice}
@@ -168,6 +205,8 @@ export function FleetsPage() {
  *
  * @param view The fleets of the player.
  * @param plans The flight plans of the player.
+ * @param clock The clock of the game as the screen read it.
+ * @param onReload Reads the fleets and the plans again.
  * @param busy Whether a command is under way.
  * @param dialog The window that is open, or `null`.
  * @param dialogError The refusal shown in the window, or `null`.
@@ -179,6 +218,8 @@ export function FleetsPage() {
 function FleetsContent({
   view,
   plans,
+  clock,
+  onReload,
   busy,
   dialog,
   dialogError,
@@ -189,6 +230,8 @@ function FleetsContent({
 }: {
   view: FleetsView;
   plans: readonly FlightPlan[];
+  clock: FleetsClock | null;
+  onReload: () => void;
   busy: boolean;
   dialog: Dialog | null;
   dialogError: string | null;
@@ -211,7 +254,7 @@ function FleetsContent({
     return view.fleets.filter(
       (fleet) =>
         (planetFilter === null || fleet.homePlanetId === planetFilter) &&
-        passesState(stateFilter, view.hasCredits) &&
+        passesState(stateFilter, view.hasCredits, fleet) &&
         (needle === '' || fleet.name.toLocaleLowerCase(language).includes(needle)),
     );
   }, [language, planetFilter, query, stateFilter, view]);
@@ -298,7 +341,7 @@ function FleetsContent({
                   <button aria-pressed={stateFilter === 'ready'} className="fl-filter" onClick={() => setStateFilter('ready')} type="button">
                     {t('fleets.stateReadyFilter')}
                   </button>
-                  <button className="fl-filter" disabled title={t('fleets.ordersSoon')} type="button">
+                  <button aria-pressed={stateFilter === 'flying'} className="fl-filter" onClick={() => setStateFilter('flying')} type="button">
                     {t('fleets.stateInFlightFilter')}
                   </button>
                   <button aria-pressed={stateFilter === 'noCredits'} className="fl-filter" onClick={() => setStateFilter('noCredits')} type="button">
@@ -365,6 +408,9 @@ function FleetsContent({
                 onPlanDelete={() => onDialog({ kind: 'planDelete', fleetId: selected.id })}
                 onPlanEdit={() => onDialog({ kind: 'plan', fleetId: selected.id, seed: null })}
                 onPlanStop={() => void onPlan(() => fleetApi.stopFlightPlan(selected.id), t('plan.stopped'))}
+                onPlanExecute={() => void onPlan(() => fleetApi.executeFlightPlan(selected.id), t('plan.started'))}
+                clock={clock}
+                onArrived={onReload}
               />
             ) : null}
           </div>
@@ -450,13 +496,15 @@ function FleetsContent({
           error={dialogError}
           fleets={view.fleets}
           onClose={() => onDialog(null)}
-          onExecute={(_fleetId, _orders) => void onPlan(() => fleetApi.executeFlightPlan(_fleetId), t('plan.saved'))}
-          onSave={(fleetId, orders) =>
-            void onPlan(
-              () => (planOfDialog ? fleetApi.saveFlightPlan({ fleetId, orders }) : fleetApi.createFlightPlan({ fleetId, orders })),
-              t('plan.saved'),
-            )
+          onExecute={(fleetId, orders) =>
+            void onPlan(async () => {
+              // The orders of the window are written first, and the plan that was written is carried out.
+              await writeFlightPlan(fleetApi, fleetId, orders);
+
+              return fleetApi.executeFlightPlan(fleetId);
+            }, t('plan.started'))
           }
+          onSave={(fleetId, orders) => void onPlan(() => writeFlightPlan(fleetApi, fleetId, orders), t('plan.saved'))}
           plan={planOfDialog}
           seed={planDialog.seed}
           sectorId={sectorId}

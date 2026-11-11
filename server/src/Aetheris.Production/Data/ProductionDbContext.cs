@@ -74,6 +74,9 @@ public sealed class ProductionDbContext : DbContext
     /// <summary>Gets the links of the parts to the races they belong to (task 00042).</summary>
     public DbSet<PartRaceCompatibilityEntity> PartRaceCompatibilities => Set<PartRaceCompatibilityEntity>();
 
+    /// <summary>Gets what every module of extraction takes and where (task 00055).</summary>
+    public DbSet<PartExtractionEntity> PartExtractions => Set<PartExtractionEntity>();
+
     /// <summary>Gets the recipes.</summary>
     public DbSet<RecipeEntity> Recipes => Set<RecipeEntity>();
 
@@ -211,6 +214,22 @@ public sealed class ProductionDbContext : DbContext
             // The races live in the world module, so this module keeps their identifiers and
             // reads them through its contract, and the table carries no foreign key into the
             // tables of the other modules (the remark of the class).
+        });
+
+        modelBuilder.Entity<PartExtractionEntity>(entity =>
+        {
+            entity.ToTable("part_extraction");
+            entity.Property(e => e.PlaceKind).HasMaxLength(CodeLength);
+            entity.Property(e => e.Mode).HasMaxLength(CodeLength);
+            entity.HasIndex(e => e.PartTypeId);
+            entity.HasIndex(e => e.ResourceId);
+            entity.HasIndex(e => e.ResourceGroupId);
+            entity.HasOne<PartTypeEntity>().WithMany(part => part.ExtractionIds).HasForeignKey(e => e.PartTypeId).OnDelete(DeleteBehavior.Cascade);
+
+            // The resource and the group of the resources live in the world module, so the table keeps
+            // their identifiers and carries no foreign key into the tables of the other modules (the
+            // remark of the class). A row names a resource or a group, never both.
+            entity.ToTable(table => table.HasCheckConstraint("ck_part_extraction_target", "NOT (resource_id IS NOT NULL AND resource_group_id IS NOT NULL)"));
         });
 
         modelBuilder.Entity<RecipeEntity>(entity =>

@@ -138,6 +138,18 @@ public static class FleetErrorCodes
     /// <summary>The order of the plan names a target that does not exist (task 00050).</summary>
     public const string FlightOrderTargetUnknown = "fleet_flight_order_target_unknown";
 
-    /// <summary>The estimate of the extraction names no fleet or no place (task 00050).</summary>
-    public const string ExtractionTargetUnknown = "fleet_extraction_target_unknown";
+    /// <summary>The fleet does not stand at a body of the player, or its plan is under way, so its ships are not changed (task 00053).</summary>
+    public const string FleetAway = "fleet_fleet_away";
+
+    /// <summary>The plan has no orders, so there is nothing to carry out (task 00053).</summary>
+    public const string FlightPlanEmpty = "fleet_flight_plan_empty";
+
+    /// <summary>The plan has an order that the fleet cannot carry out yet (task 00053).</summary>
+    public const string FlightOrderNotSupported = "fleet_flight_order_not_supported";
+
+    /// <summary>The target of a flight is not a place of the map any more, or lies outside its sector (task 00053).</summary>
+    public const string FlightTargetUnknown = "fleet_flight_target_unknown";
+
+    /// <summary>No ship of the fleet has a drive, so the fleet does not fly (task 00053).</summary>
+    public const string FlightNoDrive = "fleet_flight_no_drive";
 }

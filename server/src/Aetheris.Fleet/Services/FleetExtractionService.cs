@@ -8,110 +8,49 @@ using Microsoft.EntityFrameworkCore;
 namespace Aetheris.Fleet.Services;
 
 /// <summary>
-/// The extraction of a fleet (task 00050).
+/// The extraction of a fleet (task 00050, task 00055).
 /// </summary>
 /// <remarks>
 /// <para>
-/// A fleet extracts with the modules of its ships. The modules of the group of extraction are of
-/// five kinds, and every kind takes from its own place:
+/// A fleet extracts with the modules of its ships. What a module takes and where it takes it is data
+/// of the production, not a code of the fleet: a module of extraction has rows that name the kind of
+/// the place (the class of the object of the map), the way it takes and, for some ways, the resource or
+/// the group of the resources (task 00055). The fleet reads the rows through the catalog of the ships and
+/// knows no module, no resource and no group of them. The ways are:
 /// </para>
 /// <list type="bullet">
-/// <item>the drill rig takes from an asteroid field by the shares of the composition of the field;</item>
-/// <item>the crystal extractor takes only the crystals of the field, and its yield is split evenly
-/// between them;</item>
-/// <item>the helium extractor takes from a gas giant, which has no shares;</item>
-/// <item>the ether extractor and the matter extractor take from a nebula by the shares of the
-/// composition of the nebula.</item>
+/// <item>every resource of the composition of the place by its share (the drill rig of an asteroid
+/// field, which also takes the mass it processes from the field);</item>
+/// <item>a named resource: the yield of the period times its share in the composition, or the whole
+/// yield at a place that has no composition (a gas giant);</item>
+/// <item>the resources of a named group that the place holds, the yield split evenly between them.</item>
 /// </list>
 /// <para>
-/// The yield of the characteristic of a module is the amount of an hour and a cycle lasts a quarter
-/// of an hour, so a cycle takes a fourth of it. Several modules of the same kind multiply the yield
-/// of the cycle.
+/// The yield of the characteristic of a module is the amount of an hour, and a cycle takes the part
+/// of it that fits into the length of the cycle (the length comes from the configuration, task
+/// 00053). Several modules of the same kind multiply the yield of the cycle.
 /// </para>
 /// </remarks>
 public sealed class FleetExtractionService
 {
     /// <summary>
-    /// The group of the modules of extraction (task 00050).
+    /// The seconds of an hour: the yield of a module is an amount of an hour, and a cycle takes the
+    /// part of it that fits into the length of the cycle (task 00053).
     /// </summary>
-    public const string ExtractionGroupCode = "pg_8";
+    public const int SecondsPerHour = 3600;
 
     /// <summary>
-    /// The module that takes from an asteroid field.
+    /// The modules of a ship that take from a place (task 00050, task 00055).
     /// </summary>
-    public const string DrillRigCode = "part_m_54";
-
-    /// <summary>
-    /// The module that takes only the crystals of a field.
-    /// </summary>
-    public const string CrystalExtractorCode = "part_m_55";
-
-    /// <summary>
-    /// The module that takes the helium of a gas giant.
-    /// </summary>
-    public const string HeliumExtractorCode = "part_m_53";
-
-    /// <summary>
-    /// The module that takes the ether of a nebula.
-    /// </summary>
-    public const string EtherExtractorCode = "part_m_56";
-
-    /// <summary>
-    /// The module that takes the matter of a nebula.
-    /// </summary>
-    public const string MatterExtractorCode = "part_m_57";
-
-    /// <summary>
-    /// The number of cycles of an hour: the yield of a module is an amount of an hour.
-    /// </summary>
-    public const int CyclesPerHour = 4;
-
-    /// <summary>
-    /// The kinds of a place a fleet takes from (task 00050).
-    /// </summary>
-    public enum ExtractionSource
-    {
-        /// <summary>An asteroid field with a composition.</summary>
-        Field,
-
-        /// <summary>A gas giant without a composition.</summary>
-        GasGiant,
-
-        /// <summary>A nebula with a composition.</summary>
-        Nebula,
-    }
-
-    /// <summary>
-    /// The modules of a ship that take from a place (task 00050).
-    /// </summary>
-    /// <param name="Code">The code of the module.</param>
+    /// <param name="PartTypeId">The module of the catalog.</param>
     /// <param name="YieldPerHour">The yield of the module per hour, in tonnes.</param>
-    /// <param name="Count">How many such modules the ship has.</param>
-    public sealed record ExtractionModules(string Code, decimal YieldPerHour, int Count);
-
-    /// <summary>
-    /// What the extraction of a fleet at a place will take (task 00050).
-    /// </summary>
-    /// <remarks>
-    /// The three times answer three different questions: how long the player asked the fleet to
-    /// work, how long the holds of the fleet will hold the yield, and how long the place itself
-    /// will last.
-    /// </remarks>
-    /// <param name="CycleSeconds">The length of a cycle of extraction, in game seconds.</param>
-    /// <param name="ResourceTonsPerCycle">The yield of the fleet in one cycle, in tonnes.</param>
-    /// <param name="ProcessedTonsPerCycle">The mass the fleet takes from the place in one cycle, in tonnes.</param>
-    /// <param name="FreeHoldTons">The room that is left in the holds of the fleet, in tonnes.</param>
-    /// <param name="PlaceMassTons">The mass that is left in the place, in tonnes.</param>
-    /// <param name="HoldFullSeconds">How long the holds of the fleet will hold the yield, in game seconds.</param>
-    /// <param name="PlaceEmptySeconds">How long the place will last, in game seconds.</param>
-    public sealed record ExtractionEstimate(
-        int CycleSeconds,
-        long ResourceTonsPerCycle,
-        long ProcessedTonsPerCycle,
-        long FreeHoldTons,
-        long PlaceMassTons,
-        long HoldFullSeconds,
-        long PlaceEmptySeconds);
+    /// <param name="Count">How many such modules the fleet has.</param>
+    /// <param name="Rules">What the module takes and where, from the catalog of the ships.</param>
+    public sealed record ExtractionModules(
+        int PartTypeId,
+        decimal YieldPerHour,
+        int Count,
+        IReadOnlyList<ShipModuleExtractionDto> Rules);
 
     private readonly FleetDbContext _dbContext;
     private readonly IProductionModule _production;
@@ -131,7 +70,8 @@ public sealed class FleetExtractionService
     }
 
     /// <summary>
-    /// The modules of extraction of the ships of a fleet, by the code of the module.
+    /// The modules of extraction of the ships of a fleet, by the module of the catalog (task 00055): a
+    /// module is of extraction when the catalog gives it rows of what it takes.
     /// </summary>
     /// <param name="fleetId">The fleet.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
@@ -159,102 +99,188 @@ public sealed class FleetExtractionService
 
         ShipCatalogDto catalog = await _production.GetShipCatalogAsync(cancellationToken).ConfigureAwait(false);
         Dictionary<int, ShipModuleDto> byType = catalog.Modules.ToDictionary(module => module.Id);
-        Dictionary<string, (decimal Yield, int Count)> byCode = new(StringComparer.Ordinal);
+        Dictionary<int, (ShipModuleDto Module, int Count)> byPart = [];
 
         foreach (ShipModuleEntity module in modules)
         {
-            if (!byType.TryGetValue(module.PartTypeId, out ShipModuleDto? known) || known.PartGroupCode != ExtractionGroupCode)
+            // A destroyed module does not work (the battles of a later stage set the condition).
+            if (module.IsHull
+                || module.ConditionCode == ShipModuleConditions.Destroyed
+                || !byType.TryGetValue(module.PartTypeId, out ShipModuleDto? known)
+                || known.Extraction is not { Count: > 0 })
             {
                 continue;
             }
 
-            decimal yield = known.Facts?
-                .Where(fact => fact.Kind == CharacteristicKinds.Yield)
-                .Select(fact => fact.Amount)
-                .FirstOrDefault() ?? 0m;
-
-            (decimal Yield, int Count) current = byCode.GetValueOrDefault(known.Code);
-            byCode[known.Code] = (current.Yield, current.Count + 1);
+            // A stack of modules counts as many modules as it holds parts.
+            (ShipModuleDto Module, int Count) current = byPart.GetValueOrDefault(known.Id);
+            byPart[known.Id] = (known, current.Count + (int)Math.Min(int.MaxValue, Math.Max(0L, module.Quantity)));
         }
 
         return
         [
-            .. byCode
-                .Select(entry => new ExtractionModules(entry.Key, entry.Value.Yield, entry.Value.Count))
-                .OrderBy(entry => entry.Code, StringComparer.Ordinal),
+            .. byPart
+                .OrderBy(entry => entry.Value.Module.Code, StringComparer.Ordinal)
+                .Select(entry => new ExtractionModules(
+                    entry.Key,
+                    entry.Value.Module.Facts?
+                        .Where(fact => fact.Kind == CharacteristicKinds.Yield)
+                        .Select(fact => fact.Amount)
+                        .FirstOrDefault() ?? 0m,
+                    entry.Value.Count,
+                    entry.Value.Module.Extraction!)),
         ];
     }
 
     /// <summary>
-    /// The mass that the modules of a fleet take from a place in one cycle (task 00050).
+    /// The amount a number of modules of one kind gives in a period (task 00053): the yield of an hour
+    /// times the number of modules and the part of the hour the period takes, rounded down.
     /// </summary>
-    /// <remarks>
-    /// Only the drill rig and the extractors of a nebula take the mass of the place. The crystal
-    /// extractor and the helium extractor take the yield out of what the place holds without
-    /// emptying it, so they do not shorten the life of the place: a gas giant has no mass at all.
-    /// </remarks>
-    /// <param name="modules">The modules of the fleet.</param>
-    /// <param name="source">The kind of the place.</param>
-    /// <returns>The mass of the cycle, in tonnes.</returns>
-    public static long CycleMass(IReadOnlyList<ExtractionModules> modules, ExtractionSource source)
+    /// <param name="yieldPerHour">The yield of one module per hour, in tonnes.</param>
+    /// <param name="count">How many such modules the fleet has.</param>
+    /// <param name="periodSeconds">The length of the period, in game seconds.</param>
+    /// <returns>The amount, in whole tonnes.</returns>
+    public static long YieldOfPeriod(decimal yieldPerHour, int count, int periodSeconds)
     {
-        ArgumentNullException.ThrowIfNull(modules);
-
-        long mass = 0;
-
-        foreach (ExtractionModules module in modules)
+        if (yieldPerHour <= 0m || count <= 0 || periodSeconds <= 0)
         {
-            bool takes = source switch
-            {
-                ExtractionSource.Field => module.Code == DrillRigCode,
-                ExtractionSource.GasGiant => false,
-                ExtractionSource.Nebula => module.Code is EtherExtractorCode or MatterExtractorCode,
-                _ => false,
-            };
-
-            if (takes)
-            {
-                mass += (long)(module.YieldPerHour / CyclesPerHour) * module.Count;
-            }
+            return 0;
         }
 
-        return mass;
+        return (long)decimal.Floor(yieldPerHour * count * periodSeconds / SecondsPerHour);
     }
 
     /// <summary>
-    /// The crystals that the crystal extractor takes from a field, split evenly between them
-    /// (task 00050).
+    /// The mass that the modules of a fleet process at a place in a period (task 00050, task 00055).
     /// </summary>
+    /// <remarks>
+    /// Only a module whose row says that it takes the mass processes a mass of the place, and the mass
+    /// is taken away from the place; the other modules take their yield by the rules of their rows and
+    /// do not touch the mass. A gas giant and a nebula have no mass at all.
+    /// </remarks>
     /// <param name="modules">The modules of the fleet.</param>
-    /// <param name="groupResources">The resources of the group of the crystals among the shares of the field.</param>
-    /// <returns>The amount of every crystal.</returns>
-    public static IReadOnlyList<ResourceAmount> CrystalCycle(IReadOnlyList<ExtractionModules> modules, IReadOnlyList<int> groupResources)
+    /// <param name="placeKind">The kind of the place, the class of its object.</param>
+    /// <param name="periodSeconds">The length of the period, in game seconds.</param>
+    /// <returns>The mass of the period, in tonnes.</returns>
+    public static long CycleMass(IReadOnlyList<ExtractionModules> modules, string placeKind, int periodSeconds)
     {
         ArgumentNullException.ThrowIfNull(modules);
-        ArgumentNullException.ThrowIfNull(groupResources);
+        ArgumentNullException.ThrowIfNull(placeKind);
+
+        return modules
+            .Where(module => module.Rules.Any(rule => IsMassRule(rule, placeKind)))
+            .Sum(module => YieldOfPeriod(module.YieldPerHour, module.Count, periodSeconds));
+    }
+
+    /// <summary>
+    /// Tells whether the modules of a fleet take anything from a kind of place (task 00053, task 00055).
+    /// </summary>
+    /// <param name="modules">The modules of the fleet.</param>
+    /// <param name="placeKind">The kind of the place, the class of its object.</param>
+    /// <returns><see langword="true"/> when at least one module has a row for such a place.</returns>
+    public static bool CanExtract(IReadOnlyList<ExtractionModules> modules, string placeKind)
+    {
+        ArgumentNullException.ThrowIfNull(modules);
+        ArgumentNullException.ThrowIfNull(placeKind);
+
+        return modules.Any(module => module.Rules.Any(rule => rule.PlaceKind == placeKind));
+    }
+
+    /// <summary>
+    /// The kinds of the places the modules of a fleet take from (task 00055).
+    /// </summary>
+    /// <param name="modules">The modules of the fleet.</param>
+    /// <returns>The kinds of the places, the classes of their objects.</returns>
+    public static IReadOnlySet<string> PlaceKinds(IReadOnlyList<ExtractionModules> modules)
+    {
+        ArgumentNullException.ThrowIfNull(modules);
+
+        return modules
+            .SelectMany(module => module.Rules)
+            .Select(rule => rule.PlaceKind)
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    /// The resources the modules of a fleet take from a place in a period, by the rows of the modules
+    /// (task 00055), without the mass the drilling processes: that part is taken from the place by the
+    /// world and comes back as the yield of the mass.
+    /// </summary>
+    /// <remarks>
+    /// Every module gives the yield of the period times the number of its modules, rounded down, and
+    /// every row of the module turns it into resources: the way «every resource» gives the share of every
+    /// resource of the composition, the way «named resource» the share of that resource (the whole yield
+    /// at a place that has no composition), and the way «group evenly» an even part of the yield for every
+    /// resource of the group that the place holds. The amounts of the modules that take the same resource
+    /// add up.
+    /// </remarks>
+    /// <param name="modules">The modules of the fleet.</param>
+    /// <param name="placeKind">The kind of the place, the class of its object.</param>
+    /// <param name="shares">The shares of the composition of the place, or <see langword="null"/> when the place has no composition.</param>
+    /// <param name="groupResourceIds">The resources of every group of resources the rows name, by the group.</param>
+    /// <param name="periodSeconds">The length of the period, in game seconds.</param>
+    /// <returns>The amount of every resource the modules take.</returns>
+    public static IReadOnlyList<ResourceAmount> RuleYields(
+        IReadOnlyList<ExtractionModules> modules,
+        string placeKind,
+        IReadOnlyList<CompositionDto>? shares,
+        IReadOnlyDictionary<int, IReadOnlyList<int>> groupResourceIds,
+        int periodSeconds)
+    {
+        ArgumentNullException.ThrowIfNull(modules);
+        ArgumentNullException.ThrowIfNull(placeKind);
+        ArgumentNullException.ThrowIfNull(groupResourceIds);
 
         List<ResourceAmount> yields = [];
 
         foreach (ExtractionModules module in modules)
         {
-            if (module.Code != CrystalExtractorCode || groupResources.Count == 0)
+            long amount = YieldOfPeriod(module.YieldPerHour, module.Count, periodSeconds);
+
+            if (amount <= 0)
             {
                 continue;
             }
 
-            // The yield of the module is an amount of an hour; a cycle takes a fourth of it, and the
-            // crystals of the field share it evenly.
-            long amount = (long)(module.YieldPerHour / CyclesPerHour) * module.Count;
-            long each = amount / groupResources.Count;
-
-            if (each <= 0)
+            foreach (ShipModuleExtractionDto rule in module.Rules.Where(rule => rule.PlaceKind == placeKind && !IsMassRule(rule, placeKind)))
             {
-                continue;
-            }
+                switch (rule.Mode)
+                {
+                    case ExtractionModes.AllShares when shares is not null:
+                        foreach (CompositionDto share in shares)
+                        {
+                            Add(yields, share.ResourceId, (long)decimal.Floor(amount * share.Coefficient));
+                        }
 
-            foreach (int resource in groupResources)
-            {
-                yields.Add(new ResourceAmount(resource, each));
+                        break;
+
+                    case ExtractionModes.Listed when rule.ResourceId is { } resourceId:
+                        // A place without a composition gives the whole yield; a place with one gives the
+                        // share of the resource, which is nothing when the place does not hold it.
+                        Add(
+                            yields,
+                            resourceId,
+                            shares is null
+                                ? amount
+                                : (long)decimal.Floor(amount * shares.Where(entry => entry.ResourceId == resourceId).Sum(entry => entry.Coefficient)));
+                        break;
+
+                    case ExtractionModes.GroupEven when rule.ResourceGroupId is { } groupId && shares is not null:
+                        HashSet<int> members = [.. groupResourceIds.GetValueOrDefault(groupId, [])];
+                        int[] held = [.. shares.Select(entry => entry.ResourceId).Where(members.Contains).Distinct().OrderBy(id => id)];
+
+                        if (held.Length > 0)
+                        {
+                            long each = amount / held.Length;
+
+                            foreach (int resourceInGroup in held)
+                            {
+                                Add(yields, resourceInGroup, each);
+                            }
+                        }
+
+                        break;
+                }
             }
         }
 
@@ -262,68 +288,32 @@ public sealed class FleetExtractionService
     }
 
     /// <summary>
-    /// The yield of the helium extractor of a fleet in one cycle (task 00050): a gas giant has no
-    /// shares, so the yield goes to the hold as it is.
+    /// Tells whether a row of a module is the drilling of the mass of a place: the way «every
+    /// resource», taking the mass it processes from the place (task 00055).
     /// </summary>
-    /// <param name="modules">The modules of the fleet.</param>
-    /// <param name="heliumResourceId">The resource of the helium.</param>
-    /// <returns>The amount of the helium.</returns>
-    public static ResourceAmount? HeliumCycle(IReadOnlyList<ExtractionModules> modules, int heliumResourceId)
-    {
-        ArgumentNullException.ThrowIfNull(modules);
-
-        foreach (ExtractionModules module in modules)
-        {
-            if (module.Code == HeliumExtractorCode)
-            {
-                return new ResourceAmount(heliumResourceId, (long)(module.YieldPerHour / CyclesPerHour) * module.Count);
-            }
-        }
-
-        return null;
-    }
+    private static bool IsMassRule(ShipModuleExtractionDto rule, string placeKind) =>
+        rule.PlaceKind == placeKind && rule.Mode == ExtractionModes.AllShares && rule.ReducesMass;
 
     /// <summary>
-    /// The yield of the whole fleet in one cycle, in tonnes (task 00050).
+    /// Adds an amount to the yield of a resource, keeping the order of the first appearance; a zero
+    /// amount is left out.
     /// </summary>
-    /// <remarks>
-    /// The drill rig and the extractors of a nebula take a part of the mass of the place, and the
-    /// crystal extractor adds the crystals of the field on top of it. The shares of the place are
-    /// not counted here: they are counted when the cycle runs, and the estimate must not lie about
-    /// the amount that goes to the hold.
-    /// </remarks>
-    /// <param name="modules">The modules of the fleet.</param>
-    /// <returns>The yield of one cycle, in tonnes.</returns>
-    public static long ResourceCycleTons(IReadOnlyList<ExtractionModules> modules)
+    private static void Add(List<ResourceAmount> yields, int resourceId, long amount)
     {
-        ArgumentNullException.ThrowIfNull(modules);
-
-        long tons = 0;
-
-        foreach (ExtractionModules module in modules)
+        if (amount <= 0)
         {
-            tons += (long)(module.YieldPerHour / CyclesPerHour) * module.Count;
+            return;
         }
 
-        return tons;
-    }
+        int index = yields.FindIndex(entry => entry.ResourceId == resourceId);
 
-    /// <summary>
-    /// Counts how long a thing lasts, in game seconds (task 00050).
-    /// </summary>
-    /// <param name="total">The whole amount that is spent or gathered.</param>
-    /// <param name="perCycle">The amount that is spent or gathered in one cycle.</param>
-    /// <param name="cycleSeconds">The length of a cycle, in game seconds.</param>
-    /// <returns>The time in seconds, or zero when nothing is spent or gathered.</returns>
-    public static long SecondsOfCycles(long total, long perCycle, int cycleSeconds)
-    {
-        if (total <= 0 || perCycle <= 0)
+        if (index < 0)
         {
-            return 0;
+            yields.Add(new ResourceAmount(resourceId, amount));
         }
-
-        long cycles = (long)Math.Ceiling((double)total / perCycle);
-
-        return cycles * cycleSeconds;
+        else
+        {
+            yields[index] = new ResourceAmount(resourceId, yields[index].Amount + amount);
+        }
     }
 }

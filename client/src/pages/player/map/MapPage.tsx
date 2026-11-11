@@ -15,6 +15,7 @@ import { useTexts } from '../../../texts/useTexts';
 import { ScreenHead } from '../ScreenHead';
 import { formatCoefficient, formatDuration } from '../planetText';
 import { FlightPlanDialog, type FlightPlanSeed } from '../fleets/FlightPlanDialog';
+import { writeFlightPlan } from '../fleets/flightPlanParts';
 import { noticeFromError } from '../screenNotice';
 import { usePlanet } from '../usePlanet';
 import { useResourceGroups } from '../useResourceGroups';
@@ -630,8 +631,15 @@ export function MapPage() {
           error={planError}
           fleets={fleets.fleets}
           onClose={() => setPlanOpen(false)}
-          onExecute={(_fleetId, _orders) => void writePlan(() => fleetApi.executeFlightPlan(_fleetId), t('plan.saved'))}
-          onSave={(fleetId, orders) => void writePlan(() => fleetApi.createFlightPlan({ fleetId, orders }), t('plan.saved'))}
+          onExecute={(fleetId, orders) =>
+            void writePlan(async () => {
+              // The orders of the window are written first, and the plan that was written is carried out.
+              await writeFlightPlan(fleetApi, fleetId, orders);
+
+              return fleetApi.executeFlightPlan(fleetId);
+            }, t('plan.started'))
+          }
+          onSave={(fleetId, orders) => void writePlan(() => writeFlightPlan(fleetApi, fleetId, orders), t('plan.saved'))}
           plan={null}
           seed={planSeed}
           sectorId={sector?.sectorId ?? location.sectorId}

@@ -326,7 +326,24 @@ public static class ProductionReferenceSeed
             }
         }
 
-        if (data.PartHulls is { Count: > 0 } || data.PartRaces is { Count: > 0 } || data.PartAmmunition is { Count: > 0 })
+        // What the modules of extraction take and where (task 00055): the resource and the group of the
+        // resources are named by the codes of the starting data of the world.
+        Dictionary<string, int> resourceGroupIds = resources.Groups.ToDictionary(group => group.Code, group => group.Id);
+
+        foreach (SeedPartExtraction row in data.PartExtractions ?? [])
+        {
+            dbContext.PartExtractions.Add(new PartExtractionEntity
+            {
+                PartTypeId = partTypeIds[row.Part],
+                PlaceKind = row.PlaceKind,
+                Mode = row.Mode,
+                ResourceId = row.Resource is null ? null : resourceIds[row.Resource],
+                ResourceGroupId = row.ResourceGroup is null ? null : resourceGroupIds[row.ResourceGroup],
+                ReducesMass = row.ReducesMass,
+            });
+        }
+
+        if (data.PartHulls is { Count: > 0 } || data.PartRaces is { Count: > 0 } || data.PartAmmunition is { Count: > 0 } || data.PartExtractions is { Count: > 0 })
         {
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -496,6 +513,7 @@ public static class ProductionReferenceSeed
 /// <param name="PartHulls">The hulls every part fits (task 00042).</param>
 /// <param name="PartRaces">The races every part belongs to (task 00042).</param>
 /// <param name="PartAmmunition">The ammunition every weapon fires (task 00040).</param>
+/// <param name="PartExtractions">What every module of extraction takes and where (task 00055).</param>
 public sealed record ProductionSeedData(
     IReadOnlyList<SeedPartGroup> PartGroups,
     IReadOnlyList<SeedPart> Parts,
@@ -505,7 +523,8 @@ public sealed record ProductionSeedData(
     IReadOnlyList<SeedGroupCharacteristic>? GroupCharacteristics = null,
     IReadOnlyList<SeedPartHull>? PartHulls = null,
     IReadOnlyList<SeedPartRace>? PartRaces = null,
-    IReadOnlyList<SeedPartAmmunition>? PartAmmunition = null);
+    IReadOnlyList<SeedPartAmmunition>? PartAmmunition = null,
+    IReadOnlyList<SeedPartExtraction>? PartExtractions = null);
 
 /// <summary>A characteristic of the starting data.</summary>
 /// <param name="Code">The neutral code of the characteristic.</param>
@@ -545,6 +564,21 @@ public sealed record SeedPartHull(
 public sealed record SeedPartAmmunition(
     string Part,
     IReadOnlyList<string> Ammunition);
+
+/// <summary>One way a module of extraction of the starting data takes from one kind of place (task 00055).</summary>
+/// <param name="Part">The code of the module of the file.</param>
+/// <param name="PlaceKind">The kind of the place the module takes from.</param>
+/// <param name="Mode">The way the module takes.</param>
+/// <param name="Resource">The code of the resource the module takes, for the way «listed».</param>
+/// <param name="ResourceGroup">The code of the group of the resources the module takes, for the way «group evenly».</param>
+/// <param name="ReducesMass">Whether the module takes the mass it processes from the place.</param>
+public sealed record SeedPartExtraction(
+    string Part,
+    string PlaceKind,
+    string Mode,
+    string? Resource = null,
+    string? ResourceGroup = null,
+    bool ReducesMass = false);
 
 /// <summary>The races a part of the starting data belongs to (task 00042).</summary>
 /// <param name="Part">The code of the part of the file.</param>

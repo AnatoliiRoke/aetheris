@@ -366,5 +366,45 @@
   "admin.reference.component.not_a_ship_module": {
     "uk": "Не модуль корабля",
     "en": "Not a ship module"
+  },
+  "admin.reference.field.extraction": {
+    "uk": "Видобування",
+    "en": "Extraction"
+  },
+  "admin.reference.field.extraction_place_kind": {
+    "uk": "Вид місця",
+    "en": "Kind of place"
+  },
+  "admin.reference.field.extraction_mode": {
+    "uk": "Спосіб",
+    "en": "Way"
+  },
+  "admin.reference.field.extraction_reduces_mass": {
+    "uk": "Зменшує масу місця",
+    "en": "Takes the mass from the place"
+  },
+  "admin.reference.extraction_place_kind.asteroid_field": {
+    "uk": "Астероїдне поле",
+    "en": "Asteroid field"
+  },
+  "admin.reference.extraction_place_kind.nebula": {
+    "uk": "Туманність",
+    "en": "Nebula"
+  },
+  "admin.reference.extraction_place_kind.gas_giant": {
+    "uk": "Газовий гігант",
+    "en": "Gas giant"
+  },
+  "admin.reference.extraction_mode.all_shares": {
+    "uk": "Усі ресурси місця за частками",
+    "en": "Every resource of the place by its share"
+  },
+  "admin.reference.extraction_mode.listed": {
+    "uk": "Названий ресурс",
+    "en": "The named resource"
+  },
+  "admin.reference.extraction_mode.group_even": {
+    "uk": "Ресурси групи порівну",
+    "en": "The resources of the group evenly"
   }
 }

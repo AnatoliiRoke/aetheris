@@ -1,11 +1,11 @@
 using System.Globalization;
 using System.Text.Json;
+using Aetheris.Core.Configuration;
+using Aetheris.Core.Errors;
 using Aetheris.Core.Scheduling;
-using Aetheris.Core.Time;
+using Aetheris.Fleet.Configuration;
 using Aetheris.Fleet.Data;
 using Aetheris.Fleet.Data.Entities;
-using Aetheris.Production;
-using Aetheris.Production.Api;
 using Aetheris.World;
 using Aetheris.World.Api;
 using Microsoft.EntityFrameworkCore;
@@ -13,18 +13,25 @@ using Microsoft.EntityFrameworkCore;
 namespace Aetheris.Fleet.Services;
 
 /// <summary>
-/// The cycle of extraction of a fleet (task 00050).
+/// The cycle of extraction of a fleet (task 00050, task 00053).
 /// </summary>
 /// <remarks>
 /// <para>
-/// A fleet with a plan under way that has an order of extraction works every quarter of an hour:
-/// the event of the cycle comes, the fleet takes what it can from the place of the order, and the
-/// yield goes to the holds of its ships. The event of the next cycle is planned right away.
+/// A fleet with a plan under way whose current order is an order of extraction works in cycles: the
+/// event of the cycle comes, the fleet takes what it can from the place of the order, and the yield
+/// goes to the holds of its ships. The length of a cycle is a parameter of the configuration (a quarter
+/// of an hour at the start); the last cycle of an order with a time is shortened to what is left of it
+/// and takes the matching part of the yield.
 /// </para>
 /// <para>
 /// The hold of a ship is the room of its hull and of its container modules. The yield goes to the
 /// ships in the order of their numbers, and what does not fit into the hold of a ship goes to the
 /// next one. What fits into none of them stays in the place: it is the empty rock of the cycle.
+/// </para>
+/// <para>
+/// The order ends when its time is up, when the holds are full or when the place has nothing left; the
+/// plan then goes on to its next order. The service changes the data only, it does not open a
+/// transaction: the caller does, together with the plan.
 /// </para>
 /// </remarks>
 public sealed class FleetExtractionCycleService
@@ -34,307 +41,322 @@ public sealed class FleetExtractionCycleService
     /// </summary>
     public const string CycleEventType = "fleet.extraction_cycle";
 
-    /// <summary>
-    /// The length of a cycle of extraction, in seconds of game time (a quarter of an hour).
-    /// </summary>
-    public const int CycleSeconds = 900;
-
-    /// <summary>
-    /// The group of the crystals (task 00050): the crystal extractor takes only these.
-    /// </summary>
-    public const string CrystalGroupCode = "resource_group_4";
-
-    /// <summary>
-    /// The code of the resource of the helium (task 00050).
-    /// </summary>
-    public const string HeliumResourceCode = "resource_13";
-
     private readonly FleetDbContext _dbContext;
-    private readonly FleetUnitOfWork _unitOfWork;
     private readonly FleetExtractionService _extraction;
-    private readonly IProductionModule _production;
+    private readonly FleetHoldService _holds;
     private readonly IWorldModule _world;
     private readonly IEventScheduler _scheduler;
-    private readonly IGameClock _clock;
+    private readonly IGameConfig _config;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FleetExtractionCycleService"/> class.
     /// </summary>
     /// <param name="dbContext">The fleet context.</param>
-    /// <param name="unitOfWork">The transaction of the request.</param>
     /// <param name="extraction">The rules of the extraction.</param>
-    /// <param name="production">The catalog of the modules.</param>
+    /// <param name="holds">The holds of the ships of the fleets.</param>
     /// <param name="world">The world module.</param>
     /// <param name="scheduler">The event scheduler.</param>
-    /// <param name="clock">The game clock.</param>
+    /// <param name="config">The game configuration.</param>
     public FleetExtractionCycleService(
         FleetDbContext dbContext,
-        FleetUnitOfWork unitOfWork,
         FleetExtractionService extraction,
-        IProductionModule production,
+        FleetHoldService holds,
         IWorldModule world,
         IEventScheduler scheduler,
-        IGameClock clock)
+        IGameConfig config)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
-        ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(extraction);
-        ArgumentNullException.ThrowIfNull(production);
+        ArgumentNullException.ThrowIfNull(holds);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(scheduler);
-        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(config);
 
         _dbContext = dbContext;
-        _unitOfWork = unitOfWork;
         _extraction = extraction;
-        _production = production;
+        _holds = holds;
         _world = world;
         _scheduler = scheduler;
-        _clock = clock;
+        _config = config;
     }
 
     /// <summary>
-    /// The body of the event of a cycle (task 00050).
+    /// The body of the event of a cycle (task 00050, task 00053).
     /// </summary>
     /// <param name="FleetId">The fleet that works.</param>
     /// <param name="OrderId">The order of extraction.</param>
-    public sealed record CyclePayload(long FleetId, long OrderId);
+    /// <param name="PlanVersion">The version of the plan when the cycle was planned: an event of a plan that was stopped and started again is not the event of the new run.</param>
+    /// <param name="PeriodSeconds">How long the cycle lasts, in game seconds.</param>
+    public sealed record CyclePayload(long FleetId, long OrderId, int PlanVersion, int PeriodSeconds);
 
     /// <summary>
-    /// Plans the first cycle of the extraction of a fleet (task 00050).
+    /// What a cycle ended with.
+    /// </summary>
+    public enum CycleResult
+    {
+        /// <summary>The event does not belong to the plan that is under way: nothing was done.</summary>
+        Ignored,
+
+        /// <summary>The cycle was done and the order goes on.</summary>
+        Continue,
+
+        /// <summary>The cycle was done and the order is over: the plan goes to its next order.</summary>
+        Finished,
+    }
+
+    /// <summary>
+    /// The outcome of a cycle.
+    /// </summary>
+    /// <param name="Result">What the cycle ended with.</param>
+    /// <param name="NextPeriodSeconds">The length of the next cycle, when the order goes on.</param>
+    public sealed record CycleOutcome(CycleResult Result, int NextPeriodSeconds);
+
+    /// <summary>
+    /// Gets the length of a cycle of extraction, in game seconds.
+    /// </summary>
+    /// <returns>The length of a cycle.</returns>
+    public int CycleSeconds() => FleetSettings.From(_config).ExtractionCycleSeconds;
+
+    /// <summary>
+    /// Counts the length of the next cycle of an order: a full cycle, or what is left of the time of
+    /// the order when that is shorter (task 00053).
+    /// </summary>
+    /// <param name="order">The order of extraction.</param>
+    /// <param name="startedAt">The moment the order began.</param>
+    /// <param name="now">The moment the previous cycle ended.</param>
+    /// <returns>The length of the next cycle, in game seconds.</returns>
+    public int NextPeriodSeconds(FlightPlanOrderEntity order, DateTimeOffset startedAt, DateTimeOffset now)
+    {
+        ArgumentNullException.ThrowIfNull(order);
+
+        int cycle = CycleSeconds();
+
+        if (order.DurationSeconds <= 0)
+        {
+            return cycle;
+        }
+
+        long left = order.DurationSeconds - (long)(now - startedAt).TotalSeconds;
+
+        return (int)Math.Clamp(left, 1L, cycle);
+    }
+
+    /// <summary>
+    /// Plans a cycle of the extraction of a fleet (task 00050, task 00053).
     /// </summary>
     /// <param name="fleetId">The fleet.</param>
     /// <param name="orderId">The order of extraction.</param>
-    /// <param name="sectorId">The sector of the place of the order.</param>
+    /// <param name="planVersion">The version of the plan.</param>
+    /// <param name="sectorId">The sector the fleet works in.</param>
+    /// <param name="now">The moment the cycle begins.</param>
+    /// <param name="periodSeconds">How long the cycle lasts.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>A task that completes when the event is planned.</returns>
-    public async Task ScheduleAsync(long fleetId, long orderId, int sectorId, CancellationToken cancellationToken = default)
+    public async Task ScheduleAsync(
+        long fleetId,
+        long orderId,
+        int planVersion,
+        int sectorId,
+        DateTimeOffset now,
+        int periodSeconds,
+        CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(_scheduler);
-
-        DateTimeOffset runAt = _clock.GameNow + TimeSpan.FromSeconds(CycleSeconds);
-        string dedupe = CycleEventType + ":" + fleetId.ToString(CultureInfo.InvariantCulture) + ":" + orderId.ToString(CultureInfo.InvariantCulture);
+        // The cycle that is planned from inside the handler of the previous cycle is planned while that
+        // one is still pending, so the key names the moment of the cycle too: one key per cycle.
+        DateTimeOffset runAt = now + TimeSpan.FromSeconds(periodSeconds);
+        string dedupe = CycleEventType
+            + ":" + fleetId.ToString(CultureInfo.InvariantCulture)
+            + ":" + orderId.ToString(CultureInfo.InvariantCulture)
+            + ":" + planVersion.ToString(CultureInfo.InvariantCulture)
+            + ":" + runAt.UtcTicks.ToString(CultureInfo.InvariantCulture);
 
         await _scheduler.ScheduleAsync(
             new ScheduledEventRequest(
                 sectorId,
                 CycleEventType,
                 runAt,
-                JsonSerializer.Serialize(new CyclePayload(fleetId, orderId)),
+                JsonSerializer.Serialize(new CyclePayload(fleetId, orderId, planVersion, periodSeconds)),
                 dedupe),
             cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Does one cycle of the extraction of a fleet and plans the next one (task 00050).
+    /// Does one cycle of the extraction of a fleet (task 00050, task 00053).
     /// </summary>
-    /// <param name="fleetId">The fleet.</param>
-    /// <param name="orderId">The order of extraction.</param>
+    /// <param name="payload">The body of the event.</param>
+    /// <param name="now">The moment the cycle ends, in game time.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>A task that completes when the cycle is done.</returns>
-    public async Task CycleAsync(long fleetId, long orderId, CancellationToken cancellationToken = default)
+    /// <returns>What the cycle ended with.</returns>
+    public async Task<CycleOutcome> CycleAsync(CyclePayload payload, DateTimeOffset now, CancellationToken cancellationToken = default)
     {
-        int sectorId = await _unitOfWork.RunAsync(
-            async () =>
-            {
-                FlightPlanOrderEntity? order = await _dbContext.FlightPlanOrders
-                    .FirstOrDefaultAsync(entry => entry.Id == orderId, cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(payload);
 
-                if (order is null)
-                {
-                    return -1;
-                }
+        FlightPlanOrderEntity? order = await _dbContext.FlightPlanOrders.AsNoTracking()
+            .FirstOrDefaultAsync(entry => entry.Id == payload.OrderId, cancellationToken).ConfigureAwait(false);
 
-                // The plan of the order must be under way: a plan that was stopped, deleted or
-                // finished changes nothing.
-                bool underWay = await _dbContext.FlightPlans
-                    .AnyAsync(plan => plan.Id == order.FlightPlanId && plan.StateCode == FlightPlanStates.Active, cancellationToken)
-                    .ConfigureAwait(false);
-
-                if (!underWay)
-                {
-                    return -1;
-                }
-
-                IReadOnlyList<FleetExtractionService.ExtractionModules> modules =
-                    await _extraction.ModulesAsync(fleetId, cancellationToken).ConfigureAwait(false);
-
-                if (modules.Count == 0)
-                {
-                    return -1;
-                }
-
-                // The extraction lasts as long as the player asked for: the moment it began is kept
-                // in the parameters of the order, and the order stops when the time is up.
-                DateTimeOffset now = _clock.GameNow;
-                DateTimeOffset? startedAt = ExtractionOrderParameters.ReadStartedAt(order.Parameters);
-
-                if (startedAt is null)
-                {
-                    order.Parameters = ExtractionOrderParameters.WriteStartedAt(order.Parameters, now);
-                    startedAt = now;
-                }
-                else if (order.DurationSeconds > 0 && now - startedAt.Value >= TimeSpan.FromSeconds(order.DurationSeconds))
-                {
-                    return -1;
-                }
-
-                await TakeAsync(fleetId, modules, order, cancellationToken).ConfigureAwait(false);
-
-                return order.TargetSectorId;
-            },
-            cancellationToken).ConfigureAwait(false);
-
-        if (sectorId < 0)
+        if (order is null)
         {
-            return;
+            return new CycleOutcome(CycleResult.Ignored, 0);
         }
 
-        await ScheduleAsync(fleetId, orderId, sectorId, cancellationToken).ConfigureAwait(false);
+        // The plan of the order must be under way and be the run this cycle was planned for: a plan
+        // that was stopped, deleted, finished or started anew changes nothing.
+        bool underWay = await _dbContext.FlightPlans.AsNoTracking()
+            .AnyAsync(
+                plan => plan.Id == order.FlightPlanId
+                    && plan.FleetId == payload.FleetId
+                    && plan.StateCode == FlightPlanStates.Active
+                    && plan.Version == payload.PlanVersion
+                    && plan.CurrentPosition == order.Position,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!underWay)
+        {
+            return new CycleOutcome(CycleResult.Ignored, 0);
+        }
+
+        IReadOnlyList<FleetExtractionService.ExtractionModules> modules =
+            await _extraction.ModulesAsync(payload.FleetId, cancellationToken).ConfigureAwait(false);
+
+        if (modules.Count == 0)
+        {
+            return new CycleOutcome(CycleResult.Finished, 0);
+        }
+
+        DateTimeOffset startedAt = ExtractionOrderParameters.ReadStartedAt(order.Parameters) ?? now - TimeSpan.FromSeconds(payload.PeriodSeconds);
+        TakeResult taken = await TakeAsync(payload.FleetId, modules, order, payload.PeriodSeconds, now, cancellationToken).ConfigureAwait(false);
+
+        // The order ends when its time is up, when the holds are full or when the place has nothing
+        // more to give. A cycle that took nothing means the fleet cannot take anything here.
+        bool timeUp = order.DurationSeconds > 0 && now - startedAt >= TimeSpan.FromSeconds(order.DurationSeconds);
+
+        if (timeUp || taken.HoldsFull || taken.PlaceGone || !taken.Taken)
+        {
+            return new CycleOutcome(CycleResult.Finished, 0);
+        }
+
+        return new CycleOutcome(CycleResult.Continue, NextPeriodSeconds(order, startedAt, now));
     }
 
     /// <summary>
-    /// Takes what the modules of the fleet take from the place of the order and puts it into the
-    /// holds of the ships (task 00050).
+    /// Tells whether the modules of a fleet take anything from a place (task 00054, task 00055): by the rows
+    /// of the modules, a place that holds none of the resources they take gives nothing, so the order is
+    /// skipped at its start and no cycle is planned.
     /// </summary>
-    private async Task TakeAsync(
+    /// <param name="objectId">The object of the place.</param>
+    /// <param name="modules">The modules of the fleet.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when at least one module of the fleet takes a resource of the place.</returns>
+    public async Task<bool> YieldsAsync(
+        long objectId,
+        IReadOnlyList<FleetExtractionService.ExtractionModules> modules,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(modules);
+
+        PlaceContentDto? place = await _world.GetPlaceContentAsync(objectId, cancellationToken).ConfigureAwait(false);
+
+        if (place is null)
+        {
+            return false;
+        }
+
+        string placeKind = place.Object.ObjectClass;
+        IReadOnlyList<CompositionDto>? shares = SharesOf(place);
+        IReadOnlyDictionary<int, IReadOnlyList<int>> groups = await GroupResourceIdsAsync(modules, placeKind, cancellationToken).ConfigureAwait(false);
+
+        // The drilling of a field takes by the shares of the field, so it yields where the field has any
+        // share. An hour is long enough for any yield above zero to show: the rounding of a short period
+        // does not hide a resource the place has.
+        bool drills = FleetExtractionService.CycleMass(modules, placeKind, FleetExtractionService.SecondsPerHour) > 0
+            && shares is not null
+            && shares.Any(share => share.Coefficient > 0m);
+
+        return drills
+            || FleetExtractionService.RuleYields(modules, placeKind, shares, groups, FleetExtractionService.SecondsPerHour).Count > 0;
+    }
+
+    /// <summary>
+    /// Takes what the modules of the fleet take from the place of the order in a period and puts it
+    /// into the holds of the ships (task 00050, task 00053).
+    /// </summary>
+    private async Task<TakeResult> TakeAsync(
         long fleetId,
         IReadOnlyList<FleetExtractionService.ExtractionModules> modules,
         FlightPlanOrderEntity order,
+        int periodSeconds,
+        DateTimeOffset now,
         CancellationToken cancellationToken)
     {
         PlaceContentDto? place = await _world.GetPlaceContentAsync(order.TargetObjectId, cancellationToken).ConfigureAwait(false);
 
         if (place is null)
         {
-            return;
+            return new TakeResult(false, false, true);
         }
 
-        IReadOnlyList<ShipHold> holds = await HoldsAsync(fleetId, cancellationToken).ConfigureAwait(false);
-
-        if (holds.Count == 0)
-        {
-            return;
-        }
-
+        IReadOnlyList<ShipHold> holds = await _holds.ReadAsync(fleetId, cancellationToken).ConfigureAwait(false);
         long free = holds.Sum(hold => hold.Free);
 
         if (free <= 0)
         {
-            return;
+            return new TakeResult(false, true, false);
         }
 
+        string placeKind = place.Object.ObjectClass;
         List<ResourceAmount> yields = [];
+        bool placeGone = false;
 
-        if (place.Object.AsteroidFieldId is { } fieldId)
-        {
-            long mass = FleetExtractionService.CycleMass(modules, FleetExtractionService.ExtractionSource.Field);
-            ExtractionResult result = await _world.ExtractFromFieldAsync(fieldId, mass, free, cancellationToken).ConfigureAwait(false);
-            yields.AddRange(result.YieldIds);
+        // The modules that take the mass of the place (the drilling of a field) are served by the world,
+        // which splits the mass by the shares of the place, loses it and says whether the place is gone.
+        long mass = FleetExtractionService.CycleMass(modules, placeKind, periodSeconds);
 
-            // The crystal extractor takes only the crystals of the field, and they share its yield
-            // evenly.
-            IReadOnlyList<int> crystals = await CrystalsAsync(fieldId, place.Compositions, cancellationToken).ConfigureAwait(false);
-            yields.AddRange(FleetExtractionService.CrystalCycle(modules, crystals));
-        }
-        else if (place.Object.NebulaId is { } nebulaId)
+        if (mass > 0 && place.Object.AsteroidFieldId is { } fieldId)
         {
-            long mass = FleetExtractionService.CycleMass(modules, FleetExtractionService.ExtractionSource.Nebula);
-            ExtractionResult result = await _world.ExtractFromNebulaAsync(nebulaId, mass, free, cancellationToken).ConfigureAwait(false);
-            yields.AddRange(result.YieldIds);
-        }
-        else if (place.Object.ObjectClass == WorldObjectClasses.GasGiant)
-        {
-            int helium = await HeliumResourceIdAsync(cancellationToken).ConfigureAwait(false);
-            ResourceAmount? amount = FleetExtractionService.HeliumCycle(modules, helium);
-
-            if (amount is not null && amount.Amount > 0)
+            try
             {
-                yields.Add(amount);
+                ExtractionResult result = await _world.ExtractFromFieldAsync(fieldId, mass, free, cancellationToken).ConfigureAwait(false);
+                yields.AddRange(result.YieldIds);
+                placeGone = result.Depleted;
+            }
+            catch (GameException exception) when (exception.Code == GameErrorCodes.NotFound)
+            {
+                // The field was emptied by another fleet since the place was read.
+                return new TakeResult(false, false, true);
             }
         }
-        else
+
+        // The other rows of the modules are the yield of the period turned into resources by their way: a
+        // nebula never runs out, so what the modules take from it is only the yield times the share.
+        IReadOnlyDictionary<int, IReadOnlyList<int>> groups = await GroupResourceIdsAsync(modules, placeKind, cancellationToken).ConfigureAwait(false);
+
+        foreach (ResourceAmount amount in FleetExtractionService.RuleYields(modules, placeKind, SharesOf(place), groups, periodSeconds))
         {
-            return;
+            Merge(yields, amount);
         }
 
         if (yields.Count == 0)
         {
-            return;
+            return new TakeResult(false, false, placeGone);
         }
 
-        await StoreAsync(fleetId, holds, yields, cancellationToken).ConfigureAwait(false);
-    }
+        await StoreAsync(fleetId, holds, yields, now, cancellationToken).ConfigureAwait(false);
 
-    /// <summary>
-    /// The holds of the ships of the fleet with the room that is left in them (task 00050).
-    /// </summary>
-    private async Task<IReadOnlyList<ShipHold>> HoldsAsync(long fleetId, CancellationToken cancellationToken)
-    {
-        List<FleetShipEntity> members = await _dbContext.FleetShips.AsNoTracking()
-            .Where(entry => entry.FleetId == fleetId)
-            .OrderBy(entry => entry.Position)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-
-        if (members.Count == 0)
-        {
-            return [];
-        }
-
-        long[] shipIds = [.. members.Select(entry => entry.ShipId)];
-        List<ShipEntity> ships = await _dbContext.Ships.AsNoTracking()
-            .Where(ship => shipIds.Contains(ship.Id))
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-
-        List<ShipModuleEntity> modules = await _dbContext.ShipModules.AsNoTracking()
-            .Where(module => shipIds.Contains(module.ShipId))
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-
-        Dictionary<long, long> carried = await _dbContext.ShipCargos.AsNoTracking()
-            .Where(cargo => shipIds.Contains(cargo.ShipId))
-            .GroupBy(cargo => cargo.ShipId)
-            .Select(group => new { ShipId = group.Key, Amount = group.Sum(cargo => cargo.Amount) })
-            .ToDictionaryAsync(row => row.ShipId, row => row.Amount, cancellationToken).ConfigureAwait(false);
-
-        ShipCatalogDto catalog = await _production.GetShipCatalogAsync(cancellationToken).ConfigureAwait(false);
-        Dictionary<int, ShipHullDto> hulls = catalog.Hulls.ToDictionary(hull => hull.Id);
-        Dictionary<int, ShipModuleDto> byType = catalog.Modules.ToDictionary(module => module.Id);
-
-        long[] designIds = [.. ships.Select(ship => ship.ShipDesignId).Distinct()];
-        Dictionary<long, int> hullOfDesign = await _dbContext.ShipDesigns.AsNoTracking()
-            .Where(design => designIds.Contains(design.Id))
-            .Select(design => new { design.Id, design.HullPartTypeId })
-            .ToDictionaryAsync(row => row.Id, row => row.HullPartTypeId, cancellationToken).ConfigureAwait(false);
-
-        List<ShipHold> holds = [];
-
-        foreach (ShipEntity ship in ships.OrderBy(ship => Array.IndexOf(shipIds, ship.Id)))
-        {
-            int hullTypeId = hullOfDesign.GetValueOrDefault(ship.ShipDesignId);
-            decimal capacity = hulls.TryGetValue(hullTypeId, out ShipHullDto? hull) ? hull.HoldCapacity : 0m;
-
-            foreach (ShipModuleEntity module in modules.Where(entry => entry.ShipId == ship.Id))
-            {
-                if (byType.TryGetValue(module.PartTypeId, out ShipModuleDto? known))
-                {
-                    capacity += known.CargoCapacity;
-                }
-            }
-
-            holds.Add(new ShipHold(ship.Id, (long)Math.Floor(capacity), carried.GetValueOrDefault(ship.Id)));
-        }
-
-        return holds;
+        return new TakeResult(true, holds.Sum(hold => hold.Free) <= 0, placeGone);
     }
 
     /// <summary>
     /// Puts the yield of the cycle into the holds of the ships of the fleet (task 00050): the ships
     /// take the yield in the order of their numbers, and what does not fit into one goes to the next.
     /// </summary>
-    private async Task StoreAsync(long fleetId, IReadOnlyList<ShipHold> holds, IReadOnlyList<ResourceAmount> yields, CancellationToken cancellationToken)
+    private async Task StoreAsync(
+        long fleetId,
+        IReadOnlyList<ShipHold> holds,
+        IReadOnlyList<ResourceAmount> yields,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
     {
-        DateTimeOffset now = _clock.GameNow;
-
         foreach (ResourceAmount yield in yields)
         {
             long left = yield.Amount;
@@ -361,6 +383,8 @@ public sealed class FleetExtractionCycleService
             // cycle, and the place loses the mass of it all.
         }
 
+        // The sum of the fleet is read from the rows of the ships, so the rows are written first.
+        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         await RecountAsync(fleetId, now, cancellationToken).ConfigureAwait(false);
     }
 
@@ -380,7 +404,7 @@ public sealed class FleetExtractionCycleService
             return;
         }
 
-        Dictionary<int, long> carried = await _dbContext.ShipCargos.AsNoTracking()
+        Dictionary<int, long> carried = await _dbContext.ShipCargos
             .Where(cargo => shipIds.Contains(cargo.ShipId))
             .GroupBy(cargo => cargo.ResourceId)
             .Select(group => new { ResourceId = group.Key, Amount = group.Sum(cargo => cargo.Amount) })
@@ -432,75 +456,76 @@ public sealed class FleetExtractionCycleService
     }
 
     /// <summary>
-    /// The crystals of a field: the resources of the group of crystals among the shares of the field
-    /// (task 00050).
+    /// The shares of the composition of a place (task 00055): the shares of its field or of its nebula, or
+    /// <see langword="null"/> when the place has no composition, as a gas giant.
     /// </summary>
-    private async Task<IReadOnlyList<int>> CrystalsAsync(long fieldId, IReadOnlyList<CompositionDto> compositions, CancellationToken cancellationToken)
+    private static IReadOnlyList<CompositionDto>? SharesOf(PlaceContentDto place)
     {
-        ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
-        HashSet<int> crystalIds = [.. catalog.Resources
-            .Where(resource => catalog.Groups.FirstOrDefault(group => group.Id == resource.ResourceGroupId)?.Code == CrystalGroupCode)
-            .Select(resource => resource.Id)];
+        if (place.Object.AsteroidFieldId is { } fieldId)
+        {
+            return [.. place.Compositions.Where(share => share.AsteroidFieldId == fieldId)];
+        }
 
-        return
+        if (place.Object.NebulaId is { } nebulaId)
+        {
+            return [.. place.Compositions.Where(share => share.NebulaId == nebulaId)];
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The resources of the groups of resources that the rows of the modules name for a kind of place
+    /// (task 00055), from the catalog of the resources of the world, which the world keeps in memory.
+    /// </summary>
+    private async Task<IReadOnlyDictionary<int, IReadOnlyList<int>>> GroupResourceIdsAsync(
+        IReadOnlyList<FleetExtractionService.ExtractionModules> modules,
+        string placeKind,
+        CancellationToken cancellationToken)
+    {
+        HashSet<int> groupIds =
         [
-            .. compositions
-                .Where(share => share.AsteroidFieldId == fieldId && crystalIds.Contains(share.ResourceId))
-                .Select(share => share.ResourceId)
-                .Distinct()
-                .OrderBy(id => id),
+            .. modules
+                .SelectMany(module => module.Rules)
+                .Where(rule => rule.PlaceKind == placeKind && rule.ResourceGroupId is not null)
+                .Select(rule => rule.ResourceGroupId!.Value),
         ];
-    }
 
-    /// <summary>
-    /// The identifier of the resource of the helium (task 00050).
-    /// </summary>
-    private async Task<int> HeliumResourceIdAsync(CancellationToken cancellationToken)
-    {
+        if (groupIds.Count == 0)
+        {
+            return new Dictionary<int, IReadOnlyList<int>>();
+        }
+
         ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
 
-        return catalog.Resources.FirstOrDefault(resource => resource.Code == HeliumResourceCode)?.Id ?? 0;
+        return groupIds.ToDictionary(
+            groupId => groupId,
+            groupId => (IReadOnlyList<int>)[.. catalog.Resources.Where(resource => resource.ResourceGroupId == groupId).Select(resource => resource.Id)]);
     }
-}
-
-/// <summary>
-/// The hold of a ship of a fleet (task 00050).
-/// </summary>
-/// <param name="ShipId">The ship.</param>
-/// <param name="Capacity">The room of the hold, in tonnes.</param>
-/// <param name="Carried">What the hold carries now, in tonnes.</param>
-public sealed class ShipHold(long shipId, long capacity, long carried)
-{
-    /// <summary>
-    /// Gets the ship the hold belongs to.
-    /// </summary>
-    public long ShipId { get; } = shipId;
 
     /// <summary>
-    /// Gets the room of the hold, in tonnes.
+    /// Adds an amount to the yield of the cycle, summing it with the amount of the same resource that is
+    /// already there.
     /// </summary>
-    public long Capacity { get; } = capacity;
-
-    /// <summary>
-    /// Gets what the hold carries now, in tonnes.
-    /// </summary>
-    public long Carried { get; } = carried;
-
-    /// <summary>
-    /// Gets the room that is left in the hold, in tonnes.
-    /// </summary>
-    public long Free { get; private set; } = Math.Max(0, capacity - carried);
-
-    /// <summary>
-    /// Puts an amount of a resource into the hold and takes the room it took.
-    /// </summary>
-    /// <param name="amount">The amount, in tonnes.</param>
-    /// <returns>How much of the amount fitted into the hold.</returns>
-    public long Take(long amount)
+    private static void Merge(List<ResourceAmount> yields, ResourceAmount amount)
     {
-        long taken = Math.Min(Free, Math.Max(0, amount));
-        Free -= taken;
+        int index = yields.FindIndex(entry => entry.ResourceId == amount.ResourceId);
 
-        return taken;
+        if (index < 0)
+        {
+            yields.Add(amount);
+        }
+        else
+        {
+            yields[index] = new ResourceAmount(amount.ResourceId, yields[index].Amount + amount.Amount);
+        }
     }
+
+    /// <summary>
+    /// What the fleet took in a cycle.
+    /// </summary>
+    /// <param name="Taken">Whether anything went to the holds.</param>
+    /// <param name="HoldsFull">Whether the holds of the fleet are full now.</param>
+    /// <param name="PlaceGone">Whether the place has nothing left or is gone.</param>
+    private sealed record TakeResult(bool Taken, bool HoldsFull, bool PlaceGone);
 }

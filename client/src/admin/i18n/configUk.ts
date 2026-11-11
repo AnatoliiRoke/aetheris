@@ -116,8 +116,6 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.world.nebula.radius_min.description': 'Найменший радіус туманності.',
   'config.world.nebula.radius_max.description': 'Найбільший радіус туманності.',
   'config.world.nebula.radar_multiplier.description': 'Множник дальності радара всередині туманності.',
-  'config.world.nebula.mass_min.description': 'Найменша маса туманності, у тоннах; екстрактори беруть частину її щоколу.',
-  'config.world.nebula.mass_max.description': 'Найбільша маса туманності, у тоннах.',
   'config.world.nebula.blocks_jump_drive.description': 'Чи забороняє туманність стрибковий двигун.',
   'config.world.field.max_composition_share.description': 'Найбільша сумарна частка ресурсів у складі поля; решта завжди порожня порода.',
   'config.world.planet.rich_probability.description': 'Імовірність, що нова планета багата: усі її родовища беруть «багатий» діапазон правила.',
@@ -272,6 +270,16 @@ export const configDescriptionsUk: Record<string, string> = {
     'Найбільша кількість символів у назві флоту.',
   'config.fleet.flight_plan.max_orders.description':
     'Найбільша кількість наказів у політному листі флоту.',
+  'config.fleet.extraction.cycle_seconds.description':
+    'Тривалість одного циклу видобування, у секундах ігрового часу: раз на цикл видобуток потрапляє в трюми флоту. Орієнтир — 15 хвилин.',
+  'config.fleet.extraction.place_tolerance.description':
+    'Допуск збігу координат флоту з точкою вільного астероїдного поля, в одиницях карти: видобування бере місце з позиції флоту, і поле вважається тим, де стоїть флот, коли відстань до його точки не більша за допуск.',
+  'config.fleet.speed.reference_push.description':
+    'Опорна тяга для швидкості перельоту, у кН. Разом з опорною масою й опорною швидкістю задає сталу формули швидкості v = K·√(F/m): корабель із цією тягою й цією масою летить з опорною швидкістю.',
+  'config.fleet.speed.reference_mass.description':
+    'Опорна маса для швидкості перельоту, у тоннах (корпус разом із вантажем).',
+  'config.fleet.speed.reference_speed.description':
+    'Опорна швидкість для швидкості перельоту, у світлових роках за годину: стільки літає корабель з опорною тягою й опорною масою.',
   'config.fleet.shipyard.queue_base_slots.description':
     'Місця черги верфі, коли в будівлі ще немає ефекту місць.',
   'config.fleet.shipyard.queue_max_slots.description':

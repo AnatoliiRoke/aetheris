@@ -40,6 +40,18 @@ public sealed class FlightPlanEntity
     /// <summary>Gets or sets the version of the row, raised by every change.</summary>
     public int Version { get; set; } = 1;
 
+    /// <summary>
+    /// Gets or sets the position of the order the fleet carries out now. It is zero until the plan
+    /// begins; the orders before it are done and the orders after it wait (task 00053).
+    /// </summary>
+    public int CurrentPosition { get; set; }
+
+    /// <summary>
+    /// Gets or sets why the plan stopped by itself, the code of an error of the fleet module, or
+    /// <see langword="null"/> when it did not (task 00053).
+    /// </summary>
+    public string? PauseCode { get; set; }
+
     /// <summary>Gets or sets the orders of the plan, in the order they are carried out in.</summary>
     public List<FlightPlanOrderEntity> OrderIds { get; set; } = [];
 }
@@ -118,6 +130,12 @@ public static class FlightPlanStates
     /// again or make a new one.
     /// </summary>
     public const string Paused = "paused";
+
+    /// <summary>
+    /// The plan was carried out to its last order. A carried out plan is deleted, so this state is
+    /// never stored: it is only what the command that finished the plan answers with (task 00053).
+    /// </summary>
+    public const string Completed = "completed";
 }
 
 /// <summary>

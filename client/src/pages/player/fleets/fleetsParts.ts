@@ -7,7 +7,7 @@ import { hasKey } from '../planetText';
  * The filter of the state of a fleet. The states are what the server says about a fleet and about
  * the credits of the civilization; the screen only groups them.
  */
-export type StateFilter = 'all' | 'ready' | 'noCredits';
+export type StateFilter = 'all' | 'ready' | 'flying' | 'noCredits';
 
 /**
  * The text of the state of a fleet. A civilization without credits cannot fly, whatever else the
@@ -38,10 +38,15 @@ export function stateText(
  *
  * @param filter The filter.
  * @param hasCredits Whether the civilization has credits.
+ * @param fleet The fleet; the filter of the flights looks at its state.
  */
-export function passesState(filter: StateFilter, hasCredits: boolean): boolean {
+export function passesState(filter: StateFilter, hasCredits: boolean, fleet: Fleet): boolean {
   if (filter === 'noCredits') {
     return !hasCredits;
+  }
+
+  if (filter === 'flying') {
+    return fleet.stateCode === 'flying';
   }
 
   return filter === 'ready' ? hasCredits : true;

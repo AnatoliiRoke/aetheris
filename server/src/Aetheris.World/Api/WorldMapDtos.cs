@@ -92,7 +92,8 @@ public sealed record MapSystemDto(
 /// <param name="Z">The z coordinate of the centre.</param>
 /// <param name="Radius">The radius.</param>
 /// <param name="BlocksJumpDrive">Whether a jump drive does not work inside.</param>
-public sealed record MapNebulaDto(long Id, long ObjectId, string Name, double X, double Y, double Z, double Radius, bool BlocksJumpDrive);
+/// <param name="State">One of <see cref="MapStates"/>: <c>open</c> when a radar of the player reaches the nebula, so the player may name it as a target of a flight.</param>
+public sealed record MapNebulaDto(long Id, long ObjectId, string Name, double X, double Y, double Z, double Radius, bool BlocksJumpDrive, string State);
 
 /// <summary>A free asteroid field the player sees in the space of a sector.</summary>
 /// <param name="ObjectId">The celestial object.</param>

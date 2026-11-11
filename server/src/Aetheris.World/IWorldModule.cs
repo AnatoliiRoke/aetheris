@@ -165,6 +165,58 @@ public interface IWorldModule
     Task<PlaceContentDto?> GetPlaceContentAsync(long objectId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the place of an object of the map in the coordinates of the galaxy, without the
+    /// visibility filter, for the server itself (task 00053).
+    /// </summary>
+    /// <param name="objectId">The object of the map.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place, or <see langword="null"/> when the object is unknown or a depleted field.</returns>
+    Task<WorldPlaceDto?> GetObjectPlaceAsync(long objectId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the place of a body in the coordinates of the galaxy (task 00053).
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place, or <see langword="null"/> when the body is unknown.</returns>
+    Task<WorldPlaceDto?> GetPlanetPlaceAsync(long planetId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a point of open space inside a sector as a place (task 00053).
+    /// </summary>
+    /// <param name="sectorId">The sector.</param>
+    /// <param name="x">The first axis inside the sector.</param>
+    /// <param name="y">The second axis inside the sector.</param>
+    /// <param name="z">The third axis inside the sector.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place, or <see langword="null"/> when the sector is unknown or the point lies outside it.</returns>
+    Task<WorldPlaceDto?> GetPointPlaceAsync(int sectorId, double x, double y, double z, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Finds the place a fleet standing at a point of the galaxy takes from (task 00054): the nearest of
+    /// the free asteroid fields whose point is within the tolerance of the point and the nebulae whose
+    /// sphere holds the point. A gas giant and a field of a star system are not found by the point: a
+    /// fleet stands at them by the reference to their object.
+    /// </summary>
+    /// <param name="x">The first axis in the galaxy.</param>
+    /// <param name="y">The second axis in the galaxy.</param>
+    /// <param name="z">The third axis in the galaxy.</param>
+    /// <param name="tolerance">How far from the point of a free field the point may lie, in the units of the map.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place, or <see langword="null"/> when the point holds nothing to take from.</returns>
+    Task<WorldPlaceDto?> FindExtractionPlaceAsync(double x, double y, double z, double tolerance, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the distance a fleet flies between two places (task 00053): inside a star system it is
+    /// the number of orbits between the places times the step of an orbit, elsewhere it is the
+    /// three-dimensional distance between the coordinates of the galaxy.
+    /// </summary>
+    /// <param name="from">The place the flight starts at.</param>
+    /// <param name="to">The place the flight ends at.</param>
+    /// <returns>The distance, in the units of the map.</returns>
+    double GetTravelDistance(WorldPlaceDto from, WorldPlaceDto to);
+
+    /// <summary>
     /// Gets the facts of a body for another module: the sector, the owner and the deposits.
     /// </summary>
     /// <param name="planetId">The body.</param>

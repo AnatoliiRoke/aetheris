@@ -161,14 +161,17 @@ public sealed class FlightPlanTests
         JsonElement plan = await CommandAsync(player, Save, new
         {
             fleet_id = fleetId,
-            orders = new object[] { new { type_code = "mine", target_kind = "object", target_sector_id = 1, target_object_id = 40 } },
+            orders = new object[] { new { type_code = "mine", duration_seconds = 600 } },
         });
 
         JsonElement orders = plan.GetProperty("orders");
         Assert.Single(orders.EnumerateArray());
         Assert.Equal("mine", orders[0].GetProperty("type_code").GetString());
-        Assert.Equal("object", orders[0].GetProperty("target_kind").GetString());
-        Assert.Equal(40, orders[0].GetProperty("target_object_id").GetInt64());
+
+        // The order of extraction names no target (task 00054): it has the time only.
+        Assert.Equal("none", orders[0].GetProperty("target_kind").GetString());
+        Assert.Equal(0, orders[0].GetProperty("target_object_id").GetInt64());
+        Assert.Equal(600, orders[0].GetProperty("duration_seconds").GetInt64());
         Assert.Equal(1, orders[0].GetProperty("position").GetInt32());
 
         using IServiceScope scope = _factory.Services.CreateScope();
@@ -207,7 +210,8 @@ public sealed class FlightPlanTests
         using PlanetsTestPlayer player = await FoundAsync(spaceportLevel: 1);
         long fleetId = await FleetAsync(player);
 
-        await CommandAsync(player, Plans, new { fleet_id = fleetId, orders = Array.Empty<object>() });
+        // The plan waits for ten minutes, so it is under way when the command answers (task 00053).
+        await CommandAsync(player, Plans, new { fleet_id = fleetId, orders = new object[] { new { type_code = "wait", duration_seconds = 600 } } });
         JsonElement plan = await CommandAsync(player, Execute, new { fleet_id = fleetId });
 
         Assert.Equal("active", plan.GetProperty("state_code").GetString());
@@ -228,7 +232,7 @@ public sealed class FlightPlanTests
         using PlanetsTestPlayer player = await FoundAsync(spaceportLevel: 1);
         long fleetId = await FleetAsync(player);
 
-        await CommandAsync(player, Plans, new { fleet_id = fleetId, orders = Array.Empty<object>() });
+        await CommandAsync(player, Plans, new { fleet_id = fleetId, orders = new object[] { new { type_code = "wait", duration_seconds = 600 } } });
         await CommandAsync(player, Execute, new { fleet_id = fleetId });
 
         JsonElement stopped = await CommandAsync(player, Stop, new { fleet_id = fleetId });

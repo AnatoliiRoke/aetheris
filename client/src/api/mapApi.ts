@@ -57,6 +57,8 @@ export interface MapNebula {
   z: number;
   radius: number;
   blocksJumpDrive: boolean;
+  /** `open` when a radar of the player reaches the nebula: only such a nebula may be a target of a flight. */
+  state: MapState;
 }
 
 /** A free asteroid field the player sees in the space of a sector. */

@@ -30,6 +30,9 @@ public static class SeedCodes
     /// <summary>The first mineral of the starting data.</summary>
     public const string Quartzite = "resource_8";
 
+    /// <summary>Deuterium. It is mined in a nebula, not on a planet.</summary>
+    public const string Deuterium = "resource_12";
+
     /// <summary>Helium-3. It is mined in space, not on a planet.</summary>
     public const string Helium = "resource_13";
 

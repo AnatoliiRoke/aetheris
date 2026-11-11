@@ -192,6 +192,7 @@ public sealed class FleetFormationService
             {
                 await FleetLocks.LockPlayerAsync(_dbContext, playerId, cancellationToken).ConfigureAwait(false);
                 FleetEntity fleet = await LoadFleetAsync(playerId, fleetId, cancellationToken).ConfigureAwait(false);
+                await EnsureDockedAsync(fleet, cancellationToken).ConfigureAwait(false);
                 await CheckFreeShipsAsync(playerId, fleet.PlanetId, ships, cancellationToken).ConfigureAwait(false);
 
                 Append(fleet, ships);
@@ -227,6 +228,7 @@ public sealed class FleetFormationService
             {
                 await FleetLocks.LockPlayerAsync(_dbContext, playerId, cancellationToken).ConfigureAwait(false);
                 FleetEntity fleet = await LoadFleetAsync(playerId, fleetId, cancellationToken).ConfigureAwait(false);
+                await EnsureDockedAsync(fleet, cancellationToken).ConfigureAwait(false);
 
                 Detach(fleet, ships);
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -274,6 +276,9 @@ public sealed class FleetFormationService
                 {
                     throw new GameException(FleetErrorCodes.FleetsApart, "The fleets do not stand on the same body.");
                 }
+
+                await EnsureDockedAsync(source, cancellationToken).ConfigureAwait(false);
+                await EnsureDockedAsync(target, cancellationToken).ConfigureAwait(false);
 
                 Detach(source, ships);
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -331,6 +336,7 @@ public sealed class FleetFormationService
             {
                 await FleetLocks.LockPlayerAsync(_dbContext, playerId, cancellationToken).ConfigureAwait(false);
                 FleetEntity fleet = await LoadFleetAsync(playerId, fleetId, cancellationToken).ConfigureAwait(false);
+                await EnsureDockedAsync(fleet, cancellationToken).ConfigureAwait(false);
 
                 _dbContext.Fleets.Remove(fleet);
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -466,6 +472,41 @@ public sealed class FleetFormationService
         ?? throw new GameException(FleetErrorCodes.FleetUnknown, "The fleet does not exist.");
 
     /// <summary>
+    /// Checks that the fleet stands on a body together with its ships and has no plan under way
+    /// (task 00053): a fleet that flies, that works at a field or that stands at a body that is not
+    /// the body of its ships does not give its ships back, so a ship cannot be moved by taking it out
+    /// of a fleet that is far away.
+    /// </summary>
+    /// <param name="fleet">The fleet with its ships.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the fleet is docked.</returns>
+    /// <exception cref="GameException">The fleet is away.</exception>
+    private async Task EnsureDockedAsync(FleetEntity fleet, CancellationToken cancellationToken)
+    {
+        bool away = !string.Equals(fleet.StateCode, FleetStates.Stationed, StringComparison.Ordinal) || fleet.PlanetId <= 0;
+
+        if (!away)
+        {
+            long[] shipIds = [.. fleet.ShipIds.Select(entry => entry.ShipId)];
+            away = await _dbContext.Ships.AsNoTracking()
+                .AnyAsync(ship => shipIds.Contains(ship.Id) && ship.PlanetId != fleet.PlanetId, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        if (!away)
+        {
+            away = await _dbContext.FlightPlans.AsNoTracking()
+                .AnyAsync(plan => plan.FleetId == fleet.Id && plan.StateCode == FlightPlanStates.Active, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        if (away)
+        {
+            throw new GameException(FleetErrorCodes.FleetAway, "The fleet is away from the body of its ships or its plan is under way.");
+        }
+    }
+
+    /// <summary>
     /// Checks that every ship is the player's, stands on the body and is in no fleet.
     /// </summary>
     private async Task CheckFreeShipsAsync(string playerId, long planetId, IReadOnlyList<long> shipIds, CancellationToken cancellationToken)
@@ -549,6 +590,13 @@ public sealed class FleetFormationService
         Dictionary<long, ShipDesignSummaryDto> summaries = (await _designs.ReadAsync(playerId, null, true, cancellationToken).ConfigureAwait(false))
             .ToDictionary(design => design.Id, design => design.Summary);
         Dictionary<int, ShipHullDto> hulls = catalog.Hulls.ToDictionary(hull => hull.Id);
+        long[] fleetIds = [.. fleets.Select(fleet => fleet.Id)];
+        Dictionary<long, FleetFlightEntity> flights = fleetIds.Length == 0
+            ? []
+            : await _dbContext.FleetFlights.AsNoTracking()
+                .Where(flight => fleetIds.Contains(flight.FleetId))
+                .ToDictionaryAsync(flight => flight.FleetId, cancellationToken)
+                .ConfigureAwait(false);
         Dictionary<long, long> fleetOfShip = fleets
             .SelectMany(fleet => fleet.ShipIds.Select(entry => (entry.ShipId, FleetId: fleet.Id)))
             .ToDictionary(entry => entry.ShipId, entry => entry.FleetId);
@@ -601,14 +649,42 @@ public sealed class FleetFormationService
                     carried.Sum(summary => summary.Integrity),
                     carried.Sum(summary => summary.DamageMin),
                     carried.Sum(summary => summary.DamageMax),
-                    carried.Sum(summary => summary.ShieldCapacity));
+                    carried.Sum(summary => summary.ShieldCapacity),
+                    fleet.ObjectId,
+                    fleet.SystemId,
+                    fleet.PositionX,
+                    fleet.PositionY,
+                    fleet.PositionZ,
+                    flights.TryGetValue(fleet.Id, out FleetFlightEntity? flight)
+                        ? new FleetFlightDto(
+                            flight.FlightPlanOrderId,
+                            flight.StartedAt,
+                            flight.ArrivesAt,
+                            flight.Distance,
+                            flight.Speed,
+                            flight.ToSectorId,
+                            flight.ToSystemId,
+                            flight.ToObjectId,
+                            flight.ToPlanetId,
+                            flight.ToX,
+                            flight.ToY,
+                            flight.ToZ)
+                        : null);
             }),
         ];
 
         List<FleetShipDto> free = [.. cards.Values.Where(card => card.FleetId is null).OrderBy(card => card.PlanetId).ThenBy(card => card.Id)];
         bool hasCredits = await HasCreditsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
-        return new FleetsViewDto(limit, fleets.Count, hasCredits, ships.Sum(ship => ship.UpkeepPerHour), fleetCards, free);
+        return new FleetsViewDto(
+            limit,
+            fleets.Count,
+            hasCredits,
+            ships.Sum(ship => ship.UpkeepPerHour),
+            fleetCards,
+            free,
+            _clock.GameNow,
+            _clock.Multiplier);
     }
 
     /// <summary>

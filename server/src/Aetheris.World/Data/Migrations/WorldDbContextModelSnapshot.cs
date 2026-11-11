@@ -655,15 +655,6 @@ namespace Aetheris.World.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("sector_id");
 
-
-                    b.Property<long>("InitialMass")
-                        .HasColumnType("bigint")
-                        .HasColumnName("initial_mass");
-
-                    b.Property<long>("Mass")
-                        .HasColumnType("bigint")
-                        .HasColumnName("mass");
-
                     b.HasKey("Id")
                         .HasName("pk_nebula");
 
@@ -674,10 +665,7 @@ namespace Aetheris.World.Data.Migrations
                     b.HasIndex("SectorId")
                         .HasDatabaseName("ix_nebula_sector_id");
 
-                    b.ToTable("nebula", null, t =>
-                        {
-                            t.HasCheckConstraint("ck_nebula_mass", "mass >= 0");
-                        });
+                    b.ToTable("nebula", (string)null);
                 });
 
             modelBuilder.Entity("Aetheris.World.Data.Entities.PlanetEntity", b =>

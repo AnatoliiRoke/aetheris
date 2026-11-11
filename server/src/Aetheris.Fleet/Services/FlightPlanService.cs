@@ -26,15 +26,16 @@ namespace Aetheris.Fleet.Services;
 /// do, so twenty requests at once do not make two plans of one fleet.
 /// </para>
 /// <para>
-/// The orders of a plan are written by the task of the orders themselves: this task keeps the
-/// model and the commands around it, and the fleet carries the orders out in the tasks to come.
+/// The orders of a plan are carried out one after another by <see cref="FlightPlanRunner"/> (task
+/// 00053); this service keeps the model and the commands around it: writing, changing, deleting,
+/// stopping and starting a plan.
 /// </para>
 /// </remarks>
 public sealed class FlightPlanService
 {
     private readonly FleetDbContext _dbContext;
     private readonly FleetUnitOfWork _unitOfWork;
-    private readonly FleetExtractionCycleService _cycles;
+    private readonly FlightPlanRunner _runner;
     private readonly IGameClock _clock;
     private readonly IGameConfig _config;
 
@@ -43,24 +44,25 @@ public sealed class FlightPlanService
     /// </summary>
     /// <param name="dbContext">The context of the module.</param>
     /// <param name="unitOfWork">The unit of the transaction.</param>
+    /// <param name="runner">Carries the orders of a plan out.</param>
     /// <param name="clock">The game clock.</param>
     /// <param name="config">The game configuration.</param>
     public FlightPlanService(
         FleetDbContext dbContext,
         FleetUnitOfWork unitOfWork,
-        FleetExtractionCycleService cycles,
+        FlightPlanRunner runner,
         IGameClock clock,
         IGameConfig config)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
-        ArgumentNullException.ThrowIfNull(cycles);
+        ArgumentNullException.ThrowIfNull(runner);
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(config);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
-        _cycles = cycles;
+        _runner = runner;
         _clock = clock;
         _config = config;
     }
@@ -190,6 +192,10 @@ public sealed class FlightPlanService
                 plan.UpdatedAt = _clock.GameNow;
                 plan.Version++;
 
+                // The orders are new, so the progress through the old ones means nothing.
+                plan.CurrentPosition = 0;
+                plan.PauseCode = null;
+
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 return ToDto(plan);
@@ -252,8 +258,15 @@ public sealed class FlightPlanService
                 }
 
                 plan.StateCode = FlightPlanStates.Paused;
+                plan.PauseCode = null;
                 plan.UpdatedAt = _clock.GameNow;
                 plan.Version++;
+
+                // A fleet that is under way hangs at the point of its route it has reached and waits
+                // there (decision 4 of task 00050); the events of the run that was stopped change
+                // nothing, because the plan has another version now.
+                FleetEntity fleet = await LoadFleetAsync(playerId, fleetId, cancellationToken).ConfigureAwait(false);
+                await _runner.SettleAsync(fleet, _clock.GameNow, cancellationToken).ConfigureAwait(false);
 
                 await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -263,13 +276,14 @@ public sealed class FlightPlanService
     }
 
     /// <summary>
-    /// Starts the plan of a fleet. The orders themselves are carried out by the tasks to come;
-    /// this command only puts the plan under way.
+    /// Starts the plan of a fleet (task 00053): the orders are carried out one after another, the first
+    /// begins now and every next one begins when the previous is over. A plan that was stopped goes on
+    /// with the order it was stopped at.
     /// </summary>
     /// <param name="playerId">The player.</param>
     /// <param name="fleetId">The fleet.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The plan after the change.</returns>
+    /// <returns>The plan after the change; a plan whose orders all took no time is already carried out.</returns>
     public Task<FlightPlanDto> ExecuteAsync(string playerId, long fleetId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrEmpty(playerId);
@@ -285,23 +299,31 @@ public sealed class FlightPlanService
                     throw new GameException(FleetErrorCodes.FlightPlanUnderWay, "The plan of the fleet is under way already.");
                 }
 
-                plan.StateCode = FlightPlanStates.Active;
-                plan.UpdatedAt = _clock.GameNow;
-                plan.Version++;
+                FleetEntity fleet = await LoadFleetAsync(playerId, fleetId, cancellationToken).ConfigureAwait(false);
+                DateTimeOffset now = _clock.GameNow;
 
-                // The orders of extraction work every quarter of an hour, so the first cycle is
-                // planned right away (task 00050). The moment the extraction began is written here,
-                // so the time the player asked for is counted from the moment the plan began.
-                foreach (FlightPlanOrderEntity order in plan.OrderIds.Where(entry => entry.TypeCode == FlightOrderTypes.Mine))
+                if (!string.Equals(fleet.StateCode, FleetStates.Stationed, StringComparison.Ordinal))
                 {
-                    order.Parameters = ExtractionOrderParameters.WriteStartedAt(order.Parameters, plan.UpdatedAt);
+                    throw new GameException(FleetErrorCodes.FlightPlanUnderWay, "The fleet is under way.");
                 }
 
-                await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _runner.ValidateAsync(fleet, plan.OrderIds, cancellationToken).ConfigureAwait(false);
 
-                foreach (FlightPlanOrderEntity order in plan.OrderIds.Where(entry => entry.TypeCode == FlightOrderTypes.Mine))
+                // A plan that was stopped begins again with the order it was stopped at; a plan that
+                // never began starts with its first order.
+                plan.CurrentPosition = Math.Max(0, plan.CurrentPosition - 1);
+                plan.StateCode = FlightPlanStates.Active;
+                plan.PauseCode = null;
+                plan.UpdatedAt = now;
+                plan.Version++;
+
+                // The events of the plan carry its version, so they are the events of this run.
+                await _runner.AdvanceAsync(plan, fleet, now, cancellationToken).ConfigureAwait(false);
+
+                // A plan that is carried out at once is deleted by the runner; the answer says so.
+                if (_dbContext.Entry(plan).State == EntityState.Deleted)
                 {
-                    await _cycles.ScheduleAsync(fleetId, order.Id, order.TargetSectorId, cancellationToken).ConfigureAwait(false);
+                    plan.StateCode = FlightPlanStates.Completed;
                 }
 
                 return ToDto(plan);
@@ -336,25 +358,22 @@ public sealed class FlightPlanService
 
         foreach (FlightPlanOrderInput order in orders)
         {
-            // An order of extraction names a place of the map: a field, a nebula or a gas giant.
-            // Without a place there is nothing to take from, so the order is refused.
-            if (order.TypeCode == FlightOrderTypes.Mine
-                && (order.TargetKind != FlightTargetKinds.Object || order.TargetObjectId <= 0))
-            {
-                throw new GameException(FleetErrorCodes.FlightOrderTargetUnknown, "The order of extraction names no place.");
-            }
+            // An order of extraction has the time only, and the time is optional (task 00054): zero means
+            // no limit. The place is where the fleet is when the order begins, so a target the request
+            // names is dropped.
+            bool isMine = order.TypeCode == FlightOrderTypes.Mine;
 
             written.Add(new FlightPlanOrderEntity
             {
                 Position = position++,
                 TypeCode = order.TypeCode,
-                TargetKind = order.TargetKind,
-                TargetSectorId = order.TargetSectorId,
-                TargetSystemId = order.TargetSystemId,
-                TargetObjectId = order.TargetObjectId,
-                TargetX = order.TargetX,
-                TargetY = order.TargetY,
-                TargetZ = order.TargetZ,
+                TargetKind = isMine ? FlightTargetKinds.None : order.TargetKind,
+                TargetSectorId = isMine ? 0 : order.TargetSectorId,
+                TargetSystemId = isMine ? 0 : order.TargetSystemId,
+                TargetObjectId = isMine ? 0 : order.TargetObjectId,
+                TargetX = isMine ? 0m : order.TargetX,
+                TargetY = isMine ? 0m : order.TargetY,
+                TargetZ = isMine ? 0m : order.TargetZ,
                 DurationSeconds = order.DurationSeconds,
                 Parameters = order.Parameters,
             });
@@ -387,7 +406,9 @@ public sealed class FlightPlanService
                         order.TargetZ,
                         order.DurationSeconds,
                         order.Parameters)),
-            ]);
+            ],
+            plan.CurrentPosition,
+            plan.PauseCode);
 }
 
 /// <summary>

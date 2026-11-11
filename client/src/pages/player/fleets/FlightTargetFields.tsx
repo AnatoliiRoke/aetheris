@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from 'react';
-import type { Fleet, ShipDesign } from '../../../api/fleetApi';
+import type { Fleet } from '../../../api/fleetApi';
 import type { MapSector, MapSectorView, MapSystemView } from '../../../api/mapApi';
 import { useApi } from '../../../api/useApi';
 import { useI18n } from '../../../i18n/useI18n';
 import { useRead } from '../market/useRead';
 import { FlightPlanTime } from './FlightPlanTime';
-import type { DraftOrder, TargetKind } from './flightPlanParts';
+import type { DraftOrder, FlightTimeTarget, TargetKind } from './flightPlanParts';
 import { objectText, planetBodies, systemText, visibleSystems } from './flightPlanTarget';
 
 /**
@@ -19,7 +19,7 @@ import { objectText, planetBodies, systemText, visibleSystems } from './flightPl
  * @param value The target as the order holds it.
  * @param sectors The sectors the player knows of.
  * @param fleet The fleet the plan is made for.
- * @param designs The projects of the ships of the fleet.
+ * @param from The place the fleet is at when the order begins, when an order before it moves the fleet.
  * @param onChange Answers the new target of the order.
  */
 export function FlightTargetFields({
@@ -27,14 +27,14 @@ export function FlightTargetFields({
   value,
   sectors,
   fleet,
-  designs,
+  from,
   onChange,
 }: {
   id: string;
   value: Pick<DraftOrder, 'targetKind' | 'targetSectorId' | 'targetSystemId' | 'targetObjectId' | 'target'>;
   sectors: readonly MapSector[];
   fleet: Fleet | null;
-  designs: readonly ShipDesign[];
+  from: FlightTimeTarget | null;
   onChange: (patch: Partial<DraftOrder>) => void;
 }) {
   const { t } = useI18n();
@@ -64,8 +64,17 @@ export function FlightTargetFields({
   // The planets of the chosen system and the asteroid field of it, when it has one.
   const objects = useMemo(() => (systemRead.data === null ? [] : planetBodies(systemRead.data.objects)), [systemRead.data]);
 
-  // The free fields of the chosen sector: the objects that belong to no system.
-  const fields = useMemo(() => sectorRead.data?.fields ?? [], [sectorRead.data]);
+  // The objects of the chosen sector that belong to no system: the free fields and the nebulas a
+  // radar of the player reaches (the server sends only the fields a radar sees).
+  const fields = useMemo(
+    () => [
+      ...(sectorRead.data?.fields ?? []).map((field) => ({ objectId: field.objectId, name: field.name })),
+      ...(sectorRead.data?.nebulas ?? [])
+        .filter((nebula) => nebula.state === 'open')
+        .map((nebula) => ({ objectId: nebula.objectId, name: nebula.name })),
+    ],
+    [sectorRead.data],
+  );
 
   // A change of the kind of the target drops what was chosen for the other kind.
   const changeKind = (kind: TargetKind) => {
@@ -221,16 +230,15 @@ export function FlightTargetFields({
       ) : null}
 
       <FlightPlanTime
-        designs={designs}
         fleet={fleet}
+        from={from}
         target={{
           kind: value.targetKind,
           sectorId: value.targetSectorId,
-          systemId: value.targetSystemId,
           objectId: value.targetObjectId,
-          planetId: null,
           point: value.target,
         }}
+        typeCode="fly"
       />
     </>
   );

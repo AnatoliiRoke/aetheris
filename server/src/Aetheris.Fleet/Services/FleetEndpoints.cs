@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Security;
 using Aetheris.Fleet.Api;
+using Aetheris.Fleet.Data.Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -112,6 +113,16 @@ public static class FleetEndpoints
                 await fleets.ReadAsync(PlayerId(user), cancellationToken).ConfigureAwait(false),
                 FleetJson.Options));
 
+        // What the holds of a fleet carry (task 00056): read when the player opens the window of the hold.
+        fleet.MapGet("/fleets/{fleetId:long}/hold", async (
+            long fleetId,
+            ClaimsPrincipal user,
+            FleetHoldService holds,
+            CancellationToken cancellationToken) =>
+            Results.Json(
+                await holds.ReadForPlayerAsync(PlayerId(user), fleetId, cancellationToken).ConfigureAwait(false),
+                FleetJson.Options));
+
         fleet.MapGet("/flight-plans", async (
             ClaimsPrincipal user,
             FlightPlanService plans,
@@ -133,36 +144,36 @@ public static class FleetEndpoints
                 : Results.Json(plan, FleetJson.Options);
         });
 
-        fleet.MapGet("/extraction/estimate", async (
+        // The time of a flight is counted by the server (task 00053): the distance comes from the world and
+        // the speed from the ships of the fleet, so the screen shows the same time the fleet will take.
+        fleet.MapGet("/flight-plans/estimate", async (
             HttpContext context,
             ClaimsPrincipal user,
-            FleetExtractionEstimateService estimates,
+            FleetFlightService flights,
             CancellationToken cancellationToken) =>
         {
-            long? fleetId = Number(context.Request.Query, "fleet_id");
-            long? objectId = Number(context.Request.Query, "object_id");
+            IQueryCollection query = context.Request.Query;
+            long? fleetId = Number(query, "fleet_id");
 
-            if (fleetId is null || objectId is null)
+            if (fleetId is null)
             {
-                throw new GameException(FleetErrorCodes.ExtractionTargetUnknown, "The fleet or the place of the extraction is missing.");
+                throw new GameException(FleetErrorCodes.FleetUnknown, "The fleet is missing.");
             }
 
-            FleetExtractionService.ExtractionEstimate? estimate = await estimates
-                .EstimateAsync(fleetId.Value, objectId.Value, cancellationToken)
+            bool isReturn = string.Equals(query["type_code"], FlightOrderTypes.Return, StringComparison.Ordinal);
+            FlightEstimateDto? estimate = await flights
+                .EstimateAsync(
+                    PlayerId(user),
+                    fleetId.Value,
+                    isReturn,
+                    ReadTarget(query, "target"),
+                    ReadTarget(query, "from"),
+                    cancellationToken)
                 .ConfigureAwait(false);
 
             return estimate is null
                 ? Results.NotFound()
-                : Results.Json(
-                    new ExtractionEstimateDto(
-                        estimate.CycleSeconds,
-                        estimate.ResourceTonsPerCycle,
-                        estimate.ProcessedTonsPerCycle,
-                        estimate.FreeHoldTons,
-                        estimate.PlaceMassTons,
-                        estimate.HoldFullSeconds,
-                        estimate.PlaceEmptySeconds),
-                    FleetJson.Options);
+                : Results.Json(estimate, FleetJson.Options);
         });
 
         return endpoints;
@@ -178,6 +189,35 @@ public static class FleetEndpoints
         long.TryParse(query[name], NumberStyles.Integer, CultureInfo.InvariantCulture, out long value)
             ? value
             : null;
+
+    /// <summary>
+    /// Reads the target of a flight out of the query of a request: the kind and the places it names,
+    /// each parameter with the prefix of the target.
+    /// </summary>
+    /// <param name="query">The query.</param>
+    /// <param name="prefix">The prefix of the parameters: <c>target</c> or <c>from</c>.</param>
+    /// <returns>The target, or <see langword="null"/> when the query names no kind.</returns>
+    private static FlightTarget? ReadTarget(IQueryCollection query, string prefix)
+    {
+        string kind = query[prefix + "_kind"].ToString().Trim().ToLowerInvariant();
+
+        if (kind.Length == 0)
+        {
+            return null;
+        }
+
+        return new FlightTarget(
+            kind,
+            (int)(Number(query, prefix + "_sector_id") ?? 0),
+            Number(query, prefix + "_system_id") ?? 0,
+            Number(query, prefix + "_object_id") ?? 0,
+            Decimal(query, prefix + "_x"),
+            Decimal(query, prefix + "_y"),
+            Decimal(query, prefix + "_z"));
+    }
+
+    private static decimal Decimal(IQueryCollection query, string name) =>
+        decimal.TryParse(query[name], NumberStyles.Number, CultureInfo.InvariantCulture, out decimal value) ? value : 0m;
 
     private static long RequiredBody(IQueryCollection query) =>
         Body(query) ?? throw new GameException(FleetErrorCodes.PlanetUnknown, "The body is missing.");

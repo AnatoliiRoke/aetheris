@@ -45,7 +45,7 @@ public sealed record ResourceAmount(int ResourceId, long Amount);
 /// <param name="ProcessedMass">The mass taken from the place, rock included.</param>
 /// <param name="YieldIds">The resources that go to the hold.</param>
 /// <param name="RockMass">The processed mass that stays behind as empty rock, rounding included.</param>
-/// <param name="RemainingMass">The mass of the place after the cycle.</param>
+/// <param name="RemainingMass">The mass of the place after the cycle; zero for a nebula, which has no mass.</param>
 /// <param name="Depleted">Whether the place is empty and disappears.</param>
 public sealed record ExtractionResult(
     long ProcessedMass,

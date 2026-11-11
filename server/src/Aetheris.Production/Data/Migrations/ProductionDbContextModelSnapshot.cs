@@ -245,6 +245,69 @@ namespace Aetheris.Production.Data.Migrations
                     b.ToTable("part_characteristic_value", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartExtractionEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_archived");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("mode");
+
+                    b.Property<int>("PartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_type_id");
+
+                    b.Property<string>("PlaceKind")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("place_kind");
+
+                    b.Property<bool>("ReducesMass")
+                        .HasColumnType("boolean")
+                        .HasColumnName("reduces_mass");
+
+                    b.Property<int?>("ResourceGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_group_id");
+
+                    b.Property<int?>("ResourceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_part_extraction");
+
+                    b.HasIndex("PartTypeId")
+                        .HasDatabaseName("ix_part_extraction_part_type_id");
+
+                    b.HasIndex("ResourceGroupId")
+                        .HasDatabaseName("ix_part_extraction_resource_group_id");
+
+                    b.HasIndex("ResourceId")
+                        .HasDatabaseName("ix_part_extraction_resource_id");
+
+                    b.ToTable("part_extraction", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_part_extraction_target", "NOT (resource_id IS NOT NULL AND resource_group_id IS NOT NULL)");
+                        });
+                });
+
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartGroupCharacteristicEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -984,6 +1047,16 @@ namespace Aetheris.Production.Data.Migrations
                         .HasConstraintName("fk_part_characteristic_value_part_type_part_type_id");
                 });
 
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartExtractionEntity", b =>
+                {
+                    b.HasOne("Aetheris.Production.Data.Entities.PartTypeEntity", null)
+                        .WithMany("ExtractionIds")
+                        .HasForeignKey("PartTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_extraction_part_type_part_type_id");
+                });
+
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartGroupCharacteristicEntity", b =>
                 {
                     b.HasOne("Aetheris.Production.Data.Entities.CharacteristicEntity", null)
@@ -1085,6 +1158,8 @@ namespace Aetheris.Production.Data.Migrations
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartTypeEntity", b =>
                 {
                     b.Navigation("AttributeIds");
+
+                    b.Navigation("ExtractionIds");
 
                     b.Navigation("HullCompatibilityIds");
 

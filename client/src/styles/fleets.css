@@ -278,6 +278,10 @@
 .pl-order__time { color: var(--text-soft); font-size: var(--fs-small); }
 /* Місце наказу — праворуч від його назви: ціль перельоту або планета приписки. */
 .pl-order__place { color: var(--text-soft); font-size: var(--fs-small); overflow-wrap: anywhere; }
+/* Наказ, який флот виконує зараз, виділений кольором акценту. */
+.pl-order--current .pl-order__text { color: var(--accent-hover); }
+/* Стан польоту флоту: куди летить і коли прибуде. */
+.fl-flight { margin: 0; display: flex; flex-direction: column; gap: var(--space-1); }
 /* Знаряддя наказу — у правому верхньому кутку блоку, в рядку з полями. */
 .pl-order__tools { display: flex; flex: 0 0 auto; gap: var(--space-1); align-self: flex-start; padding-top: 1px; }
 /* Знаряддя політного листа — чотири кнопки в одному рядку, кожна лише з іконкою. */
@@ -285,3 +289,12 @@
 /* Знаряддя наказу маленьке: правило йде після .fl-btn--small і знімає його мінімальну висоту. */
 .pl-order__tools .pl-tool { min-width: 22px; min-height: 22px; width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .pl-error { margin: 0; color: var(--danger-text); font-size: var(--fs-ui); }
+
+/* ---------- трюм флоту (задача 00056) ---------- */
+.fl-hold { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
+.fl-hold__item {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 44px; padding: var(--space-1) var(--space-3);
+  box-sizing: border-box; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-card-in);
+}
+.fl-hold__name { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; overflow-wrap: anywhere; }
+.fl-hold__amount { flex: 0 0 auto; font-variant-numeric: tabular-nums; }

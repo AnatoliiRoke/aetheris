@@ -80,6 +80,34 @@ public static class FleetConfigKeys
     public const string FlightPlanMaxOrders = "fleet.flight_plan.max_orders";
 
     /// <summary>
+    /// The length of a cycle of extraction, in game seconds (task 00053): the yield of a fleet goes to
+    /// its holds once per cycle.
+    /// </summary>
+    public const string ExtractionCycleSeconds = "fleet.extraction.cycle_seconds";
+
+    /// <summary>
+    /// How far a fleet may be from the point of a free asteroid field and still be at the field, in
+    /// the units of the map (task 00054): the extraction takes its place from the position of the fleet.
+    /// </summary>
+    public const string ExtractionPlaceTolerance = "fleet.extraction.place_tolerance";
+
+    /// <summary>
+    /// The push of the reference point of the speed, in kilonewtons (task 00053).
+    /// </summary>
+    public const string SpeedReferencePush = "fleet.speed.reference_push";
+
+    /// <summary>
+    /// The mass of the reference point of the speed, in tonnes (task 00053).
+    /// </summary>
+    public const string SpeedReferenceMass = "fleet.speed.reference_mass";
+
+    /// <summary>
+    /// The speed of the reference point, in light-years per hour (task 00053): a ship with the
+    /// reference push and the reference mass flies at this speed.
+    /// </summary>
+    public const string SpeedReferenceSpeed = "fleet.speed.reference_speed";
+
+    /// <summary>
     /// Gets the definitions of the parameters with their starting values and bounds.
     /// </summary>
     public static IReadOnlyList<ConfigParameterDefinition> Definitions { get; } =
@@ -100,6 +128,11 @@ public static class FleetConfigKeys
         new(UpkeepShare, "0.1", "0", "1", "Частка кредитної ціни модулів проєкту, яку готовий корабель бере кредитами за годину. Корпус не входить."),
         new(FleetNameMaxLength, "64", "1", "128", "Найбільша кількість символів у назві флоту."),
         new(FlightPlanMaxOrders, "32", "1", "256", "Найбільша кількість наказів у політному листі флоту."),
+        new(ExtractionCycleSeconds, "900", "1", "86400", "Тривалість одного циклу видобування, у секундах ігрового часу: раз на цикл видобуток потрапляє в трюми флоту. Орієнтир — 15 хвилин."),
+        new(ExtractionPlaceTolerance, "1", "0", "1000000", "Допуск збігу координат флоту з точкою вільного астероїдного поля, в одиницях карти: видобування бере місце з позиції флоту, і поле вважається тим, де стоїть флот, коли відстань до його точки не більша за допуск."),
+        new(SpeedReferencePush, "100", "0.000001", "1000000000", "Опорна тяга для швидкості перельоту, у кН. Разом з опорною масою й опорною швидкістю задає сталу формули швидкості v = K·√(F/m): корабель із цією тягою й цією масою летить з опорною швидкістю."),
+        new(SpeedReferenceMass, "1000", "0.000001", "1000000000", "Опорна маса для швидкості перельоту, у тоннах (корпус разом із вантажем)."),
+        new(SpeedReferenceSpeed, "45", "0.000001", "1000000000", "Опорна швидкість для швидкості перельоту, у світлових роках за годину: стільки літає корабель з опорною тягою й опорною масою."),
         new(HullReturnShare, "0.5", "0", "1", "Не застосовується. Розбір повертає всі компоненти проєкту й екіпаж і не повертає ресурси на склад."),
     ];
 }

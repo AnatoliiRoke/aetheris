@@ -1,4 +1,32 @@
-import type { FlightPlanOrderInput } from '../../../api/fleetApi';
+import type { FleetApi, FlightEstimateTarget, FlightPlan, FlightPlanOrderInput } from '../../../api/fleetApi';
+import { ApiError } from '../../../api/http';
+
+/**
+ * The refusal of the server that says the fleet has a flight plan already.
+ */
+const planExistsCode = 'fleet_flight_plan_exists';
+
+/**
+ * Writes the flight plan of a fleet: a new plan, or the new orders of the plan the fleet already has
+ * (task 00053). The window of the plan and the card of the map write the plan the same way, and a plan that is
+ * carried out at once is written first.
+ *
+ * @param api The fleet API.
+ * @param fleetId The fleet.
+ * @param orders The orders of the plan.
+ * @returns The plan after the write.
+ */
+export async function writeFlightPlan(api: FleetApi, fleetId: number, orders: FlightPlanOrderInput[]): Promise<FlightPlan> {
+  try {
+    return await api.createFlightPlan({ fleetId, orders });
+  } catch (error) {
+    if (error instanceof ApiError && error.code === planExistsCode) {
+      return api.saveFlightPlan({ fleetId, orders });
+    }
+
+    throw error;
+  }
+}
 
 /**
  * One order of a flight plan as the window holds it while the player writes it (task 00050).
@@ -60,6 +88,22 @@ export function readAxes(text: string): [number, number, number] | null {
  */
 export function toOrderInputs(orders: readonly DraftOrder[]): FlightPlanOrderInput[] {
   return orders.map((order) => {
+    // The order of extraction names no target (task 00054): it takes from the place where the fleet stands.
+    if (order.typeCode === 'mine') {
+      return {
+        typeCode: order.typeCode,
+        targetKind: 'none',
+        targetSectorId: 0,
+        targetSystemId: 0,
+        targetObjectId: 0,
+        targetX: 0,
+        targetY: 0,
+        targetZ: 0,
+        durationSeconds: Math.max(0, Math.round((Number(order.durationMinutes) || 0) * 60)),
+        parameters: '{}',
+      };
+    }
+
     const isPoint = order.targetKind === 'point';
     const axes = isPoint ? readAxes(order.target) : null;
 
@@ -76,4 +120,37 @@ export function toOrderInputs(orders: readonly DraftOrder[]): FlightPlanOrderInp
       parameters: '{}',
     };
   });
+}
+
+/**
+ * The place the time of the flight is counted to (task 00050, task 00053).
+ */
+export interface FlightTimeTarget {
+  /** The kind of the target: the coordinates of a point, a planet or an object. */
+  kind: TargetKind;
+  /** The sector of the target. */
+  sectorId: number | null;
+  /** The body or the object of the target, as the map knows it: the identifier of the object. */
+  objectId: number | null;
+  /** The coordinates of the target, when the target is a point of the space. */
+  point: string;
+}
+
+/**
+ * Turns a target of the window into the place the server counts the flight to, or `null` when the
+ * target is not named whole yet: a point needs a sector and three numbers, a place needs its object.
+ *
+ * @param target The target of the window.
+ * @returns The place for the request, or `null`.
+ */
+export function estimateTargetOf(target: FlightTimeTarget): FlightEstimateTarget | null {
+  if (target.kind === 'point') {
+    const axes = readAxes(target.point);
+
+    return axes === null || target.sectorId === null
+      ? null
+      : { kind: 'point', sectorId: target.sectorId, objectId: 0, x: axes[0], y: axes[1], z: axes[2] };
+  }
+
+  return target.objectId === null ? null : { kind: target.kind, sectorId: target.sectorId ?? 0, objectId: target.objectId, x: 0, y: 0, z: 0 };
 }

@@ -185,14 +185,12 @@ public static class SectorGenerator
         Point3 position = RandomPoint(random, settings);
         double radius = random.NextDouble(settings.NebulaRadiusMin, settings.NebulaRadiusMax);
         string name = NameTemplate.Format(settings.Names.Nebula, (NameTemplate.Sector, sectorName), (NameTemplate.Number, number));
-        long mass = random.NextInclusive(settings.NebulaMassMin, settings.NebulaMassMax);
 
         return new NebulaPlan(
             type.Id,
             name,
             position,
             radius,
-            mass,
             settings.NebulaBlocksJumpDrive,
             RollComposition(random, config.Reference, type.Id));
     }

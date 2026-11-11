@@ -8,17 +8,17 @@ import type { MessageKey } from '../../../i18n/uk';
 import { useRead } from '../market/useRead';
 import { useBodies } from '../useBodies';
 import { FleetDialog } from './FleetDialog';
-import { FlightMineTarget } from './FlightMineTarget';
 import { FlightMineTime } from './FlightMineTime';
 import { FlightPlanTime } from './FlightPlanTime';
 import { FlightTargetFields } from './FlightTargetFields';
 import { fleetExtracts } from './fleetExtraction';
-import { readAxes, toOrderInputs, type DraftOrder, type TargetKind } from './flightPlanParts';
+import { readAxes, toOrderInputs, type DraftOrder, type FlightTimeTarget, type TargetKind } from './flightPlanParts';
 
 /**
  * The types of an order of a flight plan, as the client sends them (task 00050). Only the type of
  * an order decides what the player has to fill in: the flights name a target and last a while,
- * and the return names the home body of the fleet and lasts a while.
+ * and the return names the home body of the fleet and lasts a while. The order of extraction names
+ * no target (task 00054): it has the time only and takes from the place where the fleet stands.
  *
  * The order of extraction is offered only to a fleet that may extract: one of its ships has a
  * module of extraction.
@@ -27,7 +27,7 @@ const orderTypes: readonly { code: string; label: MessageKey; fields: OrderField
   { code: 'fly', label: 'plan.order.fly', fields: { target: true, duration: true } },
   { code: 'hyperfly', label: 'plan.order.hyperfly', fields: { target: true, duration: true } },
   { code: 'jump', label: 'plan.order.jump', fields: { target: true, duration: true } },
-  { code: 'mine', label: 'plan.order.mine', fields: { target: true, duration: true } },
+  { code: 'mine', label: 'plan.order.mine', fields: { duration: true } },
   { code: 'scan', label: 'plan.order.scan', fields: {} },
   { code: 'load', label: 'plan.order.load', fields: {} },
   { code: 'unload', label: 'plan.order.unload', fields: {} },
@@ -165,13 +165,6 @@ export function FlightPlanDialog({
     return home?.name?.trim() || (entry === undefined ? null : String(entry.homePlanetId));
   }, [bodies, fleetId, fleets]);
 
-  // The home body of the fleet with its place: the time of the return is counted to it.
-  const home = useMemo(() => {
-    const entry = fleets.find((item) => item.id === fleetId);
-
-    return entry === undefined ? null : bodies.find((item) => item.planetId === entry.homePlanetId) ?? null;
-  }, [bodies, fleetId, fleets]);
-
   const needsFleet = fleetId === null;
   const ready = fleetId !== null && orders.length > 0;
 
@@ -207,14 +200,6 @@ export function FlightPlanDialog({
           next.targetKind = 'point';
           next.target = '';
           next.targetSectorId = null;
-          next.targetSystemId = null;
-          next.targetObjectId = null;
-        }
-
-        // An order of extraction always names a place of the map, never a point of the space.
-        if (next.typeCode === 'mine' && next.targetKind !== 'object') {
-          next.targetKind = 'object';
-          next.target = '';
           next.targetSystemId = null;
           next.targetObjectId = null;
         }
@@ -256,7 +241,11 @@ export function FlightPlanDialog({
     }
 
     // Only the type of an order decides what is checked: a type without a target names none.
-    const needsTarget = (order: DraftOrder): boolean => orderTypes.find((type) => type.code === order.typeCode)?.fields.target ?? true;
+    const needsTarget = (order: DraftOrder): boolean => {
+      const type = orderTypes.find((entry) => entry.code === order.typeCode);
+
+      return type === undefined || type.fields.target === true;
+    };
 
     // A point of the space is written as three numbers, so the text is read before the plan is sent.
     const bad = orders.some(
@@ -309,7 +298,7 @@ export function FlightPlanDialog({
           <button className="btn fl-btn" onClick={onClose} type="button">
             {t('fleets.cancel')}
           </button>
-          <button className="btn btn--secondary" disabled={busy || !ready} onClick={() => write(onExecute)} title={ready ? undefined : t('plan.executeSoon')} type="button">
+          <button className="btn btn--secondary" disabled={busy || !ready} onClick={() => write(onExecute)} title={ready ? undefined : t('plan.executeNeedsOrders')} type="button">
             {t('plan.execute')}
           </button>
           <button className="btn btn--primary" disabled={busy || !ready} onClick={() => write(onSave)} type="button">
@@ -384,47 +373,21 @@ export function FlightPlanDialog({
                   ) : null}
 
                   {order.typeCode === 'return' ? (
-                    <FlightPlanTime
-                      designs={designsRead.data ?? []}
-                      fleet={chosenFleet}
-                      target={{
-                        kind: 'planet',
-                        sectorId: home?.sectorId ?? null,
-                        systemId: home?.systemId ?? null,
-                        objectId: null,
-                        planetId: chosenFleet?.homePlanetId ?? null,
-                        point: '',
-                      }}
-                    />
+                    <FlightPlanTime fleet={chosenFleet} from={placeBefore(orders, index)} typeCode="return" />
                   ) : null}
 
                   {order.typeCode === 'mine' ? (
-                    <>
-                      <FlightMineTarget
-                        id={String(index)}
-                        onChange={(patch) => changeOrder(index, patch)}
-                        sectors={galaxyRead.data?.sectors ?? []}
-                        value={{
-                          targetSectorId: order.targetSectorId,
-                          targetSystemId: order.targetSystemId,
-                          targetObjectId: order.targetObjectId,
-                        }}
-                      />
-
-                      <FlightMineTime
-                        durationMinutes={order.durationMinutes}
-                        fleet={chosenFleet}
-                        id={String(index)}
-                        objectId={order.targetObjectId}
-                        onChange={(durationMinutes) => changeOrder(index, { durationMinutes })}
-                      />
-                    </>
+                    <FlightMineTime
+                      durationMinutes={order.durationMinutes}
+                      id={String(index)}
+                      onChange={(durationMinutes) => changeOrder(index, { durationMinutes })}
+                    />
                   ) : null}
 
-                  {fields.target && order.typeCode !== 'mine' ? (
+                  {fields.target ? (
                     <FlightTargetFields
-                      designs={designsRead.data ?? []}
                       fleet={chosenFleet}
+                      from={placeBefore(orders, index)}
                       id={String(index)}
                       onChange={(patch) => changeOrder(index, patch)}
                       sectors={galaxyRead.data?.sectors ?? []}
@@ -483,6 +446,37 @@ export function FlightPlanDialog({
       {error ? <Alert kind="error">{error}</Alert> : null}
     </FleetDialog>
   );
+}
+
+/**
+ * The place the fleet is at when an order begins, as far as the orders before it tell (task 00053): the
+ * target of the last flight before it; an extraction leaves the fleet where it is (task 00054). The return
+ * and an order that moves the fleet to a place the window cannot name leave the place unknown, and the time
+ * is then counted from the place the fleet is at now.
+ *
+ * @param orders The orders of the window.
+ * @param index The position of the order.
+ * @returns The place before the order, or `null` when it is the place the fleet is at now or is unknown.
+ */
+function placeBefore(orders: readonly DraftOrder[], index: number): FlightTimeTarget | null {
+  for (let place = index - 1; place >= 0; place -= 1) {
+    const order = orders[place]!;
+
+    if (order.typeCode === 'return') {
+      return null;
+    }
+
+    if (order.typeCode === 'fly' || order.typeCode === 'hyperfly' || order.typeCode === 'jump') {
+      return {
+        kind: order.targetKind,
+        sectorId: order.targetSectorId,
+        objectId: order.targetObjectId,
+        point: order.target,
+      };
+    }
+  }
+
+  return null;
 }
 
 /**

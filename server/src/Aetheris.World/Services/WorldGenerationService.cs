@@ -484,8 +484,6 @@ public sealed class WorldGenerationService
                 CelestialObjectId = entry.Id,
                 Radius = nebula.Radius,
                 BlocksJumpDrive = nebula.BlocksJumpDrive,
-                InitialMass = nebula.Mass,
-                Mass = nebula.Mass,
                 CompositionIds =
                 [
                     .. nebula.CompositionIds.Select(share => new NebulaCompositionEntity

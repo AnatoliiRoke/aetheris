@@ -1,5 +1,10 @@
-import type { HttpClient } from './http';
+import { ApiError, type HttpClient } from './http';
 import { camelize } from './planetApi';
+
+/**
+ * The status of the answer of the server for a thing it does not know.
+ */
+const notFoundStatus = 404;
 
 /**
  * A hull of the catalog of the ships (task 00038).
@@ -108,6 +113,8 @@ export interface ShipModule {
   launcherSize?: number;
   /** The ammunition the weapon fires. A weapon that fires ammunition has no damage of its own. */
   ammunitionIds?: number[];
+  /** The kinds of the places the module takes from (task 00055); a module that takes from none is not a module of extraction. */
+  extractionPlaceKinds?: string[];
   /** The characteristics the plaque adds up. */
   facts?: ShipModuleFact[];
   /** The weight of one module in tonnes. */
@@ -299,8 +306,10 @@ export interface FleetApi {
   stopFlightPlan(fleetId: number): Promise<FlightPlan>;
   /** Puts the flight plan of a fleet under way. */
   executeFlightPlan(fleetId: number): Promise<FlightPlan>;
-  /** Estimates what the extraction of a fleet at a place will take (task 00050). */
-  extractionEstimate(fleetId: number, objectId: number): Promise<ExtractionEstimate>;
+  /** The distance and the time of a flight, counted by the server (task 00053); `null` when the place is unknown. */
+  flightEstimate(request: FlightEstimateRequest): Promise<FlightEstimate | null>;
+  /** What the holds of the ships of a fleet carry (task 00056); read when the window of the hold opens. */
+  fleetHold(fleetId: number): Promise<FleetHold>;
 }
 
 /**
@@ -316,6 +325,10 @@ export interface FlightPlan {
   updatedAt: string;
   version: number;
   orders: FlightPlanOrder[];
+  /** The position of the order the fleet carries out now; zero before the plan begins (task 00053). */
+  currentPosition?: number;
+  /** Why the plan stopped by itself: the code of a refusal of the server, or `null` (task 00053). */
+  pauseCode?: string | null;
 }
 
 /**
@@ -354,26 +367,6 @@ export interface FlightPlanOrderInput {
   targetZ: number;
   durationSeconds: number;
   parameters: string;
-}
-
-/**
- * What the extraction of a fleet at a place will take (task 00050).
- */
-export interface ExtractionEstimate {
-  /** The length of a cycle of extraction, in game seconds. */
-  cycleSeconds: number;
-  /** The yield of the fleet in one cycle, in tonnes. */
-  resourceTonsPerCycle: number;
-  /** The mass the fleet takes from the place in one cycle, in tonnes. */
-  processedTonsPerCycle: number;
-  /** The room that is left in the holds of the fleet, in tonnes. */
-  freeHoldTons: number;
-  /** The mass that is left in the place, in tonnes. */
-  placeMassTons: number;
-  /** How long the holds of the fleet will hold the yield, in game seconds. */
-  holdFullSeconds: number;
-  /** How long the place will last, in game seconds. */
-  placeEmptySeconds: number;
 }
 
 /**
@@ -425,6 +418,112 @@ export interface Fleet {
   damageMax: number;
   /** The capacity of all the shields. */
   shieldCapacity: number;
+  /** The object of the map the fleet stands at; `null` in open space or before its first flight (task 00053). */
+  objectId?: number | null;
+  /** The star system the fleet stands in; `null` in open space (task 00053). */
+  systemId?: number | null;
+  /** The first axis of the position of the fleet in the galaxy; `null` before its first flight (task 00053). */
+  positionX?: number | null;
+  /** The second axis of the position of the fleet in the galaxy (task 00053). */
+  positionY?: number | null;
+  /** The third axis of the position of the fleet in the galaxy (task 00053). */
+  positionZ?: number | null;
+  /** The flight of the fleet when it is under way, or `null` (task 00053). */
+  flight?: FleetFlight | null;
+}
+
+/**
+ * The flight of a fleet that is under way (task 00053): where it goes and when it arrives.
+ */
+export interface FleetFlight {
+  /** The order of the plan that is the flight. */
+  orderId: number;
+  /** The moment of game time the fleet left. */
+  startedAt: string;
+  /** The moment of game time the fleet arrives. */
+  arrivesAt: string;
+  /** The distance of the flight, in light-years. */
+  distance: number;
+  /** The speed of the fleet, in light-years per hour. */
+  speed: number;
+  toSectorId: number;
+  toSystemId: number | null;
+  toObjectId: number | null;
+  toPlanetId: number | null;
+  toX: number;
+  toY: number;
+  toZ: number;
+}
+
+/**
+ * What a flight of a fleet to a place takes, as the server counts it (task 00053).
+ */
+export interface FlightEstimate {
+  /** The distance of the flight, in light-years. */
+  distance: number;
+  /** The speed of the fleet with an empty hold, in light-years per hour. */
+  emptySpeed: number;
+  /** The speed of the fleet with the cargo it carries now. */
+  currentSpeed: number;
+  /** The speed of the fleet with a full hold. */
+  fullSpeed: number;
+  /** The time with an empty hold, in game seconds. */
+  emptySeconds: number;
+  /** The time with the cargo the fleet carries now, in game seconds. */
+  currentSeconds: number;
+  /** The time with a full hold, in game seconds. */
+  fullSeconds: number;
+  /** Whether the fleet can fly at all: every ship of it has a drive. */
+  canFly: boolean;
+}
+
+/**
+ * What the holds of the ships of a fleet carry (task 00056).
+ */
+export interface FleetHold {
+  fleetId: number;
+  /** The room of all the holds of the fleet, in tonnes. */
+  capacity: number;
+  /** What the holds carry now, in tonnes. */
+  carried: number;
+  /** What is in the holds; an item with nothing in it is not listed. */
+  items: FleetHoldItem[];
+}
+
+/**
+ * One kind of resource in the holds of a fleet (task 00056).
+ */
+export interface FleetHoldItem {
+  resourceId: number;
+  /** How much of the resource the fleet carries, in tonnes. */
+  amount: number;
+}
+
+/**
+ * What the screen asks the server for to count the time of a flight (task 00053).
+ */
+export interface FlightEstimateRequest {
+  fleetId: number;
+  /** `fly` for a flight to a named place, `return` for the flight to the home body of the fleet. */
+  typeCode: 'fly' | 'return';
+  /** The place the flight goes to; absent for the return. */
+  target?: FlightEstimateTarget;
+  /** The place the flight starts at; absent for the place the fleet is at. */
+  from?: FlightEstimateTarget;
+}
+
+/**
+ * A place the estimate of a flight names (task 00053).
+ */
+export interface FlightEstimateTarget {
+  /** The kind of the place: `point`, `planet` or `object`. */
+  kind: string;
+  sectorId: number;
+  objectId: number;
+  /** The three axes of a point, inside its sector. */
+  x: number;
+  y: number;
+  z: number;
 }
 
 /**
@@ -441,6 +540,10 @@ export interface FleetsView {
   fleets: Fleet[];
   /** The finished ships that are in no fleet. */
   freeShips: FleetShip[];
+  /** The game time of the answer (task 00053). */
+  gameNow?: string;
+  /** How many game seconds pass in a real second (task 00053). */
+  timeMultiplier?: number;
 }
 
 /**
@@ -681,12 +784,47 @@ export function createFleetApi(http: HttpClient): FleetApi {
     async executeFlightPlan(fleetId) {
       return camelize<FlightPlan>(await http.command<unknown>(`${prefix}/flight-plans/execute`, { fleet_id: fleetId }));
     },
-    async extractionEstimate(fleetId, objectId) {
-      return camelize<ExtractionEstimate>(
-        await http.get<unknown>(`${prefix}/extraction/estimate?fleet_id=${fleetId}&object_id=${objectId}`),
-      );
+    async flightEstimate(request) {
+      const query = new URLSearchParams({ fleet_id: String(request.fleetId), type_code: request.typeCode });
+
+      writeTarget(query, 'target', request.target);
+      writeTarget(query, 'from', request.from);
+
+      try {
+        return camelize<FlightEstimate>(await http.get<unknown>(`${prefix}/flight-plans/estimate?${query.toString()}`));
+      } catch (error) {
+        // The server answers «not found» for a place it does not know: there is nothing to count.
+        if (error instanceof ApiError && error.status === notFoundStatus) {
+          return null;
+        }
+
+        throw error;
+      }
+    },
+    async fleetHold(fleetId) {
+      return camelize<FleetHold>(await http.get<unknown>(`${prefix}/fleets/${fleetId}/hold`));
     },
   };
+}
+
+/**
+ * Writes a place into the query of the estimate of a flight (task 00053).
+ *
+ * @param query The query.
+ * @param prefix The prefix of the parameters of the place: `target` or `from`.
+ * @param place The place, or nothing.
+ */
+function writeTarget(query: URLSearchParams, prefix: string, place: FlightEstimateTarget | undefined): void {
+  if (place === undefined) {
+    return;
+  }
+
+  query.set(`${prefix}_kind`, place.kind);
+  query.set(`${prefix}_sector_id`, String(place.sectorId));
+  query.set(`${prefix}_object_id`, String(place.objectId));
+  query.set(`${prefix}_x`, String(place.x));
+  query.set(`${prefix}_y`, String(place.y));
+  query.set(`${prefix}_z`, String(place.z));
 }
 
 /**

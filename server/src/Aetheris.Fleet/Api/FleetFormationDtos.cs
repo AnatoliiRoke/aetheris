@@ -9,13 +9,17 @@ namespace Aetheris.Fleet.Api;
 /// <param name="UpkeepPerHour">The credits the ships of the player cost per hour.</param>
 /// <param name="Fleets">The fleets, the oldest first.</param>
 /// <param name="FreeShips">The finished ships that are in no fleet, by body.</param>
+/// <param name="GameNow">The game time of the answer, so the screen counts the time left of a flight (task 00053).</param>
+/// <param name="TimeMultiplier">How many game seconds pass in a real second (task 00053).</param>
 public sealed record FleetsViewDto(
     int Limit,
     int Used,
     bool HasCredits,
     decimal UpkeepPerHour,
     IReadOnlyList<FleetDto> Fleets,
-    IReadOnlyList<FleetShipDto> FreeShips);
+    IReadOnlyList<FleetShipDto> FreeShips,
+    DateTimeOffset GameNow = default,
+    double TimeMultiplier = 1d);
 
 /// <summary>
 /// A fleet with its ships.
@@ -35,6 +39,12 @@ public sealed record FleetsViewDto(
 /// <param name="DamageMin">The least damage all the weapons make in one round, as the projects of the ships count it.</param>
 /// <param name="DamageMax">The greatest damage all the weapons make in one round.</param>
 /// <param name="ShieldCapacity">The capacity of all the shields.</param>
+/// <param name="ObjectId">The object of the map the fleet stands at, or <see langword="null"/> in open space or before its first flight (task 00053).</param>
+/// <param name="SystemId">The star system the fleet stands in, or <see langword="null"/> (task 00053).</param>
+/// <param name="PositionX">The first axis of the position of the fleet in the galaxy, or <see langword="null"/> before its first flight (task 00053).</param>
+/// <param name="PositionY">The second axis of the position of the fleet in the galaxy (task 00053).</param>
+/// <param name="PositionZ">The third axis of the position of the fleet in the galaxy (task 00053).</param>
+/// <param name="Flight">The flight of the fleet when it is under way, or <see langword="null"/> (task 00053).</param>
 public sealed record FleetDto(
     long Id,
     string Name,
@@ -50,7 +60,13 @@ public sealed record FleetDto(
     decimal Integrity = 0m,
     decimal DamageMin = 0m,
     decimal DamageMax = 0m,
-    decimal ShieldCapacity = 0m);
+    decimal ShieldCapacity = 0m,
+    long? ObjectId = null,
+    long? SystemId = null,
+    double? PositionX = null,
+    double? PositionY = null,
+    double? PositionZ = null,
+    FleetFlightDto? Flight = null);
 
 /// <summary>
 /// A finished ship as the fleets show it.

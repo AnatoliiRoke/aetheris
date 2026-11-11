@@ -290,8 +290,9 @@ public sealed class WorldQueryService
             ];
         }
 
-        // The mass of the place: the mass of a field or of a nebula. A gas giant has no mass at all.
-        long mass = field?.Mass ?? nebula?.Mass ?? 0;
+        // The mass of the place: the mass of a field. A gas giant and a nebula have no mass at all
+        // (task 00053): they are endless sources and are never emptied.
+        long mass = field?.Mass ?? 0;
 
         return new PlaceContentDto(dto, compositions, mass);
     }

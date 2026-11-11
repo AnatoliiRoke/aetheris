@@ -109,6 +109,9 @@ public sealed class PartTypeEntity
 
     /// <summary>Gets or sets the races the part belongs to (task 00042).</summary>
     public List<PartRaceCompatibilityEntity> RaceCompatibilityIds { get; set; } = [];
+
+    /// <summary>Gets or sets what the part takes and where, when it is a module of extraction (task 00055).</summary>
+    public List<PartExtractionEntity> ExtractionIds { get; set; } = [];
 }
 
 /// <summary>

@@ -212,13 +212,26 @@ public sealed class WorldMapService
             }),
         ];
 
-        List<MapNebulaDto> nebulas = await (
-                from nebula in _dbContext.Nebulae.AsNoTracking()
-                join entry in _dbContext.Objects on nebula.CelestialObjectId equals entry.Id
-                where nebula.SectorId == sectorId
-                orderby nebula.Id
-                select new MapNebulaDto(nebula.Id, entry.Id, entry.Name, entry.X, entry.Y, entry.Z, nebula.Radius, nebula.BlocksJumpDrive))
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        // A nebula is drawn for everyone, but only a nebula a radar reaches is open: the player
+        // may name only that one as the target of a flight.
+        List<MapNebulaDto> nebulas = (await (
+                    from nebula in _dbContext.Nebulae.AsNoTracking()
+                    join entry in _dbContext.Objects on nebula.CelestialObjectId equals entry.Id
+                    where nebula.SectorId == sectorId
+                    orderby nebula.Id
+                    select new { nebula.Id, ObjectId = entry.Id, entry.Name, entry.X, entry.Y, entry.Z, nebula.Radius, nebula.BlocksJumpDrive })
+                .ToListAsync(cancellationToken).ConfigureAwait(false))
+            .Select(row => new MapNebulaDto(
+                row.Id,
+                row.ObjectId,
+                row.Name,
+                row.X,
+                row.Y,
+                row.Z,
+                row.Radius,
+                row.BlocksJumpDrive,
+                scope.SeesObject(row.ObjectId) ? MapStates.Open : MapStates.Unknown))
+            .ToList();
 
         List<MapFieldDto> fields = (await (
                     from field in _dbContext.Fields.AsNoTracking()

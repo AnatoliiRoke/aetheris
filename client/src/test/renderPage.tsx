@@ -7,7 +7,7 @@ import type { Api } from '../api/context';
 import type { ContentApi } from '../api/contentApi';
 import type { CurrencyBalanceFacts, EconomyApi, EconomyOverview, PopulationFacts } from '../api/economyApi';
 import type { GameApi, Race } from '../api/gameApi';
-import type { ExtractionEstimate, Fleet, FleetApi, FleetShip, FleetsView, FinishedShip, FlightPlan, ShipCatalog, ShipDesign, ShipHull, ShipModule, ShipyardView } from '../api/fleetApi';
+import type { FlightEstimate, Fleet, FleetApi, FleetHold, FleetShip, FleetsView, FinishedShip, FlightPlan, ShipCatalog, ShipDesign, ShipHull, ShipModule, ShipyardView } from '../api/fleetApi';
 import type { MarketApi, MarketLot, MarketOverview, MyLot } from '../api/marketApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
@@ -678,23 +678,43 @@ export function fakeFleetApi(overrides: Partial<FleetApi> = {}): FleetApi {
     deleteFlightPlan: vi.fn(async () => undefined),
     stopFlightPlan: vi.fn(async () => sampleFlightPlan()),
     executeFlightPlan: vi.fn(async () => sampleFlightPlan()),
-    extractionEstimate: vi.fn(async () => sampleExtractionEstimate()),
+    flightEstimate: vi.fn(async () => sampleFlightEstimate()),
+    fleetHold: vi.fn(async (fleetId: number) => sampleFleetHold({ fleetId })),
     ...overrides,
   };
 }
 
 /**
- * The estimate of the extraction of a fleet at a place (task 00050).
+ * The hold of a fleet as the server reads it (task 00056): two resources, the greater amount first.
  */
-export function sampleExtractionEstimate(): ExtractionEstimate {
+export function sampleFleetHold(overrides: Partial<FleetHold> = {}): FleetHold {
   return {
-    cycleSeconds: 900,
-    resourceTonsPerCycle: 350,
-    processedTonsPerCycle: 350,
-    freeHoldTons: 1000,
-    placeMassTons: 500000,
-    holdFullSeconds: 2700,
-    placeEmptySeconds: 2142000,
+    fleetId: 1,
+    capacity: 500,
+    carried: 130,
+    items: [
+      { resourceId: 3, amount: 100 },
+      { resourceId: 1, amount: 30 },
+    ],
+    ...overrides,
+  };
+}
+
+/**
+ * The time of a flight as the server counts it (task 00053): 61 minutes with an empty hold and 197 with a
+ * full one.
+ */
+export function sampleFlightEstimate(overrides: Partial<FlightEstimate> = {}): FlightEstimate {
+  return {
+    distance: 53.76,
+    emptySpeed: 52.8,
+    currentSpeed: 52.8,
+    fullSpeed: 16.4,
+    emptySeconds: 3668,
+    currentSeconds: 3668,
+    fullSeconds: 11800,
+    canFly: true,
+    ...overrides,
   };
 }
 
@@ -1353,7 +1373,7 @@ export function sampleMapSector(overrides: Partial<MapSectorView> = {}): MapSect
       { id: 5, number: 3, name: null, x: 700, y: 640, z: 0, inNebula: false, state: 'unknown', objectCount: 0, ownPlanetCount: 0, distance: 640, travelSeconds: 23040 },
       { id: 6, number: 4, name: null, x: 760, y: 700, z: 0, inNebula: false, state: 'unknown', objectCount: 0, ownPlanetCount: 0, distance: 700, travelSeconds: 25200 },
     ],
-    nebulas: [{ id: 1, objectId: 90, name: 'Arena', x: 450, y: 250, z: 0, radius: 120, blocksJumpDrive: true }],
+    nebulas: [{ id: 1, objectId: 90, name: 'Arena', x: 450, y: 250, z: 0, radius: 120, blocksJumpDrive: true, state: 'open' }],
     fields: [{ objectId: 91, objectTypeId: 10, name: 'Field A-12', x: 300, y: 500, z: 0, mass: 1200000, distance: 300, travelSeconds: 10800 }],
     radars: [{ planetId: 10, x: 200, y: 200, z: 0, radius: 1500 }],
     seesOnlyOwn: false,

@@ -3,6 +3,7 @@ import { GameIcon } from '../../../components/GameIcon';
 import { useI18n } from '../../../i18n/useI18n';
 import { formatNumber } from '../planetText';
 import { ClassChip, PlanetAvatar, StatePill } from './FleetBits';
+import { FleetPlace } from './FleetPlace';
 import { classCounts, stateText } from './fleetsParts';
 import { useFleetsScene } from './useFleetsScene';
 
@@ -42,7 +43,9 @@ export function FleetCard({
       </span>
       <span className="fl-card__row">
         <GameIcon name="planet" size={18} />
-        <span>{t('fleets.place', { place: scene.placeOf(fleet.planetId) })}</span>
+        <span>
+          <FleetPlace compact fleet={fleet} />
+        </span>
       </span>
       <span className="fl-card__chips">
         <b>{t('fleets.shipsCount', { count: fleet.ships.length })}</b>

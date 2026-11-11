@@ -32,6 +32,21 @@ public sealed class FleetDbContext : DbContext
     private const int CodeLength = 32;
 
     /// <summary>
+    /// The length of the code of the reason a plan stopped.
+    /// </summary>
+    private const int PauseCodeLength = 64;
+
+    /// <summary>
+    /// The total digits of the speed of a flight.
+    /// </summary>
+    private const int SpeedPrecision = 18;
+
+    /// <summary>
+    /// The digits of the speed of a flight after the point.
+    /// </summary>
+    private const int SpeedScale = 6;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="FleetDbContext"/> class.
     /// </summary>
     /// <param name="options">The database options.</param>
@@ -87,6 +102,9 @@ public sealed class FleetDbContext : DbContext
 
     /// <summary>Gets the cargo of the fleets (task 00050).</summary>
     public DbSet<FleetCargoEntity> FleetCargos => Set<FleetCargoEntity>();
+
+    /// <summary>Gets the flights of the fleets that are under way (task 00053).</summary>
+    public DbSet<FleetFlightEntity> FleetFlights => Set<FleetFlightEntity>();
 
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -202,6 +220,7 @@ public sealed class FleetDbContext : DbContext
             entity.HasIndex(e => e.PlayerId);
             entity.HasIndex(e => new { e.PlayerId, e.PlanetId });
             entity.HasIndex(e => e.HomePlanetId);
+            entity.HasIndex(e => e.ObjectId);
         });
 
         modelBuilder.Entity<FleetShipEntity>(entity =>
@@ -219,6 +238,7 @@ public sealed class FleetDbContext : DbContext
             entity.ToTable("flight_plan");
             entity.Property(e => e.PlayerId).HasMaxLength(PlayerIdLength);
             entity.Property(e => e.StateCode).HasMaxLength(CodeLength);
+            entity.Property(e => e.PauseCode).HasMaxLength(PauseCodeLength);
             entity.HasIndex(e => e.PlayerId);
             entity.HasIndex(e => e.FleetId).IsUnique();
             entity.HasOne<FleetEntity>().WithMany().HasForeignKey(e => e.FleetId).OnDelete(DeleteBehavior.Cascade);
@@ -252,6 +272,16 @@ public sealed class FleetDbContext : DbContext
             entity.HasIndex(e => new { e.FleetId, e.ResourceId }).IsUnique();
             entity.HasOne<FleetEntity>().WithMany().HasForeignKey(e => e.FleetId).OnDelete(DeleteBehavior.Cascade);
             entity.ToTable(table => table.HasCheckConstraint("ck_fleet_cargo_amount", "amount >= 0"));
+        });
+
+        modelBuilder.Entity<FleetFlightEntity>(entity =>
+        {
+            entity.ToTable("fleet_flight");
+            entity.Property(e => e.Speed).HasPrecision(SpeedPrecision, SpeedScale);
+            entity.HasIndex(e => e.FleetId).IsUnique();
+            entity.HasOne<FleetEntity>().WithMany().HasForeignKey(e => e.FleetId).OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint("ck_fleet_flight_distance", "distance >= 0"));
+            entity.ToTable(table => table.HasCheckConstraint("ck_fleet_flight_time", "arrives_at >= started_at"));
         });
     }
 }

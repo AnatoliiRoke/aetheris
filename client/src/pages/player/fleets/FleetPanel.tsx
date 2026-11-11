@@ -1,12 +1,16 @@
 import { useState, type FormEvent } from 'react';
 import type { Fleet, FlightPlan } from '../../../api/fleetApi';
 import { GameIcon } from '../../../components/GameIcon';
+import type { Language } from '../../../i18n/context';
 import { useI18n } from '../../../i18n/useI18n';
 import type { MessageKey } from '../../../i18n/uk';
 import { routes } from '../../../router/context';
 import { Link } from '../../../router/Router';
-import { formatNumber } from '../planetText';
+import { formatNumber, hasKey } from '../planetText';
 import { PlanetAvatar, StatePill } from './FleetBits';
+import { FleetFlightStatus, type FleetsClock } from './FleetFlightStatus';
+import { FleetHoldButton } from './FleetHold';
+import { FleetPlace } from './FleetPlace';
 import { FlightPlanPlace } from './FlightPlanPlace';
 import { ProjectList } from './ProjectLists';
 import { stateText } from './fleetsParts';
@@ -62,6 +66,9 @@ const planStates: Record<string, MessageKey> = {
  * @param onPlanEdit Opens the window that changes the flight plan.
  * @param onPlanDelete Opens the window that deletes the flight plan.
  * @param onPlanStop Stops the flight plan.
+ * @param onPlanExecute Puts the flight plan under way.
+ * @param clock The clock of the game as the screen read it, for the time left of a flight.
+ * @param onArrived What to do when the time left of a flight runs out.
  */
 export function FleetPanel({
   fleet,
@@ -78,6 +85,9 @@ export function FleetPanel({
   onPlanEdit,
   onPlanDelete,
   onPlanStop,
+  onPlanExecute,
+  clock,
+  onArrived,
 }: {
   fleet: Fleet;
   plan: FlightPlan | null;
@@ -93,6 +103,9 @@ export function FleetPanel({
   onPlanEdit: () => void;
   onPlanDelete: () => void;
   onPlanStop: () => void;
+  onPlanExecute: () => void;
+  clock: FleetsClock | null;
+  onArrived: () => void;
 }) {
   const { t, language } = useI18n();
   const scene = useFleetsScene();
@@ -108,6 +121,10 @@ export function FleetPanel({
   };
 
   const body = scene.bodies.find((entry) => entry.planetId === fleet.planetId);
+
+  // A fleet that is under way, or that stands anywhere but at a body of the player, does not give its ships
+  // back: the buttons that change its ships wait until it is at home (the server checks it too).
+  const away = fleet.stateCode !== 'stationed' || !scene.bodies.some((entry) => entry.planetId === fleet.planetId);
   const mapLink = body ? `${routes.map}?sector=${body.sectorId}&system=${body.systemId}&object=${fleet.planetId}` : routes.map;
 
   // The facts of the fleet, one line each. A fact whose value is nothing says nothing, so it is not
@@ -185,7 +202,10 @@ export function FleetPanel({
             {t('fleets.home')}: <b>{scene.nameOf(fleet.homePlanetId)}</b>
           </span>
         </span>
-        <span className="fl-row fl-row--soft">{t('fleets.place', { place: scene.placeOf(fleet.planetId) })}</span>
+        <span className="fl-row fl-row--soft">
+          <FleetPlace fleet={fleet} />
+        </span>
+        {fleet.flight ? <FleetFlightStatus clock={clock} flight={fleet.flight} onArrived={onArrived} /> : null}
       </div>
 
       <dl className="fl-facts">
@@ -214,12 +234,23 @@ export function FleetPanel({
             <p className="fl-note">
               {t(planStates[plan.stateCode] ?? 'plan.state.draft')}
             </p>
+            {plan.pauseCode ? (
+              <p className="pl-error">{t('plan.pausedBecause', { reason: reasonText(plan.pauseCode, language, t) })}</p>
+            ) : null}
             {plan.orders.length === 0 ? (
               <p className="fl-note">{t('plan.noOrders')}</p>
             ) : (
               <ol className="pl-orders pl-orders--plain">
                 {plan.orders.map((order) => (
-                  <li className="pl-order pl-order--plain" key={order.id}>
+                  <li
+                    aria-current={plan.stateCode === 'active' && plan.currentPosition === order.position ? 'step' : undefined}
+                    className={
+                      plan.stateCode === 'active' && plan.currentPosition === order.position
+                        ? 'pl-order pl-order--plain pl-order--current'
+                        : 'pl-order pl-order--plain'
+                    }
+                    key={order.id}
+                  >
                     <span className="pl-order__text">{t(orderLabels[order.typeCode] ?? 'plan.order.fly')}</span>
                     {flightTypes.includes(order.typeCode) && order.targetKind === 'point' ? (
                       <span className="pl-order__place">
@@ -255,8 +286,9 @@ export function FleetPanel({
               <button
                 aria-label={t('plan.execute')}
                 className="btn fl-btn fl-btn--icon fl-btn--go"
-                disabled
-                title={t('plan.executeSoon')}
+                disabled={busy || plan.stateCode === 'active' || plan.orders.length === 0}
+                onClick={onPlanExecute}
+                title={plan.stateCode === 'active' ? t('plan.stateRunning') : plan.orders.length === 0 ? t('plan.executeNeedsOrders') : t('plan.execute')}
                 type="button"
               >
                 <GameIcon name="orderFly" size={18} />
@@ -266,7 +298,7 @@ export function FleetPanel({
                 className="btn fl-btn fl-btn--icon"
                 disabled={busy || plan.stateCode !== 'active'}
                 onClick={onPlanStop}
-                title={plan.stateCode === 'active' ? t('plan.stop') : t('plan.executeSoon')}
+                title={plan.stateCode === 'active' ? t('plan.stop') : t('plan.stopIdle')}
                 type="button"
               >
                 <GameIcon name="clock" size={18} />
@@ -276,7 +308,7 @@ export function FleetPanel({
                 className="btn fl-btn fl-btn--icon fl-btn--danger"
                 disabled={busy || plan.stateCode === 'active'}
                 onClick={onPlanDelete}
-                title={plan.stateCode === 'active' ? t('plan.executeSoon') : t('plan.delete')}
+                title={plan.stateCode === 'active' ? t('plan.deleteRunning') : t('plan.delete')}
                 type="button"
               >
                 <GameIcon name="trash" size={18} />
@@ -290,7 +322,13 @@ export function FleetPanel({
         <h3 className="fl-section__title" id="fleet-ships">
           {t('fleets.shipsTitle')}
         </h3>
-        <button className="btn fl-btn fl-btn--block" disabled={busy} onClick={onAdd} type="button">
+        <button
+          className="btn fl-btn fl-btn--block"
+          disabled={busy || away}
+          onClick={onAdd}
+          title={away ? t('fleets.awayReason') : undefined}
+          type="button"
+        >
           {t('fleets.addShips')}
         </button>
         <ProjectList ships={fleet.ships} />
@@ -312,14 +350,21 @@ export function FleetPanel({
       */}
 
       <div className="fl-panel__buttons">
-        <button className="btn fl-btn fl-btn--block" disabled={busy} onClick={onRemove} type="button">
+        <FleetHoldButton fleetId={fleet.id} />
+        <button
+          className="btn fl-btn fl-btn--block"
+          disabled={busy || away}
+          onClick={onRemove}
+          title={away ? t('fleets.awayReason') : undefined}
+          type="button"
+        >
           {t('fleets.removeShips')}
         </button>
         <button
           className="btn fl-btn fl-btn--block"
-          disabled={busy || !canMove}
+          disabled={busy || away || !canMove}
           onClick={onMove}
-          title={canMove ? undefined : t('fleets.noFleetsHere')}
+          title={away ? t('fleets.awayReason') : canMove ? undefined : t('fleets.noFleetsHere')}
           type="button"
         >
           {t('fleets.moveShips')}
@@ -327,10 +372,31 @@ export function FleetPanel({
         <Link className="btn fl-btn fl-btn--block" to={mapLink}>
           {t('fleets.showMap')}
         </Link>
-        <button className="btn fl-btn fl-btn--block fl-btn--danger" disabled={busy} onClick={onDisband} type="button">
+        <button
+          className="btn fl-btn fl-btn--block fl-btn--danger"
+          disabled={busy || away}
+          onClick={onDisband}
+          title={away ? t('fleets.awayReason') : undefined}
+          type="button"
+        >
           {t('fleets.disband')}
         </button>
       </div>
     </aside>
   );
+}
+
+/**
+ * The text of the code a plan stopped with: the refusal of the server that told why the order could not
+ * begin, or the code itself when the interface has no words for it (task 00053).
+ *
+ * @param code The code.
+ * @param language The language of the player.
+ * @param translate The translator of the interface.
+ * @returns The text.
+ */
+function reasonText(code: string, language: Language, translate: (key: MessageKey) => string): string {
+  const key = `reason.${code}`;
+
+  return hasKey(language, key) ? translate(key as MessageKey) : code;
 }

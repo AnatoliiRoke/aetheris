@@ -74,6 +74,29 @@ function useSecondsLeft(deadline: number | null, onDone: () => void): number | n
 }
 
 /**
+ * The time left to a moment as a text that counts down (task 00053). The counter of the queue owns the only
+ * tick of the screens, so a screen that needs a countdown of its own, like the flight of a fleet, shows it with
+ * this component and never sets a timer itself.
+ *
+ * @param deadline The moment on the clock of the browser, in milliseconds, or `null` when there is none.
+ * @param onDone What to do once when the time runs out.
+ * @param render Turns the seconds left (or `null`) into what is shown.
+ */
+export function SecondsLeftText({
+  deadline,
+  onDone,
+  render,
+}: {
+  deadline: number | null;
+  onDone: () => void;
+  render: (secondsLeft: number | null) => ReactNode;
+}) {
+  const secondsLeft = useSecondsLeft(deadline, onDone);
+
+  return <>{render(secondsLeft)}</>;
+}
+
+/**
  * A record of a queue: the text, the timer, the progress and the cancel.
  *
  * @param entry The record.
