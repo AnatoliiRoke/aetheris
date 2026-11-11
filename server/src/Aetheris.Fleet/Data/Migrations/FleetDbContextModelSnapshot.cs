@@ -741,6 +741,55 @@ namespace Aetheris.Fleet.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.ShipPartCargoEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("HasRaceBonus")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_race_bonus");
+
+                    b.Property<int>("MarkLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("mark_level");
+
+                    b.Property<int>("PartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_type_id");
+
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint")
+                        .HasColumnName("quantity");
+
+                    b.Property<long>("ShipId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("ship_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ship_part_cargo");
+
+                    b.HasIndex("ShipId")
+                        .HasDatabaseName("ix_ship_part_cargo_ship_id");
+
+                    b.HasIndex("ShipId", "PartTypeId", "MarkLevel", "HasRaceBonus")
+                        .IsUnique()
+                        .HasDatabaseName("ix_ship_part_cargo_ship_id_part_type_id_mark_level_has_race_bo~");
+
+                    b.ToTable("ship_part_cargo", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_ship_part_cargo_quantity", "quantity >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Aetheris.Fleet.Data.Entities.ShipyardOrderCostEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -1033,6 +1082,16 @@ namespace Aetheris.Fleet.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_ship_module_ship_ship_id");
+                });
+
+            modelBuilder.Entity("Aetheris.Fleet.Data.Entities.ShipPartCargoEntity", b =>
+                {
+                    b.HasOne("Aetheris.Fleet.Data.Entities.ShipEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ShipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_ship_part_cargo_ship_ship_id");
                 });
 
             modelBuilder.Entity("Aetheris.Fleet.Data.Entities.ShipyardOrderCostEntity", b =>

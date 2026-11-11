@@ -100,6 +100,9 @@ public sealed class FleetDbContext : DbContext
     /// <summary>Gets the cargo of the ships (task 00050).</summary>
     public DbSet<ShipCargoEntity> ShipCargos => Set<ShipCargoEntity>();
 
+    /// <summary>Gets the parts the ships carry in their holds (task 00057).</summary>
+    public DbSet<ShipPartCargoEntity> ShipPartCargos => Set<ShipPartCargoEntity>();
+
     /// <summary>Gets the cargo of the fleets (task 00050).</summary>
     public DbSet<FleetCargoEntity> FleetCargos => Set<FleetCargoEntity>();
 
@@ -263,6 +266,15 @@ public sealed class FleetDbContext : DbContext
             entity.HasIndex(e => new { e.ShipId, e.ResourceId }).IsUnique();
             entity.HasOne<ShipEntity>().WithMany().HasForeignKey(e => e.ShipId).OnDelete(DeleteBehavior.Cascade);
             entity.ToTable(table => table.HasCheckConstraint("ck_ship_cargo_amount", "amount >= 0"));
+        });
+
+        modelBuilder.Entity<ShipPartCargoEntity>(entity =>
+        {
+            entity.ToTable("ship_part_cargo");
+            entity.HasIndex(e => e.ShipId);
+            entity.HasIndex(e => new { e.ShipId, e.PartTypeId, e.MarkLevel, e.HasRaceBonus }).IsUnique();
+            entity.HasOne<ShipEntity>().WithMany().HasForeignKey(e => e.ShipId).OnDelete(DeleteBehavior.Cascade);
+            entity.ToTable(table => table.HasCheckConstraint("ck_ship_part_cargo_quantity", "quantity >= 0"));
         });
 
         modelBuilder.Entity<FleetCargoEntity>(entity =>

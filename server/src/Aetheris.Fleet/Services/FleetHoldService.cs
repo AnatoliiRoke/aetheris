@@ -20,19 +20,23 @@ public sealed class FleetHoldService
 {
     private readonly FleetDbContext _dbContext;
     private readonly IProductionModule _production;
+    private readonly IPartStock _parts;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FleetHoldService"/> class.
     /// </summary>
     /// <param name="dbContext">The fleet context.</param>
     /// <param name="production">The catalog of the hulls and the modules.</param>
-    public FleetHoldService(FleetDbContext dbContext, IProductionModule production)
+    /// <param name="parts">The facts of the parts, for the mass of the parts in the holds.</param>
+    public FleetHoldService(FleetDbContext dbContext, IProductionModule production, IPartStock parts)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(production);
+        ArgumentNullException.ThrowIfNull(parts);
 
         _dbContext = dbContext;
         _production = production;
+        _parts = parts;
     }
 
     /// <summary>
@@ -60,7 +64,7 @@ public sealed class FleetHoldService
         // A fleet without ships has no holds, so it carries nothing, whatever its rows of the sum still say.
         if (holds.Count == 0)
         {
-            return new FleetHoldDto(fleetId, 0, 0, []);
+            return new FleetHoldDto(fleetId, 0, 0, [], []);
         }
 
         List<FleetHoldItemDto> items = await _dbContext.FleetCargos.AsNoTracking()
@@ -70,7 +74,22 @@ public sealed class FleetHoldService
             .Select(cargo => new FleetHoldItemDto(cargo.ResourceId, cargo.Amount))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-        return new FleetHoldDto(fleetId, holds.Sum(hold => hold.Capacity), holds.Sum(hold => hold.Carried), items);
+        // The parts of the ships of the fleet, one row for a kind, a mark and a bonus (task 00057).
+        long[] shipIds = [.. holds.Select(hold => hold.ShipId)];
+        var partRows = await _dbContext.ShipPartCargos.AsNoTracking()
+            .Where(cargo => shipIds.Contains(cargo.ShipId) && cargo.Quantity > 0)
+            .GroupBy(cargo => new { cargo.PartTypeId, cargo.MarkLevel, cargo.HasRaceBonus })
+            .Select(group => new { group.Key.PartTypeId, group.Key.MarkLevel, group.Key.HasRaceBonus, Quantity = group.Sum(cargo => cargo.Quantity) })
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        List<FleetHoldPartDto> parts =
+        [
+            .. partRows
+                .OrderByDescending(row => row.Quantity)
+                .ThenBy(row => row.PartTypeId)
+                .Select(row => new FleetHoldPartDto(row.PartTypeId, row.MarkLevel, row.HasRaceBonus, row.Quantity)),
+        ];
+
+        return new FleetHoldDto(fleetId, holds.Sum(hold => hold.Capacity), holds.Sum(hold => hold.Carried), items, parts);
     }
 
     /// <summary>
@@ -105,6 +124,22 @@ public sealed class FleetHoldService
             .GroupBy(cargo => cargo.ShipId)
             .Select(group => new { ShipId = group.Key, Amount = group.Sum(cargo => cargo.Amount) })
             .ToDictionaryAsync(row => row.ShipId, row => row.Amount, cancellationToken).ConfigureAwait(false);
+
+        // The parts in a hold take its room as much as they weigh (task 00057).
+        List<ShipPartCargoEntity> partRows = await _dbContext.ShipPartCargos.AsNoTracking()
+            .Where(cargo => shipIds.Contains(cargo.ShipId) && cargo.Quantity > 0)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        if (partRows.Count > 0)
+        {
+            IReadOnlyDictionary<int, PartRecipeFacts> facts = await _parts.GetPartFactsAsync(cancellationToken).ConfigureAwait(false);
+
+            foreach (IGrouping<long, ShipPartCargoEntity> byShip in partRows.GroupBy(row => row.ShipId))
+            {
+                decimal mass = byShip.Sum(row => (facts.TryGetValue(row.PartTypeId, out PartRecipeFacts? known) ? known.Weight : 0m) * row.Quantity);
+                carried[byShip.Key] = carried.GetValueOrDefault(byShip.Key) + (long)Math.Ceiling(mass);
+            }
+        }
 
         ShipCatalogDto catalog = await _production.GetShipCatalogAsync(cancellationToken).ConfigureAwait(false);
         Dictionary<int, ShipHullDto> hulls = catalog.Hulls.ToDictionary(hull => hull.Id);

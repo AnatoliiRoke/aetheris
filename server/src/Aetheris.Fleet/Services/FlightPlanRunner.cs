@@ -53,6 +53,7 @@ public sealed class FlightPlanRunner
     private readonly FleetExtractionCycleService _cycles;
     private readonly FleetHoldService _holds;
     private readonly FleetMinePlaceService _minePlaces;
+    private readonly FleetCargoService _cargo;
     private readonly IWorldModule _world;
     private readonly IEventScheduler _scheduler;
 
@@ -67,6 +68,7 @@ public sealed class FlightPlanRunner
     /// <param name="cycles">The cycles of the extraction.</param>
     /// <param name="holds">The holds of the ships.</param>
     /// <param name="minePlaces">Finds the place an extraction takes from.</param>
+    /// <param name="cargo">The load and the unload of the holds (task 00057).</param>
     /// <param name="world">The world module.</param>
     /// <param name="scheduler">The event scheduler.</param>
     public FlightPlanRunner(
@@ -78,6 +80,7 @@ public sealed class FlightPlanRunner
         FleetExtractionCycleService cycles,
         FleetHoldService holds,
         FleetMinePlaceService minePlaces,
+        FleetCargoService cargo,
         IWorldModule world,
         IEventScheduler scheduler)
     {
@@ -89,6 +92,7 @@ public sealed class FlightPlanRunner
         ArgumentNullException.ThrowIfNull(cycles);
         ArgumentNullException.ThrowIfNull(holds);
         ArgumentNullException.ThrowIfNull(minePlaces);
+        ArgumentNullException.ThrowIfNull(cargo);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(scheduler);
 
@@ -100,6 +104,7 @@ public sealed class FlightPlanRunner
         _cycles = cycles;
         _holds = holds;
         _minePlaces = minePlaces;
+        _cargo = cargo;
         _world = world;
         _scheduler = scheduler;
     }
@@ -168,6 +173,16 @@ public sealed class FlightPlanRunner
 
                 case FlightOrderTypes.Mine:
                 case FlightOrderTypes.Wait:
+                    break;
+
+                case FlightOrderTypes.Load:
+                case FlightOrderTypes.Unload:
+                    // The list of what to carry is read when the plan is written, so a plan never holds an order the fleet cannot read (task 00057).
+                    if (CargoOrderParameters.ReadItems(order.Parameters) is null)
+                    {
+                        throw new GameException(FleetErrorCodes.CargoItemsInvalid, "The order names nothing to carry, or an amount that is not above zero.");
+                    }
+
                     break;
 
                 default:
@@ -470,9 +485,38 @@ public sealed class FlightPlanRunner
             case FlightOrderTypes.Mine:
                 return await BeginMineAsync(plan, fleet, order, now, cancellationToken).ConfigureAwait(false);
 
+            case FlightOrderTypes.Load:
+            case FlightOrderTypes.Unload:
+                return await BeginCargoAsync(fleet, order, now, cancellationToken).ConfigureAwait(false);
+
             default:
                 return (BeginState.Blocked, FleetErrorCodes.FlightOrderNotSupported);
         }
+    }
+
+    /// <summary>
+    /// Begins an order of a load or an unload (task 00057). The order takes no time: it is done when the call
+    /// returns, or it is blocked with the reason, and the same order begins again when the player carries
+    /// the plan out anew.
+    /// </summary>
+    private async Task<(BeginState State, string? Code)> BeginCargoAsync(
+        FleetEntity fleet,
+        FlightPlanOrderEntity order,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyList<CargoItem>? items = CargoOrderParameters.ReadItems(order.Parameters);
+
+        if (items is null)
+        {
+            return (BeginState.Blocked, FleetErrorCodes.CargoItemsInvalid);
+        }
+
+        CargoOutcome outcome = order.TypeCode == FlightOrderTypes.Load
+            ? await _cargo.LoadAsync(fleet, items, now, cancellationToken).ConfigureAwait(false)
+            : await _cargo.UnloadAsync(fleet, items, now, cancellationToken).ConfigureAwait(false);
+
+        return outcome.Done ? (BeginState.Done, null) : (BeginState.Blocked, outcome.Code);
     }
 
     /// <summary>

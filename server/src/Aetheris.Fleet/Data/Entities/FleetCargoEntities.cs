@@ -50,3 +50,35 @@ public sealed class FleetCargoEntity
     /// <summary>Gets or sets the moment of game time the cargo was counted at.</summary>
     public DateTimeOffset UpdatedAt { get; set; }
 }
+
+/// <summary>
+/// The parts a ship carries in its hold (task 00057).
+/// </summary>
+/// <remarks>
+/// A hold takes modules as well as resources: the stack is named by the kind of the part, its mark and
+/// the bonus of the race, as the stacks of the parts of a body are. The row disappears when the
+/// whole stack is gone. The mass of the stack takes the room of the hold.
+/// </remarks>
+public sealed class ShipPartCargoEntity
+{
+    /// <summary>Gets or sets the primary key.</summary>
+    public long Id { get; set; }
+
+    /// <summary>Gets or sets the ship.</summary>
+    public long ShipId { get; set; }
+
+    /// <summary>Gets or sets the kind of the part.</summary>
+    public int PartTypeId { get; set; }
+
+    /// <summary>Gets or sets the mark level of the part.</summary>
+    public int MarkLevel { get; set; }
+
+    /// <summary>Gets or sets whether the part carries the bonus of the race that made it.</summary>
+    public bool HasRaceBonus { get; set; }
+
+    /// <summary>Gets or sets how many parts the stack holds.</summary>
+    public long Quantity { get; set; }
+
+    /// <summary>Gets or sets the moment of game time the cargo was counted at.</summary>
+    public DateTimeOffset UpdatedAt { get; set; }
+}

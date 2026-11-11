@@ -1,5 +1,6 @@
 import type { FleetApi, FlightEstimateTarget, FlightPlan, FlightPlanOrderInput } from '../../../api/fleetApi';
 import { ApiError } from '../../../api/http';
+import { cargoParameters, type CargoDraftItem } from './flightPlanCargo';
 
 /**
  * The refusal of the server that says the fleet has a flight plan already.
@@ -46,6 +47,8 @@ export interface DraftOrder {
   target: string;
   /** How long the order lasts, in minutes, as the game counted it. */
   durationMinutes: string;
+  /** What a load or an unload carries (task 00057); empty for the other types. */
+  items: CargoDraftItem[];
 }
 
 /**
@@ -101,6 +104,23 @@ export function toOrderInputs(orders: readonly DraftOrder[]): FlightPlanOrderInp
         targetZ: 0,
         durationSeconds: Math.max(0, Math.round((Number(order.durationMinutes) || 0) * 60)),
         parameters: '{}',
+      };
+    }
+
+    // The order of a load and of an unload names no target either (task 00057): it works on the body the fleet
+    // stands on when the order begins, and carries the list of what to load or put out.
+    if (order.typeCode === 'load' || order.typeCode === 'unload') {
+      return {
+        typeCode: order.typeCode,
+        targetKind: 'none',
+        targetSectorId: 0,
+        targetSystemId: 0,
+        targetObjectId: 0,
+        targetX: 0,
+        targetY: 0,
+        targetZ: 0,
+        durationSeconds: 0,
+        parameters: cargoParameters(order.items),
       };
     }
 

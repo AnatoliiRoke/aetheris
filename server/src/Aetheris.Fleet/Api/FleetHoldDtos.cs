@@ -11,11 +11,13 @@ namespace Aetheris.Fleet.Api;
 /// <param name="Capacity">The room of all the holds of the fleet, in tonnes.</param>
 /// <param name="Carried">What the holds carry now, in tonnes.</param>
 /// <param name="Items">What is in the holds, the greatest amount first; an item with nothing in it is not listed.</param>
+/// <param name="Parts">The modules in the holds, the greatest number first (task 00057).</param>
 public sealed record FleetHoldDto(
     long FleetId,
     long Capacity,
     long Carried,
-    IReadOnlyList<FleetHoldItemDto> Items);
+    IReadOnlyList<FleetHoldItemDto> Items,
+    IReadOnlyList<FleetHoldPartDto> Parts);
 
 /// <summary>
 /// One kind of resource in the holds of a fleet (task 00056).
@@ -25,3 +27,16 @@ public sealed record FleetHoldDto(
 public sealed record FleetHoldItemDto(
     int ResourceId,
     long Amount);
+
+/// <summary>
+/// One kind of module in the holds of a fleet (task 00057).
+/// </summary>
+/// <param name="PartTypeId">The kind of the part.</param>
+/// <param name="MarkLevel">The mark level of the part.</param>
+/// <param name="HasRaceBonus">Whether the part carries the bonus of the race that made it.</param>
+/// <param name="Quantity">How many parts the fleet carries.</param>
+public sealed record FleetHoldPartDto(
+    int PartTypeId,
+    int MarkLevel,
+    bool HasRaceBonus,
+    long Quantity);

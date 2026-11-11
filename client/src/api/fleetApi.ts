@@ -488,6 +488,19 @@ export interface FleetHold {
   carried: number;
   /** What is in the holds; an item with nothing in it is not listed. */
   items: FleetHoldItem[];
+  /** The modules in the holds, the greatest number first (task 00057). */
+  parts?: FleetHoldPart[];
+}
+
+/**
+ * One kind of module in the holds of a fleet (task 00057).
+ */
+export interface FleetHoldPart {
+  partTypeId: number;
+  markLevel: number;
+  hasRaceBonus: boolean;
+  /** How many modules of the kind the fleet carries. */
+  quantity: number;
 }
 
 /**

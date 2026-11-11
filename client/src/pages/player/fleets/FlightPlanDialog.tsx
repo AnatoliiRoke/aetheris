@@ -11,7 +11,9 @@ import { FleetDialog } from './FleetDialog';
 import { FlightMineTime } from './FlightMineTime';
 import { FlightPlanTime } from './FlightPlanTime';
 import { FlightTargetFields } from './FlightTargetFields';
+import { FlightCargoFields } from './FlightCargoFields';
 import { fleetExtracts } from './fleetExtraction';
+import { cargoItemsValid, cargoMass, holdBefore, holdContentOf, holdMass, readCargoItems, unloadDefaults } from './flightPlanCargo';
 import { readAxes, toOrderInputs, type DraftOrder, type FlightTimeTarget, type TargetKind } from './flightPlanParts';
 
 /**
@@ -29,8 +31,8 @@ const orderTypes: readonly { code: string; label: MessageKey; fields: OrderField
   { code: 'jump', label: 'plan.order.jump', fields: { target: true, duration: true } },
   { code: 'mine', label: 'plan.order.mine', fields: { duration: true } },
   { code: 'scan', label: 'plan.order.scan', fields: {} },
-  { code: 'load', label: 'plan.order.load', fields: {} },
-  { code: 'unload', label: 'plan.order.unload', fields: {} },
+  { code: 'load', label: 'plan.order.load', fields: { cargo: true } },
+  { code: 'unload', label: 'plan.order.unload', fields: { cargo: true } },
   { code: 'wait', label: 'plan.order.wait', fields: {} },
   { code: 'return', label: 'plan.order.return', fields: { duration: true } },
 ];
@@ -43,6 +45,8 @@ interface OrderFields {
   target?: boolean;
   /** Whether the order lasts a while. */
   duration?: boolean;
+  /** Whether the order carries a list of what to load or to put out (task 00057). */
+  cargo?: boolean;
 }
 
 /**
@@ -108,6 +112,8 @@ export function FlightPlanDialog({
   const [fleetId, setFleetId] = useState<number | null>(plan?.fleetId ?? fleets.length === 1 ? (plan?.fleetId ?? fleets[0]?.id ?? null) : null);
   const [coordinatesBad, setCoordinatesBad] = useState(false);
   const [targetBad, setTargetBad] = useState(false);
+  const [cargoBad, setCargoBad] = useState(false);
+  const [cargoOverflow, setCargoOverflow] = useState(false);
 
   // The sectors of the galaxy, so the player may choose the sector of the target. The list of the
   // sectors does not change, so the tab of the browser does not read it again.
@@ -131,6 +137,17 @@ export function FlightPlanDialog({
     [fleetApi, chosenFleet],
   );
   const catalogRead = useRead(loadCatalog, chosenFleet !== null, false);
+
+  // What the holds of the fleet carry now: an unload starts with it, and a load is checked against its room.
+  // The hold is read once, when the fleet is chosen (task 00057).
+  const loadHold = useCallback(() => (fleetId === null ? Promise.resolve(null) : fleetApi.fleetHold(fleetId)), [fleetApi, fleetId]);
+  const holdRead = useRead(loadHold, fleetId !== null, false);
+  const baseHold = useMemo(() => holdContentOf(holdRead.data), [holdRead.data]);
+
+  // The names and the weights of the modules, from the catalog, for the lists of the load and of the unload.
+  const partNames = useMemo(() => new Map((catalogRead.data?.modules ?? []).map((module) => [module.id, module.nameKey])), [catalogRead.data]);
+  const partWeights = useMemo(() => new Map((catalogRead.data?.modules ?? []).map((module) => [module.id, module.weight])), [catalogRead.data]);
+  const holdCapacity = holdRead.data?.capacity ?? chosenFleet?.holdCapacity ?? null;
 
   // Whether the fleet may extract: one of its ships has a module of extraction. The order of
   // extraction is offered only then.
@@ -180,6 +197,7 @@ export function FlightPlanDialog({
         targetObjectId: null,
         target: '',
         durationMinutes: '',
+        items: [],
       },
     ]);
   };
@@ -194,6 +212,12 @@ export function FlightPlanDialog({
         const next = { ...order, ...patch };
         const fields = orderTypes.find((type) => type.code === next.typeCode)?.fields;
 
+        // A new type of a load or an unload starts its list anew: an unload with everything the holds carry (or are
+        // meant to carry after the loads before it), a load with nothing, and any other type with no list (task 00057).
+        if (patch.typeCode !== undefined && patch.typeCode !== order.typeCode) {
+          next.items = patch.typeCode === 'unload' ? unloadDefaults(holdBefore(current, index, baseHold)) : [];
+        }
+
         // The fields of the type that are gone carry nothing: an order of a type without a target
         // names no target, and an order that does not last has no duration.
         if (fields && !fields.target) {
@@ -206,6 +230,10 @@ export function FlightPlanDialog({
 
         if (fields && !fields.duration) {
           next.durationMinutes = '';
+        }
+
+        if (fields && !fields.cargo) {
+          next.items = [];
         }
 
         return next;
@@ -266,10 +294,29 @@ export function FlightPlanDialog({
       return order.targetSectorId === null || order.targetObjectId === null;
     });
 
+    // An order of a load and of an unload needs its list whole: every item names a thing and an amount (task 00057).
+    const cargoOrders = orders.filter((order) => order.typeCode === 'load' || order.typeCode === 'unload');
+    const cargoWrong = cargoOrders.some((order) => !cargoItemsValid(order.items));
+
+    // A load is checked against the room that is left in the holds, as far as the orders before it tell.
+    const overflow =
+      holdCapacity !== null &&
+      orders.some((order, index) => {
+        if (order.typeCode !== 'load') {
+          return false;
+        }
+
+        const free = Math.max(0, holdCapacity - holdMass(holdBefore(orders, index, baseHold), (entry) => (entry.kind === 'resource' ? 1 : (partWeights.get(entry.id) ?? 0))));
+
+        return cargoMass(order.items, partWeights) > free;
+      });
+
     setCoordinatesBad(bad);
     setTargetBad(unknown);
+    setCargoBad(cargoWrong);
+    setCargoOverflow(overflow);
 
-    if (!bad && !unknown) {
+    if (!bad && !unknown && !cargoWrong && !overflow) {
       done(fleetId, toOrderInputs(orders));
     }
   };
@@ -384,6 +431,20 @@ export function FlightPlanDialog({
                     />
                   ) : null}
 
+                  {fields.cargo && (order.typeCode === 'load' || order.typeCode === 'unload') ? (
+                    <FlightCargoFields
+                      capacity={holdCapacity}
+                      content={holdBefore(orders, index, baseHold)}
+                      id={String(index)}
+                      items={order.items}
+                      onChange={(items) => changeOrder(index, { items })}
+                      partNames={partNames}
+                      partWeights={partWeights}
+                      planetId={planetBefore(orders, index, chosenFleet, bodies)}
+                      typeCode={order.typeCode}
+                    />
+                  ) : null}
+
                   {fields.target ? (
                     <FlightTargetFields
                       fleet={chosenFleet}
@@ -440,6 +501,8 @@ export function FlightPlanDialog({
         </button>
         {coordinatesBad ? <p className="pl-error">{t('plan.coordinatesBad')}</p> : null}
         {targetBad ? <p className="pl-error">{t('plan.targetUnknown')}</p> : null}
+        {cargoBad ? <p className="pl-error">{t('plan.cargo.itemsRequired')}</p> : null}
+        {cargoOverflow ? <p className="pl-error">{t('plan.cargo.overflowSave')}</p> : null}
       </div>
 
       {needsFleet ? <p className="fl-note">{t('plan.fleetRequired')}</p> : null}
@@ -480,6 +543,41 @@ function placeBefore(orders: readonly DraftOrder[], index: number): FlightTimeTa
 }
 
 /**
+ * The body the fleet stands on when an order begins, as far as the orders before it tell (task 00057): the home
+ * body after a return, a body of the player the last flight goes to, and the body the fleet stands on now when no
+ * order before moves it. A flight to a point or to a free object, or to a body that is not the player's, leaves the
+ * body unknown: a fleet there cannot load, and the window shows the whole list of resources.
+ *
+ * @param orders The orders of the window.
+ * @param index The position of the order.
+ * @param fleet The fleet the plan is made for.
+ * @param bodies The bodies of the player.
+ * @returns The body, or `null` when the window does not know it.
+ */
+function planetBefore(
+  orders: readonly DraftOrder[],
+  index: number,
+  fleet: Fleet | null,
+  bodies: readonly { planetId: number }[],
+): number | null {
+  for (let place = index - 1; place >= 0; place -= 1) {
+    const order = orders[place]!;
+
+    if (order.typeCode === 'return') {
+      return fleet?.homePlanetId ?? null;
+    }
+
+    if (order.typeCode === 'fly' || order.typeCode === 'hyperfly' || order.typeCode === 'jump') {
+      return order.targetKind === 'planet' && order.targetObjectId !== null && bodies.some((body) => body.planetId === order.targetObjectId)
+        ? order.targetObjectId
+        : null;
+    }
+  }
+
+  return fleet !== null && fleet.planetId > 0 ? fleet.planetId : null;
+}
+
+/**
  * The orders the window starts with: the orders of the plan that is being changed, or the one
  * order the map gave.
  *
@@ -498,6 +596,7 @@ function draftOf(plan: FlightPlan | null, seed: FlightPlanSeed | null, sectorId:
       targetObjectId: order.targetObjectId > 0 ? order.targetObjectId : null,
       target: order.targetKind === 'point' ? `${order.targetX}, ${order.targetY}, ${order.targetZ}` : '',
       durationMinutes: order.durationSeconds > 0 ? String(Math.round(order.durationSeconds / 60)) : '',
+      items: order.typeCode === 'load' || order.typeCode === 'unload' ? readCargoItems(order.parameters) : [],
     }));
   }
 
@@ -514,6 +613,7 @@ function draftOf(plan: FlightPlan | null, seed: FlightPlanSeed | null, sectorId:
         targetObjectId: seed.targetObjectId ?? null,
         target: isPoint ? `${seed.targetX ?? 0}, ${seed.targetY ?? 0}, ${seed.targetZ ?? 0}` : '',
         durationMinutes: '',
+        items: [],
       },
     ];
   }

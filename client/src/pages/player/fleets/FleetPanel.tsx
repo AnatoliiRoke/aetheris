@@ -10,6 +10,7 @@ import { formatNumber, hasKey } from '../planetText';
 import { PlanetAvatar, StatePill } from './FleetBits';
 import { FleetFlightStatus, type FleetsClock } from './FleetFlightStatus';
 import { FleetHoldButton } from './FleetHold';
+import { readCargoItems } from './flightPlanCargo';
 import { FleetPlace } from './FleetPlace';
 import { FlightPlanPlace } from './FlightPlanPlace';
 import { ProjectList } from './ProjectLists';
@@ -268,6 +269,9 @@ export function FleetPanel({
                       </span>
                     ) : null}
                     {order.typeCode === 'return' ? <span className="pl-order__place">→ {scene.nameOf(fleet.homePlanetId)}</span> : null}
+                    {order.typeCode === 'load' || order.typeCode === 'unload' ? (
+                      <span className="pl-order__place">{t('plan.cargo.itemsCount', { count: readCargoItems(order.parameters).length })}</span>
+                    ) : null}
                   </li>
                 ))}
               </ol>
@@ -350,7 +354,7 @@ export function FleetPanel({
       */}
 
       <div className="fl-panel__buttons">
-        <FleetHoldButton fleetId={fleet.id} />
+        <FleetHoldButton fleetId={fleet.id} homePlanetId={fleet.homePlanetId} />
         <button
           className="btn fl-btn fl-btn--block"
           disabled={busy || away}

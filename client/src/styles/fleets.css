@@ -290,6 +290,17 @@
 .pl-order__tools .pl-tool { min-width: 22px; min-height: 22px; width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .pl-error { margin: 0; color: var(--danger-text); font-size: var(--fs-ui); }
 
+/* ---------- завантаження й вивантаження в політному листі (задача 00057) ---------- */
+/* Налаштування наказу видно лише для завантаження й вивантаження: список позицій і кнопка додавання. */
+.pl-cargo { display: flex; flex-direction: column; gap: var(--space-2); }
+.pl-cargo__items { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
+/* Позиція: що перевозити, кількість, скільки є й кнопка прибрати. */
+.pl-cargo__item { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.8fr) auto auto; align-items: center; gap: var(--space-2); }
+.pl-cargo__amount { min-width: 0; }
+.pl-cargo__available { color: var(--text-soft); font-size: var(--fs-small); white-space: nowrap; }
+/* Кнопка прибрати позицію така сама мала, як у наказу: правило йде після .fl-btn--small і знімає його мінімальну висоту. */
+.pl-cargo__item .pl-tool { min-width: 22px; min-height: 22px; width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+
 /* ---------- трюм флоту (задача 00056) ---------- */
 .fl-hold { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
 .fl-hold__item {

@@ -152,4 +152,16 @@ public static class FleetErrorCodes
 
     /// <summary>No ship of the fleet has a drive, so the fleet does not fly (task 00053).</summary>
     public const string FlightNoDrive = "fleet_flight_no_drive";
+
+    /// <summary>An order of a load or an unload names nothing to carry, or names an amount that is not a number above zero (task 00057).</summary>
+    public const string CargoItemsInvalid = "fleet_cargo_items_invalid";
+
+    /// <summary>The fleet is not on a body of its owner, so it cannot load or unload (task 00057).</summary>
+    public const string CargoNoPlanet = "fleet_cargo_no_planet";
+
+    /// <summary>What the order loads weighs more than the room that is left in the holds of the fleet (task 00057).</summary>
+    public const string CargoOverflow = "fleet_cargo_overflow";
+
+    /// <summary>The body has less of a resource or of a part than the order of the load asks for (task 00057).</summary>
+    public const string CargoShort = "fleet_cargo_short";
 }

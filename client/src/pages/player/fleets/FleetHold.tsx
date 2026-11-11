@@ -16,8 +16,9 @@ import { FleetDialog } from './FleetDialog';
  * until the player asks to look; opening and closing the window draws this part and nothing else.
  *
  * @param fleetId The fleet.
+ * @param homePlanetId The home body of the fleet, to read the catalog that names the modules in the holds (task 00057).
  */
-export function FleetHoldButton({ fleetId }: { fleetId: number }) {
+export function FleetHoldButton({ fleetId, homePlanetId }: { fleetId: number; homePlanetId?: number }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
@@ -26,7 +27,7 @@ export function FleetHoldButton({ fleetId }: { fleetId: number }) {
       <button className="btn fl-btn fl-btn--block" onClick={() => setOpen(true)} type="button">
         {t('fleets.showHold')}
       </button>
-      {open ? <FleetHoldDialog fleetId={fleetId} onClose={() => setOpen(false)} /> : null}
+      {open ? <FleetHoldDialog fleetId={fleetId} homePlanetId={homePlanetId} onClose={() => setOpen(false)} /> : null}
     </>
   );
 }
@@ -36,9 +37,10 @@ export function FleetHoldButton({ fleetId }: { fleetId: number }) {
  * the holds, the greatest amount first and then by name, each with the icon of its resource group.
  *
  * @param fleetId The fleet.
+ * @param homePlanetId The home body of the fleet, for the catalog that names the modules.
  * @param onClose Closes the window.
  */
-function FleetHoldDialog({ fleetId, onClose }: { fleetId: number; onClose: () => void }) {
+function FleetHoldDialog({ fleetId, homePlanetId, onClose }: { fleetId: number; homePlanetId?: number; onClose: () => void }) {
   const { t, language } = useI18n();
   const { fleet: fleetApi } = useApi();
   const { name } = useTexts();
@@ -48,6 +50,24 @@ function FleetHoldDialog({ fleetId, onClose }: { fleetId: number; onClose: () =>
   // The hold is read once, when the window opens: it is not read again when the tab becomes visible.
   const read = useRead<FleetHold>(load, true, false);
   const resources = useMemo(() => new Map((reference?.resources ?? []).map((resource) => [resource.id, resource])), [reference]);
+
+  // The modules in the holds are named by the catalog of the ships; it is read once, only when the holds carry a module.
+  const hasParts = (read.data?.parts?.length ?? 0) > 0;
+  const loadCatalog = useCallback(
+    () => (homePlanetId === undefined ? Promise.resolve(null) : fleetApi.shipCatalog(homePlanetId)),
+    [fleetApi, homePlanetId],
+  );
+  const catalogRead = useRead(loadCatalog, hasParts && homePlanetId !== undefined, false);
+  const partNames = useMemo(() => new Map((catalogRead.data?.modules ?? []).map((module) => [module.id, module.nameKey])), [catalogRead.data]);
+  const partRows = useMemo(
+    () =>
+      (read.data?.parts ?? []).map((part) => ({
+        key: `${part.partTypeId}:${part.markLevel}:${part.hasRaceBonus ? 1 : 0}`,
+        quantity: part.quantity,
+        label: `${name(partNames.get(part.partTypeId), String(part.partTypeId))} · ${t('shipyard.mark', { mark: part.markLevel })}${part.hasRaceBonus ? ' ★' : ''}`,
+      })),
+    [name, partNames, read.data, t],
+  );
 
   const rows = useMemo(
     () =>
@@ -81,7 +101,7 @@ function FleetHoldDialog({ fleetId, onClose }: { fleetId: number; onClose: () =>
     >
       {read.failed && !read.data ? <Alert kind="error">{t('fleets.holdFailed')}</Alert> : null}
       {read.loading ? <p className="fl-note">{t('fleets.holdLoading')}</p> : null}
-      {read.data && rows.length === 0 ? <p className="fl-note">{t('fleets.holdEmpty')}</p> : null}
+      {read.data && rows.length === 0 && partRows.length === 0 ? <p className="fl-note">{t('fleets.holdEmpty')}</p> : null}
       {rows.length > 0 ? (
         <ul aria-label={t('fleets.holdTitle')} className="fl-hold">
           {rows.map((row) => (
@@ -91,6 +111,18 @@ function FleetHoldDialog({ fleetId, onClose }: { fleetId: number; onClose: () =>
                 <span>{row.label}</span>
               </span>
               <b className="fl-hold__amount">{t('fleets.tonnes', { amount: formatNumber(row.amount, language) })}</b>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {partRows.length > 0 ? (
+        <ul aria-label={t('fleets.holdParts')} className="fl-hold">
+          {partRows.map((row) => (
+            <li className="fl-hold__item" key={row.key}>
+              <span className="fl-hold__name">
+                <span>{row.label}</span>
+              </span>
+              <b className="fl-hold__amount">×{formatNumber(row.quantity, language)}</b>
             </li>
           ))}
         </ul>
