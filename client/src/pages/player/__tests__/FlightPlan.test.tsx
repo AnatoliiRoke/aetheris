@@ -7,9 +7,13 @@ import {
   fakeMapApi,
   renderPage,
   sampleFleet,
+  sampleFleetShip,
   sampleFlightEstimate,
   sampleFlightPlan,
   sampleFleetsView,
+  sampleShipCatalog,
+  sampleShipDesign,
+  sampleShipModule,
   signedInMe,
 } from '../../../test/renderPage';
 
@@ -39,6 +43,33 @@ const apis = (plans: unknown[] = []) => {
 };
 
 describe('the flight plan of a fleet (task 00050)', () => {
+  it('offers scanning with the astroscanner fitted to a fleet', async () => {
+    const scanner = sampleShipModule({ id: 58, flightOrder: 'scan', scanTarget: 'systems', facts: [
+      { kind: 'scan_radius', nameKey: '', unitKey: null, amount: 25, sortOrder: 1 },
+      { kind: 'scan_duration', nameKey: '', unitKey: null, amount: 600, sortOrder: 2 },
+    ] });
+    const design = sampleShipDesign({ id: 14, slots: [{ slotIndex: 0, partTypeId: 58, markLevel: 1, hasRaceBonus: false }] });
+    const fleet = fakeFleetApi({
+      fleets: vi.fn().mockResolvedValue(sampleFleetsView({ fleets: [
+        sampleFleet({ id: 1, name: 'Інший флот', ships: [] }),
+        sampleFleet({ id: 2, name: 'Маска', ships: [sampleFleetShip({ designId: 14 })] }),
+      ] })),
+      designs: vi.fn().mockResolvedValue([design]),
+      shipCatalog: vi.fn().mockResolvedValue(sampleShipCatalog({ modules: [scanner] })),
+      flightPlans: vi.fn().mockResolvedValue([]),
+    });
+    const user = userEvent.setup();
+    renderPage('/fleets', { auth: signedIn(), fleet });
+    await user.click(await screen.findByRole('button', { name: /Маска/ }));
+    await user.click(await screen.findByRole('button', { name: 'Створити лист' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Створити політний лист' });
+    expect(within(dialog).getByLabelText('Оберіть флот')).toHaveValue('2');
+    await user.click(within(dialog).getByRole('button', { name: 'Додати наказ' }));
+    const type = within(dialog).getByLabelText('Тип наказу');
+    await waitFor(() => expect(within(type).getByRole('option', { name: 'Сканування' })).toBeInTheDocument());
+    await user.selectOptions(type, 'scan');
+    expect(within(dialog).getByText(/Радіус: 25.*Тривалість:/)).toHaveTextContent('10:00');
+  });
   it('offers the plan of the fleet in the block of the orders', async () => {
     renderPage('/fleets', apis([sampleFlightPlan()]));
 

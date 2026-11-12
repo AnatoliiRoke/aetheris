@@ -39,6 +39,27 @@ public sealed class ShipDesignTests
         _factory = factory;
     }
 
+    /// <summary>The catalog tells the client which orders and scan targets modules provide.</summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_ship_catalog_includes_the_orders_and_targets_of_scanners()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await PlanetsTestData.FoundAsync(_factory);
+        HttpResponseMessage response = await player.Client.GetAsync($"{Catalog}?planet_id={player.PlanetId}", Token);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync(Token));
+        JsonElement[] modules = [.. body.RootElement.GetProperty("modules").EnumerateArray()];
+        JsonElement astroscanner = modules.Single(module => module.GetProperty("code").GetString() == "part_m_58");
+        JsonElement radar = modules.Single(module => module.GetProperty("code").GetString() == "part_m_59");
+        Assert.Equal("scan", astroscanner.GetProperty("flight_order").GetString());
+        Assert.Equal("systems", astroscanner.GetProperty("scan_target").GetString());
+        Assert.Equal("scan", radar.GetProperty("flight_order").GetString());
+        Assert.Equal("fleets", radar.GetProperty("scan_target").GetString());
+        Assert.Equal(600, astroscanner.GetProperty("facts").EnumerateArray()
+            .Single(fact => fact.GetProperty("kind").GetString() == "scan_duration").GetProperty("amount").GetDecimal());
+    }
+
     /// <summary>
     /// A project is created, renamed, saved and archived, and it is read from the database.
     /// </summary>

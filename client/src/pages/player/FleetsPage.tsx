@@ -507,6 +507,7 @@ function FleetsContent({
           busy={busy}
           error={dialogError}
           fleets={view.fleets}
+          initialFleetId={planDialog.fleetId}
           onClose={() => onDialog(null)}
           onExecute={(fleetId, orders) =>
             void onPlan(async () => {

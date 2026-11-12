@@ -84,6 +84,7 @@ export interface FlightPlanSeed {
  * @param fleets The fleets of the player; the plan is made for one of them.
  * @param sectorId The sector the fleets stand in; the places of the sector may be named as targets.
  * @param plan The plan that is being changed, or `null` when a new one is written.
+ * @param initialFleetId The fleet selected on the fleets screen, if any.
  * @param seed The target the map gave, or `null`.
  * @param busy Whether a command is under way.
  * @param error The refusal of the last attempt, or `null`.
@@ -95,6 +96,7 @@ export function FlightPlanDialog({
   fleets,
   sectorId,
   plan,
+  initialFleetId,
   seed,
   busy,
   error,
@@ -105,6 +107,7 @@ export function FlightPlanDialog({
   fleets: readonly Fleet[];
   sectorId: number | null;
   plan: FlightPlan | null;
+  initialFleetId?: number | null;
   seed: FlightPlanSeed | null;
   busy: boolean;
   error: string | null;
@@ -115,7 +118,7 @@ export function FlightPlanDialog({
   const { t, language } = useI18n();
   const { map, fleet: fleetApi } = useApi();
   const { bodies } = useBodies();
-  const [fleetId, setFleetId] = useState<number | null>(plan?.fleetId ?? fleets.length === 1 ? (plan?.fleetId ?? fleets[0]?.id ?? null) : null);
+  const [fleetId, setFleetId] = useState<number | null>(() => plan?.fleetId ?? initialFleetId ?? (fleets.length === 1 ? fleets[0]?.id ?? null : null));
   const [coordinatesBad, setCoordinatesBad] = useState(false);
   const [targetBad, setTargetBad] = useState(false);
   const [cargoBad, setCargoBad] = useState(false);
@@ -389,6 +392,7 @@ export function FlightPlanDialog({
             onChange={(event) => setFleetId(Number(event.target.value))}
             value={fleetId ?? ''}
           >
+            {fleetId === null ? <option disabled value="">{t('plan.chooseFleet')}</option> : null}
             {fleets.map((fleet) => (
               <option key={fleet.id} value={fleet.id}>
                 {fleet.name} · {t('fleets.shipsCount', { count: fleet.ships.length })}

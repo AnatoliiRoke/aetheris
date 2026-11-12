@@ -451,7 +451,9 @@ public sealed class ShipDesignService
                         .. (module.Extraction ?? [])
                             .Select(row => row.PlaceKind)
                             .Distinct(StringComparer.Ordinal),
-                    ]))
+                    ],
+                    module.FlightOrder,
+                    module.ScanTarget))
         ];
 
         // The types of the modules that go into a ship: the counts are of the modules the builder

@@ -2297,7 +2297,7 @@
           "number": 25
         },
         "char_scan_duration": {
-          "number": 1800
+          "number": 600
         },
         "char_detection": {
           "number": 100

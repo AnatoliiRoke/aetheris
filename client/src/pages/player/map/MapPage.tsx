@@ -167,6 +167,7 @@ export function MapPage() {
   const galaxy: MapGalaxy | null = galaxyRead.data;
   const sector: MapSectorView | null = sectorRead.data;
   const systemView: MapSystemView | null = systemRead.data;
+  const reloadSector = sectorRead.reload;
   const scanDeadlines = level === 'sector'
     ? (sector?.scans ?? []).map((scan) => scan.expiresAtReal).filter((value): value is string => Boolean(value))
     : systemView?.system.scanExpiresAtReal ? [systemView.system.scanExpiresAtReal] : [];
@@ -178,12 +179,12 @@ export function MapPage() {
       timer = window.setTimeout(() => {
         if (Date.now() < nextScanDeadline) arm();
         else if (level === 'system') go({ systemId: null, objectId: null }, true);
-        else void sectorRead.reload();
+        else void reloadSector();
       }, Math.min(2_147_483_647, Math.max(0, nextScanDeadline - Date.now())));
     };
     arm();
     return () => window.clearTimeout(timer);
-  }, [nextScanDeadline, level, go, sectorRead.reload]);
+  }, [nextScanDeadline, level, go, reloadSector]);
   const sectorNames = useMemo(() => new Map((galaxy?.sectors ?? []).map((entry) => [entry.id, entry.name])), [galaxy]);
   const sectorName = level === 'system' ? systemView?.sectorName ?? '' : sector?.name ?? sectorNames.get(location.sectorId ?? 0) ?? '';
 

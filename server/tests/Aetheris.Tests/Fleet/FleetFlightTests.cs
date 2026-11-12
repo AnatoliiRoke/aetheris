@@ -1407,7 +1407,11 @@ public sealed class FleetFlightTests
         await CommandAsync(player, Plans, new { fleet_id = ship.FleetId, orders = new object[] { new { type_code = "scan", target_kind = "none" } } });
         JsonElement plan = await CommandAsync(player, Execute, new { fleet_id = ship.FleetId });
         Assert.Equal("active", plan.GetProperty("state_code").GetString());
+        JsonElement scanOrder = Assert.Single(plan.GetProperty("orders").EnumerateArray());
+        Assert.Equal(600, scanOrder.GetProperty("duration_seconds").GetInt64());
         ScheduledEventEntity scheduled = Assert.Single(await PendingEventsAsync(FlightPlanRunner.ScanEventType));
+        using JsonDocument parameters = JsonDocument.Parse(scanOrder.GetProperty("parameters").GetString()!);
+        Assert.Equal(TimeSpan.FromMinutes(10), scheduled.RunAt - parameters.RootElement.GetProperty("StartedAt").GetDateTimeOffset());
         await RunUntilAsync(scheduled.RunAt);
         using IServiceScope scope = _factory.Services.CreateScope();
         WorldDbContext world = scope.ServiceProvider.GetRequiredService<WorldDbContext>();

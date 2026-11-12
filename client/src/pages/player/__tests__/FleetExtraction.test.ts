@@ -19,12 +19,12 @@ describe('which fleets may extract (task 00055)', () => {
       { kind: 'scan_duration', amount: duration, nameKey: '', unitKey: null, sortOrder: 2 },
     ];
     const catalog = sampleShipCatalog({ modules: [
-      sampleShipModule({ id: 1, scanTarget: 'systems', facts: facts(25, 1800) }),
-      sampleShipModule({ id: 2, scanTarget: 'systems', facts: facts(30, 2000) }),
+      sampleShipModule({ id: 1, scanTarget: 'systems', facts: facts(25, 600) }),
+      sampleShipModule({ id: 2, scanTarget: 'systems', facts: facts(30, 1200) }),
       sampleShipModule({ id: 3, scanTarget: 'fleets', facts: facts(99, 1) }),
     ] });
     const fleet = sampleFleet({ ships: [sampleFleetShip({ id: 1, designId: 7 })] });
-    expect(fleetScanCapabilities(fleet, [designOf(1, 2, 3)], catalog)).toEqual({ radius: 30, duration: 1800 });
+    expect(fleetScanCapabilities(fleet, [designOf(1, 2, 3)], catalog)).toEqual({ radius: 30, duration: 600 });
   });
   const drive = sampleShipModule({ id: 1, code: 'drive', partGroupCode: 'group_drives' });
   const extractor = sampleShipModule({ id: 2, code: 'extractor', partGroupCode: 'any_group', extractionPlaceKinds: ['nebula', 'gas_giant'] });
