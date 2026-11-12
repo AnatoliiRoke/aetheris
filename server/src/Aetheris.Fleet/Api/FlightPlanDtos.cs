@@ -85,10 +85,17 @@ public sealed record FlightEstimateDto(
 /// <param name="ArrivesAt">The moment of game time the fleet arrives.</param>
 /// <param name="Distance">The distance of the flight, in light-years.</param>
 /// <param name="Speed">The speed of the fleet, in light-years per hour.</param>
+/// <param name="FromSectorId">The sector the fleet left (task 00059).</param>
+/// <param name="FromSystemId">The system the fleet left, or <see langword="null"/> in open space (task 00059).</param>
+/// <param name="FromOrbit">The orbit the fleet left, or <see langword="null"/> outside a system (task 00059).</param>
+/// <param name="FromX">The first axis of the place the fleet left.</param>
+/// <param name="FromY">The second axis of the place the fleet left.</param>
+/// <param name="FromZ">The third axis of the place the fleet left.</param>
 /// <param name="ToSectorId">The sector of the destination.</param>
 /// <param name="ToSystemId">The system of the destination, or <see langword="null"/> in open space.</param>
 /// <param name="ToObjectId">The object of the map the fleet flies to, or <see langword="null"/> for a point of space.</param>
 /// <param name="ToPlanetId">The body the fleet flies to, or <see langword="null"/>.</param>
+/// <param name="ToOrbit">The orbit of the destination, or <see langword="null"/> outside a system (task 00059).</param>
 /// <param name="ToX">The first axis of the destination in the galaxy.</param>
 /// <param name="ToY">The second axis of the destination in the galaxy.</param>
 /// <param name="ToZ">The third axis of the destination in the galaxy.</param>
@@ -98,10 +105,17 @@ public sealed record FleetFlightDto(
     DateTimeOffset ArrivesAt,
     double Distance,
     decimal Speed,
+    int FromSectorId,
+    long? FromSystemId,
+    int? FromOrbit,
+    double FromX,
+    double FromY,
+    double FromZ,
     int ToSectorId,
     long? ToSystemId,
     long? ToObjectId,
     long? ToPlanetId,
+    int? ToOrbit,
     double ToX,
     double ToY,
     double ToZ);

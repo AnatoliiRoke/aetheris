@@ -182,6 +182,34 @@ public interface IWorldModule
     Task<WorldPlaceDto?> GetPlanetPlaceAsync(long planetId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the places of bodies in the coordinates of the galaxy (task 00059).
+    /// </summary>
+    /// <remarks>
+    /// The bodies are read in one query, so a map that shows the fleets of the player reads the
+    /// world once and not once for every body the fleets stand on.
+    /// </remarks>
+    /// <param name="planetIds">The bodies.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place of every body that exists, by its identifier.</returns>
+    Task<IReadOnlyDictionary<long, WorldPlaceDto>> GetPlanetPlacesAsync(
+        IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the places of sectors in the coordinates of the galaxy (task 00059).
+    /// </summary>
+    /// <remarks>
+    /// The sectors are read in one query, so a map that shows the route of a fleet reads the world
+    /// once and not once for every sector of the route.
+    /// </remarks>
+    /// <param name="sectorIds">The sectors.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place of every sector that exists, by its identifier.</returns>
+    Task<IReadOnlyDictionary<int, SectorPlaceDto>> GetSectorPlacesAsync(
+        IReadOnlyCollection<int> sectorIds,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets a point of open space inside a sector as a place (task 00053).
     /// </summary>
     /// <param name="sectorId">The sector.</param>

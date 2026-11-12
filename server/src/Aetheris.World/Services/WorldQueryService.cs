@@ -503,6 +503,95 @@ public sealed class WorldQueryService
     }
 
     /// <summary>
+    /// Gets the places of bodies in the coordinates of the galaxy (task 00059).
+    /// </summary>
+    /// <remarks>
+    /// The bodies are read in one query, so a map that shows the fleets of the player reads the
+    /// world once and not once for every body the fleets stand on.
+    /// </remarks>
+    /// <param name="planetIds">The bodies.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place of every body that exists, by its identifier.</returns>
+    public async Task<IReadOnlyDictionary<long, WorldPlaceDto>> GetPlanetPlacesAsync(
+        IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(planetIds);
+
+        if (planetIds.Count == 0)
+        {
+            return new Dictionary<long, WorldPlaceDto>();
+        }
+
+        List<long> ids = [.. planetIds.Distinct()];
+
+        var rows = await (
+                from planet in _dbContext.Planets.AsNoTracking()
+                join entry in _dbContext.Objects.AsNoTracking() on planet.CelestialObjectId equals entry.Id
+                join sector in _dbContext.Sectors.AsNoTracking() on planet.SectorId equals sector.Id
+                join system in _dbContext.Systems.AsNoTracking() on planet.SystemId equals system.Id into systemRows
+                from system in systemRows.DefaultIfEmpty()
+                where ids.Contains(planet.Id)
+                select new
+                {
+                    planet.Id,
+                    planet.SectorId,
+                    planet.SystemId,
+                    entry.Orbit,
+                    Local = system == null ? new { entry.X, entry.Y, entry.Z } : new { system.X, system.Y, system.Z },
+                    Origin = new { sector.X, sector.Y, sector.Z },
+                })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return rows.ToDictionary(
+            row => row.Id,
+            row => new WorldPlaceDto(
+                row.SectorId,
+                row.SystemId,
+                null,
+                row.Id,
+                row.Orbit,
+                string.Empty,
+                null,
+                row.Origin.X + row.Local.X,
+                row.Origin.Y + row.Local.Y,
+                row.Origin.Z + row.Local.Z));
+    }
+
+    /// <summary>
+    /// Gets the places of sectors in the coordinates of the galaxy (task 00059).
+    /// </summary>
+    /// <remarks>
+    /// The place of a sector is the origin of the sector: the map of the galaxy draws a sector by
+    /// it and the map of a sector draws the places inside it by the distance from it. The sectors
+    /// are read in one query, so a map that shows the route of a fleet does not read the world once
+    /// for every sector of the route.
+    /// </remarks>
+    /// <param name="sectorIds">The sectors.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place of every sector that exists, by its identifier.</returns>
+    public async Task<IReadOnlyDictionary<int, SectorPlaceDto>> GetSectorPlacesAsync(
+        IReadOnlyCollection<int> sectorIds,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(sectorIds);
+
+        if (sectorIds.Count == 0)
+        {
+            return new Dictionary<int, SectorPlaceDto>();
+        }
+
+        List<int> ids = [.. sectorIds.Distinct()];
+
+        return await _dbContext.Sectors.AsNoTracking()
+            .Where(sector => ids.Contains(sector.Id))
+            .Select(sector => new SectorPlaceDto(sector.Id, sector.X, sector.Y, sector.Z))
+            .ToDictionaryAsync(sector => sector.SectorId, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Finds the owner of a body.
     /// </summary>
     /// <param name="planetId">The body.</param>

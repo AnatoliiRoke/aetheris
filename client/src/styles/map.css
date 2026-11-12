@@ -231,6 +231,22 @@
 }
 .map-target { position: absolute; transform: translate(-50%, -50%); color: var(--accent-hover); pointer-events: none; filter: drop-shadow(0 0 6px var(--accent)); }
 
+/* ---------- the fleets that fly (task 00059) ---------- */
+/* The route of a fleet that flies: the line of the route and the mark of the fleet on it. The
+   colour of the route is the warning tone, so it is told from the route of a future flight. */
+.map-route--fleet { stroke: var(--warning); stroke-width: 2; stroke-dasharray: 4 5; }
+.map-marker--fleet .map-marker__symbol { color: var(--warning); width: 30px; height: 30px; }
+.map-marker--fleet .map-marker__symbol::before { background: radial-gradient(circle, rgba(242, 193, 78, 0.4), rgba(0, 0, 0, 0) 70%); }
+.map-marker--fleet .map-marker__symbol::after { border-color: var(--warning); }
+.map-marker--fleet .map-marker__label { color: var(--text-1); }
+/* A fleet that stands at a place: it arrived, so its mark is quieter than the mark of a fleet that flies. */
+.map-marker--fleet-stationed .map-marker__symbol { color: var(--accent-hover); width: 26px; height: 26px; }
+.map-marker--fleet-stationed .map-marker__symbol::before { background: radial-gradient(circle, rgba(46, 196, 196, 0.35), rgba(0, 0, 0, 0) 70%); }
+.map-marker--fleet-stationed .map-marker__symbol::after { border-color: var(--accent-hover); }
+.map-marker--fleet-stationed .map-marker__label { color: var(--text-soft); }
+/* The time left to the arrival is written under the mark of the fleet, so the mark stays clear. */
+.map-fleet-label { transform: translate(-50%, 26px); color: var(--text-soft); font-size: var(--fs-tiny); }
+
 /* ---------- the marks ---------- */
 /* A mark is a bright core with a halo and one or two rings around it, so a star of any kind is
    told from the others at a glance. */

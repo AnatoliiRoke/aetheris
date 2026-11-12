@@ -70,9 +70,17 @@ public static class PlanetsReferenceSeed
     {
         ArgumentNullException.ThrowIfNull(formula);
 
-        // A listed cost is already a whole number for every level. The growth formula cannot
-        // hold a step that shrinks from the low levels to the high ones.
-        if (formula is SeedCost { Values: { Count: > 0 } values })
+        // A listed cost or time is already a whole number for every level. The growth formula
+        // cannot hold a step that shrinks from the low levels to the high ones, nor the prices
+        // balanced by the steps of the game (documentation/references/balance/tsiny-budivel-i-nauk.html).
+        IReadOnlyList<long>? listed = formula switch
+        {
+            SeedCost cost => cost.Values,
+            SeedDuration duration => duration.Values,
+            _ => null,
+        };
+
+        if (listed is { Count: > 0 } values)
         {
             int index = Math.Clamp(level, 1, values.Count) - 1;
 
@@ -503,7 +511,7 @@ public sealed record SeedBuildingType(
     int SortOrder,
     IReadOnlyDictionary<string, string> Name,
     IReadOnlyDictionary<string, string>? Description,
-    SeedGrowth DurationSeconds,
+    SeedDuration DurationSeconds,
     IReadOnlyList<SeedCost> Costs,
     IReadOnlyList<SeedEffect> Effects,
     IReadOnlyList<SeedRequirement> Requirements,
@@ -528,6 +536,19 @@ public record SeedGrowth
 
     /// <summary>Gets the number of significant digits the value is rounded to, so the numbers read round; zero keeps the value as it is.</summary>
     public int Significant { get; init; }
+}
+
+/// <summary>
+/// The construction time of a building level of the starting data: the growth formula, or the
+/// time of every level.
+/// </summary>
+public sealed record SeedDuration : SeedGrowth
+{
+    /// <summary>
+    /// Gets the time of every level, from the first, in seconds, when it does not grow by one
+    /// multiplier. When it is empty the time comes from the growth formula.
+    /// </summary>
+    public IReadOnlyList<long>? Values { get; init; }
 }
 
 /// <summary>A cost of the starting data.</summary>

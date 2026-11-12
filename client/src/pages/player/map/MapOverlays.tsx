@@ -11,18 +11,18 @@ const layerIcons: Record<MapLayer, GameIconName> = {
   fields: 'mapField',
   nebulae: 'mapCloud',
   giants: 'mapGiant',
+  fleets: 'fleets',
 };
 
 const comingIcons: Record<(typeof comingLayers)[number], GameIconName> = {
-  fleets: 'fleets',
   clan: 'clan',
   enemies: 'mapAttack',
   pirates: 'danger',
 };
 
 /**
- * The panel of the layers of the map: the six that work are checkboxes, the four that wait for
- * fleets, clans and the PvE are switched off with a clock and the reason.
+ * The panel of the layers of the map: the seven that work are checkboxes, the three that wait for
+ * clans and the PvE are switched off with a clock and the reason.
  *
  * @param layers Which layers are on.
  * @param onChange What to do when the player switches a layer.

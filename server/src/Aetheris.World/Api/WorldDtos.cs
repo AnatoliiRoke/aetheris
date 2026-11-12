@@ -208,6 +208,20 @@ public sealed record WorldPlaceDto(
     double Y,
     double Z);
 
+/// <summary>
+/// The place of a sector in the coordinates of the galaxy (task 00059).
+/// </summary>
+/// <remarks>
+/// The place of a sector is the origin of the sector: every place inside it lies near it, so the
+/// map of the galaxy draws a sector by its place and the map of the sector draws the places inside
+/// it by the distance from that origin.
+/// </remarks>
+/// <param name="SectorId">The sector.</param>
+/// <param name="X">The first axis of the sector in the galaxy.</param>
+/// <param name="Y">The second axis of the sector in the galaxy.</param>
+/// <param name="Z">The third axis of the sector in the galaxy.</param>
+public sealed record SectorPlaceDto(int SectorId, double X, double Y, double Z);
+
 /// <summary>A free body that a player may take.</summary>
 /// <param name="PlanetId">The body.</param>
 /// <param name="CelestialObjectId">Its celestial object.</param>

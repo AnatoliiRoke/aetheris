@@ -43,6 +43,7 @@ public static class FleetServiceCollectionExtensions
         services.AddScoped<FleetCargoService>();
         services.AddScoped<FleetSpeedService>();
         services.AddScoped<FleetFlightService>();
+        services.AddScoped<FleetMapService>();
         services.AddScoped<FleetExtractionCycleService>();
         services.AddScoped<FleetMinePlaceService>();
         services.AddScoped<FlightPlanRunner>();

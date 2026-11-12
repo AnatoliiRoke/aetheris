@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { FleetInFlight } from '../../../api/fleetApi';
 import type { MapField, MapObject, MapSector, MapSystem, MapTargetInfo } from '../../../api/mapApi';
 import { ResourceIcon } from '../../../components/GameIcon';
 import { GameIcon, type GameIconName } from '../../../components/GameIcon';
@@ -14,7 +15,8 @@ export type MapSelection =
   | { kind: 'system'; system: MapSystem; sectorName: string }
   | { kind: 'object'; object: MapObject; systemName: string; sectorName: string }
   | { kind: 'field'; field: MapField; sectorName: string }
-  | { kind: 'point'; info: MapTargetInfo; sectorName: string };
+  | { kind: 'point'; info: MapTargetInfo; sectorName: string }
+  | { kind: 'fleet'; fleet: FleetInFlight; secondsLeft: number };
 
 /** What the card needs from the screen. */
 export interface MapCardContext {
@@ -37,6 +39,8 @@ export interface MapCardContext {
   onSendFleet: () => void;
   /** Whether the player has a fleet that may take the flight: without one the button is off. */
   canSendFleet: boolean;
+  /** Opens the screen of the fleets (task 00059). */
+  onOpenFleets: () => void;
 }
 
 const futureActions: { icon: GameIconName; key: 'colonize' | 'mine' | 'scout' | 'attack' | 'escort' }[] = [
@@ -201,6 +205,35 @@ export function MapCard({ selection, context }: { selection: MapSelection; conte
         {t('map.openPlanet')}
       </button>
     ) : null;
+  } else if (selection.kind === 'fleet') {
+    const { fleet, secondsLeft } = selection;
+
+    title = fleet.name;
+    chip = t('map.fleetInFlight');
+    showFlight = false;
+    targetable = false;
+    rows = (
+      <>
+        <Row label={t('map.fleetTo')}>
+          {fleet.flight.toSystemId !== null ? (
+            <span>{t('map.fleetToSystem')}</span>
+          ) : fleet.flight.toObjectId !== null ? (
+            <span>{t('map.fleetTarget')}</span>
+          ) : (
+            <span className="num">{`${formatCoefficient(fleet.flight.toX, language)} · ${formatCoefficient(fleet.flight.toY, language)} · ${formatCoefficient(fleet.flight.toZ, language)}`}</span>
+          )}
+        </Row>
+        <Row label={t('map.fleetArrives')}>
+          <span className="num">{secondsLeft > 0 ? t('map.fleetArrivesIn', { time: formatDuration(language, secondsLeft) }) : t('map.fleetArrived')}</span>
+        </Row>
+      </>
+    );
+    actions = (
+      <button className="btn btn--primary" type="button" onClick={context.onOpenFleets}>
+        <GameIcon name="fleets" size={18} />
+        {t('map.openFleets')}
+      </button>
+    );
   } else {
     const { info } = selection;
 

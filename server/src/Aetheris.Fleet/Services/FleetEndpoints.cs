@@ -113,6 +113,16 @@ public static class FleetEndpoints
                 await fleets.ReadAsync(PlayerId(user), cancellationToken).ConfigureAwait(false),
                 FleetJson.Options));
 
+        // The fleets that are under way, as the map draws them (task 00059): the route of every fleet
+        // and the moment it arrives, in one read.
+        fleet.MapGet("/fleets/in-flight", async (
+            ClaimsPrincipal user,
+            FleetMapService fleets,
+            CancellationToken cancellationToken) =>
+            Results.Json(
+                await fleets.ReadAsync(PlayerId(user), cancellationToken).ConfigureAwait(false),
+                FleetJson.Options));
+
         // What the holds of a fleet carry (task 00056): read when the player opens the window of the hold.
         fleet.MapGet("/fleets/{fleetId:long}/hold", async (
             long fleetId,

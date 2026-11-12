@@ -67,7 +67,7 @@
 <script id="seed" type="application/json">__SEED_DATA__</script>
 <script>
 const seed = JSON.parse(document.getElementById("seed").textContent);
-const storageKey = "aetheris-prices-v1";
+const storageKey = "aetheris-prices-v3";
 const resourceByCode = Object.fromEntries(seed.resources.map((resource) => [resource.code, resource]));
 const resourceGroupName = Object.fromEntries(seed.resource_groups.map((group) => [group.code, group.name]));
 const clone = (source) => JSON.parse(JSON.stringify(source));
@@ -119,11 +119,35 @@ function formulaAt(formula, level) {
 const costFormula = (kind, cost) => kind === "technologies" ? cost.growth : cost;
 const effectFormula = (kind, effect) => kind === "technologies" ? effect.growth : effect;
 
+// The value the server stores (PlanetsReferenceSeed.ValueAt, ResearchReferenceSeed.ValueAt): a
+// listed value as it is, otherwise the formula rounded to its significant digits, then to a whole
+// number.
+function toSignificant(value, digits) {
+  if (!digits || !value) {
+    return value;
+  }
+  const magnitude = Math.floor(Math.log10(Math.abs(value))) + 1;
+  const scale = Math.pow(10, digits - magnitude);
+  return scale >= 1 ? Math.round(value) : Math.round(value * scale) / scale;
+}
+
+function storedAt(formula, level) {
+  if (formula.values && formula.values.length) {
+    return formulaAt(formula, level);
+  }
+  return Math.round(toSignificant(formulaAt(formula, level), formula.significant || 0));
+}
+
+// A cost counts from the first level that pays it, as on the server: the formula, or the list of
+// values, starts at that level (the cost at "from_level" is the base, or the first value).
+const costLevel = (cost, level) => level - cost.from_level + 1;
+const costSpan = (cost, maxLevel) => maxLevel - cost.from_level + 1;
+
 function costsAt(kind, code, level, source = state) {
   const costs = {};
   for (const cost of source[kind][code].costs) {
     if (level >= cost.from_level) {
-      const amount = Math.round(formulaAt(costFormula(kind, cost), level));
+      const amount = Math.round(storedAt(costFormula(kind, cost), costLevel(cost, level)));
       if (amount) {
         costs[cost.resource] = (costs[cost.resource] || 0) + amount;
       }
@@ -132,13 +156,13 @@ function costsAt(kind, code, level, source = state) {
   return costs;
 }
 
-const durationAt = (kind, code, level, source = state) => Math.round(formulaAt(source[kind][code].duration_seconds, level));
+const durationAt = (kind, code, level, source = state) => Math.round(storedAt(source[kind][code].duration_seconds, level));
 
 // A value typed into the table of steps: the formula turns into a list of values by level, so
 // the other levels keep what the formula gave them.
 function valuesOf(formula, maxLevel) {
   if (!formula.values || !formula.values.length) {
-    formula.values = Array.from({ length: maxLevel }, (unused, index) => Math.round(formulaAt(formula, index + 1)));
+    formula.values = Array.from({ length: maxLevel }, (unused, index) => Math.round(storedAt(formula, index + 1)));
   }
   while (formula.values.length < maxLevel) {
     formula.values.push(formula.values[formula.values.length - 1]);
@@ -154,18 +178,17 @@ function setCost(kind, code, level, resource, amount) {
     if (!amount) {
       return;
     }
-    const formula = { base: 0, growth: 1, step: 0, significant: 2, values: Array(maxLevel).fill(0) };
+    const formula = { base: 0, growth: 1, step: 0, significant: 2, values: Array(maxLevel - level + 1).fill(0) };
     cost = kind === "technologies" ? { resource, growth: formula, from_level: level } : { resource, ...formula, from_level: level };
     costs.push(cost);
   }
-  const values = valuesOf(costFormula(kind, cost), maxLevel);
+  const formula = costFormula(kind, cost);
+  const values = valuesOf(formula, costSpan(cost, maxLevel));
   if (level < cost.from_level) {
-    for (let index = level; index < cost.from_level - 1; index += 1) {
-      values[index] = 0;
-    }
+    formula.values = [...Array(cost.from_level - level).fill(0), ...values];
     cost.from_level = level;
   }
-  values[level - 1] = amount;
+  formula.values[costLevel(cost, level) - 1] = amount;
 }
 
 function setDuration(kind, code, level, seconds) {
@@ -203,7 +226,7 @@ function planetFigures(levels) {
       continue;
     }
     for (const effect of state.buildings[building.code].effects) {
-      const value = formulaAt(effect, level) * (multipliers[effect.type] || 1);
+      const value = (effect.values && effect.values.length ? formulaAt(effect, level) : storedAt(effect, level)) * (multipliers[effect.type] || 1);
       if (effect.resource) {
         if (state.deposits.includes(effect.resource)) {
           production[effect.resource] = (production[effect.resource] || 0) + value;
@@ -510,17 +533,17 @@ function writeTargets(targets, variant) {
     const current = state[subject.kind][subject.code];
     for (const cost of current.costs) {
       const formula = costFormula(subject.kind, cost);
-      const seedValues = Array.from({ length: subject.max }, (unused, index) => formulaAt(formula, index + 1));
+      const seedValues = Array.from({ length: costSpan(cost, subject.max) }, (unused, index) => storedAt(formula, index + 1));
       formula.values = seedValues.map((amount, index) => {
-        const target = targets[subject.code + ":" + (index + 1)];
+        const target = targets[subject.code + ":" + (index + cost.from_level)];
         return Math.round(target && target.values[cost.resource] !== undefined ? target.values[cost.resource] : amount);
       });
     }
     const duration = current.duration_seconds;
-    const seedSeconds = Array.from({ length: subject.max }, (unused, index) => formulaAt(duration, index + 1));
+    const seedSeconds = Array.from({ length: subject.max }, (unused, index) => storedAt(duration, index + 1));
     duration.values = seedSeconds.map((amount, index) => {
       const target = targets[subject.code + ":" + (index + 1)];
-      return Math.round(target ? target.seconds : amount);
+      return Math.round(target && target.seconds !== undefined ? target.seconds : amount);
     });
   }
   keepSeedMaxima(simulate());
@@ -552,7 +575,7 @@ function keepSeedMaxima(result) {
       for (const cost of current.costs) {
         const ratio = before[cost.resource] && after[cost.resource] ? before[cost.resource] * maxShare(kind, cost.resource) / after[cost.resource] : 1;
         if (ratio !== 1) {
-          const values = valuesOf(costFormula(kind, cost), subject.max_level);
+          const values = valuesOf(costFormula(kind, cost), costSpan(cost, subject.max_level));
           values.forEach((amount, index) => { values[index] = Math.round(amount * ratio); });
         }
       }
@@ -565,11 +588,12 @@ function keepSeedMaxima(result) {
   }
 }
 
-const curveVersion = 8;
+const curveVersion = 10;
 
-// Author's trials (11.11.2026), the share of the seed maximum by kind and resource; every curve
-// not named here ends at 100%, the population at 150%.
-const curveMaxPercents = { buildings: { resource_1: 70, resource_22: 50, resource_23: 600 }, technologies: { resource_1: 50, resource_8: 40, resource_22: 60, resource_23: 50 } };
+// The share of the seed maximum by kind and resource a curve ends at; every curve not named here
+// ends at 100%. The author's trials of 11.11.2026 (population 150%, iron, microprocessors,
+// composites, quartzite) are in the seed since then, so the seed is the new base.
+const curveMaxPercents = { buildings: {}, technologies: {} };
 
 // The share of the seed maximum a curve ends at: 100% keeps the seed maximum, the population
 // ends 50% higher (author, 11.11.2026). Editable on the page.
@@ -584,7 +608,8 @@ function defaultCurve(result) {
   const curve = { version: curveVersion, swing: 0.1, buildings: {}, technologies: {} };
   for (const kind of ["buildings", "technologies"]) {
     const steps = result.steps.filter((step) => step.subject.kind === kind);
-    const series = { seconds: steps.map((step) => durationAt(kind, step.subject.code, step.level, original)) };
+    // The time is not balanced by the parabola: the author keeps the times of the seed (11.11.2026).
+    const series = {};
     for (const step of steps) {
       for (const [resource, amount] of Object.entries(costsAt(kind, step.subject.code, step.level, original))) {
         (series[resource] = series[resource] || []).push(amount);
@@ -593,7 +618,7 @@ function defaultCurve(result) {
     for (const [metric, values] of Object.entries(series)) {
       const positive = values.filter((value) => value > 0);
       if (positive.length) {
-        const maxPercent = curveMaxPercents[kind][metric] || (resourceByCode[metric] && resourceByCode[metric].paid_by_population ? 150 : 100);
+        const maxPercent = curveMaxPercents[kind][metric] || 100;
         curve[kind][metric] = { start: Math.round(median(positive.slice(0, 15))), end: Math.round(Math.max(...positive) * maxPercent / 100 / (1 + curve.swing)), power: 2, max_percent: maxPercent };
       }
     }
@@ -627,7 +652,7 @@ function applyParabola() {
         values[resource] = target * swing;
       }
     }
-    targets[step.subject.code + ":" + step.level] = { values, seconds: curveAt(kind, "seconds", index) * swing };
+    targets[step.subject.code + ":" + step.level] = { values };
   });
   writeTargets(targets, "Парабола");
 }

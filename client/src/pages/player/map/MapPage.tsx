@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { MapField, MapGalaxy, MapObject, MapSearchResult, MapSectorView, MapSystem, MapSystemView } from '../../../api/mapApi';
 import { ApiError } from '../../../api/http';
-import type { FleetsView } from '../../../api/fleetApi';
+import type { FleetsInFlight, FleetsView } from '../../../api/fleetApi';
 import { useApi } from '../../../api/useApi';
 import { Alert } from '../../../components/Alert';
 import { GameIcon, type GameIconName } from '../../../components/GameIcon';
@@ -23,6 +23,7 @@ import { useResourceNames } from '../useResourceNames';
 import { useCurrentPlanetId, useShellActions } from '../useShell';
 import { useWorldReference } from '../useWorldReference';
 import { MapCard, type MapCardContext, type MapSelection } from './MapCard';
+import { MapFleetsLayer } from './MapFleetsLayer';
 import { MapList, type MapListRow } from './MapList';
 import { GalaxyLayer, SectorLayer, SystemLayer, type LayerContext } from './MapLayersDraw';
 import { allLayersOn, objectClasses, type MapLayer, type MapLayers } from './mapLayers';
@@ -78,7 +79,13 @@ export function MapPage() {
   // to know whether there is a fleet at all (task 00050).
   const [fleets, setFleets] = useState<FleetsView | null>(null);
 
+  // The fleets that are under way, as the layer of the map draws them (task 00059). The answer
+  // comes with the game time it was made at, so the layer counts the place of a fleet from it.
+  const [fleetsInFlight, setFleetsInFlight] = useState<FleetsInFlight | null>(null);
+  const [fleetsReceivedAt, setFleetsReceivedAt] = useState(() => Date.now());
+
   const loadFleets = useCallback(() => fleetApi.fleets(), [fleetApi]);
+  const loadFleetsInFlight = useCallback(() => fleetApi.fleetsInFlight(), [fleetApi]);
 
   useEffect(() => {
     let alive = true;
@@ -97,6 +104,29 @@ export function MapPage() {
       alive = false;
     };
   }, [loadFleets]);
+
+  useEffect(() => {
+    let alive = true;
+
+    const read = () => {
+      void loadFleetsInFlight()
+        .then((answer) => {
+          if (alive) {
+            setFleetsInFlight(answer);
+            setFleetsReceivedAt(Date.now());
+          }
+        })
+        .catch(() => {
+          // The layer stays empty: the map shows no fleet and the screen does not fail.
+        });
+    };
+
+    read();
+
+    return () => {
+      alive = false;
+    };
+  }, [loadFleetsInFlight]);
 
   const level: Level = location.systemId !== null ? 'system' : location.sectorId !== null ? 'sector' : 'galaxy';
   const levelKey = `${level}:${location.sectorId ?? ''}:${location.systemId ?? ''}`;
@@ -140,6 +170,32 @@ export function MapPage() {
   const sectorNames = useMemo(() => new Map((galaxy?.sectors ?? []).map((entry) => [entry.id, entry.name])), [galaxy]);
   const sectorName = level === 'system' ? systemView?.sectorName ?? '' : sector?.name ?? sectorNames.get(location.sectorId ?? 0) ?? '';
 
+  // The place of the sector that is drawn in the axes of the galaxy: the route of a fleet is
+  // counted in the axes of the galaxy, and the map of a sector draws them in its own axes
+  // (task 00059).
+  const sectorOrigin = useMemo<{ x: number; y: number } | null>(() => {
+    if (level !== 'sector' || location.sectorId === null) {
+      return null;
+    }
+
+    const found = galaxy?.sectors.find((entry) => entry.id === location.sectorId);
+
+    return found ? { x: found.x, y: found.y } : null;
+  }, [level, location.sectorId, galaxy]);
+
+  // The fleet that is under way is read again when the time of its flight runs out, and not by a
+  // timer: the map asks the server when it has to (task 00059).
+  const reloadFleetsInFlight = useCallback(() => {
+    void loadFleetsInFlight()
+      .then((answer) => {
+        setFleetsInFlight(answer);
+        setFleetsReceivedAt(Date.now());
+      })
+      .catch(() => {
+        // The layer stays as it is: the screen does not fail because of the fleets.
+      });
+  }, [loadFleetsInFlight]);
+
   const typeById = useMemo(() => new Map((reference?.objectTypes ?? []).map((type) => [type.id, type])), [reference]);
   const typeName = useCallback((id: number | null) => (id === null ? t('map.unknownKind') : text(typeById.get(id)?.nameKey ?? '') ?? typeById.get(id)?.nameKey ?? t('map.unknownKind')), [typeById, text, t]);
   const typeImage = useCallback((id: number | null) => (id === null ? null : typeById.get(id)?.imageKey ?? null), [typeById]);
@@ -155,6 +211,13 @@ export function MapPage() {
   const setSelectedKey = useCallback(
     (key: string | null) => {
       setChosen({ levelKey, key });
+
+      // A fleet that is under way is not a place of the map: it has no place in the address, so the
+      // address does not change (task 00059).
+      if (key?.startsWith('fleet:')) {
+        return;
+      }
+
       const objectId = key?.startsWith('object:') ? Number(key.slice('object:'.length)) : null;
 
       if (objectId !== location.objectId) {
@@ -218,6 +281,18 @@ export function MapPage() {
 
     const id = Number(selectedKey.slice(selectedKey.indexOf(':') + 1));
 
+    // A fleet that is under way is chosen by its mark on the map (task 00059).
+    if (selectedKey.startsWith('fleet:')) {
+      const found = fleetsInFlight?.fleets.find((entry) => entry.fleetId === id);
+
+      if (!found) {
+        return null;
+      }
+
+      const secondsLeft = Math.max(0, Math.round((Date.parse(found.flight.arrivesAt) - Date.parse(fleetsInFlight?.gameNow ?? '')) / 1000));
+
+      return { kind: 'fleet', fleet: found, secondsLeft };
+    }
     if (level === 'galaxy') {
       const found = galaxy?.sectors.find((entry) => entry.id === id);
 
@@ -243,7 +318,7 @@ export function MapPage() {
     }
 
     return null;
-  }, [selectedKey, level, galaxy, sector, systemView, pointRead.data, sectorName]);
+  }, [selectedKey, level, galaxy, sector, systemView, pointRead.data, sectorName, fleetsInFlight]);
 
   const selectionTarget = useMemo<MapTarget | null>(() => {
     if (!selection) {
@@ -352,6 +427,13 @@ export function MapPage() {
     }
   };
 
+  // The mark of a fleet that is under way is chosen by a click on it (task 00059). The handler is
+  // stable, so the layer of the fleets is not drawn again for nothing.
+  const onSelectFleet = useCallback((fleetId: number) => setSelectedKey(`fleet:${fleetId}`), [setSelectedKey]);
+
+  // The place of an orbit of the system that is drawn, for the fleet that flies inside it.
+  const fleetOrbitPlace = useCallback((orbit: number, count: number) => orbitPlace(0, orbit, count), []);
+
   const onBackgroundPoint = (world: { x: number; y: number }) => {
     if (targetContext.picking && level === 'sector' && sector) {
       const point: MapTarget = { kind: 'point', sectorId: sector.sectorId, x: Math.round(world.x * 10) / 10, y: Math.round(world.y * 10) / 10, z: 0 };
@@ -397,6 +479,7 @@ export function MapPage() {
       setPlanOpen(true);
     },
     canSendFleet: (fleets?.fleets.length ?? 0) > 0,
+    onOpenFleets: () => navigate(routes.fleets),
   };
 
   const layerContext: LayerContext = { typeName, typeImage, selectedKey, onSelect, onOpen };
@@ -581,6 +664,23 @@ export function MapPage() {
           {level === 'galaxy' && galaxy ? <GalaxyLayer context={layerContext} galaxy={galaxy} /> : null}
           {level === 'sector' && sector ? <SectorLayer context={layerContext} layers={layers} sector={sector} onZoomTo={onZoomTo} /> : null}
           {level === 'system' && systemView ? <SystemLayer context={layerContext} layers={layers} view={systemView} /> : null}
+          {layers.fleets && fleetsInFlight ? (
+            <MapFleetsLayer
+              fleets={fleetsInFlight.fleets}
+              gameNow={fleetsInFlight.gameNow ?? ''}
+              level={level}
+              onArrived={reloadFleetsInFlight}
+              onSelect={onSelectFleet}
+              orbitCount={systemView?.orbitCount ?? 1}
+              orbitPlace={fleetOrbitPlace}
+              receivedAt={fleetsReceivedAt}
+              sectorId={level === 'sector' ? location.sectorId : null}
+              sectorPlace={sectorOrigin}
+              stationed={fleetsInFlight.stationed ?? []}
+              systemId={level === 'system' ? location.systemId : null}
+              timeMultiplier={fleetsInFlight.timeMultiplier ?? 1}
+            />
+          ) : null}
           {route}
         </MapViewportArea>
         {selection ? <MapCard context={cardContext} selection={selection} /> : null}

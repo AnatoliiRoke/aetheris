@@ -74,6 +74,17 @@ public static class ResearchReferenceSeed
     {
         ArgumentNullException.ThrowIfNull(formula);
 
+        // A listed cost or time is already a whole number for every level: the prices balanced by
+        // the steps of the game do not follow one multiplier
+        // (documentation/references/balance/tsiny-budivel-i-nauk.html). A level past the end of the
+        // list keeps the last value.
+        if (formula.Values is { Count: > 0 } values)
+        {
+            int index = Math.Clamp(level, 1, values.Count) - 1;
+
+            return values[index];
+        }
+
         int steps = level - 1;
 
         double value = (formula.Base * Math.Pow(formula.Growth, steps)) + (formula.Step * steps);
@@ -510,4 +521,11 @@ public record SeedGrowth
 
     /// <summary>Gets the number of significant digits the value is rounded to, so the numbers read round; zero keeps the value as it is.</summary>
     public int Significant { get; init; }
+
+    /// <summary>
+    /// Gets the value of every level, from the first level the formula counts from, when it does
+    /// not grow by one multiplier. When it is empty the value comes from the growth formula. Only
+    /// whole values (costs and times) are listed; a multiplier of an effect keeps its formula.
+    /// </summary>
+    public IReadOnlyList<long>? Values { get; init; }
 }

@@ -147,6 +147,18 @@ public sealed class WorldModule : IWorldModule
         _places.GetPlanetPlaceAsync(planetId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<IReadOnlyDictionary<int, SectorPlaceDto>> GetSectorPlacesAsync(
+        IReadOnlyCollection<int> sectorIds,
+        CancellationToken cancellationToken = default) =>
+        _queries.GetSectorPlacesAsync(sectorIds, cancellationToken);
+
+    /// <inheritdoc />
+    public Task<IReadOnlyDictionary<long, WorldPlaceDto>> GetPlanetPlacesAsync(
+        IReadOnlyCollection<long> planetIds,
+        CancellationToken cancellationToken = default) =>
+        _queries.GetPlanetPlacesAsync(planetIds, cancellationToken);
+
+    /// <inheritdoc />
     public Task<WorldPlaceDto?> GetPointPlaceAsync(int sectorId, double x, double y, double z, CancellationToken cancellationToken = default) =>
         _places.GetPointPlaceAsync(sectorId, x, y, z, cancellationToken);
 

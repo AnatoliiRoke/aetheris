@@ -284,6 +284,8 @@ export interface FleetApi {
   disassembleShip(shipId: number): Promise<ShipyardView>;
   /** The fleets of the player and the ships that are in no fleet (task 00040). */
   fleets(): Promise<FleetsView>;
+  /** The fleets of the player that are under way, as the map draws them (task 00059). */
+  fleetsInFlight(): Promise<FleetsInFlight>;
   /** Forms a fleet of free ships that stand on one body; the body is the home of the fleet. */
   createFleet(request: { planetId: number; name: string; shipIds: number[] }): Promise<FleetsView>;
   /** Puts free ships into a fleet. */
@@ -448,13 +450,93 @@ export interface FleetFlight {
   distance: number;
   /** The speed of the fleet, in light-years per hour. */
   speed: number;
+  /** The sector the fleet left (task 00059). */
+  fromSectorId: number;
+  /** The system the fleet left, or `null` in open space (task 00059). */
+  fromSystemId: number | null;
+  /** The orbit the fleet left, or `null` outside a system (task 00059). */
+  fromOrbit: number | null;
+  /** The first axis of the place the fleet left. */
+  fromX: number;
+  /** The second axis of the place the fleet left. */
+  fromY: number;
+  /** The third axis of the place the fleet left. */
+  fromZ: number;
   toSectorId: number;
   toSystemId: number | null;
   toObjectId: number | null;
   toPlanetId: number | null;
+  /** The orbit of the destination, or `null` outside a system (task 00059). */
+  toOrbit: number | null;
   toX: number;
   toY: number;
   toZ: number;
+}
+
+/**
+ * The fleets of the player that are under way, as the map of the galaxy draws them (task 00059).
+ */
+export interface FleetsInFlight {
+  /** The fleets that are under way, the oldest flight first. */
+  fleets: FleetInFlight[];
+  /** The fleets that stand at a place, so the map shows a fleet that arrived (task 00059). */
+  stationed?: FleetStationed[];
+  /** The game time of the answer, so the client counts the time left of a flight. */
+  gameNow?: string;
+  /** How many game seconds pass in a real second. */
+  timeMultiplier?: number;
+}
+
+/**
+ * One fleet of the player that stands at a place (task 00059).
+ */
+export interface FleetStationed {
+  /** The fleet. */
+  fleetId: number;
+  /** The name of the fleet. */
+  name: string;
+  /** The sector the fleet stands in. */
+  sectorId: number;
+  /** The star system the fleet stands in, or `null` in open space. */
+  systemId: number | null;
+  /** The orbit the fleet stands on, or `null` outside a system. */
+  orbit: number | null;
+  /** The first axis of the place of the fleet in the galaxy. */
+  x: number;
+  /** The second axis of the place of the fleet in the galaxy. */
+  y: number;
+  /** The third axis of the place of the fleet in the galaxy. */
+  z: number;
+}
+
+/**
+ * One fleet of the player that is under way (task 00059).
+ */
+export interface FleetInFlight {
+  /** The fleet. */
+  fleetId: number;
+  /** The name of the fleet. */
+  name: string;
+  /** The flight of the fleet: where it left, where it goes and when it arrives. */
+  flight: FleetFlight;
+  /** The place of the sector the fleet left, in the axes of the galaxy, or `null` when the sector is gone. */
+  fromSector: FleetSectorPlace | null;
+  /** The place of the sector the fleet flies to, in the axes of the galaxy, or `null` when the sector is gone. */
+  toSector: FleetSectorPlace | null;
+}
+
+/**
+ * The place of a sector of the map (task 00059): the axes of the galaxy.
+ */
+export interface FleetSectorPlace {
+  /** The sector. */
+  sectorId: number;
+  /** The first axis of the sector in the galaxy. */
+  x: number;
+  /** The second axis of the sector in the galaxy. */
+  y: number;
+  /** The third axis of the sector in the galaxy. */
+  z: number;
 }
 
 /**
@@ -740,6 +822,9 @@ export function createFleetApi(http: HttpClient): FleetApi {
     },
     async fleets() {
       return camelize<FleetsView>(await http.get<unknown>(`${prefix}/fleets`));
+    },
+    async fleetsInFlight() {
+      return camelize<FleetsInFlight>(await http.get<unknown>(`${prefix}/fleets/in-flight`));
     },
     async createFleet(request) {
       return camelize<FleetsView>(

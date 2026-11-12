@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { fakeAuthApi, fakeFleetApi, fakeMapApi, renderPage, sampleFleetsView, sampleMapGalaxy, sampleMapSector, signedInMe } from '../../../test/renderPage';
+import { fakeAuthApi, fakeFleetApi, fakeMapApi, renderPage, sampleFleetsInFlight, sampleFleetsView, sampleMapGalaxy, sampleMapSector, signedInMe } from '../../../test/renderPage';
 
 /**
  * A signed-in player with a civilization and a confirmed address.
@@ -27,11 +27,11 @@ describe('the map screen (task 00034)', () => {
     expect(document.querySelector('.map-radar')).not.toBeNull();
     expect(document.querySelector('.map-nebula')).not.toBeNull();
 
-    // The six layers work, the four that wait for fleets and clans are off with a reason.
+    // The seven layers work, the three that wait for clans and the PvE are off with a reason.
     const layers = screen.getByRole('region', { name: 'Шари' });
     await userEvent.setup().click(within(layers).getByRole('button', { name: /Шари/ }));
     expect(within(layers).getByRole('checkbox', { name: 'Мої' })).toBeChecked();
-    expect(within(layers).getByRole('checkbox', { name: 'Флоти' })).toBeDisabled();
+    expect(within(layers).getByRole('checkbox', { name: 'Флоти' })).toBeChecked();
     expect(within(layers).getByRole('checkbox', { name: 'Пірати' })).toBeDisabled();
   });
 
@@ -186,8 +186,92 @@ describe('the map screen (task 00034)', () => {
     expect(await screen.findByRole('img', { name: 'Ціль польоту' })).toBeInTheDocument();
   });
 
-  it('tells a player who has no radar that they see only their own planet', async () => {
-    const map = fakeMapApi({
+  it('draws a fleet that is under way with its route and its mark, and opens its card on a click', async () => {
+    const user = userEvent.setup();
+    const fleet = fakeFleetApi({
+      fleetsInFlight: vi.fn().mockResolvedValue(
+        sampleFleetsInFlight({
+          gameNow: '2026-11-11T10:00:00Z',
+          fleets: [
+            {
+              fleetId: 4,
+              name: 'Ескадра',
+              fromSector: { sectorId: 1, x: 0, y: 0, z: 0 },
+              toSector: { sectorId: 1, x: 0, y: 0, z: 0 },
+              flight: {
+                orderId: 1,
+                startedAt: '2026-11-11T09:00:00Z',
+                arrivesAt: '2026-11-11T11:00:00Z',
+                distance: 250,
+                speed: 150,
+                fromSectorId: 1,
+                fromSystemId: null,
+                fromOrbit: null,
+                fromX: 200,
+                fromY: 200,
+                fromZ: 0,
+                toSectorId: 1,
+                toSystemId: null,
+                toObjectId: null,
+                toPlanetId: null,
+                toOrbit: null,
+                toX: 420,
+                toY: 260,
+                toZ: 0,
+              },
+            },
+          ],
+        }),
+      ),
+    });
+
+    renderPage('/map?sector=1', { auth: signedIn(), fleet });
+
+    // The mark of the fleet stands on the route with the name of the fleet and the time left.
+    const mark = await screen.findByRole('button', { name: /Ескадра.*У польоті/ });
+
+    expect(mark).toBeInTheDocument();
+    expect(document.querySelector('.map-route--fleet')).not.toBeNull();
+
+    await user.click(mark);
+
+    const card = await screen.findByRole('complementary', { name: 'Картка об’єкта' });
+
+    expect(within(card).getByRole('heading', { name: 'Ескадра' })).toBeInTheDocument();
+
+    // The button of the card takes the player to the screen of the fleets.
+    await user.click(within(card).getByRole('button', { name: 'Відкрити флоти' }));
+
+    await waitFor(() => expect(window.location.pathname).toBe('/fleets'));
+  });
+
+  it('draws a fleet that stands at a place without a route', async () => {
+    const fleet = fakeFleetApi({
+      fleetsInFlight: vi.fn().mockResolvedValue(
+        sampleFleetsInFlight({
+          stationed: [
+            {
+              fleetId: 9,
+              name: 'Дозвір',
+              sectorId: 1,
+              systemId: null,
+              orbit: null,
+              x: 300,
+              y: 500,
+              z: 0,
+            },
+          ],
+        }),
+      ),
+    });
+
+    renderPage('/map?sector=1', { auth: signedIn(), fleet });
+
+    expect(await screen.findByRole('button', { name: /Дозвір.*Стоїть на місці/ })).toBeInTheDocument();
+    expect(document.querySelector('.map-route--fleet')).toBeNull();
+  });
+
+  it('tells a player who has no radar that they see only their own planet', async () => {    const map = fakeMapApi({
       galaxy: vi.fn().mockResolvedValue(sampleMapGalaxy({ seesOnlyOwn: true })),
       sector: vi.fn().mockResolvedValue(sampleMapSector({ seesOnlyOwn: true, radars: [] })),
     });
