@@ -1,4 +1,5 @@
 import type { HttpClient } from './http';
+import { camelize } from './planetApi';
 
 /**
  * The mail of a player (task 00060): the folders, the categories, the list of the letters and the
@@ -243,7 +244,7 @@ const prefix = '/api/v1/mail';
  */
 export function createMailApi(http: HttpClient): MailApi {
   return {
-    mail: (request) => {
+    mail: async (request) => {
       const query = new URLSearchParams();
 
       if (request?.folder) {
@@ -264,25 +265,25 @@ export function createMailApi(http: HttpClient): MailApi {
 
       const search = query.toString();
 
-      return http.get<MailView>(`${prefix}/${search ? `?${search}` : ''}`);
+      return camelize<MailView>(await http.get<unknown>(`${prefix}/${search ? `?${search}` : ''}`));
     },
-    letter: (messageId) => http.get<MailLetterDetail>(`${prefix}/letters/${messageId}`),
-    drafts: () => http.get<MailDrafts>(`${prefix}/drafts`),
-    recipients: (text) => http.get<MailRecipients>(`${prefix}/recipients${text ? `?text=${encodeURIComponent(text)}` : ''}`),
-    unread: () => http.get<MailUnread>(`${prefix}/unread`),
+    letter: async (messageId) => camelize<MailLetterDetail>(await http.get<unknown>(`${prefix}/letters/${messageId}`)),
+    drafts: async () => camelize<MailDrafts>(await http.get<unknown>(`${prefix}/drafts`)),
+    recipients: async (text) => camelize<MailRecipients>(await http.get<unknown>(`${prefix}/recipients${text ? `?text=${encodeURIComponent(text)}` : ''}`)),
+    unread: async () => camelize<MailUnread>(await http.get<unknown>(`${prefix}/unread`)),
     sendLetter: (request) =>
       http.command<{ id: number }>(`${prefix}/letters`, {
         receiver_nickname: request.receiverNickname,
         subject: request.subject,
         body: request.body,
       }),
-    saveDraft: (request) =>
-      http.command<MailDraft>(`${prefix}/drafts`, {
+    saveDraft: async (request) =>
+      camelize<MailDraft>(await http.command<unknown>(`${prefix}/drafts`, {
         draft_id: request.draftId,
         receiver_nickname: request.receiverNickname,
         subject: request.subject,
         body: request.body,
-      }),
+      })),
     removeDraft: (draftId) => http.command<{ removed: boolean }>(`${prefix}/drafts/remove`, { draft_id: draftId }),
     readAll: (folderCode) => http.command<{ marked: number }>(`${prefix}/read-all`, { folder_code: folderCode }),
     toggleSaved: (messageId) => http.command<{ saved: boolean | null }>(`${prefix}/letters/save`, { message_id: messageId }),

@@ -2,6 +2,8 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../api/http';
+import type { HttpClient } from '../../../api/http';
+import { createMailApi } from '../../../api/mailApi';
 import {
   fakeAuthApi,
   fakeMailApi,
@@ -82,6 +84,21 @@ const richView = () =>
   });
 
 describe('the screen of the mail (task 00060)', () => {
+  it('opens a scan report returned in the server JSON format', async () => {
+    const letter = { id: 20, folder_code: 'incoming', category_id: 3, category_name_key: 'mail.category.reports', sender_player_id: null, sender_nickname: null, sender_race_color_key: null, subject: '', preview: '', kind_code: 'report', system_kind_code: 'scan_report', is_read: true, is_saved: false, is_deleted: false, has_attachment: false, created_at: '2026-11-12T17:38:55Z', group_count: 1 };
+    const report = { snapshot_id: 1, sector_id: 1, x: 675.3, y: 440.9, z: 0, radius: 25, scanned_at: '2026-11-12T17:38:54Z', systems: [{ id: 41, sector_id: 1, name: 'S1-41', has_deposits: true, has_gas_giants: false, objects: [] }], free_fields: [] };
+    const get = vi.fn(async (path: string) => {
+      if (path.includes('/letters/20')) return { letter, body: '', text_key: 'mail.scan_report', text_parameters: JSON.stringify(report) };
+      if (path.includes('/unread')) return { unread_count: 0 };
+      if (path.includes('/drafts')) return { drafts: [] };
+      if (path.includes('/recipients')) return { players: [] };
+      return { folders: [{ code: 'incoming', unread_count: 0, total_count: 1 }], categories: [{ id: 3, code: 'mail_category_3', name_key: 'mail.category.reports', image_key: null, count: 1 }], letters: [letter], unread_count: 0, total_count: 1, game_now: '2026-11-12T18:00:00Z' };
+    });
+    renderPage('/mail', { auth: signedIn(), mail: createMailApi({ get } as unknown as HttpClient) });
+    await userEvent.click(await screen.findByRole('button', { name: /Звіт сканування/ }));
+    expect(await screen.findByRole('heading', { name: 'S1-41' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Показати на карті' })).toBeInTheDocument();
+  });
   it('shows a scan report and opens its fleet plan', async () => {
     const user = userEvent.setup();
     const letter = sampleMailLetter({ id: 3, kindCode: 'report', systemKindCode: 'scan_report', subject: 'Звіт сканування', senderNickname: null });
