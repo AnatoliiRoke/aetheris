@@ -220,7 +220,8 @@ public sealed class ShipCatalogService
                             row.ResourceGroupId,
                             row.ReducesMass)),
                     ],
-                    RoleOf(part, PartAttributeKeys.FlightOrder))),
+                    RoleOf(part, PartAttributeKeys.FlightOrder),
+                    RoleOf(part, PartAttributeKeys.ScanTarget))),
         ];
 
         // The ammunition is not a module of a ship: the constructor does not offer it, and the

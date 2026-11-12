@@ -270,6 +270,7 @@ export const configDescriptionsUk: Record<string, string> = {
     'Найбільша кількість символів у назві флоту.',
   'config.fleet.flight_plan.max_orders.description':
     'Найбільша кількість наказів у політному листі флоту.',
+  'config.fleet.scan.snapshot_lifetime_seconds.description': 'Термін зберігання знімка сканування, у секундах ігрового часу.',
   'config.fleet.extraction.cycle_seconds.description':
     'Тривалість одного циклу видобування, у секундах ігрового часу: раз на цикл видобуток потрапляє в трюми флоту. Орієнтир — 15 хвилин.',
   'config.fleet.extraction.place_tolerance.description':

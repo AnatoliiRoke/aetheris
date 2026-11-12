@@ -52,5 +52,11 @@
         "en": "Letters of the market: about sales and exchange."
       }
     }
+  ],
+  "system_texts": [
+    {
+      "key": "mail.scan_report",
+      "text": { "uk": "Звіт сканування", "en": "Scan report" }
+    }
   ]
 }

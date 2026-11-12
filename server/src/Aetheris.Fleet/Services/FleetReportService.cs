@@ -59,6 +59,39 @@ public sealed class FleetReportService
         _world = world;
     }
 
+    /// <summary>Writes the completed scan report to its owner.</summary>
+    /// <param name="playerId">The owner of the scan.</param>
+    /// <param name="result">The recorded data.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task representing the work.</returns>
+    public async Task WriteScanReportAsync(string playerId, ScanSnapshotResult result, CancellationToken cancellationToken)
+    {
+        ILookup<long?, ScanObjectResult> bySystem = result.Objects.ToLookup(obj => obj.SystemId);
+        string parameters = JsonSerializer.Serialize(new
+        {
+            snapshot_id = result.Id,
+            sector_id = result.SectorId,
+            sector_name = result.SectorName,
+            x = result.X,
+            y = result.Y,
+            z = result.Z,
+            radius = result.Radius,
+            scanned_at = result.ScannedAt,
+            systems = result.Systems.Select(system => new
+            {
+                id = system.Id,
+                sector_id = system.SectorId,
+                name = system.Name,
+                has_deposits = bySystem[system.Id].Any(obj => obj.HasDeposits),
+                has_gas_giants = bySystem[system.Id].Any(obj => obj.ObjectClass == WorldObjectClasses.GasGiant),
+                objects = bySystem[system.Id].Where(obj => obj.PlanetId is not null || obj.ObjectClass == WorldObjectClasses.AsteroidField),
+            }),
+            free_fields = bySystem[null].Where(obj => obj.ObjectClass == WorldObjectClasses.AsteroidField),
+        }, WorldJson.Options);
+        long? id = await _mail.SendSystemAsync(playerId, MailCategoryCodes.Report, "mail.scan_report", parameters, "scan_report", cancellationToken).ConfigureAwait(false);
+        if (id is null) throw new InvalidOperationException("The scan report category is unavailable.");
+    }
+
     /// <summary>
     /// Writes the report of a fleet to the player that owns it (task 00060).
     /// </summary>

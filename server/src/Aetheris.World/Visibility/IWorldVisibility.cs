@@ -1,3 +1,5 @@
+using Aetheris.World.Data.Entities;
+
 namespace Aetheris.World.Visibility;
 
 /// <summary>
@@ -7,11 +9,13 @@ namespace Aetheris.World.Visibility;
 /// <param name="VisibleObjectIds">The celestial objects that are open.</param>
 /// <param name="VisibleSystemIds">The star systems that are open.</param>
 /// <param name="RadarCircles">The ranges of the radars of the player, for the map; none until the radar is built (task 00034).</param>
+/// <param name="ScanSnapshots">The player's unexpired scans, separate from live visibility.</param>
 public sealed record VisibilityScope(
     bool SeesEverything,
     IReadOnlySet<long> VisibleObjectIds,
     IReadOnlySet<long> VisibleSystemIds,
-    IReadOnlyList<RadarCircle>? RadarCircles = null)
+    IReadOnlyList<RadarCircle>? RadarCircles = null,
+    IReadOnlyList<ScanSnapshotEntity>? ScanSnapshots = null)
 {
     /// <summary>
     /// Tells whether an object is open.

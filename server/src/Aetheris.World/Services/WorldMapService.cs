@@ -1,6 +1,7 @@
 using System.Globalization;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Players;
+using Aetheris.Core.Time;
 using Aetheris.World.Api;
 using Aetheris.World.Configuration;
 using Aetheris.World.Data;
@@ -32,6 +33,7 @@ public sealed class WorldMapService
     private readonly IWorldVisibility _visibility;
     private readonly WorldReferenceRepository _reference;
     private readonly IPlayerDirectory _players;
+    private readonly IGameClock _clock;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WorldMapService"/> class.
@@ -40,17 +42,19 @@ public sealed class WorldMapService
     /// <param name="visibility">The visibility of the map.</param>
     /// <param name="reference">The parameters.</param>
     /// <param name="players">The nicknames of the players.</param>
-    public WorldMapService(WorldDbContext dbContext, IWorldVisibility visibility, WorldReferenceRepository reference, IPlayerDirectory players)
+    public WorldMapService(WorldDbContext dbContext, IWorldVisibility visibility, WorldReferenceRepository reference, IPlayerDirectory players, IGameClock clock)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(visibility);
         ArgumentNullException.ThrowIfNull(reference);
         ArgumentNullException.ThrowIfNull(players);
+        ArgumentNullException.ThrowIfNull(clock);
 
         _dbContext = dbContext;
         _visibility = visibility;
         _reference = reference;
         _players = players;
+        _clock = clock;
     }
 
     /// <summary>
@@ -113,6 +117,13 @@ public sealed class WorldMapService
             states[circle.SectorId] = MapStates.Open;
         }
 
+        foreach (ScanSnapshotEntity scan in scope.ScanSnapshots ?? [])
+        {
+            states[scan.SectorId] = MapStates.Open;
+            foreach (ScanSnapshotSystemEntity system in scan.SystemIds) states[system.SectorId] = MapStates.Open;
+            foreach (ScanSnapshotObjectEntity obj in scan.ObjectIds) states[obj.SectorId] = MapStates.Open;
+        }
+
         // The sectors with a body of the player in them are open: the player stands there.
         foreach ((int sectorId, _) in own)
         {
@@ -164,6 +175,24 @@ public sealed class WorldMapService
         Origin? origin = await OriginAsync(playerId, fromPlanetId, cancellationToken).ConfigureAwait(false);
         List<(int SectorId, long ObjectId)> own = await OwnPlanetsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
+        ScanSnapshotEntity[] scans = [.. (scope.ScanSnapshots ?? []).OrderByDescending(scan => scan.ScannedAt)];
+        int[] circleSectorIds = [.. scans.Select(scan => scan.SectorId).Concat((scope.RadarCircles ?? []).Select(circle => circle.SectorId)).Distinct()];
+        Dictionary<int, SectorEntity> circleSectors = await _dbContext.Sectors.AsNoTracking().Where(s => circleSectorIds.Contains(s.Id)).ToDictionaryAsync(s => s.Id, cancellationToken).ConfigureAwait(false);
+        bool Covered(double x, double y, double z, int circleSectorId, double circleX, double circleY, double circleZ, double radius)
+        {
+            SectorEntity source = circleSectors[circleSectorId];
+            double dx = sector.X + x - source.X - circleX, dy = sector.Y + y - source.Y - circleY, dz = sector.Z + z - source.Z - circleZ;
+            return (dx * dx) + (dy * dy) + (dz * dz) <= radius * radius;
+        }
+        bool LiveAt(double x, double y, double z) => scope.SeesEverything || (scope.RadarCircles ?? []).Any(circle => Covered(x, y, z, circle.SectorId, circle.X, circle.Y, circle.Z, circle.Radius));
+        bool ScannedAt(double x, double y, double z) => scans.Any(scan => Covered(x, y, z, scan.SectorId, scan.X, scan.Y, scan.Z, scan.Radius));
+        Dictionary<long, (ScanSnapshotSystemEntity System, ScanSnapshotEntity Scan)> recordedSystems = scans
+            .SelectMany(scan => scan.SystemIds.Where(system => system.SectorId == sectorId).Select(system => (System: system, Scan: scan)))
+            .GroupBy(row => row.System.SystemId).ToDictionary(group => group.Key, group => group.First());
+        Dictionary<(long ScanId, long SystemId), int> recordedCounts = scans
+            .SelectMany(scan => scan.ObjectIds.Where(obj => obj.SystemId != null).Select(obj => (scan.Id, SystemId: obj.SystemId!.Value)))
+            .GroupBy(row => (row.Id, row.SystemId)).ToDictionary(group => group.Key, group => group.Count());
+
         List<StarSystemEntity> systems = await _dbContext.Systems.AsNoTracking()
             .Where(system => system.SectorId == sectorId)
             .OrderBy(system => system.Number)
@@ -212,6 +241,25 @@ public sealed class WorldMapService
             }),
         ];
 
+        for (int i = 0; i < systemDtos.Count; i++)
+        {
+            MapSystemDto current = systemDtos[i];
+            if (!scope.SeesSystem(current.Id) && !LiveAt(current.X, current.Y, current.Z) && recordedSystems.TryGetValue(current.Id, out var row))
+            {
+                ScanSnapshotSystemEntity saved = row.System;
+                int count = recordedCounts.GetValueOrDefault((row.Scan.Id, saved.SystemId));
+                systemDtos[i] = current with { Name = saved.Name, Number = saved.Number, X = saved.X, Y = saved.Y, Z = saved.Z, InNebula = saved.InNebula, State = MapStates.Open, ObjectCount = count, FromScan = true, ScannedAt = row.Scan.ScannedAt, ScanExpiresAtReal = _clock.ToRealTime(row.Scan.ExpiresAt) };
+            }
+        }
+        systemDtos.RemoveAll(system => !scope.SeesSystem(system.Id) && !system.FromScan && ScannedAt(system.X, system.Y, system.Z) && !LiveAt(system.X, system.Y, system.Z));
+        HashSet<long> listedSystemIds = [.. systemDtos.Select(system => system.Id)];
+        foreach (var row in recordedSystems.Values.Where(row => !listedSystemIds.Contains(row.System.SystemId) && !LiveAt(row.System.X, row.System.Y, row.System.Z)))
+        {
+            ScanSnapshotSystemEntity saved = row.System;
+            (double? distance, long? seconds) = Travel(settings, origin, sector, new Point3(saved.X, saved.Y, saved.Z), saved.SystemId, null);
+            systemDtos.Add(new MapSystemDto(saved.SystemId, saved.Number, saved.Name, saved.X, saved.Y, saved.Z, saved.InNebula, MapStates.Open, recordedCounts.GetValueOrDefault((row.Scan.Id, saved.SystemId)), 0, distance, seconds, true, row.Scan.ScannedAt, _clock.ToRealTime(row.Scan.ExpiresAt)));
+        }
+
         // A nebula is drawn for everyone, but only a nebula a radar reaches is open: the player
         // may name only that one as the target of a flight.
         List<MapNebulaDto> nebulas = (await (
@@ -249,13 +297,38 @@ public sealed class WorldMapService
             })
             .ToList();
 
+        nebulas.RemoveAll(nebula => !LiveAt(nebula.X, nebula.Y, nebula.Z) && ScannedAt(nebula.X, nebula.Y, nebula.Z));
+        var savedNebulae = scans.SelectMany(scan => scan.ObjectIds)
+            .Where(obj => obj.SectorId == sectorId && obj.NebulaId != null)
+            .GroupBy(obj => obj.CelestialObjectId).Select(group => group.First());
+        foreach (ScanSnapshotObjectEntity saved in savedNebulae.Where(obj => !LiveAt(obj.X, obj.Y, obj.Z)))
+        {
+            nebulas.Add(new MapNebulaDto(saved.NebulaId!.Value, saved.CelestialObjectId, saved.Name, saved.X, saved.Y, saved.Z, saved.NebulaRadius ?? 0, saved.NebulaBlocksJumpDrive, MapStates.Open));
+        }
+
         List<MapRadarDto> radars =
         [
             .. (scope.RadarCircles ?? []).Where(circle => circle.SectorId == sectorId)
                 .Select(circle => new MapRadarDto(circle.PlanetId, circle.X, circle.Y, circle.Z, circle.Radius)),
         ];
 
-        return new MapSectorViewDto(sector.Id, sector.Name, settings.SectorSize, systemDtos, nebulas, fields, radars, SeesOnlyOwn(scope, own));
+        var recordedFields = scans.SelectMany(scan => scan.ObjectIds.Select(obj => (Object: obj, Scan: scan)))
+            .Where(row => row.Object.SectorId == sectorId && row.Object.SystemId == null && row.Object.AsteroidFieldId != null)
+            .GroupBy(row => row.Object.CelestialObjectId).Select(group => group.First());
+        foreach (var row in recordedFields.Where(row => !scope.SeesObject(row.Object.CelestialObjectId) && !LiveAt(row.Object.X, row.Object.Y, row.Object.Z)))
+        {
+            ScanSnapshotObjectEntity saved = row.Object;
+            (double? distance, long? seconds) = Travel(settings, origin, sector, new Point3(saved.X, saved.Y, saved.Z), null, null);
+            fields.Add(new MapFieldDto(saved.CelestialObjectId, saved.ObjectTypeId, saved.Name, saved.X, saved.Y, saved.Z, saved.FieldMass ?? 0, distance, seconds,
+                [.. saved.DepositIds.Select(deposit => new MapResourceShareDto(deposit.ResourceId, deposit.Coefficient))], row.Scan.ScannedAt));
+        }
+        List<MapScanDto> scanDtos = [.. scans.Select(scan =>
+        {
+            SectorEntity source = circleSectors[scan.SectorId];
+            return new MapScanDto(source.X + scan.X - sector.X, source.Y + scan.Y - sector.Y, source.Z + scan.Z - sector.Z, scan.Radius, scan.ScannedAt, scan.ExpiresAt, _clock.ToRealTime(scan.ExpiresAt));
+        })];
+
+        return new MapSectorViewDto(sector.Id, sector.Name, settings.SectorSize, systemDtos, nebulas, fields, radars, SeesOnlyOwn(scope, own) && scans.Length == 0, scanDtos);
     }
 
     /// <summary>
@@ -277,7 +350,23 @@ public sealed class WorldMapService
 
         if (!scope.SeesSystem(systemId))
         {
-            throw new GameException(GameErrorCodes.NotFound, "The system is unknown.");
+            ScanSnapshotEntity? scan = (scope.ScanSnapshots ?? []).OrderByDescending(entry => entry.ScannedAt)
+                .FirstOrDefault(entry => entry.SystemIds.Any(system => system.SystemId == systemId));
+            if (scan is null) throw new GameException(GameErrorCodes.NotFound, "The system is unknown.");
+            ScanSnapshotSystemEntity saved = scan.SystemIds.Single(system => system.SystemId == systemId);
+            int[] sectorIds = [.. (scope.RadarCircles ?? []).Select(circle => circle.SectorId).Append(saved.SectorId).Distinct()];
+            Dictionary<int, SectorEntity> sectors = await _dbContext.Sectors.AsNoTracking().Where(sector => sectorIds.Contains(sector.Id)).ToDictionaryAsync(sector => sector.Id, cancellationToken).ConfigureAwait(false);
+            SectorEntity savedSector = sectors[saved.SectorId];
+            bool live = (scope.RadarCircles ?? []).Any(circle =>
+            {
+                SectorEntity radarSector = sectors[circle.SectorId];
+                double dx = savedSector.X + saved.X - radarSector.X - circle.X;
+                double dy = savedSector.Y + saved.Y - radarSector.Y - circle.Y;
+                double dz = savedSector.Z + saved.Z - radarSector.Z - circle.Z;
+                return (dx * dx) + (dy * dy) + (dz * dz) <= circle.Radius * circle.Radius;
+            });
+            if (live) throw new GameException(GameErrorCodes.NotFound, "The system is unknown.");
+            return await GetScannedSystemAsync(playerId, scan, systemId, fromPlanetId, cancellationToken).ConfigureAwait(false);
         }
 
         StarSystemEntity system = await _dbContext.Systems.AsNoTracking().SingleOrDefaultAsync(entry => entry.Id == systemId, cancellationToken).ConfigureAwait(false)
@@ -371,6 +460,34 @@ public sealed class WorldMapService
             systemSeconds);
 
         return new MapSystemViewDto(systemDto, sector.Name, _reference.Settings.OrbitCount, dtos);
+    }
+
+    private async Task<MapSystemViewDto> GetScannedSystemAsync(string playerId, ScanSnapshotEntity scan, long systemId, long? fromPlanetId, CancellationToken cancellationToken)
+    {
+        ScanSnapshotSystemEntity system = scan.SystemIds.Single(entry => entry.SystemId == systemId);
+        SectorEntity sector = await _dbContext.Sectors.AsNoTracking().SingleAsync(entry => entry.Id == system.SectorId, cancellationToken).ConfigureAwait(false);
+        Origin? origin = await OriginAsync(playerId, fromPlanetId, cancellationToken).ConfigureAwait(false);
+        ScanSnapshotObjectEntity[] objects = [.. scan.ObjectIds.Where(obj => obj.SystemId == systemId).OrderBy(obj => obj.Orbit).ThenBy(obj => obj.CelestialObjectId)];
+        int[] typeIds = [.. objects.Select(obj => obj.ObjectTypeId).Distinct()];
+        Dictionary<int, CelestialObjectTypeEntity> types = await _dbContext.ObjectTypes.AsNoTracking().Where(type => typeIds.Contains(type.Id)).ToDictionaryAsync(type => type.Id, cancellationToken).ConfigureAwait(false);
+        Dictionary<string, MapOwnerDto> owners = await OwnersAsync([.. objects.Where(obj => obj.OwnerPlayerId is not null).Select(obj => obj.OwnerPlayerId!).Distinct()], cancellationToken).ConfigureAwait(false);
+        List<MapObjectDto> dtos = [];
+        foreach (ScanSnapshotObjectEntity obj in objects)
+        {
+            CelestialObjectTypeEntity type = types[obj.ObjectTypeId];
+            if (type.ObjectClass == WorldObjectClasses.Nebula) continue;
+            (double? distance, long? seconds) = Travel(_reference.Settings, origin, sector, new Point3(system.X, system.Y, system.Z), systemId, obj.Orbit);
+            MapOwnerDto? owner = obj.OwnerPlayerId is { } ownerId && owners.TryGetValue(ownerId, out MapOwnerDto? known) ? known : null;
+            dtos.Add(new MapObjectDto(obj.CelestialObjectId, MapStates.Open, obj.Orbit, type.ObjectClass, obj.ObjectTypeId, obj.Name,
+                obj.PlanetId, obj.SizeClassId, obj.Size, obj.OwnerPlayerId == playerId, obj.PlanetId is not null && obj.OwnerPlayerId is null && type.IsColonizable,
+                obj.IsTerraformed, owner, type.ObjectClass == WorldObjectClasses.GasGiant ? _reference.Settings.GasGiantStationLimit : null,
+                obj.FieldMass, [.. obj.DepositIds.OrderBy(deposit => deposit.ResourceId).Select(deposit => new MapResourceShareDto(deposit.ResourceId, deposit.Coefficient))], distance, seconds));
+        }
+
+        (double? systemDistance, long? systemSeconds) = Travel(_reference.Settings, origin, sector, new Point3(system.X, system.Y, system.Z), systemId, null);
+        MapSystemDto dto = new(systemId, system.Number, system.Name, system.X, system.Y, system.Z, system.InNebula, MapStates.Open,
+            dtos.Count, objects.Count(obj => obj.OwnerPlayerId == playerId), systemDistance, systemSeconds, true, scan.ScannedAt, _clock.ToRealTime(scan.ExpiresAt));
+        return new MapSystemViewDto(dto, sector.Name, _reference.Settings.OrbitCount, dtos);
     }
 
     /// <summary>
@@ -480,6 +597,56 @@ public sealed class WorldMapService
             || x < 0 || x > settings.SectorSize || y < 0 || y > settings.SectorSize || z < 0 || z > settings.SectorDepth)
         {
             errors.Add(MapTargetErrors.OutOfSector);
+        }
+
+        if (errors.Count == 0 && !scope.SeesEverything && scope.ScanSnapshots is { Count: > 0 })
+        {
+            int[] circleIds = [.. scope.ScanSnapshots.Select(scan => scan.SectorId).Concat((scope.RadarCircles ?? []).Select(circle => circle.SectorId)).Distinct()];
+            Dictionary<int, SectorEntity> origins = await _dbContext.Sectors.AsNoTracking().Where(entry => circleIds.Contains(entry.Id)).ToDictionaryAsync(entry => entry.Id, cancellationToken).ConfigureAwait(false);
+            bool Covers(int originId, double ox, double oy, double oz, double radius)
+            {
+                SectorEntity source = origins[originId];
+                double dx = sector.X + x - source.X - ox, dy = sector.Y + y - source.Y - oy, dz = sector.Z + z - source.Z - oz;
+                return (dx * dx) + (dy * dy) + (dz * dz) <= radius * radius;
+            }
+            bool radar = (scope.RadarCircles ?? []).Any(circle => Covers(circle.SectorId, circle.X, circle.Y, circle.Z, circle.Radius));
+            ScanSnapshotEntity? scan = scope.ScanSnapshots.OrderByDescending(entry => entry.ScannedAt)
+                .FirstOrDefault(entry => Covers(entry.SectorId, entry.X, entry.Y, entry.Z, entry.Radius));
+            if (!radar && scan is not null)
+            {
+                ScanSnapshotSystemEntity? savedSystem = scan.SystemIds.Where(entry => entry.SectorId == sectorId)
+                    .OrderBy(entry => WorldGeometry.Distance(point, new Point3(entry.X, entry.Y, entry.Z))).FirstOrDefault();
+                ScanSnapshotObjectEntity? savedField = scan.ObjectIds.Where(entry => entry.SectorId == sectorId && entry.SystemId == null && entry.AsteroidFieldId != null)
+                    .OrderBy(entry => WorldGeometry.Distance(point, new Point3(entry.X, entry.Y, entry.Z))).FirstOrDefault();
+                double systemDistance = savedSystem is null ? double.MaxValue : WorldGeometry.Distance(point, new Point3(savedSystem.X, savedSystem.Y, savedSystem.Z));
+                double fieldDistance = savedField is null ? double.MaxValue : WorldGeometry.Distance(point, new Point3(savedField.X, savedField.Y, savedField.Z));
+                string savedKind = MapTargetKinds.Point;
+                long? savedId = null;
+                string? savedName = null;
+                Point3 savedPlace = point;
+                if (savedSystem is not null && systemDistance <= settings.MapSnapRadius && systemDistance <= fieldDistance)
+                {
+                    savedKind = MapTargetKinds.System;
+                    savedId = savedSystem.SystemId;
+                    savedName = savedSystem.Name;
+                    savedPlace = new Point3(savedSystem.X, savedSystem.Y, savedSystem.Z);
+                }
+                else if (savedField is not null && fieldDistance <= settings.MapSnapRadius)
+                {
+                    savedKind = MapTargetKinds.Object;
+                    savedId = savedField.CelestialObjectId;
+                    savedName = savedField.Name;
+                    savedPlace = new Point3(savedField.X, savedField.Y, savedField.Z);
+                }
+                var insideNebulae = scan.ObjectIds.Where(entry => entry.SectorId == sectorId && entry.NebulaId is not null && entry.NebulaRadius is not null)
+                    .Where(entry => WorldGeometry.Distance(savedPlace, new Point3(entry.X, entry.Y, entry.Z)) <= entry.NebulaRadius).ToArray();
+                (double? savedDistance, long? savedSeconds) = Travel(settings, origin, sector, savedPlace, savedKind == MapTargetKinds.System ? savedId : null, null);
+                if (savedKind == MapTargetKinds.Point && savedDistance is < SamePlaceDistance) errors.Add(MapTargetErrors.SamePlace);
+                return new MapTargetDto(savedKind, savedId, sectorId, savedPlace.X, savedPlace.Y, savedPlace.Z, savedName,
+                    savedKind == MapTargetKinds.Point ? savedSystem?.SystemId : null, savedKind == MapTargetKinds.Point ? savedSystem?.Name : null,
+                    insideNebulae.Length > 0 || (savedKind == MapTargetKinds.System && savedSystem?.InNebula == true), insideNebulae.Any(entry => entry.NebulaBlocksJumpDrive),
+                    MapStates.Open, savedDistance, savedSeconds, errors);
+            }
         }
 
         List<StarSystemEntity> systems = await _dbContext.Systems.AsNoTracking().Where(system => system.SectorId == sectorId).ToListAsync(cancellationToken).ConfigureAwait(false);

@@ -10,6 +10,22 @@ const signedIn = () => fakeAuthApi({ me: vi.fn().mockResolvedValue(signedInMe())
 
 
 describe('the map screen (task 00034)', () => {
+  it('draws a scan circle and labels its date', async () => {
+    const map = fakeMapApi({ sector: vi.fn().mockResolvedValue(sampleMapSector({ scans: [{ x: 12, y: 20, z: 0, radius: 25, scannedAt: '2026-11-12T12:00:00Z', expiresAt: '2026-11-14T12:00:00Z' }] })) });
+    renderPage('/map?sector=1', { auth: signedIn(), map });
+    expect(await screen.findByText(/Сканування ·/)).toBeInTheDocument();
+    expect(document.querySelector('.map-scan-label')).not.toBeNull();
+  });
+
+  it('reads the sector once when the scan expires', async () => {
+    const sector = vi.fn()
+      .mockResolvedValueOnce(sampleMapSector({ scans: [{ x: 12, y: 20, z: 0, radius: 25, scannedAt: '2026-11-12T12:00:00Z', expiresAt: '2026-11-14T12:00:00Z', expiresAtReal: new Date(Date.now() + 300).toISOString() }] }))
+      .mockResolvedValue(sampleMapSector({ scans: [] }));
+    renderPage('/map?sector=1', { auth: signedIn(), map: fakeMapApi({ sector }) });
+    expect(await screen.findByText(/Сканування ·/)).toBeInTheDocument();
+    await waitFor(() => expect(sector).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByText(/Сканування ·/)).toBeNull());
+  });
   it('opens from the menu on the sector of the body and draws the stars, the nebula, the radar and the layers', async () => {
     const map = fakeMapApi();
     renderPage('/map', { auth: signedIn(), map });

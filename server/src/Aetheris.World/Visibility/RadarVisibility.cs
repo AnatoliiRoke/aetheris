@@ -1,6 +1,8 @@
 using Aetheris.Core.Configuration;
+using Aetheris.Core.Time;
 using Aetheris.World.Configuration;
 using Aetheris.World.Data;
+using Aetheris.World.Data.Entities;
 using Aetheris.World.Geometry;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +34,7 @@ public sealed class RadarVisibility : IWorldVisibility
     private readonly WorldDbContext _dbContext;
     private readonly IGameConfig _config;
     private readonly IServiceProvider _services;
+    private readonly IGameClock _clock;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RadarVisibility"/> class.
@@ -39,15 +42,17 @@ public sealed class RadarVisibility : IWorldVisibility
     /// <param name="dbContext">The world context.</param>
     /// <param name="config">The game configuration.</param>
     /// <param name="services">The services; the levels of the radars are asked from them only when the stub is off, because the module that gives them itself depends on the world.</param>
-    public RadarVisibility(WorldDbContext dbContext, IGameConfig config, IServiceProvider services)
+    public RadarVisibility(WorldDbContext dbContext, IGameConfig config, IServiceProvider services, IGameClock clock)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(config);
         ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(clock);
 
         _dbContext = dbContext;
         _config = config;
         _services = services;
+        _clock = clock;
     }
 
     /// <inheritdoc />
@@ -56,10 +61,16 @@ public sealed class RadarVisibility : IWorldVisibility
         ArgumentException.ThrowIfNullOrEmpty(playerId);
 
         WorldSettings settings = WorldSettings.From(_config);
+        DateTimeOffset now = _clock.GameNow;
+        List<ScanSnapshotEntity> scans = await _dbContext.ScanSnapshots.AsNoTracking()
+            .Where(scan => scan.PlayerId == playerId && scan.ExpiresAt > now)
+            .Include(scan => scan.SystemIds)
+            .Include(scan => scan.ObjectIds).ThenInclude(obj => obj.DepositIds)
+            .AsSplitQuery().ToListAsync(cancellationToken).ConfigureAwait(false);
 
         if (settings.RevealAll)
         {
-            return new VisibilityScope(true, new HashSet<long>(), new HashSet<long>());
+            return new VisibilityScope(true, new HashSet<long>(), new HashSet<long>(), ScanSnapshots: scans);
         }
 
         var observers = await (
@@ -89,7 +100,7 @@ public sealed class RadarVisibility : IWorldVisibility
 
         if (observers.Count == 0)
         {
-            return new VisibilityScope(false, objects, systems, circles);
+            return new VisibilityScope(false, objects, systems, circles, scans);
         }
 
         IReadOnlyDictionary<long, int> levels = await LevelsAsync(playerId, [.. observers.Select(observer => observer.Id)], settings, cancellationToken).ConfigureAwait(false);
@@ -147,7 +158,7 @@ public sealed class RadarVisibility : IWorldVisibility
             objects.UnionWith(free.Where(entry => WorldGeometry.Distance(center, new Point3(entry.X, entry.Y, entry.Z)) <= radius).Select(entry => entry.Id));
         }
 
-        return new VisibilityScope(false, objects, systems, circles);
+        return new VisibilityScope(false, objects, systems, circles, scans);
     }
 
     private async Task<IReadOnlyDictionary<long, int>> LevelsAsync(string playerId, long[] planetIds, WorldSettings settings, CancellationToken cancellationToken)

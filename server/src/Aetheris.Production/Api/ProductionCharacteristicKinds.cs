@@ -64,6 +64,9 @@ public static class CharacteristicKinds
     /// <summary>How fast a scan proceeds.</summary>
     public const string ScanSpeed = "scan_speed";
 
+    /// <summary>The duration of a scan, in game seconds.</summary>
+    public const string ScanDuration = "scan_duration";
+
     /// <summary>The distance at which a module sees a target.</summary>
     public const string Detection = "detection";
 
@@ -144,6 +147,7 @@ public static class CharacteristicKinds
         Yield,
         ScanRadius,
         ScanSpeed,
+        ScanDuration,
         Detection,
         DigSpeed,
         Speed,
@@ -173,6 +177,7 @@ public static class CharacteristicKinds
         Yield,
         ScanRadius,
         ScanSpeed,
+        ScanDuration,
         Detection,
         DigSpeed,
         Speed,

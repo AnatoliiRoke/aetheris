@@ -1141,6 +1141,244 @@ namespace Aetheris.World.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Aetheris.World.Data.Entities.ScanSnapshotDepositEntity", b =>
+                {
+                    b.Property<long>("ScanSnapshotObjectId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("scan_snapshot_object_id");
+
+                    b.Property<int>("ResourceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<decimal>("Coefficient")
+                        .HasPrecision(12, 6)
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("coefficient");
+
+                    b.HasKey("ScanSnapshotObjectId", "ResourceId")
+                        .HasName("pk_scan_snapshot_deposit");
+
+                    b.ToTable("scan_snapshot_deposit", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.ScanSnapshotEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("PlayerId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("player_id");
+
+                    b.Property<double>("Radius")
+                        .HasColumnType("double precision")
+                        .HasColumnName("radius");
+
+                    b.Property<DateTimeOffset>("ScannedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("scanned_at");
+
+                    b.Property<int>("SectorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("sector_id");
+
+                    b.Property<double>("X")
+                        .HasColumnType("double precision")
+                        .HasColumnName("x");
+
+                    b.Property<double>("Y")
+                        .HasColumnType("double precision")
+                        .HasColumnName("y");
+
+                    b.Property<double>("Z")
+                        .HasColumnType("double precision")
+                        .HasColumnName("z");
+
+                    b.HasKey("Id")
+                        .HasName("pk_scan_snapshot");
+
+                    b.HasIndex("PlayerId", "ExpiresAt")
+                        .HasDatabaseName("ix_scan_snapshot_player_id_expires_at");
+
+                    b.ToTable("scan_snapshot", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.ScanSnapshotObjectEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("AsteroidFieldId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("asteroid_field_id");
+
+                    b.Property<long>("CelestialObjectId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("celestial_object_id");
+
+                    b.Property<long?>("FieldMass")
+                        .HasColumnType("bigint")
+                        .HasColumnName("field_mass");
+
+                    b.Property<bool>("IsTerraformed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_terraformed");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name");
+
+                    b.Property<bool>("NebulaBlocksJumpDrive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("nebula_blocks_jump_drive");
+
+                    b.Property<long?>("NebulaId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("nebula_id");
+
+                    b.Property<double?>("NebulaRadius")
+                        .HasColumnType("double precision")
+                        .HasColumnName("nebula_radius");
+
+                    b.Property<int>("ObjectTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("object_type_id");
+
+                    b.Property<int?>("Orbit")
+                        .HasColumnType("integer")
+                        .HasColumnName("orbit");
+
+                    b.Property<string>("OwnerPlayerId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
+                        .HasColumnName("owner_player_id");
+
+                    b.Property<long?>("PlanetId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("planet_id");
+
+                    b.Property<long>("ScanSnapshotId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("scan_snapshot_id");
+
+                    b.Property<int>("SectorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("sector_id");
+
+                    b.Property<int?>("Size")
+                        .HasColumnType("integer")
+                        .HasColumnName("size");
+
+                    b.Property<int?>("SizeClassId")
+                        .HasColumnType("integer")
+                        .HasColumnName("size_class_id");
+
+                    b.Property<long?>("SystemId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("system_id");
+
+                    b.Property<double>("X")
+                        .HasColumnType("double precision")
+                        .HasColumnName("x");
+
+                    b.Property<double>("Y")
+                        .HasColumnType("double precision")
+                        .HasColumnName("y");
+
+                    b.Property<double>("Z")
+                        .HasColumnType("double precision")
+                        .HasColumnName("z");
+
+                    b.HasKey("Id")
+                        .HasName("pk_scan_snapshot_object");
+
+                    b.HasIndex("ScanSnapshotId", "CelestialObjectId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_scan_snapshot_object_scan_snapshot_id_celestial_object_id");
+
+                    b.HasIndex("SectorId", "SystemId")
+                        .HasDatabaseName("ix_scan_snapshot_object_sector_id_system_id");
+
+                    b.ToTable("scan_snapshot_object", (string)null);
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.ScanSnapshotSystemEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("InNebula")
+                        .HasColumnType("boolean")
+                        .HasColumnName("in_nebula");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer")
+                        .HasColumnName("number");
+
+                    b.Property<long>("ScanSnapshotId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("scan_snapshot_id");
+
+                    b.Property<int>("SectorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("sector_id");
+
+                    b.Property<long>("SystemId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("system_id");
+
+                    b.Property<double>("X")
+                        .HasColumnType("double precision")
+                        .HasColumnName("x");
+
+                    b.Property<double>("Y")
+                        .HasColumnType("double precision")
+                        .HasColumnName("y");
+
+                    b.Property<double>("Z")
+                        .HasColumnType("double precision")
+                        .HasColumnName("z");
+
+                    b.HasKey("Id")
+                        .HasName("pk_scan_snapshot_system");
+
+                    b.HasIndex("ScanSnapshotId", "SystemId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_scan_snapshot_system_scan_snapshot_id_system_id");
+
+                    b.HasIndex("SectorId", "SystemId")
+                        .HasDatabaseName("ix_scan_snapshot_system_sector_id_system_id");
+
+                    b.ToTable("scan_snapshot_system", (string)null);
+                });
+
             modelBuilder.Entity("Aetheris.World.Data.Entities.SectorEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -1609,6 +1847,36 @@ namespace Aetheris.World.Data.Migrations
                         .HasConstraintName("fk_resource_type_resource_group_resource_group_id");
                 });
 
+            modelBuilder.Entity("Aetheris.World.Data.Entities.ScanSnapshotDepositEntity", b =>
+                {
+                    b.HasOne("Aetheris.World.Data.Entities.ScanSnapshotObjectEntity", null)
+                        .WithMany("DepositIds")
+                        .HasForeignKey("ScanSnapshotObjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_scan_snapshot_deposit_scan_snapshot_object_scan_snapshot_ob~");
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.ScanSnapshotObjectEntity", b =>
+                {
+                    b.HasOne("Aetheris.World.Data.Entities.ScanSnapshotEntity", null)
+                        .WithMany("ObjectIds")
+                        .HasForeignKey("ScanSnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_scan_snapshot_object_scan_snapshot_scan_snapshot_id");
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.ScanSnapshotSystemEntity", b =>
+                {
+                    b.HasOne("Aetheris.World.Data.Entities.ScanSnapshotEntity", null)
+                        .WithMany("SystemIds")
+                        .HasForeignKey("ScanSnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_scan_snapshot_system_scan_snapshot_scan_snapshot_id");
+                });
+
             modelBuilder.Entity("Aetheris.World.Data.Entities.SectorEntity", b =>
                 {
                     b.HasOne("Aetheris.World.Data.Entities.GalaxyEntity", null)
@@ -1672,6 +1940,18 @@ namespace Aetheris.World.Data.Migrations
             modelBuilder.Entity("Aetheris.World.Data.Entities.RaceEntity", b =>
                 {
                     b.Navigation("StartResourceIds");
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.ScanSnapshotEntity", b =>
+                {
+                    b.Navigation("ObjectIds");
+
+                    b.Navigation("SystemIds");
+                });
+
+            modelBuilder.Entity("Aetheris.World.Data.Entities.ScanSnapshotObjectEntity", b =>
+                {
+                    b.Navigation("DepositIds");
                 });
 
             modelBuilder.Entity("Aetheris.World.Data.Entities.StarSystemEntity", b =>

@@ -1,9 +1,11 @@
-import type { Fleet } from '../../../api/fleetApi';
+import type { Fleet, FlightPlanOrder } from '../../../api/fleetApi';
 import { GameIcon } from '../../../components/GameIcon';
 import { useI18n } from '../../../i18n/useI18n';
 import { formatNumber } from '../planetText';
 import { ClassChip, PlanetAvatar, StatePill } from './FleetBits';
 import { FleetPlace } from './FleetPlace';
+import { FleetScanStatus } from './FleetScanStatus';
+import type { FleetsClock } from './FleetFlightStatus';
 import { classCounts, stateText } from './fleetsParts';
 import { useFleetsScene } from './useFleetsScene';
 
@@ -23,11 +25,17 @@ export function FleetCard({
   selected,
   hasCredits,
   onSelect,
+  scan,
+  clock,
+  onScanDone,
 }: {
   fleet: Fleet;
   selected: boolean;
   hasCredits: boolean;
   onSelect: (fleetId: number) => void;
+  scan?: FlightPlanOrder;
+  clock?: FleetsClock | null;
+  onScanDone?: () => void;
 }) {
   const { t, language } = useI18n();
   const scene = useFleetsScene();
@@ -61,7 +69,7 @@ export function FleetCard({
           {t('fleets.upkeep')}: <b>{t('fleets.upkeepValue', { amount: formatNumber(fleet.upkeepPerHour, language) })}</b>
         </span>
       </span>
-      <StatePill tone={hasCredits ? 'ok' : 'warn'}>{stateText(language, t, fleet, hasCredits)}</StatePill>
+      {scan ? <FleetScanStatus clock={clock ?? null} onDone={onScanDone ?? (() => {})} order={scan} /> : <StatePill tone={hasCredits ? 'ok' : 'warn'}>{stateText(language, t, fleet, hasCredits)}</StatePill>}
     </button>
   );
 }

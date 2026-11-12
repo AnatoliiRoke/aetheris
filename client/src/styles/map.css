@@ -205,6 +205,7 @@
 .map-radar__ring {
   position: absolute; inset: 22%; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent) 14%, transparent);
 }
+.map-scan-label { color: var(--text-2); font-size: var(--fs-small); white-space: nowrap; }
 .map-radar__sweep {
   position: absolute; inset: 0; border-radius: 50%;
   background: conic-gradient(from 0deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70deg, transparent 360deg);

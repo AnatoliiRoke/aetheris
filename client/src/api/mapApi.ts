@@ -45,6 +45,9 @@ export interface MapSystem {
   ownPlanetCount: number;
   distance: number | null;
   travelSeconds: number | null;
+  fromScan?: boolean;
+  scannedAt?: string | null;
+  scanExpiresAtReal?: string | null;
 }
 
 /** A nebula of a sector. */
@@ -72,6 +75,8 @@ export interface MapField {
   mass: number;
   distance: number | null;
   travelSeconds: number | null;
+  resources?: MapResourceShare[] | null;
+  scannedAt?: string | null;
 }
 
 /** The range of a radar of a body of the player. */
@@ -83,6 +88,17 @@ export interface MapRadar {
   radius: number;
 }
 
+/** The area of a recorded scan. */
+export interface MapScan {
+  x: number;
+  y: number;
+  z: number;
+  radius: number;
+  scannedAt: string;
+  expiresAt: string;
+  expiresAtReal?: string;
+}
+
 /** The map of a sector. */
 export interface MapSectorView {
   sectorId: number;
@@ -92,6 +108,7 @@ export interface MapSectorView {
   nebulas: MapNebula[];
   fields: MapField[];
   radars: MapRadar[];
+  scans?: MapScan[];
   seesOnlyOwn: boolean;
 }
 

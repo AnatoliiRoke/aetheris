@@ -70,6 +70,9 @@ public sealed record FleetSettings
     /// <summary>Gets how far a fleet may be from the point of a free asteroid field and still be at it, in the units of the map.</summary>
     public double ExtractionPlaceTolerance { get; init; }
 
+    /// <summary>Gets the lifetime of a scan snapshot in game seconds.</summary>
+    public long ScanSnapshotLifetimeSeconds { get; init; }
+
     /// <summary>Gets the push of the reference point of the speed, in kilonewtons.</summary>
     public decimal SpeedReferencePush { get; init; }
 
@@ -108,6 +111,7 @@ public sealed record FleetSettings
             FlightPlanMaxOrders = ReadInt32(config, FleetConfigKeys.FlightPlanMaxOrders),
             ExtractionCycleSeconds = ReadInt32(config, FleetConfigKeys.ExtractionCycleSeconds),
             ExtractionPlaceTolerance = (double)ReadDecimal(config, FleetConfigKeys.ExtractionPlaceTolerance),
+            ScanSnapshotLifetimeSeconds = ReadInt64(config, FleetConfigKeys.ScanSnapshotLifetimeSeconds),
             SpeedReferencePush = ReadDecimal(config, FleetConfigKeys.SpeedReferencePush),
             SpeedReferenceMass = ReadDecimal(config, FleetConfigKeys.SpeedReferenceMass),
             SpeedReferenceSpeed = ReadDecimal(config, FleetConfigKeys.SpeedReferenceSpeed),

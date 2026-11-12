@@ -103,6 +103,12 @@ public sealed class MailBootstrapService
             texts.Add(new LocalizationTextEntry($"mail.category.{entry.Code}.description", "en", entry.Description.En));
         }
 
+        foreach (SystemTextEntry entry in seed.SystemTexts)
+        {
+            texts.Add(new LocalizationTextEntry(entry.Key, "uk", entry.Text.Uk));
+            texts.Add(new LocalizationTextEntry(entry.Key, "en", entry.Text.En));
+        }
+
         int written = await _texts.AddMissingAsync(texts, "seed", cancellationToken).ConfigureAwait(false);
 
         return new MailBootstrapResult(added, written);
@@ -121,6 +127,18 @@ public sealed class MailBootstrapService
     {
         [JsonPropertyName("categories")]
         public List<CategoryEntry> Categories { get; set; } = [];
+
+        [JsonPropertyName("system_texts")]
+        public List<SystemTextEntry> SystemTexts { get; set; } = [];
+    }
+
+    private sealed class SystemTextEntry
+    {
+        [JsonPropertyName("key")]
+        public string Key { get; set; } = string.Empty;
+
+        [JsonPropertyName("text")]
+        public TextEntry Text { get; set; } = new();
     }
 
     private sealed class CategoryEntry

@@ -22,6 +22,7 @@ using Aetheris.World.Api;
 using Aetheris.World.Configuration;
 using Aetheris.World.Data;
 using Aetheris.World.Data.Entities;
+using Aetheris.World.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -1114,7 +1115,7 @@ public sealed class FleetFlightTests
         Assert.Contains(FleetErrorCodes.FlightPlanEmpty, await RefusalAsync(player, Execute, new { fleet_id = withDrive.FleetId }));
 
         await CommandAsync(player, Save, new { fleet_id = withDrive.FleetId, orders = new object[] { new { type_code = "scan", target_kind = "object", target_object_id = 1 } } });
-        Assert.Contains(FleetErrorCodes.FlightOrderNotSupported, await RefusalAsync(player, Execute, new { fleet_id = withDrive.FleetId }));
+        Assert.Contains(FleetErrorCodes.ScanNoModule, await RefusalAsync(player, Execute, new { fleet_id = withDrive.FleetId }));
 
         await CommandAsync(player, Save, new { fleet_id = withDrive.FleetId, orders = new object[] { PointOrder("fly", home.SectorId, 5000000, 1, 0) } });
         Assert.Contains(FleetErrorCodes.FlightTargetUnknown, await RefusalAsync(player, Execute, new { fleet_id = withDrive.FleetId }));
@@ -1389,6 +1390,150 @@ public sealed class FleetFlightTests
 
         Assert.Contains(FleetErrorCodes.FlightPlanUnknown, await RefusalAsync(stranger, Stop, new { fleet_id = ship.FleetId }));
         Assert.Equal("active", (await PlanAsync(ship.FleetId)).StateCode);
+    }
+
+    /// <summary>A scanner completes once and writes a snapshot and a report.</summary>
+    /// <returns>A task that completes when the test has finished.</returns>
+    [Fact]
+    public async Task A_system_scanner_writes_a_snapshot_and_report_after_its_duration()
+    {
+        await ResetAsync();
+        using (IServiceScope setup = _factory.Services.CreateScope())
+        {
+            await setup.ServiceProvider.GetRequiredService<Aetheris.Mail.Services.MailBootstrapService>().EnsureAsync(Token);
+        }
+        using PlanetsTestPlayer player = await FoundAsync();
+        Ship ship = await FleetAsync(player, ("part_m_58", 1));
+        await CommandAsync(player, Plans, new { fleet_id = ship.FleetId, orders = new object[] { new { type_code = "scan", target_kind = "none" } } });
+        JsonElement plan = await CommandAsync(player, Execute, new { fleet_id = ship.FleetId });
+        Assert.Equal("active", plan.GetProperty("state_code").GetString());
+        ScheduledEventEntity scheduled = Assert.Single(await PendingEventsAsync(FlightPlanRunner.ScanEventType));
+        await RunUntilAsync(scheduled.RunAt);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        WorldDbContext world = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
+        ScanSnapshotEntity snapshot = await world.ScanSnapshots.AsNoTracking().Include(entry => entry.SystemIds).SingleAsync(entry => entry.PlayerId == player.Account.UserId, Token);
+        Assert.Equal(25, snapshot.Radius);
+        Assert.Equal(TimeSpan.FromHours(48), snapshot.ExpiresAt - snapshot.ScannedAt);
+        Assert.NotEmpty(snapshot.SystemIds);
+        var mail = scope.ServiceProvider.GetRequiredService<Aetheris.Mail.Data.MailDbContext>();
+        Assert.True(await mail.MailMessages.AnyAsync(entry => entry.ReceiverPlayerId == player.Account.UserId && entry.SystemKindCode == "scan_report", Token));
+        Assert.False(await PlanExistsAsync(ship.FleetId));
+    }
+
+    /// <summary>Stopping a scan invalidates its completion event.</summary>
+    /// <returns>A task that completes when the test has finished.</returns>
+    [Fact]
+    public async Task A_stopped_scan_does_not_write_a_snapshot()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await FoundAsync();
+        Ship ship = await FleetAsync(player, ("part_m_58", 1));
+        await CommandAsync(player, Plans, new { fleet_id = ship.FleetId, orders = new object[] { new { type_code = "scan", target_kind = "none" } } });
+        await CommandAsync(player, Execute, new { fleet_id = ship.FleetId });
+        ScheduledEventEntity scheduled = Assert.Single(await PendingEventsAsync(FlightPlanRunner.ScanEventType));
+        await CommandAsync(player, Stop, new { fleet_id = ship.FleetId });
+        await RunUntilAsync(scheduled.RunAt);
+        using IServiceScope scope = _factory.Services.CreateScope();
+        Assert.False(await scope.ServiceProvider.GetRequiredService<WorldDbContext>().ScanSnapshots.AnyAsync(entry => entry.PlayerId == player.Account.UserId, Token));
+    }
+
+    /// <summary>A ship radar alone does not provide system scanning.</summary>
+    /// <returns>A task that completes when the test has finished.</returns>
+    [Fact]
+    public async Task A_ship_radar_cannot_scan_systems()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await FoundAsync();
+        Ship ship = await FleetAsync(player, ("part_m_59", 1));
+        await CommandAsync(player, Plans, new { fleet_id = ship.FleetId, orders = new object[] { new { type_code = "scan", target_kind = "none" } } });
+        Assert.Contains(FleetErrorCodes.FlightOrderNotSupported, await RefusalAsync(player, Execute, new { fleet_id = ship.FleetId }));
+    }
+
+    /// <summary>A snapshot remains unchanged until a later scan replaces the covered system.</summary>
+    /// <returns>A task that completes when the test has finished.</returns>
+    [Fact]
+    public async Task A_scan_keeps_the_recorded_state_and_replaces_it_on_a_new_scan()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await FoundAsync();
+        WorldPlaceDto home = await HomeAsync(player);
+        DateTimeOffset now = _factory.Services.GetRequiredService<IGameClock>().GameNow;
+        long snapshotId;
+        long systemId;
+        string original;
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            ScanSnapshotResult result = await scope.ServiceProvider.GetRequiredService<IWorldModule>().TakeScanSnapshotAsync(player.Account.UserId, home.SectorId, home.X, home.Y, home.Z, 25, now, now.AddHours(48), Token);
+            snapshotId = result.Id;
+            systemId = result.Systems.First().Id;
+            original = result.Systems.First().Name;
+        }
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            WorldDbContext db = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
+            StarSystemEntity system = await db.Systems.SingleAsync(entry => entry.Id == systemId, Token);
+            system.Name = "Changed after scan";
+            await db.SaveChangesAsync(Token);
+            Assert.Equal(original, (await db.ScanSnapshotSystems.AsNoTracking().SingleAsync(entry => entry.ScanSnapshotId == snapshotId && entry.SystemId == systemId, Token)).Name);
+        }
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            ScanSnapshotResult next = await scope.ServiceProvider.GetRequiredService<IWorldModule>().TakeScanSnapshotAsync(player.Account.UserId, home.SectorId, home.X, home.Y, home.Z, 25, now.AddMinutes(1), now.AddHours(49), Token);
+            Assert.Equal("Changed after scan", next.Systems.Single(entry => entry.Id == systemId).Name);
+            WorldDbContext db = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
+            Assert.False(await db.ScanSnapshotSystems.AnyAsync(entry => entry.ScanSnapshotId == snapshotId && entry.SystemId == systemId, Token));
+        }
+    }
+
+    /// <summary>A free field is selected in three dimensions and removed at expiration.</summary>
+    /// <returns>A task that completes when the test has finished.</returns>
+    [Fact]
+    public async Task A_scan_finds_free_fields_in_three_dimensions_and_expires()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await FoundAsync();
+        WorldPlaceDto home = await HomeAsync(player);
+        long fieldId = await FreeFieldAsync(home.SectorId);
+        WorldPlaceDto field = await ObjectPlaceAsync(fieldId);
+        DateTimeOffset now = _factory.Services.GetRequiredService<IGameClock>().GameNow;
+        long snapshotId;
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            IWorldModule world = scope.ServiceProvider.GetRequiredService<IWorldModule>();
+            ScanSnapshotResult high = await world.TakeScanSnapshotAsync(player.Account.UserId, field.SectorId, field.X, field.Y, field.Z + 5, 1, now, now.AddHours(48), Token);
+            Assert.DoesNotContain(high.Objects, entry => entry.Id == fieldId);
+        }
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            ScanSnapshotResult found = await scope.ServiceProvider.GetRequiredService<IWorldModule>().TakeScanSnapshotAsync(player.Account.UserId, field.SectorId, field.X, field.Y, field.Z, 1, now, now.AddHours(48), Token);
+            Assert.Contains(found.Objects, entry => entry.Id == fieldId && entry.SystemId == null);
+            snapshotId = found.Id;
+        }
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            WorldDbContext db = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
+            AsteroidFieldEntity liveField = await db.Fields.SingleAsync(entry => entry.CelestialObjectId == fieldId, Token);
+            liveField.DepletedAt = now.AddMinutes(1);
+            await db.SaveChangesAsync(Token);
+            Assert.True(await db.ScanSnapshotObjects.AnyAsync(entry => entry.ScanSnapshotId == snapshotId && entry.CelestialObjectId == fieldId, Token));
+        }
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            ScanSnapshotResult rescanned = await scope.ServiceProvider.GetRequiredService<IWorldModule>().TakeScanSnapshotAsync(player.Account.UserId, field.SectorId, field.X, field.Y, field.Z, 1, now.AddMinutes(1), now.AddHours(48), Token);
+            Assert.DoesNotContain(rescanned.Objects, entry => entry.Id == fieldId);
+            Assert.False(await scope.ServiceProvider.GetRequiredService<WorldDbContext>().ScanSnapshotObjects.AnyAsync(entry => entry.ScanSnapshotId == snapshotId && entry.CelestialObjectId == fieldId, Token));
+            snapshotId = rescanned.Id;
+        }
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            ScanSnapshotService service = scope.ServiceProvider.GetRequiredService<ScanSnapshotService>();
+            Assert.Equal(0, await service.ExpireAsync(snapshotId, now.AddHours(47), Token));
+            var handler = scope.ServiceProvider.GetServices<Aetheris.Core.Scheduling.IScheduledEventHandler>()
+                .Single(entry => entry.EventType == ScanSnapshotService.ExpireEventType);
+            await handler.HandleAsync(new Aetheris.Core.Scheduling.ScheduledEvent(1, field.SectorId, ScanSnapshotService.ExpireEventType,
+                now.AddHours(48), JsonSerializer.Serialize(snapshotId)), Token);
+            Assert.False(await scope.ServiceProvider.GetRequiredService<WorldDbContext>().ScanSnapshots.AnyAsync(entry => entry.Id == snapshotId, Token));
+        }
     }
 
     private static object PointOrder(string type, int sectorId, double x, double y, double z) =>

@@ -243,6 +243,7 @@
     "uk": "Радіус сканування",
     "en": "Scan radius"
   },
+  "admin.reference.kind.scan_duration": { "uk": "Тривалість сканування", "en": "Scan duration" },
   "admin.reference.kind.scan_speed": {
     "uk": "Швидкість сканування",
     "en": "Scan speed"
@@ -355,6 +356,9 @@
     "uk": "Дрон",
     "en": "Drone"
   },
+  "admin.reference.attribute.scan_target": { "uk": "Ціль сканування", "en": "Scan target" },
+  "admin.reference.scan_target.systems": { "uk": "Системи", "en": "Systems" },
+  "admin.reference.scan_target.fleets": { "uk": "Флоти", "en": "Fleets" },
   "admin.reference.attribute.flight_order": { "uk": "Відкриває наказ листа", "en": "Opens an order of the plan" },
   "admin.reference.flight_order.hyperfly": { "uk": "Гіперперліт", "en": "Hyperflight" },
   "admin.reference.flight_order.jump": { "uk": "Стрибок", "en": "Jump" },

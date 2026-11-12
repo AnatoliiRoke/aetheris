@@ -82,6 +82,25 @@ const richView = () =>
   });
 
 describe('the screen of the mail (task 00060)', () => {
+  it('shows a scan report and opens its fleet plan', async () => {
+    const user = userEvent.setup();
+    const letter = sampleMailLetter({ id: 3, kindCode: 'report', systemKindCode: 'scan_report', subject: 'Звіт сканування', senderNickname: null });
+    const report = { snapshot_id: 1, sector_id: 1, x: 10, y: 20, z: 0, radius: 25, scanned_at: '2026-11-12T12:00:00Z', systems: [{ id: 3, sector_id: 1, name: 'Lyra', has_deposits: true, has_gas_giants: false, objects: [{ id: 101, system_id: 3, sector_id: 1, name: 'Nova', object_class: 'planet', planet_id: 10 }] }], free_fields: [] };
+    renderPage('/mail', { auth: signedIn(), mail: fakeMailApi({ mail: vi.fn().mockResolvedValue(sampleMailView({ letters: [letter] })), letter: vi.fn().mockResolvedValue(sampleMailLetterDetail({ letter, textParameters: JSON.stringify(report) })) }) });
+    await user.click(await screen.findByRole('button', { name: /Звіт сканування/ }));
+    expect(await screen.findByText(/Є родовища.*Газових гігантів немає/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Переслати/ }));
+    expect(screen.getByRole('combobox', { name: 'Кому' })).toBeEnabled();
+    expect((screen.getByRole('textbox', { name: 'Повідомлення' }) as HTMLTextAreaElement).value).toContain('Lyra');
+    await user.click(screen.getByRole('button', { name: 'Скасувати' }));
+    await user.click(screen.getByRole('button', { name: 'Відправити флот' }));
+    const dialog = await screen.findByRole('dialog');
+    await waitFor(() => expect(within(dialog).getByLabelText('Планета')).toHaveValue('101'));
+    await user.keyboard('{Escape}');
+    await user.click(screen.getByRole('button', { name: 'Показати на карті' }));
+    await waitFor(() => expect(window.location.search).toContain('scan_x=10'));
+    expect(window.location.pathname).toBe('/map');
+  });
   it('shows the folders, the categories and the letters with their marks and their labels', async () => {
     renderPage('/mail', { auth: signedIn(), mail: fakeMailApi({ mail: vi.fn().mockResolvedValue(richView()) }) });
 

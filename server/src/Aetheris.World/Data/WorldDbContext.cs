@@ -135,6 +135,18 @@ public sealed class WorldDbContext : DbContext
     /// <summary>Gets the generation runs started from the admin panel.</summary>
     public DbSet<GenerationRunEntity> GenerationRuns => Set<GenerationRunEntity>();
 
+    /// <summary>Gets the scan snapshots.</summary>
+    public DbSet<ScanSnapshotEntity> ScanSnapshots => Set<ScanSnapshotEntity>();
+
+    /// <summary>Gets the systems recorded in scans.</summary>
+    public DbSet<ScanSnapshotSystemEntity> ScanSnapshotSystems => Set<ScanSnapshotSystemEntity>();
+
+    /// <summary>Gets the objects recorded in scans.</summary>
+    public DbSet<ScanSnapshotObjectEntity> ScanSnapshotObjects => Set<ScanSnapshotObjectEntity>();
+
+    /// <summary>Gets the resources recorded in scans.</summary>
+    public DbSet<ScanSnapshotDepositEntity> ScanSnapshotDeposits => Set<ScanSnapshotDepositEntity>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -237,6 +249,37 @@ public sealed class WorldDbContext : DbContext
 
     private static void ConfigureWorldTables(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<ScanSnapshotEntity>(entity =>
+        {
+            entity.ToTable("scan_snapshot");
+            entity.Property(e => e.PlayerId).HasMaxLength(PlayerIdLength);
+            entity.HasIndex(e => new { e.PlayerId, e.ExpiresAt });
+            entity.HasMany(e => e.SystemIds).WithOne().HasForeignKey(e => e.ScanSnapshotId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(e => e.ObjectIds).WithOne().HasForeignKey(e => e.ScanSnapshotId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<ScanSnapshotSystemEntity>(entity =>
+        {
+            entity.ToTable("scan_snapshot_system");
+            entity.Property(e => e.Name).HasMaxLength(NameLength);
+            entity.HasIndex(e => new { e.ScanSnapshotId, e.SystemId }).IsUnique();
+            entity.HasIndex(e => new { e.SectorId, e.SystemId });
+        });
+        modelBuilder.Entity<ScanSnapshotObjectEntity>(entity =>
+        {
+            entity.ToTable("scan_snapshot_object");
+            entity.Property(e => e.Name).HasMaxLength(NameLength);
+            entity.Property(e => e.OwnerPlayerId).HasMaxLength(PlayerIdLength);
+            entity.HasIndex(e => new { e.ScanSnapshotId, e.CelestialObjectId }).IsUnique();
+            entity.HasIndex(e => new { e.SectorId, e.SystemId });
+            entity.HasMany(e => e.DepositIds).WithOne().HasForeignKey(e => e.ScanSnapshotObjectId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<ScanSnapshotDepositEntity>(entity =>
+        {
+            entity.ToTable("scan_snapshot_deposit");
+            entity.HasKey(e => new { e.ScanSnapshotObjectId, e.ResourceId });
+            entity.Property(e => e.Coefficient).HasPrecision(CoefficientPrecision, CoefficientScale);
+        });
+
         modelBuilder.Entity<GalaxyEntity>(entity =>
         {
             entity.ToTable("galaxy");

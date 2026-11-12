@@ -3,6 +3,7 @@ import type { MailLetterDetail } from '../../../api/mailApi';
 import { GameIcon } from '../../../components/GameIcon';
 import { Glyph } from '../../../components/Glyph';
 import { useI18n } from '../../../i18n/useI18n';
+import { readScanReport, type ScanReportObject } from './scanReport';
 import { useTexts } from '../../../texts/useTexts';
 import { markKindOf } from './mailParts';
 
@@ -37,6 +38,8 @@ export function MailLetterPanel({
   onDelete,
   onComplain,
   onSendReply,
+  onScanMap,
+  onScanFleet,
 }: {
   detail: MailLetterDetail;
   busy: boolean;
@@ -46,10 +49,13 @@ export function MailLetterPanel({
   onDelete: () => void;
   onComplain: (reason: string) => void;
   onSendReply: (body: string) => void;
+  onScanMap?: (sectorId: number, x: number, y: number) => void;
+  onScanFleet?: (object: ScanReportObject) => void;
 }) {
   const { t, language } = useI18n();
   const { text } = useTexts();
   const letter = detail.letter;
+  const scan = letter.systemKindCode === 'scan_report' ? readScanReport(detail.textParameters) : null;
   const mark = markKindOf(letter);
   const [reply, setReply] = useState('');
   const [complaining, setComplaining] = useState(false);
@@ -64,7 +70,7 @@ export function MailLetterPanel({
     <article className="mail-letter">
       <header className="mail-letter__head">
         <span className={`mail-tag mail-tag--${mark}`}>{text(letter.categoryNameKey) ?? letter.categoryNameKey}</span>
-        <h2 className="mail-letter__subject">{letter.subject || text(letter.categoryNameKey) || letter.preview}</h2>
+        <h2 className="mail-letter__subject">{scan ? t('mail.scanTitle') : letter.subject || text(letter.categoryNameKey) || letter.preview}</h2>
         <div className="mail-letter__meta">
           {letter.senderNickname ? (
             <span className="mail-letter__sender">
@@ -114,7 +120,22 @@ export function MailLetterPanel({
       ) : null}
 
       <div className="mail-letter__body">
-        {detail.textKey ? (
+        {scan ? (
+          <div>
+            <p>{t('mail.scanSummary', { radius: scan.radius, date: new Date(scan.scanned_at).toLocaleString(language) })}</p>
+            <p>{t('mail.scanPlace', { sector: scan.sector_name ?? scan.sector_id, x: scan.x, y: scan.y, z: scan.z })}</p>
+            {scan.systems.map((system) => (
+              <section key={system.id}>
+                <h3>{system.name}</h3>
+                <p>{system.has_deposits ? t('mail.scanHasDeposits') : t('mail.scanNoDeposits')} · {system.has_gas_giants ? t('mail.scanHasGiants') : t('mail.scanNoGiants')}</p>
+                {system.objects.map((object) => <p key={object.id}>{object.name} <button className="btn btn--secondary" type="button" onClick={() => onScanFleet?.(object)}>{t('mail.scanSendFleet')}</button></p>)}
+              </section>
+            ))}
+            {scan.free_fields.length > 0 ? <h3>{t('mail.scanFreeFields')}</h3> : null}
+            {scan.free_fields.map((object) => <p key={object.id}>{object.name} <button className="btn btn--secondary" type="button" onClick={() => onScanFleet?.(object)}>{t('mail.scanSendFleet')}</button></p>)}
+            <button className="btn btn--secondary" type="button" onClick={() => onScanMap?.(scan.sector_id, scan.x, scan.y)}>{t('mail.scanShowMap')}</button>
+          </div>
+        ) : detail.textKey ? (
           <p className="mail-letter__system">{text(detail.textKey) ?? detail.textKey}</p>
         ) : (
           paragraphs.map((part, index) => <p key={index}>{part}</p>)

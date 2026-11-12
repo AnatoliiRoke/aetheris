@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Text.Json;
+using Aetheris.Core.Configuration;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Scheduling;
+using Aetheris.Fleet.Configuration;
 using Aetheris.Fleet.Data;
 using Aetheris.Fleet.Data.Entities;
 using Aetheris.World;
@@ -45,6 +47,9 @@ public sealed class FlightPlanRunner
     /// </summary>
     public const string WaitEventType = "fleet.order_wait";
 
+    /// <summary>The event type of the end of a scan.</summary>
+    public const string ScanEventType = "fleet.order_scan";
+
     private readonly FleetDbContext _dbContext;
     private readonly FleetUnitOfWork _unitOfWork;
     private readonly FleetFlightService _flights;
@@ -57,6 +62,8 @@ public sealed class FlightPlanRunner
     private readonly FleetReportService _reports;
     private readonly IWorldModule _world;
     private readonly IEventScheduler _scheduler;
+    private readonly FleetScanService _scans;
+    private readonly IGameConfig _config;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FlightPlanRunner"/> class.
@@ -85,7 +92,9 @@ public sealed class FlightPlanRunner
         FleetCargoService cargo,
         FleetReportService reports,
         IWorldModule world,
-        IEventScheduler scheduler)
+        IEventScheduler scheduler,
+        FleetScanService scans,
+        IGameConfig config)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -99,6 +108,8 @@ public sealed class FlightPlanRunner
         ArgumentNullException.ThrowIfNull(reports);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(scheduler);
+        ArgumentNullException.ThrowIfNull(scans);
+        ArgumentNullException.ThrowIfNull(config);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -112,6 +123,8 @@ public sealed class FlightPlanRunner
         _reports = reports;
         _world = world;
         _scheduler = scheduler;
+        _scans = scans;
+        _config = config;
     }
 
     /// <summary>
@@ -128,6 +141,21 @@ public sealed class FlightPlanRunner
     /// <param name="OrderId">The order of waiting.</param>
     /// <param name="PlanVersion">The version of the plan when the wait began.</param>
     public sealed record WaitPayload(long FleetId, long OrderId, int PlanVersion);
+
+    /// <summary>The scheduled end of a scan.</summary>
+    /// <param name="FleetId">The fleet.</param>
+    /// <param name="OrderId">The order.</param>
+    /// <param name="PlanVersion">The plan version.</param>
+    public sealed record ScanPayload(long FleetId, long OrderId, int PlanVersion);
+
+    /// <summary>The scan parameters fixed at the beginning of an order.</summary>
+    /// <param name="StartedAt">The start time.</param>
+    /// <param name="SectorId">The centre sector.</param>
+    /// <param name="X">The absolute x coordinate.</param>
+    /// <param name="Y">The absolute y coordinate.</param>
+    /// <param name="Z">The absolute z coordinate.</param>
+    /// <param name="Radius">The scan radius.</param>
+    public sealed record ScanOrderState(DateTimeOffset StartedAt, int SectorId, double X, double Y, double Z, double Radius);
 
     /// <summary>
     /// Checks that the fleet can carry out every order of the plan, one after another, before the
@@ -178,6 +206,15 @@ public sealed class FlightPlanRunner
 
                 case FlightOrderTypes.Mine:
                 case FlightOrderTypes.Wait:
+                    break;
+
+                case FlightOrderTypes.Scan:
+                    FleetScanModules available = await _scans.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+                    if (available.Systems is null)
+                    {
+                        throw new GameException(available.HasFleetScanner ? FleetErrorCodes.FlightOrderNotSupported : FleetErrorCodes.ScanNoModule, "The fleet has no working scanner of systems.");
+                    }
+
                     break;
 
                 case FlightOrderTypes.Load:
@@ -375,6 +412,30 @@ public sealed class FlightPlanRunner
             cancellationToken);
     }
 
+    /// <summary>Completes a scan if its plan has not been interrupted.</summary>
+    /// <param name="payload">The scheduled scan.</param>
+    /// <param name="now">The scheduled completion time.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task representing the work.</returns>
+    public Task HandleScanAsync(ScanPayload payload, DateTimeOffset now, CancellationToken cancellationToken) =>
+        _unitOfWork.RunAsync(async () =>
+        {
+            if (!await LockFleetAsync(payload.FleetId, cancellationToken).ConfigureAwait(false)) return 0;
+            FlightPlanEntity? plan = await _dbContext.FlightPlans.Include(entry => entry.OrderIds)
+                .SingleOrDefaultAsync(entry => entry.FleetId == payload.FleetId, cancellationToken).ConfigureAwait(false);
+            if (plan is null || plan.StateCode != FlightPlanStates.Active || plan.Version != payload.PlanVersion) return 0;
+            FlightPlanOrderEntity? order = plan.OrderIds.SingleOrDefault(entry => entry.Id == payload.OrderId && entry.Position == plan.CurrentPosition && entry.TypeCode == FlightOrderTypes.Scan);
+            if (order is null) return 0;
+            FleetEntity? fleet = await _dbContext.Fleets.SingleOrDefaultAsync(entry => entry.Id == payload.FleetId, cancellationToken).ConfigureAwait(false);
+            if (fleet is null) return 0;
+            ScanOrderState state = JsonSerializer.Deserialize<ScanOrderState>(order.Parameters) ?? throw new InvalidOperationException("The scan has no parameters.");
+            long lifetime = FleetSettings.From(_config).ScanSnapshotLifetimeSeconds;
+            ScanSnapshotResult result = await _world.TakeScanSnapshotAsync(fleet.PlayerId, state.SectorId, state.X, state.Y, state.Z, state.Radius, now, now + TimeSpan.FromSeconds(lifetime), cancellationToken).ConfigureAwait(false);
+            await _reports.WriteScanReportAsync(fleet.PlayerId, result, cancellationToken).ConfigureAwait(false);
+            await AdvanceAsync(plan, fleet, now, cancellationToken).ConfigureAwait(false);
+            return 0;
+        }, cancellationToken);
+
     /// <summary>
     /// Handles a cycle of an extraction: the fleet takes its yield, and the order goes on or ends.
     /// </summary>
@@ -470,6 +531,19 @@ public sealed class FlightPlanRunner
     {
         switch (order.TypeCode)
         {
+            case FlightOrderTypes.Scan:
+                FleetScanModules available = await _scans.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+                ScanCapabilities? scan = available.Systems;
+                if (scan is null) return (BeginState.Blocked, available.HasFleetScanner ? FleetErrorCodes.FlightOrderNotSupported : FleetErrorCodes.ScanNoModule);
+                WorldPlaceDto? place = await _flights.CurrentPlaceAsync(fleet, null, now, cancellationToken).ConfigureAwait(false);
+                if (place is null) return (BeginState.Blocked, FleetErrorCodes.FlightTargetUnknown);
+                order.DurationSeconds = (long)decimal.Ceiling(scan.DurationSeconds);
+                order.Parameters = JsonSerializer.Serialize(new ScanOrderState(now, place.SectorId, place.X, place.Y, place.Z, (double)scan.Radius));
+                await _scheduler.ScheduleAsync(new ScheduledEventRequest(place.SectorId, ScanEventType, now + TimeSpan.FromSeconds(order.DurationSeconds),
+                    JsonSerializer.Serialize(new ScanPayload(fleet.Id, order.Id, plan.Version)),
+                    ScanEventType + ":" + fleet.Id.ToString(CultureInfo.InvariantCulture) + ":" + order.Id.ToString(CultureInfo.InvariantCulture) + ":" + plan.Version.ToString(CultureInfo.InvariantCulture)), cancellationToken).ConfigureAwait(false);
+                return (BeginState.Started, null);
+
             case FlightOrderTypes.Fly:
             case FlightOrderTypes.Return:
                 return await BeginFlightAsync(fleet, order, now, cancellationToken).ConfigureAwait(false);

@@ -279,6 +279,70 @@ public sealed class WorldMapTests
     private static async Task<int> SectorOfAsync(IServiceProvider services, long planetId) =>
         await services.GetRequiredService<WorldDbContext>().Planets.AsNoTracking().Where(planet => planet.Id == planetId).Select(planet => planet.SectorId).SingleAsync(Token);
 
+    /// <summary>Scan-only map data stays at the recorded state after the live world changes.</summary>
+    /// <returns>A task that completes when the test has finished.</returns>
+    [Fact]
+    public async Task The_map_uses_the_recorded_system_when_only_a_scan_sees_it()
+    {
+        using PlanetsTestPlayer player = await StartAsync(stub: false);
+        long systemId;
+        long objectId;
+        int resourceId;
+        decimal coefficient;
+        int sectorId;
+        string original;
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            WorldDbContext db = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
+            long ownSystemId = await db.Planets.Where(planet => planet.Id == player.PlanetId).Select(planet => planet.SystemId).SingleAsync(Token);
+            PlanetEntity planet = await db.Planets.AsNoTracking().Include(entry => entry.DepositIds)
+                .FirstAsync(entry => entry.SystemId != ownSystemId && entry.OwnerPlayerId == null && entry.DepositIds.Count > 0, Token);
+            StarSystemEntity system = await db.Systems.AsNoTracking().SingleAsync(entry => entry.Id == planet.SystemId, Token);
+            objectId = planet.CelestialObjectId;
+            resourceId = planet.DepositIds[0].ResourceId;
+            coefficient = planet.DepositIds[0].Coefficient;
+            SectorEntity sector = await db.Sectors.AsNoTracking().SingleAsync(entry => entry.Id == system.SectorId, Token);
+            systemId = system.Id;
+            sectorId = system.SectorId;
+            original = system.Name;
+            DateTimeOffset now = scope.ServiceProvider.GetRequiredService<Aetheris.Core.Time.IGameClock>().GameNow;
+            await scope.ServiceProvider.GetRequiredService<Aetheris.World.IWorldModule>().TakeScanSnapshotAsync(player.Account.UserId, sector.Id,
+                sector.X + system.X, sector.Y + system.Y, sector.Z + system.Z, 1, now, now.AddHours(48), Token);
+        }
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            WorldDbContext db = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
+            StarSystemEntity system = await db.Systems.SingleAsync(entry => entry.Id == systemId, Token);
+            system.Name = "Changed live name";
+            PlanetEntity planet = await db.Planets.SingleAsync(entry => entry.CelestialObjectId == objectId, Token);
+            planet.OwnerPlayerId = "new-owner";
+            DepositEntity deposit = await db.Deposits.SingleAsync(entry => entry.PlanetId == planet.Id && entry.ResourceId == resourceId, Token);
+            deposit.Coefficient += 1;
+            await db.SaveChangesAsync(Token);
+        }
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            WorldMapService map = scope.ServiceProvider.GetRequiredService<WorldMapService>();
+            MapSystemDto recorded = (await map.GetSectorAsync(player.Account.UserId, sectorId, null, Token)).Systems.Single(entry => entry.Id == systemId);
+            Assert.True(recorded.FromScan);
+            Assert.Equal(original, recorded.Name);
+            MapSystemViewDto view = await map.GetSystemAsync(player.Account.UserId, systemId, null, Token);
+            Assert.Equal(original, view.System.Name);
+            MapObjectDto planet = view.Objects.Single(entry => entry.Id == objectId);
+            Assert.Null(planet.Owner);
+            Assert.Equal(coefficient, planet.Resources.Single(entry => entry.ResourceId == resourceId).Coefficient);
+        }
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, WorldConfigKeys.RadarStubEnabled, "true");
+            await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, WorldConfigKeys.RadarRangePerLevel, "1000000");
+            WorldMapService map = scope.ServiceProvider.GetRequiredService<WorldMapService>();
+            MapSystemDto live = (await map.GetSectorAsync(player.Account.UserId, sectorId, null, Token)).Systems.Single(entry => entry.Id == systemId);
+            Assert.False(live.FromScan);
+            Assert.Equal("Changed live name", live.Name);
+        }
+    }
+
     private async Task<PlanetsTestPlayer> StartAsync(bool stub)
     {
         await PlanetsTestData.ResetAsync(_factory);

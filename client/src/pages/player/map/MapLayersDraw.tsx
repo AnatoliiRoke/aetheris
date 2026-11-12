@@ -1,6 +1,6 @@
 import { memo, type CSSProperties } from 'react';
 import { artImage } from '../../../assets/images';
-import type { MapField, MapGalaxy, MapNebula, MapObject, MapRadar, MapSector, MapSectorView, MapSystem, MapSystemView } from '../../../api/mapApi';
+import type { MapField, MapGalaxy, MapNebula, MapObject, MapRadar, MapScan, MapSector, MapSectorView, MapSystem, MapSystemView } from '../../../api/mapApi';
 import { GameIcon } from '../../../components/GameIcon';
 import { useI18n } from '../../../i18n/useI18n';
 import { clusterPoints, orbitPlace, orbitRadius, systemWorldSize } from './mapGeometry';
@@ -150,6 +150,20 @@ function RadarRange({ radar }: { radar: MapRadar }) {
   );
 }
 
+function ScanRange({ scan }: { scan: MapScan }) {
+  const { t, language } = useI18n();
+  const diameter = scan.radius * 2;
+  const date = new Date(scan.scannedAt).toLocaleString(language);
+  return (
+    <>
+      <span aria-hidden="true" className="map-radar" style={worldStyle(scan.x, scan.y, diameter, diameter)}>
+        <span className="map-radar__ring" />
+      </span>
+      <span className="map-scan-label map-nebula-label" style={worldStyle(scan.x, scan.y - scan.radius)}>{t('map.scanLabel', { date })}</span>
+    </>
+  );
+}
+
 /** One of the four star pictures, fixed for this system. A system of the player also carries the house. */
 function StarPicture({ systemId, own }: { systemId: number; own: boolean }) {
   return (
@@ -209,6 +223,7 @@ export const SectorLayer = memo(function SectorLayer({
       {sector.radars.map((radar) => (
         <RadarRange key={`r${radar.planetId}`} radar={radar} />
       ))}
+      {(sector.scans ?? []).map((scan, index) => <ScanRange key={`s${index}`} scan={scan} />)}
       {layers.nebulae
         ? sector.nebulas.map((nebula) => (
             <span aria-hidden="true" className="map-nebula-label" key={`l${nebula.id}`} style={worldStyle(nebula.x, nebula.y + nebula.radius)}>

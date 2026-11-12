@@ -18,6 +18,19 @@ public interface IWorldModule
     /// </summary>
     string ModuleName { get; }
 
+    /// <summary>Captures the world within the given absolute sphere for a player.</summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="sectorId">The sector containing the centre.</param>
+    /// <param name="x">The absolute x coordinate.</param>
+    /// <param name="y">The absolute y coordinate.</param>
+    /// <param name="z">The absolute z coordinate.</param>
+    /// <param name="radius">The radius.</param>
+    /// <param name="now">The scan time.</param>
+    /// <param name="expiresAt">The expiration time.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The recorded scan and its report data.</returns>
+    Task<ScanSnapshotResult> TakeScanSnapshotAsync(string playerId, int sectorId, double x, double y, double z, double radius, DateTimeOffset now, DateTimeOffset expiresAt, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Gets the fixed travel time inside a star system (task 00004, decision 3).
     /// </summary>

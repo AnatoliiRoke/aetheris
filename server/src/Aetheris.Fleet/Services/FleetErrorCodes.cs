@@ -147,6 +147,9 @@ public static class FleetErrorCodes
     /// <summary>The plan has an order that the fleet cannot carry out yet (task 00053).</summary>
     public const string FlightOrderNotSupported = "fleet_flight_order_not_supported";
 
+    /// <summary>The fleet has no working scanner of systems.</summary>
+    public const string ScanNoModule = "fleet_scan_no_module";
+
     /// <summary>The target of a flight is not a place of the map any more, or lies outside its sector (task 00053).</summary>
     public const string FlightTargetUnknown = "fleet_flight_target_unknown";
 

@@ -80,3 +80,15 @@ export function fleetOpenedOrders(fleet: Fleet | null, designs: readonly ShipDes
 
   return opened;
 }
+
+/** The best radius and duration of the fleet's system scanners. */
+export function fleetScanCapabilities(fleet: Fleet | null, designs: readonly ShipDesign[], catalog: ShipCatalog | null): { radius: number; duration: number } | null {
+  if (!fleet || !catalog) return null;
+  const byDesign = new Map(designs.map((design) => [design.id, design]));
+  const fitted = new Set(fleet.ships.flatMap((ship) => (byDesign.get(ship.designId)?.slots ?? []).map((slot) => slot.partTypeId)));
+  const scanners = catalog.modules.filter((module) => fitted.has(module.id) && module.scanTarget === 'systems').map((module) => ({
+    radius: module.facts?.find((fact) => fact.kind === 'scan_radius')?.amount ?? 0,
+    duration: module.facts?.find((fact) => fact.kind === 'scan_duration')?.amount ?? 0,
+  })).filter((scanner) => scanner.radius > 0 && scanner.duration > 0);
+  return scanners.length ? { radius: Math.max(...scanners.map((entry) => entry.radius)), duration: Math.min(...scanners.map((entry) => entry.duration)) } : null;
+}

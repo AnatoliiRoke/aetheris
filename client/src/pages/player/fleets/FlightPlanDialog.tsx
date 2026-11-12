@@ -12,7 +12,8 @@ import { FlightMineTime } from './FlightMineTime';
 import { FlightPlanTime } from './FlightPlanTime';
 import { FlightTargetFields } from './FlightTargetFields';
 import { FlightCargoFields } from './FlightCargoFields';
-import { fleetExtracts, fleetOpenedOrders } from './fleetExtraction';
+import { fleetExtracts, fleetOpenedOrders, fleetScanCapabilities } from './fleetExtraction';
+import { formatDuration } from '../planetText';
 import { cargoItemsValid, cargoMass, holdBefore, holdContentOf, holdMass, readCargoItems, unloadDefaults } from './flightPlanCargo';
 import { readAxes, toOrderInputs, type DraftOrder, type FlightTimeTarget, type TargetKind } from './flightPlanParts';
 
@@ -111,7 +112,7 @@ export function FlightPlanDialog({
   onExecute: (fleetId: number, orders: FlightPlanOrderInput[]) => void;
   onClose: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { map, fleet: fleetApi } = useApi();
   const { bodies } = useBodies();
   const [fleetId, setFleetId] = useState<number | null>(plan?.fleetId ?? fleets.length === 1 ? (plan?.fleetId ?? fleets[0]?.id ?? null) : null);
@@ -160,6 +161,7 @@ export function FlightPlanDialog({
     () => fleetExtracts(chosenFleet, designsRead.data ?? [], catalogRead.data),
     [chosenFleet, designsRead.data, catalogRead.data],
   );
+  const scanCapabilities = useMemo(() => fleetScanCapabilities(chosenFleet, designsRead.data ?? [], catalogRead.data), [chosenFleet, designsRead.data, catalogRead.data]);
 
   // The sector the fleet stands in: it is the sector of the target of every new order.
   const fleetSectorId = useMemo(() => chosenFleet?.sectorId ?? sectorId, [chosenFleet, sectorId]);
@@ -448,6 +450,7 @@ export function FlightPlanDialog({
                       onChange={(durationMinutes) => changeOrder(index, { durationMinutes })}
                     />
                   ) : null}
+                  {order.typeCode === 'scan' && scanCapabilities ? <p className="fl-note">{t('plan.scanDetails', { radius: scanCapabilities.radius, duration: formatDuration(language, scanCapabilities.duration) })}</p> : null}
 
                   {fields.cargo && (order.typeCode === 'load' || order.typeCode === 'unload') ? (
                     <FlightCargoFields

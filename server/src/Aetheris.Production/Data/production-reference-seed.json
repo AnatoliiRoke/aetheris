@@ -2283,6 +2283,9 @@
         },
         "flight_order": {
           "code": "scan"
+        },
+        "scan_target": {
+          "code": "systems"
         }
       },
       "weight": 228.761562,
@@ -2291,7 +2294,10 @@
           "number": 18
         },
         "char_scan_radius": {
-          "number": 15
+          "number": 25
+        },
+        "char_scan_duration": {
+          "number": 1800
         },
         "char_detection": {
           "number": 100
@@ -2318,6 +2324,9 @@
         },
         "flight_order": {
           "code": "scan"
+        },
+        "scan_target": {
+          "code": "fleets"
         }
       },
       "weight": 251.637719,
@@ -11524,6 +11533,19 @@
       }
     },
     {
+      "code": "char_scan_duration",
+      "kind": "scan_duration",
+      "sort_order": 18,
+      "name": {
+        "uk": "Тривалість сканування",
+        "en": "Scan duration"
+      },
+      "description": {
+        "uk": "Тривалість сканування в секундах ігрового часу.",
+        "en": "The scan duration in game seconds."
+      }
+    },
+    {
       "code": "char_scan_speed",
       "kind": "scan_speed",
       "sort_order": 18,
@@ -12507,6 +12529,12 @@
       "group": "pg_9",
       "characteristic": "char_scan_radius",
       "sort_order": 4,
+      "is_required": false
+    },
+    {
+      "group": "pg_9",
+      "characteristic": "char_scan_duration",
+      "sort_order": 5,
       "is_required": false
     },
     {

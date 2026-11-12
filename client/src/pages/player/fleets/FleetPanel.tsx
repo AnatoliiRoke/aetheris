@@ -9,6 +9,7 @@ import { Link } from '../../../router/Router';
 import { formatNumber, hasKey } from '../planetText';
 import { PlanetAvatar, StatePill } from './FleetBits';
 import { FleetFlightStatus, type FleetsClock } from './FleetFlightStatus';
+import { FleetScanStatus } from './FleetScanStatus';
 import { FleetHoldButton } from './FleetHold';
 import { readCargoItems } from './flightPlanCargo';
 import { FleetPlace } from './FleetPlace';
@@ -89,6 +90,7 @@ export function FleetPanel({
   onPlanExecute,
   clock,
   onArrived,
+  onScanDone,
 }: {
   fleet: Fleet;
   plan: FlightPlan | null;
@@ -107,6 +109,7 @@ export function FleetPanel({
   onPlanExecute: () => void;
   clock: FleetsClock | null;
   onArrived: () => void;
+  onScanDone: () => void;
 }) {
   const { t, language } = useI18n();
   const scene = useFleetsScene();
@@ -122,6 +125,7 @@ export function FleetPanel({
   };
 
   const body = scene.bodies.find((entry) => entry.planetId === fleet.planetId);
+  const scanning = plan?.stateCode === 'active' ? plan.orders.find((order) => order.position === plan.currentPosition && order.typeCode === 'scan') : undefined;
 
   // A fleet that is under way, or that stands anywhere but at a body of the player, does not give its ships
   // back: the buttons that change its ships wait until it is at home (the server checks it too).
@@ -181,7 +185,7 @@ export function FleetPanel({
           ) : (
             <>
               <h2 className="fl-panel__title">{fleet.name}</h2>
-              <StatePill tone={hasCredits ? 'ok' : 'warn'}>{stateText(language, t, fleet, hasCredits)}</StatePill>
+              <StatePill tone={hasCredits ? 'ok' : 'warn'}>{scanning ? t('plan.scanningShort') : stateText(language, t, fleet, hasCredits)}</StatePill>
               <button
                 aria-label={t('fleets.rename')}
                 className="fl-iconbtn"
@@ -207,6 +211,7 @@ export function FleetPanel({
           <FleetPlace fleet={fleet} />
         </span>
         {fleet.flight ? <FleetFlightStatus clock={clock} flight={fleet.flight} onArrived={onArrived} /> : null}
+        {scanning ? <FleetScanStatus clock={clock} onDone={onScanDone} order={scanning} /> : null}
       </div>
 
       <dl className="fl-facts">

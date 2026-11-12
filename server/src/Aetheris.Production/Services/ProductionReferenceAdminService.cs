@@ -294,6 +294,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             new AdminReferenceOption(HullRoles.Drone, LabelPrefix + "role." + HullRoles.Drone),
                             .. PartComponents.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "component." + value)),
                             .. PartFlightOrders.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "flight_order." + value)),
+                            .. PartScanTargets.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "scan_target." + value)),
                         ]),
                     new("text_value", AdminReferenceFieldTypes.Text, LabelPrefix + "field.attribute_text"),
                 ]),
@@ -1087,7 +1088,14 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             }
 
             // A logical code is one the program knows; the constructor of the ships reads it.
-            if (attribute.CodeValue is { } codeValue && !PartDamageKinds.All.Contains(codeValue) && !PartSlotSizes.All.Contains(codeValue))
+            if (attribute.CodeValue is { } codeValue
+                && !PartDamageKinds.All.Contains(codeValue)
+                && !PartSlotSizes.All.Contains(codeValue)
+                && !PartRoles.All.Contains(codeValue)
+                && codeValue != HullRoles.Drone
+                && !PartComponents.All.Contains(codeValue)
+                && !PartFlightOrders.All.Contains(codeValue)
+                && !PartScanTargets.All.Contains(codeValue))
             {
                 AdminReferenceRules.Fail(failures, AdminReferenceRules.PathOf(AttributesField, index, "code_value"), AdminReferenceErrors.Unknown);
             }

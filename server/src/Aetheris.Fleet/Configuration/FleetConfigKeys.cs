@@ -91,6 +91,9 @@ public static class FleetConfigKeys
     /// </summary>
     public const string ExtractionPlaceTolerance = "fleet.extraction.place_tolerance";
 
+    /// <summary>The lifetime of a scan snapshot in game seconds.</summary>
+    public const string ScanSnapshotLifetimeSeconds = "fleet.scan.snapshot_lifetime_seconds";
+
     /// <summary>
     /// The push of the reference point of the speed, in kilonewtons (task 00053).
     /// </summary>
@@ -130,6 +133,7 @@ public static class FleetConfigKeys
         new(FlightPlanMaxOrders, "32", "1", "256", "Найбільша кількість наказів у політному листі флоту."),
         new(ExtractionCycleSeconds, "900", "1", "86400", "Тривалість одного циклу видобування, у секундах ігрового часу: раз на цикл видобуток потрапляє в трюми флоту. Орієнтир — 15 хвилин."),
         new(ExtractionPlaceTolerance, "1", "0", "1000000", "Допуск збігу координат флоту з точкою вільного астероїдного поля, в одиницях карти: видобування бере місце з позиції флоту, і поле вважається тим, де стоїть флот, коли відстань до його точки не більша за допуск."),
+        new(ScanSnapshotLifetimeSeconds, "172800", "1", "31536000", "Термін зберігання знімка сканування, у секундах ігрового часу."),
         new(SpeedReferencePush, "100", "0.000001", "1000000000", "Опорна тяга для швидкості перельоту, у кН. Разом з опорною масою й опорною швидкістю задає сталу формули швидкості v = K·√(F/m): корабель із цією тягою й цією масою летить з опорною швидкістю."),
         new(SpeedReferenceMass, "1000", "0.000001", "1000000000", "Опорна маса для швидкості перельоту, у тоннах (корпус разом із вантажем)."),
         new(SpeedReferenceSpeed, "45", "0.000001", "1000000000", "Опорна швидкість для швидкості перельоту, у світлових роках за годину: стільки літає корабель з опорною тягою й опорною масою."),

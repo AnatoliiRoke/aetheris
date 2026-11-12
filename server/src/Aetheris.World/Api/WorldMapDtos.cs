@@ -69,6 +69,9 @@ public sealed record MapGalaxyDto(IReadOnlyList<MapSectorDto> Sectors, double Se
 /// <param name="OwnPlanetCount">How many bodies of the player lie in the system.</param>
 /// <param name="Distance">The distance from the body the player flies from, or <see langword="null"/>.</param>
 /// <param name="TravelSeconds">The travel time from that body, in game seconds, or <see langword="null"/>.</param>
+/// <param name="FromScan">Whether this information is from a scan.</param>
+/// <param name="ScannedAt">The time of that scan, if applicable.</param>
+/// <param name="ScanExpiresAtReal">The real time at which the scan expires.</param>
 public sealed record MapSystemDto(
     long Id,
     int Number,
@@ -81,7 +84,10 @@ public sealed record MapSystemDto(
     int ObjectCount,
     int OwnPlanetCount,
     double? Distance,
-    long? TravelSeconds);
+    long? TravelSeconds,
+    bool FromScan = false,
+    DateTimeOffset? ScannedAt = null,
+    DateTimeOffset? ScanExpiresAtReal = null);
 
 /// <summary>A nebula on the map of a sector.</summary>
 /// <param name="Id">The nebula.</param>
@@ -105,7 +111,9 @@ public sealed record MapNebulaDto(long Id, long ObjectId, string Name, double X,
 /// <param name="Mass">The mass left in the field.</param>
 /// <param name="Distance">The distance from the body the player flies from, or <see langword="null"/>.</param>
 /// <param name="TravelSeconds">The travel time from that body, or <see langword="null"/>.</param>
-public sealed record MapFieldDto(long ObjectId, int ObjectTypeId, string Name, double X, double Y, double Z, long Mass, double? Distance, long? TravelSeconds);
+/// <param name="Resources">The composition recorded by a scan, if any.</param>
+/// <param name="ScannedAt">The time of the scan, if this field comes from a snapshot.</param>
+public sealed record MapFieldDto(long ObjectId, int ObjectTypeId, string Name, double X, double Y, double Z, long Mass, double? Distance, long? TravelSeconds, IReadOnlyList<MapResourceShareDto>? Resources = null, DateTimeOffset? ScannedAt = null);
 
 /// <summary>The range of the radar of a body of the player; none exists until the radar is built.</summary>
 /// <param name="PlanetId">The body.</param>
@@ -114,6 +122,16 @@ public sealed record MapFieldDto(long ObjectId, int ObjectTypeId, string Name, d
 /// <param name="Z">The z coordinate within the sector.</param>
 /// <param name="Radius">The radius of the range.</param>
 public sealed record MapRadarDto(long PlanetId, double X, double Y, double Z, double Radius);
+
+/// <summary>The area covered by a recorded scan.</summary>
+/// <param name="X">The local x coordinate.</param>
+/// <param name="Y">The local y coordinate.</param>
+/// <param name="Z">The local z coordinate.</param>
+/// <param name="Radius">The radius.</param>
+/// <param name="ScannedAt">The scan time.</param>
+/// <param name="ExpiresAt">The expiration time.</param>
+/// <param name="ExpiresAtReal">The expiration time on the real clock.</param>
+public sealed record MapScanDto(double X, double Y, double Z, double Radius, DateTimeOffset ScannedAt, DateTimeOffset ExpiresAt, DateTimeOffset ExpiresAtReal);
 
 /// <summary>The map of a sector.</summary>
 /// <param name="SectorId">The sector.</param>
@@ -124,6 +142,7 @@ public sealed record MapRadarDto(long PlanetId, double X, double Y, double Z, do
 /// <param name="Fields">The free fields the player sees.</param>
 /// <param name="Radars">The ranges of the radars of the player in the sector.</param>
 /// <param name="SeesOnlyOwn">Whether the player sees nothing but their own bodies.</param>
+/// <param name="Scans">The player's unexpired scans.</param>
 public sealed record MapSectorViewDto(
     int SectorId,
     string Name,
@@ -132,7 +151,8 @@ public sealed record MapSectorViewDto(
     IReadOnlyList<MapNebulaDto> Nebulas,
     IReadOnlyList<MapFieldDto> Fields,
     IReadOnlyList<MapRadarDto> Radars,
-    bool SeesOnlyOwn);
+    bool SeesOnlyOwn,
+    IReadOnlyList<MapScanDto>? Scans = null);
 
 /// <summary>The owner of a body as the map shows them.</summary>
 /// <param name="Nickname">The nickname.</param>

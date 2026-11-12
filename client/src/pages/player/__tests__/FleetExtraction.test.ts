@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { sampleFleet, sampleFleetShip, sampleShipCatalog, sampleShipDesign, sampleShipModule } from '../../../test/renderPage';
-import { designExtracts, fleetExtracts } from '../fleets/fleetExtraction';
+import { designExtracts, fleetExtracts, fleetScanCapabilities } from '../fleets/fleetExtraction';
 
 /**
  * A project whose slots hold the given modules.
@@ -13,6 +13,19 @@ function designOf(...partTypeIds: number[]) {
 }
 
 describe('which fleets may extract (task 00055)', () => {
+  it('uses the best radius and duration of system scanners only', () => {
+    const facts = (radius: number, duration: number) => [
+      { kind: 'scan_radius', amount: radius, nameKey: '', unitKey: null, sortOrder: 1 },
+      { kind: 'scan_duration', amount: duration, nameKey: '', unitKey: null, sortOrder: 2 },
+    ];
+    const catalog = sampleShipCatalog({ modules: [
+      sampleShipModule({ id: 1, scanTarget: 'systems', facts: facts(25, 1800) }),
+      sampleShipModule({ id: 2, scanTarget: 'systems', facts: facts(30, 2000) }),
+      sampleShipModule({ id: 3, scanTarget: 'fleets', facts: facts(99, 1) }),
+    ] });
+    const fleet = sampleFleet({ ships: [sampleFleetShip({ id: 1, designId: 7 })] });
+    expect(fleetScanCapabilities(fleet, [designOf(1, 2, 3)], catalog)).toEqual({ radius: 30, duration: 1800 });
+  });
   const drive = sampleShipModule({ id: 1, code: 'drive', partGroupCode: 'group_drives' });
   const extractor = sampleShipModule({ id: 2, code: 'extractor', partGroupCode: 'any_group', extractionPlaceKinds: ['nebula', 'gas_giant'] });
   const catalog = sampleShipCatalog({ modules: [drive, extractor] });

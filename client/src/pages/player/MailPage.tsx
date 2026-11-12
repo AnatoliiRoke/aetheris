@@ -1,12 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
 import { mailFolders, type MailDraft, type MailLetter, type MailLetterDetail, type MailRecipient, type MailView } from '../../api/mailApi';
 import { useApi } from '../../api/useApi';
+import type { FleetsView } from '../../api/fleetApi';
 import { Alert } from '../../components/Alert';
 import { GameIcon } from '../../components/GameIcon';
 import { useDocumentTitle } from '../../components/useDocumentTitle';
 import { useI18n } from '../../i18n/useI18n';
 import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
+import { useRouter } from '../../router/useRouter';
 import { ScreenHead } from './ScreenHead';
 import { noticeFromError, type Notice } from './screenNotice';
 import { useRead } from './market/useRead';
@@ -14,6 +16,9 @@ import { MailCategoryList, MailFolderList, MailLetterList } from './mail/MailLis
 import { MailComposeForm } from './mail/MailComposeForm';
 import { MailLetterPanel } from './mail/MailLetterPanel';
 import { useMailUnread } from './mail/useMailUnread';
+import { FlightPlanDialog, type FlightPlanSeed } from './fleets/FlightPlanDialog';
+import { writeFlightPlan } from './fleets/flightPlanParts';
+import { readScanReport, type ScanReportObject } from './mail/scanReport';
 
 /**
  * The prefixes of the refusals of the server that have their own text for the player here.
@@ -39,7 +44,8 @@ type ComposeMode =
  */
 export function MailPage() {
   const { t, language } = useI18n();
-  const { mail: mailApi } = useApi();
+  const { mail: mailApi, fleet: fleetApi } = useApi();
+  const { navigate } = useRouter();
 
   useDocumentTitle(t('meta.mail.title'));
 
@@ -53,6 +59,31 @@ export function MailPage() {
   const [composeError, setComposeError] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice>(null);
   const [busy, setBusy] = useState(false);
+  const [scanFleet, setScanFleet] = useState<{ view: FleetsView; seed: FlightPlanSeed } | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
+
+  const openScanFleet = useCallback(async (object: ScanReportObject) => {
+    try {
+      const fleets = await fleetApi.fleets();
+      setScanError(null);
+      setScanFleet({ view: fleets, seed: { targetKind: object.system_id === null ? 'object' : 'planet', targetSectorId: object.sector_id, targetSystemId: object.system_id ?? undefined, targetObjectId: object.id } });
+    } catch (error) {
+      setNotice(noticeFromError(error, language, t('fleets.failed'), ['fleet_']));
+    }
+  }, [fleetApi, language, t]);
+
+  const saveScanPlan = useCallback(async (fleetId: number, orders: Parameters<typeof writeFlightPlan>[2], execute: boolean) => {
+    setBusy(true);
+    try {
+      await writeFlightPlan(fleetApi, fleetId, orders);
+      if (execute) await fleetApi.executeFlightPlan(fleetId);
+      setScanFleet(null);
+    } catch (error) {
+      setScanError(noticeFromError(error, language, t('fleets.failed'), ['fleet_'])?.text ?? t('fleets.failed'));
+    } finally {
+      setBusy(false);
+    }
+  }, [fleetApi, language, t]);
 
   // The counter of the top bar follows the mail: it is read when the frame loads and after every
   // command, so the number in the header is never a made-up one.
@@ -278,7 +309,7 @@ export function MailPage() {
               error={composeError}
               forwardedBody={compose.kind === 'forward' ? compose.body : null}
               key={composeDraft?.id ?? `compose-${compose.kind}`}
-              lockedReceiver={compose.kind === 'reply' || compose.kind === 'forward' ? compose.receiver : null}
+              lockedReceiver={compose.kind === 'reply' ? compose.receiver : null}
               onCancel={() => setCompose({ kind: 'none' })}
               onRemoveDraft={() => void run(() => mailApi.removeDraft(composeDraft?.id ?? 0), t('mail.draftRemoved'))}
               onSaveDraft={saveDraft}
@@ -292,7 +323,18 @@ export function MailPage() {
               key={openLetter.letter.id}
               onComplain={(reason) => void run(() => mailApi.complain({ messageId: openLetter.letter.id, reason }), t('mail.complained'))}
               onDelete={() => void run(() => mailApi.toggleDeleted(openLetter.letter.id), t('mail.deleted'))}
-              onForward={() => openCompose({ kind: 'forward', receiver: openLetter.letter.senderNickname ?? '', body: openLetter.body })}
+              onForward={() => {
+                const report = readScanReport(openLetter.textParameters);
+                const body = report ? [
+                  t('mail.scanSummary', { radius: report.radius, date: new Date(report.scanned_at).toLocaleString(language) }),
+                  t('mail.scanPlace', { sector: report.sector_name ?? report.sector_id, x: report.x, y: report.y, z: report.z }),
+                  ...report.systems.map((system) => `${system.name}: ${system.has_deposits ? t('mail.scanHasDeposits') : t('mail.scanNoDeposits')}; ${system.has_gas_giants ? t('mail.scanHasGiants') : t('mail.scanNoGiants')}\n${system.objects.map((object) => object.name).join(', ')}`),
+                  ...report.free_fields.map((object) => `${t('mail.scanFreeFields')}: ${object.name}`),
+                ].join('\n\n') : openLetter.body;
+                openCompose({ kind: 'forward', receiver: openLetter.letter.senderNickname ?? '', body });
+              }}
+              onScanMap={(sectorId, x, y) => navigate(`${routes.map}?sector=${sectorId}&scan_x=${encodeURIComponent(x)}&scan_y=${encodeURIComponent(y)}`)}
+              onScanFleet={(object) => void openScanFleet(object)}
               onReply={() => openCompose({ kind: 'reply', receiver: openLetter.letter.senderNickname ?? '' })}
               onSendReply={(body) =>
                 void run(
@@ -318,6 +360,8 @@ export function MailPage() {
           )}
         </section>
       </div>
+      {scanFleet ? <FlightPlanDialog busy={busy} error={scanError} fleets={scanFleet.view.fleets} plan={null} seed={scanFleet.seed} sectorId={scanFleet.seed.targetSectorId ?? null}
+        onClose={() => setScanFleet(null)} onSave={(fleetId, orders) => void saveScanPlan(fleetId, orders, false)} onExecute={(fleetId, orders) => void saveScanPlan(fleetId, orders, true)} /> : null}
 
       <p className="meta">
         <Link to={routes.game}>{t('mail.back')}</Link>

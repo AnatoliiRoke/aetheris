@@ -167,6 +167,23 @@ export function MapPage() {
   const galaxy: MapGalaxy | null = galaxyRead.data;
   const sector: MapSectorView | null = sectorRead.data;
   const systemView: MapSystemView | null = systemRead.data;
+  const scanDeadlines = level === 'sector'
+    ? (sector?.scans ?? []).map((scan) => scan.expiresAtReal).filter((value): value is string => Boolean(value))
+    : systemView?.system.scanExpiresAtReal ? [systemView.system.scanExpiresAtReal] : [];
+  const nextScanDeadline = scanDeadlines.length ? Math.min(...scanDeadlines.map((value) => Date.parse(value)).filter(Number.isFinite)) : null;
+  useEffect(() => {
+    if (nextScanDeadline === null || !Number.isFinite(nextScanDeadline)) return;
+    let timer = 0;
+    const arm = () => {
+      timer = window.setTimeout(() => {
+        if (Date.now() < nextScanDeadline) arm();
+        else if (level === 'system') go({ systemId: null, objectId: null }, true);
+        else void sectorRead.reload();
+      }, Math.min(2_147_483_647, Math.max(0, nextScanDeadline - Date.now())));
+    };
+    arm();
+    return () => window.clearTimeout(timer);
+  }, [nextScanDeadline, level, go, sectorRead.reload]);
   const sectorNames = useMemo(() => new Map((galaxy?.sectors ?? []).map((entry) => [entry.id, entry.name])), [galaxy]);
   const sectorName = level === 'system' ? systemView?.sectorName ?? '' : sector?.name ?? sectorNames.get(location.sectorId ?? 0) ?? '';
 
@@ -239,6 +256,18 @@ export function MapPage() {
     focusToken.current += 1;
     setFocus({ x, y, token: focusToken.current });
   };
+
+  const scanFocus = useRef<string | null>(null);
+  useEffect(() => {
+    const x = query.get('scan_x');
+    const y = query.get('scan_y');
+    const key = `${location.sectorId}:${x}:${y}`;
+    if (sector && x !== null && y !== null && Number.isFinite(Number(x)) && Number.isFinite(Number(y)) && scanFocus.current !== key) {
+      scanFocus.current = key;
+      focusToken.current += 1;
+      setFocus({ x: Number(x), y: Number(y), token: focusToken.current });
+    }
+  }, [query, sector, location.sectorId]);
 
   const bounds = useMemo<Bounds>(() => {
     if (level === 'sector') {

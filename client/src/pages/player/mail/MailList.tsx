@@ -149,7 +149,8 @@ function MailLetterRow({
   const { text } = useTexts();
   const mark = markKindOf(letter);
   const sender = letter.senderNickname ?? text(letter.categoryNameKey) ?? t('mail.game');
-  const label = `${letter.isRead ? '' : `${t('mail.unread')}. `}${text(letter.categoryNameKey) ?? ''}: ${letter.subject || letter.preview}`;
+  const subject = letter.systemKindCode === 'scan_report' ? t('mail.scanTitle') : letter.subject || letter.preview;
+  const label = `${letter.isRead ? '' : `${t('mail.unread')}. `}${text(letter.categoryNameKey) ?? ''}: ${subject}`;
 
   return (
     <div className={active ? 'mail-row is-active' : letter.isRead ? 'mail-row' : 'mail-row is-unread'}>
@@ -161,7 +162,7 @@ function MailLetterRow({
           {letter.senderRaceColorKey && mark === 'player' ? <Glyph colorKey={letter.senderRaceColorKey} small /> : null}
           <span className="mail-row__name">{sender}</span>
         </span>
-        <span className={letter.isRead ? 'mail-row__subject' : 'mail-row__subject is-unread'}>{letter.subject || letter.preview}</span>
+        <span className={letter.isRead ? 'mail-row__subject' : 'mail-row__subject is-unread'}>{subject}</span>
         {letter.preview && letter.subject ? <span className="mail-row__preview">{letter.preview}</span> : null}
         <span className="mail-row__labels">
           <span className={`mail-tag mail-tag--${mark}`}>{text(letter.categoryNameKey) ?? letter.categoryNameKey}</span>

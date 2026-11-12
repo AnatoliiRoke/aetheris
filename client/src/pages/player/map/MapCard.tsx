@@ -117,6 +117,7 @@ export function MapCard({ selection, context }: { selection: MapSelection; conte
       <>
         <Row label={t('map.place')}>{`${t('map.sector', { name: selection.sectorName })} · ${t('civ.system')} ${system.name ?? system.number}`}</Row>
         {open ? <Row label={t('map.bodies')}>{formatNumber(system.objectCount, language)}</Row> : <p className="map-card__note">{t('map.needRadar')}</p>}
+        {system.fromScan && system.scannedAt ? <p className="map-card__note">{t('map.scanData', { date: new Date(system.scannedAt).toLocaleString(language) })}</p> : null}
         {system.inNebula ? <Row label={t('map.nebulaKind')}>{t('map.inNebula')}</Row> : null}
       </>
     );
@@ -138,6 +139,8 @@ export function MapCard({ selection, context }: { selection: MapSelection; conte
       <>
         <Row label={t('map.place')}>{`${t('map.sector', { name: selection.sectorName })} · ${t('map.openSpace')}`}</Row>
         <Row label={t('map.mass')}>{formatAmount(field.mass, language)}</Row>
+        {field.scannedAt ? <p className="map-card__note">{t('map.scanData', { date: new Date(field.scannedAt).toLocaleString(language) })}</p> : null}
+        {field.resources?.map((share) => <Row key={share.resourceId} label={context.resourceName(share.resourceId)}>{formatCoefficient(share.coefficient, language)}</Row>)}
       </>
     );
   } else if (selection.kind === 'object') {

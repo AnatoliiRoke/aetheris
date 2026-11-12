@@ -68,6 +68,7 @@ export function FleetsPage() {
   const [busy, setBusy] = useState(false);
   const [dialog, setDialog] = useState<Dialog | null>(null);
   const lastArrivalRead = useRef(0);
+  const lastScanRead = useRef(0);
 
   // An answer of a command is newer than the last read until a read arrives after it.
   const view: FleetsView | null = fresh && (read.receivedAt === null || fresh.at > read.receivedAt) ? fresh.view : read.data;
@@ -165,6 +166,13 @@ export function FleetsPage() {
     window.setTimeout(again, arrivalRetryMs);
   }, [plansRead, read]);
 
+  const reloadScan = useCallback(() => {
+    const now = Date.now();
+    if (now - lastScanRead.current < arrivalRetryMs) return;
+    lastScanRead.current = now;
+    void Promise.all([read.reload(), plansRead.reload()]);
+  }, [plansRead, read]);
+
   if (read.failed && !view) {
     return (
       <div className="civ-main__in">
@@ -187,6 +195,7 @@ export function FleetsPage() {
         busy={busy}
         clock={clock}
         onReload={reloadAll}
+        onScanDone={reloadScan}
         dialog={dialog}
         dialogError={dialogError}
         notice={notice}
@@ -220,6 +229,7 @@ function FleetsContent({
   plans,
   clock,
   onReload,
+  onScanDone,
   busy,
   dialog,
   dialogError,
@@ -232,6 +242,7 @@ function FleetsContent({
   plans: readonly FlightPlan[];
   clock: FleetsClock | null;
   onReload: () => void;
+  onScanDone: () => void;
   busy: boolean;
   dialog: Dialog | null;
   dialogError: string | null;
@@ -378,7 +389,7 @@ function FleetsContent({
               ) : (
                 <div aria-label={t('fleets.list')} className="fl-cards" role="group">
                   {visible.map((fleet) => (
-                    <FleetCard fleet={fleet} hasCredits={view.hasCredits} key={fleet.id} onSelect={setSelectedId} selected={selected?.id === fleet.id} />
+                    <FleetCard fleet={fleet} hasCredits={view.hasCredits} key={fleet.id} onSelect={setSelectedId} selected={selected?.id === fleet.id} clock={clock} onScanDone={onScanDone} scan={(() => { const plan = planOf(fleet.id); return plan?.stateCode === 'active' ? plan.orders.find((order) => order.position === plan.currentPosition && order.typeCode === 'scan') : undefined; })()} />
                   ))}
                 </div>
               )}
@@ -396,6 +407,7 @@ function FleetsContent({
                 busy={busy}
                 canMove={fleetsOn(view, selected.planetId, selected.id).length > 0}
                 fleet={selected}
+                onScanDone={onScanDone}
                 hasCredits={view.hasCredits}
                 key={selected.id}
                 onAdd={() => onDialog({ kind: 'add', planetId: selected.planetId, fleetId: selected.id })}

@@ -117,6 +117,8 @@ export interface ShipModule {
   extractionPlaceKinds?: string[];
   /** The order of a flight plan the module opens for a fleet: `hyperfly`, `jump` or `scan`; absent for a module that opens none (task 00058). */
   flightOrder?: string | null;
+  /** The type of target detected by a scanner. */
+  scanTarget?: string | null;
   /** The characteristics the plaque adds up. */
   facts?: ShipModuleFact[];
   /** The weight of one module in tonnes. */

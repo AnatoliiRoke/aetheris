@@ -197,6 +197,9 @@ public static class PartAttributeKeys
     /// </summary>
     public const string FlightOrder = "flight_order";
 
+    /// <summary>The kind of target a scanning module detects.</summary>
+    public const string ScanTarget = "scan_target";
+
     /// <summary>
     /// The mark of a part that is not a module of a ship: the ammunition and the capsules of
     /// inhabitants are carried in the hold or used on a body, so they are never fitted to a
@@ -223,8 +226,22 @@ public static class PartAttributeKeys
         HullRole,
         Component,
         FlightOrder,
+        ScanTarget,
         NotAShipModule,
     ];
+}
+
+/// <summary>The supported targets of a scanning module.</summary>
+public static class PartScanTargets
+{
+    /// <summary>Star systems and their objects.</summary>
+    public const string Systems = "systems";
+
+    /// <summary>Fleets.</summary>
+    public const string Fleets = "fleets";
+
+    /// <summary>Gets the available scan targets.</summary>
+    public static IReadOnlyList<string> All { get; } = [Systems, Fleets];
 }
 
 /// <summary>

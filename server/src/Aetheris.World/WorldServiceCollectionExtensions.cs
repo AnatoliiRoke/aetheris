@@ -50,6 +50,8 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<WorldPlaceService>();
         services.AddScoped<IWorldVisibility, RadarVisibility>();
         services.AddScoped<WorldMapService>();
+        services.AddScoped<ScanSnapshotService>();
+        services.AddScoped<IScheduledEventHandler, ScanSnapshotExpireHandler>();
         services.AddScoped<IWorldModule, WorldModule>();
         services.AddScoped<IScheduledEventHandler, FieldRespawnHandler>();
         services.AddScoped<GenerationRunService>();

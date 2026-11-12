@@ -39,6 +39,7 @@ public static class FleetServiceCollectionExtensions
         services.AddScoped<FlightPlanService>();
         services.AddScoped<FleetBootstrapService>();
         services.AddScoped<FleetExtractionService>();
+        services.AddScoped<FleetScanService>();
         services.AddScoped<FleetHoldService>();
         services.AddScoped<FleetCargoService>();
         services.AddScoped<FleetSpeedService>();
@@ -52,6 +53,7 @@ public static class FleetServiceCollectionExtensions
         services.AddScoped<IScheduledEventHandler, FleetExtractionCycleHandler>();
         services.AddScoped<IScheduledEventHandler, FleetArrivalHandler>();
         services.AddScoped<IScheduledEventHandler, FleetWaitHandler>();
+        services.AddScoped<IScheduledEventHandler, FleetScanHandler>();
 
         services.AddCommand<CreateShipDesignCommand>();
         services.AddCommand<RenameShipDesignCommand>();

@@ -21,6 +21,7 @@ public sealed class WorldModule : IWorldModule
     private readonly GenerationRunService _runs;
     private readonly DepositRichnessService _deposits;
     private readonly IGameConfig _config;
+    private readonly ScanSnapshotService _snapshots;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WorldModule"/> class.
@@ -43,7 +44,8 @@ public sealed class WorldModule : IWorldModule
         WorldPlaceService places,
         GenerationRunService runs,
         DepositRichnessService deposits,
-        IGameConfig config)
+        IGameConfig config,
+        ScanSnapshotService snapshots)
     {
         ArgumentNullException.ThrowIfNull(generation);
         ArgumentNullException.ThrowIfNull(allocator);
@@ -55,6 +57,7 @@ public sealed class WorldModule : IWorldModule
         ArgumentNullException.ThrowIfNull(runs);
         ArgumentNullException.ThrowIfNull(deposits);
         ArgumentNullException.ThrowIfNull(config);
+        ArgumentNullException.ThrowIfNull(snapshots);
 
         _generation = generation;
         _allocator = allocator;
@@ -66,10 +69,15 @@ public sealed class WorldModule : IWorldModule
         _runs = runs;
         _deposits = deposits;
         _config = config;
+        _snapshots = snapshots;
     }
 
     /// <inheritdoc />
     public string ModuleName => "World";
+
+    /// <inheritdoc />
+    public Task<ScanSnapshotResult> TakeScanSnapshotAsync(string playerId, int sectorId, double x, double y, double z, double radius, DateTimeOffset now, DateTimeOffset expiresAt, CancellationToken cancellationToken = default) =>
+        _snapshots.TakeAsync(playerId, sectorId, x, y, z, radius, now, expiresAt, cancellationToken);
 
     /// <inheritdoc />
     public TimeSpan InSystemTravelTime => WorldSettings.From(_config).InSystemTravelTime;
