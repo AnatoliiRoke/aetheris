@@ -21,7 +21,7 @@ ON CONFLICT (part_group_id, characteristic_id) DO NOTHING;
 
 INSERT INTO part_characteristic_value (part_type_id, characteristic_id, number_value, is_archived, version)
 SELECT p.id, c.id, v.amount, false, 1
-FROM part_type p JOIN (VALUES ('char_scan_radius', 25::numeric), ('char_scan_duration', 600::numeric)) AS v(code, amount) ON true
+FROM part_type p JOIN (VALUES ('char_scan_radius', 50::numeric), ('char_scan_duration', 600::numeric)) AS v(code, amount) ON true
 JOIN characteristic c ON c.code = v.code WHERE p.code = 'part_m_58'
 ON CONFLICT (part_type_id, characteristic_id) DO UPDATE SET number_value = EXCLUDED.number_value, version = part_characteristic_value.version + 1
 WHERE part_characteristic_value.number_value IS DISTINCT FROM EXCLUDED.number_value;

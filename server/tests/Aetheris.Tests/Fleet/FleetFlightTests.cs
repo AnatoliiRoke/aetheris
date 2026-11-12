@@ -1416,7 +1416,7 @@ public sealed class FleetFlightTests
         using IServiceScope scope = _factory.Services.CreateScope();
         WorldDbContext world = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
         ScanSnapshotEntity snapshot = await world.ScanSnapshots.AsNoTracking().Include(entry => entry.SystemIds).SingleAsync(entry => entry.PlayerId == player.Account.UserId, Token);
-        Assert.Equal(25, snapshot.Radius);
+        Assert.Equal(50, snapshot.Radius);
         Assert.Equal(TimeSpan.FromHours(48), snapshot.ExpiresAt - snapshot.ScannedAt);
         Assert.NotEmpty(snapshot.SystemIds);
         var mail = scope.ServiceProvider.GetRequiredService<Aetheris.Mail.Data.MailDbContext>();

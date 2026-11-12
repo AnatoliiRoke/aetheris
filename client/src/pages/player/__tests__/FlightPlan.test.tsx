@@ -45,7 +45,7 @@ const apis = (plans: unknown[] = []) => {
 describe('the flight plan of a fleet (task 00050)', () => {
   it('offers scanning with the astroscanner fitted to a fleet', async () => {
     const scanner = sampleShipModule({ id: 58, flightOrder: 'scan', scanTarget: 'systems', facts: [
-      { kind: 'scan_radius', nameKey: '', unitKey: null, amount: 25, sortOrder: 1 },
+      { kind: 'scan_radius', nameKey: '', unitKey: null, amount: 50, sortOrder: 1 },
       { kind: 'scan_duration', nameKey: '', unitKey: null, amount: 600, sortOrder: 2 },
     ] });
     const design = sampleShipDesign({ id: 14, slots: [{ slotIndex: 0, partTypeId: 58, markLevel: 1, hasRaceBonus: false }] });
@@ -68,7 +68,7 @@ describe('the flight plan of a fleet (task 00050)', () => {
     const type = within(dialog).getByLabelText('Тип наказу');
     await waitFor(() => expect(within(type).getByRole('option', { name: 'Сканування' })).toBeInTheDocument());
     await user.selectOptions(type, 'scan');
-    expect(within(dialog).getByText(/Радіус: 25.*Тривалість:/)).toHaveTextContent('10:00');
+    expect(within(dialog).getByText(/Радіус: 50.*Тривалість:/)).toHaveTextContent('10:00');
   });
   it('offers the plan of the fleet in the block of the orders', async () => {
     renderPage('/fleets', apis([sampleFlightPlan()]));

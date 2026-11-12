@@ -2294,7 +2294,7 @@
           "number": 18
         },
         "char_scan_radius": {
-          "number": 25
+          "number": 50
         },
         "char_scan_duration": {
           "number": 600
