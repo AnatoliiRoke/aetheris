@@ -4,6 +4,7 @@ import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
 import { useRouter } from '../../router/useRouter';
 import { useSession } from '../../session/useSession';
+import { useMailUnread } from './mail/useMailUnread';
 
 /**
  * A counter of the top bar: the icon, the name for a screen reader and the value. A counter whose
@@ -82,6 +83,7 @@ export function HeaderTools() {
   const { t } = useI18n();
   const { signOut } = useSession();
   const { navigate } = useRouter();
+  const unread = useMailUnread();
 
   const onSignOut = async () => {
     await signOut();
@@ -91,9 +93,15 @@ export function HeaderTools() {
   return (
     <>
       <span aria-hidden="true" className="civ-sep" />
-      <button aria-disabled="true" aria-label={t('civ.nav.mail')} className="civ-ibtn" disabled title={t('civ.mailSoon')} type="button">
+      <Link
+        aria-label={unread.count > 0 ? t('civ.mailUnread', { count: unread.count }) : t('civ.nav.mail')}
+        className="civ-ibtn"
+        title={unread.count > 0 ? t('civ.mailUnread', { count: unread.count }) : t('civ.nav.mail')}
+        to={routes.mail}
+      >
         <GameIcon name="mail" size={22} />
-      </button>
+        {unread.count > 0 ? <span className="civ-ibtn__count">{unread.count}</span> : null}
+      </Link>
       <Link aria-label={t('civ.nav.settings')} className="civ-ibtn" title={t('civ.nav.settings')} to={routes.account}>
         <GameIcon name="settings" size={22} />
       </Link>

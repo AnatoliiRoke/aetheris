@@ -58,8 +58,9 @@ describe('the header of the game has every element of the design (task 00020, se
     expect(within(header).queryByRole('button', { name: 'Бій' })).toBeNull();
     expect(within(header).queryByRole('button', { name: 'Склад повний' })).toBeNull();
 
-    // The mail, the settings and the sign-out.
-    expect(within(header).getByRole('button', { name: 'Пошта' })).toBeDisabled();
+    // The mail, the settings and the sign-out. The mail has its screen now (task 00060), so it
+    // leads there instead of standing inactive.
+    expect(within(header).getByRole('link', { name: 'Пошта' })).toHaveAttribute('href', '/mail');
     expect(within(header).getByRole('link', { name: 'Налаштування' })).toHaveAttribute('href', '/account');
     expect(within(header).getByRole('button', { name: 'Вийти' })).toBeEnabled();
   });
@@ -68,16 +69,17 @@ describe('the header of the game has every element of the design (task 00020, se
     const { container } = renderPage('/planet', { auth: signedIn() });
     const header = await loadedHeader(container);
 
-    const placeholders = [
-      header.querySelector<HTMLElement>('.civ-counter--trade')!,
-      within(header).getByRole('button', { name: 'Пошта' }),
-    ];
+    const placeholders = [header.querySelector<HTMLElement>('.civ-counter--trade')!];
 
     for (const placeholder of placeholders) {
       expect(placeholder.textContent ?? '').not.toMatch(/\d/);
       // The reason is in the hint.
       expect(placeholder.getAttribute('title')).toMatch(/^Скоро: /);
     }
+
+    // The counter of the mail shows no number when the server has none (task 00060): a dash is
+    // better than a made-up one.
+    expect(within(header).getByRole('link', { name: 'Пошта' }).querySelector('.civ-ibtn__count')).toBeNull();
 
     const chat = container.querySelector<HTMLInputElement>('.civ-bottombar input')!;
     expect(chat).toBeDisabled();
@@ -176,7 +178,7 @@ describe('the menu, the tabs of the phone and the bottom bar of the design (task
     const labels = [...menu.querySelectorAll('.civ-nav__label')].map((label) => label.textContent);
     expect(labels).toEqual(menuOrder);
 
-    const withScreen = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Виробництво', 'Карта', 'Дослідження', 'Ринок', 'Верф', 'Флоти'];
+    const withScreen = ['Огляд', 'Планета', 'Будівництво', 'Склад', 'Виробництво', 'Карта', 'Дослідження', 'Ринок', 'Верф', 'Флоти', 'Пошта'];
 
     for (const label of menuOrder) {
       if (withScreen.includes(label)) {

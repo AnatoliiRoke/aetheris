@@ -12,12 +12,14 @@
     The module of the fleet reads the world for the races and the bodies, the planets module
     for the shipyard and the limit of the projects, the production module for the catalog and
     the storage of the parts, the economy module for the crew and the credits, the research
-    module for the assembly time, and the requirements module for the hulls a shipyard level
-    opens. The dependencies go one way only.
+    module for the assembly time, the requirements module for the hulls a shipyard level
+    opens, and the mail module for the report of a fleet (task 00060). The dependencies go
+    one way only.
   -->
   <ItemGroup>
     <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
     <ProjectReference Include="..\Aetheris.Economy\Aetheris.Economy.csproj" />
+    <ProjectReference Include="..\Aetheris.Mail\Aetheris.Mail.csproj" />
     <ProjectReference Include="..\Aetheris.Planets\Aetheris.Planets.csproj" />
     <ProjectReference Include="..\Aetheris.Production\Aetheris.Production.csproj" />
     <ProjectReference Include="..\Aetheris.Requirements\Aetheris.Requirements.csproj" />

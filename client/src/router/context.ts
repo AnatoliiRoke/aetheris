@@ -21,6 +21,7 @@ export const routes = {
   market: '/market',
   shipyard: '/shipyard',
   fleets: '/fleets',
+  mail: '/mail',
   civilization: '/civilization',
   account: '/account',
 } as const;

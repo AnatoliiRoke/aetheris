@@ -54,6 +54,7 @@ public sealed class FlightPlanRunner
     private readonly FleetHoldService _holds;
     private readonly FleetMinePlaceService _minePlaces;
     private readonly FleetCargoService _cargo;
+    private readonly FleetReportService _reports;
     private readonly IWorldModule _world;
     private readonly IEventScheduler _scheduler;
 
@@ -69,6 +70,7 @@ public sealed class FlightPlanRunner
     /// <param name="holds">The holds of the ships.</param>
     /// <param name="minePlaces">Finds the place an extraction takes from.</param>
     /// <param name="cargo">The load and the unload of the holds (task 00057).</param>
+    /// <param name="reports">The reports of the fleets to the players (task 00060).</param>
     /// <param name="world">The world module.</param>
     /// <param name="scheduler">The event scheduler.</param>
     public FlightPlanRunner(
@@ -81,6 +83,7 @@ public sealed class FlightPlanRunner
         FleetHoldService holds,
         FleetMinePlaceService minePlaces,
         FleetCargoService cargo,
+        FleetReportService reports,
         IWorldModule world,
         IEventScheduler scheduler)
     {
@@ -93,6 +96,7 @@ public sealed class FlightPlanRunner
         ArgumentNullException.ThrowIfNull(holds);
         ArgumentNullException.ThrowIfNull(minePlaces);
         ArgumentNullException.ThrowIfNull(cargo);
+        ArgumentNullException.ThrowIfNull(reports);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(scheduler);
 
@@ -105,6 +109,7 @@ public sealed class FlightPlanRunner
         _holds = holds;
         _minePlaces = minePlaces;
         _cargo = cargo;
+        _reports = reports;
         _world = world;
         _scheduler = scheduler;
     }
@@ -404,6 +409,12 @@ public sealed class FlightPlanRunner
                 {
                     return 0;
                 }
+
+                // The report of the fleet is written to the player: what the fleet took from the place
+                // (task 00060).
+                await _reports
+                    .WriteExtractionReportAsync(payload.FleetId, outcome.Yields, cancellationToken)
+                    .ConfigureAwait(false);
 
                 if (outcome.Result == FleetExtractionCycleService.CycleResult.Continue)
                 {

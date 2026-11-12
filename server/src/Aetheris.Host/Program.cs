@@ -22,6 +22,10 @@ using Aetheris.Host.Realtime;
 using Aetheris.Host.Scheduling;
 using Aetheris.Host.Security;
 using Aetheris.Host.Time;
+using Aetheris.Mail;
+using Aetheris.Mail.Data;
+using Aetheris.Mail.Events;
+using Aetheris.Mail.Services;
 using Aetheris.Market;
 using Aetheris.Market.Data;
 using Aetheris.Planets;
@@ -217,6 +221,10 @@ builder.Services.AddMarketModule();
 // The Fleet module reads the world, the bodies and the production, so it comes after them.
 builder.Services.AddFleetModule();
 
+// The Mail module reads the world for the races of the players and writes the letters of the
+// game, so it comes after the world (task 00060).
+builder.Services.AddMailModule();
+
 // The tracing of the requests and the measuring of the SQL commands of every database context
 // (task 00036). It comes after the modules, because it finds their contexts. The settings are
 // read from the configuration, so they change without a restart.
@@ -268,6 +276,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(EconomyDatabase), () => EconomyDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
     await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(MarketDatabase), () => MarketDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
     await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(FleetDatabase), () => FleetDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(MailDatabase), () => MailDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
 
@@ -332,6 +341,11 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
         // The Market module fills its levels of the market once the bodies, the production and the
         // economy modules have their own reference data, because a lot reads them (task 00024).
         await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IMarketModule), () => scope.ServiceProvider.GetRequiredService<IMarketModule>().EnsureAsync()).ConfigureAwait(false);
+
+        // The Mail module writes the categories of the letters and their texts, and puts the first
+        // cleanup of the bin in place (task 00060).
+        await StartupTimer.RunAsync(startupLogger, "ensure:mail", () => scope.ServiceProvider.GetRequiredService<MailBootstrapService>().EnsureAsync()).ConfigureAwait(false);
+        await StartupTimer.RunAsync(startupLogger, "schedule:mail_trash", () => scope.ServiceProvider.GetRequiredService<MailTrashCleanupHandler>().ScheduleNextAsync()).ConfigureAwait(false);
     }
 }
 
@@ -371,6 +385,7 @@ ProcessesServiceCollectionExtensions.MapEndpoints(app);
 EconomyServiceCollectionExtensions.MapEndpoints(app);
 MarketServiceCollectionExtensions.MapEndpoints(app);
 FleetServiceCollectionExtensions.MapEndpoints(app);
+MailServiceCollectionExtensions.MapEndpoints(app);
 app.MapCommands();
 
 await app.RunAsync().ConfigureAwait(false);

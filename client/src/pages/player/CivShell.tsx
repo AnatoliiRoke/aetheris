@@ -26,6 +26,7 @@ const ShellLoader = memo(function ShellLoader() {
     void actions.loadEconomy();
     void actions.loadBodies();
     void actions.loadRaces();
+    void actions.loadMailUnread();
   }, [actions]);
 
   useEffect(() => {

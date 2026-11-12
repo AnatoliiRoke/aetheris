@@ -46,6 +46,7 @@ public static class FleetServiceCollectionExtensions
         services.AddScoped<FleetMapService>();
         services.AddScoped<FleetExtractionCycleService>();
         services.AddScoped<FleetMinePlaceService>();
+        services.AddScoped<FleetReportService>();
         services.AddScoped<FlightPlanRunner>();
         services.AddScoped<IScheduledEventHandler, ShipyardCompleteHandler>();
         services.AddScoped<IScheduledEventHandler, FleetExtractionCycleHandler>();

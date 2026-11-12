@@ -7,6 +7,7 @@ import type { Api } from '../api/context';
 import type { ContentApi } from '../api/contentApi';
 import type { CurrencyBalanceFacts, EconomyApi, EconomyOverview, PopulationFacts } from '../api/economyApi';
 import type { GameApi, Race } from '../api/gameApi';
+import type { MailApi, MailDraft, MailLetter, MailLetterDetail, MailRecipient, MailView } from '../api/mailApi';
 import type { FlightEstimate, Fleet, FleetApi, FleetHold, FleetShip, FleetsInFlight, FleetsView, FinishedShip, FlightPlan, ShipCatalog, ShipDesign, ShipHull, ShipModule, ShipyardView } from '../api/fleetApi';
 import type { MarketApi, MarketLot, MarketOverview, MyLot } from '../api/marketApi';
 import { mockContentApi } from '../api/mockContentApi';
@@ -126,6 +127,11 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'processes.process_recipe.recipe_1.description': 'Майстерня лагодить корпус і всі модулі корабля.',
     'processes.process_recipe.recipe_2.name': 'Розбирання деталі',
     'processes.process_recipe.recipe_2.description': 'Деталь розбирається на ресурси.',
+    'mail.category.players': 'Гравці',
+    'mail.category.system': 'Система',
+    'mail.category.reports': 'Звіти',
+    'mail.category.market': 'Ринок',
+    'mail.fleet.extraction_report': 'Звіт флоту: {fleet_name} добув {yields}.',
   },
   en: {
     'world.race.race_1.name': 'Terrans',
@@ -159,6 +165,10 @@ export const sampleTexts: Record<string, Record<string, string>> = {
     'processes.process_recipe.recipe_1.description': 'The workshop repairs the hull and every module of a ship.',
     'processes.process_recipe.recipe_2.name': 'Recycling of a part',
     'processes.process_recipe.recipe_2.description': 'The part is taken apart into resources.',
+    'mail.category.players': 'Players',
+    'mail.category.system': 'System',
+    'mail.category.reports': 'Reports',
+    'mail.category.market': 'Market',
   },
 };
 
@@ -686,10 +696,110 @@ export function fakeFleetApi(overrides: Partial<FleetApi> = {}): FleetApi {
 }
 
 /**
+ * A mail API whose every method is a spy; a test overrides what it needs (task 00060).
+ */
+export function fakeMailApi(overrides: Partial<MailApi> = {}): MailApi {
+  return {
+    mail: vi.fn(async () => sampleMailView()),
+    letter: vi.fn(async () => sampleMailLetterDetail()),
+    drafts: vi.fn(async () => ({ drafts: [] as MailDraft[] })),
+    recipients: vi.fn(async () => ({ players: [] as MailRecipient[] })),
+    unread: vi.fn(async () => ({ unreadCount: 0 })),
+    sendLetter: vi.fn(async () => ({ id: 1 })),
+    saveDraft: vi.fn(async () => sampleMailDraft()),
+    removeDraft: vi.fn(async () => ({ removed: true })),
+    readAll: vi.fn(async () => ({ marked: 0 })),
+    toggleSaved: vi.fn(async () => ({ saved: true })),
+    toggleDeleted: vi.fn(async () => ({ deleted: true })),
+    emptyTrash: vi.fn(async () => ({ removed: 0 })),
+    complain: vi.fn(async () => ({ id: 1 })),
+    ...overrides,
+  };
+}
+
+/**
+ * The mail of a player as the server reads it (task 00060): an empty list with the folders and the
+ * categories of the game.
+ */
+export function sampleMailView(overrides: Partial<MailView> = {}): MailView {
+  return {
+    folders: [
+      { code: 'incoming', unreadCount: 0, totalCount: 0 },
+      { code: 'sent', unreadCount: 0, totalCount: 0 },
+      { code: 'saved', unreadCount: 0, totalCount: 0 },
+      { code: 'trash', unreadCount: 0, totalCount: 0 },
+    ],
+    categories: [
+      { id: 1, code: 'mail_category_1', nameKey: 'mail.category.players', imageKey: 'player', count: 0 },
+      { id: 2, code: 'mail_category_2', nameKey: 'mail.category.system', imageKey: 'system', count: 0 },
+      { id: 3, code: 'mail_category_3', nameKey: 'mail.category.reports', imageKey: 'report', count: 0 },
+      { id: 4, code: 'mail_category_4', nameKey: 'mail.category.market', imageKey: 'market', count: 0 },
+    ],
+    letters: [],
+    unreadCount: 0,
+    totalCount: 0,
+    gameNow: '2026-11-12T09:00:00Z',
+    ...overrides,
+  };
+}
+
+/**
+ * One letter of the mail as the server reads it (task 00060).
+ */
+export function sampleMailLetter(overrides: Partial<MailLetter> = {}): MailLetter {
+  return {
+    id: 1,
+    folderCode: 'incoming',
+    categoryId: 1,
+    categoryNameKey: 'mail.category.players',
+    senderPlayerId: 'player-2',
+    senderNickname: 'Krell_77',
+    senderRaceColorKey: 'race-3',
+    subject: 'Щодо Ісару',
+    preview: 'Пропоную ненапад на 3 доби.',
+    kindCode: 'player',
+    systemKindCode: null,
+    isRead: false,
+    isSaved: false,
+    isDeleted: false,
+    hasAttachment: false,
+    createdAt: '2026-11-12T08:15:00Z',
+    groupCount: 1,
+    ...overrides,
+  };
+}
+
+/**
+ * One letter of the mail with its whole text, as the server reads it (task 00060).
+ */
+export function sampleMailLetterDetail(overrides: Partial<MailLetterDetail> = {}): MailLetterDetail {
+  return {
+    letter: sampleMailLetter(),
+    body: 'Командоре, вітаю.\n\nПропоную ненапад на 3 доби.',
+    textKey: null,
+    textParameters: null,
+    ...overrides,
+  };
+}
+
+/**
+ * One draft of a letter, as the server reads it (task 00060).
+ */
+export function sampleMailDraft(overrides: Partial<MailDraft> = {}): MailDraft {
+  return {
+    id: 1,
+    receiverPlayerId: 'player-2',
+    subject: 'Обмін кристалами',
+    body: 'Привіт!',
+    updatedAt: '2026-11-12T08:00:00Z',
+    ...overrides,
+  };
+}
+
+/**
  * The fleets that are under way, as the server reads them for the map (task 00059).
  */
-export function sampleFleetsInFlight(overrides: Partial<FleetsInFlight> = {}): FleetsInFlight {
-  return {
+export function sampleFleetsInFlight(overrides: Partial<FleetsInFlight> = {}): FleetsInFlight {  return {
     fleets: [],
     stationed: [],
     gameNow: '2026-11-11T10:00:00Z',
@@ -1451,7 +1561,7 @@ export function signedInMe(overrides: Partial<Me> = {}): Me {
 /**
  * The fake server interfaces of the tests that a test may override.
  */
-type FakeApis = { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; fleet?: FleetApi; game?: GameApi; map?: MapApi; market?: MarketApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi };
+type FakeApis = { auth?: AuthApi; content?: ContentApi; economy?: EconomyApi; fleet?: FleetApi; game?: GameApi; mail?: MailApi; map?: MapApi; market?: MarketApi; planets?: PlanetApi; processes?: ProcessesApi; production?: ProductionApi; research?: ResearchApi; texts?: TextsApi; world?: WorldApi };
 
 /**
  * The server interfaces of a test: every one is a fake unless the test gives its own.
@@ -1463,6 +1573,7 @@ function buildApi(options: FakeApis): Api {
     economy: options.economy ?? fakeEconomyApi(),
     fleet: options.fleet ?? fakeFleetApi(),
     game: options.game ?? fakeGameApi(),
+    mail: options.mail ?? fakeMailApi(),
     map: options.map ?? fakeMapApi(),
     market: options.market ?? fakeMarketApi(),
     planets: options.planets ?? fakePlanetApi(),

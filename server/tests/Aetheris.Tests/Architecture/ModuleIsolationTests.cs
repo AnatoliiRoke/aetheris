@@ -29,6 +29,7 @@ public sealed class ModuleIsolationTests
         "Aetheris.Research",
         "Aetheris.Production",
         "Aetheris.Processes",
+        "Aetheris.Mail",
     ];
 
     /// <summary>
@@ -53,7 +54,8 @@ public sealed class ModuleIsolationTests
         ["Aetheris.Production"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research", "Aetheris.Economy"],
         ["Aetheris.Processes"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Requirements", "Aetheris.Research", "Aetheris.Production", "Aetheris.Economy"],
         ["Aetheris.Market"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Production", "Aetheris.Requirements", "Aetheris.Economy"],
-        ["Aetheris.Fleet"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Production", "Aetheris.Economy", "Aetheris.Research", "Aetheris.Requirements"],
+        ["Aetheris.Fleet"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Production", "Aetheris.Economy", "Aetheris.Research", "Aetheris.Requirements", "Aetheris.Mail"],
+        ["Aetheris.Mail"] = ["Aetheris.World"],
     };
 
     private readonly AetherisTestFactory _factory;
@@ -86,6 +88,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Research")]
     [InlineData("Aetheris.Production")]
     [InlineData("Aetheris.Processes")]
+    [InlineData("Aetheris.Mail")]
     public void A_module_does_not_reference_another_module(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -120,6 +123,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Research")]
     [InlineData("Aetheris.Production")]
     [InlineData("Aetheris.Processes")]
+    [InlineData("Aetheris.Mail")]
     public void A_module_exposes_exactly_one_public_contract(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -153,6 +157,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Research")]
     [InlineData("Aetheris.Production")]
     [InlineData("Aetheris.Processes")]
+    [InlineData("Aetheris.Mail")]
     public void The_public_contract_follows_the_naming_convention(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -191,6 +196,7 @@ public sealed class ModuleIsolationTests
         Assert.NotNull(services.GetService<Aetheris.Research.IResearchModule>());
         Assert.NotNull(services.GetService<Aetheris.Production.IProductionModule>());
         Assert.NotNull(services.GetService<Aetheris.Processes.IProcessesModule>());
+        Assert.NotNull(services.GetService<Aetheris.Mail.IMailModule>());
     }
 
     /// <summary>

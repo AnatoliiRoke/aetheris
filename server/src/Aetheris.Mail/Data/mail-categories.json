@@ -1,0 +1,56 @@
+{
+  "categories": [
+    {
+      "code": "mail_category_1",
+      "sort_order": 1,
+      "image_key": "mailCategoryPlayer",
+      "name": {
+        "uk": "Гравці",
+        "en": "Players"
+      },
+      "description": {
+        "uk": "Листи, які написали інші гравці.",
+        "en": "Letters written by other players."
+      }
+    },
+    {
+      "code": "mail_category_2",
+      "sort_order": 2,
+      "image_key": "mailCategorySystem",
+      "name": {
+        "uk": "Система",
+        "en": "System"
+      },
+      "description": {
+        "uk": "Листи, які написала гра.",
+        "en": "Letters written by the game."
+      }
+    },
+    {
+      "code": "mail_category_3",
+      "sort_order": 3,
+      "image_key": "mailCategoryReport",
+      "name": {
+        "uk": "Звіти",
+        "en": "Reports"
+      },
+      "description": {
+        "uk": "Звіти гри про події.",
+        "en": "Reports of the game about events."
+      }
+    },
+    {
+      "code": "mail_category_4",
+      "sort_order": 4,
+      "image_key": "mailCategoryMarket",
+      "name": {
+        "uk": "Ринок",
+        "en": "Market"
+      },
+      "description": {
+        "uk": "Листи ринку: про продажі й обмін.",
+        "en": "Letters of the market: about sales and exchange."
+      }
+    }
+  ]
+}

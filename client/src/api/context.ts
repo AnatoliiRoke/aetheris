@@ -4,6 +4,7 @@ import type { ContentApi } from './contentApi';
 import type { EconomyApi } from './economyApi';
 import type { FleetApi } from './fleetApi';
 import type { GameApi } from './gameApi';
+import type { MailApi } from './mailApi';
 import type { MapApi } from './mapApi';
 import type { MarketApi } from './marketApi';
 import type { PlanetApi } from './planetApi';
@@ -22,6 +23,7 @@ export interface Api {
   economy: EconomyApi;
   fleet: FleetApi;
   game: GameApi;
+  mail: MailApi;
   map: MapApi;
   market: MarketApi;
   planets: PlanetApi;

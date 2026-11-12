@@ -40,7 +40,7 @@ export const menuItems: readonly MenuItem[] = [
   { id: 'ranking', icon: 'ranking', label: 'civ.nav.ranking' },
   { id: 'battle', icon: 'battle', label: 'civ.nav.battle' },
   { id: 'clan', icon: 'clan', label: 'civ.nav.clan' },
-  { id: 'mail', icon: 'mail', label: 'civ.nav.mail', separated: true },
+  { id: 'mail', icon: 'mail', label: 'civ.nav.mail', route: routes.mail, separated: true },
   { id: 'help', icon: 'help', label: 'civ.nav.help' },
 ];
 

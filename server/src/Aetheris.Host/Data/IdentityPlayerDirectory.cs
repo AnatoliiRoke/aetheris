@@ -36,4 +36,25 @@ public sealed class IdentityPlayerDirectory : IPlayerDirectory
             .ToDictionaryAsync(user => user.Id, user => user.UserName!, cancellationToken)
             .ConfigureAwait(false);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<PlayerBrief>> FindByNicknameAsync(string text, int limit, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(text);
+
+        if (limit <= 0)
+        {
+            return [];
+        }
+
+        string pattern = text.Trim().ToUpperInvariant();
+
+        return await _dbContext.Users.AsNoTracking()
+            .Where(user => user.UserName != null && user.UserName.ToUpper().StartsWith(pattern))
+            .OrderBy(user => user.UserName)
+            .Select(user => new PlayerBrief(user.Id, user.UserName!))
+            .Take(limit)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

@@ -307,6 +307,19 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.fleet.shipyard.hull_return_share.description':
     'Не застосовується. Розбір повертає всі компоненти проєкту й екіпаж і не повертає ресурси на склад.',
 
+  'config.mail.letter.body_max_length.description':
+    'Найбільша кількість символів у тексті листа, який гравець пише іншому гравцеві.',
+  'config.mail.letter.subject_max_length.description':
+    'Найбільша кількість символів у темі листа, який гравець пише іншому гравцеві.',
+  'config.mail.letter.send_limit_per_hour.description':
+    'Скільки листів гравець може надіслати за одну годину ігрового часу.',
+  'config.mail.trash.days.description':
+    'Скільки днів ігрового часу лежать видалені листи в кошику, перш ніж зникнуть назавжди.',
+  'config.mail.draft.limit.description':
+    'Скільки чернеток листів гравець може тримати в пошті одночасно.',
+  'config.mail.complaint.limit.description':
+    'Скільки скарг на один лист гравця може подати гравець.',
+
   'config.economy.population.growth_percent.description':
     'Відсоток від найбільшого населення, на який населення зростає за годину.',
   'config.economy.population.decline_per_hour.description':

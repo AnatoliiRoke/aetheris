@@ -3,6 +3,7 @@ using System.Text.Json;
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Scheduling;
+using Aetheris.Fleet.Api;
 using Aetheris.Fleet.Configuration;
 using Aetheris.Fleet.Data;
 using Aetheris.Fleet.Data.Entities;
@@ -109,7 +110,27 @@ public sealed class FleetExtractionCycleService
     /// </summary>
     /// <param name="Result">What the cycle ended with.</param>
     /// <param name="NextPeriodSeconds">The length of the next cycle, when the order goes on.</param>
-    public sealed record CycleOutcome(CycleResult Result, int NextPeriodSeconds);
+    /// <param name="Yields">The resources the fleet took in the cycle, by their type, for the report of
+    /// the fleet (task 00060).</param>
+    public sealed record CycleOutcome(
+        FleetExtractionCycleService.CycleResult Result,
+        int NextPeriodSeconds,
+        IReadOnlyList<FleetYieldDto> Yields)
+    {
+        /// <summary>
+        /// The outcome of a cycle that took nothing.
+        /// </summary>
+        /// <param name="result">What the cycle ended with.</param>
+        /// <param name="nextPeriodSeconds">The length of the next cycle, when the order goes on.</param>
+        /// <returns>An outcome without a yield.</returns>
+        public static CycleOutcome Empty(CycleResult result, int nextPeriodSeconds = 0) =>
+            new(result, nextPeriodSeconds, NoYields);
+
+        /// <summary>
+        /// An empty list of the resources the fleet took.
+        /// </summary>
+        public static readonly IReadOnlyList<FleetYieldDto> NoYields = [];
+    }
 
     /// <summary>
     /// Gets the length of a cycle of extraction, in game seconds.
@@ -196,7 +217,7 @@ public sealed class FleetExtractionCycleService
 
         if (order is null)
         {
-            return new CycleOutcome(CycleResult.Ignored, 0);
+            return CycleOutcome.Empty(CycleResult.Ignored);
         }
 
         // The plan of the order must be under way and be the run this cycle was planned for: a plan
@@ -213,7 +234,7 @@ public sealed class FleetExtractionCycleService
 
         if (!underWay)
         {
-            return new CycleOutcome(CycleResult.Ignored, 0);
+            return CycleOutcome.Empty(CycleResult.Ignored);
         }
 
         IReadOnlyList<FleetExtractionService.ExtractionModules> modules =
@@ -221,7 +242,7 @@ public sealed class FleetExtractionCycleService
 
         if (modules.Count == 0)
         {
-            return new CycleOutcome(CycleResult.Finished, 0);
+            return CycleOutcome.Empty(CycleResult.Finished);
         }
 
         DateTimeOffset startedAt = ExtractionOrderParameters.ReadStartedAt(order.Parameters) ?? now - TimeSpan.FromSeconds(payload.PeriodSeconds);
@@ -233,10 +254,10 @@ public sealed class FleetExtractionCycleService
 
         if (timeUp || taken.HoldsFull || taken.PlaceGone || !taken.Taken)
         {
-            return new CycleOutcome(CycleResult.Finished, 0);
+            return new CycleOutcome(CycleResult.Finished, 0, taken.Yields);
         }
 
-        return new CycleOutcome(CycleResult.Continue, NextPeriodSeconds(order, startedAt, now));
+        return new CycleOutcome(CycleResult.Continue, NextPeriodSeconds(order, startedAt, now), taken.Yields);
     }
 
     /// <summary>
@@ -293,7 +314,7 @@ public sealed class FleetExtractionCycleService
 
         if (place is null)
         {
-            return new TakeResult(false, false, true);
+            return TakeResult.Nothing(holdsFull: false, placeGone: true);
         }
 
         IReadOnlyList<ShipHold> holds = await _holds.ReadAsync(fleetId, cancellationToken).ConfigureAwait(false);
@@ -301,7 +322,7 @@ public sealed class FleetExtractionCycleService
 
         if (free <= 0)
         {
-            return new TakeResult(false, true, false);
+            return TakeResult.Nothing(holdsFull: true, placeGone: false);
         }
 
         string placeKind = place.Object.ObjectClass;
@@ -323,7 +344,7 @@ public sealed class FleetExtractionCycleService
             catch (GameException exception) when (exception.Code == GameErrorCodes.NotFound)
             {
                 // The field was emptied by another fleet since the place was read.
-                return new TakeResult(false, false, true);
+                return TakeResult.Nothing(holdsFull: false, placeGone: true);
             }
         }
 
@@ -338,12 +359,15 @@ public sealed class FleetExtractionCycleService
 
         if (yields.Count == 0)
         {
-            return new TakeResult(false, false, placeGone);
+            return TakeResult.Nothing(holdsFull: false, placeGone);
         }
 
         await StoreAsync(fleetId, holds, yields, now, cancellationToken).ConfigureAwait(false);
 
-        return new TakeResult(true, holds.Sum(hold => hold.Free) <= 0, placeGone);
+        // The resources the fleet took are the report of the fleet (task 00060).
+        List<FleetYieldDto> taken = [.. yields.Select(yield => new FleetYieldDto(yield.ResourceId, yield.Amount))];
+
+        return new TakeResult(true, holds.Sum(hold => hold.Free) <= 0, placeGone, taken);
     }
 
     /// <summary>
@@ -527,5 +551,26 @@ public sealed class FleetExtractionCycleService
     /// <param name="Taken">Whether anything went to the holds.</param>
     /// <param name="HoldsFull">Whether the holds of the fleet are full now.</param>
     /// <param name="PlaceGone">Whether the place has nothing left or is gone.</param>
-    private sealed record TakeResult(bool Taken, bool HoldsFull, bool PlaceGone);
+    /// <summary>
+    /// What one cycle of extraction took from the place.
+    /// </summary>
+    /// <param name="Taken">Whether the fleet took anything.</param>
+    /// <param name="HoldsFull">Whether the holds of the fleet are full.</param>
+    /// <param name="PlaceGone">Whether the place is gone.</param>
+    /// <param name="Yields">The resources the fleet took, for the report of the fleet (task 00060).</param>
+    private sealed record TakeResult(
+        bool Taken,
+        bool HoldsFull,
+        bool PlaceGone,
+        IReadOnlyList<FleetYieldDto> Yields)
+    {
+        /// <summary>
+        /// A result of a cycle that took nothing.
+        /// </summary>
+        /// <param name="holdsFull">Whether the holds of the fleet are full.</param>
+        /// <param name="placeGone">Whether the place is gone.</param>
+        /// <returns>A result without a yield.</returns>
+        public static TakeResult Nothing(bool holdsFull, bool placeGone) =>
+            new(false, holdsFull, placeGone, CycleOutcome.NoYields);
+    }
 }

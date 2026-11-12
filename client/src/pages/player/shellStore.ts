@@ -33,6 +33,9 @@ export interface ShellState {
   bodiesLoaded: boolean;
   bodiesFailed: boolean;
   races: readonly Race[] | null;
+  /** How many letters of the mail are not read: the counter of the top bar (task 00060). */
+  mailUnread: number;
+  mailUnreadLoaded: boolean;
 }
 
 /**
@@ -48,6 +51,8 @@ export interface ShellActions {
   loadPopulation: (planetId: number, force?: boolean) => Promise<void>;
   loadBodies: (force?: boolean) => Promise<void>;
   loadRaces: () => Promise<void>;
+  /** Reads the number of the letters that are not read again; the counter of the top bar. */
+  loadMailUnread: (force?: boolean) => Promise<void>;
   selectPlanet: (planetId: number) => void;
   /** Reads again what was read before: the one reload of the page when it comes back into view. */
   refreshAll: () => Promise<void>;
@@ -79,6 +84,8 @@ const initialState: ShellState = {
   bodiesLoaded: false,
   bodiesFailed: false,
   races: null,
+  mailUnread: 0,
+  mailUnreadLoaded: false,
 };
 
 /**
@@ -263,6 +270,25 @@ export function createShellStore(api: Api): ShellStore {
     });
   };
 
+  const loadMailUnread = (force = false): Promise<void> => {
+    if (!force && state.mailUnreadLoaded) {
+      return Promise.resolve();
+    }
+
+    return once('mailUnread', async () => {
+      try {
+        const answer = await api.mail.unread();
+
+        set({ mailUnread: answer.unreadCount, mailUnreadLoaded: true });
+        clearRetry('mailUnread');
+      } catch {
+        // Without the counter the top bar shows no number: a dash is better than a made-up one.
+        set({ mailUnreadLoaded: true });
+        scheduleRetry('mailUnread', () => loadMailUnread(true));
+      }
+    });
+  };
+
   const actions: ShellActions = {
     loadPlanet,
     applyPlanet: (planetId, planet) => {
@@ -276,6 +302,7 @@ export function createShellStore(api: Api): ShellStore {
     loadPopulation,
     loadBodies,
     loadRaces,
+    loadMailUnread,
     selectPlanet: (planetId) => {
       if (state.selectedPlanetId !== planetId) {
         set({ selectedPlanetId: planetId });
