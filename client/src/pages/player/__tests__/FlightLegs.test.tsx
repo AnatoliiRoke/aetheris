@@ -269,6 +269,53 @@ describe('the legs of a flight and the fuel of a fleet (task 00072)', () => {
     expect(orders[2]).toMatchObject({ typeCode: 'wait' });
   });
 
+  it('sends the colonization of a saved plan without a target, so the server does not refuse it (task 00073)', async () => {
+    // The plan of the button «Колонізувати»: the flight legs and the colonization, which names no target.
+    const colonizePlan = sampleFlightPlan({
+      orders: [
+        ...savedHyperflight().orders.filter((order) => order.typeCode !== 'wait'),
+        {
+          id: 4,
+          position: 3,
+          typeCode: 'colonize',
+          targetKind: 'none',
+          targetSectorId: 0,
+          targetSystemId: 0,
+          targetObjectId: 0,
+          targetX: 0,
+          targetY: 0,
+          targetZ: 0,
+          durationSeconds: 0,
+          parameters: '{}',
+        },
+      ],
+    });
+    const write = vi.fn().mockResolvedValue(sampleFlightPlan());
+    const fleet = fakeFleetApi({
+      fleets: vi.fn().mockResolvedValue(withFleet()),
+      flightPlans: vi.fn().mockResolvedValue([colonizePlan]),
+      createFlightPlan: write,
+      saveFlightPlan: write,
+    });
+
+    renderPage('/fleets', { auth: signedIn(), fleet, map: fakeMapApi() });
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Змінити лист' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Політний лист флоту' });
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Змінити лист' }));
+
+    await waitFor(() => expect(write).toHaveBeenCalled());
+
+    const orders = write.mock.calls[0]![0].orders;
+
+    expect(orders).toHaveLength(3);
+    expect(orders[0]).toMatchObject({ typeCode: 'fly', targetKind: 'system', targetSystemId: 4 });
+    expect(orders[1]).toMatchObject({ typeCode: 'hyperfly', targetKind: 'point', targetX: 181.6 });
+    expect(orders[2]).toMatchObject({ typeCode: 'colonize', targetKind: 'none', targetObjectId: 0, targetSystemId: 0 });
+  });
+
   it('removes the flight to the edge together with the hyperflight it belongs to', async () => {
     const write = vi.fn().mockResolvedValue(sampleFlightPlan());
     const fleet = fakeFleetApi({

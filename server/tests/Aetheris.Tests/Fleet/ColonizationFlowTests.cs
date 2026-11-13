@@ -48,6 +48,7 @@ public sealed partial class ColonizationFlowTests : IAsyncLifetime
     private const string Fleets = "/api/v1/fleet/fleets";
     private const string Plans = "/api/v1/fleet/flight-plans";
     private const string Execute = "/api/v1/fleet/flight-plans/execute";
+    private const string SavePlan = "/api/v1/fleet/flight-plans/save";
     private const string Colonize = "/api/v1/fleet/flight-plans/colonize";
     private const string CargoLoad = "/api/v1/fleet/fleets/cargo-load";
     private const string FuelResource = "resource_12";
@@ -108,6 +109,51 @@ public sealed partial class ColonizationFlowTests : IAsyncLifetime
         Assert.Equal(await ObjectOfAsync(planetId), orders[0].GetProperty("target_object_id").GetInt64());
         Assert.True(orders[0].GetProperty("duration_seconds").GetInt64() > 0);
         Assert.Equal("none", orders[1].GetProperty("target_kind").GetString());
+    }
+
+    /// <summary>
+    /// The draft of the button «Колонізувати», sent back as the window of the plan sends it, saves: the
+    /// colonization names no target. A flight to an object without the object is refused, and the refusal
+    /// names the position and the type of the order (task 00073).
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_draft_of_a_colonization_saves_again_and_an_order_without_its_object_is_named()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await FoundAsync();
+        (long fleetId, long shipId) = await FleetAsync(player, [NormalDrive, ContainerCode]);
+        await PutModuleAsync(shipId);
+        long planetId = await SuitablePlanetAsync(player, otherSystem: true);
+        long objectId = await ObjectOfAsync(planetId);
+
+        await CommandAsync(player, Colonize, new { fleet_id = fleetId, planet_id = planetId });
+        JsonElement saved = await CommandAsync(player, SavePlan, new
+        {
+            fleet_id = fleetId,
+            orders = new object[]
+            {
+                new { type_code = "fly", target_kind = "object", target_object_id = objectId },
+                new { type_code = "colonize", target_kind = "none" },
+            },
+        });
+
+        Assert.Equal(["fly", "colonize"], saved.GetProperty("orders").EnumerateArray().Select(order => order.GetProperty("type_code").GetString()));
+
+        using HttpResponseMessage response = await TestAccounts.SendCommandAsync(player.Client, SavePlan, new
+        {
+            fleet_id = fleetId,
+            orders = new object[]
+            {
+                new { type_code = "fly", target_kind = "object", target_object_id = objectId },
+                new { type_code = "fly", target_kind = "object" },
+            },
+        }, Guid.NewGuid().ToString("N"));
+        JsonElement refusal = JsonDocument.Parse(await response.Content.ReadAsStringAsync(Token)).RootElement;
+
+        Assert.Equal(FleetErrorCodes.FlightOrderTargetUnknown, refusal.GetProperty("error").GetString());
+        Assert.Equal(2, refusal.GetProperty("details").GetProperty("position").GetInt32());
+        Assert.Equal("fly", refusal.GetProperty("details").GetProperty("type_code").GetString());
     }
 
     /// <summary>

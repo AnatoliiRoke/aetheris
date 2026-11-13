@@ -426,9 +426,11 @@ public static class FlightPlanOrderMapper
         ArgumentNullException.ThrowIfNull(orders);
 
         List<FlightPlanOrderInput> inputs = [];
+        int position = 0;
 
         foreach (CreateFlightPlanCommand.OrderRequest order in orders)
         {
+            position++;
             string type = (order.TypeCode ?? string.Empty).Trim().ToLowerInvariant();
 
             if (!FlightOrderTypes.All.Contains(type))
@@ -438,9 +440,12 @@ public static class FlightPlanOrderMapper
 
             string kind = (order.TargetKind ?? FlightTargetKinds.None).Trim().ToLowerInvariant();
 
+            // A refusal of the target says which order it is about (task 00073): the position in the plan and its type.
+            Dictionary<string, object?> where = new() { ["position"] = position, ["type_code"] = type };
+
             if (!FlightTargetKinds.All.Contains(kind))
             {
-                throw new GameException(FleetErrorCodes.FlightOrderTargetUnknown, "The order names a kind of target that does not exist.");
+                throw new GameException(FleetErrorCodes.FlightOrderTargetUnknown, "The order names a kind of target that does not exist.", where);
             }
 
             long systemId = order.TargetSystemId ?? 0;
@@ -450,12 +455,12 @@ public static class FlightPlanOrderMapper
             // order would point at nothing, so it is refused instead of being written.
             if (kind == FlightTargetKinds.System && systemId <= 0)
             {
-                throw new GameException(FleetErrorCodes.FlightOrderTargetUnknown, "The order names a system but does not say which one.");
+                throw new GameException(FleetErrorCodes.FlightOrderTargetUnknown, "The order names a system but does not say which one.", where);
             }
 
             if ((kind == FlightTargetKinds.Object || kind == FlightTargetKinds.Planet) && objectId <= 0)
             {
-                throw new GameException(FleetErrorCodes.FlightOrderTargetUnknown, "The order names an object but does not say which one.");
+                throw new GameException(FleetErrorCodes.FlightOrderTargetUnknown, "The order names an object but does not say which one.", where);
             }
 
             inputs.Add(new FlightPlanOrderInput(

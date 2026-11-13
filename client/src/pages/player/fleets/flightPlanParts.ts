@@ -88,6 +88,13 @@ export function readAxes(text: string): [number, number, number] | null {
 }
 
 /**
+ * The orders that name no target: the extraction takes from the place the fleet stands at (task 00054), the
+ * colonization colonizes the planet the fleet stands on (task 00073), the wait and the scan work where the fleet
+ * is, and the return flies to the home planet. They are written with the target `none`, whatever the window holds.
+ */
+const untargetedOrders: readonly string[] = ['mine', 'colonize', 'wait', 'scan', 'return'];
+
+/**
  * Turns the orders of the window into the orders the server reads (task 00050).
  *
  * The target is either the three coordinates of a point of the space, a planet of a system or an
@@ -99,8 +106,7 @@ export function readAxes(text: string): [number, number, number] | null {
  */
 export function toOrderInputs(orders: readonly DraftOrder[]): FlightPlanOrderInput[] {
   return orders.map((order) => {
-    // The order of extraction names no target (task 00054): it takes from the place where the fleet stands.
-    if (order.typeCode === 'mine') {
+    if (untargetedOrders.includes(order.typeCode)) {
       return {
         typeCode: order.typeCode,
         targetKind: 'none',
