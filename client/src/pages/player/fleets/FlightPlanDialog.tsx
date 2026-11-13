@@ -613,8 +613,27 @@ function planetBefore(
  */
 function draftOf(plan: FlightPlan | null, seed: FlightPlanSeed | null, sectorId: number | null): DraftOrder[] {
   if (plan) {
-    return plan.orders.map((order: FlightPlanOrder) => ({
-      typeCode: order.typeCode,
+    // The server writes a hyperflight or a jump as two or three legs that share one key, and every
+    // leg keeps the target of the command (task 00072). The window edits the commands of the
+    // player, so the legs of a group come back as the one command they were made from: its time
+    // is counted over all its legs, and a save spreads it over the legs again.
+    const seenGroups = new Set<string>();
+    const commands = plan.orders.filter((order: FlightPlanOrder) => {
+      if (!order.groupKey) {
+        return true;
+      }
+
+      if (seenGroups.has(order.groupKey)) {
+        return false;
+      }
+
+      seenGroups.add(order.groupKey);
+
+      return true;
+    });
+
+    return commands.map((order: FlightPlanOrder) => ({
+      typeCode: order.groupKey && order.command ? order.command : order.typeCode,
       targetKind: order.targetKind === 'point' ? 'point' : order.targetKind === 'planet' ? 'planet' : 'object',
       targetSectorId: order.targetSectorId > 0 ? order.targetSectorId : sectorId,
       targetSystemId: order.targetSystemId > 0 ? order.targetSystemId : null,

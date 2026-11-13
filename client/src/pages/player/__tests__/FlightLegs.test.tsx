@@ -181,4 +181,49 @@ describe('the legs of a flight and the fuel of a fleet (task 00072)', () => {
     // The shortage is told to the player (task 00072).
     expect(screen.getAllByText(/бракує палива/i).length).toBeGreaterThan(0);
   });
+  it('gives a saved hyperflight back to the editor as the one command it was made from', async () => {
+    // The server wrote the command as its legs, and every leg keeps the target of the command.
+    const leg = (id: number, typeCode: string, legRole: string) => ({
+      id,
+      position: id,
+      typeCode,
+      targetKind: 'point',
+      targetSectorId: 3,
+      targetSystemId: 0,
+      targetObjectId: 0,
+      targetX: 180.2,
+      targetY: 117.5,
+      targetZ: 0,
+      durationSeconds: 0,
+      parameters: '{}',
+      groupKey: '22222222-2222-2222-2222-222222222222',
+      command: 'hyperfly',
+      leg: legRole,
+    });
+    const write = vi.fn().mockResolvedValue(sampleFlightPlan());
+    const fleet = fakeFleetApi({
+      fleets: vi.fn().mockResolvedValue(withFleet()),
+      flightPlans: vi.fn().mockResolvedValue([sampleFlightPlan({ orders: [leg(1, 'fly', 'to_edge'), leg(2, 'hyperfly', 'ftl')] })]),
+      createFlightPlan: write,
+      saveFlightPlan: write,
+    });
+
+    renderPage('/fleets', { auth: signedIn(), fleet, map: fakeMapApi() });
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Змінити лист' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Політний лист флоту' });
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Змінити лист' }));
+
+    await waitFor(() => expect(write).toHaveBeenCalled());
+
+    // The editor holds the command, not its legs: the save spreads it over the legs again.
+    const orders = write.mock.calls[0]![0].orders;
+
+    expect(orders).toHaveLength(1);
+    expect(orders[0]!.typeCode).toBe('hyperfly');
+    expect(orders[0]!.targetX).toBe(180.2);
+    expect(orders[0]!.targetY).toBe(117.5);
+  });
 });
