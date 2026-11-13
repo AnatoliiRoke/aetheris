@@ -17,6 +17,9 @@ using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
 using Aetheris.Research;
 using Aetheris.Research.Configuration;
+using Aetheris.Research.Data;
+using Aetheris.Research.Data.Entities;
+using Aetheris.Research.Services;
 using Aetheris.Tests.Infrastructure;
 using Aetheris.Tests.Planets;
 using Aetheris.World;
@@ -359,6 +362,71 @@ public sealed partial class ColonizationFlowTests : IAsyncLifetime
         Assert.Equal(one, three);
     }
 
+    /// <summary>
+    /// A player with the colonial administration at level 25 and one planet may colonize even when the
+    /// base limit is one (task 00073): the effect of the level gives twelve planets.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_player_with_the_technology_at_level_25_may_colonize_over_the_base_limit()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await FoundAsync();
+        (long fleetId, long shipId) = await FleetAsync(player, [NormalDrive, ContainerCode]);
+        await PutModuleAsync(shipId);
+        long planetId = await SuitablePlanetAsync(player, otherSystem: true);
+
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            await AetherisTestFactory.SetParameterAsync(scope.ServiceProvider, ResearchConfigKeys.ColonyBaseLimit, "1");
+            await SetColonialAdministrationAsync(scope.ServiceProvider, player, 25);
+
+            Assert.Equal(12, await scope.ServiceProvider.GetRequiredService<IResearchModule>().GetPlanetLimitAsync(player.Account.UserId, Token));
+        }
+
+        JsonElement plan = await CommandAsync(player, Colonize, new { fleet_id = fleetId, planet_id = planetId });
+
+        Assert.Equal("colonize", plan.GetProperty("orders").EnumerateArray().Last().GetProperty("type_code").GetString());
+    }
+
+    /// <summary>
+    /// A database made before the limit of the planets joined the starting data gets the effect from
+    /// the seed of the research (task 00073), without the rows of the other effects being touched.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_seed_adds_the_missing_effect_of_the_limit_of_the_planets()
+    {
+        await ResetAsync();
+
+        using (IServiceScope scope = _factory.Services.CreateScope())
+        {
+            ResearchDbContext database = scope.ServiceProvider.GetRequiredService<ResearchDbContext>();
+            int[] levelIds = [.. await LimitLevelIdsAsync(database)];
+
+            await database.TechnologyLevelEffects
+                .Where(effect => levelIds.Contains(effect.TechnologyLevelId) && effect.EffectType == TechnologyEffectTypes.PlanetLimit)
+                .ExecuteDeleteAsync(Token);
+
+            Assert.False(await database.TechnologyLevelEffects.AnyAsync(effect => levelIds.Contains(effect.TechnologyLevelId) && effect.EffectType == TechnologyEffectTypes.PlanetLimit, Token));
+
+            await scope.ServiceProvider.GetRequiredService<IResearchModule>().EnsureAsync(Token);
+        }
+
+        using IServiceScope after = _factory.Services.CreateScope();
+        ResearchDbContext reread = after.ServiceProvider.GetRequiredService<ResearchDbContext>();
+        int[] ids = [.. await LimitLevelIdsAsync(reread)];
+        List<decimal> values = await (
+                from effect in reread.TechnologyLevelEffects.AsNoTracking()
+                join level in reread.TechnologyLevels.AsNoTracking() on effect.TechnologyLevelId equals level.Id
+                where ids.Contains(effect.TechnologyLevelId) && effect.EffectType == TechnologyEffectTypes.PlanetLimit
+                orderby level.Level
+                select effect.Value)
+            .ToListAsync(Token);
+
+        Assert.Equal([1m, 1m, 2m, 2m, 2m, 3m, 3m, 4m, 4m, 5m, 5m, 6m, 6m, 7m, 7m, 7m, 8m, 8m, 9m, 9m, 10m, 10m, 11m, 11m, 12m], values);
+    }
+
     private async Task ResetAsync()
     {
         await PlanetsTestData.ResetAsync(_factory);
@@ -381,6 +449,23 @@ public sealed partial class ColonizationFlowTests : IAsyncLifetime
         {
             await _consumption.ApplyAsync(Token);
         }
+    }
+
+    private static async Task<List<int>> LimitLevelIdsAsync(ResearchDbContext database) =>
+        await (
+                from level in database.TechnologyLevels.AsNoTracking()
+                join technology in database.Technologies.AsNoTracking() on level.TechnologyId equals technology.Id
+                where technology.Code == "tech_17"
+                select level.Id)
+            .ToListAsync(Token);
+
+    private static async Task SetColonialAdministrationAsync(IServiceProvider services, PlanetsTestPlayer player, int level)
+    {
+        ResearchDbContext database = services.GetRequiredService<ResearchDbContext>();
+        int technologyId = await database.Technologies.AsNoTracking().Where(technology => technology.Code == "tech_17").Select(technology => technology.Id).SingleAsync(Token);
+
+        database.PlayerTechnologies.Add(new PlayerTechnologyEntity { PlayerId = player.Account.UserId, PlanetId = player.PlanetId, TechnologyId = technologyId, Level = level });
+        await database.SaveChangesAsync(Token);
     }
 
     private async Task<PlanetsTestPlayer> FoundAsync()

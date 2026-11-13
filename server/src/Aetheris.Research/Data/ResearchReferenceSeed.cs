@@ -261,6 +261,8 @@ public static class ResearchReferenceSeed
             await WriteInsertedRequirementsAsync(missingTechnologies, planets, requirements, dbContext, cancellationToken).ConfigureAwait(false);
         }
 
+        bool effectsAdded = await AddMissingEffectsAsync(dbContext, seed, existingCodes, cancellationToken).ConfigureAwait(false);
+
         await texts.AddMissingAsync(
             [
                 .. seed.Technologies.SelectMany(technology => SeedTexts.Entries(ResearchTextKeys.Name(technology.Code), technology.Name)),
@@ -273,7 +275,95 @@ public static class ResearchReferenceSeed
 
         bool groupsAligned = await AlignGroupsAsync(dbContext, texts, seed, cancellationToken).ConfigureAwait(false);
 
-        return missingTechnologies.Count > 0 || groupsAligned;
+        return missingTechnologies.Count > 0 || groupsAligned || effectsAdded;
+    }
+
+    /// <summary>
+    /// Adds to the technologies that are already in the database the effects of the starting data
+    /// they have no row of at all (task 00073: the limit of the planets of the colonial
+    /// administration joined the starting data after the databases were made).
+    /// </summary>
+    /// <remarks>
+    /// Only an effect type a technology has no row of is written, for every level the starting data
+    /// gives it, so an effect an administrator changed or removed on some levels stays as it is. The
+    /// effects that open a subject are left out: they are written with the technology itself.
+    /// </remarks>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="seed">The starting data.</param>
+    /// <param name="existingCodes">The codes of the technologies of the starting data that are in the database.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>Whether a row was written.</returns>
+    private static async Task<bool> AddMissingEffectsAsync(
+        ResearchDbContext dbContext,
+        ResearchSeedData seed,
+        IReadOnlySet<string> existingCodes,
+        CancellationToken cancellationToken)
+    {
+        List<SeedTechnology> technologies =
+        [
+            .. seed.Technologies.Where(technology => existingCodes.Contains(technology.Code) && technology.Effects.Any(effect => effect.UnlockKind is null)),
+        ];
+
+        if (technologies.Count == 0)
+        {
+            return false;
+        }
+
+        string[] codes = [.. technologies.Select(technology => technology.Code)];
+
+        // The levels of the technologies and the effect types they already have, read at once.
+        var levels = await (
+                from level in dbContext.TechnologyLevels.AsNoTracking()
+                join technology in dbContext.Technologies.AsNoTracking() on level.TechnologyId equals technology.Id
+                where codes.Contains(technology.Code)
+                select new { level.Id, level.Level, technology.Code })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var present = await (
+                from effect in dbContext.TechnologyLevelEffects.AsNoTracking()
+                join level in dbContext.TechnologyLevels.AsNoTracking() on effect.TechnologyLevelId equals level.Id
+                join technology in dbContext.Technologies.AsNoTracking() on level.TechnologyId equals technology.Id
+                where codes.Contains(technology.Code)
+                select new { technology.Code, effect.EffectType })
+            .Distinct()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        HashSet<(string Code, string EffectType)> known = [.. present.Select(row => (row.Code, row.EffectType))];
+        bool added = false;
+
+        foreach (SeedTechnology technology in technologies)
+        {
+            foreach (IGrouping<string, SeedTechnologyEffect> type in technology.Effects.Where(effect => effect.UnlockKind is null).GroupBy(effect => effect.Type))
+            {
+                if (known.Contains((technology.Code, type.Key)))
+                {
+                    continue;
+                }
+
+                foreach (var level in levels.Where(entry => entry.Code == technology.Code))
+                {
+                    foreach (SeedTechnologyEffect effect in type.Where(effect => effect.Level is null || effect.Level == level.Level))
+                    {
+                        dbContext.TechnologyLevelEffects.Add(new TechnologyLevelEffectEntity
+                        {
+                            TechnologyLevelId = level.Id,
+                            EffectType = effect.Type,
+                            Value = MultiplierAt(effect.Growth ?? new SeedGrowth { Base = 1 }, level.Level),
+                        });
+                        added = true;
+                    }
+                }
+            }
+        }
+
+        if (added)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return added;
     }
 
     /// <summary>
