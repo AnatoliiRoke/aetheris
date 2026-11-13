@@ -4,7 +4,7 @@
 > **Запит автора (12–13.11.2026):** задачі боїв з узгодженої логіки. Ця — як бій починається.
 > **Логіка бою:** [game-design/06](../game-design/06-kosmichni-boi.md) §9, §9.1.
 > **Обов'язково прочитати:** `documentation/tech/08-pravyla-kodu-dlia-ahentiv.md`, `documentation/tech/09-zvedeni-pravyla-kodu-lohiky-ta-kodiv.md`, `documentation/tech/07-planuvalnyk-podii.md`, `documentation/tech/04-api.md`.
-> **Залежить від:** [00063](00063-rushii-boiu-symuliator.md), [00071](00071-boiovyi-poriadok-flotu.md), польотний лист [00050](00050-politnyi-lyst-flotu.md), карта [00059](00059-fleet-on-map.md).
+> **Залежить від:** [00063](00063-rushii-boiu-symuliator.md), [00071](00071-boiovyi-poriadok-flotu.md), польотний лист [00050](00050-politnyi-lyst-flotu.md), карта [00059](00059-flot-u-polyoti-na-karti.md).
 
 ## 1. Як є зараз (перевірено 13.11.2026)
 
