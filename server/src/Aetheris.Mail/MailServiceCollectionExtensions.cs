@@ -36,7 +36,11 @@ public static class MailServiceCollectionExtensions
         services.AddScoped<MailSendService>();
         services.AddScoped<MailBootstrapService>();
         services.AddScoped<MailUnitOfWork>();
-        services.AddScoped<IScheduledEventHandler, MailTrashCleanupHandler>();
+
+        // The cleanup of the bin is registered by its own type too: the host puts the first event
+        // in place at start, and it asks for the handler by its type (task 00060).
+        services.AddScoped<MailTrashCleanupHandler>();
+        services.AddScoped<IScheduledEventHandler>(services => services.GetRequiredService<MailTrashCleanupHandler>());
 
         services.AddCommand<SendMailCommand>();
         services.AddCommand<SaveMailDraftCommand>();
