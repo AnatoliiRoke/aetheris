@@ -704,6 +704,58 @@ public sealed partial class FlightLegTests
     }
 
     /// <summary>
+    /// The estimate of a saved hyperflight to a point of open space counts every leg from the real
+    /// places (task 00072): the leg to the edge ends on the last orbit of the system of the fleet,
+    /// and the leg between the systems starts there, ends at the point and takes time.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task The_estimate_of_a_saved_hyperflight_counts_every_leg_from_the_real_places()
+    {
+        await ResetAsync();
+        await using DriveConsumptionScope consumption = await DriveConsumptionScope.SetAsync(_factory.Services, 0m, Token);
+        using PlanetsTestPlayer player = await FoundAsync(spaceportLevel: 1);
+        long fleetId = await FleetAsync(player, [NormalDrive, HyperDrive]);
+        WorldPlaceDto home = await HomeAsync(player);
+        WorldPlaceDto space = await OpenSpaceAsync(home.SectorId);
+        WorldPlaceDto edge = await EdgeAsync(home.SystemId!.Value);
+
+        await CommandAsync(player, Plans, new
+        {
+            fleet_id = fleetId,
+            orders = new object[] { new { type_code = "hyperfly", target_kind = "point", target_sector_id = space.SectorId, target_x = space.X, target_y = space.Y, target_z = space.Z } },
+        });
+
+        using HttpResponseMessage response = await player.Client.GetAsync($"/api/v1/fleet/flight-plans/plan-estimate?fleet_id={fleetId}", Token);
+        JsonElement legs = JsonDocument.Parse(await response.Content.ReadAsStringAsync(Token)).RootElement.GetProperty("legs");
+        List<JsonElement> route = [.. legs.EnumerateArray()];
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        // The leg between the systems ends at the point of open space and takes time.
+        JsonElement ftl = Assert.Single(route, entry => entry.GetProperty("leg").GetString() == "ftl");
+
+        Assert.Equal(JsonValueKind.Null, ftl.GetProperty("to_system_id").ValueKind);
+        Assert.True(ftl.GetProperty("seconds").GetInt64() > 0);
+        Assert.True(ftl.GetProperty("distance").GetDouble() > 0d);
+        Assert.Equal(edge.Orbit, ftl.GetProperty("from_orbit").GetInt32());
+        Assert.Equal(home.SystemId, ftl.GetProperty("from_system_id").GetInt64());
+
+        // The leg to the edge, when the body is not on the edge, ends on the last orbit of the system.
+        if (home.Orbit != edge.Orbit)
+        {
+            JsonElement toEdge = route[0];
+
+            Assert.Equal("to_edge", toEdge.GetProperty("leg").GetString());
+            Assert.Equal(edge.Orbit, toEdge.GetProperty("to_orbit").GetInt32());
+            Assert.Equal(home.SystemId, toEdge.GetProperty("to_system_id").GetInt64());
+            Assert.True(toEdge.GetProperty("seconds").GetInt64() > 0);
+        }
+
+        Assert.DoesNotContain(route, entry => entry.GetProperty("leg").GetString() == "from_edge");
+    }
+
+    /// <summary>
     /// The consumption of a drive is counted in units of fuel per hour of its work (task 00072,
     /// decision of the author of 13.11.2026): a drive of 3600 units an hour burns one unit in a
     /// second, and a part of a unit is rounded up once for the leg.
@@ -1101,6 +1153,14 @@ public sealed partial class FlightLegTests
 
         return await scope.ServiceProvider.GetRequiredService<FleetDbContext>().Fleets.AsNoTracking()
             .SingleAsync(entry => entry.Id == fleetId, Token);
+    }
+
+    private async Task<WorldPlaceDto> EdgeAsync(long systemId)
+    {
+        using IServiceScope scope = _factory.Services.CreateScope();
+
+        return await scope.ServiceProvider.GetRequiredService<IWorldModule>().GetSystemEdgePlaceAsync(systemId, Token)
+            ?? throw new InvalidOperationException("The system has no edge.");
     }
 
     private async Task<WorldPlaceDto> ObjectPlaceAsync(long objectId)

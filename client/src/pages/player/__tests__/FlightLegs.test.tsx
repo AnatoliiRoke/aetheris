@@ -226,4 +226,59 @@ describe('the legs of a flight and the fuel of a fleet (task 00072)', () => {
     expect(orders[0]!.targetX).toBe(180.2);
     expect(orders[0]!.targetY).toBe(117.5);
   });
+  it('shows every leg of a saved hyperflight with its real end and its time', async () => {
+    // The plan of the fleet as the server stores it: the legs keep the target of the command, a
+    // point of open space, so there is no leg from the edge.
+    const leg = (id: number, typeCode: string, legRole: string) => ({
+      id,
+      position: id,
+      typeCode,
+      targetKind: 'point',
+      targetSectorId: 1,
+      targetSystemId: 0,
+      targetObjectId: 0,
+      targetX: 181.6,
+      targetY: 127.8,
+      targetZ: 0,
+      durationSeconds: 0,
+      parameters: '{}',
+      groupKey: '33333333-3333-3333-3333-333333333333',
+      command: 'hyperfly',
+      leg: legRole,
+    });
+    const estimate = sampleFlightFuelEstimate({
+      legs: [
+        { leg: 'to_edge', kind: 'normal', fromSectorId: 1, fromSystemId: 4, fromOrbit: 3, toSectorId: 1, toSystemId: 4, toOrbit: 12, distance: 5.4, seconds: 1800, fuel: [] },
+        { leg: 'ftl', kind: 'hyper', fromSectorId: 1, fromSystemId: 4, fromOrbit: 12, toSectorId: 1, toSystemId: null, toOrbit: null, distance: 40, seconds: 7200, fuel: [] },
+      ],
+    });
+    const fleet = fakeFleetApi({
+      fleets: vi.fn().mockResolvedValue(withFleet()),
+      flightPlans: vi.fn().mockResolvedValue([sampleFlightPlan({ orders: [leg(1, 'fly', 'to_edge'), leg(2, 'hyperfly', 'ftl')] })]),
+      fuelEstimate: vi.fn().mockResolvedValue(estimate),
+    });
+
+    renderPage('/fleets', { auth: signedIn(), fleet, map: fakeMapApi() });
+
+    const list = await waitFor(() => {
+      const found = document.querySelector<HTMLElement>('ol.pl-orders');
+
+      if (found === null) {
+        throw new Error('The list of the orders is not on the screen.');
+      }
+
+      return found;
+    });
+
+    // The row is the command of the player, not its first leg.
+    await waitFor(() => expect(within(list).getByText('Гіперперліт')).toBeInTheDocument());
+
+    await userEvent.click(within(list).getByRole('button'));
+
+    // The leg to the edge ends on the last orbit of the system, and the leg between the systems
+    // has its own time and ends at the target.
+    await waitFor(() => expect(within(list).getByText(/До краю системи/)).toHaveTextContent('орбіта 12'));
+    expect(within(list).getByText(/Між системами/)).toHaveTextContent('181.6 / 127.8 / 0');
+    expect(within(list).getByText(/Між системами/)).not.toHaveTextContent('0:00:00');
+  });
 });

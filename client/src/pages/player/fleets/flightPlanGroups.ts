@@ -1,4 +1,4 @@
-import type { FlightPlanOrder } from '../../../api/fleetApi';
+import type { FlightFuelLeg, FlightPlanOrder } from '../../../api/fleetApi';
 
 /**
  * One row of the flight plan as the list of the screen shows it (task 00072).
@@ -50,4 +50,56 @@ export function groupPlanOrders(orders: readonly FlightPlanOrder[]): PlanRow[] {
   }
 
   return rows;
+}
+
+/** The orders that fly on their own, as one ordinary leg of the route. */
+const plainFlights: readonly string[] = ['fly', 'return'];
+
+/**
+ * Gives every row of the plan the legs of the route the server counted for it (task 00072).
+ *
+ * The estimate of the plan lists the legs of the whole route one after another: one ordinary leg
+ * for a flight that stands alone, and for a hyperflight or a jump its leg to the edge (when the
+ * fleet stands in a system), its leg between the systems and its leg from the edge (when the
+ * target lies in a system). The legs are counted from the real places, so they carry the real end
+ * of every leg and its time; the rows take them in the order of the route.
+ *
+ * @param rows The rows of the plan.
+ * @param legs The legs of the route from the estimate of the server.
+ * @returns The legs of every row, in the order of the rows; an empty list for a row that does not fly.
+ */
+export function legsOfRows(rows: readonly PlanRow[], legs: readonly FlightFuelLeg[]): FlightFuelLeg[][] {
+  let cursor = 0;
+
+  return rows.map((row) => {
+    const first = row.orders[0];
+
+    if (first === undefined) {
+      return [];
+    }
+
+    if (row.expandable) {
+      const taken: FlightFuelLeg[] = [];
+
+      if (legs[cursor]?.leg === 'to_edge') {
+        taken.push(legs[cursor++]!);
+      }
+
+      if (legs[cursor]?.leg === 'ftl') {
+        taken.push(legs[cursor++]!);
+      }
+
+      if (legs[cursor]?.leg === 'from_edge') {
+        taken.push(legs[cursor++]!);
+      }
+
+      return taken;
+    }
+
+    if (plainFlights.includes(first.typeCode) && legs[cursor]?.leg === 'normal') {
+      return [legs[cursor++]!];
+    }
+
+    return [];
+  });
 }

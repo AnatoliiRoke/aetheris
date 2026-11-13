@@ -7,7 +7,7 @@ import { useI18n } from '../../../i18n/useI18n';
 import type { MessageKey } from '../../../i18n/uk';
 import { routes } from '../../../router/context';
 import { Link } from '../../../router/Router';
-import { formatNumber, hasKey } from '../planetText';
+import { formatDuration, formatNumber, hasKey } from '../planetText';
 import { useRead } from '../market/useRead';
 import { PlanetAvatar, StatePill } from './FleetBits';
 import { FleetFlightStatus, type FleetsClock } from './FleetFlightStatus';
@@ -19,7 +19,7 @@ import { FlightFuelBlock } from './FlightFuelBlock';
 import { FlightPlanPlace } from './FlightPlanPlace';
 import { ProjectList } from './ProjectLists';
 import { stateText } from './fleetsParts';
-import { groupPlanOrders } from './flightPlanGroups';
+import { groupPlanOrders, legsOfRows } from './flightPlanGroups';
 import { useFleetsScene } from './useFleetsScene';
 
 /**
@@ -146,6 +146,10 @@ export function FleetPanel({
   );
   const fuelRead = useRead<FlightFuelEstimate | null>(loadFuel, plan !== null && plan.orders.length > 0, false);
   const fuelShort = (fuelRead.data?.shortages.length ?? 0) > 0;
+
+  // The legs of the route as the server counted them from the real places (task 00072): a row of
+  // a hyperflight or a jump shows the real end and the time of every leg, not the target of the command.
+  const rowLegs = useMemo(() => legsOfRows(rows, fuelRead.data?.legs ?? []), [rows, fuelRead.data]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -278,8 +282,9 @@ export function FleetPanel({
               <p className="fl-note">{t('plan.noOrders')}</p>
             ) : (
               <ol className="pl-orders pl-orders--plain">
-                {rows.map((row) => {
+                {rows.map((row, rowIndex) => {
                   const first = row.orders[0]!;
+                  const legsOfRow = rowLegs[rowIndex] ?? [];
                   const open = row.groupKey !== null && openGroups.includes(row.groupKey);
                   const current = plan.stateCode === 'active' && row.orders.some((order) => order.position === plan.currentPosition);
 
@@ -299,7 +304,7 @@ export function FleetPanel({
                           {open ? '−' : '+'}
                         </button>
                       ) : null}
-                      <span className="pl-order__text">{t(orderLabels[first.typeCode] ?? 'plan.order.fly')}</span>
+                      <span className="pl-order__text">{t(orderLabels[(row.expandable ? row.command : null) ?? first.typeCode] ?? 'plan.order.fly')}</span>
                       {row.expandable ? (
                         <span className="pl-order__place">{t('plan.leg.count', { count: row.orders.length })}</span>
                       ) : flightTypes.includes(first.typeCode) && first.targetKind === 'point' ? (
@@ -320,13 +325,29 @@ export function FleetPanel({
                       ) : first.typeCode === 'load' || first.typeCode === 'unload' ? (
                         <span className="pl-order__place">{t('plan.cargo.itemsCount', { count: readCargoItems(first.parameters).length })}</span>
                       ) : null}
-                      {open
-                        ? row.orders.map((order) => (
-                            <span className="pl-order__leg" key={order.id}>
-                              {t(legLabels[order.leg ?? 'normal'] ?? 'plan.leg.normal')}
+                      {open && legsOfRow.length > 0
+                        ? legsOfRow.map((leg, legIndex) => (
+                            <span className="pl-order__leg" key={`${row.groupKey}-${legIndex}`}>
+                              {t(legLabels[leg.leg] ?? 'plan.leg.normal')} →{' '}
+                              {leg.toSystemId ? (
+                                <>
+                                  <FlightPlanPlace objectId={0} sectorId={leg.toSectorId} systemId={leg.toSystemId} />
+                                  {leg.toOrbit !== null && leg.toOrbit !== undefined ? `, ${t('map.orbitNumber', { orbit: leg.toOrbit })}` : ''}
+                                </>
+                              ) : (
+                                `${first.targetX} / ${first.targetY} / ${first.targetZ}`
+                              )}
+                              {' · '}
+                              {formatDuration(language, leg.seconds)}
                             </span>
                           ))
-                        : null}
+                        : open
+                          ? row.orders.map((order) => (
+                              <span className="pl-order__leg" key={order.id}>
+                                {t(legLabels[order.leg ?? 'normal'] ?? 'plan.leg.normal')}
+                              </span>
+                            ))
+                          : null}
                     </li>
                   );
                 })}
