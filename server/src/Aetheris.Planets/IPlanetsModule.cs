@@ -270,6 +270,31 @@ public interface IPlanetsModule
     /// that adds requirements to the building types calls it after its change is committed.
     /// </summary>
     void InvalidateCatalog();
+
+    /// <summary>
+    /// Founds a colony on a body (task 00073): the state of the body, the same start buildings
+    /// that a new civilization gets, and the population of the colony.
+    /// </summary>
+    /// <remarks>
+    /// The buildings are the same as the ones of the registration, because the same method places
+    /// them: the types with the flag of the start building and the start building of the race.
+    /// </remarks>
+    /// <param name="playerId">The owner of the body.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="sectorId">The sector of the body.</param>
+    /// <param name="raceBuildingTypeId">The start building of the race.</param>
+    /// <param name="raceBuildingLevel">The level of the start building.</param>
+    /// <param name="inhabitants">The number of inhabitants of the colony.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the colony is founded.</returns>
+    Task FoundColonyAsync(
+        string playerId,
+        long planetId,
+        int sectorId,
+        int raceBuildingTypeId,
+        int raceBuildingLevel,
+        long inhabitants,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>

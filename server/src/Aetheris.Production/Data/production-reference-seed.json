@@ -2685,6 +2685,12 @@
       "attributes": {
         "role": {
           "code": "transport"
+        },
+        "cargo_only": {
+          "code": "true"
+        },
+        "cargo_order": {
+          "code": "colonize"
         }
       },
       "weight": 717.951779,
@@ -2693,7 +2699,7 @@
           "number": 0
         },
         "char_deploy_time": {
-          "number": 129600
+          "number": 600
         },
         "char_colonists": {
           "number": 150

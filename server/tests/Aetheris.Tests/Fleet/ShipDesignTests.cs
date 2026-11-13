@@ -271,7 +271,8 @@ public sealed class ShipDesignTests
         Assert.Equal(HttpStatusCode.UnprocessableEntity, weaponOnTransport.StatusCode);
         Assert.Equal("fleet_role_mismatch", await TestAccounts.ReadErrorAsync(weaponOnTransport));
 
-        // The colonial module does not go on the combat hull.
+        // The colonial module goes on no hull at all: it is a cargo of a hold since task 00073, so
+        // the combat hull refuses it as a cargo before any check of the role.
         HttpResponseMessage colonialOnCombat = await SaveAsync(
             player,
             await CreateIdAsync(player, "Колонія на бойовому", combat.Id),
@@ -279,7 +280,7 @@ public sealed class ShipDesignTests
             [.. combatKit, colonial.Id]);
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, colonialOnCombat.StatusCode);
-        Assert.Equal("fleet_role_mismatch", await TestAccounts.ReadErrorAsync(colonialOnCombat));
+        Assert.Equal("fleet_design_part_cargo_only", await TestAccounts.ReadErrorAsync(colonialOnCombat));
     }
 
     /// <summary>

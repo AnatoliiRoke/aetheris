@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { FleetHold } from '../../../api/fleetApi';
+import type { FleetCargoItem, FleetHold } from '../../../api/fleetApi';
 import { useApi } from '../../../api/useApi';
 import { Alert } from '../../../components/Alert';
 import { ResourceIcon } from '../../../components/GameIcon';
@@ -9,6 +9,8 @@ import { useRead } from '../market/useRead';
 import { formatNumber } from '../planetText';
 import { useShellSelector } from '../useShell';
 import { FleetDialog } from './FleetDialog';
+import { FlightCargoFields } from './FlightCargoFields';
+import { cargoItemsValid, holdContentOf, type CargoDraftItem } from './flightPlanCargo';
 
 /**
  * The button «Show the hold» of a fleet with the window it opens (task 00056). The window is the only
@@ -17,8 +19,9 @@ import { FleetDialog } from './FleetDialog';
  *
  * @param fleetId The fleet.
  * @param homePlanetId The home body of the fleet, to read the catalog that names the modules in the holds (task 00057).
+ * @param planetId The body the fleet stands on now; the hold may be loaded and unloaded only on a body of its owner (task 00073).
  */
-export function FleetHoldButton({ fleetId, homePlanetId }: { fleetId: number; homePlanetId?: number }) {
+export function FleetHoldButton({ fleetId, homePlanetId, planetId }: { fleetId: number; homePlanetId?: number; planetId?: number }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
@@ -27,7 +30,9 @@ export function FleetHoldButton({ fleetId, homePlanetId }: { fleetId: number; ho
       <button className="btn fl-btn fl-btn--block" onClick={() => setOpen(true)} type="button">
         {t('fleets.showHold')}
       </button>
-      {open ? <FleetHoldDialog fleetId={fleetId} homePlanetId={homePlanetId} onClose={() => setOpen(false)} /> : null}
+      {open ? (
+        <FleetHoldDialog fleetId={fleetId} homePlanetId={homePlanetId} planetId={planetId} onClose={() => setOpen(false)} />
+      ) : null}
     </>
   );
 }
@@ -38,9 +43,20 @@ export function FleetHoldButton({ fleetId, homePlanetId }: { fleetId: number; ho
  *
  * @param fleetId The fleet.
  * @param homePlanetId The home body of the fleet, for the catalog that names the modules.
+ * @param planetId The body the fleet stands on now, or `undefined` when it is not known.
  * @param onClose Closes the window.
  */
-function FleetHoldDialog({ fleetId, homePlanetId, onClose }: { fleetId: number; homePlanetId?: number; onClose: () => void }) {
+function FleetHoldDialog({
+  fleetId,
+  homePlanetId,
+  planetId,
+  onClose,
+}: {
+  fleetId: number;
+  homePlanetId?: number;
+  planetId?: number;
+  onClose: () => void;
+}) {
   const { t, language } = useI18n();
   const { fleet: fleetApi } = useApi();
   const { name } = useTexts();
@@ -59,6 +75,7 @@ function FleetHoldDialog({ fleetId, homePlanetId, onClose }: { fleetId: number; 
   );
   const catalogRead = useRead(loadCatalog, hasParts && homePlanetId !== undefined, false);
   const partNames = useMemo(() => new Map((catalogRead.data?.modules ?? []).map((module) => [module.id, module.nameKey])), [catalogRead.data]);
+  const partWeights = useMemo(() => new Map((catalogRead.data?.modules ?? []).map((module) => [module.id, module.weight])), [catalogRead.data]);
   const partRows = useMemo(
     () =>
       (read.data?.parts ?? []).map((part) => ({
@@ -85,6 +102,61 @@ function FleetHoldDialog({ fleetId, homePlanetId, onClose }: { fleetId: number; 
         .sort((first, second) => second.amount - first.amount || first.label.localeCompare(second.label, language)),
     [language, name, read.data, resources],
   );
+
+  // The commands of the hold (task 00073): the hold is loaded and unloaded only when the fleet stands
+  // on a body of its own, and the fleet is under way nowhere else.
+  const onOwnBody = planetId !== undefined && planetId > 0;
+  const [cargoMode, setCargoMode] = useState<'load' | 'unload' | null>(null);
+  const [cargoItems, setCargoItems] = useState<CargoDraftItem[]>([]);
+  const [cargoBusy, setCargoBusy] = useState(false);
+  const [cargoError, setCargoError] = useState<string | null>(null);
+
+  const baseHold = useMemo(() => holdContentOf(read.data), [read.data]);
+
+  const openCargo = (mode: 'load' | 'unload') => {
+    setCargoError(null);
+    setCargoItems([]);
+    setCargoMode(mode);
+  };
+
+  const sendCargo = async () => {
+    if (cargoMode === null || !cargoItemsValid(cargoItems)) {
+      return;
+    }
+
+    const items: FleetCargoItem[] = cargoItems.flatMap((item) => {
+      const amount = Number(item.amount);
+
+      if (item.id === null || !Number.isInteger(amount) || amount <= 0) {
+        return [];
+      }
+
+      return [{ kind: item.kind, id: item.id, markLevel: item.markLevel, hasRaceBonus: item.hasRaceBonus, amount }];
+    });
+
+    setCargoBusy(true);
+    setCargoError(null);
+
+    try {
+      const request = { fleetId, items };
+
+      if (cargoMode === 'load') {
+        await fleetApi.cargoLoad(request);
+      } else {
+        await fleetApi.cargoUnload(request);
+      }
+
+      setCargoMode(null);
+      setCargoItems([]);
+
+      // The hold of the fleet has changed, so the window reads it again.
+      void read.reload();
+    } catch (error) {
+      setCargoError(error instanceof Error ? error.message : t('fleets.holdFailed'));
+    } finally {
+      setCargoBusy(false);
+    }
+  };
 
   return (
     <FleetDialog
@@ -126,6 +198,45 @@ function FleetHoldDialog({ fleetId, homePlanetId, onClose }: { fleetId: number; 
             </li>
           ))}
         </ul>
+      ) : null}
+
+      {/*
+      The commands of the hold (task 00073): the same rules as the orders of the plan, so the window
+      shows the same form of the list of what to carry.
+      */}
+      <div className="fl-row fl-row--wrap">
+        <button className="btn fl-btn fl-btn--small" disabled={!onOwnBody} onClick={() => openCargo('load')} type="button">
+          {t('fleets.holdLoad')}
+        </button>
+        <button className="btn fl-btn fl-btn--small" disabled={!onOwnBody} onClick={() => openCargo('unload')} type="button">
+          {t('fleets.holdUnload')}
+        </button>
+      </div>
+
+      {cargoMode !== null ? (
+        <div className="fl-field">
+          <span className="fl-label">{cargoMode === 'load' ? t('fleets.holdLoadTitle') : t('fleets.holdUnloadTitle')}</span>
+          <FlightCargoFields
+            capacity={read.data?.capacity ?? null}
+            content={baseHold}
+            id="hold"
+            items={cargoItems}
+            onChange={setCargoItems}
+            partNames={partNames}
+            partWeights={partWeights}
+            planetId={onOwnBody ? planetId! : null}
+            typeCode={cargoMode}
+          />
+          {cargoError !== null ? <p className="pl-error">{cargoError}</p> : null}
+          <div className="fl-row fl-row--wrap">
+            <button className="btn fl-btn fl-btn--small" disabled={cargoBusy} onClick={() => setCargoMode(null)} type="button">
+              {t('fleets.cancel')}
+            </button>
+            <button className="btn btn--primary" disabled={cargoBusy || !cargoItemsValid(cargoItems)} onClick={sendCargo} type="button">
+              {t('fleets.holdCargoDone')}
+            </button>
+          </div>
+        </div>
       ) : null}
     </FleetDialog>
   );

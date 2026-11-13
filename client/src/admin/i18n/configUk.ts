@@ -250,6 +250,8 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.research.queue.base_slots.description': 'Місць у черзі досліджень гравця, разом із тим, що досліджується.',
   'config.research.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черзі досліджень гравця.',
   'config.research.catalog.cache_seconds.description': 'Скільки секунд таблиці технологій тримаються в пам’яті сервера до повторного читання.',
+  'config.research.colony.base_limit.description':
+    'Скільки планет гравець може мати без вивченого «Колоніального управління»; домашня планета входить.',
 
   'config.production.queue.base_slots.description': 'Місць у черзі заводу, разом із тим, що виробляється.',
   'config.production.queue.max_extra_slots.description': 'Найбільше платних місць, які можна додати до черги заводу.',

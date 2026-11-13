@@ -36,6 +36,7 @@ const orderTypes: readonly { code: string; label: MessageKey; fields: OrderField
   { code: 'unload', label: 'plan.order.unload', fields: { cargo: true } },
   { code: 'wait', label: 'plan.order.wait', fields: {} },
   { code: 'return', label: 'plan.order.return', fields: { duration: true } },
+  { code: 'colonize', label: 'plan.order.colonize', fields: { target: false } },
 ];
 
 /**
@@ -192,9 +193,15 @@ export function FlightPlanDialog({
           return mayExtract;
         }
 
+        // The colonization is opened by the colony module in the hold of the fleet (task 00073);
+        // the server says which orders the fleet may be given.
+        if (type.code === 'colonize') {
+          return holdRead.data?.availableOrders?.includes('colonize') === true;
+        }
+
         return !moduleOrders.includes(type.code) || openedOrders.has(type.code);
       }),
-    [mayExtract, openedOrders, orders],
+    [holdRead.data, mayExtract, openedOrders, orders],
   );
 
   // The home body of the fleet: the return of the fleet goes back to it.
@@ -480,6 +487,14 @@ export function FlightPlanDialog({
                     />
                   ) : null}
                   {order.typeCode === 'scan' && scanCapabilities ? <p className="fl-note">{t('plan.scanDetails', { radius: scanCapabilities.radius, duration: formatDuration(language, scanCapabilities.duration) })}</p> : null}
+                  {order.typeCode === 'colonize' ? (
+                    <>
+                      <p className="fl-note">{t('plan.colonize.hint')}</p>
+                      {holdRead.data?.planetLimit ? (
+                        <p className="fl-note">{t('plan.colonize.planets', { owned: holdRead.data.ownedPlanets ?? 0, allowed: holdRead.data.planetLimit })}</p>
+                      ) : null}
+                    </>
+                  ) : null}
 
                   {fields.cargo && (order.typeCode === 'load' || order.typeCode === 'unload') ? (
                     <FlightCargoFields

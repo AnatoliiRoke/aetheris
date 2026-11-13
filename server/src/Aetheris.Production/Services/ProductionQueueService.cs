@@ -634,7 +634,8 @@ public sealed class ProductionQueueService
                     raceCode is not null
                         && part is not null
                         && part.Attributes.TryGetValue(PartAttributeKeys.CapsuleRace, out PartAttributeInfo? capsuleRace)
-                        && string.Equals(capsuleRace.CodeValue, raceCode, StringComparison.Ordinal));
+                        && string.Equals(capsuleRace.CodeValue, raceCode, StringComparison.Ordinal),
+                    part is not null && part.Attributes.ContainsKey(PartAttributeKeys.CargoOnly));
             }),
         ];
 

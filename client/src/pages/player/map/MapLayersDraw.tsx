@@ -311,6 +311,7 @@ function BodySymbol({ object, context }: { object: MapObject; context: LayerCont
       {object.owner && !object.isOwn ? <GameIcon className="map-marker__sign" name="mapFlag" size={11} /> : null}
       {object.isFree ? <GameIcon className="map-marker__sign" name="mapPlus" size={11} /> : null}
       {object.isFree && object.isTerraformed ? <GameIcon className="map-marker__sign map-marker__sign--second" name="mapLeaf" size={11} /> : null}
+      {object.suitableForRace ? <GameIcon className="map-marker__sign map-marker__sign--second" name="orderColonize" size={11} /> : null}
       {isGiant ? <GameIcon className="map-marker__sign" name="mapStation" size={11} /> : null}
     </>
   );

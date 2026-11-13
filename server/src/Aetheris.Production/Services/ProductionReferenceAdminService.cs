@@ -296,6 +296,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             .. PartFlightOrders.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "flight_order." + value)),
                             .. PartScanTargets.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "scan_target." + value)),
                             .. PartEngineKinds.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "engine_kind." + value)),
+                            .. PartCargoOrders.All.Select(value => new AdminReferenceOption(value, LabelPrefix + "cargo_order." + value)),
                         ]),
                     new("text_value", AdminReferenceFieldTypes.Text, LabelPrefix + "field.attribute_text"),
                 ]),
@@ -1097,7 +1098,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                 && !PartComponents.All.Contains(codeValue)
                 && !PartFlightOrders.All.Contains(codeValue)
                 && !PartScanTargets.All.Contains(codeValue)
-                && !PartEngineKinds.All.Contains(codeValue))
+                && !PartEngineKinds.All.Contains(codeValue)
+                && !PartCargoOrders.All.Contains(codeValue))
             {
                 AdminReferenceRules.Fail(failures, AdminReferenceRules.PathOf(AttributesField, index, "code_value"), AdminReferenceErrors.Unknown);
             }

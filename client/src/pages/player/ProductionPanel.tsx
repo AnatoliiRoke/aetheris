@@ -222,6 +222,7 @@ function PartStockRow({
       </div>
       <span className="storage-resource__value num">
         {full ? <span className="badge badge--warning">{t('planet.storageFullBadge')}</span> : null}
+        {stack.cargoOnly === true ? <span className="badge">{t('production.cargoOnlyBadge')}</span> : null}
         {capacity > 0 ? (
           <span>{t('planet.storageAmount', { amount: formatAmount(stack.quantity, language), capacity: formatAmount(capacity, language) })}</span>
         ) : (

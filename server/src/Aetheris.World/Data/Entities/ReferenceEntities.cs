@@ -365,6 +365,11 @@ public sealed class RaceEntity
 
     /// <summary>Gets or sets the start resources of the race.</summary>
     public List<RaceStartResourceEntity> StartResourceIds { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the types of the bodies the race may colonize (task 00073).
+    /// </summary>
+    public List<RaceColonizableTypeEntity> ColonizableTypeIds { get; set; } = [];
 }
 
 /// <summary>
@@ -384,4 +389,21 @@ public sealed class RaceStartResourceEntity
 
     /// <summary>Gets or sets the amount.</summary>
     public long Amount { get; set; }
+}
+
+/// <summary>
+/// A type of a body a race may colonize (task 00073).
+/// </summary>
+/// <remarks>
+/// The types of a race are the data of the table, so the administrator may give a race another
+/// type without a change of the code. A body suits a race when its type is in the table of the
+/// race and the type itself is colonizable.
+/// </remarks>
+public sealed class RaceColonizableTypeEntity
+{
+    /// <summary>Gets or sets the race.</summary>
+    public int RaceId { get; set; }
+
+    /// <summary>Gets or sets the type of the body.</summary>
+    public int ObjectTypeId { get; set; }
 }

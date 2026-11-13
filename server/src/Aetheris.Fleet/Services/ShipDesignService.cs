@@ -795,6 +795,13 @@ public sealed class ShipDesignService
                 throw new GameException(FleetErrorCodes.ModuleUnknown, "The module does not exist.");
             }
 
+            // A module that is only a cargo is carried in the hold of a ship and never fitted to a
+            // hull (task 00073); it is told before the checks of the hull, which do not apply to it.
+            if (module.CargoOnly)
+            {
+                throw new GameException(FleetErrorCodes.DesignPartCargoOnly, "The module is only a cargo and is not fitted to a hull.");
+            }
+
             CheckRole(hull, module);
             CheckBelonging(hull, module);
 
@@ -1143,13 +1150,28 @@ public sealed class ShipDesignService
         ArgumentNullException.ThrowIfNull(catalog);
 
         List<int> ftlSlots = [];
+        List<int> cargoSlots = [];
         bool hasNormalDrive = false;
 
         foreach (ShipDesignSlotEntity row in rows)
         {
             ShipModuleDto? module = catalog.Modules.FirstOrDefault(entry => entry.Id == row.PartTypeId);
 
-            if (module is null || !string.Equals(module.Component, DriveComponent, StringComparison.Ordinal))
+            if (module is null)
+            {
+                continue;
+            }
+
+            // A module that is only a cargo is not fitted to a hull (task 00073): a project that
+            // holds one is a project of the old data, so the problem is shown as a warning.
+            if (module.CargoOnly)
+            {
+                cargoSlots.Add(row.SlotIndex);
+
+                continue;
+            }
+
+            if (!string.Equals(module.Component, DriveComponent, StringComparison.Ordinal))
             {
                 continue;
             }
@@ -1170,17 +1192,23 @@ public sealed class ShipDesignService
             }
         }
 
-        if (hasNormalDrive || ftlSlots.Count == 0)
+        List<ShipDesignWarningDto> warnings = [];
+
+        if (!hasNormalDrive && ftlSlots.Count > 0)
         {
-            return [];
+            warnings.Add(new ShipDesignWarningDto(
+                ShipDesignWarningCodes.FtlNeedsNormalDrive,
+                [.. ftlSlots.OrderBy(index => index)]));
         }
 
-        return
-        [
-            new ShipDesignWarningDto(
-                ShipDesignWarningCodes.FtlNeedsNormalDrive,
-                [.. ftlSlots.OrderBy(index => index)]),
-        ];
+        if (cargoSlots.Count > 0)
+        {
+            warnings.Add(new ShipDesignWarningDto(
+                ShipDesignWarningCodes.DesignPartCargoOnly,
+                [.. cargoSlots.OrderBy(index => index)]));
+        }
+
+        return warnings;
     }
 
     /// <summary>

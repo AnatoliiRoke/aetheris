@@ -28,6 +28,7 @@ public static class PlanetsConfigKeys
     /// <summary>The level of the start building.</summary>
     public const string StartBuildingLevel = "planets.start.building_level";
 
+
     /// <summary>
     /// Gets the definitions of the parameters with their starting values and bounds.
     /// </summary>

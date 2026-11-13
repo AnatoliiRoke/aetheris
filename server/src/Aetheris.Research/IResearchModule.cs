@@ -74,4 +74,14 @@ public interface IResearchModule
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>The multiplier. One changes nothing. It is never negative.</returns>
     Task<decimal> ShipyardTimeMultiplierAsync(string playerId, long planetId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the largest number of bodies a player may have at once, the home body among them
+    /// (task 00073). The technology of the colonial administration gives the limit; a player
+    /// without it keeps the limit of the configuration.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The limit. It is never smaller than one.</returns>
+    Task<int> GetPlanetLimitAsync(string playerId, CancellationToken cancellationToken = default);
 }

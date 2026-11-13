@@ -41,10 +41,11 @@ export interface MapCardContext {
   canSendFleet: boolean;
   /** Opens the screen of the fleets (task 00059). */
   onOpenFleets: () => void;
+  /** Opens the choice of the fleet that colonizes the planet (task 00073). */
+  onColonize: (planetId: number) => void;
 }
 
-const futureActions: { icon: GameIconName; key: 'colonize' | 'mine' | 'scout' | 'attack' | 'escort' }[] = [
-  { icon: 'mapPlus', key: 'colonize' },
+const futureActions: { icon: GameIconName; key: 'mine' | 'scout' | 'attack' | 'escort' }[] = [
   { icon: 'mine', key: 'mine' },
   { icon: 'mapScout', key: 'scout' },
   { icon: 'mapAttack', key: 'attack' },
@@ -73,6 +74,12 @@ export function MapCard({ selection, context }: { selection: MapSelection; conte
   const distanceText = (value: number | null) => (value === null ? '—' : `${formatCoefficient(value, language)} ${unit}`);
   const timeText = (seconds: number | null, inSystem: boolean) =>
     seconds === null ? '—' : inSystem ? t('map.timeInSystem', { time: formatDuration(language, seconds) }) : `~${formatDuration(language, seconds)}`;
+
+  // A free planet whose type suits the race of the player may be colonized (task 00073).
+  const colonizable =
+    selection.kind === 'object' && selection.object.planetId !== null && selection.object.isFree === true && selection.object.suitableForRace === true
+      ? selection.object.planetId
+      : null;
 
   let imageKey: string | null = null;
   let title = '';
@@ -323,6 +330,12 @@ export function MapCard({ selection, context }: { selection: MapSelection; conte
               <GameIcon name="mapRoute" size={18} />
               {t('map.sendFleet')}
             </button>
+            {colonizable !== null ? (
+              <button className="btn btn--primary" onClick={() => context.onColonize(colonizable)} type="button">
+                <GameIcon name="mapPlus" size={18} />
+                {t('map.action.colonize')}
+              </button>
+            ) : null}
             {futureActions.map((action) => (
               <button aria-describedby="map-fleet-note" className="btn btn--secondary" disabled key={action.key} title={t('map.needFleet')} type="button">
                 <GameIcon name={action.icon} size={18} />

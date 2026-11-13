@@ -12699,7 +12699,258 @@
           "from_level": 18
         }
       ],
-      "effects": [],
+      "effects": [
+        {
+          "type": "planet_limit",
+          "level": 1,
+          "growth": {
+            "base": 1,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 2,
+          "growth": {
+            "base": 1,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 3,
+          "growth": {
+            "base": 2,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 4,
+          "growth": {
+            "base": 2,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 5,
+          "growth": {
+            "base": 2,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 6,
+          "growth": {
+            "base": 3,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 7,
+          "growth": {
+            "base": 3,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 8,
+          "growth": {
+            "base": 4,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 9,
+          "growth": {
+            "base": 4,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 10,
+          "growth": {
+            "base": 5,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 11,
+          "growth": {
+            "base": 5,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 12,
+          "growth": {
+            "base": 6,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 13,
+          "growth": {
+            "base": 6,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 14,
+          "growth": {
+            "base": 7,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 15,
+          "growth": {
+            "base": 7,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 16,
+          "growth": {
+            "base": 7,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 17,
+          "growth": {
+            "base": 8,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 18,
+          "growth": {
+            "base": 8,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 19,
+          "growth": {
+            "base": 9,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 20,
+          "growth": {
+            "base": 9,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 21,
+          "growth": {
+            "base": 10,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 22,
+          "growth": {
+            "base": 10,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 23,
+          "growth": {
+            "base": 11,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 24,
+          "growth": {
+            "base": 11,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        },
+        {
+          "type": "planet_limit",
+          "level": 25,
+          "growth": {
+            "base": 12,
+            "growth": 1,
+            "step": 0,
+            "significant": 2
+          }
+        }
+      ],
       "requirements": [
         {
           "type": "building_level",

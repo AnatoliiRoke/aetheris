@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { MapField, MapGalaxy, MapObject, MapSearchResult, MapSectorView, MapSystem, MapSystemView } from '../../../api/mapApi';
 import { ApiError } from '../../../api/http';
-import type { FleetsInFlight, FleetsView } from '../../../api/fleetApi';
+import type { FleetsInFlight, FleetsView, FlightPlan } from '../../../api/fleetApi';
 import { useApi } from '../../../api/useApi';
 import { Alert } from '../../../components/Alert';
 import { GameIcon, type GameIconName } from '../../../components/GameIcon';
@@ -15,6 +15,7 @@ import { useTexts } from '../../../texts/useTexts';
 import { ScreenHead } from '../ScreenHead';
 import { formatCoefficient, formatDuration } from '../planetText';
 import { FlightPlanDialog, type FlightPlanSeed } from '../fleets/FlightPlanDialog';
+import { ColonizeFleetDialog } from './ColonizeFleetDialog';
 import { writeFlightPlan } from '../fleets/flightPlanParts';
 import { noticeFromError } from '../screenNotice';
 import { usePlanet } from '../usePlanet';
@@ -74,6 +75,11 @@ export function MapPage() {
   const [planOpen, setPlanOpen] = useState(false);
   const [planBusy, setPlanBusy] = useState(false);
   const [planError, setPlanError] = useState<string | null>(null);
+
+  // The colonization from the map (task 00073): the planet the player chose to colonize, and the draft
+  // of the plan the server wrote for the fleet the player picked, opened in the window of the plan.
+  const [colonizePlanetId, setColonizePlanetId] = useState<number | null>(null);
+  const [colonizePlan, setColonizePlan] = useState<FlightPlan | null>(null);
 
   // The fleets of the player: a flight plan is made for one of them, so the card of the map needs
   // to know whether there is a fleet at all (task 00050).
@@ -416,6 +422,7 @@ export function MapPage() {
 
         setPlanError(null);
         setPlanOpen(false);
+        setColonizePlan(null);
       } catch (error) {
         const refusal = noticeFromError(error, language, t('fleets.failed'), ['fleet_']);
 
@@ -510,6 +517,10 @@ export function MapPage() {
     },
     canSendFleet: (fleets?.fleets.length ?? 0) > 0,
     onOpenFleets: () => navigate(routes.fleets),
+    onColonize: (id) => {
+      setPlanError(null);
+      setColonizePlanetId(id);
+    },
   };
 
   const layerContext: LayerContext = { typeName, typeImage, selectedKey, onSelect, onOpen };
@@ -586,6 +597,8 @@ export function MapPage() {
             </span>
           ) : entry.isOwn ? (
             t('map.mine')
+          ) : entry.suitableForRace ? (
+            t('map.colonizable')
           ) : entry.isFree ? (
             t('map.free')
           ) : (
@@ -755,12 +768,28 @@ export function MapPage() {
         drawn
       )}
 
+      {colonizePlanetId !== null && fleets ? (
+        <ColonizeFleetDialog
+          fleets={fleets.fleets}
+          onClose={() => setColonizePlanetId(null)}
+          onPlanned={(plan) => {
+            setColonizePlanetId(null);
+            setColonizePlan(plan);
+            setPlanOpen(true);
+          }}
+          planetId={colonizePlanetId}
+        />
+      ) : null}
+
       {planOpen && fleets ? (
         <FlightPlanDialog
           busy={planBusy}
           error={planError}
           fleets={fleets.fleets}
-          onClose={() => setPlanOpen(false)}
+          onClose={() => {
+            setPlanOpen(false);
+            setColonizePlan(null);
+          }}
           onExecute={(fleetId, orders) =>
             void writePlan(async () => {
               // The orders of the window are written first, and the plan that was written is carried out.
@@ -770,8 +799,9 @@ export function MapPage() {
             }, t('plan.started'))
           }
           onSave={(fleetId, orders) => void writePlan(() => writeFlightPlan(fleetApi, fleetId, orders), t('plan.saved'))}
-          plan={null}
-          seed={planSeed}
+          initialFleetId={colonizePlan?.fleetId ?? null}
+          plan={colonizePlan}
+          seed={colonizePlan === null ? planSeed : null}
           sectorId={sector?.sectorId ?? location.sectorId}
         />
       ) : null}

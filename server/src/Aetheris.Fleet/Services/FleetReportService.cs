@@ -33,6 +33,17 @@ public sealed class FleetReportService
     public const string ReportTextKey = "mail.fleet.extraction_report";
 
     /// <summary>
+    /// The key of the text of the report of a colonization (task 00073).
+    /// </summary>
+    public const string ColonizationReportTextKey = "mail.fleet.colonized";
+
+    /// <summary>
+    /// The kind of the letter of the report of a colonization (task 00073), so the client may draw
+    /// it with a mark of its own.
+    /// </summary>
+    public const string ColonizationReportKindCode = "fleet_colonized";
+
+    /// <summary>
     /// The kind of the letter of the report of a fleet, so the client may draw it with a mark of its
     /// own.
     /// </summary>
@@ -143,6 +154,47 @@ public sealed class FleetReportService
             ReportTextKey,
             parameters,
             ReportKindCode,
+            cancellationToken).ConfigureAwait(false);
+
+        return messageId is not null;
+    }
+
+    /// <summary>
+    /// Writes the report of a colonization to the player that owns the fleet (task 00073).
+    /// </summary>
+    /// <param name="fleetId">The fleet.</param>
+    /// <param name="planetName">The name of the new colony.</param>
+    /// <param name="inhabitants">How many people the colony has.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when the report was written.</returns>
+    public async Task<bool> WriteColonizationReportAsync(
+        long fleetId,
+        string planetName,
+        long inhabitants,
+        CancellationToken cancellationToken = default)
+    {
+        FleetEntity? fleet = await _dbContext.Fleets.AsNoTracking()
+            .SingleOrDefaultAsync(entry => entry.Id == fleetId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (fleet is null)
+        {
+            return false;
+        }
+
+        string parameters = JsonSerializer.Serialize(new
+        {
+            fleet_name = fleet.Name,
+            planet_name = planetName,
+            inhabitants,
+        });
+
+        long? messageId = await _mail.SendSystemAsync(
+            fleet.PlayerId,
+            MailCategoryCodes.Report,
+            ColonizationReportTextKey,
+            parameters,
+            ColonizationReportKindCode,
             cancellationToken).ConfigureAwait(false);
 
         return messageId is not null;

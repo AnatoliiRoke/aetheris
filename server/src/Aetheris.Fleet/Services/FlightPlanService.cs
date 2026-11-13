@@ -45,6 +45,7 @@ public sealed class FlightPlanService
     private readonly FlightLegPlanner _legs;
     private readonly FlightChainResolver _chain;
     private readonly EngineKindsReader _engines;
+    private readonly FleetColonizeService _colonize;
     private readonly FleetSpeedService _speeds;
     private readonly FuelService _fuel;
     private readonly IWorldModule _world;
@@ -61,6 +62,7 @@ public sealed class FlightPlanService
     /// <param name="legs">Plans the legs of a command (task 00072).</param>
     /// <param name="chain">Walks the route of the plan (task 00072).</param>
     /// <param name="engines">The drives of the ships of the fleet (task 00072).</param>
+    /// <param name="colonize">The colonization of a planet (task 00073).</param>
     /// <param name="speeds">The speeds of the fleet (task 00072).</param>
     /// <param name="propellant">The fuel of the fleet (task 00072).</param>
     /// <param name="world">The world module.</param>
@@ -74,6 +76,7 @@ public sealed class FlightPlanService
         FlightLegPlanner legs,
         FlightChainResolver chain,
         EngineKindsReader engines,
+        FleetColonizeService colonize,
         FleetSpeedService speeds,
         FuelService propellant,
         IWorldModule world,
@@ -87,6 +90,7 @@ public sealed class FlightPlanService
         ArgumentNullException.ThrowIfNull(legs);
         ArgumentNullException.ThrowIfNull(chain);
         ArgumentNullException.ThrowIfNull(engines);
+        ArgumentNullException.ThrowIfNull(colonize);
         ArgumentNullException.ThrowIfNull(speeds);
         ArgumentNullException.ThrowIfNull(propellant);
         ArgumentNullException.ThrowIfNull(world);
@@ -100,6 +104,7 @@ public sealed class FlightPlanService
         _legs = legs;
         _chain = chain;
         _engines = engines;
+        _colonize = colonize;
         _speeds = speeds;
         _fuel = propellant;
         _world = world;
@@ -195,6 +200,162 @@ public sealed class FlightPlanService
                 return ToDto(plan);
             },
             cancellationToken);
+    }
+
+    /// <summary>
+    /// Writes the plan of a colonization for a fleet (task 00073, the button «Колонізувати» of the map):
+    /// the flight to the planet and the colonization at the end of it.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The flight depends on the drives of the fleet: when every ship has a hyperdrive (or, without
+    /// one, a jump drive) and an ordinary drive, and the planet is in another system, the flight is a
+    /// hyperflight (or a jump) and is spread over its real commands as any saved plan is (task 00072);
+    /// the hyperflight wins when the fleet has both. Otherwise the flight is an ordinary one.
+    /// </para>
+    /// <para>
+    /// The plan is written as a draft through the same spreading as the window of the plan, so the
+    /// player sees its commands, their times and the fuel, and sends it himself. A plan the fleet has
+    /// that is not under way is replaced.
+    /// </para>
+    /// </remarks>
+    /// <param name="playerId">The player.</param>
+    /// <param name="fleetId">The fleet.</param>
+    /// <param name="planetId">The planet to colonize.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The plan that was written.</returns>
+    /// <exception cref="GameException">The fleet may not colonize the planet: the reason is the code.</exception>
+    public Task<FlightPlanDto> CreateColonizePlanAsync(
+        string playerId,
+        long fleetId,
+        long planetId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                await FleetLocks.LockPlayerAsync(_dbContext, playerId, cancellationToken).ConfigureAwait(false);
+                FleetEntity fleet = await LoadFleetAsync(playerId, fleetId, cancellationToken).ConfigureAwait(false);
+
+                FlightPlanEntity? existing = await _dbContext.FlightPlans
+                    .Include(entry => entry.OrderIds)
+                    .SingleOrDefaultAsync(entry => entry.PlayerId == playerId && entry.FleetId == fleetId, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (existing is not null && string.Equals(existing.StateCode, FlightPlanStates.Active, StringComparison.Ordinal))
+                {
+                    throw new GameException(FleetErrorCodes.FlightPlanUnderWay, "The plan of the fleet is under way and cannot be changed.");
+                }
+
+                if (await _colonize.FindModuleAsync(fleet.Id, cancellationToken).ConfigureAwait(false) is null)
+                {
+                    throw new GameException(FleetErrorCodes.ColonizeNoModule, "The fleet carries no colony module.");
+                }
+
+                await _colonize.CheckPlanetAsync(fleet, planetId, cancellationToken).ConfigureAwait(false);
+                await _colonize.CheckLimitAsync(fleet, cancellationToken).ConfigureAwait(false);
+
+                WorldPlaceDto planet = await _world.GetPlanetPlaceAsync(planetId, cancellationToken).ConfigureAwait(false)
+                    ?? throw new GameException(FleetErrorCodes.ColonizeNotOnPlanet, "The planet does not exist.");
+                WorldPlaceDto start = await CurrentPlaceAsync(fleet, cancellationToken).ConfigureAwait(false);
+                string flight = await ColonizeFlightAsync(fleet, start, planet, cancellationToken).ConfigureAwait(false);
+
+                List<FlightPlanOrderInput> orders =
+                [
+                    new(
+                        flight,
+                        FlightTargetKinds.Planet,
+                        planet.SectorId,
+                        planet.SystemId ?? 0,
+                        planet.ObjectId ?? 0,
+                        0m,
+                        0m,
+                        0m,
+                        0,
+                        "{}"),
+                    new(FlightOrderTypes.Colonize, FlightTargetKinds.None, 0, 0, 0, 0m, 0m, 0m, 0, "{}"),
+                ];
+
+                List<FlightPlanOrderEntity> written = await BuildLegsAsync(fleet, orders, start, cancellationToken).ConfigureAwait(false);
+                DateTimeOffset now = _clock.GameNow;
+
+                if (existing is null)
+                {
+                    existing = new FlightPlanEntity
+                    {
+                        PlayerId = playerId,
+                        FleetId = fleetId,
+                        StateCode = FlightPlanStates.Draft,
+                        CreatedAt = now,
+                        UpdatedAt = now,
+                        OrderIds = written,
+                    };
+                    _dbContext.FlightPlans.Add(existing);
+                }
+                else
+                {
+                    _dbContext.FlightPlanOrders.RemoveRange(existing.OrderIds);
+                    existing.OrderIds = written;
+                    existing.StateCode = FlightPlanStates.Draft;
+                    existing.UpdatedAt = now;
+                    existing.Version++;
+                    existing.CurrentPosition = 0;
+                    existing.PauseCode = null;
+                }
+
+                await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                return ToDto(existing);
+            },
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Chooses the flight of a colonization (task 00073): a hyperflight or a jump between the systems
+    /// when every ship of the fleet can fly it, an ordinary flight otherwise.
+    /// </summary>
+    /// <param name="fleet">The fleet.</param>
+    /// <param name="start">The place the fleet stands at.</param>
+    /// <param name="planet">The planet.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The type of the order of the flight.</returns>
+    /// <exception cref="GameException">The fleet cannot fly to the planet at all.</exception>
+    private async Task<string> ColonizeFlightAsync(
+        FleetEntity fleet,
+        WorldPlaceDto start,
+        WorldPlaceDto planet,
+        CancellationToken cancellationToken)
+    {
+        bool sameSystem = start.SystemId is { } systemId && systemId == planet.SystemId;
+        FleetEngines engines = await _engines.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+        bool everyShipNormal = engines.ShipsWithout(FlightEngineKinds.Normal).Count == 0;
+
+        if (!sameSystem && everyShipNormal)
+        {
+            if (engines.ShipsWithout(FlightEngineKinds.Hyper).Count == 0)
+            {
+                return FlightOrderTypes.Hyperfly;
+            }
+
+            if (engines.ShipsWithout(FlightEngineKinds.Jump).Count == 0)
+            {
+                return FlightOrderTypes.Jump;
+            }
+        }
+
+        // An ordinary flight: inside the system with the ordinary drives, between the systems through
+        // open space, where the gravitational drives do not work.
+        FleetSpeeds speeds = await _speeds.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+        decimal speed = sameSystem ? speeds.Normal.Empty : speeds.NormalOpenSpace.Empty;
+
+        if (speed <= 0m)
+        {
+            throw new GameException(FleetErrorCodes.ColonizeNoDrive, "A ship of the fleet has no drive for the flight to the planet.");
+        }
+
+        return FlightOrderTypes.Fly;
     }
 
     /// <summary>
@@ -756,23 +917,40 @@ public sealed class FlightPlanService
         List<FlightPlanOrderEntity> written = [];
         HashSet<string> checkedKinds = [];
         FleetSpeeds? speeds = null;
+        bool colonizeChecked = false;
         int position = 1;
 
         foreach (FlightPlanOrderInput order in orders)
         {
             if (order.TypeCode != FlightOrderTypes.Hyperfly && order.TypeCode != FlightOrderTypes.Jump)
             {
+                // The order of a colonization needs a colony module in the hold of the fleet
+                // (task 00073), so a fleet without one may not be given it.
+                if (order.TypeCode == FlightOrderTypes.Colonize && !colonizeChecked)
+                {
+                    colonizeChecked = true;
+
+                    if (await _colonize.FindModuleAsync(fleet.Id, cancellationToken).ConfigureAwait(false) is null)
+                    {
+                        throw new GameException(FleetErrorCodes.ColonizeNoModule, "The fleet carries no colony module.");
+                    }
+                }
+
+                // The extraction (task 00054) and the colonization (task 00073) name no target: they work
+                // where the fleet stands when the order begins.
+                bool noTarget = order.TypeCode == FlightOrderTypes.Mine || order.TypeCode == FlightOrderTypes.Colonize;
+
                 written.Add(new FlightPlanOrderEntity
                 {
                     Position = position++,
                     TypeCode = order.TypeCode,
-                    TargetKind = order.TypeCode == FlightOrderTypes.Mine ? FlightTargetKinds.None : order.TargetKind,
-                    TargetSectorId = order.TypeCode == FlightOrderTypes.Mine ? 0 : order.TargetSectorId,
-                    TargetSystemId = order.TypeCode == FlightOrderTypes.Mine ? 0 : order.TargetSystemId,
-                    TargetObjectId = order.TypeCode == FlightOrderTypes.Mine ? 0 : order.TargetObjectId,
-                    TargetX = order.TypeCode == FlightOrderTypes.Mine ? 0m : order.TargetX,
-                    TargetY = order.TypeCode == FlightOrderTypes.Mine ? 0m : order.TargetY,
-                    TargetZ = order.TypeCode == FlightOrderTypes.Mine ? 0m : order.TargetZ,
+                    TargetKind = noTarget ? FlightTargetKinds.None : order.TargetKind,
+                    TargetSectorId = noTarget ? 0 : order.TargetSectorId,
+                    TargetSystemId = noTarget ? 0 : order.TargetSystemId,
+                    TargetObjectId = noTarget ? 0 : order.TargetObjectId,
+                    TargetX = noTarget ? 0m : order.TargetX,
+                    TargetY = noTarget ? 0m : order.TargetY,
+                    TargetZ = noTarget ? 0m : order.TargetZ,
                     DurationSeconds = order.DurationSeconds,
                     Parameters = order.Parameters,
                 });

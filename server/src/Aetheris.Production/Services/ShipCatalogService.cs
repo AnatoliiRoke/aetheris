@@ -225,7 +225,9 @@ public sealed class ShipCatalogService
                     RoleOf(part, PartAttributeKeys.EngineKind),
                     (part.Fuel is { Count: > 0 })
                         ? [.. part.Fuel.Select(row => new ShipModuleFuelDto(row.ResourceTypeId, row.Share))]
-                        : null)),
+                        : null,
+                    part.Attributes.ContainsKey(PartAttributeKeys.CargoOnly),
+                    RoleOf(part, PartAttributeKeys.CargoOrder))),
         ];
 
         // The ammunition is not a module of a ship: the constructor does not offer it, and the

@@ -131,6 +131,13 @@ export interface ShipModule {
   isAmmunition: boolean;
   /** Whether the module is a capsule of inhabitants: it is used on a body, not fitted. */
   isCapsule: boolean;
+  /**
+   * Whether the module is only a cargo (task 00073): it is never fitted to a hull and is carried
+   * in the hold of a ship.
+   */
+  cargoOnly?: boolean;
+  /** The order of a flight plan the cargo opens, `colonize` for the colony module (task 00073). */
+  cargoOrder?: string | null;
 }
 
 /**
@@ -324,12 +331,64 @@ export interface FleetApi {
   stopFlightPlan(fleetId: number): Promise<FlightPlan>;
   /** Puts the flight plan of a fleet under way. */
   executeFlightPlan(fleetId: number): Promise<FlightPlan>;
+  /**
+   * Writes the plan of a colonization for a fleet (task 00073, the button «Колонізувати» of the map): the flight to
+   * the planet, spread over its commands as the fleet can fly it, and the colonization; the plan is a draft.
+   */
+  colonizeFlightPlan(request: { fleetId: number; planetId: number }): Promise<FlightPlan>;
   /** The distance and the time of a flight, counted by the server (task 00053); `null` when the place is unknown. */
   flightEstimate(request: FlightEstimateRequest): Promise<FlightEstimate | null>;
   /** The fuel of the route of the plan of a fleet and what the hold holds (task 00072). */
   fuelEstimate(fleetId: number): Promise<FlightFuelEstimate | null>;
   /** What the holds of the ships of a fleet carry (task 00056); read when the window of the hold opens. */
   fleetHold(fleetId: number): Promise<FleetHold>;
+  /**
+   * Loads the resources and the modules of the body into the holds of the fleet (task 00073).
+   */
+  cargoLoad(request: FleetCargoRequest): Promise<FleetHold>;
+  /**
+   * Puts the resources and the modules of the hold of the fleet back onto the body it stands on
+   * (task 00073).
+   */
+  cargoUnload(request: FleetCargoRequest): Promise<FleetHold>;
+}
+
+/**
+ * One thing a command of a load or an unload carries (task 00073).
+ */
+export interface FleetCargoItem {
+  /** What it is: `resource` or `part`. */
+  kind: 'resource' | 'part';
+  /** The resource or the kind of the module. */
+  id: number;
+  /** The mark level of a module; one for a resource. */
+  markLevel: number;
+  /** Whether a module carries the bonus of its race. */
+  hasRaceBonus: boolean;
+  /** How much of the resource, or how many modules. */
+  amount: number;
+}
+
+/**
+ * What a command of a load or an unload carries (task 00073).
+ */
+export interface FleetCargoRequest {
+  /** The fleet whose hold is changed. */
+  fleetId: number;
+  /** What to carry. */
+  items: FleetCargoItem[];
+}
+
+/**
+ * Writes one thing of a load or an unload as the server reads it (task 00073).
+ *
+ * @param item The thing.
+ * @returns The payload.
+ */
+function cargoItemPayload(item: FleetCargoItem): Record<string, unknown> {
+  return item.kind === 'resource'
+    ? { kind: item.kind, id: item.id, amount: item.amount }
+    : { kind: item.kind, id: item.id, mark_level: item.markLevel, has_race_bonus: item.hasRaceBonus, amount: item.amount };
 }
 
 /**
@@ -664,6 +723,15 @@ export interface FleetHold {
   items: FleetHoldItem[];
   /** The modules in the holds, the greatest number first (task 00057). */
   parts?: FleetHoldPart[];
+  /**
+   * The orders of a flight plan the fleet may be given, because of the modules it carries
+   * (task 00073): `colonize` for a fleet with a colony module in its hold.
+   */
+  availableOrders?: string[];
+  /** How many bodies the player has, the home body among them (task 00073). */
+  ownedPlanets?: number;
+  /** How many bodies the player may have at once (task 00073). */
+  planetLimit?: number;
 }
 
 /**
@@ -978,6 +1046,11 @@ export function createFleetApi(http: HttpClient): FleetApi {
     async executeFlightPlan(fleetId) {
       return camelize<FlightPlan>(await http.command<unknown>(`${prefix}/flight-plans/execute`, { fleet_id: fleetId }));
     },
+    async colonizeFlightPlan(request) {
+      return camelize<FlightPlan>(
+        await http.command<unknown>(`${prefix}/flight-plans/colonize`, { fleet_id: request.fleetId, planet_id: request.planetId }),
+      );
+    },
     async flightEstimate(request) {
       const query = new URLSearchParams({ fleet_id: String(request.fleetId), type_code: request.typeCode });
 
@@ -997,6 +1070,22 @@ export function createFleetApi(http: HttpClient): FleetApi {
     },
     async fleetHold(fleetId) {
       return camelize<FleetHold>(await http.get<unknown>(`${prefix}/fleets/${fleetId}/hold`));
+    },
+    async cargoLoad(request) {
+      return camelize<FleetHold>(
+        await http.command<unknown>(`${prefix}/fleets/cargo-load`, {
+          fleet_id: request.fleetId,
+          items: request.items.map(cargoItemPayload),
+        }),
+      );
+    },
+    async cargoUnload(request) {
+      return camelize<FleetHold>(
+        await http.command<unknown>(`${prefix}/fleets/cargo-unload`, {
+          fleet_id: request.fleetId,
+          items: request.items.map(cargoItemPayload),
+        }),
+      );
     },
     async fuelEstimate(fleetId) {
       try {

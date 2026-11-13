@@ -215,6 +215,19 @@ public static class PartAttributeKeys
     public const string EngineKind = "engine_kind";
 
     /// <summary>
+    /// The mark of a part that is only a cargo: it is never fitted to a hull and never shows in the
+    /// constructor, but it is carried in the hold of a ship (task 00073).
+    /// </summary>
+    public const string CargoOnly = "cargo_only";
+
+    /// <summary>
+    /// The order of a flight plan a cargo opens for a fleet, one of <see cref="PartCargoOrders"/>:
+    /// a fleet may be given the order only when a ship of it carries a part with this attribute
+    /// (task 00073).
+    /// </summary>
+    public const string CargoOrder = "cargo_order";
+
+    /// <summary>
     /// Gets every key of an attribute, in the order of the form of the admin panel.
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -236,6 +249,8 @@ public static class PartAttributeKeys
         ScanTarget,
         NotAShipModule,
         EngineKind,
+        CargoOnly,
+        CargoOrder,
     ];
 }
 
@@ -309,6 +324,21 @@ public static class PartFlightOrders
     /// Gets every order a part may open, in the order of the form of the admin panel.
     /// </summary>
     public static IReadOnlyList<string> All { get; } = [Hyperfly, Jump, Scan];
+}
+
+/// <summary>
+/// The orders of a flight plan that a cargo opens (task 00073). They are logical codes; the plan
+/// names the same codes (<c>FlightOrderTypes</c> of the fleet module).
+/// </summary>
+public static class PartCargoOrders
+{
+    /// <summary>The fleet may colonize a planet with the cargo in its hold.</summary>
+    public const string Colonize = "colonize";
+
+    /// <summary>
+    /// Gets every order a cargo may open, in the order of the form of the admin panel.
+    /// </summary>
+    public static IReadOnlyList<string> All { get; } = [Colonize];
 }
 
 /// <summary>

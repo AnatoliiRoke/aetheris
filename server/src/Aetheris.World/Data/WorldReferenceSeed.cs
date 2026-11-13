@@ -285,7 +285,9 @@ public static class WorldReferenceSeed
 
         if (await dbContext.Races.AnyAsync(cancellationToken).ConfigureAwait(false))
         {
-            return false;
+            // The types a race may colonize joined the starting data later (task 00073), so a
+            // database that already has its races still gets the missing rows of the table.
+            return await SeedMissingColonizableTypesAsync(dbContext, cancellationToken).ConfigureAwait(false);
         }
 
         ReferenceSeedData seed = Load();
@@ -318,6 +320,13 @@ public static class WorldReferenceSeed
                     Amount = resource.Amount,
                 }),
             ],
+            ColonizableTypeIds =
+            [
+                .. (race.ColonizableTypes ?? []).Select(code => new RaceColonizableTypeEntity
+                {
+                    ObjectTypeId = typeIds[code],
+                }),
+            ],
         }));
 
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -334,6 +343,73 @@ public static class WorldReferenceSeed
         await RaiseAsync(codes, WorldCodeGroups.Race, races.Select(race => race.Code), cancellationToken).ConfigureAwait(false);
 
         return true;
+    }
+
+    /// <summary>
+    /// Adds the types of the bodies the races may colonize that the database does not have yet
+    /// (task 00073).
+    /// </summary>
+    /// <remarks>
+    /// The rows that are there are left alone, so a row the administrator changed keeps its value.
+    /// </remarks>
+    /// <param name="dbContext">The world context.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when a row was added.</returns>
+    private static async Task<bool> SeedMissingColonizableTypesAsync(WorldDbContext dbContext, CancellationToken cancellationToken)
+    {
+        ReferenceSeedData seed = Load();
+        IReadOnlyList<SeedRace> races = seed.Races ?? [];
+
+        if (races.Count == 0)
+        {
+            return false;
+        }
+
+        Dictionary<string, int> raceIds = await dbContext.Races.AsNoTracking()
+            .ToDictionaryAsync(race => race.Code, race => race.Id, StringComparer.Ordinal, cancellationToken)
+            .ConfigureAwait(false);
+        Dictionary<string, int> typeIds = await dbContext.ObjectTypes.AsNoTracking()
+            .ToDictionaryAsync(type => type.Code, type => type.Id, StringComparer.Ordinal, cancellationToken)
+            .ConfigureAwait(false);
+
+        // The rows that are there, in one query, so the table is not walked row by row.
+        HashSet<(int RaceId, int ObjectTypeId)> existing =
+        [
+            .. (await dbContext.RaceColonizableTypes.AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false))
+                .Select(row => (row.RaceId, row.ObjectTypeId)),
+        ];
+
+        bool added = false;
+
+        foreach (SeedRace race in races)
+        {
+            if (!raceIds.TryGetValue(race.Code, out int raceId))
+            {
+                continue;
+            }
+
+            foreach (string code in race.ColonizableTypes ?? [])
+            {
+                if (!typeIds.TryGetValue(code, out int typeId) || !existing.Add((raceId, typeId)))
+                {
+                    continue;
+                }
+
+                dbContext.RaceColonizableTypes.Add(new RaceColonizableTypeEntity
+                {
+                    RaceId = raceId,
+                    ObjectTypeId = typeId,
+                });
+                added = true;
+            }
+        }
+
+        if (added)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return added;
     }
 
     /// <summary>
@@ -439,7 +515,8 @@ public sealed record SeedRace(
     IReadOnlyDictionary<string, string>? Mood,
     IReadOnlyList<IReadOnlyDictionary<string, string>> Traits,
     string? ImageKey,
-    string? ColorKey);
+    string? ColorKey,
+    IReadOnlyList<string>? ColonizableTypes = null);
 
 /// <summary>A start resource of a race in the starting data.</summary>
 /// <param name="Resource">The code of the resource.</param>

@@ -140,6 +140,10 @@ export interface MapObject {
   size: number | null;
   isOwn: boolean;
   isFree: boolean;
+  /**
+   * Whether the body suits the race of the player and may be colonized (task 00073).
+   */
+  suitableForRace: boolean;
   isTerraformed: boolean;
   owner: MapOwner | null;
   stationLimit: number | null;

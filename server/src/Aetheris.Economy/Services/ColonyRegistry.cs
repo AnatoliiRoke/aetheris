@@ -31,6 +31,19 @@ public interface IColonyRegistry
     Task FoundAsync(string playerId, long planetId, int sectorId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Writes the row of the population of a new colony with a given number of inhabitants
+    /// (task 00073): a colony founded by a module carries the inhabitants of the module, not the
+    /// starting number of the configuration.
+    /// </summary>
+    /// <param name="playerId">The owner of the body.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="sectorId">The sector of the body.</param>
+    /// <param name="inhabitants">The number of inhabitants of the colony.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the row is written.</returns>
+    Task FoundAsync(string playerId, long planetId, int sectorId, long inhabitants, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Removes the rows of the population of the bodies that stop being colonies.
     /// </summary>
     /// <param name="planetIds">The bodies.</param>
@@ -85,6 +98,21 @@ public sealed class ColonyRegistry : IColonyRegistry
     }
 
     /// <inheritdoc />
+    public Task FoundAsync(string playerId, long planetId, int sectorId, long inhabitants, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                await EnsureAsync(playerId, [new OwnedPlanet(planetId, sectorId)], inhabitants, cancellationToken).ConfigureAwait(false);
+
+                return true;
+            },
+            cancellationToken);
+    }
+
+    /// <inheritdoc />
     public Task ReleaseAsync(IReadOnlyCollection<long> planetIds, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(planetIds);
@@ -110,13 +138,27 @@ public sealed class ColonyRegistry : IColonyRegistry
     /// </remarks>
     internal async Task EnsureAsync(string playerId, IReadOnlyCollection<OwnedPlanet> planets, CancellationToken cancellationToken)
     {
+        await EnsureAsync(playerId, planets, EconomySettings.From(_config).PopulationInitial, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Writes the rows of the population of the bodies of a player that have none, with a given
+    /// number of inhabitants, inside the current transaction (task 00073).
+    /// </summary>
+    /// <param name="playerId">The owner of the bodies.</param>
+    /// <param name="planets">The bodies.</param>
+    /// <param name="inhabitants">The number of inhabitants of every colony.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the rows are written.</returns>
+    internal async Task EnsureAsync(string playerId, IReadOnlyCollection<OwnedPlanet> planets, long inhabitants, CancellationToken cancellationToken)
+    {
         if (planets.Count == 0)
         {
             return;
         }
 
         DateTimeOffset now = EconomyTime.Normalize(_clock.GameNow);
-        long initial = EconomySettings.From(_config).PopulationInitial;
+        long initial = Math.Max(0L, inhabitants);
 
         foreach (OwnedPlanet planet in planets.OrderBy(entry => entry.PlanetId))
         {

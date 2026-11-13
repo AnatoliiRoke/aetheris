@@ -138,8 +138,9 @@ export function moduleFits(module: ShipModule, hull: ShipHull | null): boolean {
   }
 
   // The ammunition of a weapon and the capsules of the inhabitants are not modules of a ship:
-  // they are loaded into the weapon or used on a body, never fitted to a hull.
-  if (module.isAmmunition || module.isCapsule) {
+  // they are loaded into the weapon or used on a body, never fitted to a hull. A module that is
+  // only a cargo is not fitted either: it is carried in the hold (task 00073).
+  if (module.isAmmunition || module.isCapsule || module.cargoOnly === true) {
     return false;
   }
 

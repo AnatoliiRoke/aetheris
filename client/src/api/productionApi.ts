@@ -169,6 +169,11 @@ export interface ProductionStack {
   capsuleInhabitants: number;
   /** Whether the player can use the capsule: its inhabitants belong to the race of the player. */
   capsuleUsable: boolean;
+  /**
+   * Whether the part is only a cargo: it is carried in the hold of a ship, never fitted to a hull
+   * (task 00073).
+   */
+  cargoOnly?: boolean;
 }
 
 /**

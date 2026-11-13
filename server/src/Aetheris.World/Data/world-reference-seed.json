@@ -1838,6 +1838,9 @@
       "code": "race_1",
       "sort_order": 1,
       "preferred_object_type": "object_type_5",
+      "colonizable_types": [
+        "object_type_5"
+      ],
       "start_building_level": 1,
       "start_resources": [
         {
@@ -1910,6 +1913,9 @@
       "code": "race_2",
       "sort_order": 2,
       "preferred_object_type": "object_type_7",
+      "colonizable_types": [
+        "object_type_7"
+      ],
       "start_building_level": 1,
       "start_resources": [
         {
@@ -1982,6 +1988,9 @@
       "code": "race_3",
       "sort_order": 3,
       "preferred_object_type": "object_type_6",
+      "colonizable_types": [
+        "object_type_6"
+      ],
       "start_building_level": 1,
       "start_resources": [
         {
@@ -2054,6 +2063,9 @@
       "code": "race_4",
       "sort_order": 4,
       "preferred_object_type": "object_type_8",
+      "colonizable_types": [
+        "object_type_8"
+      ],
       "start_building_level": 1,
       "start_resources": [
         {

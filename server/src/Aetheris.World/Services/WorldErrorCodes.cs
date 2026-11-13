@@ -49,4 +49,16 @@ public static class WorldErrorCodes
 
     /// <summary>The record changed since the administrator opened it; nothing was written.</summary>
     public const string VersionConflict = "world_version_conflict";
+
+    /// <summary>The body does not exist (task 00073).</summary>
+    public const string PlanetNotFound = "world_planet_not_found";
+
+    /// <summary>The body belongs to another player already (task 00073).</summary>
+    public const string PlanetTaken = "world_planet_taken";
+
+    /// <summary>The body is not of a colonizable type (task 00073).</summary>
+    public const string PlanetNotColonizable = "world_planet_not_colonizable";
+
+    /// <summary>The body does not suit the race of the player (task 00073).</summary>
+    public const string PlanetRaceUnsuitable = "world_planet_race_unsuitable";
 }

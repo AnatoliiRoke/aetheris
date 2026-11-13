@@ -345,6 +345,72 @@ public sealed class ExecuteFlightPlanCommand : Command<ExecuteFlightPlanCommand.
 }
 
 /// <summary>
+/// Writes the plan of a colonization for a fleet (task 00073): the button «Колонізувати» of the map
+/// names the planet and the fleet, and the server writes the flight to the planet and the
+/// colonization at the end of it as a draft the player reviews and sends.
+/// </summary>
+public sealed class ColonizeFlightPlanCommand : Command<ColonizeFlightPlanCommand.Request, JsonElement>
+{
+    /// <summary>The route of the command.</summary>
+    public const string RoutePath = "/api/v1/fleet/flight-plans/colonize";
+
+    /// <summary>The action code of the command.</summary>
+    public const string Code = "fleet.flight_plan_colonize";
+
+    private readonly FlightPlanService _plans;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ColonizeFlightPlanCommand"/> class.
+    /// </summary>
+    /// <param name="plans">The service of the flight plans.</param>
+    public ColonizeFlightPlanCommand(FlightPlanService plans)
+    {
+        ArgumentNullException.ThrowIfNull(plans);
+
+        _plans = plans;
+    }
+
+    /// <inheritdoc />
+    public override string Route => RoutePath;
+
+    /// <inheritdoc />
+    public override string ActionCode => Code;
+
+    /// <inheritdoc />
+    public override void DefineRules(AbstractValidator<Request> rules)
+    {
+        ArgumentNullException.ThrowIfNull(rules);
+
+        rules.RuleFor(request => request.FleetId).NotNull().GreaterThan(0);
+        rules.RuleFor(request => request.PlanetId).NotNull().GreaterThan(0);
+    }
+
+    /// <inheritdoc />
+    public override OwnedObjectReference? GetTarget(Request request) => null;
+
+    /// <inheritdoc />
+    public override async Task<JsonElement> ExecuteAsync(Request request, CommandContext context, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        FlightPlanDto plan = await _plans
+            .CreateColonizePlanAsync(context.PlayerId, request.FleetId!.Value, request.PlanetId!.Value, cancellationToken)
+            .ConfigureAwait(false);
+
+        return JsonSerializer.SerializeToElement(plan, FleetJson.Options);
+    }
+
+    /// <summary>
+    /// The request: the fleet and the planet to colonize.
+    /// </summary>
+    /// <param name="FleetId">The fleet.</param>
+    /// <param name="PlanetId">The planet.</param>
+    public sealed record Request(
+        [property: JsonPropertyName("fleet_id")] long? FleetId,
+        [property: JsonPropertyName("planet_id")] long? PlanetId);
+}
+
+/// <summary>
 /// Turns the orders of a request into the orders the service writes (task 00050).
 /// </summary>
 public static class FlightPlanOrderMapper

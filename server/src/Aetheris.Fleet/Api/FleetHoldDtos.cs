@@ -12,12 +12,18 @@ namespace Aetheris.Fleet.Api;
 /// <param name="Carried">What the holds carry now, in tonnes.</param>
 /// <param name="Items">What is in the holds, the greatest amount first; an item with nothing in it is not listed.</param>
 /// <param name="Parts">The modules in the holds, the greatest number first (task 00057).</param>
+/// <param name="AvailableOrders">The orders of a flight plan the fleet may be given, because of the modules it carries (task 00073).</param>
+/// <param name="OwnedPlanets">How many bodies the player has, the home body among them (task 00073).</param>
+/// <param name="PlanetLimit">How many bodies the player may have at once (task 00073).</param>
 public sealed record FleetHoldDto(
     long FleetId,
     long Capacity,
     long Carried,
     IReadOnlyList<FleetHoldItemDto> Items,
-    IReadOnlyList<FleetHoldPartDto> Parts);
+    IReadOnlyList<FleetHoldPartDto> Parts,
+    IReadOnlyList<string> AvailableOrders,
+    int OwnedPlanets = 0,
+    int PlanetLimit = 0);
 
 /// <summary>
 /// One kind of resource in the holds of a fleet (task 00056).

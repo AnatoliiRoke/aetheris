@@ -193,12 +193,54 @@ public sealed class PlanetStartPackage : IHomePlanetStore, IStartBuildingPlacer
     }
 
     /// <summary>
-    /// Places the start buildings of a new body: the building of the race and every other type the
-    /// data flags as a start building (task 00030: the administrative centre, the housing, the
-    /// warehouse and the solar plant), all at the level of the race.
+    /// Founds a colony on a body (task 00073): the state of the body, the same start buildings
+    /// that a new civilization gets, and the population of the colony.
+    /// </summary>
+    /// <remarks>
+    /// The buildings are the same as the ones of the registration, because the same method places
+    /// them: the types with the flag of the start building and the start building of the race.
+    /// The start resources of the race are not given, so the colony starts with nothing but its
+    /// buildings and its people.
+    /// </remarks>
+    /// <param name="playerId">The owner of the body.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="sectorId">The sector of the body.</param>
+    /// <param name="raceBuildingTypeId">The start building of the race.</param>
+    /// <param name="raceBuildingLevel">The level of the start building.</param>
+    /// <param name="inhabitants">The number of inhabitants of the colony.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the colony is founded.</returns>
+    public Task FoundColonyAsync(
+        string playerId,
+        long planetId,
+        int sectorId,
+        int raceBuildingTypeId,
+        int raceBuildingLevel,
+        long inhabitants,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                await EnsureStateAsync(planetId, sectorId, playerId, cancellationToken).ConfigureAwait(false);
+                await PlaceStartBuildingsAsync(planetId, sectorId, raceBuildingTypeId, raceBuildingLevel, cancellationToken).ConfigureAwait(false);
+
+                // The body is a colony of the player from now on: its population is counted from here.
+                await _colonies.FoundAsync(playerId, planetId, sectorId, inhabitants, cancellationToken).ConfigureAwait(false);
+
+                return true;
+            },
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Places the start buildings on a body: the types with the flag of the start building and the
+    /// start building of the race.
     /// </summary>
     /// <param name="planetId">The body.</param>
-    /// <param name="sectorId">The sector.</param>
+    /// <param name="sectorId">The sector of the body.</param>
     /// <param name="raceBuildingTypeId">The start building of the race.</param>
     /// <param name="level">The level.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>

@@ -393,6 +393,10 @@ public sealed class WorldMapService
             [.. planets.Values.Where(planet => planet.OwnerPlayerId is not null && scope.SeesObject(planet.CelestialObjectId)).Select(planet => planet.OwnerPlayerId!).Distinct()],
             cancellationToken).ConfigureAwait(false);
 
+        // The types that suit the race of the player (task 00073): the map marks the bodies that may
+        // be colonized, so the race of the player and the table of the types are read once here.
+        HashSet<int> colonizableTypes = await ColonizableTypesAsync(playerId, cancellationToken).ConfigureAwait(false);
+
         List<MapObjectDto> dtos = [];
 
         foreach (CelestialObjectEntity entry in objects)
@@ -440,7 +444,8 @@ public sealed class WorldMapService
                     ? [.. planet.DepositIds.OrderBy(deposit => deposit.Id).Select(deposit => new MapResourceShareDto(deposit.ResourceId, deposit.Coefficient))]
                     : field is not null ? [.. field.CompositionIds.OrderBy(share => share.Id).Select(share => new MapResourceShareDto(share.ResourceId, share.Coefficient))] : [],
                 distance,
-                seconds));
+                seconds,
+                planet is not null && planet.OwnerPlayerId is null && type.IsColonizable && colonizableTypes.Contains(entry.ObjectTypeId)));
         }
 
         int ownCount = planets.Values.Count(planet => planet.OwnerPlayerId == playerId);
@@ -793,6 +798,35 @@ public sealed class WorldMapService
         return races
             .Where(row => nicknames.ContainsKey(row.PlayerId))
             .ToDictionary(row => row.PlayerId, row => new MapOwnerDto(nicknames[row.PlayerId], row.Code, row.NameKey, row.ColorKey), StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    /// Gets the types of the bodies that suit the race of a player (task 00073).
+    /// </summary>
+    /// <param name="playerId">The player, or <see langword="null"/> to read without the race of a player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The types of the bodies; empty when the player has no civilization.</returns>
+    private async Task<HashSet<int>> ColonizableTypesAsync(string? playerId, CancellationToken cancellationToken)
+    {
+        if (playerId is null)
+        {
+            return [];
+        }
+
+        int? raceId = await _dbContext.Civilizations.AsNoTracking()
+            .Where(civilization => civilization.PlayerId == playerId)
+            .Select(civilization => (int?)civilization.RaceId)
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+        if (raceId is not { } id)
+        {
+            return [];
+        }
+
+        return [.. await _dbContext.RaceColonizableTypes.AsNoTracking()
+            .Where(entry => entry.RaceId == id)
+            .Select(entry => entry.ObjectTypeId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false)];
     }
 
     private sealed record Origin(Point3 Position, long SystemId, int? Orbit);

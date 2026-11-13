@@ -76,9 +76,13 @@ describe('the map screen (task 00034)', () => {
     // The flight of a fleet is written in a window (task 00050), so the button works; the actions
     // of a battle are still off, with the reason.
     expect(within(card).getByRole('button', { name: 'Відправити флот' })).toBeEnabled();
-    for (const name of ['Колонізувати', 'Видобувати', 'Розвідати', 'Атакувати', 'Супровід']) {
+    for (const name of ['Видобувати', 'Розвідати', 'Атакувати', 'Супровід']) {
       expect(within(card).getByRole('button', { name })).toBeDisabled();
     }
+
+    // A star is no planet to colonize: the colonization is offered only for a free planet that suits the
+    // race of the player (task 00073).
+    expect(within(card).queryByRole('button', { name: 'Колонізувати' })).toBeNull();
     expect(within(card).getByText('Потрібен флот: флоти з’являться пізніше')).toBeInTheDocument();
   });
 

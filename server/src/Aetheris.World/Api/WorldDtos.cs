@@ -112,6 +112,9 @@ public sealed record SystemDto(long Id, int SectorId, int Number, string Name, d
 /// <param name="NebulaId">The nebula row, for a nebula.</param>
 /// <param name="Radius">The radius of a nebula.</param>
 /// <param name="CompositionIds">The composition of a field or a nebula.</param>
+/// <param name="Radius">The radius of a nebula, when it is one.</param>
+/// <param name="CompositionIds">The compositions of the place, for a field or a nebula.</param>
+/// <param name="SuitableForRace">Whether the body suits the race of the player and may be colonized (task 00073).</param>
 public sealed record ObjectDto(
     long Id,
     int SectorId,
@@ -133,7 +136,8 @@ public sealed record ObjectDto(
     long? Mass,
     long? NebulaId,
     double? Radius,
-    IReadOnlyList<long> CompositionIds);
+    IReadOnlyList<long> CompositionIds,
+    bool SuitableForRace = false);
 
 /// <summary>A deposit of a body.</summary>
 /// <param name="Id">The deposit.</param>
@@ -243,7 +247,16 @@ public sealed record FreePlanetDto(
     string Name,
     int SizeClassId,
     int Size,
-    bool IsTerraformed = false);
+    bool IsTerraformed = false,
+    bool SuitableForRace = false);
+
+/// <summary>
+/// The body a player has claimed (task 00073).
+/// </summary>
+/// <param name="PlanetId">The body.</param>
+/// <param name="CelestialObjectId">The object of the map of the body.</param>
+/// <param name="SectorId">The sector of the body.</param>
+public sealed record PlanetClaimResult(long PlanetId, long CelestialObjectId, int SectorId);
 
 /// <summary>A row of a reference table, for the client to name the identifiers.</summary>
 /// <param name="Id">The identifier.</param>
@@ -291,6 +304,8 @@ public sealed record WorldReferenceDto(
 /// <param name="ImageKey">The key of the picture, or <see langword="null"/> for the neutral placeholder.</param>
 /// <param name="ColorKey">The key of the colour, or <see langword="null"/> for the neutral one.</param>
 /// <param name="PreferredObjectTypeId">The preferred start body type, if any.</param>
+/// <param name="StartBuildingTypeId">The building type a colony of the race starts with, if any (task 00073).</param>
+/// <param name="StartBuildingLevel">The level of the start building of the race (task 00073).</param>
 public sealed record RaceDto(
     int Id,
     string Code,
@@ -300,7 +315,9 @@ public sealed record RaceDto(
     IReadOnlyList<string> TraitKeys,
     string? ImageKey,
     string? ColorKey,
-    int? PreferredObjectTypeId);
+    int? PreferredObjectTypeId,
+    int? StartBuildingTypeId = null,
+    int StartBuildingLevel = 0);
 
 /// <summary>The civilization of a player.</summary>
 /// <param name="RaceId">The race.</param>

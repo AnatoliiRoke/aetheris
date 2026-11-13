@@ -42,7 +42,9 @@ public static class FleetServiceCollectionExtensions
         services.AddScoped<FleetExtractionService>();
         services.AddScoped<FleetScanService>();
         services.AddScoped<FleetHoldService>();
+        services.AddScoped<FleetOrdersService>();
         services.AddScoped<FleetCargoService>();
+        services.AddScoped<FleetColonizeService>();
         services.AddScoped<FleetSpeedService>();
         services.AddScoped<FleetFlightService>();
         services.AddScoped<FleetMapService>();
@@ -60,6 +62,7 @@ public static class FleetServiceCollectionExtensions
         services.AddScoped<IScheduledEventHandler, FleetArrivalHandler>();
         services.AddScoped<IScheduledEventHandler, FleetWaitHandler>();
         services.AddScoped<IScheduledEventHandler, FleetScanHandler>();
+        services.AddScoped<IScheduledEventHandler, ColonizeCompleteHandler>();
 
         services.AddCommand<CreateShipDesignCommand>();
         services.AddCommand<RenameShipDesignCommand>();
@@ -79,6 +82,9 @@ public static class FleetServiceCollectionExtensions
         services.AddCommand<DeleteFlightPlanCommand>();
         services.AddCommand<StopFlightPlanCommand>();
         services.AddCommand<ExecuteFlightPlanCommand>();
+        services.AddCommand<ColonizeFlightPlanCommand>();
+        services.AddCommand<FleetCargoLoadCommand>();
+        services.AddCommand<FleetCargoUnloadCommand>();
 
         // The module keeps tables of its own, so it works on the context of the request, which
         // lives in the scope.

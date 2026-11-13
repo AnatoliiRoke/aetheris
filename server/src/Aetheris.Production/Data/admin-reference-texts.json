@@ -368,6 +368,9 @@
   "admin.reference.engine_kind.gravity": { "uk": "Гравітаційний", "en": "Gravitational" },
   "admin.reference.engine_kind.hyper": { "uk": "Гіперперельотний", "en": "Hyperflight" },
   "admin.reference.engine_kind.jump": { "uk": "Стрибковий", "en": "Jump" },
+  "admin.reference.attribute.cargo_only": { "uk": "Тільки вантаж", "en": "Cargo only" },
+  "admin.reference.attribute.cargo_order": { "uk": "Відкриває наказ вантажу", "en": "Opens an order of the cargo" },
+  "admin.reference.cargo_order.colonize": { "uk": "Колонізація", "en": "Colonization" },
   "admin.reference.component.drive": {
     "uk": "Двигун",
     "en": "Drive"

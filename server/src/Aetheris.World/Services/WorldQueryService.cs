@@ -134,6 +134,11 @@ public sealed class WorldQueryService
             .ToDictionaryAsync(field => field.CelestialObjectId, cancellationToken).ConfigureAwait(false);
 
         int stationLimit = _reference.Settings.GasGiantStationLimit;
+
+        // The types that suit the race of the player (task 00073): the map marks the bodies that may
+        // be colonized, so the race of the player and the table of the types are read once here.
+        HashSet<int> colonizableTypes = await ColonizableTypesAsync(playerId, cancellationToken).ConfigureAwait(false);
+
         List<ObjectDto> objectDtos = [];
 
         foreach (CelestialObjectEntity entry in objects)
@@ -170,7 +175,8 @@ public sealed class WorldQueryService
                 field?.Mass,
                 null,
                 null,
-                field is null ? [] : [.. field.CompositionIds.OrderBy(share => share.Id).Select(share => share.Id)]));
+                field is null ? [] : [.. field.CompositionIds.OrderBy(share => share.Id).Select(share => share.Id)],
+                planet is not null && planet.OwnerPlayerId is null && colonizableTypes.Contains(entry.ObjectTypeId)));
         }
 
         List<DepositDto> deposits =
@@ -349,6 +355,20 @@ public sealed class WorldQueryService
         long[] visible = [.. scope.VisibleObjectIds];
         int pageSize = _reference.Settings.FreeBodiesPageSize;
 
+        // The race of the player decides which bodies it may colonize (task 00073): the types that
+        // suit the race are the data of the table of the types of a race.
+        int? raceId = await _dbContext.Civilizations.AsNoTracking()
+            .Where(civilization => civilization.PlayerId == playerId)
+            .Select(civilization => (int?)civilization.RaceId)
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+        int[] suitableTypes = raceId is { } id
+            ? [.. await _dbContext.RaceColonizableTypes.AsNoTracking()
+                .Where(entry => entry.RaceId == id)
+                .Select(entry => entry.ObjectTypeId)
+                .ToListAsync(cancellationToken).ConfigureAwait(false)]
+            : [];
+
         return await _dbContext.Planets.AsNoTracking()
             .Where(planet => planet.SectorId == sectorId && planet.OwnerPlayerId == null)
             .Join(_dbContext.Objects, planet => planet.CelestialObjectId, entry => entry.Id, (planet, entry) => new { planet, entry })
@@ -368,8 +388,38 @@ public sealed class WorldQueryService
                 row.entry.Name,
                 row.planet.SizeClassId,
                 row.planet.Size,
-                row.planet.IsTerraformed))
+                row.planet.IsTerraformed,
+                suitableTypes.Contains(row.entry.ObjectTypeId)))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Gets the types of the bodies that suit the race of a player (task 00073).
+    /// </summary>
+    /// <param name="playerId">The player, or <see langword="null"/> to read without the race of a player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The types of the bodies; empty when the player has no civilization.</returns>
+    private async Task<HashSet<int>> ColonizableTypesAsync(string? playerId, CancellationToken cancellationToken)
+    {
+        if (playerId is null)
+        {
+            return [];
+        }
+
+        int? raceId = await _dbContext.Civilizations.AsNoTracking()
+            .Where(civilization => civilization.PlayerId == playerId)
+            .Select(civilization => (int?)civilization.RaceId)
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+        if (raceId is not { } id)
+        {
+            return [];
+        }
+
+        return [.. await _dbContext.RaceColonizableTypes.AsNoTracking()
+            .Where(entry => entry.RaceId == id)
+            .Select(entry => entry.ObjectTypeId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false)];
     }
 
     /// <summary>

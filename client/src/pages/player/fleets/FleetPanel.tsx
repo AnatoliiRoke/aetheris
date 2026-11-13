@@ -394,7 +394,7 @@ export function FleetPanel({
       */}
 
       <div className="fl-panel__buttons">
-        <FleetHoldButton fleetId={fleet.id} homePlanetId={fleet.homePlanetId} />
+        <FleetHoldButton fleetId={fleet.id} homePlanetId={fleet.homePlanetId} planetId={fleet.planetId} />
         <button
           className="btn fl-btn fl-btn--block"
           disabled={busy || away}

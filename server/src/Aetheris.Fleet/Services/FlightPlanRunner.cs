@@ -50,6 +50,11 @@ public sealed class FlightPlanRunner
     /// <summary>The event type of the end of a scan.</summary>
     public const string ScanEventType = "fleet.order_scan";
 
+    /// <summary>
+    /// The event type of the end of the deployment of a colony module (task 00073).
+    /// </summary>
+    public const string ColonizeEventType = "fleet.colonize_complete";
+
     /// <summary>The key of the details of a refusal that lists the ships it names (task 00072).</summary>
     public const string ShipIdsDetail = "ship_ids";
 
@@ -62,6 +67,7 @@ public sealed class FlightPlanRunner
     private readonly FleetHoldService _holds;
     private readonly FleetMinePlaceService _minePlaces;
     private readonly FleetCargoService _cargo;
+    private readonly FleetColonizeService _colonize;
     private readonly FleetReportService _reports;
     private readonly IWorldModule _world;
     private readonly IEventScheduler _scheduler;
@@ -83,6 +89,7 @@ public sealed class FlightPlanRunner
     /// <param name="holds">The holds of the ships.</param>
     /// <param name="minePlaces">Finds the place an extraction takes from.</param>
     /// <param name="cargo">The load and the unload of the holds (task 00057).</param>
+    /// <param name="colonize">The colonization of a planet (task 00073).</param>
     /// <param name="reports">The reports of the fleets to the players (task 00060).</param>
     /// <param name="world">The world module.</param>
     /// <param name="scheduler">The event scheduler.</param>
@@ -101,6 +108,7 @@ public sealed class FlightPlanRunner
         FleetHoldService holds,
         FleetMinePlaceService minePlaces,
         FleetCargoService cargo,
+        FleetColonizeService colonize,
         FleetReportService reports,
         IWorldModule world,
         IEventScheduler scheduler,
@@ -119,6 +127,7 @@ public sealed class FlightPlanRunner
         ArgumentNullException.ThrowIfNull(holds);
         ArgumentNullException.ThrowIfNull(minePlaces);
         ArgumentNullException.ThrowIfNull(cargo);
+        ArgumentNullException.ThrowIfNull(colonize);
         ArgumentNullException.ThrowIfNull(reports);
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(scheduler);
@@ -137,6 +146,7 @@ public sealed class FlightPlanRunner
         _holds = holds;
         _minePlaces = minePlaces;
         _cargo = cargo;
+        _colonize = colonize;
         _reports = reports;
         _world = world;
         _scheduler = scheduler;
@@ -167,6 +177,15 @@ public sealed class FlightPlanRunner
     /// <param name="OrderId">The order.</param>
     /// <param name="PlanVersion">The plan version.</param>
     public sealed record ScanPayload(long FleetId, long OrderId, int PlanVersion);
+
+    /// <summary>
+    /// The scheduled end of the deployment of a colony module (task 00073).
+    /// </summary>
+    /// <param name="FleetId">The fleet.</param>
+    /// <param name="OrderId">The order of the colonization.</param>
+    /// <param name="PlanetId">The planet the fleet colonizes.</param>
+    /// <param name="PlanVersion">The version of the plan when the deployment began.</param>
+    public sealed record ColonizePayload(long FleetId, long OrderId, long PlanetId, int PlanVersion);
 
     /// <summary>The scan parameters fixed at the beginning of an order.</summary>
     /// <param name="StartedAt">The start time.</param>
@@ -250,6 +269,19 @@ public sealed class FlightPlanRunner
                     {
                         throw new GameException(FleetErrorCodes.CargoItemsInvalid, "The order names nothing to carry, or an amount that is not above zero.");
                     }
+
+                    break;
+
+                case FlightOrderTypes.Colonize:
+                    // The fleet must carry a colony module and the player must have room for one more
+                    // planet (task 00073). The colonization names no target: the planet is the one the
+                    // fleet stands on when the order begins, so it is checked then.
+                    if (await _colonize.FindModuleAsync(fleet.Id, cancellationToken).ConfigureAwait(false) is null)
+                    {
+                        throw new GameException(FleetErrorCodes.ColonizeNoModule, "The fleet carries no colony module.");
+                    }
+
+                    await _colonize.CheckLimitAsync(fleet, cancellationToken).ConfigureAwait(false);
 
                     break;
 
@@ -511,6 +543,91 @@ public sealed class FlightPlanRunner
             cancellationToken);
     }
 
+    /// <summary>
+    /// Handles the end of the deployment of a colony module (task 00073): the planet belongs to the
+    /// player, the colony is founded on it, the module is gone and the plan goes on.
+    /// </summary>
+    /// <remarks>
+    /// The colonization is one transaction: the body is taken under the lock of its row, the
+    /// colony is founded and the module is taken out of the hold of the fleet. A planet that was
+    /// taken in the meantime stops the plan with the code of a taken planet, and the module stays
+    /// in the hold of the fleet.
+    /// </remarks>
+    /// <param name="payload">The body of the event.</param>
+    /// <param name="now">The moment the deployment ends, in game time.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the end of the deployment is handled.</returns>
+    public Task HandleColonizeCompleteAsync(ColonizePayload payload, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(payload);
+
+        return _unitOfWork.RunAsync(
+            async () =>
+            {
+                if (!await LockFleetAsync(payload.FleetId, cancellationToken).ConfigureAwait(false))
+                {
+                    return 0;
+                }
+
+                FlightPlanEntity? plan = await _dbContext.FlightPlans
+                    .Include(entry => entry.OrderIds)
+                    .SingleOrDefaultAsync(entry => entry.FleetId == payload.FleetId, cancellationToken).ConfigureAwait(false);
+
+                // The deployment belongs to the run of the plan it was planned in: a plan that was
+                // stopped, changed or started anew has another version.
+                if (plan is null
+                    || plan.StateCode != FlightPlanStates.Active
+                    || plan.Version != payload.PlanVersion
+                    || !plan.OrderIds.Any(order => order.Id == payload.OrderId && order.Position == plan.CurrentPosition))
+                {
+                    return 0;
+                }
+
+                FleetEntity? fleet = await _dbContext.Fleets
+                    .SingleOrDefaultAsync(entry => entry.Id == payload.FleetId, cancellationToken).ConfigureAwait(false);
+
+                if (fleet is null)
+                {
+                    return 0;
+                }
+
+                ColonyModule? module = await _colonize.FindModuleAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+
+                if (module is null)
+                {
+                    plan.StateCode = FlightPlanStates.Paused;
+                    plan.PauseCode = FleetErrorCodes.ColonizeNoModule;
+                    plan.UpdatedAt = now;
+                    plan.Version++;
+
+                    return 0;
+                }
+
+                try
+                {
+                    string planetName = await _colonize.ColonizeAsync(fleet, payload.PlanetId, module, now, cancellationToken).ConfigureAwait(false);
+
+                    await _reports.WriteColonizationReportAsync(fleet.Id, planetName, module.Colonists, cancellationToken).ConfigureAwait(false);
+                }
+                catch (GameException exception)
+                {
+                    // The planet was taken, or the player has no room for one more body: the plan
+                    // stops with the reason and the fleet waits. The module stays in the hold.
+                    plan.StateCode = FlightPlanStates.Paused;
+                    plan.PauseCode = exception.Code;
+                    plan.UpdatedAt = now;
+                    plan.Version++;
+
+                    return 0;
+                }
+
+                await AdvanceAsync(plan, fleet, now, cancellationToken).ConfigureAwait(false);
+
+                return 0;
+            },
+            cancellationToken);
+    }
+
     /// <summary>Completes a scan if its plan has not been interrupted.</summary>
     /// <param name="payload">The scheduled scan.</param>
     /// <param name="now">The scheduled completion time.</param>
@@ -677,6 +794,9 @@ public sealed class FlightPlanRunner
             case FlightOrderTypes.Unload:
                 return await BeginCargoAsync(fleet, order, now, cancellationToken).ConfigureAwait(false);
 
+            case FlightOrderTypes.Colonize:
+                return await BeginColonizeAsync(plan, fleet, order, now, cancellationToken).ConfigureAwait(false);
+
             default:
                 return (BeginState.Blocked, FleetErrorCodes.FlightOrderNotSupported);
         }
@@ -708,7 +828,100 @@ public sealed class FlightPlanRunner
     }
 
     /// <summary>
-    /// Begins an order of flight: the fleet leaves for the target at the speed of its slowest ship.
+    /// Begins an order of a colonization (task 00073): the fleet stands at the planet it is to
+    /// colonize, and the deployment of the colony module begins.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The order takes no fuel and burns none: only the flight to the planet costs fuel. The
+    /// deployment lasts as long as the module says, and the planet belongs to the player when the
+    /// deployment is over.
+    /// </para>
+    /// <para>
+    /// The checks are made again here, because the world may have changed while the fleet flew to
+    /// the planet: a planet that was taken in the meantime stops the plan with the code of a taken
+    /// planet, and the module stays in the hold of the fleet.
+    /// </para>
+    /// </remarks>
+    /// <param name="plan">The plan of the fleet.</param>
+    /// <param name="fleet">The fleet.</param>
+    /// <param name="order">The order of the colonization.</param>
+    /// <param name="now">The moment of game time.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The state of the order and the reason it is blocked.</returns>
+    private async Task<(BeginState State, string? Code)> BeginColonizeAsync(
+        FlightPlanEntity plan,
+        FleetEntity fleet,
+        FlightPlanOrderEntity order,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        ArgumentNullException.ThrowIfNull(fleet);
+        ArgumentNullException.ThrowIfNull(order);
+
+        WorldPlaceDto? place = await _flights.CurrentPlaceAsync(fleet, null, now, cancellationToken).ConfigureAwait(false);
+
+        // The colonization names no target (task 00073): the planet is the body the fleet stands on.
+        if (place?.PlanetId is not { } planetId)
+        {
+            return (BeginState.Blocked, FleetErrorCodes.ColonizeNotOnPlanet);
+        }
+
+        ColonyModule? module;
+
+        try
+        {
+            module = await _colonize.FindModuleAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+
+            if (module is null)
+            {
+                return (BeginState.Blocked, FleetErrorCodes.ColonizeNoModule);
+            }
+
+            await _colonize.CheckLimitAsync(fleet, cancellationToken).ConfigureAwait(false);
+            await _colonize.CheckPlanetAsync(fleet, planetId, cancellationToken).ConfigureAwait(false);
+        }
+        catch (GameException exception)
+        {
+            return (BeginState.Blocked, exception.Code);
+        }
+
+        // The deployment takes the time of the module (char_deploy_time, data). A module without a
+        // time is deployed at once: the colonization happens now, in the step of the plan.
+        long seconds = Math.Max(0, module.DeploySeconds);
+        order.DurationSeconds = seconds;
+
+        if (seconds <= 0)
+        {
+            try
+            {
+                string planetName = await _colonize.ColonizeAsync(fleet, planetId, module, now, cancellationToken).ConfigureAwait(false);
+
+                await _reports.WriteColonizationReportAsync(fleet.Id, planetName, module.Colonists, cancellationToken).ConfigureAwait(false);
+            }
+            catch (GameException exception)
+            {
+                return (BeginState.Blocked, exception.Code);
+            }
+
+            return (BeginState.Done, null);
+        }
+
+        await _scheduler.ScheduleAsync(
+            new ScheduledEventRequest(
+                place.SectorId,
+                ColonizeEventType,
+                now + TimeSpan.FromSeconds(seconds),
+                JsonSerializer.Serialize(new ColonizePayload(fleet.Id, order.Id, planetId, plan.Version)),
+                ColonizeEventType + ":" + fleet.Id.ToString(CultureInfo.InvariantCulture) + ":" + order.Id.ToString(CultureInfo.InvariantCulture) + ":" + plan.Version.ToString(CultureInfo.InvariantCulture)),
+            cancellationToken).ConfigureAwait(false);
+
+        return (BeginState.Started, null);
+    }
+
+    /// <summary>
+    /// Begins an order of a flight: the fleet leaves for the target at the speed of its slowest ship.
     /// </summary>
     /// <remarks>
     /// The flight burns the fuel of its class (task 00072): the fuel is taken from the hold of the

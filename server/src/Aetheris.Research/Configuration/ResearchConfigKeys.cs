@@ -22,6 +22,12 @@ public static class ResearchConfigKeys
     public const string CatalogCacheSeconds = "research.catalog.cache_seconds";
 
     /// <summary>
+    /// How many planets a player may have without the technology that raises the limit of the planets
+    /// (task 00073): the home planet is one of them.
+    /// </summary>
+    public const string ColonyBaseLimit = "research.colony.base_limit";
+
+    /// <summary>
     /// Gets the definitions of the parameters with their starting values and bounds.
     /// </summary>
     public static IReadOnlyList<ConfigParameterDefinition> Definitions { get; } =
@@ -29,5 +35,6 @@ public static class ResearchConfigKeys
         new(QueueBaseSlots, "2", "1", "100", "Місць у черзі досліджень гравця, разом із тим, що досліджується."),
         new(QueueMaxExtraSlots, "2", "0", "100", "Найбільша кількість платних місць, доданих до черги досліджень гравця."),
         new(CatalogCacheSeconds, "30", "0", "86400", "Скільки секунд таблиці технологій залишаються в пам'яті сервера перед повторним читанням."),
+        new(ColonyBaseLimit, "1", "1", "1000", "Скільки планет гравець може мати без вивченого «Колоніального управління» (домашня планета входить)."),
     ];
 }

@@ -190,4 +190,43 @@ public static class FleetErrorCodes
     /// The hold of the fleet holds less fuel than the route needs (task 00072).
     /// </summary>
     public const string FuelShort = "fleet_fuel_short";
+
+    /// <summary>
+    /// The module in the slot of the project is only a cargo and is not fitted to a hull
+    /// (task 00073).
+    /// </summary>
+    public const string DesignPartCargoOnly = "fleet_design_part_cargo_only";
+
+    /// <summary>
+    /// The hold of the fleet holds no cargo that opens the order (task 00073): a fleet without a
+    /// colony module may not colonize a planet.
+    /// </summary>
+    public const string ColonizeNoModule = "fleet_colonize_no_module";
+
+    /// <summary>
+    /// The fleet does not stand on a planet when the colonization begins (task 00073): the
+    /// colonization names no target and works on the planet the fleet stands on.
+    /// </summary>
+    public const string ColonizeNotOnPlanet = "fleet_colonize_not_on_planet";
+
+    /// <summary>
+    /// The planet was taken by another player while the fleet flew to it (task 00073).
+    /// </summary>
+    public const string ColonizeTaken = "fleet_colonize_taken";
+
+    /// <summary>
+    /// The planet does not suit the race of the player (task 00073).
+    /// </summary>
+    public const string ColonizeUnsuitable = "fleet_colonize_unsuitable";
+
+    /// <summary>
+    /// The player has as many planets as the limit allows (task 00073).
+    /// </summary>
+    public const string ColonizeLimit = "fleet_colonize_limit";
+
+    /// <summary>
+    /// The fleet cannot fly to the planet it is to colonize (task 00073): a ship of it has no drive
+    /// for the way the plan would take.
+    /// </summary>
+    public const string ColonizeNoDrive = "fleet_colonize_no_drive";
 }

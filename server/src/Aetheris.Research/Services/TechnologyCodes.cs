@@ -64,6 +64,13 @@ public static class TechnologyEffectTypes
     public const string ShipyardTime = "shipyard_time";
 
     /// <summary>
+    /// The technology raises the largest number of bodies the player may have (task 00073). The
+    /// value of the level is absolute: it is the number of bodies the player may have at once,
+    /// the home body among them.
+    /// </summary>
+    public const string PlanetLimit = "planet_limit";
+
+    /// <summary>
     /// Gets every effect kind, in the order of the form of the admin panel (task 00023).
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -80,6 +87,7 @@ public static class TechnologyEffectTypes
         PopulationGrowthBonus,
         CreditIncomeBonus,
         ShipyardTime,
+        PlanetLimit,
     ];
 }
 

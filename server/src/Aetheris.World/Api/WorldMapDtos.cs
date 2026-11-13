@@ -178,6 +178,7 @@ public sealed record MapResourceShareDto(int ResourceId, decimal Coefficient);
 /// <param name="Size">The size of a body.</param>
 /// <param name="IsOwn">Whether the body is the player's.</param>
 /// <param name="IsFree">Whether the body is free and may be colonized.</param>
+/// <param name="SuitableForRace">Whether the body suits the race of the player and may be colonized (task 00073).</param>
 /// <param name="IsTerraformed">Whether the body is terraformed.</param>
 /// <param name="Owner">The owner of the body, if it has one.</param>
 /// <param name="StationLimit">The largest number of stations on a gas giant.</param>
@@ -203,7 +204,8 @@ public sealed record MapObjectDto(
     long? Mass,
     IReadOnlyList<MapResourceShareDto> Resources,
     double? Distance,
-    long? TravelSeconds);
+    long? TravelSeconds,
+    bool SuitableForRace = false);
 
 /// <summary>The map of a star system.</summary>
 /// <param name="System">The system.</param>

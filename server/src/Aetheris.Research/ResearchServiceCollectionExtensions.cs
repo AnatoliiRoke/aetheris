@@ -69,6 +69,10 @@ public static class ResearchServiceCollectionExtensions
         services.AddScoped<IProductionMultipliers, ProductionMultipliersService>();
         services.AddScoped<IShipyardTime, ShipyardTimeService>();
 
+        // The limit of the bodies of a player is a rule of the research: the technology of the
+        // colonial administration gives it (task 00073).
+        services.AddScoped<IPlanetLimit, PlanetLimitService>();
+
         return services;
     }
 

@@ -84,6 +84,9 @@ public sealed class WorldDbContext : DbContext
     /// <summary>Gets the start resources of the races.</summary>
     public DbSet<RaceStartResourceEntity> RaceStartResources => Set<RaceStartResourceEntity>();
 
+    /// <summary>Gets the types of the bodies the races may colonize (task 00073).</summary>
+    public DbSet<RaceColonizableTypeEntity> RaceColonizableTypes => Set<RaceColonizableTypeEntity>();
+
     /// <summary>Gets the galaxies.</summary>
     public DbSet<GalaxyEntity> Galaxies => Set<GalaxyEntity>();
 
@@ -237,6 +240,7 @@ public sealed class WorldDbContext : DbContext
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasOne<CelestialObjectTypeEntity>().WithMany().HasForeignKey(e => e.PreferredObjectTypeId).OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(e => e.StartResourceIds).WithOne().HasForeignKey(resource => resource.RaceId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(e => e.ColonizableTypeIds).WithOne().HasForeignKey(type => type.RaceId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<RaceStartResourceEntity>(entity =>
@@ -244,6 +248,14 @@ public sealed class WorldDbContext : DbContext
             entity.ToTable("race_start_resource");
             entity.HasIndex(e => new { e.RaceId, e.ResourceTypeId }).IsUnique();
             entity.HasOne<ResourceTypeEntity>().WithMany().HasForeignKey(e => e.ResourceTypeId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RaceColonizableTypeEntity>(entity =>
+        {
+            entity.ToTable("race_colonizable_type");
+            entity.HasKey(e => new { e.RaceId, e.ObjectTypeId });
+            entity.HasIndex(e => e.ObjectTypeId);
+            entity.HasOne<CelestialObjectTypeEntity>().WithMany().HasForeignKey(e => e.ObjectTypeId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 

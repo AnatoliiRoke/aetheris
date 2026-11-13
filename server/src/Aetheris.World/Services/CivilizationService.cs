@@ -94,7 +94,9 @@ public sealed class CivilizationService
                 race.TraitKeys,
                 race.ImageKey,
                 race.ColorKey,
-                race.PreferredObjectTypeId))
+                race.PreferredObjectTypeId,
+                race.StartBuildingTypeId,
+                race.StartBuildingLevel))
             .ToListAsync(cancellationToken);
 
     /// <summary>

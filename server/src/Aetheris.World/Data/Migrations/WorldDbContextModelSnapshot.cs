@@ -869,6 +869,25 @@ namespace Aetheris.World.Data.Migrations
                     b.ToTable("player_civilization", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.World.Data.Entities.RaceColonizableTypeEntity", b =>
+                {
+                    b.Property<int>("RaceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("race_id");
+
+                    b.Property<int>("ObjectTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("object_type_id");
+
+                    b.HasKey("RaceId", "ObjectTypeId")
+                        .HasName("pk_race_colonizable_type");
+
+                    b.HasIndex("ObjectTypeId")
+                        .HasDatabaseName("ix_race_colonizable_type_object_type_id");
+
+                    b.ToTable("race_colonizable_type", (string)null);
+                });
+
             modelBuilder.Entity("Aetheris.World.Data.Entities.RaceEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -1812,6 +1831,23 @@ namespace Aetheris.World.Data.Migrations
                         .HasConstraintName("fk_player_civilization_race_race_id");
                 });
 
+            modelBuilder.Entity("Aetheris.World.Data.Entities.RaceColonizableTypeEntity", b =>
+                {
+                    b.HasOne("Aetheris.World.Data.Entities.CelestialObjectTypeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ObjectTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_race_colonizable_type_celestial_object_type_object_type_id");
+
+                    b.HasOne("Aetheris.World.Data.Entities.RaceEntity", null)
+                        .WithMany("ColonizableTypeIds")
+                        .HasForeignKey("RaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_race_colonizable_type_race_race_id");
+                });
+
             modelBuilder.Entity("Aetheris.World.Data.Entities.RaceEntity", b =>
                 {
                     b.HasOne("Aetheris.World.Data.Entities.CelestialObjectTypeEntity", null)
@@ -1939,6 +1975,8 @@ namespace Aetheris.World.Data.Migrations
 
             modelBuilder.Entity("Aetheris.World.Data.Entities.RaceEntity", b =>
                 {
+                    b.Navigation("ColonizableTypeIds");
+
                     b.Navigation("StartResourceIds");
                 });
 

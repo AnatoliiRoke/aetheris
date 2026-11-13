@@ -28,6 +28,7 @@ public sealed class PlanetsModule : IPlanetsModule
     private readonly PlanetsBootstrapService _bootstrap;
     private readonly PlanetQueryService _queries;
     private readonly Services.OwnerBuildingEffects _ownerEffects;
+    private readonly Services.PlanetStartPackage _startPackage;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PlanetsModule"/> class.
@@ -35,18 +36,22 @@ public sealed class PlanetsModule : IPlanetsModule
     /// <param name="bootstrap">The start of the module.</param>
     /// <param name="queries">The reads of a body.</param>
     /// <param name="ownerEffects">What the buildings of every body of the owner give the whole civilization.</param>
+    /// <param name="startPackage">The start package of a civilization; it also founds a colony (task 00073).</param>
     public PlanetsModule(
         PlanetsBootstrapService bootstrap,
         PlanetQueryService queries,
-        Services.OwnerBuildingEffects ownerEffects)
+        Services.OwnerBuildingEffects ownerEffects,
+        Services.PlanetStartPackage startPackage)
     {
         ArgumentNullException.ThrowIfNull(bootstrap);
         ArgumentNullException.ThrowIfNull(queries);
         ArgumentNullException.ThrowIfNull(ownerEffects);
+        ArgumentNullException.ThrowIfNull(startPackage);
 
         _bootstrap = bootstrap;
         _queries = queries;
         _ownerEffects = ownerEffects;
+        _startPackage = startPackage;
     }
 
     /// <summary>
@@ -205,6 +210,24 @@ public sealed class PlanetsModule : IPlanetsModule
     /// <inheritdoc />
     public Task<IReadOnlyDictionary<int, string>> GetBuildingNameKeysAsync(CancellationToken cancellationToken = default) =>
         _queries.GetBuildingNameKeysAsync(cancellationToken);
+
+    /// <inheritdoc />
+    public Task FoundColonyAsync(
+        string playerId,
+        long planetId,
+        int sectorId,
+        int raceBuildingTypeId,
+        int raceBuildingLevel,
+        long inhabitants,
+        CancellationToken cancellationToken = default) =>
+        _startPackage.FoundColonyAsync(
+            playerId,
+            planetId,
+            sectorId,
+            raceBuildingTypeId,
+            raceBuildingLevel,
+            inhabitants,
+            cancellationToken);
 
     /// <inheritdoc />
     public async Task<int> GetBuildingLevelByTypeAsync(

@@ -100,6 +100,8 @@ public sealed record ShipHullDto(
 /// <param name="ScanTarget">The kind of target detected by the module, or <see langword="null"/>.</param>
 /// <param name="EngineKind">The class of the drive, or <see langword="null"/> when the module is not a drive (task 00072).</param>
 /// <param name="Fuel">The fuel of the drive and the share of every resource in it (task 00072). A drive without rows burns nothing.</param>
+/// <param name="CargoOnly">Whether the module is only a cargo: it is never fitted to a hull and is carried in the hold of a ship (task 00073).</param>
+/// <param name="CargoOrder">The order of a flight plan the cargo opens, one of <see cref="PartCargoOrders"/>, or <see langword="null"/> (task 00073).</param>
 public sealed record ShipModuleDto(
     int Id,
     string Code,
@@ -138,7 +140,9 @@ public sealed record ShipModuleDto(
     string? FlightOrder = null,
     string? ScanTarget = null,
     string? EngineKind = null,
-    IReadOnlyList<ShipModuleFuelDto>? Fuel = null);
+    IReadOnlyList<ShipModuleFuelDto>? Fuel = null,
+    bool CargoOnly = false,
+    string? CargoOrder = null);
 
 /// <summary>
 /// One resource of the fuel of a drive and its share in it (task 00072).

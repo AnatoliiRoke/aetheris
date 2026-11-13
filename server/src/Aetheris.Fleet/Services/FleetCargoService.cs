@@ -311,6 +311,66 @@ public sealed class FleetCargoService
     }
 
     /// <summary>
+    /// Takes one unit of a module out of the holds of the ships of a fleet (task 00073).
+    /// </summary>
+    /// <remarks>
+    /// The unit is taken from the first ship of the fleet that carries it, in the order the ships
+    /// joined the fleet. A module of a hold is never divided: a unit of it is a whole module, so
+    /// the hold of the ship that carries it loses one module.
+    /// </remarks>
+    /// <param name="fleet">The fleet.</param>
+    /// <param name="partTypeId">The kind of the module.</param>
+    /// <param name="now">The moment of game time.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when a module was taken.</returns>
+    public async Task<bool> TakePartAsync(
+        FleetEntity fleet,
+        int partTypeId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(fleet);
+
+        long[] shipIds = [.. await _dbContext.FleetShips.AsNoTracking()
+            .Where(entry => entry.FleetId == fleet.Id)
+            .OrderBy(entry => entry.Position)
+            .Select(entry => entry.ShipId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false)];
+
+        if (shipIds.Length == 0)
+        {
+            return false;
+        }
+
+        List<ShipPartCargoEntity> rows = await _dbContext.ShipPartCargos
+            .Where(cargo => shipIds.Contains(cargo.ShipId) && cargo.PartTypeId == partTypeId && cargo.Quantity > 0)
+            .OrderBy(cargo => Array.IndexOf(shipIds, cargo.ShipId))
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        ShipPartCargoEntity? taken = rows.FirstOrDefault();
+
+        if (taken is null)
+        {
+            return false;
+        }
+
+        taken.Quantity -= 1;
+        taken.UpdatedAt = now;
+
+        // A stack that is gone leaves no row: the hold lists only what it carries.
+        if (taken.Quantity <= 0)
+        {
+            _dbContext.ShipPartCargos.Remove(taken);
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await RecountAsync(fleet.Id, now, cancellationToken).ConfigureAwait(false);
+        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return true;
+    }
+
+    /// <summary>
     /// Fills the holds on paper: which ship takes how much of which item. The ships are taken in the
     /// order they joined the fleet. A resource goes where there is room for it, a module goes whole.
     /// </summary>

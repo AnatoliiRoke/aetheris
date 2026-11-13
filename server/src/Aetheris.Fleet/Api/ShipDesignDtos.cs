@@ -67,6 +67,12 @@ public static class ShipDesignWarningCodes
     /// inside a system, so a fleet with it may not fly at all.
     /// </summary>
     public const string FtlNeedsNormalDrive = "fleet_ftl_needs_normal_drive";
+
+    /// <summary>
+    /// The project holds a module that is only a cargo (task 00073): such a module is carried in
+    /// the hold of a ship and never fitted to a hull.
+    /// </summary>
+    public const string DesignPartCargoOnly = "fleet_design_part_cargo_only";
 }
 
 /// <summary>

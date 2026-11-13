@@ -692,6 +692,9 @@ export function fakeFleetApi(overrides: Partial<FleetApi> = {}): FleetApi {
     fuelEstimate: vi.fn(async () => sampleFlightFuelEstimate()),
     fleetHold: vi.fn(async (fleetId: number) => sampleFleetHold({ fleetId })),
     fleetsInFlight: vi.fn(async () => sampleFleetsInFlight()),
+    cargoLoad: vi.fn(async (request: { fleetId: number }) => sampleFleetHold({ fleetId: request.fleetId })),
+    cargoUnload: vi.fn(async (request: { fleetId: number }) => sampleFleetHold({ fleetId: request.fleetId })),
+    colonizeFlightPlan: vi.fn(async () => sampleFlightPlan()),
     ...overrides,
   };
 }
@@ -1538,7 +1541,7 @@ export function sampleMapSector(overrides: Partial<MapSectorView> = {}): MapSect
  * another player, a place the player only knows of and a field on the outer orbit.
  */
 export function sampleMapSystem(overrides: Partial<MapSystemView> = {}): MapSystemView {
-  const none = { planetId: null as number | null, sizeClassId: null as number | null, size: null as number | null, isOwn: false, isFree: false, isTerraformed: false, owner: null as MapOwner | null, stationLimit: null, mass: null as number | null, resources: [] as MapResourceShare[], distance: 0.6 as number | null, travelSeconds: 600 as number | null };
+  const none = { planetId: null as number | null, sizeClassId: null as number | null, size: null as number | null, isOwn: false, isFree: false, isTerraformed: false, owner: null as MapOwner | null, stationLimit: null, mass: null as number | null, resources: [] as MapResourceShare[], distance: 0.6 as number | null, travelSeconds: 600 as number | null, suitableForRace: false };
 
   return {
     system: { id: 3, number: 1, name: 'Lyra', x: 200, y: 200, z: 0, inNebula: false, state: 'open', objectCount: 5, ownPlanetCount: 1, distance: 0, travelSeconds: 600 },

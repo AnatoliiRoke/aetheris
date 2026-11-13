@@ -4,6 +4,8 @@ using Aetheris.Fleet.Data;
 using Aetheris.Fleet.Data.Entities;
 using Aetheris.Production;
 using Aetheris.Production.Api;
+using Aetheris.Research;
+using Aetheris.World;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aetheris.Fleet.Services;
@@ -21,6 +23,9 @@ public sealed class FleetHoldService
     private readonly FleetDbContext _dbContext;
     private readonly IProductionModule _production;
     private readonly IPartStock _parts;
+    private readonly FleetOrdersService _orders;
+    private readonly IWorldModule _world;
+    private readonly IResearchModule _research;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FleetHoldService"/> class.
@@ -28,15 +33,30 @@ public sealed class FleetHoldService
     /// <param name="dbContext">The fleet context.</param>
     /// <param name="production">The catalog of the hulls and the modules.</param>
     /// <param name="parts">The facts of the parts, for the mass of the parts in the holds.</param>
-    public FleetHoldService(FleetDbContext dbContext, IProductionModule production, IPartStock parts)
+    /// <param name="orders">The orders the modules of the fleet open (task 00073).</param>
+    /// <param name="world">The world, for the bodies of the player (task 00073).</param>
+    /// <param name="research">The research, for the limit of the bodies (task 00073).</param>
+    public FleetHoldService(
+        FleetDbContext dbContext,
+        IProductionModule production,
+        IPartStock parts,
+        FleetOrdersService orders,
+        IWorldModule world,
+        IResearchModule research)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(production);
         ArgumentNullException.ThrowIfNull(parts);
+        ArgumentNullException.ThrowIfNull(orders);
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(research);
 
         _dbContext = dbContext;
         _production = production;
         _parts = parts;
+        _orders = orders;
+        _world = world;
+        _research = research;
     }
 
     /// <summary>
@@ -61,10 +81,16 @@ public sealed class FleetHoldService
 
         IReadOnlyList<ShipHold> holds = await ReadAsync(fleetId, cancellationToken).ConfigureAwait(false);
 
+        // The limit of the bodies of the player (task 00073): the window shows how many of them the
+        // player has and how many it may have, so the player sees whether a colony is possible.
+        int planetLimit = await _research.GetPlanetLimitAsync(playerId, cancellationToken).ConfigureAwait(false);
+        int ownedPlanets = (await _world.CountOwnedPlanetsAsync([playerId], cancellationToken).ConfigureAwait(false)).GetValueOrDefault(playerId);
+        IReadOnlyList<string> availableOrders = await _orders.AvailableAsync(fleetId, cancellationToken).ConfigureAwait(false);
+
         // A fleet without ships has no holds, so it carries nothing, whatever its rows of the sum still say.
         if (holds.Count == 0)
         {
-            return new FleetHoldDto(fleetId, 0, 0, [], []);
+            return new FleetHoldDto(fleetId, 0, 0, [], [], availableOrders, ownedPlanets, planetLimit);
         }
 
         List<FleetHoldItemDto> items = await _dbContext.FleetCargos.AsNoTracking()
@@ -89,7 +115,15 @@ public sealed class FleetHoldService
                 .Select(row => new FleetHoldPartDto(row.PartTypeId, row.MarkLevel, row.HasRaceBonus, row.Quantity)),
         ];
 
-        return new FleetHoldDto(fleetId, holds.Sum(hold => hold.Capacity), holds.Sum(hold => hold.Carried), items, parts);
+        return new FleetHoldDto(
+            fleetId,
+            holds.Sum(hold => hold.Capacity),
+            holds.Sum(hold => hold.Carried),
+            items,
+            parts,
+            availableOrders,
+            ownedPlanets,
+            planetLimit);
     }
 
     /// <summary>

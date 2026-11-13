@@ -165,7 +165,7 @@ public static class FlightPlanStates
 public static class FlightOrderTypes
 {
     /// <summary>Every type of an order, so a request that names another one is refused.</summary>
-    public static readonly IReadOnlyList<string> All = [Fly, Hyperfly, Jump, Mine, Scan, Load, Unload, Wait, Return];
+    public static readonly IReadOnlyList<string> All = [Fly, Hyperfly, Jump, Mine, Scan, Load, Unload, Wait, Return, Colonize];
 
     /// <summary>The fleet flies to a target.</summary>
     public const string Fly = "fly";
@@ -193,6 +193,12 @@ public static class FlightOrderTypes
 
     /// <summary>The fleet flies back to its home body.</summary>
     public const string Return = "return";
+
+    /// <summary>
+    /// The fleet colonizes the planet it stands at with the colony module it carries (task 00073).
+    /// The order takes no fuel and burns no fuel: only the flight to the planet does.
+    /// </summary>
+    public const string Colonize = "colonize";
 }
 
 /// <summary>

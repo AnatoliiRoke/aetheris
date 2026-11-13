@@ -447,3 +447,6 @@
     border-radius: var(--r-xl) var(--r-xl) 0 0; box-shadow: var(--shadow-lg);
   }
 }
+
+/* The choice of the fleet that colonizes a planet (task 00073). */
+.map-colonize__fleets { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }

@@ -363,6 +363,27 @@ public interface IWorldModule
     Task<IReadOnlyList<FreePlanetDto>> GetFreePlanetsAsync(string playerId, int sectorId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Claims a free body for a player (task 00073): the body must be free, colonizable and of a
+    /// type that suits the race of the player. The row of the body is locked, so two fleets that fly
+    /// to the same body cannot take it twice.
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="playerId">The owner of the body.</param>
+    /// <param name="raceId">The race of the player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The body, as it is now.</returns>
+    Task<PlanetClaimResult> ClaimPlanetAsync(long planetId, string playerId, int raceId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Checks that a body suits the race of a player, without taking it (task 00073).
+    /// </summary>
+    /// <param name="planetId">The body.</param>
+    /// <param name="raceId">The race of the player.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>Whether the body suits the race.</returns>
+    Task<bool> PlanetSuitsRaceAsync(long planetId, int raceId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Sets the start building of every race that has none yet (task 00011).
     /// </summary>
     /// <param name="buildingTypeId">The building type.</param>

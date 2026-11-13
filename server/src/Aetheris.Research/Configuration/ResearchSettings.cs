@@ -22,6 +22,12 @@ public sealed record ResearchSettings
     public TimeSpan CatalogCacheDuration { get; init; }
 
     /// <summary>
+    /// Gets how many planets a player may have without the technology that raises the limit of the
+    /// planets (task 00073): the home planet is one of them.
+    /// </summary>
+    public int ColonyBaseLimit { get; init; }
+
+    /// <summary>
     /// Reads the parameters.
     /// </summary>
     /// <param name="config">The game configuration.</param>
@@ -34,6 +40,7 @@ public sealed record ResearchSettings
         {
             QueueBaseSlots = ReadInt32(config, ResearchConfigKeys.QueueBaseSlots),
             QueueMaxExtraSlots = ReadInt32(config, ResearchConfigKeys.QueueMaxExtraSlots),
+            ColonyBaseLimit = ReadInt32(config, ResearchConfigKeys.ColonyBaseLimit),
             CatalogCacheDuration = TimeSpan.FromSeconds(ReadInt64(config, ResearchConfigKeys.CatalogCacheSeconds)),
         };
     }

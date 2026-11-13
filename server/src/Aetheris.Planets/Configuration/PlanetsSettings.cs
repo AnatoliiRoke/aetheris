@@ -27,6 +27,7 @@ public sealed record PlanetsSettings
     /// <summary>Gets the level of the start building.</summary>
     public int StartBuildingLevel { get; init; }
 
+
     /// <summary>
     /// Reads the parameters.
     /// </summary>

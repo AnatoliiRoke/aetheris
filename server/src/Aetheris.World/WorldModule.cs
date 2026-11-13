@@ -1,6 +1,7 @@
 using Aetheris.Core.Configuration;
 using Aetheris.World.Api;
 using Aetheris.World.Configuration;
+using Aetheris.World.Data.Entities;
 using Aetheris.World.Extraction;
 using Aetheris.World.Services;
 
@@ -18,6 +19,7 @@ public sealed class WorldModule : IWorldModule
     private readonly NebulaExtractionService _nebulae;
     private readonly WorldQueryService _queries;
     private readonly WorldPlaceService _places;
+    private readonly PlanetClaimService _claims;
     private readonly GenerationRunService _runs;
     private readonly DepositRichnessService _deposits;
     private readonly IGameConfig _config;
@@ -42,6 +44,7 @@ public sealed class WorldModule : IWorldModule
         NebulaExtractionService nebulae,
         WorldQueryService queries,
         WorldPlaceService places,
+        PlanetClaimService claims,
         GenerationRunService runs,
         DepositRichnessService deposits,
         IGameConfig config,
@@ -54,6 +57,7 @@ public sealed class WorldModule : IWorldModule
         ArgumentNullException.ThrowIfNull(nebulae);
         ArgumentNullException.ThrowIfNull(queries);
         ArgumentNullException.ThrowIfNull(places);
+        ArgumentNullException.ThrowIfNull(claims);
         ArgumentNullException.ThrowIfNull(runs);
         ArgumentNullException.ThrowIfNull(deposits);
         ArgumentNullException.ThrowIfNull(config);
@@ -66,6 +70,7 @@ public sealed class WorldModule : IWorldModule
         _nebulae = nebulae;
         _queries = queries;
         _places = places;
+        _claims = claims;
         _runs = runs;
         _deposits = deposits;
         _config = config;
@@ -227,6 +232,18 @@ public sealed class WorldModule : IWorldModule
     /// <inheritdoc />
     public Task<IReadOnlyList<FreePlanetDto>> GetFreePlanetsAsync(string playerId, int sectorId, CancellationToken cancellationToken = default) =>
         _queries.GetFreePlanetsAsync(playerId, sectorId, null, cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<PlanetClaimResult> ClaimPlanetAsync(long planetId, string playerId, int raceId, CancellationToken cancellationToken = default)
+    {
+        PlanetEntity planet = await _claims.ClaimAsync(planetId, playerId, raceId, cancellationToken).ConfigureAwait(false);
+
+        return new PlanetClaimResult(planet.Id, planet.CelestialObjectId, planet.SectorId);
+    }
+
+    /// <inheritdoc />
+    public Task<bool> PlanetSuitsRaceAsync(long planetId, int raceId, CancellationToken cancellationToken = default) =>
+        _claims.SuitsRaceAsync(planetId, raceId, cancellationToken);
 
     /// <inheritdoc />
     public Task<int> AssignStartBuildingAsync(int buildingTypeId, int level, CancellationToken cancellationToken = default) =>
