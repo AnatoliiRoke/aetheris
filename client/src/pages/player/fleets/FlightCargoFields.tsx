@@ -20,7 +20,16 @@ interface CargoOption {
   available: number | null;
   /** The weight of one unit, in tonnes. */
   weight: number;
+  /** Whether the stock has none of it: the entry is shown, but it cannot be chosen (task 00072). */
+  missing?: boolean;
 }
+
+/**
+ * The neutral code of the group of the resources that are the fuel of the drives (task 00072). The
+ * fuel is shown in the list of a load even when the stock has none of it, so the player sees that
+ * it is missing; the same code names the group on the server.
+ */
+const fuelGroupCode = 'resource_group_3';
 
 /**
  * The settings of an order of a load or an unload (task 00057). They are shown only for these two types.
@@ -94,6 +103,20 @@ export function FlightCargoFields({
               label: resourceLabel(resource.resourceTypeId),
               available: Math.floor(resource.amount),
               weight: resource.weight ?? 1,
+            });
+          }
+        }
+
+        // The fuel the stock has none of is shown too, so the player sees that it is missing (task 00072).
+        for (const resource of reference?.resources ?? []) {
+          if (resource.groupCode === fuelGroupCode && !list.some((option) => option.key === `r:${resource.id}`)) {
+            list.push({
+              key: `r:${resource.id}`,
+              item: { kind: 'resource', id: resource.id, markLevel: 1, hasRaceBonus: false },
+              label: resourceLabel(resource.id),
+              available: 0,
+              weight: 1,
+              missing: true,
             });
           }
         }
@@ -224,8 +247,8 @@ export function FlightCargoFields({
                 {resources.length > 0 ? (
                   <optgroup label={t('plan.cargo.resources')}>
                     {resources.map((entry) => (
-                      <option key={entry.key} value={entry.key}>
-                        {entry.label}
+                      <option disabled={entry.missing === true} key={entry.key} value={entry.key}>
+                        {entry.missing === true ? `${entry.label} — ${t('plan.cargo.notInStock')}` : entry.label}
                       </option>
                     ))}
                   </optgroup>

@@ -5,7 +5,10 @@ import {
   fakeAuthApi,
   fakeFleetApi,
   fakeMapApi,
+  fakeWorldApi,
   renderPage,
+  sampleReference,
+  sampleWorldReference,
   sampleFlightFuelEstimate,
   sampleFlightPlan,
   sampleFleetsView,
@@ -291,5 +294,43 @@ describe('the legs of a flight and the fuel of a fleet (task 00072)', () => {
 
     expect(orders).toHaveLength(1);
     expect(orders[0]).toMatchObject({ typeCode: 'wait' });
+  });
+  it('shows the fuel the stock has none of as an entry that cannot be chosen', async () => {
+    // The reference names a resource of the group of the fuel; the stock of the body holds none of it.
+    const reference = sampleWorldReference();
+    const world = fakeWorldApi({
+      reference: vi.fn().mockResolvedValue({
+        ...reference,
+        resources: [
+          ...reference.resources,
+          sampleReference({ id: 13, code: 'resource_13', nameKey: 'world.resource.resource_13.name', groupCode: 'resource_group_3', groupId: 3 }),
+        ],
+      }),
+    });
+    // The plan has no flight, so the load works on the body the fleet stands on.
+    const waitOnly = sampleFlightPlan({ orders: savedHyperflight().orders.filter((order) => order.typeCode === 'wait') });
+    const fleet = fakeFleetApi({
+      fleets: vi.fn().mockResolvedValue(withFleet()),
+      flightPlans: vi.fn().mockResolvedValue([waitOnly]),
+    });
+
+    renderPage('/fleets', { auth: signedIn(), fleet, world, map: fakeMapApi() });
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Змінити лист' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Політний лист флоту' });
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Додати наказ' }));
+
+    const types = within(dialog).getAllByLabelText('Тип наказу');
+
+    await userEvent.selectOptions(types[types.length - 1]!, 'load');
+    await userEvent.click(await within(dialog).findByRole('button', { name: 'Додати позицію' }));
+
+    // The fuel is in the list, with the note, and it cannot be chosen.
+    const missing = await within(dialog).findByRole('option', { name: /немає на складі/ });
+
+    expect(missing).toBeDisabled();
+    expect(missing).toHaveValue('r:13');
   });
 });

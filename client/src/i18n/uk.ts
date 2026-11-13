@@ -1210,6 +1210,7 @@ export const uk = {
   'plan.cargo.thing': 'Що перевозити',
   'plan.cargo.choose': 'Оберіть',
   'plan.cargo.resources': 'Ресурси',
+  'plan.cargo.notInStock': 'немає на складі',
   'plan.cargo.parts': 'Модулі',
   'plan.cargo.amount': 'Кількість',
   'plan.cargo.available': 'Є {amount}',

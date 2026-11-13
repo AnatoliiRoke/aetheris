@@ -1212,6 +1212,7 @@ export const en: Messages = {
   'plan.cargo.thing': 'What to carry',
   'plan.cargo.choose': 'Choose',
   'plan.cargo.resources': 'Resources',
+  'plan.cargo.notInStock': 'not in stock',
   'plan.cargo.parts': 'Modules',
   'plan.cargo.amount': 'Amount',
   'plan.cargo.available': 'Have {amount}',
