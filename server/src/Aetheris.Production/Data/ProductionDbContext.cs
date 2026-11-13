@@ -77,6 +77,9 @@ public sealed class ProductionDbContext : DbContext
     /// <summary>Gets what every module of extraction takes and where (task 00055).</summary>
     public DbSet<PartExtractionEntity> PartExtractions => Set<PartExtractionEntity>();
 
+    /// <summary>Gets the fuel of every drive and the share of every resource in it (task 00072).</summary>
+    public DbSet<PartFuelEntity> PartFuels => Set<PartFuelEntity>();
+
     /// <summary>Gets the recipes.</summary>
     public DbSet<RecipeEntity> Recipes => Set<RecipeEntity>();
 
@@ -230,6 +233,18 @@ public sealed class ProductionDbContext : DbContext
             // their identifiers and carries no foreign key into the tables of the other modules (the
             // remark of the class). A row names a resource or a group, never both.
             entity.ToTable(table => table.HasCheckConstraint("ck_part_extraction_target", "NOT (resource_id IS NOT NULL AND resource_group_id IS NOT NULL)"));
+        });
+
+        modelBuilder.Entity<PartFuelEntity>(entity =>
+        {
+            entity.ToTable("part_fuel");
+            entity.HasKey(e => new { e.PartTypeId, e.ResourceTypeId });
+            entity.HasIndex(e => e.ResourceTypeId);
+            entity.HasOne<PartTypeEntity>().WithMany(part => part.FuelIds).HasForeignKey(e => e.PartTypeId).OnDelete(DeleteBehavior.Cascade);
+
+            // The resource lives in the world module, so the table keeps its identifier and carries
+            // no foreign key into the tables of the other modules (the remark of the class).
+            entity.ToTable(table => table.HasCheckConstraint("ck_part_fuel_share", "share > 0 AND share <= 1"));
         });
 
         modelBuilder.Entity<RecipeEntity>(entity =>

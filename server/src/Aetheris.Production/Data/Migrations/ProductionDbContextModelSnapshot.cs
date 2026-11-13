@@ -308,6 +308,32 @@ namespace Aetheris.Production.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartFuelEntity", b =>
+                {
+                    b.Property<int>("PartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_type_id");
+
+                    b.Property<int>("ResourceTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_type_id");
+
+                    b.Property<double>("Share")
+                        .HasColumnType("double precision")
+                        .HasColumnName("share");
+
+                    b.HasKey("PartTypeId", "ResourceTypeId")
+                        .HasName("pk_part_fuel");
+
+                    b.HasIndex("ResourceTypeId")
+                        .HasDatabaseName("ix_part_fuel_resource_type_id");
+
+                    b.ToTable("part_fuel", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_part_fuel_share", "share > 0 AND share <= 1");
+                        });
+                });
+
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartGroupCharacteristicEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -1057,6 +1083,16 @@ namespace Aetheris.Production.Data.Migrations
                         .HasConstraintName("fk_part_extraction_part_type_part_type_id");
                 });
 
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartFuelEntity", b =>
+                {
+                    b.HasOne("Aetheris.Production.Data.Entities.PartTypeEntity", null)
+                        .WithMany("FuelIds")
+                        .HasForeignKey("PartTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_fuel_part_type_part_type_id");
+                });
+
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartGroupCharacteristicEntity", b =>
                 {
                     b.HasOne("Aetheris.Production.Data.Entities.CharacteristicEntity", null)
@@ -1160,6 +1196,8 @@ namespace Aetheris.Production.Data.Migrations
                     b.Navigation("AttributeIds");
 
                     b.Navigation("ExtractionIds");
+
+                    b.Navigation("FuelIds");
 
                     b.Navigation("HullCompatibilityIds");
 

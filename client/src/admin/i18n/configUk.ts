@@ -307,6 +307,12 @@ export const configDescriptionsUk: Record<string, string> = {
     'Частка кредитної ціни модулів проєкту, яку готовий корабель бере кредитами за годину. Корпус не входить.',
   'config.fleet.shipyard.hull_return_share.description':
     'Не застосовується. Розбір повертає всі компоненти проєкту й екіпаж і не повертає ресурси на склад.',
+  'config.fleet.hyper.speed_multiplier.description':
+    'Множник швидкості гіперперельоту: швидкість гіпердвигунів кораблів, помножена на це число.',
+  'config.fleet.jump.reference_distance.description':
+    'Відстань в одиницях карти, до якої підготовка стрибка триває однаково; далі вона росте пропорційно відстані.',
+  'config.fleet.propellant.check_return_home.description':
+    'Чи додає перевірка палива перед відправкою флоту політ додому до потреби в паливі.',
 
   'config.mail.letter.body_max_length.description':
     'Найбільша кількість символів у тексті листа, який гравець пише іншому гравцеві.',

@@ -123,6 +123,9 @@ public static class ProductionSeedAdditions
         // What the modules of extraction take and where joined the starting data later (task 00055).
         added |= await AddMissingExtractionsAsync(dbContext, data, resources, partIds, cancellationToken).ConfigureAwait(false);
 
+        // The fuel of the drives joined the starting data later as well (task 00072).
+        added |= await AddMissingFuelsAsync(dbContext, data, resources, partIds, cancellationToken).ConfigureAwait(false);
+
         if (missingParts.Count == 0 && missingRecipes.Count == 0 && !missingLinks)
         {
             return added;
@@ -927,8 +930,69 @@ public static class ProductionSeedAdditions
     }
 
     /// <summary>
-    /// Reads the identifiers of the rows of the database by the codes of the file, in one query.
+    /// Adds the fuel of the drives that joined the starting data later (task 00072).
     /// </summary>
+    /// <remarks>
+    /// A database that was filled before the fuel of the drives joined the data has no rows of the
+    /// fuel, so the step adds the missing ones and leaves the rows that are there alone.
+    /// </remarks>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="data">The starting data.</param>
+    /// <param name="resources">The resources of the world.</param>
+    /// <param name="partIds">The identifiers of the parts, by their code.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>Whether a row was added.</returns>
+    private static async Task<bool> AddMissingFuelsAsync(
+        ProductionDbContext dbContext,
+        ProductionSeedData data,
+        ResourceCatalog resources,
+        IReadOnlyDictionary<string, int> partIds,
+        CancellationToken cancellationToken)
+    {
+        if (data.PartFuels is not { Count: > 0 } wanted)
+        {
+            return false;
+        }
+
+        Dictionary<string, int> resourceIds = resources.Resources.ToDictionary(resource => resource.Code, resource => resource.Id);
+
+        // The rows that are there, in one query, so the table is not walked row by row.
+        HashSet<(int PartTypeId, int ResourceTypeId)> existing =
+        [
+            .. (await dbContext.PartFuels.AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false))
+                .Select(row => (row.PartTypeId, row.ResourceTypeId)),
+        ];
+
+        bool added = false;
+
+        foreach (SeedPartFuel row in wanted)
+        {
+            if (!partIds.TryGetValue(row.Part, out int partId) || !resourceIds.TryGetValue(row.Resource, out int resourceId))
+            {
+                continue;
+            }
+
+            if (!existing.Add((partId, resourceId)))
+            {
+                continue;
+            }
+
+            dbContext.PartFuels.Add(new PartFuelEntity
+            {
+                PartTypeId = partId,
+                ResourceTypeId = resourceId,
+                Share = row.Share,
+            });
+            added = true;
+        }
+
+        if (added)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return added;
+    }
     private static async Task<Dictionary<string, int>> IdsAsync(
         IQueryable<CodeId> rows,
         List<string> wanted,

@@ -64,6 +64,8 @@
     { "code": "admin.player_designs_read", "kind": "screen" },
     { "code": "admin.player_design_updated", "kind": "action" },
     { "code": "admin.player_design_archived", "kind": "action" },
+    { "code": "admin.player_ships_read", "kind": "screen" },
+    { "code": "admin.player_ship_quantity_set", "kind": "action" },
     { "code": "admin.player_market_read", "kind": "screen" },
     { "code": "admin.player_lot_cancelled", "kind": "action" }
   ],

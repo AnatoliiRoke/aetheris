@@ -1,4 +1,4 @@
-import type { ShipAmmunition, ShipDesign, ShipDesignFact, ShipDesignSummary, ShipHull, ShipModule, ShipModuleFact } from '../../../api/fleetApi';
+import type { ShipAmmunition, ShipDesign, ShipDesignFact, ShipDesignSummary, ShipDesignWarning, ShipHull, ShipModule, ShipModuleFact } from '../../../api/fleetApi';
 import type { EntityText } from '../../../texts/context';
 import type { Language, MessageParams } from '../../../i18n/context';
 import type { MessageKey } from '../../../i18n/uk';
@@ -453,4 +453,64 @@ export function designProblem(
   }
 
   return null;
+}
+
+/** The code of the warning of a project with a hyperdrive or a jump drive and no ordinary drive (task 00072). */
+export const ftlNeedsNormalDriveCode = 'fleet_ftl_needs_normal_drive';
+
+/** The classes of the drives that fly between the systems (task 00072). */
+const ftlEngineKinds: readonly string[] = ['hyper', 'jump'];
+
+/**
+ * Tells whether a drive belongs to the ordinary class (task 00072): the ordinary and the
+ * gravitational drives fly inside the systems; a drive of the old data has no class and is ordinary.
+ *
+ * @param module The module.
+ * @returns `true` for a drive of the ordinary class.
+ */
+export function isNormalDrive(module: ShipModule): boolean {
+  return module.component === 'drive' && !ftlEngineKinds.includes(module.engineKind ?? '');
+}
+
+/**
+ * Finds the slots of the hyperdrives and of the jump drives of a project that has no ordinary
+ * drive (task 00072): such a ship cannot fly inside a system, so the constructor warns about it,
+ * but the project is saved anyway.
+ *
+ * @param slots The slots of the project.
+ * @param byId The modules of the catalog by their identifier.
+ * @returns The indexes of the slots, or an empty list when the project has an ordinary drive or no hyperdrive or jump drive.
+ */
+export function ftlSlotsWithoutNormalDrive(
+  slots: readonly { slotIndex: number; partTypeId: number }[],
+  byId: ReadonlyMap<number, ShipModule>,
+): number[] {
+  const ftlSlots: number[] = [];
+  let hasNormal = false;
+
+  for (const slot of slots) {
+    const module = byId.get(slot.partTypeId);
+
+    if (!module || module.component !== 'drive') {
+      continue;
+    }
+
+    if (ftlEngineKinds.includes(module.engineKind ?? '')) {
+      ftlSlots.push(slot.slotIndex);
+    } else {
+      hasNormal = true;
+    }
+  }
+
+  return hasNormal ? [] : ftlSlots.sort((left, right) => left - right);
+}
+
+/**
+ * Tells whether a project carries the warning about a missing ordinary drive (task 00072).
+ *
+ * @param design The project.
+ * @returns `true` when the server warns that the project has no ordinary drive.
+ */
+export function needsNormalDrive(design: { warnings?: readonly ShipDesignWarning[] }): boolean {
+  return (design.warnings ?? []).some((warning) => warning.code === ftlNeedsNormalDriveCode);
 }

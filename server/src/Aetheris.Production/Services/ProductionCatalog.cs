@@ -143,6 +143,7 @@ public sealed record CharacteristicInfo(
 /// <param name="RaceIds">The races the part belongs to, by their identifier (task 00042).</param>
 /// <param name="AmmunitionIds">The ammunition the part fires, when it is a weapon, by their identifier (task 00040).</param>
 /// <param name="Extraction">What the part takes and where, when it is a module of extraction (task 00055).</param>
+/// <param name="Fuel">The fuel of the part, when it is a drive, with the share of every resource in it (task 00072).</param>
 public sealed record PartTypeInfo(
     int Id,
     string Code,
@@ -159,7 +160,13 @@ public sealed record PartTypeInfo(
     IReadOnlyList<int> CompatibleHullIds,
     IReadOnlyList<int> RaceIds,
     IReadOnlyList<int>? AmmunitionIds = null,
-    IReadOnlyList<PartExtractionInfo>? Extraction = null);
+    IReadOnlyList<PartExtractionInfo>? Extraction = null,
+    IReadOnlyList<PartFuelInfo>? Fuel = null);
+
+/// <summary>One resource of the fuel of a drive and its share in it (task 00072).</summary>
+/// <param name="ResourceTypeId">The resource the drive burns.</param>
+/// <param name="Share">The share of the resource in the fuel of the drive.</param>
+public sealed record PartFuelInfo(int ResourceTypeId, double Share);
 
 /// <summary>One way a module of extraction takes from one kind of place (task 00055).</summary>
 /// <param name="PlaceKind">The kind of the place, one of <see cref="Api.ExtractionPlaceKinds"/>.</param>

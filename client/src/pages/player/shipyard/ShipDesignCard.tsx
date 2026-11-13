@@ -5,7 +5,7 @@ import { useI18n } from '../../../i18n/useI18n';
 import { useTexts } from '../../../texts/useTexts';
 import { formatAmount } from '../planetText';
 import { AssemblyCosts } from './AssemblyCosts';
-import { installedModules, designProblem, factLabel, formatCombatDamage, formatFactAmount, formatShield } from './shipyardParts';
+import { installedModules, designProblem, factLabel, formatCombatDamage, formatFactAmount, formatShield, needsNormalDrive } from './shipyardParts';
 
 /**
  * The card of a project of a ship on the design tab of the shipyard (task 00038): the picture of
@@ -75,6 +75,8 @@ export const ShipDesignCard = memo(function ShipDesignCard({
           {design.isArchived ? <span className="badge badge--warning">{t('shipyard.archived')}</span> : null}
         </div>
       </div>
+
+      {needsNormalDrive(design) ? <p className="sh-note sh-note--warning">{t('shipyard.ftlNeedsNormalDrive')}</p> : null}
 
       <section aria-labelledby={`sh-modules-${design.id}`}>
         <span className="civ-label" id={`sh-modules-${design.id}`}>

@@ -400,6 +400,8 @@ export const adminUk = {
   'admin.players.production': 'Виробництво',
   'admin.players.processes': 'Процеси',
   'admin.players.designs': 'Проєкти кораблів',
+  'admin.players.ships': 'Кораблі',
+  'admin.players.shipsHint': 'Кількість готових кораблів кожного проєкту, навіть коли їх нуль. Флот не змінюється: корабель у флоті лишається, і кількість не стає меншою за число таких кораблів.',
   'admin.players.market': 'Ринок',
   'admin.players.amount': 'Кількість',
   'admin.players.income': 'Приріст за годину',
@@ -462,6 +464,12 @@ export const adminUk = {
   'admin.error.levelRange': 'Рівень поза межами.',
   'admin.error.queueBlocks': 'Черга ще тримає цей запис. Спершу скасуйте його.',
   'admin.error.notAStock': 'Це не ресурс складу.',
+  'admin.error.shipsInFleet': 'Кораблі цього проєкту стоять у флоті. Кількість не може бути меншою.',
+  'admin.error.hullUnknown': 'Корпус проєкту невідомий, тож корабель не створено.',
+  'admin.error.hullIsDrone': 'Корпус — дрон, тож корабель не створено.',
+  'admin.error.hullArchived': 'Корпус в архіві, тож новий корабель не створено.',
+  'admin.error.moduleUnknown': 'Модуль проєкту невідомий, тож корабель не створено.',
+  'admin.error.quantityInvalid': 'Зміна кількості за один раз завелика.',
 } as const;
 
 export type AdminMessageKey = keyof typeof adminUk;

@@ -111,6 +111,60 @@ public sealed class WorldPlaceService
     }
 
     /// <summary>
+    /// Gets the place of the edge of a star system (task 00072): the last orbit of the system, as
+    /// the data of the world give it.
+    /// </summary>
+    /// <remarks>
+    /// The edge of a system is the last orbit that has an object: the number of the orbits is not a
+    /// number of the code, so it comes from the data of the world. The place carries the
+    /// coordinates of the system, because the edge is a point of the space inside the system and
+    /// not a body.
+    /// </remarks>
+    /// <param name="systemId">The system.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place, or <see langword="null"/> when the system is unknown or has no object.</returns>
+    public async Task<WorldPlaceDto?> GetSystemEdgePlaceAsync(long systemId, CancellationToken cancellationToken)
+    {
+        // One query reads the last orbit of the system and the coordinates of the system.
+        var row = await (
+                from system in _dbContext.Systems.AsNoTracking()
+                where system.Id == systemId
+                join sector in _dbContext.Sectors on system.SectorId equals sector.Id
+                select new
+                {
+                    system.SectorId,
+                    SectorX = sector.X,
+                    SectorY = sector.Y,
+                    SectorZ = sector.Z,
+                    system.X,
+                    system.Y,
+                    system.Z,
+                    LastOrbit = _dbContext.Objects
+                        .Where(entry => entry.SystemId == systemId && entry.Orbit != null)
+                        .Max(entry => (int?)entry.Orbit),
+                })
+            .SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+        // A system without an object has no edge: there is nothing to fly to.
+        if (row is null || row.LastOrbit is not { } orbit)
+        {
+            return null;
+        }
+
+        return new WorldPlaceDto(
+            row.SectorId,
+            systemId,
+            null,
+            null,
+            orbit,
+            string.Empty,
+            null,
+            row.SectorX + row.X,
+            row.SectorY + row.Y,
+            row.SectorZ + row.Z);
+    }
+
+    /// <summary>
     /// Gets the place of a body.
     /// </summary>
     /// <param name="planetId">The body.</param>

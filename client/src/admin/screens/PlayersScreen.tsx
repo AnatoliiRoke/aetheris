@@ -23,6 +23,7 @@ import type {
   ProductionView,
   ResearchRow,
   DesignSummary,
+  PlayerShipQuantity,
   ShipDesign,
   StockRow,
   TechnologyRow,
@@ -41,6 +42,7 @@ type TabId =
   | 'production'
   | 'processes'
   | 'designs'
+  | 'ships'
   | 'market';
 
 const colonyTabIds: TabId[] = ['stock', 'population', 'buildings', 'construction'];
@@ -57,10 +59,11 @@ const tabs: { id: TabId; label: AdminMessageKey; permission: string | null; need
   { id: 'production', label: 'admin.players.production', permission: 'admin.player_production_read', needsPlanet: true },
   { id: 'processes', label: 'admin.players.processes', permission: 'admin.player_process_read', needsPlanet: true },
   { id: 'designs', label: 'admin.players.designs', permission: 'admin.player_designs_read', needsPlanet: false },
+  { id: 'ships', label: 'admin.players.ships', permission: 'admin.player_ships_read', needsPlanet: false },
   { id: 'market', label: 'admin.players.market', permission: 'admin.player_market_read', needsPlanet: false },
 ];
 
-type Area = 'card' | 'balances' | 'colony' | 'technologies' | 'production' | 'processes' | 'designs' | 'market';
+type Area = 'card' | 'balances' | 'colony' | 'technologies' | 'production' | 'processes' | 'designs' | 'ships' | 'market';
 
 /**
  * The player list and the card of one player. The body itself is not edited: a planet is only
@@ -194,6 +197,7 @@ function PlayerCard({ userId }: { userId: string }) {
     production: 0,
     processes: 0,
     designs: 0,
+    ships: 0,
     market: 0,
   });
   const [cardState, setCardState] = useState<{ key: string; card: PlayerCard | null; error: AdminMessageKey | null }>({ key: '', card: null, error: null });
@@ -267,6 +271,7 @@ function PlayerCard({ userId }: { userId: string }) {
       production: currentStamps.production + 1,
       processes: currentStamps.processes + 1,
       designs: currentStamps.designs + 1,
+      ships: currentStamps.ships + 1,
       market: currentStamps.market + 1,
     }));
   };
@@ -436,6 +441,19 @@ function PlayerCard({ userId }: { userId: string }) {
               canArchive={can('admin.player_design_archived')}
               onRename={(designId, designName) => commit(() => players.renameDesign(userId, designId, designName, reason.trim()), 'designs')}
               onArchive={(designId) => commit(() => players.archiveDesign(userId, designId, reason.trim()), 'designs')}
+            />
+            </div>
+          ) : null}
+          {seen.includes('ships') ? (
+            <div hidden={current.id !== 'ships'}>
+            <ShipsSection
+              userId={userId}
+              planets={card.planets}
+              reloadKey={stamps.ships}
+              reasonReady={reasonReady}
+              busy={busy}
+              canSet={can('admin.player_ship_quantity_set')}
+              onQuantity={(designId, quantity) => commit(() => players.setShipQuantity(userId, designId, quantity, reason.trim()), 'ships')}
             />
             </div>
           ) : null}
@@ -1107,6 +1125,104 @@ function OrdersSection({
       )}
     </LoadGate>
   );
+}
+
+function ShipsSection({
+  userId,
+  planets,
+  reloadKey,
+  reasonReady,
+  busy,
+  canSet,
+  onQuantity,
+}: {
+  userId: string;
+  planets: PlanetLabel[];
+  reloadKey: number;
+  reasonReady: boolean;
+  busy: boolean;
+  canSet: boolean;
+  onQuantity: (designId: number, quantity: number) => void;
+}) {
+  const { t, language } = useAdminText();
+  const { players, onError } = useAdmin();
+  const requestKey = `${userId}:${reloadKey}`;
+  const [loaded, setLoaded] = useState<{ key: string; rows: PlayerShipQuantity[]; error: AdminMessageKey | null }>({ key: '', rows: [], error: null });
+
+  useEffect(() => {
+    let active = true;
+
+    players.ships(userId).then(
+      (rows) => {
+        if (active) {
+          setLoaded({ key: requestKey, rows, error: null });
+        }
+      },
+      (failure: unknown) => {
+        if (active) {
+          onError(failure);
+          setLoaded({ key: requestKey, rows: [], error: errorKey(failure) });
+        }
+      },
+    );
+
+    return () => {
+      active = false;
+    };
+  }, [players, userId, onError, requestKey]);
+
+  return (
+    <LoadGate pending={loaded.key !== requestKey} errorMessage={loaded.error}>
+      <p className="hint">{t('admin.players.shipsHint')}</p>
+      {loaded.rows.length === 0 ? <p className="hint">{t('admin.players.emptySection')}</p> : (
+        <div className="admin-table__scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>{t('admin.players.name')}</th>
+                <th>{t('admin.players.planet')}</th>
+                <th>{t('admin.players.quantity')}</th>
+                <th>{t('admin.players.amount')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loaded.rows.map((row) => (
+                <tr key={row.design_id}>
+                  <td>
+                    {row.name}
+                    {row.is_archived ? ` · ${t('admin.players.archived')}` : ''}
+                  </td>
+                  <td>{shipPlanet(planets, row.planet_id, t)}</td>
+                  <td>{formatNumber(row.quantity, language, 0)}</td>
+                  <td>
+                    <DraftCell
+                      key={`${row.design_id}:${row.quantity}`}
+                      label={t('admin.players.quantity')}
+                      initial={row.quantity}
+                      allowNegative={false}
+                      disabled={!(canSet && reasonReady && !busy)}
+                      saveLabel={t('admin.players.save')}
+                      onSave={(quantity) => onQuantity(row.design_id, quantity)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </LoadGate>
+  );
+}
+
+function shipPlanet(
+  planets: PlanetLabel[],
+  planetId: number,
+  t: (key: AdminMessageKey, params?: Record<string, string | number>) => string,
+): string {
+  const planet = planets.find((entry) => entry.planet_id === planetId);
+
+  return planet ? planetCaption(planet, t) : t('admin.players.planetLabel', { id: planetId });
 }
 
 function DesignsSection({

@@ -98,6 +98,8 @@ public sealed record ShipHullDto(
 /// <param name="Extraction">What the module takes and where, when it is a module of extraction (task 00055). A module without rows takes nothing.</param>
 /// <param name="FlightOrder">The order of a flight plan the module opens for a fleet, or <see langword="null"/> (task 00058).</param>
 /// <param name="ScanTarget">The kind of target detected by the module, or <see langword="null"/>.</param>
+/// <param name="EngineKind">The class of the drive, or <see langword="null"/> when the module is not a drive (task 00072).</param>
+/// <param name="Fuel">The fuel of the drive and the share of every resource in it (task 00072). A drive without rows burns nothing.</param>
 public sealed record ShipModuleDto(
     int Id,
     string Code,
@@ -134,7 +136,16 @@ public sealed record ShipModuleDto(
     IReadOnlyList<int>? AmmunitionIds = null,
     IReadOnlyList<ShipModuleExtractionDto>? Extraction = null,
     string? FlightOrder = null,
-    string? ScanTarget = null);
+    string? ScanTarget = null,
+    string? EngineKind = null,
+    IReadOnlyList<ShipModuleFuelDto>? Fuel = null);
+
+/// <summary>
+/// One resource of the fuel of a drive and its share in it (task 00072).
+/// </summary>
+/// <param name="ResourceTypeId">The resource the drive burns.</param>
+/// <param name="Share">The share of the resource in the fuel of the drive.</param>
+public sealed record ShipModuleFuelDto(int ResourceTypeId, double Share);
 
 /// <summary>
 /// One way a module of extraction takes from one kind of place (task 00055).

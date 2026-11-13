@@ -312,6 +312,9 @@
         },
         "component": {
           "code": "drive"
+        },
+        "engine_kind": {
+          "code": "normal"
         }
       },
       "weight": 1,
@@ -347,6 +350,9 @@
         },
         "component": {
           "code": "drive"
+        },
+        "engine_kind": {
+          "code": "normal"
         }
       },
       "weight": 1.1,
@@ -382,6 +388,9 @@
         },
         "component": {
           "code": "drive"
+        },
+        "engine_kind": {
+          "code": "normal"
         }
       },
       "weight": 1.21,
@@ -417,6 +426,9 @@
         },
         "component": {
           "code": "drive"
+        },
+        "engine_kind": {
+          "code": "gravity"
         }
       },
       "weight": 1.331,
@@ -452,6 +464,9 @@
         },
         "component": {
           "code": "drive"
+        },
+        "engine_kind": {
+          "code": "hyper"
         },
         "flight_order": {
           "code": "hyperfly"
@@ -491,6 +506,9 @@
         "component": {
           "code": "drive"
         },
+        "engine_kind": {
+          "code": "jump"
+        },
         "flight_order": {
           "code": "jump"
         }
@@ -505,6 +523,9 @@
         },
         "char_energy_use": {
           "number": 120
+        },
+        "char_jump_prep": {
+          "number": 900
         }
       }
     },
@@ -2947,9 +2968,6 @@
       "weight": 1692.892739,
       "characteristics": {
         "char_energy_use": {
-          "number": 214.358881
-        },
-        "char_jump_prep": {
           "number": 214.358881
         }
       }
@@ -11926,6 +11944,12 @@
       "is_required": true
     },
     {
+      "group": "pg_1",
+      "characteristic": "char_jump_prep",
+      "sort_order": 4,
+      "is_required": false
+    },
+    {
       "group": "pg_2",
       "characteristic": "char_power",
       "sort_order": 1,
@@ -14153,6 +14177,48 @@
       "place_kind": "nebula",
       "mode": "listed",
       "resource": "resource_12"
+    }
+  ],
+  "part_fuels": [
+    {
+      "part": "part_m_1",
+      "resource": "resource_12",
+      "share": 1.0
+    },
+    {
+      "part": "part_m_2",
+      "resource": "resource_12",
+      "share": 1.0
+    },
+    {
+      "part": "part_m_3",
+      "resource": "resource_12",
+      "share": 1.0
+    },
+    {
+      "part": "part_m_4",
+      "resource": "resource_13",
+      "share": 1.0
+    },
+    {
+      "part": "part_m_5",
+      "resource": "resource_14",
+      "share": 0.3
+    },
+    {
+      "part": "part_m_5",
+      "resource": "resource_15",
+      "share": 0.7
+    },
+    {
+      "part": "part_m_6",
+      "resource": "resource_14",
+      "share": 0.7
+    },
+    {
+      "part": "part_m_6",
+      "resource": "resource_15",
+      "share": 0.3
     }
   ]
 }

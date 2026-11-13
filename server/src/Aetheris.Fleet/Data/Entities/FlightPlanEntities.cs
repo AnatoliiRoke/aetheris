@@ -112,6 +112,27 @@ public sealed class FlightPlanOrderEntity
 
     /// <summary>Gets or sets the parameters of the order as a document.</summary>
     public string Parameters { get; set; } = "{}";
+
+    /// <summary>
+    /// Gets or sets the key that binds the legs of one command of the player together (task 00072).
+    /// The legs of a hyperflight or of a jump share one key, so the client shows them as one row
+    /// with a list of the legs under it. It is <see langword="null"/> for the orders that are not
+    /// a part of a group.
+    /// </summary>
+    public Guid? GroupKey { get; set; }
+
+    /// <summary>
+    /// Gets or sets the command of the player the legs come from (task 00072): the hyperflight or
+    /// the jump. It is <see langword="null"/> for the orders that are not a leg of a group.
+    /// </summary>
+    public string? Command { get; set; }
+
+    /// <summary>
+    /// Gets or sets the role of the order in the group (task 00072), one of
+    /// <see cref="FlightLegKinds"/>. It is <see langword="null"/> for the orders that are not a leg
+    /// of a group.
+    /// </summary>
+    public string? Leg { get; set; }
 }
 
 /// <summary>
@@ -197,4 +218,75 @@ public static class FlightTargetKinds
 
     /// <summary>The target is a body of the player.</summary>
     public const string Planet = "planet";
+}
+
+/// <summary>
+/// The roles of the legs of a command of the player (task 00072). A hyperflight or a jump between
+/// two systems is made of three legs: to the edge of the system, through the space between the
+/// systems, and from the edge of the system of the target to the target itself.
+/// </summary>
+public static class FlightLegKinds
+{
+    /// <summary>Every role of a leg, so a request that names another one is refused.</summary>
+    public static readonly IReadOnlyList<string> All = [Normal, ToEdge, Ftl, FromEdge];
+
+    /// <summary>The leg of an ordinary flight: it stays inside a system.</summary>
+    public const string Normal = "normal";
+
+    /// <summary>The leg from the place the fleet stands at to the edge of its system.</summary>
+    public const string ToEdge = "to_edge";
+
+    /// <summary>The leg through the space between the systems: the hyperflight or the jump itself.</summary>
+    public const string Ftl = "ftl";
+
+    /// <summary>The leg from the edge of the system of the target to the target itself.</summary>
+    public const string FromEdge = "from_edge";
+}
+
+/// <summary>
+/// The classes of a drive of a ship (task 00072). The class decides how the drive works: the
+/// ordinary drives fly inside a system, the hyperdrive flies between the systems and the jump
+/// drive jumps between them.
+/// </summary>
+public static class FlightEngineKinds
+{
+    /// <summary>Every class of a drive, so a request that names another one is refused.</summary>
+    public static readonly IReadOnlyList<string> All = [Normal, Gravity, Hyper, Jump];
+
+    /// <summary>The ordinary drive: it flies inside a system and burns the fuel of the ordinary drives.</summary>
+    public const string Normal = "normal";
+
+    /// <summary>
+    /// The gravitational drive (task 00072): it works only near a star, so it gives no push and
+    /// burns no fuel in open space.
+    /// </summary>
+    public const string Gravity = "gravity";
+
+    /// <summary>The hyperdrive: it flies between the systems faster than an ordinary drive.</summary>
+    public const string Hyper = "hyper";
+
+    /// <summary>The jump drive: it jumps between the systems after a preparation.</summary>
+    public const string Jump = "jump";
+
+    /// <summary>
+    /// Tells whether a drive of a kind belongs to the class of the ordinary drives: the ordinary
+    /// drive and the gravitational drive both fly the legs inside the systems (task 00072).
+    /// </summary>
+    /// <param name="kind">The kind of the drive.</param>
+    /// <returns><see langword="true"/> for a drive of the ordinary class.</returns>
+    public static bool IsNormalClass(string? kind) =>
+        kind is null
+        || string.Equals(kind, Normal, StringComparison.Ordinal)
+        || string.Equals(kind, Gravity, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Tells whether a drive of a kind belongs to a class.
+    /// </summary>
+    /// <param name="kind">The kind of the drive.</param>
+    /// <param name="engineClass">The class: <see cref="Normal"/>, <see cref="Hyper"/> or <see cref="Jump"/>.</param>
+    /// <returns><see langword="true"/> when the drive belongs to the class.</returns>
+    public static bool BelongsTo(string? kind, string engineClass) =>
+        string.Equals(engineClass, Normal, StringComparison.Ordinal)
+            ? IsNormalClass(kind)
+            : string.Equals(kind, engineClass, StringComparison.Ordinal);
 }

@@ -2,6 +2,7 @@ using Aetheris.Core.Configuration;
 using Aetheris.Fleet.Api;
 using Aetheris.Fleet.Configuration;
 using Aetheris.Fleet.Data;
+using Aetheris.Fleet.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aetheris.Fleet.Services;
@@ -20,12 +21,18 @@ namespace Aetheris.Fleet.Services;
 /// The mass of a ship is the mass of its project (the hull and the modules) plus what its hold carries.
 /// A fleet flies at the speed of its slowest ship, so a ship without a drive grounds the fleet.
 /// </para>
+/// <para>
+/// The ships may carry drives of several classes (task 00072), so the speed is counted for every
+/// class: the ordinary drives fly inside a system, the hyperdrives fly between the systems and the
+/// jump drives jump between them. The speed of a class is the speed of its slowest ship.
+/// </para>
 /// </remarks>
 public sealed class FleetSpeedService
 {
     private readonly FleetDbContext _dbContext;
     private readonly ShipDesignService _designs;
     private readonly FleetHoldService _holds;
+    private readonly EngineKindsReader _engines;
     private readonly IGameConfig _config;
 
     /// <summary>
@@ -34,17 +41,25 @@ public sealed class FleetSpeedService
     /// <param name="dbContext">The fleet context.</param>
     /// <param name="designs">The projects of the ships, for their mass and push.</param>
     /// <param name="holds">The holds of the ships, for what they carry.</param>
+    /// <param name="engines">The drives of the ships, for the push of every class.</param>
     /// <param name="config">The game configuration.</param>
-    public FleetSpeedService(FleetDbContext dbContext, ShipDesignService designs, FleetHoldService holds, IGameConfig config)
+    public FleetSpeedService(
+        FleetDbContext dbContext,
+        ShipDesignService designs,
+        FleetHoldService holds,
+        EngineKindsReader engines,
+        IGameConfig config)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(designs);
         ArgumentNullException.ThrowIfNull(holds);
+        ArgumentNullException.ThrowIfNull(engines);
         ArgumentNullException.ThrowIfNull(config);
 
         _dbContext = dbContext;
         _designs = designs;
         _holds = holds;
+        _engines = engines;
         _config = config;
     }
 
@@ -111,25 +126,57 @@ public sealed class FleetSpeedService
     {
         FleetSettings settings = FleetSettings.From(_config);
 
-        var ships = await _dbContext.FleetShips.AsNoTracking()
+        List<FleetShipRow> ships = await _dbContext.FleetShips.AsNoTracking()
             .Where(entry => entry.FleetId == fleetId)
-            .Join(_dbContext.Ships, entry => entry.ShipId, ship => ship.Id, (entry, ship) => new { ship.Id, ship.ShipDesignId })
+            .Join(_dbContext.Ships, entry => entry.ShipId, ship => ship.Id, (entry, ship) => new FleetShipRow(ship.Id, ship.ShipDesignId))
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         if (ships.Count == 0)
         {
-            return new FleetSpeeds(0m, 0m, 0m);
+            FleetSpeedSet none = new(0m, 0m, 0m);
+
+            return new FleetSpeeds(none, none, none, 0m);
         }
 
         IReadOnlyDictionary<long, ShipDesignSummaryDto> summaries = await _designs
             .ReadSummariesAsync([.. ships.Select(ship => ship.ShipDesignId)], cancellationToken).ConfigureAwait(false);
         Dictionary<long, ShipHold> holds = (await _holds.ReadAsync(fleetId, cancellationToken).ConfigureAwait(false))
             .ToDictionary(hold => hold.ShipId);
+        FleetEngines engines = await _engines.ReadAsync(fleetId, cancellationToken).ConfigureAwait(false);
 
-        // The cargo belongs to the fleet: the holds are filled one after another, but the fleet is
-        // as loaded as its whole hold is, so for the speed the cargo is spread over the ships by
-        // the room of their holds. A ship that happens to be filled first does not slow the fleet
-        // down as a ship with a full hold.
+        // The push of a class comes only from the drives of that class (task 00072): the
+        // hyperdrives and the jump drives do not move a ship inside a system, and the
+        // gravitational drives do not move it in open space.
+        FleetSpeedSet normal = SpeedsOf(ships, summaries, holds, ship => engines.PushOfShip(ship, FlightEngineKinds.Normal), settings);
+        FleetSpeedSet normalOpenSpace = SpeedsOf(ships, summaries, holds, ship => engines.PushOfShip(ship, FlightEngineKinds.Normal, inSystem: false), settings);
+        FleetSpeedSet hyper = SpeedsOf(ships, summaries, holds, ship => engines.PushOfShip(ship, FlightEngineKinds.Hyper), settings);
+
+        return new FleetSpeeds(normal, normalOpenSpace, hyper, engines.JumpPrepSeconds());
+    }
+
+    /// <summary>
+    /// Counts the speeds of the fleet for the push of one class of the drives.
+    /// </summary>
+    /// <remarks>
+    /// The cargo belongs to the fleet: the holds are filled one after another, but the fleet is as
+    /// loaded as its whole hold is, so for the speed the cargo is spread over the ships by the room
+    /// of their holds. A ship that happens to be filled first does not slow the fleet down as a
+    /// ship with a full hold. A ship without a drive of the class has no speed, so the fleet of
+    /// such a ship has no speed of the class either.
+    /// </remarks>
+    /// <param name="ships">The ships of the fleet.</param>
+    /// <param name="summaries">The summaries of the designs of the ships.</param>
+    /// <param name="holds">The holds of the ships.</param>
+    /// <param name="pushOf">The push of the class of a ship, by the identifier of the ship.</param>
+    /// <param name="settings">The parameters of the fleet.</param>
+    /// <returns>The speeds of the fleet: empty, as loaded now and with full holds.</returns>
+    private static FleetSpeedSet SpeedsOf(
+        IReadOnlyList<FleetShipRow> ships,
+        IReadOnlyDictionary<long, ShipDesignSummaryDto> summaries,
+        IReadOnlyDictionary<long, ShipHold> holds,
+        Func<long, decimal> pushOf,
+        FleetSettings settings)
+    {
         decimal fleetCapacity = holds.Values.Sum(hold => (decimal)hold.Capacity);
         decimal fleetCarried = holds.Values.Sum(hold => (decimal)hold.Carried);
 
@@ -137,7 +184,7 @@ public sealed class FleetSpeedService
         List<decimal> current = [];
         List<decimal> full = [];
 
-        foreach (var ship in ships)
+        foreach (FleetShipRow ship in ships)
         {
             if (!summaries.TryGetValue(ship.ShipDesignId, out ShipDesignSummaryDto? summary))
             {
@@ -148,23 +195,45 @@ public sealed class FleetSpeedService
                 continue;
             }
 
-            ShipHold? hold = holds.GetValueOrDefault(ship.Id);
+            ShipHold? hold = holds.GetValueOrDefault(ship.ShipId);
             decimal capacity = hold?.Capacity ?? 0m;
             decimal carried = fleetCapacity > 0m ? Math.Min(capacity, fleetCarried * capacity / fleetCapacity) : 0m;
+            decimal push = pushOf(ship.ShipId);
 
-            empty.Add(ShipSpeed(summary.DrivePush, summary.Weight, settings));
-            current.Add(ShipSpeed(summary.DrivePush, summary.Weight + carried, settings));
-            full.Add(ShipSpeed(summary.DrivePush, summary.Weight + capacity, settings));
+            empty.Add(ShipSpeed(push, summary.Weight, settings));
+            current.Add(ShipSpeed(push, summary.Weight + carried, settings));
+            full.Add(ShipSpeed(push, summary.Weight + capacity, settings));
         }
 
-        return new FleetSpeeds(FleetSpeed(empty), FleetSpeed(current), FleetSpeed(full));
+        return new FleetSpeedSet(FleetSpeed(empty), FleetSpeed(current), FleetSpeed(full));
     }
+
+    private sealed record FleetShipRow(long ShipId, long ShipDesignId);
 }
 
 /// <summary>
-/// The speeds of a fleet, in light-years per hour (task 00053).
+/// The speeds of a fleet, in light-years per hour (task 00053, task 00072).
+/// </summary>
+/// <param name="Normal">The speeds with the ordinary drives inside a star system.</param>
+/// <param name="NormalOpenSpace">The speeds with the ordinary drives in open space, where the gravitational drives do not work.</param>
+/// <param name="Hyper">The speeds with the hyperdrives alone.</param>
+/// <param name="JumpPrepSeconds">How long the fleet prepares for a jump, in seconds.</param>
+public sealed record FleetSpeeds(FleetSpeedSet Normal, FleetSpeedSet NormalOpenSpace, FleetSpeedSet Hyper, decimal JumpPrepSeconds)
+{
+    /// <summary>Gets the speed with an empty hold.</summary>
+    public decimal Empty => Normal.Empty;
+
+    /// <summary>Gets the speed with the cargo the fleet carries now.</summary>
+    public decimal Current => Normal.Current;
+
+    /// <summary>Gets the speed with a full hold.</summary>
+    public decimal Full => Normal.Full;
+}
+
+/// <summary>
+/// The three speeds of a fleet in one class of drives (task 00072).
 /// </summary>
 /// <param name="Empty">The speed with an empty hold.</param>
 /// <param name="Current">The speed with the cargo the fleet carries now.</param>
 /// <param name="Full">The speed with a full hold.</param>
-public sealed record FleetSpeeds(decimal Empty, decimal Current, decimal Full);
+public sealed record FleetSpeedSet(decimal Empty, decimal Current, decimal Full);

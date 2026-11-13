@@ -112,6 +112,9 @@ public sealed class PartTypeEntity
 
     /// <summary>Gets or sets what the part takes and where, when it is a module of extraction (task 00055).</summary>
     public List<PartExtractionEntity> ExtractionIds { get; set; } = [];
+
+    /// <summary>Gets or sets the fuel of the part, when it is a drive (task 00072).</summary>
+    public List<PartFuelEntity> FuelIds { get; set; } = [];
 }
 
 /// <summary>

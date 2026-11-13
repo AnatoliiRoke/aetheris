@@ -222,6 +222,15 @@ export interface DesignSlot {
   has_race_bonus: boolean;
 }
 
+/** The finished ships of one project. Zero is a real count. */
+export interface PlayerShipQuantity {
+  design_id: number;
+  name: string;
+  planet_id: number;
+  is_archived: boolean;
+  quantity: number;
+}
+
 /** A ship project. */
 export interface ShipDesign {
   id: number;
@@ -352,6 +361,8 @@ export interface PlayerAdminApi {
   processes(userId: string, planetId: number): Promise<ProcessOrderRow[]>;
   cancelProcess(userId: string, planetId: number, orderId: number, reason: string): Promise<void>;
   designs(userId: string): Promise<ShipDesign[]>;
+  ships(userId: string): Promise<PlayerShipQuantity[]>;
+  setShipQuantity(userId: string, designId: number, quantity: number, reason: string): Promise<void>;
   renameDesign(userId: string, designId: number, name: string, reason: string): Promise<void>;
   archiveDesign(userId: string, designId: number, reason: string): Promise<void>;
   market(userId: string, offset: number): Promise<MarketView>;
@@ -449,6 +460,12 @@ export function createPlayerAdminApi(http: HttpClient): PlayerAdminApi {
     },
     designs(userId) {
       return http.get<ShipDesign[]>(`${adminPrefix}/fleet/players/${encodeURIComponent(userId)}/designs`);
+    },
+    ships(userId) {
+      return http.get<PlayerShipQuantity[]>(`${adminPrefix}/fleet/players/${encodeURIComponent(userId)}/ships`);
+    },
+    async setShipQuantity(userId, designId, quantity, reason) {
+      await http.put(`${adminPrefix}/fleet/players/${encodeURIComponent(userId)}/ships/${designId}`, { quantity, reason });
     },
     async renameDesign(userId, designId, name, reason) {
       await http.put(`${adminPrefix}/fleet/players/${encodeURIComponent(userId)}/designs/${designId}`, { name, reason });

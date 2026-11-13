@@ -117,6 +117,8 @@ export interface ShipModule {
   extractionPlaceKinds?: string[];
   /** The order of a flight plan the module opens for a fleet: `hyperfly`, `jump` or `scan`; absent for a module that opens none (task 00058). */
   flightOrder?: string | null;
+  /** The class of a drive (task 00072): `normal`, `gravity`, `hyper` or `jump`; absent for a module that is not a drive. */
+  engineKind?: string | null;
   /** The type of target detected by a scanner. */
   scanTarget?: string | null;
   /** The characteristics the plaque adds up. */
@@ -239,6 +241,16 @@ export interface ShipDesign {
   summary: ShipDesignSummary;
   /** Whether a finished ship of this project exists. The project then cannot be edited or archived. */
   hasBuiltShips?: boolean;
+  /** The problems of the project that do not stop it from being saved or built (task 00072). */
+  warnings?: ShipDesignWarning[];
+}
+
+/**
+ * A problem of a project that does not stop it (task 00072): the code and the slots it names.
+ */
+export interface ShipDesignWarning {
+  code: string;
+  slotIndexes: number[];
 }
 
 /**
@@ -314,6 +326,8 @@ export interface FleetApi {
   executeFlightPlan(fleetId: number): Promise<FlightPlan>;
   /** The distance and the time of a flight, counted by the server (task 00053); `null` when the place is unknown. */
   flightEstimate(request: FlightEstimateRequest): Promise<FlightEstimate | null>;
+  /** The fuel of the route of the plan of a fleet and what the hold holds (task 00072). */
+  fuelEstimate(fleetId: number): Promise<FlightFuelEstimate | null>;
   /** What the holds of the ships of a fleet carry (task 00056); read when the window of the hold opens. */
   fleetHold(fleetId: number): Promise<FleetHold>;
 }
@@ -357,6 +371,76 @@ export interface FlightPlanOrder {
   durationSeconds: number;
   /** The parameters of the order as a document. */
   parameters: string;
+  /**
+   * The key that binds the legs of one command of the player together (task 00072): the legs of a
+   * hyperflight or of a jump share one key, so the client shows them as one row with a list under
+   * it. It is `null` for an order that stands alone.
+   */
+  groupKey?: string | null;
+  /** The command of the player the legs come from (task 00072): `hyperfly` or `jump`. */
+  command?: string | null;
+  /** The role of the order in the group (task 00072): `normal`, `to_edge`, `ftl` or `from_edge`. */
+  leg?: string | null;
+}
+
+/**
+ * The fuel of the route of a plan and what the hold of the fleet holds (task 00072).
+ */
+export interface FlightFuelEstimate {
+  /** The legs of the route, one after another. */
+  legs: FlightFuelLeg[];
+  /** The legs of the flight home, when the check of the fuel counts it. */
+  returnLegs: FlightFuelLeg[];
+  /** The need of every resource, with what the hold holds now. */
+  fuelNeed: FlightFuelResource[];
+  /** The resources the fleet does not have enough of. */
+  shortages: FlightFuelShortage[];
+}
+
+/**
+ * One leg of a route and what it burns (task 00072).
+ */
+export interface FlightFuelLeg {
+  /** The role of the leg: `normal`, `to_edge`, `ftl` or `from_edge`. */
+  leg: string;
+  /** The class of the drives the leg uses: `normal`, `hyper` or `jump`. */
+  kind: string;
+  fromSectorId: number;
+  fromSystemId?: number | null;
+  fromOrbit?: number | null;
+  toSectorId: number;
+  toSystemId?: number | null;
+  toOrbit?: number | null;
+  /** The distance of the leg, in the units of the map. */
+  distance: number;
+  /** How long the leg lasts, in game seconds. */
+  seconds: number;
+  /** The fuel the leg burns, by the resource. */
+  fuel: FlightFuelResource[];
+}
+
+/**
+ * One resource of the fuel of a leg (task 00072).
+ */
+export interface FlightFuelResource {
+  /** The resource. */
+  resourceTypeId: number;
+  /** How much of the resource the leg burns, or how much the route needs. */
+  amount: number;
+  /** How much of the resource the hold of the fleet holds now. */
+  have: number;
+}
+
+/**
+ * One resource the fleet does not have enough of (task 00072).
+ */
+export interface FlightFuelShortage {
+  /** The resource. */
+  resourceTypeId: number;
+  /** How much of the resource the route needs. */
+  need: number;
+  /** How much of the resource the hold of the fleet holds now. */
+  have: number;
 }
 
 /**
@@ -473,6 +557,10 @@ export interface FleetFlight {
   toX: number;
   toY: number;
   toZ: number;
+  /** The class of the drives of the flight (task 00072): `normal`, `hyper` or `jump`. */
+  legKind?: string;
+  /** The moment of game time the preparation of a jump is over, or `null` for a flight that is not a jump (task 00072). */
+  prepEndsAt?: string | null;
 }
 
 /**
@@ -706,6 +794,8 @@ export interface ShipyardDesign {
   parts: ShipyardPart[];
   /** The credits one finished ship of the project costs per hour. */
   upkeepPerHour?: number;
+  /** The problems of the project that do not stop the assembly (task 00072). */
+  warnings?: ShipDesignWarning[];
 }
 
 /**
@@ -905,6 +995,21 @@ export function createFleetApi(http: HttpClient): FleetApi {
     },
     async fleetHold(fleetId) {
       return camelize<FleetHold>(await http.get<unknown>(`${prefix}/fleets/${fleetId}/hold`));
+    },
+    async fuelEstimate(fleetId) {
+      try {
+        return camelize<FlightFuelEstimate>(
+          await http.get<unknown>(`${prefix}/flight-plans/plan-estimate?fleet_id=${fleetId}`),
+        );
+      } catch (error) {
+        // The server answers «not found» for a fleet or a plan it does not know: there is
+        // nothing to count.
+        if (error instanceof ApiError && error.status === notFoundStatus) {
+          return null;
+        }
+
+        throw error;
+      }
     },
   };
 }

@@ -44,6 +44,12 @@ public static class ProductionReferenceSeed
     private static readonly IReadOnlyDictionary<int, decimal> EmptyLevels = new Dictionary<int, decimal>();
 
     /// <summary>
+    /// The allowed difference between the sum of the shares of the fuel of a drive and one
+    /// (task 00072). The shares are stored as doubles, so the sum is compared with a tolerance.
+    /// </summary>
+    private const double FuelShareTolerance = 1e-9;
+
+    /// <summary>
     /// Reads the starting data.
     /// </summary>
     /// <returns>The starting data.</returns>
@@ -52,8 +58,37 @@ public static class ProductionReferenceSeed
         using Stream stream = typeof(ProductionReferenceSeed).Assembly.GetManifestResourceStream(ResourceName)
             ?? throw new InvalidOperationException($"The embedded starting data {ResourceName} is missing.");
 
-        return JsonSerializer.Deserialize<ProductionSeedData>(stream, JsonOptions)
+        ProductionSeedData data = JsonSerializer.Deserialize<ProductionSeedData>(stream, JsonOptions)
             ?? throw new InvalidOperationException($"The embedded starting data {ResourceName} is empty.");
+
+        CheckFuelShares(data);
+
+        return data;
+    }
+
+    /// <summary>
+    /// Checks that the shares of the fuel of every drive add up to one (task 00072). A database
+    /// cannot check it with a constraint over two rows, so the seed checks it before it writes
+    /// anything.
+    /// </summary>
+    /// <param name="data">The starting data.</param>
+    /// <exception cref="InvalidOperationException">The shares of a drive do not add up to one.</exception>
+    private static void CheckFuelShares(ProductionSeedData data)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+
+        foreach (IGrouping<string, SeedPartFuel> drive in (data.PartFuels ?? []).GroupBy(row => row.Part, StringComparer.Ordinal))
+        {
+            double sum = drive.Sum(row => row.Share);
+
+            // The shares are stored as doubles, so the sum is compared with a tolerance: the sum of
+            // the shares of a drive must be one to within a rounding error.
+            if (Math.Abs(sum - 1d) > FuelShareTolerance)
+            {
+                throw new InvalidOperationException(
+                    $"The fuel shares of the drive {drive.Key} add up to {sum} instead of one.");
+            }
+        }
     }
 
     /// <summary>
@@ -343,7 +378,21 @@ public static class ProductionReferenceSeed
             });
         }
 
-        if (data.PartHulls is { Count: > 0 } || data.PartRaces is { Count: > 0 } || data.PartAmmunition is { Count: > 0 } || data.PartExtractions is { Count: > 0 })
+        // The fuel of the drives (task 00072): the resource is named by the code of the starting
+        // data of the world.
+        foreach (SeedPartFuel row in data.PartFuels ?? [])
+        {
+            dbContext.PartFuels.Add(new PartFuelEntity
+            {
+                PartTypeId = partTypeIds[row.Part],
+                ResourceTypeId = resourceIds[row.Resource],
+                Share = row.Share,
+            });
+        }
+
+        CheckFuelShares(data);
+
+        if (data.PartHulls is { Count: > 0 } || data.PartRaces is { Count: > 0 } || data.PartAmmunition is { Count: > 0 } || data.PartExtractions is { Count: > 0 } || data.PartFuels is { Count: > 0 })
         {
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -514,6 +563,7 @@ public static class ProductionReferenceSeed
 /// <param name="PartRaces">The races every part belongs to (task 00042).</param>
 /// <param name="PartAmmunition">The ammunition every weapon fires (task 00040).</param>
 /// <param name="PartExtractions">What every module of extraction takes and where (task 00055).</param>
+/// <param name="PartFuels">The fuel of every drive and the share of every resource in it (task 00072).</param>
 public sealed record ProductionSeedData(
     IReadOnlyList<SeedPartGroup> PartGroups,
     IReadOnlyList<SeedPart> Parts,
@@ -524,7 +574,8 @@ public sealed record ProductionSeedData(
     IReadOnlyList<SeedPartHull>? PartHulls = null,
     IReadOnlyList<SeedPartRace>? PartRaces = null,
     IReadOnlyList<SeedPartAmmunition>? PartAmmunition = null,
-    IReadOnlyList<SeedPartExtraction>? PartExtractions = null);
+    IReadOnlyList<SeedPartExtraction>? PartExtractions = null,
+    IReadOnlyList<SeedPartFuel>? PartFuels = null);
 
 /// <summary>A characteristic of the starting data.</summary>
 /// <param name="Code">The neutral code of the characteristic.</param>
@@ -579,6 +630,15 @@ public sealed record SeedPartExtraction(
     string? Resource = null,
     string? ResourceGroup = null,
     bool ReducesMass = false);
+
+/// <summary>The fuel of a drive of the starting data (task 00072).</summary>
+/// <param name="Part">The code of the drive of the file.</param>
+/// <param name="Resource">The code of the resource the drive burns.</param>
+/// <param name="Share">The share of the resource in the fuel of the drive. The shares of a drive add up to one.</param>
+public sealed record SeedPartFuel(
+    string Part,
+    string Resource,
+    double Share);
 
 /// <summary>The races a part of the starting data belongs to (task 00042).</summary>
 /// <param name="Part">The code of the part of the file.</param>

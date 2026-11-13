@@ -167,4 +167,27 @@ public static class FleetErrorCodes
 
     /// <summary>The body has less of a resource or of a part than the order of the load asks for (task 00057).</summary>
     public const string CargoShort = "fleet_cargo_short";
+
+    /// <summary>
+    /// The project has a hyperdrive or a jump drive but no ordinary drive (task 00072): such a ship
+    /// may not fly inside a system, so a fleet with it may not fly at all.
+    /// </summary>
+    public const string FtlNeedsNormalDrive = "fleet_ftl_needs_normal_drive";
+
+    /// <summary>
+    /// The command of a hyperflight or of a jump names a target in the system the fleet stands in
+    /// (task 00072): inside a system only the ordinary drives fly.
+    /// </summary>
+    public const string FtlSameSystem = "fleet_ftl_same_system";
+
+    /// <summary>
+    /// A ship of the fleet has no drive of the class the command needs (task 00072): a ship without
+    /// a hyperdrive grounds a hyperflight and a ship without a jump drive grounds a jump.
+    /// </summary>
+    public const string FtlShipMissing = "fleet_ftl_ship_missing";
+
+    /// <summary>
+    /// The hold of the fleet holds less fuel than the route needs (task 00072).
+    /// </summary>
+    public const string FuelShort = "fleet_fuel_short";
 }

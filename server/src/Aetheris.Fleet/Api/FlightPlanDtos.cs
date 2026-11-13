@@ -1,3 +1,5 @@
+using Aetheris.Fleet.Data.Entities;
+
 namespace Aetheris.Fleet.Api;
 
 /// <summary>
@@ -38,6 +40,9 @@ public sealed record FlightPlanDto(
 /// <param name="TargetZ">The third axis of the target.</param>
 /// <param name="DurationSeconds">How long the order lasts, in game seconds.</param>
 /// <param name="Parameters">The parameters of the order as a document.</param>
+/// <param name="GroupKey">The key that binds the legs of one command of the player together (task 00072), or <see langword="null"/> for an order that stands alone.</param>
+/// <param name="Command">The command of the player the legs come from (task 00072): the hyperflight or the jump, or <see langword="null"/>.</param>
+/// <param name="Leg">The role of the order in the group (task 00072), or <see langword="null"/>.</param>
 public sealed record FlightPlanOrderDto(
     long Id,
     int Position,
@@ -50,7 +55,10 @@ public sealed record FlightPlanOrderDto(
     decimal TargetY,
     decimal TargetZ,
     long DurationSeconds,
-    string Parameters);
+    string Parameters,
+    Guid? GroupKey = null,
+    string? Command = null,
+    string? Leg = null);
 
 /// <summary>
 /// What a flight of a fleet to a place takes (task 00053).
@@ -67,6 +75,10 @@ public sealed record FlightPlanOrderDto(
 /// <param name="CurrentSeconds">The time with the cargo the fleet carries now, in game seconds.</param>
 /// <param name="FullSeconds">The time with a full hold, in game seconds.</param>
 /// <param name="CanFly">Whether the fleet can fly at all: every ship of it has a drive.</param>
+/// <param name="Legs">The legs of the flight with the fuel every leg burns (task 00072): two or three for a hyperflight or a jump, one for an ordinary flight.</param>
+/// <param name="ReturnLegs">The legs of the flight home of the saved plan of the fleet, when the check of the fuel counts it (task 00072).</param>
+/// <param name="FuelNeed">The need of every resource of the saved plan of the fleet, with what the hold holds now (task 00072).</param>
+/// <param name="Shortages">The resources the saved plan of the fleet does not have enough of (task 00072).</param>
 public sealed record FlightEstimateDto(
     double Distance,
     decimal EmptySpeed,
@@ -75,7 +87,67 @@ public sealed record FlightEstimateDto(
     long EmptySeconds,
     long CurrentSeconds,
     long FullSeconds,
-    bool CanFly);
+    bool CanFly,
+    IReadOnlyList<FlightFuelLegDto>? Legs = null,
+    IReadOnlyList<FlightFuelLegDto>? ReturnLegs = null,
+    IReadOnlyList<FlightFuelResourceDto>? FuelNeed = null,
+    IReadOnlyList<FlightFuelShortageDto>? Shortages = null);
+
+/// <summary>
+/// The legs of a flight and the fuel they burn (task 00072).
+/// </summary>
+/// <param name="Legs">The legs of the flight, one after another.</param>
+/// <param name="ReturnLegs">The legs of the flight home, when the check of the fuel counts it.</param>
+/// <param name="FuelNeed">The need of every resource, with what the hold holds now.</param>
+/// <param name="Shortages">The resources the fleet does not have enough of.</param>
+public sealed record FlightFuelEstimateDto(
+    IReadOnlyList<FlightFuelLegDto> Legs,
+    IReadOnlyList<FlightFuelLegDto> ReturnLegs,
+    IReadOnlyList<FlightFuelResourceDto> FuelNeed,
+    IReadOnlyList<FlightFuelShortageDto> Shortages);
+
+/// <summary>
+/// One leg of a flight and what it burns (task 00072).
+/// </summary>
+/// <param name="Leg">The role of the leg, one of <see cref="FlightLegKinds"/>.</param>
+/// <param name="Kind">The class of the drives the leg uses, one of <see cref="FlightEngineKinds"/>.</param>
+/// <param name="FromSectorId">The sector the leg starts at.</param>
+/// <param name="FromSystemId">The system the leg starts at, or <see langword="null"/> in open space.</param>
+/// <param name="FromOrbit">The orbit the leg starts at, or <see langword="null"/>.</param>
+/// <param name="ToSectorId">The sector the leg ends at.</param>
+/// <param name="ToSystemId">The system the leg ends at, or <see langword="null"/> in open space.</param>
+/// <param name="ToOrbit">The orbit the leg ends at, or <see langword="null"/>.</param>
+/// <param name="Distance">The distance of the leg, in the units of the map.</param>
+/// <param name="Seconds">How long the leg lasts, in game seconds.</param>
+/// <param name="Fuel">The fuel the leg burns, by the resource.</param>
+public sealed record FlightFuelLegDto(
+    string Leg,
+    string Kind,
+    int FromSectorId,
+    long? FromSystemId,
+    int? FromOrbit,
+    int ToSectorId,
+    long? ToSystemId,
+    int? ToOrbit,
+    double Distance,
+    long Seconds,
+    IReadOnlyList<FlightFuelResourceDto> Fuel);
+
+/// <summary>
+/// One resource of the fuel of a leg (task 00072).
+/// </summary>
+/// <param name="ResourceTypeId">The resource.</param>
+/// <param name="Amount">How much of the resource the leg burns, or how much the fleet needs.</param>
+/// <param name="Have">How much of the resource the hold of the fleet holds now.</param>
+public sealed record FlightFuelResourceDto(int ResourceTypeId, decimal Amount, decimal Have = 0m);
+
+/// <summary>
+/// One resource the fleet does not have enough of (task 00072).
+/// </summary>
+/// <param name="ResourceTypeId">The resource.</param>
+/// <param name="Need">How much of the resource the route needs.</param>
+/// <param name="Have">How much of the resource the hold of the fleet holds now.</param>
+public sealed record FlightFuelShortageDto(int ResourceTypeId, decimal Need, decimal Have);
 
 /// <summary>
 /// The flight of a fleet that is under way (task 00053).
@@ -99,6 +171,8 @@ public sealed record FlightEstimateDto(
 /// <param name="ToX">The first axis of the destination in the galaxy.</param>
 /// <param name="ToY">The second axis of the destination in the galaxy.</param>
 /// <param name="ToZ">The third axis of the destination in the galaxy.</param>
+/// <param name="LegKind">The class of the drives of the flight (task 00072): <c>normal</c>, <c>hyper</c> or <c>jump</c>.</param>
+/// <param name="PrepEndsAt">The moment the preparation of a jump is over, or <see langword="null"/> for a flight that is not a jump (task 00072).</param>
 public sealed record FleetFlightDto(
     long OrderId,
     DateTimeOffset StartedAt,
@@ -118,4 +192,6 @@ public sealed record FleetFlightDto(
     int? ToOrbit,
     double ToX,
     double ToY,
-    double ToZ);
+    double ToZ,
+    string LegKind = FlightEngineKinds.Normal,
+    DateTimeOffset? PrepEndsAt = null);

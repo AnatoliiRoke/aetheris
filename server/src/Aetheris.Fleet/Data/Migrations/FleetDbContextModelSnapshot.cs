@@ -197,6 +197,21 @@ namespace Aetheris.Fleet.Data.Migrations
                         .HasColumnType("double precision")
                         .HasColumnName("from_z");
 
+                    b.Property<string>("FuelJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("fuel_json");
+
+                    b.Property<string>("LegKind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("leg_kind");
+
+                    b.Property<DateTimeOffset?>("PrepEndsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("prep_ends_at");
+
                     b.Property<decimal>("Speed")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -248,6 +263,8 @@ namespace Aetheris.Fleet.Data.Migrations
                     b.ToTable("fleet_flight", null, t =>
                         {
                             t.HasCheckConstraint("ck_fleet_flight_distance", "distance >= 0");
+
+                            t.HasCheckConstraint("ck_fleet_flight_leg_kind", "leg_kind IN ('normal','hyper','jump')");
 
                             t.HasCheckConstraint("ck_fleet_flight_time", "arrives_at >= started_at");
                         });
@@ -372,6 +389,11 @@ namespace Aetheris.Fleet.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<string>("Command")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("command");
+
                     b.Property<long>("DurationSeconds")
                         .HasColumnType("bigint")
                         .HasColumnName("duration_seconds");
@@ -379,6 +401,15 @@ namespace Aetheris.Fleet.Data.Migrations
                     b.Property<long>("FlightPlanId")
                         .HasColumnType("bigint")
                         .HasColumnName("flight_plan_id");
+
+                    b.Property<Guid?>("GroupKey")
+                        .HasColumnType("uuid")
+                        .HasColumnName("group_key");
+
+                    b.Property<string>("Leg")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("leg");
 
                     b.Property<string>("Parameters")
                         .IsRequired()
@@ -431,6 +462,9 @@ namespace Aetheris.Fleet.Data.Migrations
                     b.HasIndex("FlightPlanId")
                         .HasDatabaseName("ix_flight_plan_order_flight_plan_id");
 
+                    b.HasIndex("GroupKey")
+                        .HasDatabaseName("ix_flight_plan_order_group_key");
+
                     b.HasIndex("FlightPlanId", "Position")
                         .IsUnique()
                         .HasDatabaseName("ix_flight_plan_order_flight_plan_id_position");
@@ -438,6 +472,8 @@ namespace Aetheris.Fleet.Data.Migrations
                     b.ToTable("flight_plan_order", null, t =>
                         {
                             t.HasCheckConstraint("ck_flight_plan_order_duration", "duration_seconds >= 0");
+
+                            t.HasCheckConstraint("ck_flight_plan_order_leg", "leg IS NULL OR leg IN ('normal','to_edge','ftl','from_edge')");
 
                             t.HasCheckConstraint("ck_flight_plan_order_position", "position >= 1");
                         });

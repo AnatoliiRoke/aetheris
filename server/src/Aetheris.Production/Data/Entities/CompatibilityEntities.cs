@@ -151,3 +151,39 @@ public sealed class PartExtractionEntity
     /// <summary>Gets or sets the version of the row, raised by every change; an admin change with an older version is refused.</summary>
     public int Version { get; set; } = 1;
 }
+
+/// <summary>
+/// The fuel of a drive: a resource and the share of it in the fuel of the drive (task 00072).
+/// </summary>
+/// <remarks>
+/// <para>
+/// The rows are data, so a new drive burns its own mixture of the resources without a change of
+/// the code of the fleet (documentation/tech/08, rules 1 and 2). The fleet reads the rows through
+/// the catalog of the ships.
+/// </para>
+/// <para>
+/// The shares of a drive add up to one. The sum is checked when the seed is loaded and by a test,
+/// because a database cannot check it with a constraint over two rows.
+/// </para>
+/// <para>
+/// The resource lives in the world module, so this module keeps its identifier and the table
+/// carries no foreign key into the tables of the other modules.
+/// </para>
+/// </remarks>
+public sealed class PartFuelEntity
+{
+    /// <summary>Gets or sets the drive the fuel belongs to. Part of the primary key.</summary>
+    public int PartTypeId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the resource the drive burns. Part of the primary key, so a drive burns a
+    /// resource only once.
+    /// </summary>
+    public int ResourceTypeId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the share of the resource in the fuel of the drive, from zero to one. The
+    /// shares of a drive add up to one.
+    /// </summary>
+    public double Share { get; set; }
+}

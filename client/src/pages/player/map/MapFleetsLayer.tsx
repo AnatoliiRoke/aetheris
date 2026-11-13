@@ -3,7 +3,7 @@ import type { FleetInFlight, FleetStationed } from '../../../api/fleetApi';
 import { GameIcon } from '../../../components/GameIcon';
 import { useI18n } from '../../../i18n/useI18n';
 import { formatDuration } from '../planetText';
-import { fleetRoute, stationedPlace, type FleetMapLevel } from './mapFleets';
+import { fleetRoute, inJumpPrep, stationedPlace, type FleetMapLevel } from './mapFleets';
 import { MapMarker } from './MapMarker';
 import { worldStyle } from './mapStyle';
 
@@ -87,6 +87,7 @@ export const MapFleetsLayer = memo(function MapFleetsLayer({
       }
 
       const secondsLeft = Math.round((Date.parse(fleet.flight.arrivesAt) - gameNowMs) / 1000);
+      const preparing = inJumpPrep(fleet.flight, gameNowMs);
 
       out.push(
         <svg aria-hidden="true" className="map-shapes" key={`r${fleet.fleetId}`}>
@@ -97,7 +98,7 @@ export const MapFleetsLayer = memo(function MapFleetsLayer({
         <MapMarker
           key={`m${fleet.fleetId}`}
           label={fleet.name}
-          name={`${fleet.name}. ${t('map.fleetInFlight')}`}
+          name={`${fleet.name}. ${t(preparing ? 'map.fleetJumpPrep' : 'map.fleetInFlight')}`}
           onSelect={() => onSelect(fleet.fleetId)}
           selected={false}
           tone="fleet"
@@ -108,16 +109,18 @@ export const MapFleetsLayer = memo(function MapFleetsLayer({
         </MapMarker>,
       );
 
+      // A fleet that prepares a jump stands still (task 00072): its badge says so, with the time
+      // left until the jump.
       if (secondsLeft > 0) {
         out.push(
           <span
             aria-hidden="true"
-            className="map-route-label map-fleet-label"
+            className={preparing ? 'map-route-label map-fleet-label map-fleet-label--prep' : 'map-route-label map-fleet-label'}
             key={`l${fleet.fleetId}`}
             style={worldStyle(route.mark.x, route.mark.y)}
           >
             <GameIcon name="mapClock" size={12} />
-            {formatDuration(language, secondsLeft)}
+            {preparing ? t('map.jumpPrep', { time: formatDuration(language, secondsLeft) }) : formatDuration(language, secondsLeft)}
           </span>,
         );
       }

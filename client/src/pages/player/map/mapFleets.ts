@@ -60,7 +60,7 @@ export function flightPlace(
   flight: FleetInFlight['flight'],
   now: number,
 ): { x: number; y: number; z: number; orbit: number | null } {
-  const progress = routeProgress(Date.parse(flight.startedAt), Date.parse(flight.arrivesAt), now);
+  const progress = flightProgress(flight, now);
 
   // Inside one system the fleet is between two orbits: it keeps the system and takes the orbit it
   // has reached, because the distance inside a system is counted by the orbits.
@@ -82,6 +82,32 @@ export function flightPlace(
 }
 
 /**
+ * Whether a fleet prepares a jump at a moment (task 00072): the fleet stands at the place it left
+ * until the preparation is over, and then the jump takes no time.
+ *
+ * @param flight The flight of the fleet.
+ * @param now The moment of game time now, in milliseconds since the epoch.
+ */
+export function inJumpPrep(flight: FleetInFlight['flight'], now: number): boolean {
+  return flight.legKind === 'jump' && now < Date.parse(flight.prepEndsAt ?? flight.arrivesAt);
+}
+
+/**
+ * The share of the route a flight has covered at a moment: a jump stays at its start while it is
+ * prepared and is at its end after (task 00072).
+ *
+ * @param flight The flight of the fleet.
+ * @param now The moment of game time now, in milliseconds since the epoch.
+ */
+function flightProgress(flight: FleetInFlight['flight'], now: number): number {
+  if (flight.legKind === 'jump') {
+    return inJumpPrep(flight, now) ? 0 : 1;
+  }
+
+  return routeProgress(Date.parse(flight.startedAt), Date.parse(flight.arrivesAt), now);
+}
+
+/**
  * Whether a flight is inside one system: the fleet flies between two orbits and not between two
  * places of the galaxy.
  *
@@ -99,7 +125,7 @@ export function flightInsideSystem(flight: FleetInFlight['flight']): boolean {
  * @param now The moment of game time now, in milliseconds since the epoch.
  */
 export function flightSector(flight: FleetInFlight['flight'], now: number): number {
-  const progress = routeProgress(Date.parse(flight.startedAt), Date.parse(flight.arrivesAt), now);
+  const progress = flightProgress(flight, now);
 
   return progress < midpointProgress ? flight.fromSectorId : flight.toSectorId;
 }

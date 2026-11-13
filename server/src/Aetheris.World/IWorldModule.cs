@@ -187,6 +187,15 @@ public interface IWorldModule
     Task<WorldPlaceDto?> GetObjectPlaceAsync(long objectId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the place of the edge of a star system (task 00072): the last orbit of the system, as
+    /// the data of the world give it, with the coordinates of the system.
+    /// </summary>
+    /// <param name="systemId">The system.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place, or <see langword="null"/> when the system is unknown or has no object.</returns>
+    Task<WorldPlaceDto?> GetSystemEdgePlaceAsync(long systemId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the place of a body in the coordinates of the galaxy (task 00053).
     /// </summary>
     /// <param name="planetId">The body.</param>

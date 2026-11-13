@@ -81,6 +81,13 @@ public sealed class FleetFlightService
             return place is null || place.ObjectClass == WorldObjectClasses.Star ? null : place;
         }
 
+        // A target of a system names the edge of the system (task 00072): it is the last orbit of
+        // the system, as the data of the world give it.
+        if (target.Kind == FlightTargetKinds.System && target.SystemId > 0)
+        {
+            return await _world.GetSystemEdgePlaceAsync(target.SystemId, cancellationToken).ConfigureAwait(false);
+        }
+
         return null;
     }
 
@@ -151,6 +158,28 @@ public sealed class FleetFlightService
     public static WorldPlaceDto PlaceOnRoute(FleetFlightEntity flight, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(flight);
+
+        // A jump is prepared before it happens (task 00072): the fleet stands at the place it left
+        // until the preparation is over, and the jump itself is instant.
+        if (string.Equals(flight.LegKind, FlightEngineKinds.Jump, StringComparison.Ordinal))
+        {
+            DateTimeOffset endsAt = flight.PrepEndsAt ?? flight.ArrivesAt;
+
+            if (now < endsAt)
+            {
+                return new WorldPlaceDto(
+                    flight.FromSectorId,
+                    flight.FromSystemId,
+                    null,
+                    null,
+                    flight.FromOrbit,
+                    string.Empty,
+                    null,
+                    flight.FromX,
+                    flight.FromY,
+                    flight.FromZ);
+            }
+        }
 
         double total = (flight.ArrivesAt - flight.StartedAt).TotalSeconds;
         double progress = total <= 0d ? 1d : Math.Clamp((now - flight.StartedAt).TotalSeconds / total, 0d, 1d);
@@ -283,6 +312,18 @@ public sealed record FlightTarget(string Kind, int SectorId, long SystemId, long
     /// <param name="order">The order.</param>
     /// <returns>The target.</returns>
     public static FlightTarget Of(FlightPlanOrderEntity order)
+    {
+        ArgumentNullException.ThrowIfNull(order);
+
+        return new FlightTarget(order.TargetKind, order.TargetSectorId, order.TargetSystemId, order.TargetObjectId, order.TargetX, order.TargetY, order.TargetZ);
+    }
+
+    /// <summary>
+    /// Reads the target out of an order as the client sends it (task 00072).
+    /// </summary>
+    /// <param name="order">The order.</param>
+    /// <returns>The target.</returns>
+    public static FlightTarget Of(FlightPlanOrderInput order)
     {
         ArgumentNullException.ThrowIfNull(order);
 

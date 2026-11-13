@@ -1,3 +1,4 @@
+using System.Globalization;
 using Aetheris.Core.Admin;
 using Aetheris.Core.Errors;
 using Aetheris.Fleet.Services;
@@ -17,6 +18,13 @@ public sealed record AdminDesignRename(
 /// <summary>A reason of an archive.</summary>
 /// <param name="Reason">Why the administrator archived the project.</param>
 public sealed record AdminDesignArchiveRequest(
+    [property: System.Text.Json.Serialization.JsonPropertyName("reason")] string? Reason);
+
+/// <summary>An absolute count of the finished ships of one project.</summary>
+/// <param name="Quantity">The count.</param>
+/// <param name="Reason">Why the administrator changed it.</param>
+public sealed record AdminShipQuantitySet(
+    [property: System.Text.Json.Serialization.JsonPropertyName("quantity")] long Quantity,
     [property: System.Text.Json.Serialization.JsonPropertyName("reason")] string? Reason);
 
 /// <summary>
@@ -111,6 +119,56 @@ public static class FleetPlayerAdminEndpoints
             }
         })
             .WithName("admin.player_design_archived");
+
+        RouteGroupBuilder ships = secured.MapGroup("/fleet/players/{playerId}/ships");
+
+        ships.MapGet(string.Empty, async (
+            string playerId,
+            PlayerShipAdminService service,
+            IAdminAuditRecorder audit,
+            CancellationToken cancellationToken) =>
+        {
+            audit.Record($"ships:{playerId}", null, null);
+            IReadOnlyList<PlayerShipQuantityRow> rows = await service.ReadAsync(playerId, cancellationToken).ConfigureAwait(false);
+
+            return Results.Json(rows, FleetJson.Options);
+        })
+            .WithName("admin.player_ships_read");
+
+        ships.MapPut("/{designId:long}", async (
+            string playerId,
+            long designId,
+            AdminShipQuantitySet request,
+            PlayerShipAdminService service,
+            IAdminAuditRecorder audit,
+            IAdminQueryLimits limits,
+            CancellationToken cancellationToken) =>
+        {
+            string target = $"ships:{playerId}:{designId}";
+            audit.Record(target, null, null);
+
+            if (ReasonError(request.Reason, limits) is { } refused)
+            {
+                return refused;
+            }
+
+            try
+            {
+                (long before, long after) = await service
+                    .SetQuantityAsync(playerId, designId, request.Quantity, cancellationToken)
+                    .ConfigureAwait(false);
+
+                audit.Record(target, before.ToString(CultureInfo.InvariantCulture), after.ToString(CultureInfo.InvariantCulture));
+                audit.RecordReason(request.Reason!.Trim());
+
+                return Results.Json(new { quantity = after }, FleetJson.Options);
+            }
+            catch (GameException exception)
+            {
+                return Failure(exception);
+            }
+        })
+            .WithName("admin.player_ship_quantity_set");
 
         return secured;
     }

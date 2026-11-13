@@ -8,7 +8,7 @@ import type { ContentApi } from '../api/contentApi';
 import type { CurrencyBalanceFacts, EconomyApi, EconomyOverview, PopulationFacts } from '../api/economyApi';
 import type { GameApi, Race } from '../api/gameApi';
 import type { MailApi, MailDraft, MailLetter, MailLetterDetail, MailRecipient, MailView } from '../api/mailApi';
-import type { FlightEstimate, Fleet, FleetApi, FleetHold, FleetShip, FleetsInFlight, FleetsView, FinishedShip, FlightPlan, ShipCatalog, ShipDesign, ShipHull, ShipModule, ShipyardView } from '../api/fleetApi';
+import type { FlightEstimate, FlightFuelEstimate, Fleet, FleetApi, FleetHold, FleetShip, FleetsInFlight, FleetsView, FinishedShip, FlightPlan, ShipCatalog, ShipDesign, ShipHull, ShipModule, ShipyardView } from '../api/fleetApi';
 import type { MarketApi, MarketLot, MarketOverview, MyLot } from '../api/marketApi';
 import { mockContentApi } from '../api/mockContentApi';
 import type { Planet, PlanetApi } from '../api/planetApi';
@@ -689,6 +689,7 @@ export function fakeFleetApi(overrides: Partial<FleetApi> = {}): FleetApi {
     stopFlightPlan: vi.fn(async () => sampleFlightPlan()),
     executeFlightPlan: vi.fn(async () => sampleFlightPlan()),
     flightEstimate: vi.fn(async () => sampleFlightEstimate()),
+    fuelEstimate: vi.fn(async () => sampleFlightFuelEstimate()),
     fleetHold: vi.fn(async (fleetId: number) => sampleFleetHold({ fleetId })),
     fleetsInFlight: vi.fn(async () => sampleFleetsInFlight()),
     ...overrides,
@@ -838,6 +839,33 @@ export function sampleFlightEstimate(overrides: Partial<FlightEstimate> = {}): F
     currentSeconds: 3668,
     fullSeconds: 11800,
     canFly: true,
+    ...overrides,
+  };
+}
+
+/**
+ * The fuel of the route of a plan for the tests (task 00072).
+ */
+export function sampleFlightFuelEstimate(overrides: Partial<FlightFuelEstimate> = {}): FlightFuelEstimate {
+  return {
+    legs: [
+      {
+        leg: 'to_edge',
+        kind: 'normal',
+        fromSectorId: 1,
+        fromSystemId: 1,
+        fromOrbit: 2,
+        toSectorId: 1,
+        toSystemId: 1,
+        toOrbit: 12,
+        distance: 10,
+        seconds: 3600,
+        fuel: [{ resourceTypeId: 12, amount: 120, have: 0 }],
+      },
+    ],
+    returnLegs: [],
+    fuelNeed: [{ resourceTypeId: 12, amount: 120, have: 500 }],
+    shortages: [],
     ...overrides,
   };
 }

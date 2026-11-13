@@ -879,7 +879,8 @@ public sealed class ShipyardQueueService
                     Available(board.Stock, line),
                     line.IsHull)),
             ],
-            quote.UpkeepPerHour);
+            quote.UpkeepPerHour,
+            board.Warnings.GetValueOrDefault(design.Id) ?? []);
     }
 
     private static ShipyardOrderDto OrderOf(
@@ -966,6 +967,52 @@ public sealed class ShipyardQueueService
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// The ship an administrator grants from a project, without paying for it. An archived
+    /// project is still granted: the archive only stops the shipyard.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="designId">The project.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The planet, the crew, the upkeep and the parts of one ship.</returns>
+    public async Task<PlayerShipGrant> GrantOfAsync(string playerId, long designId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+
+        ShipDesignEntity design = await _dbContext.ShipDesigns.AsNoTracking()
+            .SingleOrDefaultAsync(entry => entry.Id == designId && entry.OwnerPlayerId == playerId, cancellationToken)
+            .ConfigureAwait(false)
+            ?? throw new GameException(FleetErrorCodes.DesignUnknown, "The project does not exist.");
+
+        ShipCatalogDto catalog = await _production.GetShipCatalogAsync(cancellationToken).ConfigureAwait(false);
+        List<ShipDesignSlotEntity> slots = await _dbContext.ShipDesignSlots.AsNoTracking()
+            .Where(slot => slot.DesignId == design.Id)
+            .OrderBy(slot => slot.SlotIndex)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        IReadOnlyDictionary<int, PartRecipeFacts> facts = await _parts.GetPartFactsAsync(cancellationToken).ConfigureAwait(false);
+        ResourceKinds kinds = await KindsAsync(cancellationToken).ConfigureAwait(false);
+        AssemblyQuote quote = QuoteOf(design, slots, catalog, facts, kinds, FleetSettings.From(_config));
+
+        if (quote.RefusalCode is not null)
+        {
+            throw new GameException(quote.RefusalCode, "The project cannot become a ship.");
+        }
+
+        return new PlayerShipGrant(
+            design.PlanetId,
+            quote.Crew,
+            quote.UpkeepPerHour,
+            [
+                .. quote.PartLines.Select(line => new PlayerShipPartLine(
+                    line.PartTypeId,
+                    line.MarkLevel,
+                    line.HasRaceBonus,
+                    line.Quantity,
+                    line.IsHull)),
+            ]);
     }
 
     private async Task<AssemblyQuote> QuoteAsync(string playerId, long designId, CancellationToken cancellationToken)
@@ -1722,7 +1769,13 @@ public sealed class ShipyardQueueService
             ? await _economy.GetBalancesAsync(playerId, cancellationToken).ConfigureAwait(false)
             : new Dictionary<int, long>();
 
-        return new AssemblyBoard(quotes, facts, kinds, stock, ships, inhabitants, planetBalance, currencyBalance, catalog);
+        // The warnings of the projects are counted from the slots already read, with no query of
+        // their own (task 00072): the shipyard shows the same warning as the constructor.
+        Dictionary<long, IReadOnlyList<ShipDesignWarningDto>> warnings = designs.ToDictionary(
+            design => design.Id,
+            design => ShipDesignService.BuildWarnings(slotsByDesign.GetValueOrDefault(design.Id) ?? [], catalog));
+
+        return new AssemblyBoard(quotes, facts, kinds, stock, ships, inhabitants, planetBalance, currencyBalance, catalog, warnings);
     }
 
     private async Task<Dictionary<int, AvailabilityDto>> OpenedHullsAsync(
@@ -1758,7 +1811,8 @@ public sealed class ShipyardQueueService
         long Inhabitants,
         IReadOnlyDictionary<int, long> PlanetBalance,
         IReadOnlyDictionary<int, long> CurrencyBalance,
-        ShipCatalogDto Catalog);
+        ShipCatalogDto Catalog,
+        IReadOnlyDictionary<long, IReadOnlyList<ShipDesignWarningDto>> Warnings);
 
     private sealed record ResourceKinds(int? PopulationId, int? CreditId, HashSet<int> CurrencyIds, HashSet<int> FuelIds, Dictionary<int, string> NameKeys);
 

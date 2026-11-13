@@ -68,6 +68,7 @@ public sealed record ShipyardOrderDto(
 /// <param name="Costs">The resources the assembly takes, including the crew and the credits.</param>
 /// <param name="Parts">The parts the assembly takes and how many the body has.</param>
 /// <param name="UpkeepPerHour">The credits one finished ship of the project costs per hour. It is the configured share of the credit price of the fitted modules.</param>
+/// <param name="Warnings">The problems of the project that do not stop the assembly (task 00072): the same warnings the constructor shows.</param>
 public sealed record ShipyardDesignDto(
     long DesignId,
     string Name,
@@ -82,7 +83,8 @@ public sealed record ShipyardDesignDto(
     long DurationSeconds,
     IReadOnlyList<ShipyardCostDto> Costs,
     IReadOnlyList<ShipyardPartDto> Parts,
-    decimal UpkeepPerHour = 0m);
+    decimal UpkeepPerHour = 0m,
+    IReadOnlyList<ShipDesignWarningDto>? Warnings = null);
 
 /// <summary>
 /// A resource of an assembly.

@@ -62,6 +62,13 @@ const errorKeys: Record<string, AdminMessageKey> = {
   admin_level_out_of_range: 'admin.error.levelRange',
   admin_queue_blocks: 'admin.error.queueBlocks',
   admin_not_a_stock: 'admin.error.notAStock',
+  fleet_ship_in_fleet: 'admin.error.shipsInFleet',
+  fleet_hull_unknown: 'admin.error.hullUnknown',
+  fleet_hull_is_drone: 'admin.error.hullIsDrone',
+  fleet_hull_archived: 'admin.error.hullArchived',
+  fleet_module_unknown: 'admin.error.moduleUnknown',
+  fleet_design_unknown: 'admin.error.notFound',
+  fleet_quantity_invalid: 'admin.error.quantityInvalid',
 };
 
 /**

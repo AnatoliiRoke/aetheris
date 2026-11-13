@@ -35,6 +35,7 @@ public static class FleetServiceCollectionExtensions
         services.AddScoped<FleetUnitOfWork>();
         services.AddScoped<ShipDesignService>();
         services.AddScoped<ShipyardQueueService>();
+        services.AddScoped<PlayerShipAdminService>();
         services.AddScoped<FleetFormationService>();
         services.AddScoped<FlightPlanService>();
         services.AddScoped<FleetBootstrapService>();
@@ -48,6 +49,11 @@ public static class FleetServiceCollectionExtensions
         services.AddScoped<FleetExtractionCycleService>();
         services.AddScoped<FleetMinePlaceService>();
         services.AddScoped<FleetReportService>();
+        services.AddScoped<EngineKindsReader>();
+        services.AddScoped<FlightLegPlanner>();
+        services.AddScoped<FlightChainResolver>();
+        services.AddScoped<FuelPlanner>();
+        services.AddScoped<FuelService>();
         services.AddScoped<FlightPlanRunner>();
         services.AddScoped<IScheduledEventHandler, ShipyardCompleteHandler>();
         services.AddScoped<IScheduledEventHandler, FleetExtractionCycleHandler>();

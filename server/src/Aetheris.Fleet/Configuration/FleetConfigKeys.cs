@@ -111,6 +111,23 @@ public static class FleetConfigKeys
     public const string SpeedReferenceSpeed = "fleet.speed.reference_speed";
 
     /// <summary>
+    /// The multiplier of the speed of a hyperflight (task 00072): the speed of a hyperflight is the
+    /// speed of the hyperdrives of the ships times this multiplier.
+    /// </summary>
+    public const string HyperSpeedMultiplier = "fleet.hyper.speed_multiplier";
+
+    /// <summary>
+    /// The distance a jump prepares for at once (task 00072), in the units of the map: the
+    /// preparation of a jump lasts the same time up to this distance and grows past it.
+    /// </summary>
+    public const string JumpReferenceDistance = "fleet.jump.reference_distance";
+
+    /// <summary>
+    /// Whether the check of the fuel before a fleet leaves counts the flight home (task 00072).
+    /// </summary>
+    public const string FuelCheckReturnHome = "fleet.propellant.check_return_home";
+
+    /// <summary>
     /// Gets the definitions of the parameters with their starting values and bounds.
     /// </summary>
     public static IReadOnlyList<ConfigParameterDefinition> Definitions { get; } =
@@ -138,5 +155,8 @@ public static class FleetConfigKeys
         new(SpeedReferenceMass, "1000", "0.000001", "1000000000", "Опорна маса для швидкості перельоту, у тоннах (корпус разом із вантажем)."),
         new(SpeedReferenceSpeed, "45", "0.000001", "1000000000", "Опорна швидкість для швидкості перельоту, у світлових роках за годину: стільки літає корабель з опорною тягою й опорною масою."),
         new(HullReturnShare, "0.5", "0", "1", "Не застосовується. Розбір повертає всі компоненти проєкту й екіпаж і не повертає ресурси на склад."),
+        new(HyperSpeedMultiplier, "10", "1", "1000", "Множник швидкості гіперперельоту: швидкість гіперперельоту дорівнює швидкості гіпердвигунів кораблів, помноженій на це число."),
+        new(JumpReferenceDistance, "1000", "1", "1000000", "Відстань, до якої підготовка стрибка триває однаково, в одиницях карти: далі відстані підготовка стрибка росте пропорційно відстані."),
+        new(FuelCheckReturnHome, "true", null, null, "Чи додає перевірка палива перед відправкою флоту політ додому до потреби в паливі."),
     ];
 }

@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react';
-import type { Fleet, FlightPlan } from '../../../api/fleetApi';
+import { useState, useMemo, useCallback, type FormEvent } from 'react';
+import type { Fleet, FlightPlan, FlightFuelEstimate } from '../../../api/fleetApi';
+import { useApi } from '../../../api/useApi';
 import { GameIcon } from '../../../components/GameIcon';
 import type { Language } from '../../../i18n/context';
 import { useI18n } from '../../../i18n/useI18n';
@@ -7,15 +8,18 @@ import type { MessageKey } from '../../../i18n/uk';
 import { routes } from '../../../router/context';
 import { Link } from '../../../router/Router';
 import { formatNumber, hasKey } from '../planetText';
+import { useRead } from '../market/useRead';
 import { PlanetAvatar, StatePill } from './FleetBits';
 import { FleetFlightStatus, type FleetsClock } from './FleetFlightStatus';
 import { FleetScanStatus } from './FleetScanStatus';
 import { FleetHoldButton } from './FleetHold';
 import { readCargoItems } from './flightPlanCargo';
 import { FleetPlace } from './FleetPlace';
+import { FlightFuelBlock } from './FlightFuelBlock';
 import { FlightPlanPlace } from './FlightPlanPlace';
 import { ProjectList } from './ProjectLists';
 import { stateText } from './fleetsParts';
+import { groupPlanOrders } from './flightPlanGroups';
 import { useFleetsScene } from './useFleetsScene';
 
 /**
@@ -31,6 +35,17 @@ const orderLabels: Record<string, MessageKey> = {
   unload: 'plan.order.unload',
   wait: 'plan.order.wait',
   return: 'plan.order.return',
+};
+
+/**
+ * The roles of the legs of a command of the player (task 00072): a hyperflight or a jump is made
+ * of the leg to the edge of the system, the leg between the systems and the leg from the edge.
+ */
+const legLabels: Record<string, MessageKey> = {
+  normal: 'plan.leg.normal',
+  to_edge: 'plan.leg.toEdge',
+  ftl: 'plan.leg.ftl',
+  from_edge: 'plan.leg.fromEdge',
 };
 
 /**
@@ -113,8 +128,24 @@ export function FleetPanel({
 }) {
   const { t, language } = useI18n();
   const scene = useFleetsScene();
+  const { fleet: fleetApi } = useApi();
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState(fleet.name);
+
+  // The rows of the plan: a hyperflight or a jump is one row with its legs under it (task 00072).
+  const [openGroups, setOpenGroups] = useState<string[]>([]);
+  const rows = useMemo(() => groupPlanOrders(plan?.orders ?? []), [plan]);
+  const toggleGroup = (key: string) =>
+    setOpenGroups((current) => (current.includes(key) ? current.filter((entry) => entry !== key) : [...current, key]));
+
+  // The fuel of the route of the plan (task 00072): the estimate is read when the plan changes, and
+  // the tab of the browser does not read it again.
+  const loadFuel = useCallback(
+    () => (plan === null ? Promise.resolve(null) : fleetApi.fuelEstimate(fleet.id)),
+    [fleetApi, fleet.id, plan],
+  );
+  const fuelRead = useRead<FlightFuelEstimate | null>(loadFuel, plan !== null && plan.orders.length > 0, false);
+  const fuelShort = (fuelRead.data?.shortages.length ?? 0) > 0;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -247,40 +278,61 @@ export function FleetPanel({
               <p className="fl-note">{t('plan.noOrders')}</p>
             ) : (
               <ol className="pl-orders pl-orders--plain">
-                {plan.orders.map((order) => (
-                  <li
-                    aria-current={plan.stateCode === 'active' && plan.currentPosition === order.position ? 'step' : undefined}
-                    className={
-                      plan.stateCode === 'active' && plan.currentPosition === order.position
-                        ? 'pl-order pl-order--plain pl-order--current'
-                        : 'pl-order pl-order--plain'
-                    }
-                    key={order.id}
-                  >
-                    <span className="pl-order__text">{t(orderLabels[order.typeCode] ?? 'plan.order.fly')}</span>
-                    {flightTypes.includes(order.typeCode) && order.targetKind === 'point' ? (
-                      <span className="pl-order__place">
-                        → {order.targetX} / {order.targetY} / {order.targetZ}
-                      </span>
-                    ) : null}
-                    {flightTypes.includes(order.typeCode) && order.targetKind !== 'point' ? (
-                      <span className="pl-order__place">
-                        →{' '}
-                        <FlightPlanPlace
-                          objectId={order.targetObjectId}
-                          sectorId={order.targetSectorId}
-                          systemId={order.targetSystemId}
-                        />
-                      </span>
-                    ) : null}
-                    {order.typeCode === 'return' ? <span className="pl-order__place">→ {scene.nameOf(fleet.homePlanetId)}</span> : null}
-                    {order.typeCode === 'load' || order.typeCode === 'unload' ? (
-                      <span className="pl-order__place">{t('plan.cargo.itemsCount', { count: readCargoItems(order.parameters).length })}</span>
-                    ) : null}
-                  </li>
-                ))}
+                {rows.map((row) => {
+                  const first = row.orders[0]!;
+                  const open = row.groupKey !== null && openGroups.includes(row.groupKey);
+                  const current = plan.stateCode === 'active' && row.orders.some((order) => order.position === plan.currentPosition);
+
+                  return (
+                    <li
+                      aria-current={current ? 'step' : undefined}
+                      className={current ? 'pl-order pl-order--plain pl-order--current' : 'pl-order pl-order--plain'}
+                      key={row.groupKey ?? `order-${first.id}`}
+                    >
+                      {row.expandable ? (
+                        <button
+                          aria-expanded={open}
+                          className="btn fl-btn fl-btn--small pl-order__toggle"
+                          onClick={() => row.groupKey !== null && toggleGroup(row.groupKey)}
+                          type="button"
+                        >
+                          {open ? '−' : '+'}
+                        </button>
+                      ) : null}
+                      <span className="pl-order__text">{t(orderLabels[first.typeCode] ?? 'plan.order.fly')}</span>
+                      {row.expandable ? (
+                        <span className="pl-order__place">{t('plan.leg.count', { count: row.orders.length })}</span>
+                      ) : flightTypes.includes(first.typeCode) && first.targetKind === 'point' ? (
+                        <span className="pl-order__place">
+                          → {first.targetX} / {first.targetY} / {first.targetZ}
+                        </span>
+                      ) : flightTypes.includes(first.typeCode) ? (
+                        <span className="pl-order__place">
+                          →{' '}
+                          <FlightPlanPlace
+                            objectId={first.targetObjectId}
+                            sectorId={first.targetSectorId}
+                            systemId={first.targetSystemId}
+                          />
+                        </span>
+                      ) : first.typeCode === 'return' ? (
+                        <span className="pl-order__place">→ {scene.nameOf(fleet.homePlanetId)}</span>
+                      ) : first.typeCode === 'load' || first.typeCode === 'unload' ? (
+                        <span className="pl-order__place">{t('plan.cargo.itemsCount', { count: readCargoItems(first.parameters).length })}</span>
+                      ) : null}
+                      {open
+                        ? row.orders.map((order) => (
+                            <span className="pl-order__leg" key={order.id}>
+                              {t(legLabels[order.leg ?? 'normal'] ?? 'plan.leg.normal')}
+                            </span>
+                          ))
+                        : null}
+                    </li>
+                  );
+                })}
               </ol>
             )}
+            <FlightFuelBlock estimate={fuelRead.data ?? null} />
             <div className="pl-tools">
               <button
                 aria-label={t('plan.edit')}
@@ -295,9 +347,17 @@ export function FleetPanel({
               <button
                 aria-label={t('plan.execute')}
                 className="btn fl-btn fl-btn--icon fl-btn--go"
-                disabled={busy || plan.stateCode === 'active' || plan.orders.length === 0}
+                disabled={busy || plan.stateCode === 'active' || plan.orders.length === 0 || fuelShort}
                 onClick={onPlanExecute}
-                title={plan.stateCode === 'active' ? t('plan.stateRunning') : plan.orders.length === 0 ? t('plan.executeNeedsOrders') : t('plan.execute')}
+                title={
+                  plan.stateCode === 'active'
+                    ? t('plan.stateRunning')
+                    : fuelShort
+                      ? t('plan.propellant.short')
+                      : plan.orders.length === 0
+                        ? t('plan.executeNeedsOrders')
+                        : t('plan.execute')
+                }
                 type="button"
               >
                 <GameIcon name="orderFly" size={18} />

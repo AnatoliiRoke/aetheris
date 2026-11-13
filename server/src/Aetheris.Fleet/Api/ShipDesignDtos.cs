@@ -34,6 +34,7 @@ public sealed record ShipDesignSlotInput(
 /// <param name="Slots">The slots of the project, in the order of their numbers.</param>
 /// <param name="Summary">What the project gives.</param>
 /// <param name="HasBuiltShips">Whether a finished ship of this project exists. Such a project is not changed or archived until that ship is taken apart.</param>
+/// <param name="Warnings">The problems of the project that do not stop it (task 00072).</param>
 public sealed record ShipDesignDto(
     long Id,
     string Name,
@@ -46,7 +47,27 @@ public sealed record ShipDesignDto(
     int Version,
     IReadOnlyList<ShipDesignSlotDto> Slots,
     ShipDesignSummaryDto Summary,
-    bool HasBuiltShips);
+    bool HasBuiltShips,
+    IReadOnlyList<ShipDesignWarningDto>? Warnings = null);
+
+/// <summary>
+/// A problem of a project that does not stop it (task 00072).
+/// </summary>
+/// <param name="Code">The code of the problem, one of <see cref="ShipDesignWarningCodes"/>.</param>
+/// <param name="SlotIndexes">The slots of the project the problem is about.</param>
+public sealed record ShipDesignWarningDto(string Code, IReadOnlyList<int> SlotIndexes);
+
+/// <summary>
+/// The codes of the problems of a project that do not stop it (task 00072).
+/// </summary>
+public static class ShipDesignWarningCodes
+{
+    /// <summary>
+    /// The project has a hyperdrive or a jump drive but no ordinary drive: such a ship cannot fly
+    /// inside a system, so a fleet with it may not fly at all.
+    /// </summary>
+    public const string FtlNeedsNormalDrive = "fleet_ftl_needs_normal_drive";
+}
 
 /// <summary>
 /// A slot of a project of a ship (task 00038, section 3.2).
@@ -208,6 +229,7 @@ public sealed record ShipHullViewDto(
 /// <param name="ExtractionPlaceKinds">The kinds of the places the module takes from (task 00055): the classes of the objects of the map. A module that takes from none is not a module of extraction.</param>
 /// <param name="FlightOrder">The flight plan order opened by the module, if any.</param>
 /// <param name="ScanTarget">The kind of target detected by the module, if any.</param>
+/// <param name="EngineKind">The class of a drive (task 00072): <c>normal</c>, <c>gravity</c>, <c>hyper</c> or <c>jump</c>; absent for a module that is not a drive.</param>
 public sealed record ShipModuleViewDto(
     int Id,
     string Code,
@@ -241,7 +263,8 @@ public sealed record ShipModuleViewDto(
     IReadOnlyList<int> AmmunitionIds,
     IReadOnlyList<string> ExtractionPlaceKinds,
     string? FlightOrder = null,
-    string? ScanTarget = null);
+    string? ScanTarget = null,
+    string? EngineKind = null);
 
 /// <summary>
 /// One characteristic of a module that the plaque of a project adds up.

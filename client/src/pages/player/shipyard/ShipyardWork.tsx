@@ -14,6 +14,7 @@ import { deadlineFor, formatDuration, formatNumber, reasonText, requirementText 
 import { noticeFromError, type Notice } from '../screenNotice';
 import { AssemblyCosts } from './AssemblyCosts';
 import { groupShipsByClass } from './shipyardGroups';
+import { needsNormalDrive } from './shipyardParts';
 
 /**
  * The prefixes of the refusals the shipyard names for the player.
@@ -298,6 +299,7 @@ function AssemblyDesignCard({
         ))}
       </ul>
       {design.reasonCode ? <p className="sh-note">{designReason(design, language, text)}</p> : null}
+      {needsNormalDrive(design) ? <p className="sh-note sh-note--warning">{t('shipyard.ftlNeedsNormalDrive')}</p> : null}
       <div className="sh-card__foot">
         <TextField label={t('shipyard.quantity')} type="number" min={1} step={1} value={typed} disabled={busy} onChange={(event) => setTyped(event.target.value)} />
         <div className="sh-card__actions">

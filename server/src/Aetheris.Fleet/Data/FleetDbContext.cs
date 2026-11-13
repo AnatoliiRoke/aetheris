@@ -252,11 +252,15 @@ public sealed class FleetDbContext : DbContext
             entity.ToTable("flight_plan_order");
             entity.Property(e => e.TypeCode).HasMaxLength(CodeLength);
             entity.Property(e => e.TargetKind).HasMaxLength(CodeLength);
+            entity.Property(e => e.Command).HasMaxLength(CodeLength);
+            entity.Property(e => e.Leg).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.FlightPlanId);
             entity.HasIndex(e => new { e.FlightPlanId, e.Position }).IsUnique();
+            entity.HasIndex(e => e.GroupKey);
             entity.HasOne<FlightPlanEntity>().WithMany(e => e.OrderIds).HasForeignKey(e => e.FlightPlanId).OnDelete(DeleteBehavior.Cascade);
             entity.ToTable(table => table.HasCheckConstraint("ck_flight_plan_order_position", "position >= 1"));
             entity.ToTable(table => table.HasCheckConstraint("ck_flight_plan_order_duration", "duration_seconds >= 0"));
+            entity.ToTable(table => table.HasCheckConstraint("ck_flight_plan_order_leg", "leg IS NULL OR leg IN ('normal','to_edge','ftl','from_edge')"));
         });
 
         modelBuilder.Entity<ShipCargoEntity>(entity =>
@@ -290,10 +294,12 @@ public sealed class FleetDbContext : DbContext
         {
             entity.ToTable("fleet_flight");
             entity.Property(e => e.Speed).HasPrecision(SpeedPrecision, SpeedScale);
+            entity.Property(e => e.LegKind).HasMaxLength(CodeLength);
             entity.HasIndex(e => e.FleetId).IsUnique();
             entity.HasOne<FleetEntity>().WithMany().HasForeignKey(e => e.FleetId).OnDelete(DeleteBehavior.Cascade);
             entity.ToTable(table => table.HasCheckConstraint("ck_fleet_flight_distance", "distance >= 0"));
             entity.ToTable(table => table.HasCheckConstraint("ck_fleet_flight_time", "arrives_at >= started_at"));
+            entity.ToTable(table => table.HasCheckConstraint("ck_fleet_flight_leg_kind", "leg_kind IN ('normal','hyper','jump')"));
         });
     }
 }

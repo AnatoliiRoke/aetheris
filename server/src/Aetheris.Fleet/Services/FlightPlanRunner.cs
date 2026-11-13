@@ -50,6 +50,9 @@ public sealed class FlightPlanRunner
     /// <summary>The event type of the end of a scan.</summary>
     public const string ScanEventType = "fleet.order_scan";
 
+    /// <summary>The key of the details of a refusal that lists the ships it names (task 00072).</summary>
+    public const string ShipIdsDetail = "ship_ids";
+
     private readonly FleetDbContext _dbContext;
     private readonly FleetUnitOfWork _unitOfWork;
     private readonly FleetFlightService _flights;
@@ -63,6 +66,9 @@ public sealed class FlightPlanRunner
     private readonly IWorldModule _world;
     private readonly IEventScheduler _scheduler;
     private readonly FleetScanService _scans;
+    private readonly EngineKindsReader _engines;
+    private readonly FlightLegPlanner _legs;
+    private readonly FuelService _fuel;
     private readonly IGameConfig _config;
 
     /// <summary>
@@ -80,6 +86,11 @@ public sealed class FlightPlanRunner
     /// <param name="reports">The reports of the fleets to the players (task 00060).</param>
     /// <param name="world">The world module.</param>
     /// <param name="scheduler">The event scheduler.</param>
+    /// <param name="scans">The scanners of the fleet.</param>
+    /// <param name="engines">The drives of the ships of the fleet (task 00072).</param>
+    /// <param name="legs">Plans the legs of a command (task 00072).</param>
+    /// <param name="propellant">The fuel of the fleet (task 00072).</param>
+    /// <param name="config">The game configuration.</param>
     public FlightPlanRunner(
         FleetDbContext dbContext,
         FleetUnitOfWork unitOfWork,
@@ -94,6 +105,9 @@ public sealed class FlightPlanRunner
         IWorldModule world,
         IEventScheduler scheduler,
         FleetScanService scans,
+        EngineKindsReader engines,
+        FlightLegPlanner legs,
+        FuelService propellant,
         IGameConfig config)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
@@ -109,6 +123,9 @@ public sealed class FlightPlanRunner
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(scheduler);
         ArgumentNullException.ThrowIfNull(scans);
+        ArgumentNullException.ThrowIfNull(engines);
+        ArgumentNullException.ThrowIfNull(legs);
+        ArgumentNullException.ThrowIfNull(propellant);
         ArgumentNullException.ThrowIfNull(config);
 
         _dbContext = dbContext;
@@ -124,6 +141,9 @@ public sealed class FlightPlanRunner
         _world = world;
         _scheduler = scheduler;
         _scans = scans;
+        _engines = engines;
+        _legs = legs;
+        _fuel = propellant;
         _config = config;
     }
 
@@ -194,13 +214,19 @@ public sealed class FlightPlanRunner
                 case FlightOrderTypes.Return:
                     speeds ??= await _speeds.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
 
-                    if (speeds.Empty <= 0m)
+                    if (speeds.Normal.Empty <= 0m)
                     {
                         throw new GameException(FleetErrorCodes.FlightNoDrive, "A ship of the fleet has no drive.");
                     }
 
                     _ = await _flights.ResolveOrderAsync(fleet, order, cancellationToken).ConfigureAwait(false)
                         ?? throw new GameException(FleetErrorCodes.FlightTargetUnknown, "The target of the flight is not a place of the map.");
+
+                    break;
+
+                case FlightOrderTypes.Hyperfly:
+                case FlightOrderTypes.Jump:
+                    await ValidateFtlAsync(fleet, order, cancellationToken).ConfigureAwait(false);
 
                     break;
 
@@ -230,6 +256,79 @@ public sealed class FlightPlanRunner
                 default:
                     throw new GameException(FleetErrorCodes.FlightOrderNotSupported, "The fleet cannot carry out this order yet.");
             }
+        }
+    }
+
+    /// <summary>
+    /// Checks that the fleet can carry out a hyperflight or a jump (task 00072).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Every ship of the fleet needs a drive of the class the command uses: a ship without a
+    /// hyperdrive grounds a hyperflight, and a ship without a jump drive grounds a jump. The ships
+    /// that ground the fleet are named in the answer.
+    /// </para>
+    /// <para>
+    /// The fleet also needs an ordinary drive, because the legs to the edge of the system and from
+    /// the edge to the target are flown with the ordinary drives.
+    /// </para>
+    /// </remarks>
+    /// <param name="fleet">The fleet.</param>
+    /// <param name="order">The order of the command.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the command is checked.</returns>
+    /// <exception cref="GameException">The fleet cannot carry out the command.</exception>
+    private async Task ValidateFtlAsync(
+        FleetEntity fleet,
+        FlightPlanOrderEntity order,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(fleet);
+        ArgumentNullException.ThrowIfNull(order);
+
+        string kind = string.Equals(order.TypeCode, FlightOrderTypes.Hyperfly, StringComparison.Ordinal)
+            ? FlightEngineKinds.Hyper
+            : FlightEngineKinds.Jump;
+
+        await CheckFtlDrivesAsync(fleet, kind, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Checks that every ship of a fleet can fly a hyperflight or a jump (task 00072): it has a
+    /// drive of the class of the command and an ordinary drive for the legs inside the systems.
+    /// </summary>
+    /// <param name="fleet">The fleet.</param>
+    /// <param name="kind">The class of the command, <see cref="FlightEngineKinds.Hyper"/> or <see cref="FlightEngineKinds.Jump"/>.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A task that completes when the check has passed.</returns>
+    /// <exception cref="GameException">A ship lacks a drive; the details list the ships.</exception>
+    public async Task CheckFtlDrivesAsync(FleetEntity fleet, string kind, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(fleet);
+
+        FleetEngines engines = await _engines.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+
+        // The fleet flies at the speed of its slowest ship, so every ship of it needs a drive of
+        // the class of the command (task 00072, 2.2.5).
+        IReadOnlyList<long> withoutClass = engines.ShipsWithout(kind);
+
+        if (withoutClass.Count > 0)
+        {
+            throw new GameException(
+                FleetErrorCodes.FtlShipMissing,
+                "A ship of the fleet has no drive of the class the flight needs.",
+                new Dictionary<string, object?> { [ShipIdsDetail] = withoutClass });
+        }
+
+        // Every ship needs an ordinary drive for the legs inside the systems (task 00072, 2.1.2).
+        IReadOnlyList<long> withoutNormal = engines.ShipsWithout(FlightEngineKinds.Normal);
+
+        if (withoutNormal.Count > 0)
+        {
+            throw new GameException(
+                FleetErrorCodes.FtlNeedsNormalDrive,
+                "A ship of the fleet has no ordinary drive, so it cannot fly inside a system.",
+                new Dictionary<string, object?> { [ShipIdsDetail] = withoutNormal });
         }
     }
 
@@ -548,6 +647,10 @@ public sealed class FlightPlanRunner
             case FlightOrderTypes.Return:
                 return await BeginFlightAsync(fleet, order, now, cancellationToken).ConfigureAwait(false);
 
+            case FlightOrderTypes.Hyperfly:
+            case FlightOrderTypes.Jump:
+                return await BeginFtlAsync(fleet, order, now, cancellationToken).ConfigureAwait(false);
+
             case FlightOrderTypes.Wait:
                 if (order.DurationSeconds <= 0)
                 {
@@ -607,22 +710,32 @@ public sealed class FlightPlanRunner
     /// <summary>
     /// Begins an order of flight: the fleet leaves for the target at the speed of its slowest ship.
     /// </summary>
+    /// <remarks>
+    /// The flight burns the fuel of its class (task 00072): the fuel is taken from the hold of the
+    /// fleet at the start of the flight, so a flight never begins without the fuel for it.
+    /// </remarks>
     private async Task<(BeginState State, string? Code)> BeginFlightAsync(
         FleetEntity fleet,
         FlightPlanOrderEntity order,
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        WorldPlaceDto? destination = await _flights.ResolveOrderAsync(fleet, order, cancellationToken).ConfigureAwait(false);
+        WorldPlaceDto? origin = await _flights.CurrentPlaceAsync(fleet, null, now, cancellationToken).ConfigureAwait(false);
 
-        if (destination is null)
+        if (origin is null)
         {
             return (BeginState.Blocked, FleetErrorCodes.FlightTargetUnknown);
         }
 
-        WorldPlaceDto? origin = await _flights.CurrentPlaceAsync(fleet, null, now, cancellationToken).ConfigureAwait(false);
+        // The leg to the edge of a hyperflight or of a jump ends at the edge of the system the
+        // fleet stands in now (task 00072): the orders before it may have moved the fleet.
+        WorldPlaceDto? destination = string.Equals(order.Leg, FlightLegKinds.ToEdge, StringComparison.Ordinal)
+            ? origin.SystemId is { } systemId
+                ? await _world.GetSystemEdgePlaceAsync(systemId, cancellationToken).ConfigureAwait(false)
+                : origin
+            : await _flights.ResolveOrderAsync(fleet, order, cancellationToken).ConfigureAwait(false);
 
-        if (origin is null)
+        if (destination is null)
         {
             return (BeginState.Blocked, FleetErrorCodes.FlightTargetUnknown);
         }
@@ -639,14 +752,289 @@ public sealed class FlightPlanRunner
 
         FleetSpeeds speeds = await _speeds.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
 
-        if (speeds.Current <= 0m)
+        // The gravitational drives work only inside a star system (task 00072, 2.4.7).
+        bool inSystem = FuelPlanner.IsInSystem(origin, destination);
+        decimal speed = inSystem ? speeds.Normal.Current : speeds.NormalOpenSpace.Current;
+
+        if (speed <= 0m)
         {
             return (BeginState.Blocked, FleetErrorCodes.FlightNoDrive);
         }
 
         // The mass of the fleet is the mass of its ships and what their holds carry now.
-        long seconds = FleetSpeedService.FlightSeconds(distance, speeds.Current);
+        long seconds = FleetSpeedService.FlightSeconds(distance, speed);
         DateTimeOffset arrivesAt = now + TimeSpan.FromSeconds(seconds);
+
+        // The fuel of the leg is burned at the start of the flight: a flight that begins without
+        // the fuel for it is not begun at all.
+        IReadOnlyDictionary<int, decimal>? propellant = await BurnFuelAsync(
+            fleet,
+            FlightEngineKinds.Normal,
+            seconds,
+            inSystem,
+            now,
+            cancellationToken).ConfigureAwait(false);
+
+        if (propellant is null)
+        {
+            return (BeginState.Blocked, FleetErrorCodes.FuelShort);
+        }
+
+        return await StartFlightAsync(fleet, order, origin, destination, distance, speed, seconds, arrivesAt, FlightEngineKinds.Normal, null, propellant, now, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Begins a leg of a hyperflight or of a jump (task 00072).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A hyperflight or a jump is spread over three legs of a plan, and every leg begins like an
+    /// ordinary flight: the fleet leaves for the place of the leg at the speed of the drives of
+    /// the class of the leg.
+    /// </para>
+    /// <para>
+    /// A jump is prepared before it happens: the fleet stands on the edge of its system while the
+    /// drives charge, and the jump itself is instant. The moment the preparation is over is
+    /// written into the flight, and the fleet is at the place of the target from that moment on.
+    /// </para>
+    /// </remarks>
+    private async Task<(BeginState State, string? Code)> BeginFtlAsync(
+        FleetEntity fleet,
+        FlightPlanOrderEntity order,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(fleet);
+        ArgumentNullException.ThrowIfNull(order);
+
+        string kind = string.Equals(order.TypeCode, FlightOrderTypes.Hyperfly, StringComparison.Ordinal)
+            ? FlightEngineKinds.Hyper
+            : FlightEngineKinds.Jump;
+
+        // The place the leg starts at is the place the fleet stands at, and the place it ends at
+        // is the place of the leg: the edge of the system or the target.
+        WorldPlaceDto? origin = await _flights.CurrentPlaceAsync(fleet, null, now, cancellationToken).ConfigureAwait(false);
+
+        if (origin is null)
+        {
+            return (BeginState.Blocked, FleetErrorCodes.FlightTargetUnknown);
+        }
+
+        WorldPlaceDto? destination = await ResolveLegAsync(fleet, order, origin, kind, cancellationToken).ConfigureAwait(false);
+
+        if (destination is null)
+        {
+            return (BeginState.Blocked, FleetErrorCodes.FlightTargetUnknown);
+        }
+
+        double distance = _world.GetTravelDistance(origin, destination);
+
+        if (distance <= 0d)
+        {
+            await ArriveAsync(fleet, destination, cancellationToken).ConfigureAwait(false);
+
+            return (BeginState.Done, null);
+        }
+
+        FleetSpeeds speeds = await _speeds.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+        FleetSettings settings = FleetSettings.From(_config);
+
+        long seconds;
+        decimal speed;
+        DateTimeOffset arrivesAt;
+
+        if (string.Equals(kind, FlightEngineKinds.Jump, StringComparison.Ordinal))
+        {
+            // A jump takes the time of its preparation: the drives charge and the jump itself is
+            // instant. The fleet stands at the place of the leg until the preparation is over.
+            seconds = (long)Math.Ceiling(speeds.JumpPrepSeconds * JumpFactorOf(distance, settings));
+            speed = 0m;
+            arrivesAt = now + TimeSpan.FromSeconds(seconds);
+        }
+        else
+        {
+            speed = speeds.Hyper.Current * settings.HyperSpeedMultiplier;
+
+            if (speed <= 0m)
+            {
+                return (BeginState.Blocked, FleetErrorCodes.FlightNoDrive);
+            }
+
+            seconds = FleetSpeedService.FlightSeconds(distance, speed);
+            arrivesAt = now + TimeSpan.FromSeconds(seconds);
+        }
+
+        IReadOnlyDictionary<int, decimal>? propellant = await BurnFuelAsync(fleet, kind, seconds, inSystem: false, now, cancellationToken).ConfigureAwait(false);
+
+        if (propellant is null)
+        {
+            return (BeginState.Blocked, FleetErrorCodes.FuelShort);
+        }
+
+        return await StartFlightAsync(
+            fleet,
+            order,
+            origin,
+            destination,
+            distance,
+            speed,
+            seconds,
+            arrivesAt,
+            kind,
+            string.Equals(kind, FlightEngineKinds.Jump, StringComparison.Ordinal) ? arrivesAt : null,
+            propellant,
+            now,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Finds the place a leg of a hyperflight or of a jump ends at (task 00072).
+    /// </summary>
+    /// <remarks>
+    /// The plan holds the legs of a command (task 00072), so the place of the leg is taken from the
+    /// role of the leg: the leg to the edge ends at the edge of the system of the fleet, the leg
+    /// between the systems ends at the edge of the system of the target, and the leg from the edge
+    /// ends at the target itself.
+    /// </remarks>
+    /// <param name="fleet">The fleet.</param>
+    /// <param name="order">The order of the leg.</param>
+    /// <param name="origin">The place the fleet stands at.</param>
+    /// <param name="kind">The class of the drives of the command.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The place, or <see langword="null"/> when it is not on the map.</returns>
+    private async Task<WorldPlaceDto?> ResolveLegAsync(
+        FleetEntity fleet,
+        FlightPlanOrderEntity order,
+        WorldPlaceDto origin,
+        string kind,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(fleet);
+        ArgumentNullException.ThrowIfNull(order);
+        ArgumentNullException.ThrowIfNull(origin);
+
+        // A command that is not yet spread over its legs keeps its target, so the whole command
+        // is planned at once.
+        if (order.Leg is null)
+        {
+            return await _flights.ResolveOrderAsync(fleet, order, cancellationToken).ConfigureAwait(false);
+        }
+
+        if (string.Equals(order.Leg, FlightLegKinds.ToEdge, StringComparison.Ordinal))
+        {
+            return origin.SystemId is { } systemId
+                ? await _world.GetSystemEdgePlaceAsync(systemId, cancellationToken).ConfigureAwait(false)
+                : null;
+        }
+
+        if (string.Equals(order.Leg, FlightLegKinds.FromEdge, StringComparison.Ordinal))
+        {
+            return await _flights.ResolveOrderAsync(fleet, order, cancellationToken).ConfigureAwait(false);
+        }
+
+        // The leg between the systems: it ends at the edge of the system of the target.
+        WorldPlaceDto? target = await _flights.ResolveOrderAsync(fleet, order, cancellationToken).ConfigureAwait(false);
+
+        if (target?.SystemId is not { } targetSystemId)
+        {
+            return target;
+        }
+
+        return await _world.GetSystemEdgePlaceAsync(targetSystemId, cancellationToken).ConfigureAwait(false) ?? target;
+    }
+
+    /// <summary>
+    /// Burns the fuel of a leg from the hold of the fleet (task 00072).
+    /// </summary>
+    /// <param name="fleet">The fleet.</param>
+    /// <param name="kind">The class of the drives of the leg.</param>
+    /// <param name="seconds">The time of the leg, in game seconds.</param>
+    /// <param name="inSystem">Whether the leg lies inside one star system, where the gravitational drives work.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The fuel that was burned, or <see langword="null"/> when the hold holds less.</returns>
+    private async Task<IReadOnlyDictionary<int, decimal>?> BurnFuelAsync(
+        FleetEntity fleet,
+        string kind,
+        long seconds,
+        bool inSystem,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(fleet);
+
+        FleetEngines engines = await _engines.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+        Dictionary<int, decimal> propellant = FuelPlanner.BurnOf(engines, kind, seconds, inSystem);
+
+        if (propellant.Count == 0)
+        {
+            return propellant;
+        }
+
+        try
+        {
+            await _fuel.ConsumeAsync(fleet.Id, propellant, now, cancellationToken).ConfigureAwait(false);
+        }
+        catch (GameException exception) when (string.Equals(exception.Code, FleetErrorCodes.FuelShort, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        return propellant;
+    }
+
+    /// <summary>
+    /// The factor of the time of the preparation of a jump: the preparation lasts the same time up
+    /// to the reference distance and grows past it (task 00072).
+    /// </summary>
+    /// <param name="distance">The distance of the jump, in the units of the map.</param>
+    /// <param name="settings">The parameters of the fleet.</param>
+    /// <returns>The factor.</returns>
+    private static decimal JumpFactorOf(double distance, FleetSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        double reference = Math.Max(1d, settings.JumpReferenceDistance);
+
+        return (decimal)Math.Max(1d, distance / reference);
+    }
+
+    /// <summary>
+    /// Writes the flight of the fleet and plans its arrival.
+    /// </summary>
+    /// <param name="fleet">The fleet; the entity is changed.</param>
+    /// <param name="order">The order of the plan that is the flight.</param>
+    /// <param name="origin">The place the fleet leaves.</param>
+    /// <param name="destination">The place the fleet flies to.</param>
+    /// <param name="distance">The distance of the flight.</param>
+    /// <param name="speed">The speed of the fleet.</param>
+    /// <param name="seconds">The time of the flight, in game seconds.</param>
+    /// <param name="arrivesAt">The moment the fleet arrives.</param>
+    /// <param name="legKind">The class of the drives of the flight.</param>
+    /// <param name="prepEndsAt">The moment the preparation of a jump is over at.</param>
+    /// <param name="propellant">The fuel the flight burns.</param>
+    /// <param name="now">The moment the fleet leaves.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The state of the order and the reason it is blocked.</returns>
+    private async Task<(BeginState State, string? Code)> StartFlightAsync(
+        FleetEntity fleet,
+        FlightPlanOrderEntity order,
+        WorldPlaceDto origin,
+        WorldPlaceDto destination,
+        double distance,
+        decimal speed,
+        long seconds,
+        DateTimeOffset arrivesAt,
+        string legKind,
+        DateTimeOffset? prepEndsAt,
+        IReadOnlyDictionary<int, decimal> propellant,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(fleet);
+        ArgumentNullException.ThrowIfNull(order);
+        ArgumentNullException.ThrowIfNull(origin);
+        ArgumentNullException.ThrowIfNull(destination);
+        ArgumentNullException.ThrowIfNull(propellant);
 
         FleetFlightEntity flight = new()
         {
@@ -655,7 +1043,7 @@ public sealed class FlightPlanRunner
             StartedAt = now,
             ArrivesAt = arrivesAt,
             Distance = distance,
-            Speed = speeds.Current,
+            Speed = speed,
             FromSectorId = origin.SectorId,
             FromSystemId = origin.SystemId,
             FromOrbit = origin.Orbit,
@@ -670,6 +1058,9 @@ public sealed class FlightPlanRunner
             ToX = destination.X,
             ToY = destination.Y,
             ToZ = destination.Z,
+            LegKind = legKind,
+            PrepEndsAt = prepEndsAt,
+            FuelJson = JsonSerializer.Serialize(propellant),
         };
 
         // The fleet leaves its place: it is on no orbit and at no object until it arrives.

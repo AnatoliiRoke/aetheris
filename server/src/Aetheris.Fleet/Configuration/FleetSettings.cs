@@ -83,6 +83,22 @@ public sealed record FleetSettings
     public decimal SpeedReferenceSpeed { get; init; }
 
     /// <summary>
+    /// Gets the multiplier of the speed of a hyperflight (task 00072): the speed of a hyperflight is
+    /// the speed of the hyperdrives of the ships times this multiplier.
+    /// </summary>
+    public decimal HyperSpeedMultiplier { get; init; }
+
+    /// <summary>
+    /// Gets the distance a jump prepares for at once (task 00072), in the units of the map.
+    /// </summary>
+    public double JumpReferenceDistance { get; init; }
+
+    /// <summary>
+    /// Gets whether the check of the fuel before a fleet leaves counts the flight home (task 00072).
+    /// </summary>
+    public bool FuelCheckReturnHome { get; init; }
+
+    /// <summary>
     /// Reads the parameters.
     /// </summary>
     /// <param name="config">The game configuration.</param>
@@ -115,6 +131,9 @@ public sealed record FleetSettings
             SpeedReferencePush = ReadDecimal(config, FleetConfigKeys.SpeedReferencePush),
             SpeedReferenceMass = ReadDecimal(config, FleetConfigKeys.SpeedReferenceMass),
             SpeedReferenceSpeed = ReadDecimal(config, FleetConfigKeys.SpeedReferenceSpeed),
+            HyperSpeedMultiplier = ReadDecimal(config, FleetConfigKeys.HyperSpeedMultiplier),
+            JumpReferenceDistance = (double)ReadDecimal(config, FleetConfigKeys.JumpReferenceDistance),
+            FuelCheckReturnHome = ReadBool(config, FleetConfigKeys.FuelCheckReturnHome),
         };
     }
 
@@ -132,6 +151,11 @@ public sealed record FleetSettings
         int.TryParse(config.GetRaw(key), NumberStyles.Integer, CultureInfo.InvariantCulture, out int value)
             ? value
             : int.Parse(Default(key), NumberStyles.Integer, CultureInfo.InvariantCulture);
+
+    private static bool ReadBool(IGameConfig config, string key) =>
+        bool.TryParse(config.GetRaw(key), out bool value)
+            ? value
+            : bool.Parse(Default(key));
 
     private static string Default(string key) =>
         FleetConfigKeys.Definitions.First(definition => string.Equals(definition.Key, key, StringComparison.Ordinal)).DefaultValue;

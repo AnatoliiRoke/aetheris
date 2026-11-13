@@ -203,4 +203,23 @@ public sealed class FleetFlightEntity
 
     /// <summary>Gets or sets the third axis of the destination.</summary>
     public double ToZ { get; set; }
+
+    /// <summary>
+    /// Gets or sets the class of the drives the flight uses (task 00072), one of
+    /// <see cref="FlightEngineKinds"/>. An ordinary flight flies with the ordinary drives, a
+    /// hyperflight flies with the hyperdrives and a jump jumps with the jump drives.
+    /// </summary>
+    public string LegKind { get; set; } = FlightEngineKinds.Normal;
+
+    /// <summary>
+    /// Gets or sets the moment of game time the preparation of a jump is over at (task 00072). It
+    /// is <see langword="null"/> for every flight that is not a jump.
+    /// </summary>
+    public DateTimeOffset? PrepEndsAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the fuel the flight burned as a document (task 00072): the amount of every
+    /// resource by its identifier. The document is empty for a flight that burned no fuel.
+    /// </summary>
+    public string FuelJson { get; set; } = "{}";
 }

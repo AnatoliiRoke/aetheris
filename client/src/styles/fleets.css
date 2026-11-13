@@ -309,3 +309,17 @@
 }
 .fl-hold__name { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; overflow-wrap: anywhere; }
 .fl-hold__amount { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+
+/* ---------- відрізки перельоту й паливо (задача 00072) ---------- */
+/* Кнопка розгортання групи відрізків — вузька, з плюсом або мінусом. */
+.pl-order__toggle { flex: 0 0 auto; min-width: 22px; min-height: 22px; width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+/* Назва відрізка групи — під рядком команди, сірим кольором. */
+.pl-order__leg { color: var(--text-soft); font-size: var(--fs-small); }
+/* Блок палива маршруту: потреба за кожним видом палива і те, скільки його є. */
+.pl-propellant { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2); }
+.pl-propellant__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1); }
+.pl-propellant__item { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-1) var(--space-2); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-card-in); }
+.pl-propellant__name { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; overflow-wrap: anywhere; }
+.pl-propellant__amount { flex: 0 0 auto; color: var(--text-soft); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+/* Ресурс, якого в трюмі менше, ніж треба на маршрут, — з червоним написом. */
+.pl-propellant__item--short .pl-propellant__amount { color: var(--danger-text); }

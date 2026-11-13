@@ -3,11 +3,13 @@ using System.Security.Claims;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Security;
 using Aetheris.Fleet.Api;
+using Aetheris.Fleet.Data;
 using Aetheris.Fleet.Data.Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 
 namespace Aetheris.Fleet.Services;
 
@@ -160,6 +162,8 @@ public static class FleetEndpoints
             HttpContext context,
             ClaimsPrincipal user,
             FleetFlightService flights,
+            FlightPlanService plans,
+            FleetDbContext dbContext,
             CancellationToken cancellationToken) =>
         {
             IQueryCollection query = context.Request.Query;
@@ -170,23 +174,95 @@ public static class FleetEndpoints
                 throw new GameException(FleetErrorCodes.FleetUnknown, "The fleet is missing.");
             }
 
-            bool isReturn = string.Equals(query["type_code"], FlightOrderTypes.Return, StringComparison.Ordinal);
+            string? typeCode = query["type_code"];
+            bool isReturn = string.Equals(typeCode, FlightOrderTypes.Return, StringComparison.Ordinal);
+            FlightTarget? target = ReadTarget(query, "target");
+            FlightTarget? from = ReadTarget(query, "from");
             FlightEstimateDto? estimate = await flights
                 .EstimateAsync(
                     PlayerId(user),
                     fleetId.Value,
                     isReturn,
-                    ReadTarget(query, "target"),
-                    ReadTarget(query, "from"),
+                    target,
+                    from,
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            return estimate is null
-                ? Results.NotFound()
-                : Results.Json(estimate, FleetJson.Options);
+            if (estimate is null)
+            {
+                return Results.NotFound();
+            }
+
+            // The legs of the flight and the fuel of the saved plan (task 00072, 4.7).
+            FleetEntity fleet = await dbContext.Fleets.AsNoTracking()
+                .SingleAsync(entry => entry.Id == fleetId.Value, cancellationToken)
+                .ConfigureAwait(false);
+
+            estimate = await plans.ExtendEstimateAsync(fleet, typeCode, target, from, estimate, cancellationToken).ConfigureAwait(false);
+
+            return Results.Json(estimate, FleetJson.Options);
         });
 
+        // The fuel of the route of a plan is counted by the server (task 00072): the need of every
+        // resource, what the hold holds now and the shortage that stops the fleet from leaving. The
+        // same need is part of the estimate above; this route returns the fuel of the plan alone.
+        fleet.MapGet("/flight-plans/plan-estimate", PlanFuelEstimateAsync);
+
         return endpoints;
+    }
+
+    /// <summary>
+    /// Counts the fuel of the route of the saved plan of a fleet (task 00072): the need of every
+    /// resource, what the hold holds now and the shortage that stops the fleet from leaving.
+    /// </summary>
+    /// <param name="context">The request.</param>
+    /// <param name="user">The player.</param>
+    /// <param name="plans">The flight plans.</param>
+    /// <param name="dbContext">The fleet context.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The fuel of the plan, or 404 when the fleet or its plan is not there.</returns>
+    private static async Task<IResult> PlanFuelEstimateAsync(
+        HttpContext context,
+        ClaimsPrincipal user,
+        FlightPlanService plans,
+        FleetDbContext dbContext,
+        CancellationToken cancellationToken)
+    {
+        IQueryCollection query = context.Request.Query;
+        long? fleetId = Number(query, "fleet_id");
+
+        if (fleetId is null)
+        {
+            throw new GameException(FleetErrorCodes.FleetUnknown, "The fleet is missing.");
+        }
+
+        FleetEntity? fleet = await dbContext.Fleets.AsNoTracking()
+            .SingleOrDefaultAsync(entry => entry.Id == fleetId.Value && entry.PlayerId == PlayerId(user), cancellationToken)
+            .ConfigureAwait(false);
+
+        if (fleet is null)
+        {
+            return Results.NotFound();
+        }
+
+        FlightPlanEntity? plan = await dbContext.FlightPlans.AsNoTracking()
+            .SingleOrDefaultAsync(entry => entry.FleetId == fleet.Id && entry.PlayerId == PlayerId(user), cancellationToken)
+            .ConfigureAwait(false);
+
+        if (plan is null)
+        {
+            return Results.NotFound();
+        }
+
+        List<FlightPlanOrderEntity> orders = await dbContext.FlightPlanOrders.AsNoTracking()
+            .Where(order => order.FlightPlanId == plan.Id)
+            .OrderBy(order => order.Position)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return Results.Json(
+            await plans.EstimateFuelAsync(fleet, orders, cancellationToken).ConfigureAwait(false),
+            FleetJson.Options);
     }
 
     /// <summary>

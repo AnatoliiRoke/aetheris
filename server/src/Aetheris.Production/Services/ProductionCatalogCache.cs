@@ -160,6 +160,12 @@ public sealed class ProductionCatalogCache
             .ThenBy(row => row.Id)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
+        // The fuel of the drives is read in one query too (task 00072).
+        List<PartFuelEntity> fuelRows = await dbContext.PartFuels.AsNoTracking()
+            .OrderBy(row => row.PartTypeId)
+            .ThenBy(row => row.ResourceTypeId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
         List<RecipeEntity> recipes = await dbContext.Recipes.AsNoTracking()
             .Include(recipe => recipe.IngredientIds)
             .OrderBy(recipe => recipe.SortOrder)
@@ -254,6 +260,15 @@ public sealed class ProductionCatalogCache
                             row.ReducesMass))
                     ]);
 
+        Dictionary<int, IReadOnlyList<PartFuelInfo>> fuelInfos =
+            fuelRows
+                .GroupBy(row => row.PartTypeId)
+                .ToDictionary(
+                    part => part.Key,
+                    part => (IReadOnlyList<PartFuelInfo>)[
+                        .. part.Select(row => new PartFuelInfo(row.ResourceTypeId, row.Share))
+                    ]);
+
         return new ProductionCatalog(
             [
                 .. groups.Select(group => new PartGroupInfo(
@@ -291,7 +306,8 @@ public sealed class ProductionCatalogCache
                     compatibleHullIds.GetValueOrDefault(part.Id, []),
                     raceIds.GetValueOrDefault(part.Id, []),
                     ammunitionIds.GetValueOrDefault(part.Id, []),
-                    extractionInfos.GetValueOrDefault(part.Id, []))),
+                    extractionInfos.GetValueOrDefault(part.Id, []),
+                    fuelInfos.GetValueOrDefault(part.Id, []))),
             ],
             [
                 .. recipes.Select(recipe => new RecipeInfo(

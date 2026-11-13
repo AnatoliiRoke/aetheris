@@ -208,6 +208,13 @@ public static class PartAttributeKeys
     public const string NotAShipModule = "not_a_ship_module";
 
     /// <summary>
+    /// The class of the drive of the part, one of <see cref="PartEngineKinds"/> (task 00072). The
+    /// pull of the drives is counted apart for every class, so a fleet may carry drives of many
+    /// classes at once.
+    /// </summary>
+    public const string EngineKind = "engine_kind";
+
+    /// <summary>
     /// Gets every key of an attribute, in the order of the form of the admin panel.
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -228,7 +235,46 @@ public static class PartAttributeKeys
         FlightOrder,
         ScanTarget,
         NotAShipModule,
+        EngineKind,
     ];
+}
+
+/// <summary>
+/// The classes of the drives of the ships (task 00072).
+/// </summary>
+/// <remarks>
+/// <para>
+/// The classes are logical codes of the program, so the fleet module reads the same codes whatever
+/// the drive is. A drive of the class <see cref="Normal"/> flies inside a star system; a drive of
+/// the class <see cref="Hyper"/> flies between the stars; a drive of the class <see cref="Jump"/>
+/// jumps between them.
+/// </para>
+/// <para>
+/// A ship with a drive of a class other than <see cref="Normal"/> carries one of the normal
+/// drives too, because the drive of its own class works only between the stars.
+/// </para>
+/// </remarks>
+public static class PartEngineKinds
+{
+    /// <summary>The ordinary drive: it flies inside a star system and around it.</summary>
+    public const string Normal = "normal";
+
+    /// <summary>
+    /// The gravitational drive (task 00072): it works only near a star, so it gives no push and
+    /// burns no fuel in open space.
+    /// </summary>
+    public const string Gravity = "gravity";
+
+    /// <summary>The drive of the hyperflight: it flies between the stars much faster.</summary>
+    public const string Hyper = "hyper";
+
+    /// <summary>The drive of the jump: it jumps between the stars after a preparation.</summary>
+    public const string Jump = "jump";
+
+    /// <summary>
+    /// Gets every class of a drive, in the order of the form of the admin panel.
+    /// </summary>
+    public static IReadOnlyList<string> All { get; } = [Normal, Gravity, Hyper, Jump];
 }
 
 /// <summary>The supported targets of a scanning module.</summary>

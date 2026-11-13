@@ -180,6 +180,8 @@ public sealed class FleetMapService
             flight.ToOrbit,
             flight.ToX,
             flight.ToY,
-            flight.ToZ);
+            flight.ToZ,
+            flight.LegKind,
+            flight.PrepEndsAt);
     }
 }

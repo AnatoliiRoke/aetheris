@@ -357,12 +357,17 @@
     "en": "Drone"
   },
   "admin.reference.attribute.scan_target": { "uk": "Ціль сканування", "en": "Scan target" },
+  "admin.reference.attribute.engine_kind": { "uk": "Клас двигуна", "en": "Class of the drive" },
   "admin.reference.scan_target.systems": { "uk": "Системи", "en": "Systems" },
   "admin.reference.scan_target.fleets": { "uk": "Флоти", "en": "Fleets" },
   "admin.reference.attribute.flight_order": { "uk": "Відкриває наказ листа", "en": "Opens an order of the plan" },
   "admin.reference.flight_order.hyperfly": { "uk": "Гіперперліт", "en": "Hyperflight" },
   "admin.reference.flight_order.jump": { "uk": "Стрибок", "en": "Jump" },
   "admin.reference.flight_order.scan": { "uk": "Сканування", "en": "Scan" },
+  "admin.reference.engine_kind.normal": { "uk": "Звичайний", "en": "Normal" },
+  "admin.reference.engine_kind.gravity": { "uk": "Гравітаційний", "en": "Gravitational" },
+  "admin.reference.engine_kind.hyper": { "uk": "Гіперперельотний", "en": "Hyperflight" },
+  "admin.reference.engine_kind.jump": { "uk": "Стрибковий", "en": "Jump" },
   "admin.reference.component.drive": {
     "uk": "Двигун",
     "en": "Drive"

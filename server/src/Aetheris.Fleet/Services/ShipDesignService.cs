@@ -453,7 +453,8 @@ public sealed class ShipDesignService
                             .Distinct(StringComparer.Ordinal),
                     ],
                     module.FlightOrder,
-                    module.ScanTarget))
+                    module.ScanTarget,
+                    module.EngineKind))
         ];
 
         // The types of the modules that go into a ship: the counts are of the modules the builder
@@ -1040,7 +1041,12 @@ public sealed class ShipDesignService
             power += module.Power;
             crew += module.Crew;
             weight += module.Weight;
-            drivePush += module.DrivePush;
+            // The speed of a design is the speed inside a system, so only the ordinary class of the
+            // drives pushes it: the hyperdrives and the jump drives fly between the systems (task 00072).
+            if (FlightEngineKinds.IsNormalClass(module.EngineKind))
+            {
+                drivePush += module.DrivePush;
+            }
             shieldCapacity += module.ShieldCapacity;
             shieldRegen += module.ShieldRegen + module.ShieldRestore;
             armor += module.Armor;
@@ -1108,7 +1114,73 @@ public sealed class ShipDesignService
             design.Version,
             slots,
             summary,
-            hasBuiltShips);
+            hasBuiltShips,
+            BuildWarnings(rows, catalog));
+    }
+
+    /// <summary>
+    /// Counts the problems of a project that do not stop it (task 00072).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A ship with a hyperdrive or a jump drive and without an ordinary drive cannot fly inside a
+    /// system, so a fleet with it may not fly at all. The project is saved anyway: the problem is
+    /// shown to the player as a warning, with the slots of the drives that cause it.
+    /// </para>
+    /// <para>
+    /// The function is pure: it reads the catalog and the slots of the project and writes
+    /// nothing, so it never asks the database for the slots of one project.
+    /// </para>
+    /// </remarks>
+    /// <param name="rows">The slots of the project.</param>
+    /// <param name="catalog">The catalog of the ships.</param>
+    /// <returns>The problems of the project.</returns>
+    public static IReadOnlyList<ShipDesignWarningDto> BuildWarnings(
+        IReadOnlyList<ShipDesignSlotEntity> rows,
+        ShipCatalogDto catalog)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        ArgumentNullException.ThrowIfNull(catalog);
+
+        List<int> ftlSlots = [];
+        bool hasNormalDrive = false;
+
+        foreach (ShipDesignSlotEntity row in rows)
+        {
+            ShipModuleDto? module = catalog.Modules.FirstOrDefault(entry => entry.Id == row.PartTypeId);
+
+            if (module is null || !string.Equals(module.Component, DriveComponent, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            string? kind = module.EngineKind;
+
+            if (FlightEngineKinds.IsNormalClass(kind))
+            {
+                hasNormalDrive = true;
+
+                continue;
+            }
+
+            if (string.Equals(kind, FlightEngineKinds.Hyper, StringComparison.Ordinal)
+                || string.Equals(kind, FlightEngineKinds.Jump, StringComparison.Ordinal))
+            {
+                ftlSlots.Add(row.SlotIndex);
+            }
+        }
+
+        if (hasNormalDrive || ftlSlots.Count == 0)
+        {
+            return [];
+        }
+
+        return
+        [
+            new ShipDesignWarningDto(
+                ShipDesignWarningCodes.FtlNeedsNormalDrive,
+                [.. ftlSlots.OrderBy(index => index)]),
+        ];
     }
 
     /// <summary>

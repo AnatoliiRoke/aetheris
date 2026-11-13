@@ -247,6 +247,7 @@
 .map-marker--fleet-stationed .map-marker__label { color: var(--text-soft); }
 /* The time left to the arrival is written under the mark of the fleet, so the mark stays clear. */
 .map-fleet-label { transform: translate(-50%, 26px); color: var(--text-soft); font-size: var(--fs-tiny); }
+.map-fleet-label--prep { color: var(--warning); }
 
 /* ---------- the marks ---------- */
 /* A mark is a bright core with a halo and one or two rings around it, so a star of any kind is

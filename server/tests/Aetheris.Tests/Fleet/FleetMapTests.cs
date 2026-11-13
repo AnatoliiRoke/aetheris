@@ -24,7 +24,7 @@ namespace Aetheris.Tests.Fleet;
 /// route of every flight, so the client may draw it and put the mark of the fleet on it.
 /// </summary>
 [Collection(DatabaseCollection.Name)]
-public sealed class FleetMapTests
+public sealed class FleetMapTests : IAsyncLifetime
 {
     private const string Spaceport = "building_6";
     private const string HullCode = "part_h_21";
@@ -37,6 +37,8 @@ public sealed class FleetMapTests
 
     private readonly AetherisTestFactory _factory;
 
+    private DriveConsumptionScope? _consumption;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="FleetMapTests"/> class.
     /// </summary>
@@ -44,6 +46,24 @@ public sealed class FleetMapTests
     public FleetMapTests(AetherisTestFactory factory)
     {
         _factory = factory;
+    }
+
+    /// <summary>
+    /// Prepares a test of the class; the consumption of the drives is set by the reset of the test.
+    /// </summary>
+    /// <returns>A task that completes at once.</returns>
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
+
+    /// <summary>
+    /// Puts the consumption of the drives back after the test.
+    /// </summary>
+    /// <returns>A task that completes when the drives are put back.</returns>
+    public async ValueTask DisposeAsync()
+    {
+        if (_consumption is not null)
+        {
+            await _consumption.DisposeAsync();
+        }
     }
 
     /// <summary>
@@ -329,6 +349,17 @@ public sealed class FleetMapTests
         await AetherisTestFactory.SetParameterAsync(services, FleetConfigKeys.FlightPlanMaxOrders, "32");
         await services.GetRequiredService<IProductionModule>().EnsureAsync(Token);
         await services.GetRequiredService<IFleetModule>().EnsureAsync(Token);
+
+        // These tests check the flight and not its cost (task 00072): the drives burn nothing, so
+        // the fleets need no propellant in their holds and the times stay the times of the formula.
+        if (_consumption is null)
+        {
+            _consumption = await DriveConsumptionScope.SetAsync(_factory.Services, 0m, Token);
+        }
+        else
+        {
+            await _consumption.ApplyAsync(Token);
+        }
     }
 
     private async Task<PlanetsTestPlayer> FoundAsync()

@@ -675,7 +675,9 @@ public sealed class FleetFormationService
                             flight.ToOrbit,
                             flight.ToX,
                             flight.ToY,
-                            flight.ToZ)
+                            flight.ToZ,
+                            flight.LegKind,
+                            flight.PrepEndsAt)
                         : null);
             }),
         ];

@@ -1,6 +1,6 @@
 # Задача 00072 — Гіперперельот, стрибок і витрати палива
 
-> **Статус:** чернетка (чекає погодження автора)
+> **Статус:** виконана (13.11.2026). Повний `dotnet test` має 12 падінь у файлах, яких задача не змінює; вони винесені в [00072-pytannia.md](00072-pytannia.md).
 > **Запит автора (13.11.2026):** правильний розрахунок гіперперельоту, стрибка й витрат палива; розкладання команди польотного листа на відрізки; жорстка перевірка палива перед відправкою.
 > **Пов'язані документи:** [05a §4.1](../game-design/05a-moduli-ta-komponenty.md) (двигуни), [14 §2.6](../game-design/14-balans-i-formuly.md), польотний лист [00050](00050-politnyi-lyst-flotu.md), швидкість і переліт [00053](00053-vykonannia-perelotu-povernennia-ta-pravky-vydobuvannia.md), карта [00059](00059-flot-u-polyoti-na-karti.md).
 > **Обов'язково прочитати:** `documentation/tech/08-pravyla-kodu-dlia-ahentiv.md`, `documentation/tech/09-zvedeni-pravyla-kodu-lohiky-ta-kodiv.md`, `documentation/tech/07-planuvalnyk-podii.md`, `documentation/ui-art/05-yedynyi-styl-interfeisu.md`.
@@ -127,4 +127,50 @@
 
 ## 9. Результат виконання
 
-_(заповнює виконавець)_
+### 9.1 Зроблено
+
+**Production**
+
+- Атрибут деталі `engine_kind` (`PartAttributeKeys.EngineKind`) і довідник значень `PartEngineKinds` (`normal`, `gravity`, `hyper`, `jump`). Гравітаційний двигун має окремий клас `gravity`, який належить до звичайного класу (`FlightEngineKinds.IsNormalClass`).
+- Таблиця `part_fuel` (міграція `AddPartFuel`): PK `(part_type_id, resource_type_id)`, `share double precision`, `CHECK (share > 0 AND share <= 1)`, індекс `(resource_type_id)`. Сід: `engine_kind` шести двигунам, `char_jump_prep = 900` джамп-двигуну, `part_fuels`; сума часток перевіряється `CheckFuelShares`.
+- Каталог кораблів: `ShipModuleDto.EngineKind` і `Fuel`; каталог конструктора (`ShipModuleViewDto.EngineKind`) теж передає клас двигуна клієнту.
+- SQL-скрипт `server/scripts/db/task-00072-engine-fuel.sql` для наявної бази: гравітаційному двигуну задано `gravity`, як у сіді, додано підписи класу.
+
+**World**
+
+- `IWorldModule.GetSystemEdgePlaceAsync(systemId)`: місце останньої орбіти системи з даних.
+
+**Fleet**
+
+- Міграція `AddFlightLegs`: `flight_plan_order.group_key/command/leg`, `fleet_flight.leg_kind/prep_ends_at/fuel_json`, індекс `(group_key)`.
+- Налаштування: `fleet.hyper.speed_multiplier` (10), `fleet.jump.reference_distance` (1000), `fleet.propellant.check_return_home` (true). Ключ третього налаштування названо без слова `fuel`, бо воно є старим кодом групи ресурсів і заборонене перевіркою нейтральних кодів (рішення записано в питаннях, п. 10). Описи всіх трьох налаштувань є в `client/src/admin/i18n/configUk.ts`.
+- `EngineKindsReader` / `FleetEngines`: усі кораблі флоту (`ShipIds`) і їхні двигуни. Клас двигуна рахується окремо (`Of(class, inSystem)`), гравітаційні двигуни у відкритому космосі не працюють. `ShipsWithout(class)` повертає кораблі без двигуна класу (раніше повертав кораблі З ним).
+- `FleetSpeedService`: `FleetSpeeds { Normal, NormalOpenSpace, Hyper, JumpPrepSeconds }`. Звичайна тяга кожного корабля береться лише зі звичайних двигунів (гіпер- і джамп-двигуни її не дають), у відкритому космосі без гравітаційних. Тяга проєкту в конструкторі (`ShipDesignSummary.DrivePush`) теж рахується лише від звичайного класу.
+- `FlightPlanService.BuildLegsAsync`: команда `hyperfly`/`jump` зберігається як 2–3 відрізки зі спільним `group_key` і `command`. Кожен відрізок зберігає ціль команди; `to_edge` і `from_edge` записуються як `fly`, лише `ftl` як `hyperfly`/`jump`. Під час збереження перевіряється склад двигунів кожного корабля (`FlightPlanRunner.CheckFtlDrivesAsync`). Ліміт `fleet.flight_plan.max_orders` рахується за командами гравця; раніше ця перевірка лежала в методі, який ніхто не викликав, і не діяла.
+- `FlightPlanRunner`: `to_edge` летить до краю системи, у якій флот стоїть на момент старту відрізка, `from_edge` до цілі команди, обидва звичайними двигунами й звичайним паливом. `ftl` летить гіпердвигунами або стрибає після підготовки. `ValidateAsync` перевіряє клас двигуна на кожному кораблі: `fleet_ftl_ship_missing` і `fleet_ftl_needs_normal_drive` з `details.ship_ids`.
+- `FlightChainResolver`: група відрізків розкладається один раз (за `group_key`) від місця флоту до цілі команди; звичайні польоти мають реальну відстань (раніше 0, і їхнє паливо в перевірці було нульовим).
+- `FuelPlanner`: перевірка перед відправкою й оцінка рахують з повними трюмами (`Full`). Гравітаційні двигуни у відкритому космосі не палять. Режим повернення додому береться з останнього польоту листа: звичайний `fly` після гіперперельоту повертає звичайний режим. Повернення звичайним режимом має реальну відстань.
+- `FlightPlanService.CheckFuelAsync`: відмова `fleet_fuel_short` містить `details.shortages`.
+- API: `GET /fleet/flight-plans/estimate` повертає ще `legs` (відрізки запитаного польоту з часом і паливом; для гіпер-/джамп-команди час і відстань оцінки це суми відрізків), `return_legs`, `fuel_need`, `shortages` збереженого листа. `GET /fleet/flight-plans/plan-estimate` (і колишній `fuel-estimate`) повертає лише паливо листа. Політ у DTO має `leg_kind` і `prep_ends_at`. Картка проєкту на верфі має `warnings`.
+
+**Клієнт**
+
+- Рядок групи відрізків із розгортанням, блок палива, неактивна «Виконати» при нестачі. Ключі текстів `plan.propellant.*` і `plan.leg.count` та класи `pl-propellant*` названо без слова `fuel` (перевірка нейтральних кодів клієнта).
+- Конструктор: перевірка показує «Потрібен ще звичайний двигун…» і рамку слотів гіпер-/джамп-двигунів, коли в проєкті немає звичайного двигуна; збереження не блокується. Тяга проєкту лише від звичайних двигунів.
+- Картка проєкту й картка збирання на верфі показують те саме попередження за `warnings` з сервера.
+- Карта: флот у підготовці стрибка стоїть на місці старту, підпис «Стрибок через …» з таймером (клас `map-fleet-label--prep`, колір `--warning`).
+- Виправлено помилку типів TS2345 у `client/src/pages/player/__tests__/FlightLegs.test.tsx`, яка ламала `npm run build`.
+
+### 9.2 Тести
+
+- Сервер, `server/tests/Aetheris.Tests/Fleet/FlightLegTests.cs`, 24 тести. Нові: `A_hyperflight_is_flown_leg_after_leg_to_its_target` (наскрізний гіперпереліт до прибуття), `A_jump_waits_for_its_preparation_and_then_takes_no_time` (наскрізний стрибок: підготовка, позиція під час підготовки, прибуття), `The_preparation_of_a_jump_grows_past_the_reference_distance`, `Open_space_has_no_leg_to_or_from_an_edge`, `A_fleet_with_a_ship_without_the_drive_of_the_command_is_refused` (змішаний флот, `details.ship_ids`), `A_ship_with_a_hyperdrive_alone_has_no_ordinary_speed`, `The_check_of_the_fuel_counts_with_full_holds`, `The_gravitational_drive_does_nothing_in_open_space`, `The_orders_that_do_not_fly_burn_nothing`, `A_leg_without_its_fuel_is_refused_and_the_hold_keeps_its_cargo`, `The_estimate_asks_the_database_the_same_for_one_ship_and_for_three`. Тест розкладання команди перевіряє §2.3: `to_edge`/`from_edge` записані як `fly`, `ftl` як `hyperfly`, ціль у кожного відрізка.
+- Витрата палива береться з характеристики двигуна (`char_fuel_use`, рішення автора 13.11.2026). Тести, що перевіряють політ, а не його вартість (`FleetFlightTests`, `FleetMapTests`, наскрізні тести стрибка й гіперперельоту), ставлять витрату двигунів 0 через ті самі дані (`DriveConsumptionScope`) і відновлюють її після тесту; тест списання ставить витрату 1 од./с.
+- Клієнт: `client/src/pages/player/__tests__/FlightLegs.test.tsx` (3 тести: рядок групи, блок палива, вимкнена кнопка) і `FtlDrives.test.ts` (5 тестів: попередження конструктора й слоти, клас двигуна, попередження сервера, позиція флоту під час підготовки стрибка й після нього).
+
+### 9.3 Результати команд (13.11.2026)
+
+- `dotnet build -c Release`: 0 помилок, 0 попереджень.
+- `dotnet format --verify-no-changes --no-restore`: код виходу 0.
+- `dotnet test -c Release --filter` за тестами флоту, `NeutralCodeScanTests` і `ConfigDescriptionTests`: 153 з 153.
+- `dotnet test -c Release` (повний прогін на `aetheris_test`, без паралельних прогонів): 750 з 762. Падіння у файлах, яких задача не змінює: `BalancedEconomyTests` (3), `NoGameTermsTests`, `CharacteristicNameScanTests`, `RequestCostTests` (`/economy/`), `ChosenSeedTests`, `ProcessesTests`, `TechnologyReferenceTests`, `CurrencyDebtTests`, `UpgradedLauncherTests`, а також `FleetFlightTests.A_system_scanner_writes_a_snapshot_and_report_after_its_duration` (різниця 9:59.9999991 проти 10:00 у часі сканування; у вибірковому прогоні тест пройшов).
+- `client`: `npm run lint` код виходу 0 (2 старі попередження в чужих файлах), `npm run build` код виходу 0, `vitest run` 543 з 550; ті самі 7 тестів (`Characteristics`, `OrderQueuesPage`, `ProductionPanel`, `ShipyardPage`) падають і на чистому `HEAD`.

@@ -5,7 +5,7 @@ import { useI18n } from '../../../i18n/useI18n';
 import { useTexts } from '../../../texts/useTexts';
 import { formatAmount } from '../planetText';
 import { ShipyardDialog } from './ShipyardDialog';
-import { factLabel, fittedCombat, fittedFacts, formatCombatDamage, formatFactAmount, formatShield, mainTrait } from './shipyardParts';
+import { factLabel, fittedCombat, fittedFacts, formatCombatDamage, formatFactAmount, formatShield, ftlSlotsWithoutNormalDrive, isNormalDrive, mainTrait } from './shipyardParts';
 
 /**
  * The second step of a design: the window with the slots of the hull, the name of the design,
@@ -85,7 +85,9 @@ export function DesignWindow({
       power += module.power;
       crew += module.crew;
       weight += module.weight;
-      drivePush += module.drivePush;
+      // The push of a design is the push inside a system: the hyperdrives and the jump drives
+      // fly between the systems only (task 00072).
+      drivePush += isNormalDrive(module) ? module.drivePush : 0;
       shield += module.shieldCapacity;
       hasDrive ||= module.component === 'drive';
       hasReactor ||= module.component === 'reactor';
@@ -118,6 +120,10 @@ export function DesignWindow({
   ];
 
   const ready = checks.every((check) => check.ok);
+
+  // A hyperdrive or a jump drive without an ordinary drive does not stop the save (task 00072):
+  // the constructor warns and marks the slots of those drives.
+  const ftlSlots = useMemo(() => ftlSlotsWithoutNormalDrive(slots, byId), [byId, slots]);
   const facts = useMemo(() => fittedFacts(slots, byId), [byId, slots]);
   const damage = formatCombatDamage(energy.energyDamage, energy.kineticMin, energy.kineticMax, t, language);
 
@@ -192,7 +198,7 @@ export function DesignWindow({
             }
 
             return (
-              <div className="sh-slot sh-slot--filled" key={index}>
+              <div className={ftlSlots.includes(index) ? 'sh-slot sh-slot--filled sh-slot--warn' : 'sh-slot sh-slot--filled'} key={index}>
                 <span className="sh-slot__index">{t('shipyard.slot', { index: index + 1 })}</span>
                 <span className="sh-slot__name">{text(module.nameKey) ?? module.nameKey}</span>
                 {slot.markLevel > 1 ? <span className="sh-slot__mark">{t('shipyard.mark', { mark: slot.markLevel })}</span> : null}
@@ -283,6 +289,12 @@ export function DesignWindow({
               <span>{check.text}</span>
             </li>
           ))}
+          {ftlSlots.length > 0 ? (
+            <li className="sh-check__item sh-check__item--warn">
+              <span aria-hidden="true">!</span>
+              <span>{t('shipyard.ftlNeedsNormalDrive')}</span>
+            </li>
+          ) : null}
         </ul>
         {ready ? <p className="sh-note">{t('shipyard.readyToAssembly')}</p> : null}
       </section>

@@ -151,6 +151,10 @@ public sealed class WorldModule : IWorldModule
         _places.GetObjectPlaceAsync(objectId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<WorldPlaceDto?> GetSystemEdgePlaceAsync(long systemId, CancellationToken cancellationToken = default) =>
+        _places.GetSystemEdgePlaceAsync(systemId, cancellationToken);
+
+    /// <inheritdoc />
     public Task<WorldPlaceDto?> GetPlanetPlaceAsync(long planetId, CancellationToken cancellationToken = default) =>
         _places.GetPlanetPlaceAsync(planetId, cancellationToken);
 
