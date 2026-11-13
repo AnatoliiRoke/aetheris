@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, type FormEvent } from 'react';
+import { useState, useCallback, type FormEvent } from 'react';
 import type { Fleet, FlightPlan, FlightFuelEstimate } from '../../../api/fleetApi';
 import { useApi } from '../../../api/useApi';
 import { GameIcon } from '../../../components/GameIcon';
@@ -19,7 +19,6 @@ import { FlightFuelBlock } from './FlightFuelBlock';
 import { FlightPlanPlace } from './FlightPlanPlace';
 import { ProjectList } from './ProjectLists';
 import { stateText } from './fleetsParts';
-import { groupPlanOrders, legsOfRows } from './flightPlanGroups';
 import { useFleetsScene } from './useFleetsScene';
 
 /**
@@ -35,17 +34,6 @@ const orderLabels: Record<string, MessageKey> = {
   unload: 'plan.order.unload',
   wait: 'plan.order.wait',
   return: 'plan.order.return',
-};
-
-/**
- * The roles of the legs of a command of the player (task 00072): a hyperflight or a jump is made
- * of the leg to the edge of the system, the leg between the systems and the leg from the edge.
- */
-const legLabels: Record<string, MessageKey> = {
-  normal: 'plan.leg.normal',
-  to_edge: 'plan.leg.toEdge',
-  ftl: 'plan.leg.ftl',
-  from_edge: 'plan.leg.fromEdge',
 };
 
 /**
@@ -132,11 +120,10 @@ export function FleetPanel({
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState(fleet.name);
 
-  // The rows of the plan: a hyperflight or a jump is one row with its legs under it (task 00072).
-  const [openGroups, setOpenGroups] = useState<string[]>([]);
-  const rows = useMemo(() => groupPlanOrders(plan?.orders ?? []), [plan]);
-  const toggleGroup = (key: string) =>
-    setOpenGroups((current) => (current.includes(key) ? current.filter((entry) => entry !== key) : [...current, key]));
+  // The commands of the plan. A saved hyperflight or jump is a set of real commands (task 00072): the
+  // flight to the edge of the system, the hyperflight or the jump, and the flight to the target; every
+  // one names its own end and carries its time, so the list shows them one by one.
+  const commands = plan?.orders ?? [];
 
   // The fuel of the route of the plan (task 00072): the estimate is read when the plan changes, and
   // the tab of the browser does not read it again.
@@ -146,10 +133,6 @@ export function FleetPanel({
   );
   const fuelRead = useRead<FlightFuelEstimate | null>(loadFuel, plan !== null && plan.orders.length > 0, false);
   const fuelShort = (fuelRead.data?.shortages.length ?? 0) > 0;
-
-  // The legs of the route as the server counted them from the real places (task 00072): a row of
-  // a hyperflight or a jump shows the real end and the time of every leg, not the target of the command.
-  const rowLegs = useMemo(() => legsOfRows(rows, fuelRead.data?.legs ?? []), [rows, fuelRead.data]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -282,72 +265,43 @@ export function FleetPanel({
               <p className="fl-note">{t('plan.noOrders')}</p>
             ) : (
               <ol className="pl-orders pl-orders--plain">
-                {rows.map((row, rowIndex) => {
-                  const first = row.orders[0]!;
-                  const legsOfRow = rowLegs[rowIndex] ?? [];
-                  const open = row.groupKey !== null && openGroups.includes(row.groupKey);
-                  const current = plan.stateCode === 'active' && row.orders.some((order) => order.position === plan.currentPosition);
+                {commands.map((order) => {
+                  const current = plan.stateCode === 'active' && order.position === plan.currentPosition;
+                  const flies = flightTypes.includes(order.typeCode);
 
                   return (
                     <li
                       aria-current={current ? 'step' : undefined}
                       className={current ? 'pl-order pl-order--plain pl-order--current' : 'pl-order pl-order--plain'}
-                      key={row.groupKey ?? `order-${first.id}`}
+                      key={`order-${order.id}`}
                     >
-                      {row.expandable ? (
-                        <button
-                          aria-expanded={open}
-                          className="btn fl-btn fl-btn--small pl-order__toggle"
-                          onClick={() => row.groupKey !== null && toggleGroup(row.groupKey)}
-                          type="button"
-                        >
-                          {open ? '−' : '+'}
-                        </button>
-                      ) : null}
-                      <span className="pl-order__text">{t(orderLabels[(row.expandable ? row.command : null) ?? first.typeCode] ?? 'plan.order.fly')}</span>
-                      {row.expandable ? (
-                        <span className="pl-order__place">{t('plan.leg.count', { count: row.orders.length })}</span>
-                      ) : flightTypes.includes(first.typeCode) && first.targetKind === 'point' ? (
+                      <span className="pl-order__text">{t(orderLabels[order.typeCode] ?? 'plan.order.fly')}</span>
+                      {flies && order.targetKind === 'point' ? (
                         <span className="pl-order__place">
-                          → {first.targetX} / {first.targetY} / {first.targetZ}
+                          → {order.targetX} / {order.targetY} / {order.targetZ}
                         </span>
-                      ) : flightTypes.includes(first.typeCode) ? (
+                      ) : flies && order.targetKind === 'system' ? (
+                        <span className="pl-order__place">
+                          → {t('plan.targetEdge')}:{' '}
+                          <FlightPlanPlace objectId={0} sectorId={order.targetSectorId} systemId={order.targetSystemId} />
+                        </span>
+                      ) : flies ? (
                         <span className="pl-order__place">
                           →{' '}
                           <FlightPlanPlace
-                            objectId={first.targetObjectId}
-                            sectorId={first.targetSectorId}
-                            systemId={first.targetSystemId}
+                            objectId={order.targetObjectId}
+                            sectorId={order.targetSectorId}
+                            systemId={order.targetSystemId}
                           />
                         </span>
-                      ) : first.typeCode === 'return' ? (
+                      ) : order.typeCode === 'return' ? (
                         <span className="pl-order__place">→ {scene.nameOf(fleet.homePlanetId)}</span>
-                      ) : first.typeCode === 'load' || first.typeCode === 'unload' ? (
-                        <span className="pl-order__place">{t('plan.cargo.itemsCount', { count: readCargoItems(first.parameters).length })}</span>
+                      ) : order.typeCode === 'load' || order.typeCode === 'unload' ? (
+                        <span className="pl-order__place">{t('plan.cargo.itemsCount', { count: readCargoItems(order.parameters).length })}</span>
                       ) : null}
-                      {open && legsOfRow.length > 0
-                        ? legsOfRow.map((leg, legIndex) => (
-                            <span className="pl-order__leg" key={`${row.groupKey}-${legIndex}`}>
-                              {t(legLabels[leg.leg] ?? 'plan.leg.normal')} →{' '}
-                              {leg.toSystemId ? (
-                                <>
-                                  <FlightPlanPlace objectId={0} sectorId={leg.toSectorId} systemId={leg.toSystemId} />
-                                  {leg.toOrbit !== null && leg.toOrbit !== undefined ? `, ${t('map.orbitNumber', { orbit: leg.toOrbit })}` : ''}
-                                </>
-                              ) : (
-                                `${first.targetX} / ${first.targetY} / ${first.targetZ}`
-                              )}
-                              {' · '}
-                              {formatDuration(language, leg.seconds)}
-                            </span>
-                          ))
-                        : open
-                          ? row.orders.map((order) => (
-                              <span className="pl-order__leg" key={order.id}>
-                                {t(legLabels[order.leg ?? 'normal'] ?? 'plan.leg.normal')}
-                              </span>
-                            ))
-                          : null}
+                      {(flies || order.typeCode === 'return') && order.durationSeconds > 0 ? (
+                        <span className="pl-order__time">{formatDuration(language, order.durationSeconds)}</span>
+                      ) : null}
                     </li>
                   );
                 })}

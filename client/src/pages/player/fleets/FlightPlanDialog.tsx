@@ -226,14 +226,25 @@ export function FlightPlanDialog({
   };
 
   const changeOrder = (index: number, patch: Partial<DraftOrder>) => {
-    setOrders((current) =>
-      current.map((order, place) => {
+    setOrders((current) => {
+      // A changed hyperflight or jump of a saved group drops the flights to and from the edges that go
+      // with it: the server spreads the changed command over its legs again (task 00072).
+      const changed = current[index];
+      const group = changed?.leg === 'ftl' ? changed.groupKey ?? null : null;
+      const updated = current.map((order, place) => {
         if (place !== index) {
           return order;
         }
 
         const next = { ...order, ...patch };
         const fields = orderTypes.find((type) => type.code === next.typeCode)?.fields;
+
+        // A command of a saved group that the player changes is a command of its own from now on
+        // (task 00072): the server spreads a changed hyperflight or jump over its legs again.
+        if (order.groupKey) {
+          next.groupKey = null;
+          next.leg = null;
+        }
 
         // A new type of a load or an unload starts its list anew: an unload with everything the holds carry (or are
         // meant to carry after the loads before it), a load with nothing, and any other type with no list (task 00057).
@@ -260,12 +271,21 @@ export function FlightPlanDialog({
         }
 
         return next;
-      }),
-    );
+      });
+
+      return group === null ? updated : updated.filter((order, place) => place === index || order.groupKey !== group);
+    });
   };
 
+  // Removing the hyperflight or the jump of a saved group removes the flights to and from the edges
+  // that go with it (task 00072); any other command is removed alone.
   const removeOrder = (index: number) => {
-    setOrders((current) => current.filter((_, place) => place !== index));
+    setOrders((current) => {
+      const removed = current[index];
+      const group = removed?.leg === 'ftl' ? removed.groupKey ?? null : null;
+
+      return current.filter((order, place) => place !== index && (group === null || order.groupKey !== group));
+    });
   };
 
   const moveOrder = (index: number, step: number) => {
@@ -308,6 +328,11 @@ export function FlightPlanDialog({
     const unknown = orders.some((order) => {
       if (!needsTarget(order) || order.targetKind === 'point') {
         return false;
+      }
+
+      // The edge of a system is named by its sector and its system (task 00072).
+      if (order.targetKind === 'system') {
+        return order.targetSectorId === null || order.targetSystemId === null;
       }
 
       if (order.targetKind === 'planet') {
@@ -475,6 +500,7 @@ export function FlightPlanDialog({
                       fleet={chosenFleet}
                       from={placeBefore(orders, index)}
                       id={String(index)}
+                      typeCode={order.typeCode}
                       onChange={(patch) => changeOrder(index, patch)}
                       sectors={galaxyRead.data?.sectors ?? []}
                       value={{
@@ -560,6 +586,7 @@ function placeBefore(orders: readonly DraftOrder[], index: number): FlightTimeTa
         sectorId: order.targetSectorId,
         objectId: order.targetObjectId,
         point: order.target,
+        systemId: order.targetSystemId,
       };
     }
   }
@@ -613,28 +640,14 @@ function planetBefore(
  */
 function draftOf(plan: FlightPlan | null, seed: FlightPlanSeed | null, sectorId: number | null): DraftOrder[] {
   if (plan) {
-    // The server writes a hyperflight or a jump as two or three legs that share one key, and every
-    // leg keeps the target of the command (task 00072). The window edits the commands of the
-    // player, so the legs of a group come back as the one command they were made from: its time
-    // is counted over all its legs, and a save spreads it over the legs again.
-    const seenGroups = new Set<string>();
-    const commands = plan.orders.filter((order: FlightPlanOrder) => {
-      if (!order.groupKey) {
-        return true;
-      }
-
-      if (seenGroups.has(order.groupKey)) {
-        return false;
-      }
-
-      seenGroups.add(order.groupKey);
-
-      return true;
-    });
-
-    return commands.map((order: FlightPlanOrder) => ({
-      typeCode: order.groupKey && order.command ? order.command : order.typeCode,
-      targetKind: order.targetKind === 'point' ? 'point' : order.targetKind === 'planet' ? 'planet' : 'object',
+    // A saved hyperflight or jump is a set of real commands (task 00072): the flight to the edge of
+    // the system, the hyperflight or the jump, and the flight to the target. Every one names its own
+    // end, so the window shows them as they are, and they remember the group they belong to.
+    return plan.orders.map((order: FlightPlanOrder) => ({
+      typeCode: order.typeCode,
+      groupKey: order.groupKey ?? null,
+      leg: order.leg ?? null,
+      targetKind: order.targetKind === 'point' ? 'point' : order.targetKind === 'planet' ? 'planet' : order.targetKind === 'system' ? 'system' : 'object',
       targetSectorId: order.targetSectorId > 0 ? order.targetSectorId : sectorId,
       targetSystemId: order.targetSystemId > 0 ? order.targetSystemId : null,
       targetObjectId: order.targetObjectId > 0 ? order.targetObjectId : null,

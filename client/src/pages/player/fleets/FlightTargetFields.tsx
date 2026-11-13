@@ -20,6 +20,7 @@ import { objectText, planetBodies, systemText, visibleSystems } from './flightPl
  * @param sectors The sectors the player knows of.
  * @param fleet The fleet the plan is made for.
  * @param from The place the fleet is at when the order begins, when an order before it moves the fleet.
+ * @param typeCode The type of the order, so the time is counted with the drives of the order (task 00072).
  * @param onChange Answers the new target of the order.
  */
 export function FlightTargetFields({
@@ -28,6 +29,7 @@ export function FlightTargetFields({
   sectors,
   fleet,
   from,
+  typeCode,
   onChange,
 }: {
   id: string;
@@ -35,6 +37,7 @@ export function FlightTargetFields({
   sectors: readonly MapSector[];
   fleet: Fleet | null;
   from: FlightTimeTarget | null;
+  typeCode: string;
   onChange: (patch: Partial<DraftOrder>) => void;
 }) {
   const { t } = useI18n();
@@ -112,6 +115,7 @@ export function FlightTargetFields({
           <option value="point">{t('plan.targetPoint')}</option>
           <option value="planet">{t('plan.targetPlanet')}</option>
           <option value="object">{t('plan.targetObject')}</option>
+          <option value="system">{t('plan.targetEdge')}</option>
         </select>
       </div>
 
@@ -131,7 +135,7 @@ export function FlightTargetFields({
         </div>
       ) : null}
 
-      {value.targetKind === 'planet' ? (
+      {value.targetKind === 'planet' || value.targetKind === 'system' ? (
         <>
           <div className="pl-order__row pl-order__row--places">
             <label className="fl-label" htmlFor={`plan-order-sector-${id}`}>
@@ -169,23 +173,27 @@ export function FlightTargetFields({
               ))}
             </select>
 
-            <label className="fl-label" htmlFor={`plan-order-object-${id}`}>
-              {t('plan.planet')}
-            </label>
-            <select
-              className="fl-input"
-              disabled={value.targetSystemId === null}
-              id={`plan-order-object-${id}`}
-              onChange={(event) => onChange({ targetObjectId: event.target.value === '' ? null : Number(event.target.value) })}
-              value={value.targetObjectId ?? ''}
-            >
-              <option value="">{t('plan.planetAny')}</option>
-              {objects.map((object) => (
-                <option key={object.id} value={object.id}>
-                  {objectText(object)}
-                </option>
-              ))}
-            </select>
+            {value.targetKind === 'planet' ? (
+              <>
+                <label className="fl-label" htmlFor={`plan-order-object-${id}`}>
+                  {t('plan.planet')}
+                </label>
+                <select
+                  className="fl-input"
+                  disabled={value.targetSystemId === null}
+                  id={`plan-order-object-${id}`}
+                  onChange={(event) => onChange({ targetObjectId: event.target.value === '' ? null : Number(event.target.value) })}
+                  value={value.targetObjectId ?? ''}
+                >
+                  <option value="">{t('plan.planetAny')}</option>
+                  {objects.map((object) => (
+                    <option key={object.id} value={object.id}>
+                      {objectText(object)}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : null}
           </div>
         </>
       ) : null}
@@ -237,8 +245,9 @@ export function FlightTargetFields({
           sectorId: value.targetSectorId,
           objectId: value.targetObjectId,
           point: value.target,
+          systemId: value.targetSystemId,
         }}
-        typeCode="fly"
+        typeCode={typeCode}
       />
     </>
   );

@@ -106,39 +106,66 @@ const hyperflightPlan = () =>
     ],
   });
 
-describe('the legs of a flight and the fuel of a fleet (task 00072)', () => {
-  it('shows the legs of a hyperflight as one row that opens', async () => {
-    const fleet = fakeFleetApi({
-      fleets: vi.fn().mockResolvedValue(withFleet()),
-      flightPlans: vi.fn().mockResolvedValue([hyperflightPlan()]),
-      fuelEstimate: vi.fn().mockResolvedValue(sampleFlightFuelEstimate()),
-    });
-
-    renderPage('/fleets', { auth: signedIn(), fleet, map: fakeMapApi() });
-
-    const list = await waitFor(() => {
-      const found = document.querySelector<HTMLElement>('ol.pl-orders');
-
-      if (found === null) {
-        throw new Error('The list of the orders is not on the screen.');
-      }
-
-      return found;
-    });
-
-    // The three legs of the command are one row of the list (task 00072).
-    await waitFor(() => {
-      expect(within(list).getAllByRole('listitem')).toHaveLength(1);
-    });
-
-    // The row opens and shows the legs under it.
-    await userEvent.click(within(list).getByRole('button'));
-
-    await waitFor(() => {
-      expect(within(list).getByText(/до краю системи/i)).toBeInTheDocument();
-    });
+/**
+ * A saved hyperflight to a point of open space (task 00072): the server replaced the command by real
+ * commands, a flight to the edge of the system and the hyperflight to the point, each with its own
+ * end and its time; an ordinary wait follows them.
+ */
+const savedHyperflight = () =>
+  sampleFlightPlan({
+    orders: [
+      {
+        id: 1,
+        position: 1,
+        typeCode: 'fly',
+        targetKind: 'system',
+        targetSectorId: 1,
+        targetSystemId: 4,
+        targetObjectId: 0,
+        targetX: 0,
+        targetY: 0,
+        targetZ: 0,
+        durationSeconds: 137,
+        parameters: '{}',
+        groupKey: '33333333-3333-3333-3333-333333333333',
+        command: 'hyperfly',
+        leg: 'to_edge',
+      },
+      {
+        id: 2,
+        position: 2,
+        typeCode: 'hyperfly',
+        targetKind: 'point',
+        targetSectorId: 1,
+        targetSystemId: 0,
+        targetObjectId: 0,
+        targetX: 181.6,
+        targetY: 127.8,
+        targetZ: 0,
+        durationSeconds: 2540,
+        parameters: '{}',
+        groupKey: '33333333-3333-3333-3333-333333333333',
+        command: 'hyperfly',
+        leg: 'ftl',
+      },
+      {
+        id: 3,
+        position: 3,
+        typeCode: 'wait',
+        targetKind: 'none',
+        targetSectorId: 0,
+        targetSystemId: 0,
+        targetObjectId: 0,
+        targetX: 0,
+        targetY: 0,
+        targetZ: 0,
+        durationSeconds: 600,
+        parameters: '{}',
+      },
+    ],
   });
 
+describe('the legs of a flight and the fuel of a fleet (task 00072)', () => {
   it('shows the need of the fuel and what the hold holds', async () => {
     const fleet = fakeFleetApi({
       fleets: vi.fn().mockResolvedValue(withFleet()),
@@ -181,81 +208,10 @@ describe('the legs of a flight and the fuel of a fleet (task 00072)', () => {
     // The shortage is told to the player (task 00072).
     expect(screen.getAllByText(/бракує палива/i).length).toBeGreaterThan(0);
   });
-  it('gives a saved hyperflight back to the editor as the one command it was made from', async () => {
-    // The server wrote the command as its legs, and every leg keeps the target of the command.
-    const leg = (id: number, typeCode: string, legRole: string) => ({
-      id,
-      position: id,
-      typeCode,
-      targetKind: 'point',
-      targetSectorId: 3,
-      targetSystemId: 0,
-      targetObjectId: 0,
-      targetX: 180.2,
-      targetY: 117.5,
-      targetZ: 0,
-      durationSeconds: 0,
-      parameters: '{}',
-      groupKey: '22222222-2222-2222-2222-222222222222',
-      command: 'hyperfly',
-      leg: legRole,
-    });
-    const write = vi.fn().mockResolvedValue(sampleFlightPlan());
+  it('shows the commands of a saved hyperflight one by one with their ends and their times', async () => {
     const fleet = fakeFleetApi({
       fleets: vi.fn().mockResolvedValue(withFleet()),
-      flightPlans: vi.fn().mockResolvedValue([sampleFlightPlan({ orders: [leg(1, 'fly', 'to_edge'), leg(2, 'hyperfly', 'ftl')] })]),
-      createFlightPlan: write,
-      saveFlightPlan: write,
-    });
-
-    renderPage('/fleets', { auth: signedIn(), fleet, map: fakeMapApi() });
-
-    await userEvent.click(await screen.findByRole('button', { name: 'Змінити лист' }));
-
-    const dialog = await screen.findByRole('dialog', { name: 'Політний лист флоту' });
-
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Змінити лист' }));
-
-    await waitFor(() => expect(write).toHaveBeenCalled());
-
-    // The editor holds the command, not its legs: the save spreads it over the legs again.
-    const orders = write.mock.calls[0]![0].orders;
-
-    expect(orders).toHaveLength(1);
-    expect(orders[0]!.typeCode).toBe('hyperfly');
-    expect(orders[0]!.targetX).toBe(180.2);
-    expect(orders[0]!.targetY).toBe(117.5);
-  });
-  it('shows every leg of a saved hyperflight with its real end and its time', async () => {
-    // The plan of the fleet as the server stores it: the legs keep the target of the command, a
-    // point of open space, so there is no leg from the edge.
-    const leg = (id: number, typeCode: string, legRole: string) => ({
-      id,
-      position: id,
-      typeCode,
-      targetKind: 'point',
-      targetSectorId: 1,
-      targetSystemId: 0,
-      targetObjectId: 0,
-      targetX: 181.6,
-      targetY: 127.8,
-      targetZ: 0,
-      durationSeconds: 0,
-      parameters: '{}',
-      groupKey: '33333333-3333-3333-3333-333333333333',
-      command: 'hyperfly',
-      leg: legRole,
-    });
-    const estimate = sampleFlightFuelEstimate({
-      legs: [
-        { leg: 'to_edge', kind: 'normal', fromSectorId: 1, fromSystemId: 4, fromOrbit: 3, toSectorId: 1, toSystemId: 4, toOrbit: 12, distance: 5.4, seconds: 1800, fuel: [] },
-        { leg: 'ftl', kind: 'hyper', fromSectorId: 1, fromSystemId: 4, fromOrbit: 12, toSectorId: 1, toSystemId: null, toOrbit: null, distance: 40, seconds: 7200, fuel: [] },
-      ],
-    });
-    const fleet = fakeFleetApi({
-      fleets: vi.fn().mockResolvedValue(withFleet()),
-      flightPlans: vi.fn().mockResolvedValue([sampleFlightPlan({ orders: [leg(1, 'fly', 'to_edge'), leg(2, 'hyperfly', 'ftl')] })]),
-      fuelEstimate: vi.fn().mockResolvedValue(estimate),
+      flightPlans: vi.fn().mockResolvedValue([savedHyperflight()]),
     });
 
     renderPage('/fleets', { auth: signedIn(), fleet, map: fakeMapApi() });
@@ -270,15 +226,70 @@ describe('the legs of a flight and the fuel of a fleet (task 00072)', () => {
       return found;
     });
 
-    // The row is the command of the player, not its first leg.
-    await waitFor(() => expect(within(list).getByText('Гіперперліт')).toBeInTheDocument());
+    // Every command is a row of its own: the flight to the edge of the system with its time, and the
+    // hyperflight to the point with its own time.
+    const rows = within(list).getAllByRole('listitem');
 
-    await userEvent.click(within(list).getByRole('button'));
+    expect(rows).toHaveLength(3);
+    expect(rows[0]).toHaveTextContent('Переліт');
+    expect(rows[0]).toHaveTextContent('Край системи');
+    expect(rows[0]).toHaveTextContent('0:02:17');
+    expect(rows[1]).toHaveTextContent('Гіперперліт');
+    expect(rows[1]).toHaveTextContent('181.6 / 127.8 / 0');
+    expect(rows[1]).toHaveTextContent('0:42:20');
+  });
 
-    // The leg to the edge ends on the last orbit of the system, and the leg between the systems
-    // has its own time and ends at the target.
-    await waitFor(() => expect(within(list).getByText(/До краю системи/)).toHaveTextContent('орбіта 12'));
-    expect(within(list).getByText(/Між системами/)).toHaveTextContent('181.6 / 127.8 / 0');
-    expect(within(list).getByText(/Між системами/)).not.toHaveTextContent('0:00:00');
+  it('gives the editor the commands of a saved hyperflight as they are, each with its own end', async () => {
+    const write = vi.fn().mockResolvedValue(sampleFlightPlan());
+    const fleet = fakeFleetApi({
+      fleets: vi.fn().mockResolvedValue(withFleet()),
+      flightPlans: vi.fn().mockResolvedValue([savedHyperflight()]),
+      createFlightPlan: write,
+      saveFlightPlan: write,
+    });
+
+    renderPage('/fleets', { auth: signedIn(), fleet, map: fakeMapApi() });
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Змінити лист' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Політний лист флоту' });
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Змінити лист' }));
+
+    await waitFor(() => expect(write).toHaveBeenCalled());
+
+    const orders = write.mock.calls[0]![0].orders;
+
+    expect(orders).toHaveLength(3);
+    expect(orders[0]).toMatchObject({ typeCode: 'fly', targetKind: 'system', targetSystemId: 4 });
+    expect(orders[1]).toMatchObject({ typeCode: 'hyperfly', targetKind: 'point', targetX: 181.6, targetY: 127.8 });
+    expect(orders[2]).toMatchObject({ typeCode: 'wait' });
+  });
+
+  it('removes the flight to the edge together with the hyperflight it belongs to', async () => {
+    const write = vi.fn().mockResolvedValue(sampleFlightPlan());
+    const fleet = fakeFleetApi({
+      fleets: vi.fn().mockResolvedValue(withFleet()),
+      flightPlans: vi.fn().mockResolvedValue([savedHyperflight()]),
+      createFlightPlan: write,
+      saveFlightPlan: write,
+    });
+
+    renderPage('/fleets', { auth: signedIn(), fleet, map: fakeMapApi() });
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Змінити лист' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Політний лист флоту' });
+
+    // The second command is the hyperflight: removing it removes the flight to the edge as well.
+    await userEvent.click(within(dialog).getAllByRole('button', { name: 'Прибрати наказ' })[1]!);
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Змінити лист' }));
+
+    await waitFor(() => expect(write).toHaveBeenCalled());
+
+    const orders = write.mock.calls[0]![0].orders;
+
+    expect(orders).toHaveLength(1);
+    expect(orders[0]).toMatchObject({ typeCode: 'wait' });
   });
 });

@@ -225,49 +225,104 @@ public sealed partial class FlightLegTests
         using PlanetsTestPlayer player = await FoundAsync(spaceportLevel: 1);
         long fleetId = await FleetAsync(player, [NormalDrive, HyperDrive]);
 
+        long targetObjectId = await OtherBodyAsync(player);
         JsonElement plan = await CommandAsync(player, Plans, new
         {
             fleet_id = fleetId,
-            orders = new object[] { new { type_code = "hyperfly", target_kind = "object", target_object_id = await OtherBodyAsync(player) } },
+            orders = new object[] { new { type_code = "hyperfly", target_kind = "object", target_object_id = targetObjectId } },
         });
 
         JsonElement orders = plan.GetProperty("orders");
 
         Assert.True(orders.GetArrayLength() >= 2, $"The plan has {orders.GetArrayLength()} orders: {plan.GetRawText()}");
 
-        // Every leg of the command shares one key, names the command it comes from and keeps the
-        // target of the command (task 00072, 2.3).
+        // The command is replaced by real commands (task 00072, 2.3): they share one key and name the
+        // command they come from, and every one names its own end and carries its time.
+        WorldPlaceDto home = await HomeAsync(player);
+        WorldPlaceDto target = await ObjectPlaceAsync(targetObjectId);
         string? groupKey = orders[0].GetProperty("group_key").GetString();
-        long target = orders[0].GetProperty("target_object_id").GetInt64();
+        List<JsonElement> commands = [.. orders.EnumerateArray()];
 
         Assert.NotNull(groupKey);
-        Assert.NotEqual(0L, target);
+        Assert.All(commands, order => Assert.Equal(groupKey, order.GetProperty("group_key").GetString()));
+        Assert.All(commands, order => Assert.Equal("hyperfly", order.GetProperty("command").GetString()));
+        Assert.All(commands, order => Assert.True(order.GetProperty("duration_seconds").GetInt64() > 0, order.GetRawText()));
 
-        List<string?> legs = [];
+        JsonElement ftl = Assert.Single(commands, order => order.GetProperty("leg").GetString() == "ftl");
+        JsonElement fromEdge = commands[^1];
 
-        foreach (JsonElement order in orders.EnumerateArray())
+        // The hyperflight ends at the edge of the system of the target.
+        Assert.Equal("hyperfly", ftl.GetProperty("type_code").GetString());
+        Assert.Equal("system", ftl.GetProperty("target_kind").GetString());
+        Assert.Equal(target.SystemId, ftl.GetProperty("target_system_id").GetInt64());
+
+        // The last command flies from the edge to the target itself.
+        Assert.Equal("from_edge", fromEdge.GetProperty("leg").GetString());
+        Assert.Equal("fly", fromEdge.GetProperty("type_code").GetString());
+        Assert.Equal(targetObjectId, fromEdge.GetProperty("target_object_id").GetInt64());
+
+        // The first command flies to the edge of the system of the fleet, when the body is not on it.
+        if (commands.Count == 3)
         {
-            Assert.Equal(groupKey, order.GetProperty("group_key").GetString());
-            Assert.Equal("hyperfly", order.GetProperty("command").GetString());
-            Assert.Equal(target, order.GetProperty("target_object_id").GetInt64());
+            JsonElement toEdge = commands[0];
 
-            string? leg = order.GetProperty("leg").GetString();
-
-            legs.Add(leg);
-
-            // Only the leg between the systems is a hyperflight; the legs inside the systems are
-            // ordinary flights.
-            Assert.Equal(leg == "ftl" ? "hyperfly" : "fly", order.GetProperty("type_code").GetString());
+            Assert.Equal("to_edge", toEdge.GetProperty("leg").GetString());
+            Assert.Equal("fly", toEdge.GetProperty("type_code").GetString());
+            Assert.Equal("system", toEdge.GetProperty("target_kind").GetString());
+            Assert.Equal(home.SystemId, toEdge.GetProperty("target_system_id").GetInt64());
         }
+    }
 
-        // The target is not on the edge of its system, so the last leg flies from the edge to it.
-        Assert.Equal("from_edge", legs[^1]);
-        Assert.Equal("ftl", legs[^2]);
+    /// <summary>
+    /// The times of the commands of a saved hyperflight add up to the time the estimate showed for
+    /// the command before it was saved (task 00072, 2.3), and saving the commands again as the
+    /// editor sends them keeps them as they are.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_saved_hyperflight_keeps_the_time_of_its_estimate_and_saves_again_as_it_is()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await FoundAsync(spaceportLevel: 1);
+        long fleetId = await FleetAsync(player, [NormalDrive, HyperDrive]);
+        long targetObjectId = await OtherBodyAsync(player);
 
-        if (legs.Count == 3)
+        using HttpResponseMessage before = await player.Client.GetAsync(
+            $"/api/v1/fleet/flight-plans/estimate?fleet_id={fleetId}&type_code=hyperfly&target_kind=object&target_object_id={targetObjectId}",
+            Token);
+        long estimated = JsonDocument.Parse(await before.Content.ReadAsStringAsync(Token)).RootElement.GetProperty("current_seconds").GetInt64();
+
+        JsonElement plan = await CommandAsync(player, Plans, new
         {
-            Assert.Equal("to_edge", legs[0]);
-        }
+            fleet_id = fleetId,
+            orders = new object[] { new { type_code = "hyperfly", target_kind = "object", target_object_id = targetObjectId } },
+        });
+        List<JsonElement> commands = [.. plan.GetProperty("orders").EnumerateArray()];
+
+        Assert.True(estimated > 0);
+        Assert.Equal(estimated, commands.Sum(order => order.GetProperty("duration_seconds").GetInt64()));
+
+        // The editor sends the commands back as ordinary orders with their own ends.
+        object[] again =
+        [
+            .. commands.Select(order => (object)new
+            {
+                type_code = order.GetProperty("type_code").GetString(),
+                target_kind = order.GetProperty("target_kind").GetString(),
+                target_sector_id = order.GetProperty("target_sector_id").GetInt32(),
+                target_system_id = order.GetProperty("target_system_id").GetInt64(),
+                target_object_id = order.GetProperty("target_object_id").GetInt64(),
+            }),
+        ];
+
+        JsonElement saved = await CommandAsync(player, Save, new { fleet_id = fleetId, orders = again });
+        List<JsonElement> savedCommands = [.. saved.GetProperty("orders").EnumerateArray()];
+
+        Assert.Equal(commands.Count, savedCommands.Count);
+        Assert.Equal(
+            commands.Select(order => (order.GetProperty("type_code").GetString(), order.GetProperty("target_kind").GetString(), order.GetProperty("target_system_id").GetInt64())),
+            savedCommands.Select(order => (order.GetProperty("type_code").GetString(), order.GetProperty("target_kind").GetString(), order.GetProperty("target_system_id").GetInt64())));
+        Assert.Equal(estimated, savedCommands.Sum(order => order.GetProperty("duration_seconds").GetInt64()));
     }
 
     /// <summary>

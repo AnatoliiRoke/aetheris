@@ -20,9 +20,9 @@ namespace Aetheris.Fleet.Services;
 /// leaves, so it never changes the plan itself.
 /// </para>
 /// <para>
-/// A hyperflight or a jump is written into the plan as two or three legs that share one key; the
-/// group is planned once, from the place the fleet stands at when the group begins to the target
-/// of the command, which every leg of the group keeps.
+/// A hyperflight or a jump is written into the plan as two or three real commands that share one
+/// key: a flight to the edge of the system, the leg between the systems and a flight from the edge
+/// to the target. Every one of them names its own end, so the chain walks them as they are.
 /// </para>
 /// </remarks>
 public sealed class FlightChainResolver
@@ -68,28 +68,29 @@ public sealed class FlightChainResolver
         ArgumentNullException.ThrowIfNull(start);
 
         List<FlightLeg> chain = [];
-        HashSet<Guid> plannedGroups = [];
         WorldPlaceDto place = start;
 
         foreach (FlightPlanOrderEntity order in orders.OrderBy(entry => entry.Position))
         {
             string? command = CommandOf(order);
 
-            // A hyperflight or a jump: the group of its legs is planned once, from the place the
-            // fleet stands at to the target of the command.
-            if (command is not null)
+            // The leg between the systems of a saved hyperflight or jump is a command of its own: it
+            // flies from where the command before it ends to the end it names (task 00072).
+            if (command is not null && string.Equals(order.Leg, FlightLegKinds.Ftl, StringComparison.Ordinal))
             {
-                if (order.GroupKey is { } groupKey && !plannedGroups.Add(groupKey))
-                {
-                    continue;
-                }
+                WorldPlaceDto end = await TargetOfAsync(fleet, order, cancellationToken).ConfigureAwait(false);
 
+                chain.Add(new FlightLeg(FlightLegKinds.Ftl, KindOf(command), place, end, _world.GetTravelDistance(place, end)));
+                place = end;
+
+                continue;
+            }
+
+            // A hyperflight or a jump that was not spread over its legs yet is planned whole.
+            if (command is not null && order.Leg is null)
+            {
                 WorldPlaceDto target = await TargetOfAsync(fleet, order, cancellationToken).ConfigureAwait(false);
-                string kind = string.Equals(command, FlightOrderTypes.Hyperfly, StringComparison.Ordinal)
-                    ? FlightEngineKinds.Hyper
-                    : FlightEngineKinds.Jump;
-
-                IReadOnlyList<FlightLeg> legs = await _legs.PlanAsync(place, target, kind, cancellationToken).ConfigureAwait(false);
+                IReadOnlyList<FlightLeg> legs = await _legs.PlanAsync(place, target, KindOf(command), cancellationToken).ConfigureAwait(false);
 
                 chain.AddRange(legs);
                 place = legs.Count > 0 ? legs[^1].To : target;
@@ -102,7 +103,7 @@ public sealed class FlightChainResolver
                 WorldPlaceDto target = await TargetOfAsync(fleet, order, cancellationToken).ConfigureAwait(false);
 
                 chain.Add(new FlightLeg(
-                    FlightLegKinds.Normal,
+                    order.Leg ?? FlightLegKinds.Normal,
                     FlightEngineKinds.Normal,
                     place,
                     target,
@@ -114,6 +115,14 @@ public sealed class FlightChainResolver
 
         return chain;
     }
+
+    /// <summary>
+    /// Gets the class of the drives of a command.
+    /// </summary>
+    /// <param name="command">The command, <see cref="FlightOrderTypes.Hyperfly"/> or <see cref="FlightOrderTypes.Jump"/>.</param>
+    /// <returns>The class of the drives.</returns>
+    private static string KindOf(string command) =>
+        string.Equals(command, FlightOrderTypes.Hyperfly, StringComparison.Ordinal) ? FlightEngineKinds.Hyper : FlightEngineKinds.Jump;
 
     /// <summary>
     /// Gets the command of the player an order belongs to: a hyperflight or a jump, or

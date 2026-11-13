@@ -755,6 +755,7 @@ public sealed class FlightPlanService
 
         List<FlightPlanOrderEntity> written = [];
         HashSet<string> checkedKinds = [];
+        FleetSpeeds? speeds = null;
         int position = 1;
 
         foreach (FlightPlanOrderInput order in orders)
@@ -785,6 +786,12 @@ public sealed class FlightPlanService
 
                     if (target is not null)
                     {
+                        // Every flight of the plan carries its real time from the end of the command
+                        // before it (task 00072), counted with the speeds of the fleet as it is loaded now.
+                        speeds ??= await _speeds.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+                        FlightLeg flight = new(FlightLegKinds.Normal, FlightEngineKinds.Normal, start, target, _world.GetTravelDistance(start, target));
+
+                        written[^1].DurationSeconds = FuelPlanner.SecondsOf(flight, speeds, FleetSettings.From(_config), set => set.Current);
                         start = target;
                     }
                 }
@@ -823,22 +830,33 @@ public sealed class FlightPlanService
             // between the systems ends at the edge of its system and the leg to the edge ends at the
             // edge of the system the fleet stands in when the leg begins. The legs inside a system
             // are ordinary flights; only the leg between the systems is a hyperflight or a jump.
+            // The command is replaced by real commands of the plan (task 00072, decision of the author
+            // of 13.11.2026): a flight to the edge of the system, the hyperflight or the jump to the
+            // edge of the system of the target (or to the point of open space), and a flight from the
+            // edge to the target. Every command names its own end and carries its time, counted with
+            // the speeds of the fleet as it is loaded now; the runner counts the real flight again
+            // when the command begins.
+            speeds ??= await _speeds.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+            FleetSettings settings = FleetSettings.From(_config);
+
             foreach (FlightLeg leg in legs)
             {
                 bool isFtl = string.Equals(leg.Leg, FlightLegKinds.Ftl, StringComparison.Ordinal);
+                bool toEdge = leg.To.SystemId is not null
+                    && (string.Equals(leg.Leg, FlightLegKinds.ToEdge, StringComparison.Ordinal) || isFtl);
 
                 written.Add(new FlightPlanOrderEntity
                 {
                     Position = position++,
                     TypeCode = isFtl ? order.TypeCode : FlightOrderTypes.Fly,
-                    TargetKind = order.TargetKind,
-                    TargetSectorId = order.TargetSectorId,
-                    TargetSystemId = order.TargetSystemId,
-                    TargetObjectId = order.TargetObjectId,
-                    TargetX = order.TargetX,
-                    TargetY = order.TargetY,
-                    TargetZ = order.TargetZ,
-                    DurationSeconds = 0,
+                    TargetKind = toEdge ? FlightTargetKinds.System : order.TargetKind,
+                    TargetSectorId = toEdge ? leg.To.SectorId : order.TargetSectorId,
+                    TargetSystemId = toEdge ? leg.To.SystemId!.Value : order.TargetSystemId,
+                    TargetObjectId = toEdge ? 0 : order.TargetObjectId,
+                    TargetX = toEdge ? 0m : order.TargetX,
+                    TargetY = toEdge ? 0m : order.TargetY,
+                    TargetZ = toEdge ? 0m : order.TargetZ,
+                    DurationSeconds = FuelPlanner.SecondsOf(leg, speeds, settings, set => set.Current),
                     Parameters = "{}",
                     GroupKey = groupKey,
                     Command = order.TypeCode,

@@ -727,13 +727,9 @@ public sealed class FlightPlanRunner
             return (BeginState.Blocked, FleetErrorCodes.FlightTargetUnknown);
         }
 
-        // The leg to the edge of a hyperflight or of a jump ends at the edge of the system the
-        // fleet stands in now (task 00072): the orders before it may have moved the fleet.
-        WorldPlaceDto? destination = string.Equals(order.Leg, FlightLegKinds.ToEdge, StringComparison.Ordinal)
-            ? origin.SystemId is { } systemId
-                ? await _world.GetSystemEdgePlaceAsync(systemId, cancellationToken).ConfigureAwait(false)
-                : origin
-            : await _flights.ResolveOrderAsync(fleet, order, cancellationToken).ConfigureAwait(false);
+        // The flight to the edge of a system names the system (task 00072): its target resolves to
+        // the last orbit of that system, as the data of the world give it.
+        WorldPlaceDto? destination = await _flights.ResolveOrderAsync(fleet, order, cancellationToken).ConfigureAwait(false);
 
         if (destination is null)
         {

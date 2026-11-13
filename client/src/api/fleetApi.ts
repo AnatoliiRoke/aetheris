@@ -692,7 +692,7 @@ export interface FleetHoldItem {
 export interface FlightEstimateRequest {
   fleetId: number;
   /** `fly` for a flight to a named place, `return` for the flight to the home body of the fleet. */
-  typeCode: 'fly' | 'return';
+  typeCode: string;
   /** The place the flight goes to; absent for the return. */
   target?: FlightEstimateTarget;
   /** The place the flight starts at; absent for the place the fleet is at. */
@@ -703,6 +703,8 @@ export interface FlightEstimateRequest {
  * A place the estimate of a flight names (task 00053).
  */
 export interface FlightEstimateTarget {
+  /** The system of the target, when the target is the edge of a system (task 00072). */
+  systemId?: number;
   /** The kind of the place: `point`, `planet` or `object`. */
   kind: string;
   sectorId: number;
@@ -1029,6 +1031,11 @@ function writeTarget(query: URLSearchParams, prefix: string, place: FlightEstima
   query.set(`${prefix}_kind`, place.kind);
   query.set(`${prefix}_sector_id`, String(place.sectorId));
   query.set(`${prefix}_object_id`, String(place.objectId));
+
+  if (place.systemId !== undefined) {
+    query.set(`${prefix}_system_id`, String(place.systemId));
+  }
+
   query.set(`${prefix}_x`, String(place.x));
   query.set(`${prefix}_y`, String(place.y));
   query.set(`${prefix}_z`, String(place.z));

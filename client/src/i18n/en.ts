@@ -1194,6 +1194,7 @@ export const en: Messages = {
   'plan.target': 'Target',
   'plan.targetPoint': 'Coordinates',
   'plan.targetPlanet': 'Planet',
+  'plan.targetEdge': 'Edge of a system',
   'plan.targetObject': 'Object',
   'plan.sector': 'Sector',
   'plan.sectorAny': 'No sector chosen',

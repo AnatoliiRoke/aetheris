@@ -49,13 +49,21 @@ export interface DraftOrder {
   durationMinutes: string;
   /** What a load or an unload carries (task 00057); empty for the other types. */
   items: CargoDraftItem[];
+  /**
+   * The key of the commands a saved hyperflight or jump was replaced by (task 00072), or `null` for
+   * an order of its own: removing the hyperflight removes the flights that go with it.
+   */
+  groupKey?: string | null;
+  /** The role of the command in such a group: `to_edge`, `ftl` or `from_edge`. */
+  leg?: string | null;
 }
 
 /**
  * The kinds of the target of an order (task 00050): the coordinates of a point of the space, a
- * planet of a star system, or an object that belongs to no system — a free asteroid field.
+ * planet of a star system, an object that belongs to no system — a free asteroid field — or the
+ * edge of a star system, its last orbit (task 00072).
  */
-export type TargetKind = 'point' | 'planet' | 'object';
+export type TargetKind = 'point' | 'planet' | 'object' | 'system';
 
 /**
  * Reads the three coordinates out of what the player wrote: three numbers separated by spaces or
@@ -129,7 +137,7 @@ export function toOrderInputs(orders: readonly DraftOrder[]): FlightPlanOrderInp
 
     return {
       typeCode: order.typeCode,
-      targetKind: isPoint ? 'point' : order.targetKind === 'planet' ? 'planet' : 'object',
+      targetKind: isPoint ? 'point' : order.targetKind,
       targetSectorId: order.targetSectorId ?? 0,
       targetSystemId: order.targetSystemId ?? 0,
       targetObjectId: order.targetObjectId ?? 0,
@@ -154,6 +162,8 @@ export interface FlightTimeTarget {
   objectId: number | null;
   /** The coordinates of the target, when the target is a point of the space. */
   point: string;
+  /** The system of the target, when the target is the edge of a system (task 00072). */
+  systemId?: number | null;
 }
 
 /**
@@ -170,6 +180,13 @@ export function estimateTargetOf(target: FlightTimeTarget): FlightEstimateTarget
     return axes === null || target.sectorId === null
       ? null
       : { kind: 'point', sectorId: target.sectorId, objectId: 0, x: axes[0], y: axes[1], z: axes[2] };
+  }
+
+  // The edge of a system is named by the system: the server counts the flight to its last orbit.
+  if (target.kind === 'system') {
+    return target.systemId === null || target.systemId === undefined
+      ? null
+      : { kind: 'system', sectorId: target.sectorId ?? 0, objectId: 0, systemId: target.systemId, x: 0, y: 0, z: 0 };
   }
 
   return target.objectId === null ? null : { kind: target.kind, sectorId: target.sectorId ?? 0, objectId: target.objectId, x: 0, y: 0, z: 0 };

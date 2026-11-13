@@ -1192,6 +1192,7 @@ export const uk = {
   'plan.target': 'Ціль',
   'plan.targetPoint': 'Координати',
   'plan.targetPlanet': 'Планета',
+  'plan.targetEdge': 'Край системи',
   'plan.targetObject': 'Об’єкт',
   'plan.sector': 'Сектор',
   'plan.sectorAny': 'Сектор не обрано',

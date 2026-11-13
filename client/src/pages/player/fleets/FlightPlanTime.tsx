@@ -15,7 +15,7 @@ import { estimateTargetOf, type FlightTimeTarget } from './flightPlanParts';
  * anything itself.
  *
  * @param fleet The fleet the plan is made for.
- * @param typeCode `fly` for a flight to the target, `return` for the flight to the home body of the fleet.
+ * @param typeCode `fly`, `hyperfly` or `jump` for a flight to the target, counted with the drives of the order (task 00072); `return` for the flight to the home body of the fleet.
  * @param target The place the flight goes to; it is not used for the return.
  * @param from The place the flight starts at, when an order before it brings the fleet elsewhere.
  */
@@ -26,7 +26,7 @@ export function FlightPlanTime({
   from,
 }: {
   fleet: Fleet | null;
-  typeCode: 'fly' | 'return';
+  typeCode: string;
   target?: FlightTimeTarget;
   from?: FlightTimeTarget | null;
 }) {
@@ -35,7 +35,7 @@ export function FlightPlanTime({
   const start = useMemo(() => (from === undefined || from === null ? null : estimateTargetOf(from)), [from]);
 
   // The return names no target: it goes to the home body of the fleet. A flight needs its target whole.
-  if (fleetId === null || (typeCode === 'fly' && place === null)) {
+  if (fleetId === null || (typeCode !== 'return' && place === null)) {
     return null;
   }
 
@@ -56,7 +56,7 @@ function FlightEstimateLine({
   from,
 }: {
   fleetId: number;
-  typeCode: 'fly' | 'return';
+  typeCode: string;
   place: FlightEstimateTarget | null;
   from: FlightEstimateTarget | null;
 }) {
