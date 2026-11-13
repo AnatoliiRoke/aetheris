@@ -202,7 +202,7 @@ public sealed record FleetEngines(IReadOnlyList<FleetDrive> Drives, IReadOnlyLis
 /// <param name="ShipId">The ship the drive is fitted to.</param>
 /// <param name="Kind">The class of the drive, one of <see cref="FlightEngineKinds"/>.</param>
 /// <param name="Push">The push the drive gives, in kilonewtons.</param>
-/// <param name="FuelUse">How much fuel the drive burns in a second of its work.</param>
+/// <param name="FuelUse">How much fuel the drive burns in an hour of its work.</param>
 /// <param name="JumpPrepSeconds">How long the drive prepares for a jump, in seconds.</param>
 /// <param name="Quantity">How many such drives the ship carries.</param>
 /// <param name="Fuel">The fuel of the drive and the share of every resource in it.</param>

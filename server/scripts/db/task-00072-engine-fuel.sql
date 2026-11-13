@@ -65,6 +65,20 @@ VALUES
 ('admin.reference.engine_kind.jump', 'en', 'Jump', 1, now(), 'seed')
 ON CONFLICT (key, language) DO NOTHING;
 
+-- The consumption of a drive is counted in units of fuel per hour of its work (task 00072, decision
+-- of the author of 13.11.2026): the characteristic gets the unit and the description says so.
+UPDATE characteristic SET unit_key = 'production.characteristic.char_fuel_use.unit', version = version + 1
+WHERE code = 'char_fuel_use' AND unit_key IS DISTINCT FROM 'production.characteristic.char_fuel_use.unit';
+
+INSERT INTO localization_text (key, language, text, version, updated_at, updated_by)
+VALUES
+('production.characteristic.char_fuel_use.unit', 'uk', 'од./год', 1, now(), 'seed'),
+('production.characteristic.char_fuel_use.unit', 'en', 'units/h', 1, now(), 'seed'),
+('production.characteristic.char_fuel_use.description', 'uk', 'Одиниць палива за годину роботи двигуна.', 1, now(), 'seed'),
+('production.characteristic.char_fuel_use.description', 'en', 'Units of fuel per hour of the engine work.', 1, now(), 'seed')
+ON CONFLICT (key, language) DO UPDATE SET text = EXCLUDED.text, version = localization_text.version + 1, updated_at = now()
+WHERE localization_text.text IS DISTINCT FROM EXCLUDED.text;
+
 -- The parameters of the hyperflight, of the jump and of the check of the fuel (task 00072).
 INSERT INTO config_parameter (key, value, version, updated_at, updated_by)
 VALUES

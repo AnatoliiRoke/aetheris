@@ -11356,8 +11356,12 @@
         "en": "Fuel use"
       },
       "description": {
-        "uk": "Пальне, яке модуль витрачає.",
-        "en": "Fuel the module uses."
+        "uk": "Одиниць палива за годину роботи двигуна.",
+        "en": "Units of fuel per hour of the engine work."
+      },
+      "unit": {
+        "uk": "од./год",
+        "en": "units/h"
       }
     },
     {

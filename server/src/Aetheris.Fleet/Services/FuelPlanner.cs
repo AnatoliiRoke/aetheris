@@ -65,7 +65,7 @@ public sealed record FuelEstimate(
 /// <remarks>
 /// <para>
 /// The fuel of a leg is a mix of resources: the drive burns <c>char_fuel_use</c> units of fuel
-/// in a second of its work, and the fuel is split between the resources by their shares. The
+/// in an hour of its work, and the fuel is split between the resources by their shares. The
 /// amount of a resource of a leg is the sum of the drives of the class of the leg: every drive
 /// burns its own amount, multiplied by the share of the resource in its fuel.
 /// </para>
@@ -304,12 +304,20 @@ public sealed class FuelPlanner
                 continue;
             }
 
-            decimal burned = drive.FuelUse * drive.Quantity * seconds;
+            // The consumption of a drive is counted in units of fuel per hour of its work (task
+            // 00072, decision of the author of 13.11.2026), so the time of the work is in hours.
+            decimal burned = drive.FuelUse * drive.Quantity * seconds / FleetExtractionService.SecondsPerHour;
 
             foreach (FleetFuelShare share in drive.Fuel)
             {
                 fuel[share.ResourceTypeId] = fuel.GetValueOrDefault(share.ResourceTypeId) + burned * share.Share;
             }
+        }
+
+        // The fuel is a cargo of whole units: the amount of a resource of the leg is rounded up once.
+        foreach (int resourceTypeId in fuel.Keys.ToList())
+        {
+            fuel[resourceTypeId] = decimal.Ceiling(fuel[resourceTypeId]);
         }
 
         return fuel;

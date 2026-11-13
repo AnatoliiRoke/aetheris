@@ -179,15 +179,15 @@ public sealed partial class FlightLegTests
 
         FleetDrive drive = Assert.Single(read.Of("normal"));
 
-        // The seed gives the jet engine 100 units of fuel in a second, and it burns the deuterium
-        // alone, so a second of its work costs 100 units of the deuterium.
+        // The seed gives the jet engine 100 units of fuel in an hour of its work, and it burns the
+        // deuterium alone, so an hour of its work costs 100 units of the deuterium.
         Assert.Equal(100m, drive.FuelUse);
         Assert.Single(drive.Fuel);
         Assert.Equal(1m, drive.Fuel[0].Share);
 
-        Dictionary<int, decimal> fuel = FuelPlanner.BurnOf(read, "normal", 10);
+        Dictionary<int, decimal> fuel = FuelPlanner.BurnOf(read, "normal", 3600);
 
-        Assert.Equal(1000m, fuel.Single().Value);
+        Assert.Equal(100m, fuel.Single().Value);
     }
 
     /// <summary>
@@ -683,7 +683,7 @@ public sealed partial class FlightLegTests
         long full = FleetSpeedService.FlightSeconds(100d, 2m);
 
         Assert.Equal(full, estimate.Legs.Single().Seconds);
-        Assert.Equal((decimal)full, estimate.NeedByResource[12]);
+        Assert.Equal(decimal.Ceiling(full / 3600m), estimate.NeedByResource[12]);
         Assert.True(full > FleetSpeedService.FlightSeconds(100d, 5m));
     }
 
@@ -698,9 +698,74 @@ public sealed partial class FlightLegTests
 
         Assert.Equal(500m, engines.PushOfShip(1, "normal"));
         Assert.Equal(0m, engines.PushOfShip(1, "normal", inSystem: false));
-        Assert.Equal(20m, FuelPlanner.BurnOf(engines, "normal", 10).Single().Value);
-        Assert.Empty(FuelPlanner.BurnOf(engines, "normal", 10, inSystem: false));
+        Assert.Equal(2m, FuelPlanner.BurnOf(engines, "normal", 3600).Single().Value);
+        Assert.Empty(FuelPlanner.BurnOf(engines, "normal", 3600, inSystem: false));
         Assert.Empty(engines.ShipsWithout("normal"));
+    }
+
+    /// <summary>
+    /// The consumption of a drive is counted in units of fuel per hour of its work (task 00072,
+    /// decision of the author of 13.11.2026): a drive of 3600 units an hour burns one unit in a
+    /// second, and a part of a unit is rounded up once for the leg.
+    /// </summary>
+    [Fact]
+    public void The_consumption_of_a_drive_is_counted_per_hour_of_work()
+    {
+        FleetEngines engines = new([new FleetDrive(1, "normal", 100m, 3600m, 0m, 1, [new FleetFuelShare(12, 1m)])], [1]);
+        FleetEngines slow = new([new FleetDrive(1, "normal", 100m, 1m, 0m, 1, [new FleetFuelShare(12, 1m)])], [1]);
+
+        Assert.Equal(1m, FuelPlanner.BurnOf(engines, "normal", 1).Single().Value);
+        Assert.Equal(3600m, FuelPlanner.BurnOf(engines, "normal", 3600).Single().Value);
+        Assert.Equal(1m, FuelPlanner.BurnOf(slow, "normal", 1).Single().Value);
+    }
+
+    /// <summary>
+    /// The example of the author (task 00072, 13.11.2026): a fleet of 100 ships with a drive of 200
+    /// units an hour flies a leg of 9:42:07 there and the same back, so it burns about
+    /// 200 × 100 × 19.4 hours of the deuterium, rounded up once for every leg.
+    /// </summary>
+    [Fact]
+    public void A_fleet_of_a_hundred_ships_burns_its_hours_of_work()
+    {
+        const long LegSeconds = (9 * 3600) + (42 * 60) + 7;
+        const int Ships = 100;
+        FleetEngines engines = new(
+            [.. Enumerable.Range(1, Ships).Select(ship => new FleetDrive(ship, "normal", 100m, 200m, 0m, 1, [new FleetFuelShare(12, 1m)]))],
+            [.. Enumerable.Range(1, Ships).Select(ship => (long)ship)]);
+
+        decimal there = FuelPlanner.BurnOf(engines, "normal", LegSeconds).Single().Value;
+        decimal back = FuelPlanner.BurnOf(engines, "normal", LegSeconds).Single().Value;
+        decimal exact = 200m * Ships * LegSeconds * 2 / 3600m;
+
+        Assert.Equal(decimal.Ceiling(200m * Ships * LegSeconds / 3600m) * 2, there + back);
+        Assert.InRange(there + back, exact, exact + 2m);
+        Assert.Equal(388078m, there + back);
+    }
+
+    /// <summary>
+    /// A jump burns the fuel of the hours of its preparation (task 00072, 2.4.3): a jump drive of
+    /// 3600 units an hour that prepares for 900 seconds burns 900 units, split by its shares.
+    /// </summary>
+    /// <returns>A task that completes when the assertion has been evaluated.</returns>
+    [Fact]
+    public async Task A_jump_burns_the_fuel_of_its_preparation()
+    {
+        await ResetAsync();
+        using PlanetsTestPlayer player = await FoundAsync(spaceportLevel: 1);
+        WorldPlaceDto home = await HomeAsync(player);
+        FleetSettings settings = FleetSettings.From(_factory.Services.GetRequiredService<IGameConfig>());
+        FleetSpeedSet none = new(0m, 0m, 0m);
+        FleetEngines engines = new([new FleetDrive(1, "jump", 100m, 3600m, 900m, 1, [new FleetFuelShare(14, 0.7m), new FleetFuelShare(15, 0.3m)])], [1]);
+
+        FuelEstimate estimate = FuelPlanner.Estimate(
+            engines,
+            new FleetSpeeds(none, none, none, engines.JumpPrepSeconds()),
+            [new FlightLeg("ftl", "jump", home, home, settings.JumpReferenceDistance / 2d)],
+            settings);
+
+        Assert.Equal(900L, estimate.Legs.Single().Seconds);
+        Assert.Equal(630m, estimate.NeedByResource[14]);
+        Assert.Equal(270m, estimate.NeedByResource[15]);
     }
 
     /// <summary>
@@ -833,12 +898,18 @@ public sealed partial class FlightLegTests
     /// <summary>
     /// Writes a fleet of the player with a ship for every list of drives.
     /// </summary>
-    private async Task<(long FleetId, IReadOnlyList<long> ShipIds)> FleetOfShipsAsync(PlanetsTestPlayer player, params string[][] shipDrives)
+    private async Task<(long FleetId, IReadOnlyList<long> ShipIds)> FleetOfShipsAsync(PlanetsTestPlayer player, params string[][] shipDrives) =>
+        await FleetOfHullAsync(player, HullCode, shipDrives);
+
+    /// <summary>
+    /// Writes a fleet of the player with a ship on a hull for every list of modules.
+    /// </summary>
+    private async Task<(long FleetId, IReadOnlyList<long> ShipIds)> FleetOfHullAsync(PlanetsTestPlayer player, string hullCode, params string[][] shipDrives)
     {
         using IServiceScope scope = _factory.Services.CreateScope();
         IReadOnlyDictionary<string, int> partIds = await scope.ServiceProvider
             .GetRequiredService<IProductionModule>()
-            .FindPartIdsByFileCodeAsync([HullCode, .. shipDrives.SelectMany(drives => drives).Distinct()], Token);
+            .FindPartIdsByFileCodeAsync([hullCode, .. shipDrives.SelectMany(drives => drives).Distinct()], Token);
         FleetDbContext database = scope.ServiceProvider.GetRequiredService<FleetDbContext>();
         DateTimeOffset now = DateTimeOffset.UtcNow;
         List<ShipEntity> ships = [];
@@ -850,7 +921,7 @@ public sealed partial class FlightLegTests
                 OwnerPlayerId = player.Account.UserId,
                 PlanetId = player.PlanetId,
                 Name = "Проєкт " + Guid.NewGuid().ToString("N")[..6],
-                HullPartTypeId = partIds[HullCode],
+                HullPartTypeId = partIds[hullCode],
                 CreatedAt = now,
                 UpdatedAt = now,
             };
@@ -878,7 +949,7 @@ public sealed partial class FlightLegTests
                 CreatedAt = now,
                 ModuleIds =
                 [
-                    new ShipModuleEntity { PartTypeId = partIds[HullCode], MarkLevel = 1, ConditionPercent = 100, Quantity = 1, IsHull = true },
+                    new ShipModuleEntity { PartTypeId = partIds[hullCode], MarkLevel = 1, ConditionPercent = 100, Quantity = 1, IsHull = true },
                     .. driveCodes.Select(code => new ShipModuleEntity { PartTypeId = partIds[code], MarkLevel = 1, ConditionPercent = 100, Quantity = 1 }),
                 ],
             };
