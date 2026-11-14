@@ -429,9 +429,10 @@ public sealed class ResearchQueueService
             return false;
         }
 
-        // The queue of the researches is one for the whole civilization, so the speed of the
-        // research is the one of the civilization: the largest level of its bodies.
-        IReadOnlyDictionary<int, int> learnedLevels = await _levelsReader.GetAsync(head.PlayerId, cancellationToken).ConfigureAwait(false);
+        // The bonus of a technology works only on the body that researched it (decision of
+        // 04.11.2026, game design 04), so the research of a body goes at the speed its own levels
+        // of the technologies give, not at the speed of the civilization.
+        IReadOnlyDictionary<int, int> learnedLevels = await _levelsReader.GetAsync(head.PlayerId, head.PlanetId, cancellationToken).ConfigureAwait(false);
         head.StartsAt = now;
 
         // The science centres of the owner speed the research up on every body of the owner, so
@@ -638,11 +639,6 @@ public sealed class ResearchQueueService
             ? new Dictionary<int, int>()
             : await _levelsReader.GetAsync(playerId, selected.PlanetId, cancellationToken).ConfigureAwait(false);
 
-        // The level of the civilization is the largest level of its bodies, so the subjects a
-        // technology opens are open for the whole civilization and the queue of the researches,
-        // which is one for the civilization, goes at the speed of the civilization.
-        IReadOnlyDictionary<int, int> civilizationLevels = await _levelsReader.GetAsync(playerId, cancellationToken).ConfigureAwait(false);
-
         // The requirements of the next level of every technology are read in one query.
         IReadOnlyList<SubjectRequirement> requirements = await _requirements.GetManyAsync(
             RequirementSubjectTypes.Technology,
@@ -689,7 +685,9 @@ public sealed class ResearchQueueService
             .GetResearchCenterBonusAsync(planets.Select(planet => planet.Level).DefaultIfEmpty(0).Max(), cancellationToken)
             .ConfigureAwait(false);
 
-        decimal researchTime = ResearchTime.Multiplier(catalog, civilizationLevels) / (1m + ownerBonus.ResearchSpeedBonus);
+        // The time of a research of the chosen body comes from the levels of that body: the bonus of a
+        // technology works only on the body that researched it (decision of 04.11.2026).
+        decimal researchTime = ResearchTime.Multiplier(catalog, learned) / (1m + ownerBonus.ResearchSpeedBonus);
 
         return new ResearchTreeSnapshot(
             catalog,
