@@ -12637,6 +12637,11 @@
     {
       "part": "part_m_5",
       "hulls": [
+        "part_h_8",
+        "part_h_9",
+        "part_h_10",
+        "part_h_11",
+        "part_h_12",
         "part_h_13",
         "part_h_14",
         "part_h_15",
@@ -12645,7 +12650,8 @@
         "part_h_18",
         "part_h_19",
         "part_h_20",
-        "part_h_23"
+        "part_h_23",
+        "part_h_24"
       ]
     },
     {
@@ -13062,14 +13068,18 @@
       "part": "part_m_54",
       "hulls": [
         "part_h_21",
-        "part_h_22"
+        "part_h_22",
+        "part_h_23",
+        "part_h_24"
       ]
     },
     {
       "part": "part_m_55",
       "hulls": [
         "part_h_21",
-        "part_h_22"
+        "part_h_22",
+        "part_h_23",
+        "part_h_24"
       ]
     },
     {
