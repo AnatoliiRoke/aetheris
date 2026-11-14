@@ -14,7 +14,7 @@ import { FlightTargetFields } from './FlightTargetFields';
 import { FlightCargoFields } from './FlightCargoFields';
 import { fleetExtracts, fleetOpenedOrders, fleetScanCapabilities } from './fleetExtraction';
 import { formatDuration } from '../planetText';
-import { cargoItemsValid, cargoMass, holdBefore, holdContentOf, holdMass, readCargoItems, unloadDefaults } from './flightPlanCargo';
+import { cargoItemsValid, holdBefore, holdContentOf, readCargoItems, unloadDefaults } from './flightPlanCargo';
 import { readAxes, toOrderInputs, type DraftOrder, type FlightTimeTarget, type TargetKind } from './flightPlanParts';
 
 /**
@@ -123,7 +123,6 @@ export function FlightPlanDialog({
   const [coordinatesBad, setCoordinatesBad] = useState(false);
   const [targetBad, setTargetBad] = useState(false);
   const [cargoBad, setCargoBad] = useState(false);
-  const [cargoOverflow, setCargoOverflow] = useState(false);
 
   // The sectors of the galaxy, so the player may choose the sector of the target. The list of the
   // sectors does not change, so the tab of the browser does not read it again.
@@ -353,25 +352,13 @@ export function FlightPlanDialog({
     const cargoOrders = orders.filter((order) => order.typeCode === 'load' || order.typeCode === 'unload');
     const cargoWrong = cargoOrders.some((order) => !cargoItemsValid(order.items));
 
-    // A load is checked against the room that is left in the holds, as far as the orders before it tell.
-    const overflow =
-      holdCapacity !== null &&
-      orders.some((order, index) => {
-        if (order.typeCode !== 'load') {
-          return false;
-        }
-
-        const free = Math.max(0, holdCapacity - holdMass(holdBefore(orders, index, baseHold), (entry) => (entry.kind === 'resource' ? 1 : (partWeights.get(entry.id) ?? 0))));
-
-        return cargoMass(order.items, partWeights) > free;
-      });
-
+    // A load heavier than the room left in the holds does not stop the plan: the fleet loads what the
+    // stock has and the holds take (author's rule, 14.11.2026), so the fields of the order only warn.
     setCoordinatesBad(bad);
     setTargetBad(unknown);
     setCargoBad(cargoWrong);
-    setCargoOverflow(overflow);
 
-    if (!bad && !unknown && !cargoWrong && !overflow) {
+    if (!bad && !unknown && !cargoWrong) {
       done(fleetId, toOrderInputs(orders));
     }
   };
@@ -568,7 +555,6 @@ export function FlightPlanDialog({
         {coordinatesBad ? <p className="pl-error">{t('plan.coordinatesBad')}</p> : null}
         {targetBad ? <p className="pl-error">{t('plan.targetUnknown')}</p> : null}
         {cargoBad ? <p className="pl-error">{t('plan.cargo.itemsRequired')}</p> : null}
-        {cargoOverflow ? <p className="pl-error">{t('plan.cargo.overflowSave')}</p> : null}
       </div>
 
       {needsFleet ? <p className="fl-note">{t('plan.fleetRequired')}</p> : null}

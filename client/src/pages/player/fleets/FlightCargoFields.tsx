@@ -227,6 +227,7 @@ export function FlightCargoFields({
     <div className="pl-cargo">
       {isLoad && planetId === null ? <p className="fl-note">{t('plan.cargo.planetUnknown')}</p> : null}
       {items.length === 0 ? <p className="fl-note">{t(isLoad ? 'plan.cargo.emptyLoad' : 'plan.cargo.emptyUnload')}</p> : null}
+      {isLoad ? <p className="fl-note">{t('plan.cargo.partialHint')}</p> : null}
 
       <ul className="pl-cargo__items">
         {items.map((item, index) => {
@@ -293,7 +294,7 @@ export function FlightCargoFields({
       </button>
 
       {isLoad && free !== null && mass > 0 ? (
-        <p className={overflow ? 'pl-error' : 'fl-note'}>
+        <p className="fl-note">
           {overflow
             ? t('plan.cargo.overflow', { mass: formatNumber(mass, language), free: formatNumber(free, language) })
             : t('plan.cargo.mass', { mass: formatNumber(mass, language), free: formatNumber(free, language) })}

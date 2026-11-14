@@ -16,7 +16,49 @@ public sealed record CargoOutcome(string? Code)
 {
     /// <summary>Gets whether the order was carried out.</summary>
     public bool Done => Code is null;
+
+    /// <summary>
+    /// Gets the items of a load that were loaded short of what the order named: a load takes what the
+    /// stock has and what the holds take, and the rest is listed here (author's rule, 14.11.2026).
+    /// </summary>
+    public IReadOnlyList<CargoShortfall> Shortfalls { get; init; } = [];
+
+    /// <summary>Gets whether a load put anything into the holds.</summary>
+    public bool LoadedAny { get; init; }
 }
+
+/// <summary>
+/// The reasons an item of a load was loaded short. They are logical codes, not numbers of the balance.
+/// </summary>
+public static class CargoShortfallReasons
+{
+    /// <summary>The stock of the body has less than the order named.</summary>
+    public const string Stock = "stock";
+
+    /// <summary>The holds of the fleet have no room for the rest.</summary>
+    public const string Room = "room";
+}
+
+/// <summary>
+/// An item of a load that was loaded short of what the order named (author's rule, 14.11.2026).
+/// </summary>
+/// <param name="Kind">The kind of the item, one of <see cref="CargoItemKinds"/>.</param>
+/// <param name="Id">The resource or the kind of the part.</param>
+/// <param name="MarkLevel">The mark level of a part; zero for a resource.</param>
+/// <param name="HasRaceBonus">Whether a part carries the bonus of its race.</param>
+/// <param name="NameKey">The key of the name of a part, or <see langword="null"/> for a resource.</param>
+/// <param name="Requested">How much the order named.</param>
+/// <param name="Loaded">How much was loaded.</param>
+/// <param name="ReasonCode">Why the rest was not loaded, one of <see cref="CargoShortfallReasons"/>.</param>
+public sealed record CargoShortfall(
+    string Kind,
+    int Id,
+    int MarkLevel,
+    bool HasRaceBonus,
+    string? NameKey,
+    long Requested,
+    long Loaded,
+    string ReasonCode);
 
 /// <summary>
 /// The load and the unload of a fleet on a body of its owner (task 00057).
@@ -24,9 +66,10 @@ public sealed record CargoOutcome(string? Code)
 /// <remarks>
 /// <para>
 /// A load takes resources and modules from the stock of the body and puts them into the holds of
-/// the ships, in the order the ships joined the fleet. It is checked before anything is taken: the
-/// weight of what is loaded must fit into the room that is left in the holds, and the body must have
-/// what the order names. An order that does not fit, or that the body cannot give, loads nothing.
+/// the ships, in the order the ships joined the fleet. It never stops for want of goods or room
+/// (author's rule, 14.11.2026): of every item it loads what the stock has and what the holds still
+/// take, a module whole into the hold of one ship, and lists the rest as a shortfall. No module of
+/// the ships is needed for a load: the holds are enough.
 /// </para>
 /// <para>
 /// An unload puts what the holds carry back into the stock of the body. It never fails for want of
@@ -66,13 +109,17 @@ public sealed class FleetCargoService
     }
 
     /// <summary>
-    /// Loads the items from the body the fleet stands on into the holds of the fleet.
+    /// Loads the items from the body the fleet stands on into the holds of the fleet: of every item
+    /// what the stock has and what the holds take.
     /// </summary>
     /// <param name="fleet">The fleet.</param>
     /// <param name="items">What to load.</param>
     /// <param name="now">The moment of game time.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>The outcome: done, or the reason nothing was loaded.</returns>
+    /// <returns>
+    /// The outcome: done with the items loaded short, or the reason nothing could be loaded because the
+    /// request itself is wrong (the fleet is not on a body of its own, or a part is unknown).
+    /// </returns>
     public async Task<CargoOutcome> LoadAsync(FleetEntity fleet, IReadOnlyList<CargoItem> items, DateTimeOffset now, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(fleet);
@@ -93,87 +140,83 @@ public sealed class FleetCargoService
             }
         }
 
-        // The weight of the order, against the room that is left. The modules go to the ships whole,
-        // so the ships are filled first, on paper, and what does not fit anywhere refuses the order.
-        IReadOnlyList<ShipHold> holds = await _holds.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
-        List<Placement>? placements = Place(items, holds, facts);
-
-        if (placements is null)
-        {
-            return new CargoOutcome(FleetErrorCodes.CargoOverflow);
-        }
-
-        // What the body has: the resources by the balance, the modules by the stacks of new parts.
-        IReadOnlyDictionary<int, long> balance;
+        // What the body has: the resources by the balance brought to the moment, the modules by the
+        // stacks of new parts.
+        Dictionary<int, long> resourcesLeft;
 
         try
         {
-            balance = await _resources.GetBalanceAsync(fleet.PlanetId, fleet.PlayerId, cancellationToken).ConfigureAwait(false);
+            resourcesLeft = await ReadResourcesAsync(fleet, items, cancellationToken).ConfigureAwait(false);
         }
         catch (GameException)
         {
             return new CargoOutcome(FleetErrorCodes.CargoNoPlanet);
         }
 
+        Dictionary<PartKey, long> partsLeft = await ReadPartsAsync(fleet, items, cancellationToken).ConfigureAwait(false);
+
+        // The holds are filled on paper first, item by item in the order of the list: of every item what
+        // the stock has, as far as the room goes. The room is counted on a copy.
+        IReadOnlyList<ShipHold> holds = await _holds.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+        Dictionary<long, long> room = holds.ToDictionary(hold => hold.ShipId, hold => hold.Free);
+        List<Placement> placements = [];
+        List<CargoShortfall> shortfalls = [];
         Dictionary<int, long> resourcesToTake = [];
-        List<ShipPartRequest> partsToTake = [];
+        Dictionary<PartKey, long> partsToTake = [];
 
         foreach (CargoItem item in items)
         {
-            if (item.Kind == CargoItemKinds.Resource)
+            bool isResource = item.Kind == CargoItemKinds.Resource;
+            PartKey partKey = new(item.Id, item.MarkLevel, item.HasRaceBonus);
+            long inStock = isResource ? resourcesLeft.GetValueOrDefault(item.Id) : partsLeft.GetValueOrDefault(partKey);
+            long wanted = Math.Min(item.Amount, Math.Max(0, inStock));
+            decimal weight = isResource ? ResourceWeight : facts[item.Id].Weight;
+            long placed = wanted > 0 ? Place(item, wanted, weight, holds, room, placements) : 0;
+
+            if (placed > 0 && isResource)
             {
-                resourcesToTake[item.Id] = resourcesToTake.GetValueOrDefault(item.Id) + item.Amount;
+                resourcesLeft[item.Id] = inStock - placed;
+                resourcesToTake[item.Id] = resourcesToTake.GetValueOrDefault(item.Id) + placed;
             }
-            else
+            else if (placed > 0)
             {
-                partsToTake.Add(new ShipPartRequest(item.Id, item.MarkLevel, item.HasRaceBonus, item.Amount));
+                partsLeft[partKey] = inStock - placed;
+                partsToTake[partKey] = partsToTake.GetValueOrDefault(partKey) + placed;
+            }
+
+            if (placed < item.Amount)
+            {
+                shortfalls.Add(new CargoShortfall(
+                    item.Kind,
+                    item.Id,
+                    item.MarkLevel,
+                    item.HasRaceBonus,
+                    isResource ? null : facts[item.Id].NameKey,
+                    item.Amount,
+                    placed,
+                    placed < wanted ? CargoShortfallReasons.Room : CargoShortfallReasons.Stock));
             }
         }
 
-        if (resourcesToTake.Any(entry => balance.GetValueOrDefault(entry.Key) < entry.Value))
+        if (placements.Count == 0)
         {
-            return new CargoOutcome(FleetErrorCodes.CargoShort);
+            return new CargoOutcome(null) { Shortfalls = shortfalls, LoadedAny = false };
         }
 
-        if (partsToTake.Count > 0)
-        {
-            await _parts.LockAsync(fleet.PlanetId, fleet.SectorId, cancellationToken).ConfigureAwait(false);
-            IReadOnlyList<ShipPartStack> stock = await _parts.ReadAsync(fleet.PlanetId, [.. partsToTake.Select(request => request.PartTypeId).Distinct()], cancellationToken).ConfigureAwait(false);
-
-            foreach (ShipPartRequest request in partsToTake)
-            {
-                long have = stock
-                    .Where(stack => stack.PartTypeId == request.PartTypeId
-                        && stack.MarkLevel == request.MarkLevel
-                        && stack.HasRaceBonus == request.HasRaceBonus
-                        && stack.ConditionPercent >= PartConditions.Full)
-                    .Sum(stack => stack.Quantity);
-
-                if (have < request.Quantity)
-                {
-                    return new CargoOutcome(FleetErrorCodes.CargoShort);
-                }
-            }
-        }
-
-        // The resources go first: when the body cannot pay them, nothing has been taken yet and the order is
-        // refused cleanly. The modules were counted exactly above, so their taking does not fail; if it did, the
-        // error goes up and the whole step is undone with the transaction, not left half done.
+        // The amounts were counted against the balance at the moment and the stacks under their lock, so
+        // the taking does not fail; if it did, the error goes up and the whole step is undone with the
+        // transaction, not left half done.
         if (resourcesToTake.Count > 0)
         {
-            try
-            {
-                await _resources.TakeAsync(fleet.PlanetId, fleet.PlayerId, resourcesToTake, cancellationToken).ConfigureAwait(false);
-            }
-            catch (GameException)
-            {
-                return new CargoOutcome(FleetErrorCodes.CargoShort);
-            }
+            await _resources.TakeAsync(fleet.PlanetId, fleet.PlayerId, resourcesToTake, cancellationToken).ConfigureAwait(false);
         }
 
         if (partsToTake.Count > 0)
         {
-            await _parts.TakeMarkedAsync(fleet.PlanetId, partsToTake, cancellationToken).ConfigureAwait(false);
+            await _parts.TakeMarkedAsync(
+                fleet.PlanetId,
+                [.. partsToTake.Select(entry => new ShipPartRequest(entry.Key.PartTypeId, entry.Key.MarkLevel, entry.Key.HasRaceBonus, entry.Value))],
+                cancellationToken).ConfigureAwait(false);
         }
 
         foreach (Placement placement in placements)
@@ -192,7 +235,7 @@ public sealed class FleetCargoService
         await RecountAsync(fleet.Id, now, cancellationToken).ConfigureAwait(false);
         await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return new CargoOutcome(null);
+        return new CargoOutcome(null) { Shortfalls = shortfalls, LoadedAny = true };
     }
 
     /// <summary>
@@ -371,52 +414,102 @@ public sealed class FleetCargoService
     }
 
     /// <summary>
-    /// Fills the holds on paper: which ship takes how much of which item. The ships are taken in the
-    /// order they joined the fleet. A resource goes where there is room for it, a module goes whole.
+    /// Fills the holds on paper with as much of one item as there is room for: which ship takes how much.
+    /// The ships are taken in the order they joined the fleet. A resource goes where there is room for it,
+    /// a module goes whole into the hold of one ship.
     /// </summary>
-    /// <param name="items">What to load.</param>
-    /// <param name="holds">The holds with the room that is left.</param>
-    /// <param name="facts">The facts of the parts, for the weight.</param>
-    /// <returns>The placements, or <see langword="null"/> when the items do not fit.</returns>
-    private static List<Placement>? Place(IReadOnlyList<CargoItem> items, IReadOnlyList<ShipHold> holds, IReadOnlyDictionary<int, PartRecipeFacts> facts)
+    /// <param name="item">The item.</param>
+    /// <param name="wanted">How much of the item to place at most.</param>
+    /// <param name="weight">The weight of a unit of the item.</param>
+    /// <param name="holds">The holds, in the order the ships joined the fleet.</param>
+    /// <param name="room">The room that is left in each hold; changed.</param>
+    /// <param name="placements">The placements; the new ones are added.</param>
+    /// <returns>How much of the item was placed.</returns>
+    private static long Place(
+        CargoItem item,
+        long wanted,
+        decimal weight,
+        IReadOnlyList<ShipHold> holds,
+        Dictionary<long, long> room,
+        List<Placement> placements)
     {
-        // The room is counted on a copy, so the placement of an order that is refused leaves the holds as they are.
-        Dictionary<long, long> room = holds.ToDictionary(hold => hold.ShipId, hold => hold.Free);
-        List<Placement> placements = [];
+        long left = wanted;
 
-        foreach (CargoItem item in items)
+        foreach (ShipHold hold in holds)
         {
-            long left = item.Amount;
-            decimal weight = item.Kind == CargoItemKinds.Resource ? ResourceWeight : facts[item.Id].Weight;
-
-            foreach (ShipHold hold in holds)
+            if (left <= 0)
             {
-                if (left <= 0)
-                {
-                    break;
-                }
-
-                long free = room[hold.ShipId];
-                long fits = weight <= 0m ? left : (long)Math.Floor(free / weight);
-                long count = Math.Min(left, fits);
-
-                if (count <= 0)
-                {
-                    continue;
-                }
-
-                room[hold.ShipId] = free - (long)Math.Ceiling(count * weight);
-                left -= count;
-                placements.Add(new Placement(hold.ShipId, item, count));
+                break;
             }
 
-            if (left > 0)
+            long free = room[hold.ShipId];
+            long fits = weight <= 0m ? left : (long)Math.Floor(free / weight);
+            long count = Math.Min(left, fits);
+
+            if (count <= 0)
             {
-                return null;
+                continue;
             }
+
+            room[hold.ShipId] = free - (long)Math.Ceiling(count * weight);
+            left -= count;
+            placements.Add(new Placement(hold.ShipId, item, count));
         }
 
-        return placements;
+        return wanted - left;
+    }
+
+    /// <summary>
+    /// Reads how much of each resource of the load the body has. The balance is brought to the moment
+    /// first, so the load sees what the body has produced since the last change and never takes more
+    /// than the body has now.
+    /// </summary>
+    private async Task<Dictionary<int, long>> ReadResourcesAsync(FleetEntity fleet, IReadOnlyList<CargoItem> items, CancellationToken cancellationToken)
+    {
+        int[] resourceIds = [.. items.Where(item => item.Kind == CargoItemKinds.Resource).Select(item => item.Id).Distinct()];
+
+        if (resourceIds.Length == 0)
+        {
+            return [];
+        }
+
+        IReadOnlyDictionary<int, long> stored = await _resources.GetBalanceAsync(fleet.PlanetId, fleet.PlayerId, cancellationToken).ConfigureAwait(false);
+
+        // A gift of nothing opens the body like a payment does and brings its balance to the moment. Only the
+        // resources the body keeps are named, so no row of a resource the body has never had is written.
+        Dictionary<int, long> nothing = resourceIds.Where(stored.ContainsKey).ToDictionary(id => id, _ => 0L);
+
+        if (nothing.Count == 0)
+        {
+            return [];
+        }
+
+        await _resources.GiveAsync(fleet.PlanetId, fleet.PlayerId, nothing, cancellationToken).ConfigureAwait(false);
+        IReadOnlyDictionary<int, long> balance = await _resources.GetBalanceAsync(fleet.PlanetId, fleet.PlayerId, cancellationToken).ConfigureAwait(false);
+
+        return resourceIds.ToDictionary(id => id, id => balance.GetValueOrDefault(id));
+    }
+
+    /// <summary>
+    /// Reads how many whole new modules of each kind, mark and bonus of the load the body has. The
+    /// stock is locked first, so the count holds until the modules are taken.
+    /// </summary>
+    private async Task<Dictionary<PartKey, long>> ReadPartsAsync(FleetEntity fleet, IReadOnlyList<CargoItem> items, CancellationToken cancellationToken)
+    {
+        int[] partTypeIds = [.. items.Where(item => item.Kind == CargoItemKinds.Part).Select(item => item.Id).Distinct()];
+
+        if (partTypeIds.Length == 0)
+        {
+            return [];
+        }
+
+        await _parts.LockAsync(fleet.PlanetId, fleet.SectorId, cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<ShipPartStack> stock = await _parts.ReadAsync(fleet.PlanetId, partTypeIds, cancellationToken).ConfigureAwait(false);
+
+        return stock
+            .Where(stack => stack.ConditionPercent >= PartConditions.Full)
+            .GroupBy(stack => new PartKey(stack.PartTypeId, stack.MarkLevel, stack.HasRaceBonus))
+            .ToDictionary(group => group.Key, group => group.Sum(stack => stack.Quantity));
     }
 
     /// <summary>
@@ -531,4 +624,6 @@ public sealed class FleetCargoService
     private const decimal ResourceWeight = 1m;
 
     private sealed record Placement(long ShipId, CargoItem Item, long Count);
+
+    private readonly record struct PartKey(int PartTypeId, int MarkLevel, bool HasRaceBonus);
 }

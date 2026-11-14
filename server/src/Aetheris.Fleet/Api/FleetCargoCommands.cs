@@ -44,21 +44,25 @@ public abstract class FleetCargoCommand<TRequest> : Command<TRequest, JsonElemen
     /// <param name="holds">The holds of the fleet.</param>
     /// <param name="unitOfWork">The unit of the transaction.</param>
     /// <param name="clock">The game clock.</param>
+    /// <param name="reports">The reports of the fleets, for a load that was short.</param>
     protected FleetCargoCommand(
         FleetCargoService cargo,
         FleetHoldService holds,
         FleetUnitOfWork unitOfWork,
-        IGameClock clock)
+        IGameClock clock,
+        FleetReportService reports)
     {
         ArgumentNullException.ThrowIfNull(cargo);
         ArgumentNullException.ThrowIfNull(holds);
         ArgumentNullException.ThrowIfNull(unitOfWork);
         ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(reports);
 
         Cargo = cargo;
         Holds = holds;
         UnitOfWork = unitOfWork;
         Clock = clock;
+        Reports = reports;
     }
 
     /// <summary>Gets the load and the unload of the holds.</summary>
@@ -72,6 +76,9 @@ public abstract class FleetCargoCommand<TRequest> : Command<TRequest, JsonElemen
 
     /// <summary>Gets the game clock.</summary>
     protected IGameClock Clock { get; }
+
+    /// <summary>Gets the reports of the fleets.</summary>
+    protected FleetReportService Reports { get; }
 
     /// <summary>
     /// Loads the items into the holds of the fleet, or puts them out of them.
@@ -106,6 +113,24 @@ public abstract class FleetCargoCommand<TRequest> : Command<TRequest, JsonElemen
                 if (!outcome.Done)
                 {
                     throw new GameException(outcome.Code!, "The hold of the fleet did not change.");
+                }
+
+                // The command loads what it can, as the order of a plan does (author's rule, 14.11.2026). A
+                // command the player pressed that loads nothing at all is refused with the reason, so the
+                // window tells why the hold did not change; a load that took a part writes the report of
+                // the rest.
+                if (IsLoad && !outcome.LoadedAny)
+                {
+                    bool noRoom = outcome.Shortfalls.Any(entry => entry.ReasonCode == CargoShortfallReasons.Room);
+
+                    throw new GameException(
+                        noRoom ? FleetErrorCodes.CargoOverflow : FleetErrorCodes.CargoShort,
+                        noRoom ? "The holds have no room for any item of the load." : "The stock of the body has none of the items of the load.");
+                }
+
+                if (outcome.Shortfalls.Count > 0)
+                {
+                    await Reports.WriteLoadShortReportAsync(fleet, outcome.Shortfalls, cancellationToken).ConfigureAwait(false);
                 }
 
                 FleetHoldDto hold = await Holds.ReadForPlayerAsync(context.PlayerId, fleet.Id, cancellationToken).ConfigureAwait(false);
@@ -182,8 +207,9 @@ public abstract class FleetCargoCommand<TRequest> : Command<TRequest, JsonElemen
 /// Loads the resources and the modules of the body into the holds of a fleet (task 00073).
 /// </summary>
 /// <remarks>
-/// The command is the shortcut of the order of a plan: the same rules, the same service and the
-/// same refusals (task 00057). The fleet must stand on a body of its owner.
+/// The command is the shortcut of the order of a plan: the same rules and the same service (task 00057).
+/// The fleet must stand on a body of its owner. Like the order, it loads what the stock has and what the
+/// holds take and reports the rest; only a load that takes nothing at all is refused, with the reason.
 /// </remarks>
 public sealed class FleetCargoLoadCommand : FleetCargoCommand<FleetCargoLoadCommand.Request>
 {
@@ -203,13 +229,15 @@ public sealed class FleetCargoLoadCommand : FleetCargoCommand<FleetCargoLoadComm
     /// <param name="unitOfWork">The unit of the transaction.</param>
     /// <param name="clock">The game clock.</param>
     /// <param name="dbContext">The context of the module.</param>
+    /// <param name="reports">The reports of the fleets.</param>
     public FleetCargoLoadCommand(
         FleetCargoService cargo,
         FleetHoldService holds,
         FleetUnitOfWork unitOfWork,
         IGameClock clock,
-        FleetDbContext dbContext)
-        : base(cargo, holds, unitOfWork, clock)
+        FleetDbContext dbContext,
+        FleetReportService reports)
+        : base(cargo, holds, unitOfWork, clock, reports)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
 
@@ -275,13 +303,15 @@ public sealed class FleetCargoUnloadCommand : FleetCargoCommand<FleetCargoUnload
     /// <param name="unitOfWork">The unit of the transaction.</param>
     /// <param name="clock">The game clock.</param>
     /// <param name="dbContext">The context of the module.</param>
+    /// <param name="reports">The reports of the fleets.</param>
     public FleetCargoUnloadCommand(
         FleetCargoService cargo,
         FleetHoldService holds,
         FleetUnitOfWork unitOfWork,
         IGameClock clock,
-        FleetDbContext dbContext)
-        : base(cargo, holds, unitOfWork, clock)
+        FleetDbContext dbContext,
+        FleetReportService reports)
+        : base(cargo, holds, unitOfWork, clock, reports)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
 

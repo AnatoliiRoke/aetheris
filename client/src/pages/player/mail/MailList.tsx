@@ -5,6 +5,7 @@ import { useI18n } from '../../../i18n/useI18n';
 import { useTexts } from '../../../texts/useTexts';
 import { Glyph } from '../../../components/Glyph';
 import { groupByDay, letterTimeOf, markKindOf, type MailDayGroup } from './mailParts';
+import { loadShortKindCode } from './loadShortReport';
 
 /**
  * The list of the letters of the mail (task 00060): the folders, the categories, the search and the
@@ -149,7 +150,7 @@ function MailLetterRow({
   const { text } = useTexts();
   const mark = markKindOf(letter);
   const sender = letter.senderNickname ?? text(letter.categoryNameKey) ?? t('mail.game');
-  const subject = letter.systemKindCode === 'scan_report' ? t('mail.scanTitle') : letter.subject || letter.preview;
+  const subject = letter.systemKindCode === 'scan_report' ? t('mail.scanTitle') : letter.systemKindCode === loadShortKindCode ? t('mail.loadShortTitle') : letter.subject || letter.preview;
   const label = `${letter.isRead ? '' : `${t('mail.unread')}. `}${text(letter.categoryNameKey) ?? ''}: ${subject}`;
 
   return (

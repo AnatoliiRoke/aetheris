@@ -807,6 +807,12 @@ public sealed class FlightPlanRunner
     /// returns, or it is blocked with the reason, and the same order begins again when the player carries
     /// the plan out anew.
     /// </summary>
+    /// <remarks>
+    /// A load never blocks the plan for want of goods or room (author's rule, 14.11.2026): it loads what the
+    /// stock has and what the holds take, even nothing, the report tells the player what was not loaded, and
+    /// the plan goes on. Only a wrong order blocks it: a fleet that is not on a body of its own, or an item
+    /// that is not known.
+    /// </remarks>
     private async Task<(BeginState State, string? Code)> BeginCargoAsync(
         FleetEntity fleet,
         FlightPlanOrderEntity order,
@@ -824,7 +830,17 @@ public sealed class FlightPlanRunner
             ? await _cargo.LoadAsync(fleet, items, now, cancellationToken).ConfigureAwait(false)
             : await _cargo.UnloadAsync(fleet, items, now, cancellationToken).ConfigureAwait(false);
 
-        return outcome.Done ? (BeginState.Done, null) : (BeginState.Blocked, outcome.Code);
+        if (!outcome.Done)
+        {
+            return (BeginState.Blocked, outcome.Code);
+        }
+
+        if (outcome.Shortfalls.Count > 0)
+        {
+            await _reports.WriteLoadShortReportAsync(fleet, outcome.Shortfalls, cancellationToken).ConfigureAwait(false);
+        }
+
+        return (BeginState.Done, null);
     }
 
     /// <summary>

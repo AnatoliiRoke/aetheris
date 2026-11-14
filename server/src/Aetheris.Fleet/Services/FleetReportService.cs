@@ -49,6 +49,18 @@ public sealed class FleetReportService
     /// </summary>
     public const string ReportKindCode = "fleet_report";
 
+    /// <summary>
+    /// The key of the text of the report of a load that was short of what the order named (author's
+    /// rule, 14.11.2026).
+    /// </summary>
+    public const string LoadShortReportTextKey = "mail.fleet.load_short";
+
+    /// <summary>
+    /// The kind of the letter of the report of a short load, so the client may draw the list of what
+    /// was not loaded.
+    /// </summary>
+    public const string LoadShortReportKindCode = "fleet_load_short";
+
     private readonly FleetDbContext _dbContext;
     private readonly IMailModule _mail;
     private readonly IWorldModule _world;
@@ -154,6 +166,69 @@ public sealed class FleetReportService
             ReportTextKey,
             parameters,
             ReportKindCode,
+            cancellationToken).ConfigureAwait(false);
+
+        return messageId is not null;
+    }
+
+    /// <summary>
+    /// Writes the report of a load that was short of what the order named (author's rule, 14.11.2026):
+    /// for every item what was asked, what was loaded and why the rest was not. The load itself went
+    /// on, so the report only tells the player.
+    /// </summary>
+    /// <param name="fleet">The fleet that loaded.</param>
+    /// <param name="shortfalls">The items loaded short.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns><see langword="true"/> when the report was written.</returns>
+    public async Task<bool> WriteLoadShortReportAsync(
+        FleetEntity fleet,
+        IReadOnlyList<CargoShortfall> shortfalls,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(fleet);
+        ArgumentNullException.ThrowIfNull(shortfalls);
+
+        if (shortfalls.Count == 0)
+        {
+            return false;
+        }
+
+        // The names of the resources come from the world; the names of the parts come with the shortfalls.
+        Dictionary<int, string> resourceNames = [];
+
+        if (shortfalls.Any(entry => entry.Kind == CargoItemKinds.Resource))
+        {
+            ResourceCatalog catalog = await _world.GetResourceCatalogAsync(cancellationToken).ConfigureAwait(false);
+            resourceNames = catalog.Resources.ToDictionary(resource => resource.Id, resource => resource.NameKey);
+        }
+
+        PlanetFacts? planet = await _world.GetPlanetFactsAsync(fleet.PlanetId, cancellationToken).ConfigureAwait(false);
+
+        string parameters = JsonSerializer.Serialize(new
+        {
+            fleet_id = fleet.Id,
+            fleet_name = fleet.Name,
+            planet_id = fleet.PlanetId,
+            planet_name = planet?.Name,
+            items = shortfalls.Select(entry => new
+            {
+                kind = entry.Kind,
+                id = entry.Id,
+                mark_level = entry.MarkLevel,
+                has_race_bonus = entry.HasRaceBonus,
+                name_key = entry.Kind == CargoItemKinds.Resource ? resourceNames.GetValueOrDefault(entry.Id, string.Empty) : entry.NameKey ?? string.Empty,
+                requested = entry.Requested,
+                loaded = entry.Loaded,
+                reason_code = entry.ReasonCode,
+            }),
+        });
+
+        long? messageId = await _mail.SendSystemAsync(
+            fleet.PlayerId,
+            MailCategoryCodes.Report,
+            LoadShortReportTextKey,
+            parameters,
+            LoadShortReportKindCode,
             cancellationToken).ConfigureAwait(false);
 
         return messageId is not null;
