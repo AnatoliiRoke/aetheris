@@ -19,16 +19,20 @@ namespace Aetheris.World.Services;
 public sealed class NebulaExtractionService
 {
     private readonly WorldDbContext _dbContext;
+    private readonly ResourceCatalogCache _resourceCatalog;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NebulaExtractionService"/> class.
     /// </summary>
     /// <param name="dbContext">The world context.</param>
-    public NebulaExtractionService(WorldDbContext dbContext)
+    /// <param name="resourceCatalog">The catalog of the resources, for the weight of the yield in the hold.</param>
+    public NebulaExtractionService(WorldDbContext dbContext, ResourceCatalogCache resourceCatalog)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
+        ArgumentNullException.ThrowIfNull(resourceCatalog);
 
         _dbContext = dbContext;
+        _resourceCatalog = resourceCatalog;
     }
 
     /// <summary>
@@ -59,7 +63,13 @@ public sealed class NebulaExtractionService
         // The nebula is endless, so the «mass of the place» is exactly what the cycle processes: the
         // rule of the field gives the yield by the shares and stops at a full hold, and its
         // remainder is thrown away because the nebula keeps no mass.
-        ExtractionResult result = FieldExtraction.Extract(processingMass, composition, processingMass, freeHold);
+        ResourceCatalog catalog = await _resourceCatalog.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
+        ExtractionResult result = FieldExtraction.Extract(
+            processingMass,
+            composition,
+            processingMass,
+            freeHold,
+            catalog.Resources.ToDictionary(resource => resource.Id, resource => resource.Weight));
 
         return result with { RemainingMass = 0, Depleted = false };
     }

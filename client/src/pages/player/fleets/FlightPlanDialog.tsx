@@ -14,7 +14,7 @@ import { FlightTargetFields } from './FlightTargetFields';
 import { FlightCargoFields } from './FlightCargoFields';
 import { fleetExtracts, fleetOpenedOrders, fleetScanCapabilities } from './fleetExtraction';
 import { formatDuration } from '../planetText';
-import { cargoItemsValid, holdBefore, holdContentOf, readCargoItems, unloadDefaults } from './flightPlanCargo';
+import { cargoItemsValid, holdBefore, holdContentOf, readCargoItems, resourceWeightsOf, unloadDefaults } from './flightPlanCargo';
 import { readAxes, toOrderInputs, type DraftOrder, type FlightTimeTarget, type TargetKind } from './flightPlanParts';
 
 /**
@@ -152,6 +152,7 @@ export function FlightPlanDialog({
   const loadHold = useCallback(() => (fleetId === null ? Promise.resolve(null) : fleetApi.fleetHold(fleetId)), [fleetApi, fleetId]);
   const holdRead = useRead(loadHold, fleetId !== null, false);
   const baseHold = useMemo(() => holdContentOf(holdRead.data), [holdRead.data]);
+  const resourceWeights = useMemo(() => resourceWeightsOf(holdRead.data), [holdRead.data]);
 
   // The names and the weights of the modules, from the catalog, for the lists of the load and of the unload.
   const partNames = useMemo(() => new Map((catalogRead.data?.modules ?? []).map((module) => [module.id, module.nameKey])), [catalogRead.data]);
@@ -492,6 +493,7 @@ export function FlightPlanDialog({
                       onChange={(items) => changeOrder(index, { items })}
                       partNames={partNames}
                       partWeights={partWeights}
+                      resourceWeights={resourceWeights}
                       planetId={planetBefore(orders, index, chosenFleet, bodies)}
                       typeCode={order.typeCode}
                     />

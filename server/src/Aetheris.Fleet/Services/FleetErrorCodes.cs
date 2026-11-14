@@ -169,6 +169,12 @@ public static class FleetErrorCodes
     public const string CargoShort = "fleet_cargo_short";
 
     /// <summary>
+    /// The weight of a resource or a module in the data is not above zero, so the room it takes in a hold
+    /// cannot be counted. It is a fault of the data, not of the order.
+    /// </summary>
+    public const string CargoWeightInvalid = "fleet_cargo_weight_invalid";
+
+    /// <summary>
     /// The project has a hyperdrive or a jump drive but no ordinary drive (task 00072): such a ship
     /// may not fly inside a system, so a fleet with it may not fly at all.
     /// </summary>

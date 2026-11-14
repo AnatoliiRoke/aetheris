@@ -10,7 +10,7 @@ import { formatNumber } from '../planetText';
 import { useShellSelector } from '../useShell';
 import { FleetDialog } from './FleetDialog';
 import { FlightCargoFields } from './FlightCargoFields';
-import { cargoItemsValid, holdContentOf, type CargoDraftItem } from './flightPlanCargo';
+import { cargoItemsValid, holdContentOf, resourceWeightsOf, type CargoDraftItem } from './flightPlanCargo';
 
 /**
  * The button «Show the hold» of a fleet with the window it opens (task 00056). The window is the only
@@ -75,6 +75,7 @@ function FleetHoldDialog({
   );
   const catalogRead = useRead(loadCatalog, hasParts && homePlanetId !== undefined, false);
   const partNames = useMemo(() => new Map((catalogRead.data?.modules ?? []).map((module) => [module.id, module.nameKey])), [catalogRead.data]);
+  const resourceWeights = useMemo(() => resourceWeightsOf(read.data), [read.data]);
   const partWeights = useMemo(() => new Map((catalogRead.data?.modules ?? []).map((module) => [module.id, module.weight])), [catalogRead.data]);
   const partRows = useMemo(
     () =>
@@ -224,6 +225,7 @@ function FleetHoldDialog({
             onChange={setCargoItems}
             partNames={partNames}
             partWeights={partWeights}
+            resourceWeights={resourceWeights}
             planetId={onOwnBody ? planetId! : null}
             typeCode={cargoMode}
           />

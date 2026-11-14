@@ -25,13 +25,18 @@ public static class FieldExtraction
     /// <param name="fieldMass">The mass left in the field.</param>
     /// <param name="composition">The composition of the field, shares from 0 to 1.</param>
     /// <param name="processingMass">The mass the module processes per cycle.</param>
-    /// <param name="freeHold">The free room of the hold.</param>
+    /// <param name="freeHold">The free room of the hold, in tonnes.</param>
+    /// <param name="weights">
+    /// The weight of one unit of each resource, in tonnes, as the data of the resource says; a resource the
+    /// map does not name weighs one tonne a unit. The yield takes the room of the hold by these weights.
+    /// </param>
     /// <returns>The yield of the cycle.</returns>
     public static ExtractionResult Extract(
         long fieldMass,
         IReadOnlyList<ResourceShare> composition,
         long processingMass,
-        long freeHold)
+        long freeHold,
+        IReadOnlyDictionary<int, decimal>? weights = null)
     {
         ArgumentNullException.ThrowIfNull(composition);
         ArgumentOutOfRangeException.ThrowIfNegative(fieldMass);
@@ -39,10 +44,10 @@ public static class FieldExtraction
         ArgumentOutOfRangeException.ThrowIfNegative(freeHold);
 
         long processed = Math.Min(fieldMass, processingMass);
-        decimal totalShare = composition.Sum(share => share.Coefficient);
+        decimal totalShare = composition.Sum(share => share.Coefficient * WeightOf(weights, share.ResourceId));
 
         // When the hold cannot take the whole yield, the cycle processes only the mass whose
-        // yield fits: the yield of a mass m is at most m × totalShare.
+        // yield fits: the yield of a mass m weighs at most m × the sum of the shares times the weights.
         if (totalShare > 0 && processed * totalShare > freeHold)
         {
             processed = (long)decimal.Floor(freeHold / totalShare);
@@ -65,4 +70,7 @@ public static class FieldExtraction
 
         return new ExtractionResult(processed, yields, rock, remaining, remaining == 0);
     }
+
+    private static decimal WeightOf(IReadOnlyDictionary<int, decimal>? weights, int resourceId) =>
+        weights is not null && weights.TryGetValue(resourceId, out decimal weight) ? Math.Max(0m, weight) : 1m;
 }

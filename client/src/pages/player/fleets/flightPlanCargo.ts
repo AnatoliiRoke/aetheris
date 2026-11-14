@@ -253,22 +253,30 @@ export function unloadDefaults(content: HoldContent): CargoDraftItem[] {
 }
 
 /**
- * The mass of the items of a load, in tonnes: a resource weighs one tonne a unit, a module as much as its kind.
+ * The weights of one unit of the resources, by the resource, in tonnes, as the hold of the fleet sends them.
  *
- * @param items The items of the order.
- * @param partWeights The weight of one module, by the kind, in tonnes.
- * @returns The mass.
+ * @param hold The hold of the fleet, or nothing while it is read.
+ * @returns The weights.
  */
-export function cargoMass(items: readonly CargoDraftItem[], partWeights: ReadonlyMap<number, number>): number {
-  let mass = 0;
+export function resourceWeightsOf(hold: FleetHold | null | undefined): Map<number, number> {
+  return new Map((hold?.resourceWeights ?? []).map((entry) => [entry.resourceId, entry.weight]));
+}
 
-  for (const item of items) {
-    const amount = cargoAmount(item);
-
-    if (item.id !== null && amount !== null) {
-      mass += amount * (item.kind === 'resource' ? 1 : (partWeights.get(item.id) ?? 0));
-    }
+/**
+ * How many units of a thing a load can take: as many as fit into the room, rounded down, and no more than the
+ * source has. A weight that is not above zero is a fault of the data, so nothing is promised.
+ *
+ * @param free The room the load may take, in tonnes.
+ * @param weight The weight of one unit, in tonnes.
+ * @param available How much the source has, or `null` when the window does not know.
+ * @returns The number of the units, or `null` when it cannot be counted.
+ */
+export function maxLoadable(free: number, weight: number, available: number | null): number | null {
+  if (!(weight > 0)) {
+    return null;
   }
 
-  return mass;
+  const fits = Math.max(0, Math.floor(free / weight + 1e-9));
+
+  return available === null ? fits : Math.min(fits, Math.max(0, available));
 }

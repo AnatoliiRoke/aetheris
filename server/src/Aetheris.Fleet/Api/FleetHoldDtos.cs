@@ -15,6 +15,10 @@ namespace Aetheris.Fleet.Api;
 /// <param name="AvailableOrders">The orders of a flight plan the fleet may be given, because of the modules it carries (task 00073).</param>
 /// <param name="OwnedPlanets">How many bodies the player has, the home body among them (task 00073).</param>
 /// <param name="PlanetLimit">How many bodies the player may have at once (task 00073).</param>
+/// <param name="ResourceWeights">
+/// The weight of one unit of every resource, in tonnes, as the data of the resource says, so the window
+/// counts the room of a load in the same tonnes as the capacity and the load of the holds.
+/// </param>
 public sealed record FleetHoldDto(
     long FleetId,
     long Capacity,
@@ -23,13 +27,23 @@ public sealed record FleetHoldDto(
     IReadOnlyList<FleetHoldPartDto> Parts,
     IReadOnlyList<string> AvailableOrders,
     int OwnedPlanets = 0,
-    int PlanetLimit = 0);
+    int PlanetLimit = 0,
+    IReadOnlyList<FleetResourceWeightDto>? ResourceWeights = null);
+
+/// <summary>
+/// The weight of one unit of a resource (author's rule, 14.11.2026: the weight comes from the resource).
+/// </summary>
+/// <param name="ResourceId">The resource.</param>
+/// <param name="Weight">The weight of one unit, in tonnes.</param>
+public sealed record FleetResourceWeightDto(
+    int ResourceId,
+    decimal Weight);
 
 /// <summary>
 /// One kind of resource in the holds of a fleet (task 00056).
 /// </summary>
 /// <param name="ResourceId">The resource.</param>
-/// <param name="Amount">How much of it the fleet carries, in tonnes.</param>
+/// <param name="Amount">How many units of it the fleet carries; the room they take is the amount times the weight of the resource.</param>
 public sealed record FleetHoldItemDto(
     int ResourceId,
     long Amount);

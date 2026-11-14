@@ -381,9 +381,12 @@ public sealed class FleetExtractionCycleService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
+        IReadOnlyDictionary<int, decimal> weights = await _holds.ReadResourceWeightsAsync(cancellationToken).ConfigureAwait(false);
+
         foreach (ResourceAmount yield in yields)
         {
             long left = yield.Amount;
+            decimal weight = weights.GetValueOrDefault(yield.ResourceId);
 
             foreach (ShipHold hold in holds)
             {
@@ -392,7 +395,7 @@ public sealed class FleetExtractionCycleService
                     break;
                 }
 
-                long taken = hold.Take(left);
+                long taken = hold.Take(left, weight);
 
                 if (taken <= 0)
                 {

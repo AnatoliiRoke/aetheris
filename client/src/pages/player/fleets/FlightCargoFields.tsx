@@ -6,7 +6,7 @@ import { useTexts } from '../../../texts/useTexts';
 import { useRead } from '../market/useRead';
 import { formatNumber } from '../planetText';
 import { useShellSelector } from '../useShell';
-import { cargoAmount, cargoKey, emptyCargoItem, holdMass, type CargoDraftItem, type HoldContent } from './flightPlanCargo';
+import { cargoAmount, cargoKey, emptyCargoItem, holdMass, maxLoadable, type CargoDraftItem, type HoldContent } from './flightPlanCargo';
 
 /**
  * One thing the player may choose to carry: what it is, how much there is of it where it comes from, and what
@@ -47,6 +47,7 @@ const fuelGroupCode = 'resource_group_3';
  * @param capacity The room of the holds of the fleet, in tonnes, or `null` when it is not read yet.
  * @param partNames The localisation keys of the names of the modules, by the kind of the module.
  * @param partWeights The weight of one module, by the kind, in tonnes.
+ * @param resourceWeights The weight of one unit of a resource, by the resource, in tonnes, as the data of the resource says.
  * @param onChange Answers the new items of the order.
  */
 export function FlightCargoFields({
@@ -58,6 +59,7 @@ export function FlightCargoFields({
   capacity,
   partNames,
   partWeights,
+  resourceWeights,
   onChange,
 }: {
   id: string;
@@ -68,6 +70,7 @@ export function FlightCargoFields({
   capacity: number | null;
   partNames: ReadonlyMap<number, string>;
   partWeights: ReadonlyMap<number, number>;
+  resourceWeights: ReadonlyMap<number, number>;
   onChange: (items: CargoDraftItem[]) => void;
 }) {
   const { t, language } = useI18n();
@@ -83,6 +86,12 @@ export function FlightCargoFields({
   const stockRead = useRead(loadStock, isLoad && planetId !== null, false);
 
   const resourceNames = useMemo(() => new Map((reference?.resources ?? []).map((resource) => [resource.id, resource.nameKey])), [reference]);
+
+  // The weight of a unit of a thing comes from its data: a resource from the resource, a module from its kind.
+  const weightOf = useCallback(
+    (kind: 'resource' | 'part', thingId: number) => (kind === 'resource' ? (resourceWeights.get(thingId) ?? 0) : (partWeights.get(thingId) ?? 0)),
+    [partWeights, resourceWeights],
+  );
 
   const options = useMemo<CargoOption[]>(() => {
     const list: CargoOption[] = [];
@@ -102,7 +111,7 @@ export function FlightCargoFields({
               item: { kind: 'resource', id: resource.resourceTypeId, markLevel: 1, hasRaceBonus: false },
               label: resourceLabel(resource.resourceTypeId),
               available: Math.floor(resource.amount),
-              weight: resource.weight ?? 1,
+              weight: resourceWeights.get(resource.resourceTypeId) ?? resource.weight ?? 0,
             });
           }
         }
@@ -115,7 +124,7 @@ export function FlightCargoFields({
               item: { kind: 'resource', id: resource.id, markLevel: 1, hasRaceBonus: false },
               label: resourceLabel(resource.id),
               available: 0,
-              weight: 1,
+              weight: weightOf('resource', resource.id),
               missing: true,
             });
           }
@@ -128,7 +137,7 @@ export function FlightCargoFields({
             item: { kind: 'resource', id: resource.id, markLevel: 1, hasRaceBonus: false },
             label: resourceLabel(resource.id),
             available: null,
-            weight: 1,
+            weight: weightOf('resource', resource.id),
           });
         }
       }
@@ -162,7 +171,7 @@ export function FlightCargoFields({
           item: entry,
           label: entry.kind === 'resource' ? resourceLabel(entry.id) : partLabel(entry.id, entry.markLevel, entry.hasRaceBonus),
           available: entry.amount,
-          weight: entry.kind === 'resource' ? 1 : (partWeights.get(entry.id) ?? 0),
+          weight: weightOf(entry.kind, entry.id),
         });
       }
     }
@@ -181,13 +190,13 @@ export function FlightCargoFields({
           item,
           label: item.kind === 'resource' ? resourceLabel(item.id) : partLabel(item.id, item.markLevel, item.hasRaceBonus),
           available: 0,
-          weight: item.kind === 'resource' ? 1 : (partWeights.get(item.id) ?? 0),
+          weight: weightOf(item.kind, item.id),
         });
       }
     }
 
     return list;
-  }, [content, isLoad, items, name, partNames, partWeights, planetId, planetRead.data, reference, resourceNames, stockRead.data, t]);
+  }, [content, isLoad, items, name, partNames, partWeights, planetId, planetRead.data, reference, resourceNames, resourceWeights, stockRead.data, t, weightOf]);
 
   const byKey = useMemo(() => new Map(options.map((option) => [option.key, option])), [options]);
   const resources = options.filter((option) => option.item.kind === 'resource');
@@ -207,7 +216,7 @@ export function FlightCargoFields({
 
     return sum;
   }, [byKey, items]);
-  const carried = useMemo(() => holdMass(content, (entry) => (entry.kind === 'resource' ? 1 : (partWeights.get(entry.id) ?? 0))), [content, partWeights]);
+  const carried = useMemo(() => holdMass(content, (entry) => weightOf(entry.kind, entry.id)), [content, weightOf]);
   const free = capacity === null ? null : Math.max(0, capacity - carried);
   const overflow = isLoad && free !== null && mass > free;
 
@@ -234,6 +243,11 @@ export function FlightCargoFields({
           const key = item.id === null ? '' : cargoKey(item);
           const option = byKey.get(key);
           const available = option?.available ?? null;
+
+          // How much of the thing still fits: the room left by the other items of the load, by the weight of a unit.
+          const itemAmount = cargoAmount(item) ?? 0;
+          const fit =
+            isLoad && free !== null && option !== undefined ? maxLoadable(free - (mass - itemAmount * option.weight), option.weight, available) : null;
 
           return (
             <li className="pl-cargo__item" key={index}>
@@ -274,7 +288,10 @@ export function FlightCargoFields({
                 type="number"
                 value={item.amount}
               />
-              <span className="pl-cargo__available">{available === null ? '' : t('plan.cargo.available', { amount: formatNumber(available, language) })}</span>
+              <span className="pl-cargo__available">
+                {available === null ? '' : t('plan.cargo.available', { amount: formatNumber(available, language) })}
+                {fit === null ? '' : ` · ${t('plan.cargo.fits', { amount: formatNumber(fit, language) })}`}
+              </span>
               <button
                 aria-label={t('plan.cargo.remove')}
                 className="btn fl-btn fl-btn--small pl-tool fl-btn--danger-solid"

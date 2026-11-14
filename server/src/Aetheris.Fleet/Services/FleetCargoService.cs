@@ -77,8 +77,10 @@ public sealed record CargoShortfall(
 /// holds do not carry at all is skipped.
 /// </para>
 /// <para>
-/// A resource weighs one tonne a unit, as the data says now (<c>world.resource.default_weight</c>); the
-/// weight of a module is the weight of its kind. The orders take no time.
+/// A unit of a resource weighs what the data of the resource says (<c>resource_type.weight</c>), a module
+/// what its kind weighs, and both are counted against the room of the holds of the project of the ships,
+/// in tonnes. A weight that is not above zero is a fault of the data and refuses the load. The orders take
+/// no time.
 /// </para>
 /// </remarks>
 public sealed class FleetCargoService
@@ -158,6 +160,7 @@ public sealed class FleetCargoService
         // The holds are filled on paper first, item by item in the order of the list: of every item what
         // the stock has, as far as the room goes. The room is counted on a copy.
         IReadOnlyList<ShipHold> holds = await _holds.ReadAsync(fleet.Id, cancellationToken).ConfigureAwait(false);
+        IReadOnlyDictionary<int, decimal> resourceWeights = await _holds.ReadResourceWeightsAsync(cancellationToken).ConfigureAwait(false);
         Dictionary<long, long> room = holds.ToDictionary(hold => hold.ShipId, hold => hold.Free);
         List<Placement> placements = [];
         List<CargoShortfall> shortfalls = [];
@@ -170,7 +173,13 @@ public sealed class FleetCargoService
             PartKey partKey = new(item.Id, item.MarkLevel, item.HasRaceBonus);
             long inStock = isResource ? resourcesLeft.GetValueOrDefault(item.Id) : partsLeft.GetValueOrDefault(partKey);
             long wanted = Math.Min(item.Amount, Math.Max(0, inStock));
-            decimal weight = isResource ? ResourceWeight : facts[item.Id].Weight;
+            decimal weight = isResource ? resourceWeights.GetValueOrDefault(item.Id) : facts[item.Id].Weight;
+
+            if (weight <= 0m)
+            {
+                return new CargoOutcome(FleetErrorCodes.CargoWeightInvalid);
+            }
+
             long placed = wanted > 0 ? Place(item, wanted, weight, holds, room, placements) : 0;
 
             if (placed > 0 && isResource)
@@ -420,7 +429,7 @@ public sealed class FleetCargoService
     /// </summary>
     /// <param name="item">The item.</param>
     /// <param name="wanted">How much of the item to place at most.</param>
-    /// <param name="weight">The weight of a unit of the item.</param>
+    /// <param name="weight">The weight of a unit of the item, in tonnes; above zero.</param>
     /// <param name="holds">The holds, in the order the ships joined the fleet.</param>
     /// <param name="room">The room that is left in each hold; changed.</param>
     /// <param name="placements">The placements; the new ones are added.</param>
@@ -443,15 +452,14 @@ public sealed class FleetCargoService
             }
 
             long free = room[hold.ShipId];
-            long fits = weight <= 0m ? left : (long)Math.Floor(free / weight);
-            long count = Math.Min(left, fits);
+            long count = Math.Min(left, ShipHold.UnitsThatFit(free, weight));
 
             if (count <= 0)
             {
                 continue;
             }
 
-            room[hold.ShipId] = free - (long)Math.Ceiling(count * weight);
+            room[hold.ShipId] = free - ShipHold.RoomOf(count, weight);
             left -= count;
             placements.Add(new Placement(hold.ShipId, item, count));
         }
@@ -619,9 +627,6 @@ public sealed class FleetCargoService
             });
         }
     }
-
-    /// <summary>The weight of a unit of a resource, in tonnes: the data says one for every resource now.</summary>
-    private const decimal ResourceWeight = 1m;
 
     private sealed record Placement(long ShipId, CargoItem Item, long Count);
 

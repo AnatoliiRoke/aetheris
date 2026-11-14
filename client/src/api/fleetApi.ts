@@ -732,6 +732,11 @@ export interface FleetHold {
   ownedPlanets?: number;
   /** How many bodies the player may have at once (task 00073). */
   planetLimit?: number;
+  /**
+   * The weight of one unit of every resource, in tonnes, as the data of the resource says, so the window
+   * counts the room of a load in the same tonnes as the capacity and the load of the holds.
+   */
+  resourceWeights?: { resourceId: number; weight: number }[];
 }
 
 /**

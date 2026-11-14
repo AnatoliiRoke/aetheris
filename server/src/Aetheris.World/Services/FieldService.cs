@@ -31,6 +31,7 @@ public sealed class FieldService
     private readonly IEventScheduler _scheduler;
     private readonly IGameClock _clock;
     private readonly TimeProvider _timeProvider;
+    private readonly ResourceCatalogCache _resourceCatalog;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FieldService"/> class.
@@ -41,13 +42,15 @@ public sealed class FieldService
     /// <param name="scheduler">The event scheduler.</param>
     /// <param name="clock">The game clock.</param>
     /// <param name="timeProvider">The real clock.</param>
+    /// <param name="resourceCatalog">The catalog of the resources, for the weight of the yield in the hold.</param>
     public FieldService(
         WorldDbContext dbContext,
         WorldUnitOfWork unitOfWork,
         WorldReferenceRepository reference,
         IEventScheduler scheduler,
         IGameClock clock,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        ResourceCatalogCache resourceCatalog)
     {
         ArgumentNullException.ThrowIfNull(dbContext);
         ArgumentNullException.ThrowIfNull(unitOfWork);
@@ -55,6 +58,7 @@ public sealed class FieldService
         ArgumentNullException.ThrowIfNull(scheduler);
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(timeProvider);
+        ArgumentNullException.ThrowIfNull(resourceCatalog);
 
         _dbContext = dbContext;
         _unitOfWork = unitOfWork;
@@ -62,6 +66,7 @@ public sealed class FieldService
         _scheduler = scheduler;
         _clock = clock;
         _timeProvider = timeProvider;
+        _resourceCatalog = resourceCatalog;
     }
 
     /// <summary>
@@ -88,7 +93,13 @@ public sealed class FieldService
                     .Select(share => new ResourceShare(share.ResourceId, share.Coefficient))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-                ExtractionResult result = FieldExtraction.Extract(field.Mass, composition, processingMass, freeHold);
+                ResourceCatalog catalog = await _resourceCatalog.GetAsync(_dbContext, cancellationToken).ConfigureAwait(false);
+                ExtractionResult result = FieldExtraction.Extract(
+                    field.Mass,
+                    composition,
+                    processingMass,
+                    freeHold,
+                    catalog.Resources.ToDictionary(resource => resource.Id, resource => resource.Weight));
                 field.Mass = result.RemainingMass;
 
                 // A card of the admin panel opened before this cycle is now out of date
