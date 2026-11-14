@@ -4,6 +4,7 @@ using Aetheris.Core.Security;
 using Aetheris.Research.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
 namespace Aetheris.Research.Api;
@@ -33,9 +34,11 @@ public static class ResearchEndpoints
 
         // The tree of the technologies with the queue of the researches; the body the research
         // starts from may be named, and then the science centre of that body opens the
-        // technologies.
+        // technologies. The query names the body `planet_id`, as the client and the other
+        // endpoints do; without the name the body was never bound and the tree always showed the
+        // body with the highest science centre.
         research.MapGet("/", async (
-            long? planetId,
+            [FromQuery(Name = "planet_id")] long? planetId,
             ClaimsPrincipal user,
             ResearchQueueService queue,
             ResearchTreeBuilder builder,
