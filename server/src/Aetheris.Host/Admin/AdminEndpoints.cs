@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Json.Serialization;
+using Aetheris.Combat;
 using Aetheris.Core.Admin;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Security;
@@ -245,6 +246,7 @@ public static class AdminEndpoints
         EconomyServiceCollectionExtensions.MapAdminEndpoints(secured);
         MarketServiceCollectionExtensions.MapAdminEndpoints(secured);
         FleetServiceCollectionExtensions.MapAdminEndpoints(secured);
+        CombatServiceCollectionExtensions.MapAdminEndpoints(secured);
     }
 
     private static async Task<IResult> SignInAsync(

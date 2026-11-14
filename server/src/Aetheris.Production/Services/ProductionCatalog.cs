@@ -89,7 +89,8 @@ public sealed record PartGroupInfo(
     bool IsArchived,
     IReadOnlyList<PartGroupCharacteristicInfo> Characteristics,
     int? ParentGroupId = null,
-    bool IsHullGroup = false);
+    bool IsHullGroup = false,
+    short? DefaultPowerPriority = null);
 
 /// <summary>A characteristic of a group of the parts.</summary>
 /// <param name="CharacteristicId">The characteristic.</param>
@@ -144,6 +145,7 @@ public sealed record CharacteristicInfo(
 /// <param name="AmmunitionIds">The ammunition the part fires, when it is a weapon, by their identifier (task 00040).</param>
 /// <param name="Extraction">What the part takes and where, when it is a module of extraction (task 00055).</param>
 /// <param name="Fuel">The fuel of the part, when it is a drive, with the share of every resource in it (task 00072).</param>
+/// <param name="Accuracy">The accuracy of the part against each group of hulls, when it is a weapon (task 00062).</param>
 public sealed record PartTypeInfo(
     int Id,
     string Code,
@@ -161,7 +163,8 @@ public sealed record PartTypeInfo(
     IReadOnlyList<int> RaceIds,
     IReadOnlyList<int>? AmmunitionIds = null,
     IReadOnlyList<PartExtractionInfo>? Extraction = null,
-    IReadOnlyList<PartFuelInfo>? Fuel = null);
+    IReadOnlyList<PartFuelInfo>? Fuel = null,
+    IReadOnlyDictionary<int, double>? Accuracy = null);
 
 /// <summary>One resource of the fuel of a drive and its share in it (task 00072).</summary>
 /// <param name="ResourceTypeId">The resource the drive burns.</param>

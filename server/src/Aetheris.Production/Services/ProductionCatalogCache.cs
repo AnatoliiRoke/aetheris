@@ -166,6 +166,12 @@ public sealed class ProductionCatalogCache
             .ThenBy(row => row.ResourceTypeId)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
+        // The accuracy of the weapons is read in one query, whatever the number of the parts (task 00062).
+        List<PartAccuracyEntity> accuracyRows = await dbContext.PartAccuracies.AsNoTracking()
+            .OrderBy(row => row.PartTypeId)
+            .ThenBy(row => row.TargetPartGroupId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
         List<RecipeEntity> recipes = await dbContext.Recipes.AsNoTracking()
             .Include(recipe => recipe.IngredientIds)
             .OrderBy(recipe => recipe.SortOrder)
@@ -269,6 +275,15 @@ public sealed class ProductionCatalogCache
                         .. part.Select(row => new PartFuelInfo(row.ResourceTypeId, row.Share))
                     ]);
 
+        Dictionary<int, IReadOnlyDictionary<int, double>> accuracyInfos =
+            accuracyRows
+                .GroupBy(row => row.PartTypeId)
+                .ToDictionary(
+                    part => part.Key,
+                    part => (IReadOnlyDictionary<int, double>)part.ToDictionary(
+                        row => row.TargetPartGroupId,
+                        row => row.Value));
+
         return new ProductionCatalog(
             [
                 .. groups.Select(group => new PartGroupInfo(
@@ -281,7 +296,8 @@ public sealed class ProductionCatalogCache
                     group.IsArchived,
                     groupCharacteristicInfos.GetValueOrDefault(group.Id, []),
                     group.ParentGroupId,
-                    group.IsHullGroup)),
+                    group.IsHullGroup,
+                    group.DefaultPowerPriority)),
             ],
             [
                 .. parts.Select(part => new PartTypeInfo(
@@ -307,7 +323,8 @@ public sealed class ProductionCatalogCache
                     raceIds.GetValueOrDefault(part.Id, []),
                     ammunitionIds.GetValueOrDefault(part.Id, []),
                     extractionInfos.GetValueOrDefault(part.Id, []),
-                    fuelInfos.GetValueOrDefault(part.Id, []))),
+                    fuelInfos.GetValueOrDefault(part.Id, []),
+                    accuracyInfos.GetValueOrDefault(part.Id))),
             ],
             [
                 .. recipes.Select(recipe => new RecipeInfo(

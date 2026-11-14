@@ -1,0 +1,96 @@
+{
+  "target_rules": [
+    {
+      "code": "target_rule_1",
+      "logic_code": "nearest",
+      "sort_order": 10,
+      "name": { "uk": "Найближча", "en": "Nearest" },
+      "description": {
+        "uk": "Обирає найближчого супротивника.",
+        "en": "Chooses the closest opponent."
+      }
+    },
+    {
+      "code": "target_rule_2",
+      "logic_code": "weakest",
+      "sort_order": 20,
+      "name": { "uk": "Найслабша", "en": "Weakest" },
+      "description": {
+        "uk": "Обирає супротивника з найменшою міцністю.",
+        "en": "Chooses the opponent with the least integrity."
+      }
+    },
+    {
+      "code": "target_rule_3",
+      "logic_code": "carriers",
+      "sort_order": 30,
+      "name": { "uk": "Носії", "en": "Carriers" },
+      "description": {
+        "uk": "Обирає корпуси, що випускають дрони.",
+        "en": "Chooses hulls that launch drones."
+      }
+    },
+    {
+      "code": "target_rule_4",
+      "logic_code": "drones",
+      "sort_order": 40,
+      "name": { "uk": "Дрони", "en": "Drones" },
+      "description": {
+        "uk": "Обирає дрони.",
+        "en": "Chooses drones."
+      }
+    },
+    {
+      "code": "target_rule_5",
+      "logic_code": "strongest",
+      "sort_order": 50,
+      "name": { "uk": "Найсильніша", "en": "Strongest" },
+      "description": {
+        "uk": "Обирає супротивника з найбільшою міцністю.",
+        "en": "Chooses the opponent with the most integrity."
+      }
+    }
+  ],
+  "behaviors": [
+    {
+      "code": "behavior_1",
+      "logic_code": "approach",
+      "sort_order": 10,
+      "name": { "uk": "Зближення", "en": "Approach" },
+      "description": {
+        "uk": "Зближується з ціллю.",
+        "en": "Moves closer to the chosen opponent."
+      }
+    },
+    {
+      "code": "behavior_2",
+      "logic_code": "keep_distance",
+      "sort_order": 20,
+      "name": { "uk": "Тримати дистанцію", "en": "Keep distance" },
+      "description": {
+        "uk": "Тримає дистанцію до цілі.",
+        "en": "Stays at a distance from the chosen opponent."
+      }
+    },
+    {
+      "code": "behavior_3",
+      "logic_code": "stand",
+      "sort_order": 30,
+      "name": { "uk": "Стояти", "en": "Stand" },
+      "description": {
+        "uk": "Лишається на місці.",
+        "en": "Stays in place."
+      }
+    },
+    {
+      "code": "behavior_4",
+      "logic_code": "escort",
+      "sort_order": 40,
+      "name": { "uk": "Супровід", "en": "Escort" },
+      "description": {
+        "uk": "Супроводжує союзний корпус.",
+        "en": "Follows an allied hull."
+      }
+    }
+  ]
+}

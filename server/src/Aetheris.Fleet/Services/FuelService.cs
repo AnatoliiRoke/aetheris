@@ -10,9 +10,10 @@ namespace Aetheris.Fleet.Services;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The fuel is a cargo of the fleet: it lies in the common hold of the fleet, so the ships of the
-/// fleet share it. The fuel is burned at the start of a leg of a flight, in the transaction of the
-/// start of the flight, so a flight never begins without the fuel for it.
+/// The fuel is a cargo of the ships of the fleet. The row of the fleet is only the sum of those
+/// holds, so a burn takes the fuel from the ships, in the order they joined the fleet, and lowers
+/// the sum by the same amount. The burn happens at the start of a leg, in the transaction of the
+/// start, so a flight never begins without the fuel for it.
 /// </para>
 /// <para>
 /// When the hold holds less than the leg needs, the flight is refused with the code
@@ -55,8 +56,8 @@ public sealed class FuelService
     /// Burns the fuel of a leg of a flight from the hold of the fleet.
     /// </summary>
     /// <remarks>
-    /// The rows of the hold are read once and written once, so the whole fuel of a leg is taken
-    /// with one update of the table and not one for every resource.
+    /// The holds of the ships and the sum of the fleet are read once and written once, so the whole
+    /// fuel of a leg is taken with one update and not one for every resource.
     /// </remarks>
     /// <param name="fleetId">The fleet.</param>
     /// <param name="propellant">The fuel of the leg, by the identifier of the resource.</param>
@@ -77,11 +78,23 @@ public sealed class FuelService
             return;
         }
 
-        List<FleetCargoEntity> rows = await _dbContext.FleetCargos
+        long[] shipIds = [.. await _dbContext.FleetShips.AsNoTracking()
+            .Where(member => member.FleetId == fleetId)
+            .OrderBy(member => member.Position)
+            .Select(member => member.ShipId)
+            .ToListAsync(cancellationToken).ConfigureAwait(false)];
+
+        List<ShipCargoEntity> shipRows = shipIds.Length == 0
+            ? []
+            : await _dbContext.ShipCargos
+                .Where(cargo => shipIds.Contains(cargo.ShipId))
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        List<FleetCargoEntity> fleetRows = await _dbContext.FleetCargos
             .Where(cargo => cargo.FleetId == fleetId)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-        Dictionary<int, FleetCargoEntity> byResource = rows.ToDictionary(row => row.ResourceId);
+        Dictionary<int, FleetCargoEntity> fleetByResource = fleetRows.ToDictionary(row => row.ResourceId);
 
         foreach ((int resourceTypeId, decimal amount) in propellant)
         {
@@ -90,15 +103,14 @@ public sealed class FuelService
                 continue;
             }
 
-            FleetCargoEntity? row = byResource.GetValueOrDefault(resourceTypeId);
+            long need = (long)Math.Ceiling(amount);
+            long have = Held(shipRows, fleetByResource, resourceTypeId);
 
-            if (row is null || row.Amount < (long)Math.Ceiling(amount))
+            if (have < need)
             {
-                long have = row?.Amount ?? 0L;
-
                 throw new GameException(
                     FleetErrorCodes.FuelShort,
-                    $"The fleet has {have} units of the fuel it needs {Math.Ceiling(amount)} of.");
+                    $"The fleet has {have} units of the fuel it needs {need} of.");
             }
         }
 
@@ -109,17 +121,108 @@ public sealed class FuelService
                 continue;
             }
 
-            FleetCargoEntity? row = byResource.GetValueOrDefault(resourceTypeId);
+            long need = (long)Math.Ceiling(amount);
 
-            if (row is null)
+            // The ships carry the fuel. The sum of the fleet loses the same amount, so a later
+            // recount of the sum cannot put the burned fuel back. A hold that exists only as the
+            // sum (no rows on the ships) loses the fuel from that sum.
+            TakeFromShips(shipRows, shipIds, resourceTypeId, need, now);
+            TakeFromFleet(fleetByResource, resourceTypeId, need, now);
+        }
+
+        _dbContext.ShipCargos.RemoveRange(shipRows.Where(row => row.Amount <= 0));
+
+        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// How much of a resource the fleet can burn: the holds of its ships, or the sum of the fleet
+    /// when the fuel was written only into that sum.
+    /// </summary>
+    /// <param name="shipRows">The cargo of the ships of the fleet.</param>
+    /// <param name="fleetByResource">The sum of the fleet, by the resource.</param>
+    /// <param name="resourceTypeId">The resource.</param>
+    /// <returns>The amount the fleet can burn.</returns>
+    private static long Held(
+        IReadOnlyList<ShipCargoEntity> shipRows,
+        IReadOnlyDictionary<int, FleetCargoEntity> fleetByResource,
+        int resourceTypeId)
+    {
+        long aboard = 0;
+        bool aboardShips = false;
+
+        foreach (ShipCargoEntity row in shipRows)
+        {
+            if (row.ResourceId != resourceTypeId || row.Amount <= 0)
             {
                 continue;
             }
 
-            row.Amount -= (long)Math.Ceiling(amount);
-            row.UpdatedAt = now;
+            aboard += row.Amount;
+            aboardShips = true;
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        if (aboardShips)
+        {
+            return aboard;
+        }
+
+        return fleetByResource.TryGetValue(resourceTypeId, out FleetCargoEntity? fleetRow) ? fleetRow.Amount : 0L;
+    }
+
+    /// <summary>
+    /// Takes a resource out of the holds of the ships, in the order the ships joined the fleet.
+    /// </summary>
+    /// <param name="shipRows">The cargo of the ships of the fleet.</param>
+    /// <param name="shipIds">The ships, in the order they joined the fleet.</param>
+    /// <param name="resourceTypeId">The resource.</param>
+    /// <param name="need">How much to take.</param>
+    /// <param name="now">The moment of game time.</param>
+    private static void TakeFromShips(
+        List<ShipCargoEntity> shipRows,
+        long[] shipIds,
+        int resourceTypeId,
+        long need,
+        DateTimeOffset now)
+    {
+        long left = need;
+
+        foreach (ShipCargoEntity row in shipRows
+            .Where(row => row.ResourceId == resourceTypeId && row.Amount > 0)
+            .OrderBy(row => Array.IndexOf(shipIds, row.ShipId)))
+        {
+            long taken = Math.Min(left, row.Amount);
+
+            if (taken <= 0)
+            {
+                continue;
+            }
+
+            row.Amount -= taken;
+            row.UpdatedAt = now;
+            left -= taken;
+        }
+    }
+
+    /// <summary>
+    /// Lowers the sum of the fleet by the fuel a leg burned.
+    /// </summary>
+    /// <param name="fleetByResource">The sum of the fleet, by the resource.</param>
+    /// <param name="resourceTypeId">The resource.</param>
+    /// <param name="amount">How much the leg burned.</param>
+    /// <param name="now">The moment of game time.</param>
+    private static void TakeFromFleet(
+        IReadOnlyDictionary<int, FleetCargoEntity> fleetByResource,
+        int resourceTypeId,
+        long amount,
+        DateTimeOffset now)
+    {
+        if (amount <= 0 || !fleetByResource.TryGetValue(resourceTypeId, out FleetCargoEntity? row))
+        {
+            return;
+        }
+
+        row.Amount = Math.Max(0L, row.Amount - amount);
+        row.UpdatedAt = now;
     }
 }

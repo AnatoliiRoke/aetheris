@@ -1,5 +1,7 @@
+using System.Globalization;
 using Aetheris.Core.Errors;
 using Aetheris.Core.Text;
+using Aetheris.World;
 using Aetheris.World.Api;
 using Aetheris.World.Configuration;
 using Aetheris.World.Data;
@@ -213,6 +215,24 @@ public sealed class CivilizationService
     }
 
     /// <summary>
+    /// Renames a body the player owns. The name follows the rules of the home name.
+    /// </summary>
+    /// <param name="playerId">The player.</param>
+    /// <param name="planetId">The body.</param>
+    /// <param name="homeName">The new name.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The body and the stored name.</returns>
+    public Task<PlanetNameDto> RenameAsync(string playerId, long planetId, string homeName, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(playerId);
+        ArgumentNullException.ThrowIfNull(homeName);
+
+        return _unitOfWork.RunAsync(
+            () => RenameInTransactionAsync(playerId, planetId, homeName.Trim(), cancellationToken),
+            cancellationToken);
+    }
+
+    /// <summary>
     /// Releases everything a player holds in the world, for the deletion of the account: the
     /// bodies become free again, and the civilization, the storage and the start grant go.
     /// </summary>
@@ -280,6 +300,30 @@ public sealed class CivilizationService
         }
 
         return new CivilizationSummary(race.Id, race.Code, race.NameKey, planet.Id, planet.Name, planet.SystemId, planet.SectorId, now);
+    }
+
+    private async Task<PlanetNameDto> RenameInTransactionAsync(string playerId, long planetId, string homeName, CancellationToken cancellationToken)
+    {
+        WorldSettings settings = _reference.Settings;
+        await ValidateHomeNameAsync(homeName, settings, cancellationToken).ConfigureAwait(false);
+
+        PlanetEntity planet = (await _dbContext.Planets
+            .FromSql($"SELECT * FROM planet WHERE id = {planetId} FOR UPDATE")
+            .ToListAsync(cancellationToken).ConfigureAwait(false)).FirstOrDefault()
+            ?? throw new GameException(GameErrorCodes.NotFound, "The body does not exist.");
+
+        if (planet.OwnerPlayerId != playerId)
+        {
+            throw new NotYourObjectException(PlanetOwnerResolver.Type, planetId.ToString(CultureInfo.InvariantCulture));
+        }
+
+        if (planet.Name != homeName)
+        {
+            planet.Name = homeName;
+            planet.Version++;
+        }
+
+        return new PlanetNameDto(planet.Id, homeName);
     }
 
     private async Task ValidateHomeNameAsync(string homeName, WorldSettings settings, CancellationToken cancellationToken)

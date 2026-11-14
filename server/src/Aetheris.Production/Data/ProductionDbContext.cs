@@ -80,6 +80,9 @@ public sealed class ProductionDbContext : DbContext
     /// <summary>Gets the fuel of every drive and the share of every resource in it (task 00072).</summary>
     public DbSet<PartFuelEntity> PartFuels => Set<PartFuelEntity>();
 
+    /// <summary>Gets the accuracy of the weapons against the groups of hulls (task 00062).</summary>
+    public DbSet<PartAccuracyEntity> PartAccuracies => Set<PartAccuracyEntity>();
+
     /// <summary>Gets the recipes.</summary>
     public DbSet<RecipeEntity> Recipes => Set<RecipeEntity>();
 
@@ -245,6 +248,16 @@ public sealed class ProductionDbContext : DbContext
             // The resource lives in the world module, so the table keeps its identifier and carries
             // no foreign key into the tables of the other modules (the remark of the class).
             entity.ToTable(table => table.HasCheckConstraint("ck_part_fuel_share", "share > 0 AND share <= 1"));
+        });
+
+        modelBuilder.Entity<PartAccuracyEntity>(entity =>
+        {
+            entity.ToTable("part_accuracy");
+            entity.HasKey(e => new { e.PartTypeId, e.TargetPartGroupId });
+            entity.HasIndex(e => e.TargetPartGroupId).HasDatabaseName("ix_part_accuracy_target");
+            entity.HasOne<PartTypeEntity>().WithMany(part => part.AccuracyIds).HasForeignKey(e => e.PartTypeId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<PartGroupEntity>().WithMany().HasForeignKey(e => e.TargetPartGroupId).OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(table => table.HasCheckConstraint("ck_part_accuracy_value", "value >= 0 AND value <= 1"));
         });
 
         modelBuilder.Entity<RecipeEntity>(entity =>

@@ -8,6 +8,9 @@
 .civ .screen-head__text { gap: 6px; }
 .civ__main--planet .screen-head__text { gap: var(--space-1); }
 .screen-head__title { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) 14px; }
+.screen-head__rename { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-width: 0; flex: 1 1 auto; }
+.screen-head__rename .input { flex: 1 1 16rem; width: auto; max-width: 24rem; min-height: 44px; font-size: var(--fs-title-planet); }
+.screen-head__rename .error-text { flex: 1 0 100%; }
 .screen-head__note { color: var(--text-2); font-weight: 600; }
 .screen-head__badge {
   display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--r-full);
@@ -402,6 +405,7 @@
   .tabs { flex-wrap: nowrap; overflow-x: auto; }
   .tabs__tab { flex: 0 0 auto; }
   .screen-head__actions .btn { min-height: 44px; }
+  .screen-head__rename .input { font-size: var(--fs-title-planet-phone); }
   .crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
   .filter-chips { flex-wrap: nowrap; overflow-x: auto; }
   .filter-chips .chip { flex: 0 0 auto; }

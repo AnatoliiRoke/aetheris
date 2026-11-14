@@ -316,6 +316,57 @@ export const configDescriptionsUk: Record<string, string> = {
   'config.fleet.propellant.check_return_home.description':
     'Чи додає перевірка палива перед відправкою флоту політ додому до потреби в паливі.',
 
+  'config.combat.deploy_seconds.description':
+    'Тривалість фази розстановки, ігрові секунди.',
+  'config.combat.pause_seconds.description':
+    'Тривалість паузи на накази, ігрові секунди.',
+  'config.combat.segment_seconds.description':
+    'Тривалість відрізку, що рахує рушій, ігрові секунди.',
+  'config.combat.tick_ms.description':
+    'Крок розрахунку, мілісекунди.',
+  'config.combat.track_step_seconds.description':
+    'Крок точок сліду руху для клієнта, ігрові секунди.',
+  'config.combat.max_cycles.description':
+    'Ліміт циклів.',
+  'config.combat.shield_restore_share.description':
+    'Частка насичення щита, що повертається в кінці циклу.',
+  'config.combat.module_damage_share.description':
+    'Частка шкоди, що після броні йде в модуль.',
+  'config.combat.field_width.description':
+    'Ширина поля.',
+  'config.combat.field_height.description':
+    'Висота поля.',
+  'config.combat.deploy_zone_depth.description':
+    'Глибина зони розстановки.',
+  'config.combat.asteroid_detection_mult.description':
+    'Множник виявлення в астероїдному полі.',
+  'config.combat.asteroid_hit_mult.description':
+    'Множник влучання в астероїдному полі.',
+  'config.combat.asteroid_speed_mult.description':
+    'Множник швидкості в астероїдному полі.',
+  'config.combat.accuracy_default.description':
+    'Влучність по групі без рядка.',
+  'config.combat.distance_falloff.description':
+    'Спад влучності на межі дальності.',
+  'config.combat.target_speed_falloff.description':
+    'Спад влучності від швидкості цілі.',
+  'config.combat.squadron_max.description':
+    'Ескадрилей у флоті.',
+  'config.combat.formation_max.description':
+    'Формацій у флоті.',
+  'config.combat.debris_share.description':
+    'Частка ресурсів знищеного корабля в уламках.',
+  'config.combat.commander_xp_per_battle.description':
+    'Досвід командира за бій.',
+  'config.combat.order_interval_seconds.description':
+    'Мінімум між наказами одного гравця, ігрові секунди.',
+  'config.combat.scenario_rule_max.description':
+    'Правил «якщо → то» у сценарії.',
+  'config.combat.force_damage_weight.description':
+    'Вага шкоди в силі сторони.',
+  'config.combat.force_defense_weight.description':
+    'Вага захисту в силі сторони.',
+
   'config.mail.letter.body_max_length.description':
     'Найбільша кількість символів у тексті листа, який гравець пише іншому гравцеві.',
   'config.mail.letter.subject_max_length.description':

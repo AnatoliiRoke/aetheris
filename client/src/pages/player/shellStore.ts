@@ -47,6 +47,8 @@ export interface ShellActions {
   loadPlanet: (planetId: number, force?: boolean) => Promise<void>;
   /** Takes the answer of a command on a body; the balances are read again, the command may have spent them. */
   applyPlanet: (planetId: number, planet: Planet) => void;
+  /** Keeps a renamed body under its new name. A rename spends nothing, so the balances stay. */
+  setPlanetName: (planetId: number, name: string) => void;
   loadEconomy: (force?: boolean) => Promise<void>;
   loadPopulation: (planetId: number, force?: boolean) => Promise<void>;
   loadBodies: (force?: boolean) => Promise<void>;
@@ -296,6 +298,17 @@ export function createShellStore(api: Api): ShellStore {
 
       if (state.economyLoaded) {
         void loadEconomy(true);
+      }
+    },
+    setPlanetName: (planetId, name) => {
+      const current = state.planets.get(planetId);
+
+      if (current && current.planet.name !== name) {
+        setPlanet(planetId, { ...current.planet, name });
+      }
+
+      if (state.bodies.some((body) => body.planetId === planetId && body.name !== name)) {
+        set({ bodies: state.bodies.map((body) => (body.planetId === planetId ? { ...body, name } : body)) });
       }
     },
     loadEconomy,

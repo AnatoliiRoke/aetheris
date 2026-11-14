@@ -235,4 +235,7 @@ public static class FleetErrorCodes
     /// for the way the plan would take.
     /// </summary>
     public const string ColonizeNoDrive = "fleet_colonize_no_drive";
+
+    /// <summary>The shutdown order of a slot is outside 0..1000 (task 00062).</summary>
+    public const string PowerPriorityInvalid = "fleet_power_priority_invalid";
 }

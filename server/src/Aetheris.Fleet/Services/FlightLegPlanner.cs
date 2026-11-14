@@ -31,7 +31,8 @@ public sealed record FlightLeg(
 /// </para>
 /// <para>
 /// The leg to the edge is left out when the fleet stands in open space, and the leg from the edge
-/// is left out when the target lies in open space.
+/// is left out when the target lies in open space or is the edge itself. An object that stands on
+/// the last orbit is not the edge: the leg to it is kept, so the fleet arrives on the object.
 /// </para>
 /// </remarks>
 public sealed class FlightLegPlanner
@@ -100,8 +101,11 @@ public sealed class FlightLegPlanner
             middleTo,
             _world.GetTravelDistance(middleFrom, middleTo)));
 
-        // The leg from the edge exists when the target lies inside a system.
-        if (edgeOfTarget is not null && edgeOfTarget.Orbit != to.Orbit)
+        // The leg from the edge exists when the target lies inside a system and is not the edge
+        // itself. An object on the last orbit shares that orbit, so the flight from the edge takes
+        // no time, but the fleet still has to arrive on the object: an extraction finds a field of
+        // a system only by the object the fleet stands on.
+        if (edgeOfTarget is not null && (edgeOfTarget.Orbit != to.Orbit || to.ObjectId is not null))
         {
             legs.Add(new FlightLeg(
                 FlightLegKinds.FromEdge,

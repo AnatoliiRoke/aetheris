@@ -67,6 +67,7 @@ public static class WorldServiceCollectionExtensions
         services.AddScoped<IScheduledEventHandler, GenerationRunHandler>();
 
         services.AddCommand<FoundCivilizationCommand>();
+        services.AddCommand<RenamePlanetCommand>();
         services.AddOwnedObjectType<PlanetOwnerResolver>();
 
         return services;

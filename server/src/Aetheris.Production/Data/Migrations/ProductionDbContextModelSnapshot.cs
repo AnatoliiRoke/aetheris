@@ -86,6 +86,32 @@ namespace Aetheris.Production.Data.Migrations
                     b.ToTable("characteristic", (string)null);
                 });
 
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartAccuracyEntity", b =>
+                {
+                    b.Property<int>("PartTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("part_type_id");
+
+                    b.Property<int>("TargetPartGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("target_part_group_id");
+
+                    b.Property<double>("Value")
+                        .HasColumnType("double precision")
+                        .HasColumnName("value");
+
+                    b.HasKey("PartTypeId", "TargetPartGroupId")
+                        .HasName("pk_part_accuracy");
+
+                    b.HasIndex("TargetPartGroupId")
+                        .HasDatabaseName("ix_part_accuracy_target");
+
+                    b.ToTable("part_accuracy", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_part_accuracy_value", "value >= 0 AND value <= 1");
+                        });
+                });
+
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartAmmunitionCompatibilityEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -397,6 +423,10 @@ namespace Aetheris.Production.Data.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("code");
+
+                    b.Property<short?>("DefaultPowerPriority")
+                        .HasColumnType("smallint")
+                        .HasColumnName("default_power_priority");
 
                     b.Property<string>("DescriptionKey")
                         .IsRequired()
@@ -1019,6 +1049,23 @@ namespace Aetheris.Production.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Aetheris.Production.Data.Entities.PartAccuracyEntity", b =>
+                {
+                    b.HasOne("Aetheris.Production.Data.Entities.PartTypeEntity", null)
+                        .WithMany("AccuracyIds")
+                        .HasForeignKey("PartTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_accuracy_part_type_part_type_id");
+
+                    b.HasOne("Aetheris.Production.Data.Entities.PartGroupEntity", null)
+                        .WithMany()
+                        .HasForeignKey("TargetPartGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_part_accuracy_part_group_target_part_group_id");
+                });
+
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartAmmunitionCompatibilityEntity", b =>
                 {
                     b.HasOne("Aetheris.Production.Data.Entities.PartTypeEntity", null)
@@ -1193,6 +1240,8 @@ namespace Aetheris.Production.Data.Migrations
 
             modelBuilder.Entity("Aetheris.Production.Data.Entities.PartTypeEntity", b =>
                 {
+                    b.Navigation("AccuracyIds");
+
                     b.Navigation("AttributeIds");
 
                     b.Navigation("ExtractionIds");

@@ -196,6 +196,7 @@ export function fakeGameApi(overrides: Partial<GameApi> = {}): GameApi {
       systemId: 3,
       sectorId: 1,
     }),
+    renamePlanet: vi.fn().mockResolvedValue({ planetId: 10, name: 'Nova' }),
     ...overrides,
   };
 }

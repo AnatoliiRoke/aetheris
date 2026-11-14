@@ -395,6 +395,7 @@ export const tableRoutes = {
   systems: '/world/systems',
   objects: '/world/objects',
   fields: '/world/fields',
+  nebulae: '/world/nebulae',
   objectTypes: '/world/object-types',
   rules: '/world/generation-rules',
   runs: '/world/generation-runs',

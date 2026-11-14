@@ -58,7 +58,10 @@ public sealed record ShipHullDto(
     bool IsArchived,
     decimal Upkeep = 0m,
     decimal Crew = 0m,
-    long AssemblySeconds = 0);
+    long AssemblySeconds = 0,
+    decimal Signature = 0m,
+    decimal LeashRadius = 0m,
+    decimal DroneSpeed = 0m);
 
 /// <summary>
 /// A module of the catalog of the ships.
@@ -102,6 +105,15 @@ public sealed record ShipHullDto(
 /// <param name="Fuel">The fuel of the drive and the share of every resource in it (task 00072). A drive without rows burns nothing.</param>
 /// <param name="CargoOnly">Whether the module is only a cargo: it is never fitted to a hull and is carried in the hold of a ship (task 00073).</param>
 /// <param name="CargoOrder">The order of a flight plan the cargo opens, one of <see cref="PartCargoOrders"/>, or <see langword="null"/> (task 00073).</param>
+/// <param name="Accuracy">The accuracy of a weapon against each group of hulls, by the identifier of the group (task 00062). A part that is not a weapon has none.</param>
+/// <param name="Integrity">How much integrity the module has. The armor bonus stays in <see cref="ShipModuleDto.Armor"/>.</param>
+/// <param name="SignatureCut">The share of the hull signature the module removes, from zero to one.</param>
+/// <param name="DefaultPowerPriority">The shutdown order a new slot of the module starts with. A smaller number turns off later.</param>
+/// <param name="Range">How far a shot of the module reaches. Zero when the module is not a weapon.</param>
+/// <param name="FlightSpeed">How fast a shot of the module travels. Zero means the shot arrives in the same tick.</param>
+/// <param name="EnergyBlock">The energy block of a shield, as stored. A number above one is a percent.</param>
+/// <param name="KineticBlock">The kinetic block of a shield, as stored. A number above one is a percent.</param>
+/// <param name="Magazine">How many rounds the weapon holds. Zero when it has no magazine.</param>
 public sealed record ShipModuleDto(
     int Id,
     string Code,
@@ -142,7 +154,16 @@ public sealed record ShipModuleDto(
     string? EngineKind = null,
     IReadOnlyList<ShipModuleFuelDto>? Fuel = null,
     bool CargoOnly = false,
-    string? CargoOrder = null);
+    string? CargoOrder = null,
+    IReadOnlyDictionary<int, double>? Accuracy = null,
+    decimal Integrity = 0m,
+    decimal SignatureCut = 0m,
+    short? DefaultPowerPriority = null,
+    decimal Range = 0m,
+    decimal FlightSpeed = 0m,
+    decimal EnergyBlock = 0m,
+    decimal KineticBlock = 0m,
+    decimal Magazine = 0m);
 
 /// <summary>
 /// One resource of the fuel of a drive and its share in it (task 00072).
@@ -188,11 +209,15 @@ public sealed record ShipModuleFactDto(
 /// <param name="Damage">The damage of one round.</param>
 /// <param name="DamageKind">The kind of the damage: the energy or the kinetic one.</param>
 /// <param name="LauncherSize">The size of the launcher the round fits, or zero when it has none.</param>
+/// <param name="FlightSpeed">How fast the round travels. Zero means it arrives in the same tick.</param>
+/// <param name="Range">How far the round reaches. Zero when the range stays on the weapon.</param>
 public sealed record ShipAmmunitionDto(
     int Id,
     decimal Damage,
     string? DamageKind,
-    decimal LauncherSize);
+    decimal LauncherSize,
+    decimal FlightSpeed = 0m,
+    decimal Range = 0m);
 
 /// <summary>
 /// A group of the modules of the catalog: the type of a module, with the name of the group and

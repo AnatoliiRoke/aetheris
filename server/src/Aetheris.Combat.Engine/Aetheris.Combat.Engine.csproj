@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Aetheris.Combat.Engine</RootNamespace>
+  </PropertyGroup>
+
+</Project>

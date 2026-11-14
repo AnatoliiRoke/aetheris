@@ -187,3 +187,32 @@ public sealed class PartFuelEntity
     /// </summary>
     public double Share { get; set; }
 }
+
+/// <summary>
+/// The accuracy of a weapon against one group of hulls (task 00062).
+/// </summary>
+/// <remarks>
+/// <para>
+/// The rows are data, so a new weapon names its accuracy against each class of hull without a
+/// change of the code. A class of hull is a group whose <see cref="PartGroupEntity.IsHullGroup"/>
+/// is set. A database constraint cannot read that flag from another table, so the seed and the
+/// admin panel refuse a group that is not a group of hulls.
+/// </para>
+/// <para>
+/// Both sides live in this module, so the table carries foreign keys to the part and to the group.
+/// </para>
+/// </remarks>
+public sealed class PartAccuracyEntity
+{
+    /// <summary>Gets or sets the weapon the accuracy belongs to. Part of the primary key.</summary>
+    public int PartTypeId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the group of hulls the accuracy is against. Part of the primary key, so a
+    /// weapon names a group only once.
+    /// </summary>
+    public int TargetPartGroupId { get; set; }
+
+    /// <summary>Gets or sets the accuracy, from zero to one.</summary>
+    public double Value { get; set; }
+}

@@ -79,6 +79,12 @@ public sealed class ShipDesignSlotEntity
 
     /// <summary>Gets or sets whether the part in the slot carries the bonus of the race that made it.</summary>
     public bool HasRaceBonus { get; set; }
+
+    /// <summary>
+    /// Gets or sets the shutdown order of the slot (task 00062). A smaller number turns off later.
+    /// A saved project sets the number. The database default covers a row written without the column.
+    /// </summary>
+    public short PowerPriority { get; set; }
 }
 
 /// <summary>

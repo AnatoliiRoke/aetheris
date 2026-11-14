@@ -7,11 +7,13 @@ namespace Aetheris.Fleet.Api;
 /// <param name="PartTypeId">The part in the slot.</param>
 /// <param name="MarkLevel">The mark of the part in the slot.</param>
 /// <param name="HasRaceBonus">Whether the part in the slot carries the bonus of the race that made it.</param>
+/// <param name="PowerPriority">The shutdown order of the slot. A smaller number turns off later. <see langword="null"/> uses the order of the group of the module.</param>
 public sealed record ShipDesignSlotInput(
     int SlotIndex,
     int PartTypeId,
     int MarkLevel,
-    bool HasRaceBonus);
+    bool HasRaceBonus,
+    int? PowerPriority = null);
 
 /// <summary>
 /// A project of a ship as the builder shows it (task 00038, section 3.3).
@@ -82,11 +84,13 @@ public static class ShipDesignWarningCodes
 /// <param name="PartTypeId">The part in the slot.</param>
 /// <param name="MarkLevel">The mark of the part in the slot.</param>
 /// <param name="HasRaceBonus">Whether the part in the slot carries the bonus of the race that made it.</param>
+/// <param name="PowerPriority">The shutdown order of the slot. A smaller number turns off later.</param>
 public sealed record ShipDesignSlotDto(
     int SlotIndex,
     int PartTypeId,
     int MarkLevel,
-    bool HasRaceBonus);
+    bool HasRaceBonus,
+    short PowerPriority);
 
 /// <summary>
 /// What a project of a ship gives (task 00038, section 3.3).
@@ -184,6 +188,9 @@ public sealed record ShipCatalogViewDto(
 /// <param name="Weight">The weight of the hull in tonnes.</param>
 /// <param name="RaceBonusSlots">How many extra slots the race gives the hull.</param>
 /// <param name="Crew">How many people the hull needs. The starting data sets this to the number of slots.</param>
+/// <param name="Signature">How visible the hull is (task 00062).</param>
+/// <param name="LeashRadius">How far the drones of the hull may fly, in field units. Zero when the hull launches none.</param>
+/// <param name="PartGroupId">The group of the hull.</param>
 public sealed record ShipHullViewDto(
     int Id,
     string Code,
@@ -198,7 +205,10 @@ public sealed record ShipHullViewDto(
     decimal Integrity,
     decimal Weight,
     int RaceBonusSlots,
-    decimal Crew);
+    decimal Crew,
+    decimal Signature = 0m,
+    decimal LeashRadius = 0m,
+    int PartGroupId = 0);
 
 /// <summary>
 /// A module of the catalog of the ships for the builder (task 00038, section 3.3).
@@ -236,6 +246,10 @@ public sealed record ShipHullViewDto(
 /// <param name="FlightOrder">The flight plan order opened by the module, if any.</param>
 /// <param name="ScanTarget">The kind of target detected by the module, if any.</param>
 /// <param name="EngineKind">The class of a drive (task 00072): <c>normal</c>, <c>gravity</c>, <c>hyper</c> or <c>jump</c>; absent for a module that is not a drive.</param>
+/// <param name="Accuracy">The accuracy of a weapon against each group of hulls (task 00062).</param>
+/// <param name="Integrity">How much integrity the module has. The armor bonus stays in <see cref="ShipModuleViewDto.Armor"/>.</param>
+/// <param name="SignatureCut">The share of the hull signature the module removes.</param>
+/// <param name="DefaultPowerPriority">The shutdown order a new slot of the module starts with. A smaller number turns off later.</param>
 public sealed record ShipModuleViewDto(
     int Id,
     string Code,
@@ -270,7 +284,11 @@ public sealed record ShipModuleViewDto(
     IReadOnlyList<string> ExtractionPlaceKinds,
     string? FlightOrder = null,
     string? ScanTarget = null,
-    string? EngineKind = null);
+    string? EngineKind = null,
+    IReadOnlyDictionary<int, double>? Accuracy = null,
+    decimal Integrity = 0m,
+    decimal SignatureCut = 0m,
+    short? DefaultPowerPriority = null);
 
 /// <summary>
 /// One characteristic of a module that the plaque of a project adds up.

@@ -84,6 +84,16 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
 
     private const string ExtractionReducesMassField = "reduces_mass";
 
+    /// <summary>The shutdown order a new slot of the group starts with (task 00062).</summary>
+    private const string PowerPriorityField = "default_power_priority";
+
+    /// <summary>The accuracy of a weapon against the groups of hulls (task 00062).</summary>
+    private const string AccuracyField = "accuracy";
+
+    private const string AccuracyTargetField = "target_part_group_id";
+
+    private const string AccuracyValueField = "value";
+
     private const string FactoryField = "building_type_id";
 
     private const string PartField = "part_type_id";
@@ -229,6 +239,13 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                 InList: true,
                 ReferenceKind: PartGroupKind),
             new(SortOrderField, AdminReferenceFieldTypes.Number, LabelPrefix + "field.sort_order", IsRequired: true, InList: true, Minimum: 0),
+            new(
+                PowerPriorityField,
+                AdminReferenceFieldTypes.Number,
+                LabelPrefix + "field.default_power_priority",
+                InList: true,
+                Minimum: PartPowerPriority.LowerBound,
+                Maximum: PartPowerPriority.UpperBound),
         ]);
 
     /// <summary>
@@ -359,6 +376,27 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                         AdminReferenceFieldTypes.Flag,
                         LabelPrefix + "field.extraction_reduces_mass"),
                 ]),
+            new(
+                AccuracyField,
+                AdminReferenceFieldTypes.Effects,
+                LabelPrefix + "field.accuracy",
+                Fields:
+                [
+                    new(
+                        AccuracyTargetField,
+                        AdminReferenceFieldTypes.Reference,
+                        LabelPrefix + "field.accuracy_target",
+                        IsRequired: true,
+                        ReferenceKind: PartGroupKind),
+                    new(
+                        AccuracyValueField,
+                        AdminReferenceFieldTypes.Number,
+                        LabelPrefix + "field.accuracy_value",
+                        IsRequired: true,
+                        Minimum: 0,
+                        Maximum: 1,
+                        IsDecimal: true),
+                ]),
         ]);
 
     /// <summary>
@@ -448,6 +486,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             {
                                 [ParentGroupField] = group.ParentGroupId,
                                 [SortOrderField] = group.SortOrder,
+                                [PowerPriorityField] = group.DefaultPowerPriority,
                             })),
                 ],
                 query,
@@ -536,6 +575,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             [AdminReferenceRules.DescriptionField] = AdminReferenceRules.TextsOf(packs, group.DescriptionKey),
                             [ParentGroupField] = group.ParentGroupId,
                             [SortOrderField] = group.SortOrder,
+                            [PowerPriorityField] = group.DefaultPowerPriority,
                         });
                 }
 
@@ -546,6 +586,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                         .Include(entry => entry.HullCompatibilityIds)
                         .Include(entry => entry.RaceCompatibilityIds)
                         .Include(entry => entry.ExtractionIds)
+                        .Include(entry => entry.AccuracyIds)
                         .SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false);
 
                     if (part is null)
@@ -574,6 +615,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                             [CompatibleHullsField] = HullsOf(part),
                             [RacesField] = RacesOf(part),
                             [ExtractionField] = ExtractionOf(part),
+                            [AccuracyField] = AccuracyOf(part),
                         });
                 }
 
@@ -765,6 +807,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                                 [AdminReferenceRules.ImageField] = group.ImageKey,
                                 [ParentGroupField] = group.ParentGroupId,
                                 [SortOrderField] = group.SortOrder,
+                                [PowerPriorityField] = group.DefaultPowerPriority,
                             };
 
                             Apply(group, values);
@@ -803,6 +846,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
                                 [WeightField] = part.Weight,
                                 [AttributesField] = AttributesOf(part),
                                 [ExtractionField] = ExtractionOf(part),
+                                [AccuracyField] = AccuracyOf(part),
                             };
 
                             Apply(part, values);
@@ -981,6 +1025,11 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             AdminReferenceRules.Fail(failures, SortOrderField, values.SortOrder is null ? AdminReferenceErrors.Required : AdminReferenceErrors.OutOfBounds);
         }
 
+        if (values.DefaultPowerPriority is < PartPowerPriority.LowerBound or > PartPowerPriority.UpperBound)
+        {
+            AdminReferenceRules.Fail(failures, PowerPriorityField, AdminReferenceErrors.OutOfBounds);
+        }
+
         if (values.ParentGroupId is { } parentId)
         {
             await CheckParentAsync(failures, parentId, stored, cancellationToken).ConfigureAwait(false);
@@ -1109,6 +1158,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
 
         await CheckCompatibilityAsync(failures, values, cancellationToken).ConfigureAwait(false);
         await CheckExtractionAsync(failures, values, stored, cancellationToken).ConfigureAwait(false);
+        await CheckAccuracyAsync(failures, values, cancellationToken).ConfigureAwait(false);
 
         AdminReferenceRules.ThrowIfInvalid(failures);
     }
@@ -1494,6 +1544,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         group.ParentGroupId = values.ParentGroupId;
         group.SortOrder = values.SortOrder ?? 0;
         group.ImageKey = AdminReferenceRules.ImageKey(values.ImageKey);
+        group.DefaultPowerPriority = values.DefaultPowerPriority;
     }
 
     private static void Apply(PartTypeEntity part, PartValues values)
@@ -1576,6 +1627,33 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             }
         }
 
+        // The accuracy of a weapon is written the same way: a row that is not sent is gone, and a
+        // row that is sent keeps its identity and takes the number of the form (task 00062).
+        part.AccuracyIds.RemoveAll(row => !(values.Accuracy ?? []).Any(sent => sent.TargetPartGroupId == row.TargetPartGroupId));
+
+        foreach (AccuracyValues sent in values.Accuracy ?? [])
+        {
+            if (sent.TargetPartGroupId is not int targetGroupId || sent.Value is not double accuracy)
+            {
+                continue;
+            }
+
+            PartAccuracyEntity? kept = part.AccuracyIds.Find(row => row.TargetPartGroupId == targetGroupId);
+
+            if (kept is null)
+            {
+                part.AccuracyIds.Add(new PartAccuracyEntity
+                {
+                    TargetPartGroupId = targetGroupId,
+                    Value = accuracy,
+                });
+            }
+            else
+            {
+                kept.Value = accuracy;
+            }
+        }
+
         part.RaceCompatibilityIds.RemoveAll(link => !(values.Races ?? []).Any(sent => sent.RaceId == link.RaceId));
 
         foreach (RaceValues sent in values.Races ?? [])
@@ -1654,6 +1732,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             .Include(entry => entry.HullCompatibilityIds)
             .Include(entry => entry.RaceCompatibilityIds)
             .Include(entry => entry.ExtractionIds)
+            .Include(entry => entry.AccuracyIds)
             .SingleOrDefaultAsync(entry => entry.Id == id, cancellationToken).ConfigureAwait(false)
             ?? throw new AdminReferenceException(GameErrorCodes.NotFound);
     }
@@ -1719,6 +1798,70 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         && sent.ResourceId == row.ResourceId
         && sent.ResourceGroupId == row.ResourceGroupId;
 
+    /// <summary>
+    /// Checks the accuracy of a weapon (task 00062): the target is a group of hulls, the number
+    /// lies from zero to one, and a group is named only once.
+    /// </summary>
+    private async Task CheckAccuracyAsync(
+        Dictionary<string, List<string>> failures,
+        PartValues values,
+        CancellationToken cancellationToken)
+    {
+        if (values.Accuracy is not { Count: > 0 } rows)
+        {
+            return;
+        }
+
+        HashSet<int> hullGroupIds = await _dbContext.PartGroups.AsNoTracking()
+            .Where(group => group.IsHullGroup)
+            .Select(group => group.Id)
+            .ToHashSetAsync(cancellationToken)
+            .ConfigureAwait(false);
+        HashSet<int> seen = [];
+        int index = 0;
+
+        foreach (AccuracyValues row in rows)
+        {
+            string targetPath = AdminReferenceRules.PathOf(AccuracyField, index, AccuracyTargetField);
+            string valuePath = AdminReferenceRules.PathOf(AccuracyField, index, AccuracyValueField);
+
+            if (row.TargetPartGroupId is not int targetGroupId)
+            {
+                AdminReferenceRules.Fail(failures, targetPath, AdminReferenceErrors.Required);
+            }
+            else if (!seen.Add(targetGroupId))
+            {
+                AdminReferenceRules.Fail(failures, targetPath, AdminReferenceErrors.Duplicate);
+            }
+            else if (!hullGroupIds.Contains(targetGroupId))
+            {
+                AdminReferenceRules.Fail(failures, targetPath, PartAccuracyRules.NotHullGroup);
+            }
+
+            if (row.Value is not double accuracy)
+            {
+                AdminReferenceRules.Fail(failures, valuePath, AdminReferenceErrors.Required);
+            }
+            else if (PartAccuracyRules.Problem(accuracy, true) == AdminReferenceErrors.OutOfBounds)
+            {
+                AdminReferenceRules.Fail(failures, valuePath, AdminReferenceErrors.OutOfBounds);
+            }
+
+            index++;
+        }
+    }
+
+    private static List<object?> AccuracyOf(PartTypeEntity part) =>
+    [
+        .. part.AccuracyIds
+            .OrderBy(row => row.TargetPartGroupId)
+            .Select(row => (object?)new Dictionary<string, object?>
+            {
+                [AccuracyTargetField] = row.TargetPartGroupId,
+                [AccuracyValueField] = row.Value,
+            }),
+    ];
+
     private static List<object?> ExtractionOf(PartTypeEntity part) =>
     [
         .. part.ExtractionIds
@@ -1772,7 +1915,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         Dictionary<string, string>? Description,
         int? SortOrder,
         string? ImageKey,
-        int? ParentGroupId = null)
+        int? ParentGroupId = null,
+        short? DefaultPowerPriority = null)
     {
         public GroupValues Trimmed(ILocalizationTexts texts) => this with
         {
@@ -1787,6 +1931,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             [AdminReferenceRules.DescriptionField] = Description,
             [ParentGroupField] = ParentGroupId,
             [SortOrderField] = SortOrder,
+            [PowerPriorityField] = DefaultPowerPriority,
         };
     }
 
@@ -1803,7 +1948,8 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
         List<HullValues>? CompatibleHulls = null,
         List<RaceValues>? Races = null,
         decimal? Weight = null,
-        List<ExtractionValues>? Extraction = null)
+        List<ExtractionValues>? Extraction = null,
+        List<AccuracyValues>? Accuracy = null)
     {
         public PartValues Trimmed(ILocalizationTexts texts) => this with
         {
@@ -1824,6 +1970,7 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
             [CompatibleHullsField] = CompatibleHulls,
             [RacesField] = Races,
             [ExtractionField] = Extraction,
+            [AccuracyField] = Accuracy,
         };
     }
 
@@ -1848,6 +1995,11 @@ public sealed class ProductionReferenceAdminService : IAdminReferenceService
     /// <param name="ResourceGroupId">The group of the resources, for the way «group evenly».</param>
     /// <param name="ReducesMass">Whether the module takes the mass it processes from the place.</param>
     private sealed record ExtractionValues(string? PlaceKind, string? Mode, int? ResourceId, int? ResourceGroupId, bool? ReducesMass);
+
+    /// <summary>One accuracy of a weapon against one group of hulls.</summary>
+    /// <param name="TargetPartGroupId">The group of hulls.</param>
+    /// <param name="Value">The accuracy, from zero to one.</param>
+    private sealed record AccuracyValues(int? TargetPartGroupId, double? Value);
 
     private sealed record RecipeValues(
         Dictionary<string, string>? Name,

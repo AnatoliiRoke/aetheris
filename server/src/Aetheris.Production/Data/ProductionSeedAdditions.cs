@@ -126,6 +126,11 @@ public static class ProductionSeedAdditions
         // The fuel of the drives joined the starting data later as well (task 00072).
         added |= await AddMissingFuelsAsync(dbContext, data, resources, partIds, cancellationToken).ConfigureAwait(false);
 
+        // The accuracy of the weapons and the shutdown order of the groups joined later (task 00062).
+        // A priority an administrator has already set stays: only a group that still has none is filled.
+        added |= await AddMissingAccuraciesAsync(dbContext, data, partIds, groupIds, cancellationToken).ConfigureAwait(false);
+        added |= await FillMissingPowerPrioritiesAsync(dbContext, data, groupIds, cancellationToken).ConfigureAwait(false);
+
         if (missingParts.Count == 0 && missingRecipes.Count == 0 && !missingLinks)
         {
             return added;
@@ -993,6 +998,128 @@ public static class ProductionSeedAdditions
 
         return added;
     }
+
+    /// <summary>
+    /// Adds the accuracy of the weapons that joined the starting data later (task 00062).
+    /// </summary>
+    /// <remarks>
+    /// A row that is already there stays, so a change of the admin panel survives the update of
+    /// the starting data. A target that is not a group of hulls is refused by the load of the file.
+    /// </remarks>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="seed">The starting data.</param>
+    /// <param name="partIds">The identifiers of the parts, by their code.</param>
+    /// <param name="groupIds">The identifiers of the groups, by their code.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>Whether a row was added.</returns>
+    private static async Task<bool> AddMissingAccuraciesAsync(
+        ProductionDbContext dbContext,
+        ProductionSeedData seed,
+        IReadOnlyDictionary<string, int> partIds,
+        IReadOnlyDictionary<string, int> groupIds,
+        CancellationToken cancellationToken)
+    {
+        if (seed.PartAccuracies is not { Count: > 0 } wanted)
+        {
+            return false;
+        }
+
+        HashSet<(int PartTypeId, int TargetPartGroupId)> existing =
+        [
+            .. (await dbContext.PartAccuracies.AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false))
+                .Select(row => (row.PartTypeId, row.TargetPartGroupId)),
+        ];
+
+        bool added = false;
+
+        foreach (SeedPartAccuracy row in wanted)
+        {
+            if (!partIds.TryGetValue(row.Part, out int partId) || !groupIds.TryGetValue(row.TargetGroup, out int groupId))
+            {
+                continue;
+            }
+
+            if (!existing.Add((partId, groupId)))
+            {
+                continue;
+            }
+
+            dbContext.PartAccuracies.Add(new PartAccuracyEntity
+            {
+                PartTypeId = partId,
+                TargetPartGroupId = groupId,
+                Value = row.Value,
+            });
+            added = true;
+        }
+
+        if (added)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return added;
+    }
+
+    /// <summary>
+    /// Fills the shutdown order of a group that still has none (task 00062).
+    /// </summary>
+    /// <remarks>
+    /// The column starts empty. A later start writes the starting order only while it is empty,
+    /// so an order an administrator has set is kept.
+    /// </remarks>
+    /// <param name="dbContext">The context of the module.</param>
+    /// <param name="seed">The starting data.</param>
+    /// <param name="groupIds">The identifiers of the groups, by their code.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>Whether an order was filled.</returns>
+    private static async Task<bool> FillMissingPowerPrioritiesAsync(
+        ProductionDbContext dbContext,
+        ProductionSeedData seed,
+        IReadOnlyDictionary<string, int> groupIds,
+        CancellationToken cancellationToken)
+    {
+        List<int> ids = [.. groupIds.Values];
+
+        if (ids.Count == 0)
+        {
+            return false;
+        }
+
+        List<PartGroupEntity> rows = await dbContext.PartGroups
+            .Where(group => ids.Contains(group.Id) && group.DefaultPowerPriority == null)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (rows.Count == 0)
+        {
+            return false;
+        }
+
+        Dictionary<int, PartGroupEntity> byId = rows.ToDictionary(row => row.Id);
+        bool filled = false;
+
+        foreach (SeedPartGroup group in seed.PartGroups)
+        {
+            if (group.DefaultPowerPriority is not short priority
+                || !groupIds.TryGetValue(group.Code, out int groupId)
+                || !byId.TryGetValue(groupId, out PartGroupEntity? row))
+            {
+                continue;
+            }
+
+            row.DefaultPowerPriority = priority;
+            filled = true;
+        }
+
+        if (filled)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return filled;
+    }
+
     private static async Task<Dictionary<string, int>> IdsAsync(
         IQueryable<CodeId> rows,
         List<string> wanted,

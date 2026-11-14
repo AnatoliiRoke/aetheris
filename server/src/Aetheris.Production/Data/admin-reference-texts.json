@@ -387,6 +387,22 @@
     "uk": "Видобування",
     "en": "Extraction"
   },
+  "admin.reference.field.default_power_priority": {
+    "uk": "Порядок вимкнення",
+    "en": "Shutdown order"
+  },
+  "admin.reference.field.accuracy": {
+    "uk": "Влучність",
+    "en": "Accuracy"
+  },
+  "admin.reference.field.accuracy_target": {
+    "uk": "Клас цілі",
+    "en": "Target class"
+  },
+  "admin.reference.field.accuracy_value": {
+    "uk": "Влучність",
+    "en": "Accuracy"
+  },
   "admin.reference.field.extraction_place_kind": {
     "uk": "Вид місця",
     "en": "Kind of place"

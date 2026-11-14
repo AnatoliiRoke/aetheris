@@ -16,6 +16,8 @@ export interface ShipHull {
   descriptionKey: string;
   imageKey: string | null;
   partGroupCode: string;
+  /** The group of the hull. */
+  partGroupId?: number;
   /** The localisation key of the name of the group of the hull: the class of the hull. */
   partGroupNameKey: string;
   /** The role of the hull: what it carries. */
@@ -32,6 +34,10 @@ export interface ShipHull {
   raceBonusSlots: number;
   /** How many people the hull needs. The seed sets this to the number of slots. */
   crew: number;
+  /** How visible the hull is. A smaller number is harder to detect. */
+  signature?: number;
+  /** How far a drone may fly from this hull, in field units. Zero when the hull launches none. */
+  leashRadius?: number;
 }
 
 /**
@@ -119,6 +125,14 @@ export interface ShipModule {
   flightOrder?: string | null;
   /** The class of a drive (task 00072): `normal`, `gravity`, `hyper` or `jump`; absent for a module that is not a drive. */
   engineKind?: string | null;
+  /** Accuracy of a weapon against a target group, keyed by the group id. Absent when the module is not a weapon. */
+  accuracy?: Record<string, number> | null;
+  /** How much damage the module itself can take. */
+  integrity?: number;
+  /** The share of the hull signature a camouflage module removes, from 0 to 1. */
+  signatureCut?: number;
+  /** The shutdown order of the group. A smaller number turns off later. Absent when the group has none. */
+  defaultPowerPriority?: number | null;
   /** The type of target detected by a scanner. */
   scanTarget?: string | null;
   /** The characteristics the plaque adds up. */
@@ -190,6 +204,8 @@ export interface ShipDesignSlot {
   partTypeId: number;
   markLevel: number;
   hasRaceBonus: boolean;
+  /** The shutdown order of the slot. A smaller number turns off later. */
+  powerPriority?: number | null;
 }
 
 /**
@@ -268,6 +284,8 @@ export interface ShipDesignSlotInput {
   partTypeId: number;
   markLevel: number;
   hasRaceBonus: boolean;
+  /** The shutdown order of the slot. `null` asks the server for the order of the group. */
+  powerPriority?: number | null;
 }
 
 /**
@@ -958,6 +976,7 @@ export function createFleetApi(http: HttpClient): FleetApi {
             part_type_id: slot.partTypeId,
             mark_level: slot.markLevel,
             has_race_bonus: slot.hasRaceBonus,
+            power_priority: slot.powerPriority ?? null,
           })),
         }),
       );

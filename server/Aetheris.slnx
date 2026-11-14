@@ -2,6 +2,8 @@
   <Folder Name="/src/">
     <Project Path="src/Aetheris.Admin/Aetheris.Admin.csproj" />
     <Project Path="src/Aetheris.Chat/Aetheris.Chat.csproj" />
+    <Project Path="src/Aetheris.Combat/Aetheris.Combat.csproj" />
+    <Project Path="src/Aetheris.Combat.Engine/Aetheris.Combat.Engine.csproj" />
     <Project Path="src/Aetheris.Core/Aetheris.Core.csproj" />
     <Project Path="src/Aetheris.Economy/Aetheris.Economy.csproj" />
     <Project Path="src/Aetheris.Fleet/Aetheris.Fleet.csproj" />
@@ -18,6 +20,9 @@
   <Folder Name="/tests/">
     <Project Path="tests/Aetheris.Tests/Aetheris.Tests.csproj" />
     <Project Path="tests/Aetheris.Analyzers.Tests/Aetheris.Analyzers.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Aetheris.CombatSim/Aetheris.CombatSim.csproj" />
   </Folder>
   <Folder Name="/analyzers/">
     <Project Path="analyzers/Aetheris.Analyzers/Aetheris.Analyzers.csproj" />

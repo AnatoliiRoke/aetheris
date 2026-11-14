@@ -17,6 +17,7 @@
     { "code": "admin.world_systems_read", "kind": "screen" },
     { "code": "admin.world_objects_read", "kind": "screen" },
     { "code": "admin.world_fields_read", "kind": "screen" },
+    { "code": "admin.world_nebulae_read", "kind": "screen" },
     { "code": "admin.world_sector_stats", "kind": "screen" },
     { "code": "admin.world_sector_added", "kind": "action" },
     { "code": "admin.world_sector_regenerated", "kind": "action" },

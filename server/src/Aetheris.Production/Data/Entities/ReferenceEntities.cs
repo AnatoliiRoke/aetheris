@@ -46,6 +46,13 @@ public sealed class PartGroupEntity
     /// </summary>
     public int? ParentGroupId { get; set; }
 
+    /// <summary>
+    /// Gets or sets the shutdown order a new slot of this group starts with (task 00062).
+    /// A smaller number turns off later. <see langword="null"/> until the starting data or an
+    /// administrator sets it, so a later start does not overwrite a choice.
+    /// </summary>
+    public short? DefaultPowerPriority { get; set; }
+
     /// <summary>Gets or sets whether the group is archived (task 00023, decision 5).</summary>
     public bool IsArchived { get; set; }
 
@@ -115,6 +122,9 @@ public sealed class PartTypeEntity
 
     /// <summary>Gets or sets the fuel of the part, when it is a drive (task 00072).</summary>
     public List<PartFuelEntity> FuelIds { get; set; } = [];
+
+    /// <summary>Gets or sets the accuracy of the part against each hull group, when it is a weapon (task 00062).</summary>
+    public List<PartAccuracyEntity> AccuracyIds { get; set; } = [];
 }
 
 /// <summary>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from '../../router/Router';
 import { useRouter } from '../../router/useRouter';
 import type { Row, Share } from '../adminApi';
+import { AdminDialog } from '../AdminDialog';
 import { adminRoutes } from '../adminRoutes';
 import { DataTable, type Column, type Filter } from '../DataTable';
 import { WorldName } from '../EditParts';
@@ -124,6 +125,7 @@ export function SectorsScreen() {
           <Link to={`${adminRoutes.systems}?sector_id=${String(row['id'])}`}>{t('admin.nav.systems')}</Link>
           <Link to={`${adminRoutes.objects}?sector_id=${String(row['id'])}`}>{t('admin.nav.objects')}</Link>
           <Link to={`${adminRoutes.fields}?sector_id=${String(row['id'])}`}>{t('admin.nav.fields')}</Link>
+          <Link to={`${adminRoutes.nebulae}?sector_id=${String(row['id'])}`}>{t('admin.nav.nebulae')}</Link>
         </span>
       ),
     },
@@ -329,5 +331,106 @@ export function FieldsScreen() {
       />
       {card.openId !== null ? <FieldCardDialog fieldId={card.openId} reference={reference} onClose={card.close} onSaved={card.changed} /> : null}
     </>
+  );
+}
+
+/**
+ * The placed nebulae with their radius, jump ban and composition.
+ */
+export function NebulaeScreen() {
+  const { t, language } = useAdminText();
+  const name = useWorldName();
+  const yesNo = useYesNo();
+  const reference = useReference();
+  const initialFilters = useQueryFilters(['sector_id']);
+  const [openRow, setOpenRow] = useState<Row | null>(null);
+
+  const columns: Column<Row>[] = [
+    { key: 'id', label: 'admin.col.id', sort: 'id' },
+    { key: 'name', label: 'admin.col.name', sort: 'name' },
+    {
+      key: 'object_type_code',
+      label: 'admin.col.type',
+      render: (row) => <WorldName nameKey={row['object_type_name_key'] as string} code={row['object_type_code'] as string} />,
+    },
+    { key: 'sector_id', label: 'admin.col.sectorId' },
+    ...coordinateColumns(language),
+    {
+      key: 'radius',
+      label: 'admin.col.radius',
+      sort: 'radius',
+      render: (row) => formatNumber(Number(row['radius']), language, 2),
+    },
+    {
+      key: 'blocks_jump_drive',
+      label: 'admin.col.blocksJump',
+      render: (row) => (row['blocks_jump_drive'] === true ? t('admin.table.yes') : t('admin.table.no')),
+    },
+    { key: 'composition_ids', label: 'admin.col.composition', render: (row) => <Shares shares={row['composition_ids'] as Share[]} percent /> },
+  ];
+
+  const filters: Filter[] = [
+    { name: 'sector_id', label: 'admin.col.sectorId' },
+    {
+      name: 'object_type_id',
+      label: 'admin.col.type',
+      options: (reference?.object_types ?? [])
+        .filter((type) => type.group_code === 'nebula')
+        .map((type) => ({ value: String(type.id), label: name(type.name_key, type.code) })),
+    },
+    { name: 'blocks_jump_drive', label: 'admin.col.blocksJump', options: yesNo },
+  ];
+
+  return (
+    <>
+      <ScreenTitle title="admin.nebulae.title" lead="admin.nebulae.lead" />
+      <DataTable
+        key={JSON.stringify(initialFilters)}
+        table="nebulae"
+        caption="admin.nebulae.title"
+        columns={columns}
+        filters={filters}
+        initialFilters={initialFilters}
+        onRowClick={setOpenRow}
+        rowLabel={(row) => t('admin.card.open', { name: String(row['name']) })}
+      />
+      {openRow !== null ? <NebulaCardDialog row={openRow} onClose={() => setOpenRow(null)} /> : null}
+    </>
+  );
+}
+
+/**
+ * The characteristics of one placed nebula. Nothing here is edited.
+ */
+function NebulaCardDialog({ row, onClose }: { row: Row; onClose: () => void }) {
+  const { t, language } = useAdminText();
+  const coordinates = [row['x'], row['y'], row['z']].map((coordinate) => formatNumber(Number(coordinate), language, 2)).join('; ');
+
+  return (
+    <AdminDialog title={t('admin.card.nebulaTitle', { name: String(row['name']) })} onClose={onClose}>
+      <div className="admin-card">
+        <dl className="admin-card__facts">
+          <dt>{t('admin.col.id')}</dt>
+          <dd>{String(row['id'])}</dd>
+          <dt>{t('admin.col.type')}</dt>
+          <dd>
+            <WorldName nameKey={row['object_type_name_key'] as string} code={row['object_type_code'] as string} />
+          </dd>
+          <dt>{t('admin.col.sector')}</dt>
+          <dd>{String(row['sector_id'])}</dd>
+          <dt>{t('admin.card.coordinates')}</dt>
+          <dd>{coordinates}</dd>
+          <dt>{t('admin.col.radius')}</dt>
+          <dd>{formatNumber(Number(row['radius']), language, 2)}</dd>
+          <dt>{t('admin.col.blocksJump')}</dt>
+          <dd>{row['blocks_jump_drive'] === true ? t('admin.table.yes') : t('admin.table.no')}</dd>
+          <dt>{t('admin.col.composition')}</dt>
+          <dd>
+            <Shares shares={row['composition_ids'] as Share[]} percent />
+          </dd>
+        </dl>
+        <p className="hint">{t('admin.nebulae.endless')}</p>
+      </div>
+    </AdminDialog>
   );
 }

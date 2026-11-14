@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Aetheris.World.Services;
 
 /// <summary>
-/// The tables of the generated world for the admin panel: sectors, star systems, bodies and
-/// asteroid fields with their composition (task 00007, decision 2).
+/// The tables of the generated world for the admin panel: sectors, star systems, bodies,
+/// asteroid fields and nebulae with their composition (task 00007, decision 2).
 /// </summary>
 /// <remarks>
 /// Every table is filtered, searched, sorted and paged in the database. The sort column is
@@ -40,6 +40,9 @@ public sealed class WorldAdminQueryService
 
     /// <summary>The sort column of the mass of a field.</summary>
     public const string SortByMass = "mass";
+
+    /// <summary>The sort column of the radius of a nebula.</summary>
+    public const string SortByRadius = "radius";
 
     /// <summary>The sort column of the class of an object type.</summary>
     public const string SortByClass = "object_class";
@@ -450,6 +453,96 @@ public sealed class WorldAdminQueryService
     }
 
     /// <summary>
+    /// Lists the placed nebulae with their composition.
+    /// </summary>
+    /// <param name="page">The page; the search text finds a name or an identifier.</param>
+    /// <param name="filter">The filters.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The page.</returns>
+    public async Task<PageResult<AdminNebulaRow>> GetNebulaeAsync(PageRequest page, AdminNebulaFilter filter, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(page);
+        ArgumentNullException.ThrowIfNull(filter);
+
+        var nebulae = _dbContext.Nebulae.AsNoTracking()
+            .Join(_dbContext.Objects, nebula => nebula.CelestialObjectId, celestial => celestial.Id, (nebula, celestial) => new { Nebula = nebula, Celestial = celestial })
+            .Join(_dbContext.ObjectTypes, pair => pair.Celestial.ObjectTypeId, type => type.Id, (pair, type) => new { pair.Nebula, pair.Celestial, Type = type });
+
+        if (filter.SectorId is not null)
+        {
+            nebulae = nebulae.Where(entry => entry.Nebula.SectorId == filter.SectorId.Value);
+        }
+
+        if (filter.ObjectTypeId is not null)
+        {
+            nebulae = nebulae.Where(entry => entry.Type.Id == filter.ObjectTypeId.Value);
+        }
+
+        if (filter.BlocksJumpDrive is not null)
+        {
+            nebulae = nebulae.Where(entry => entry.Nebula.BlocksJumpDrive == filter.BlocksJumpDrive.Value);
+        }
+
+        if (page.Search is { } search)
+        {
+            long? number = AdminPaging.AsNumber(search);
+            string pattern = AdminPaging.ContainsPattern(search);
+
+            nebulae = number is null
+                ? nebulae.Where(entry => EF.Functions.ILike(entry.Celestial.Name, pattern, AdminPaging.LikeEscape))
+                : nebulae.Where(entry => entry.Nebula.Id == number);
+        }
+
+        var projected = nebulae.Select(entry => new
+        {
+            entry.Nebula.Id,
+            CelestialObjectId = entry.Celestial.Id,
+            entry.Celestial.Name,
+            ObjectTypeId = entry.Type.Id,
+            ObjectTypeCode = entry.Type.Code,
+            ObjectTypeNameKey = entry.Type.NameKey,
+            entry.Nebula.SectorId,
+            entry.Celestial.X,
+            entry.Celestial.Y,
+            entry.Celestial.Z,
+            entry.Nebula.Radius,
+            entry.Nebula.BlocksJumpDrive,
+        });
+
+        projected = page.Sort switch
+        {
+            SortByName => Order(projected, row => row.Name, page.Descending),
+            SortByRadius => Order(projected, row => row.Radius, page.Descending),
+            _ => Order(projected, row => row.Id, page.Descending),
+        };
+
+        int total = await projected.CountAsync(cancellationToken).ConfigureAwait(false);
+        var pageRows = await projected.Skip(page.Skip).Take(page.PageSize).ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        List<long> nebulaIds = [.. pageRows.Select(row => row.Id)];
+        ILookup<long, AdminShareDto> compositions = await NebulaSharesAsync(nebulaIds, cancellationToken).ConfigureAwait(false);
+
+        return new PageResult<AdminNebulaRow>(
+            [.. pageRows.Select(row => new AdminNebulaRow(
+                row.Id,
+                row.CelestialObjectId,
+                row.Name,
+                row.ObjectTypeId,
+                row.ObjectTypeCode,
+                row.ObjectTypeNameKey,
+                row.SectorId,
+                row.X,
+                row.Y,
+                row.Z,
+                row.Radius,
+                row.BlocksJumpDrive,
+                [.. compositions[row.Id].OrderByDescending(share => share.Coefficient)]))],
+            total,
+            page.Page,
+            page.PageSize);
+    }
+
+    /// <summary>
     /// Lists the object types of the reference table (task 00009, decision 7).
     /// </summary>
     /// <param name="page">The page; the search text finds a code or an identifier.</param>
@@ -658,6 +751,23 @@ public sealed class WorldAdminQueryService
             })
             .ToListAsync(cancellationToken).ConfigureAwait(false))
             .ToLookup(entry => entry.AsteroidFieldId, entry => entry.Share);
+
+    /// <summary>
+    /// Reads the compositions of nebulae in one query.
+    /// </summary>
+    /// <param name="nebulaIds">The nebulae.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The shares by nebula.</returns>
+    private async Task<ILookup<long, AdminShareDto>> NebulaSharesAsync(IReadOnlyCollection<long> nebulaIds, CancellationToken cancellationToken) =>
+        (await _dbContext.NebulaCompositions.AsNoTracking()
+            .Where(share => nebulaIds.Contains(share.NebulaId))
+            .Join(_dbContext.ResourceTypes, share => share.ResourceId, resource => resource.Id, (share, resource) => new
+            {
+                share.NebulaId,
+                Share = new AdminShareDto(resource.Id, resource.Code, resource.NameKey, share.Coefficient),
+            })
+            .ToListAsync(cancellationToken).ConfigureAwait(false))
+            .ToLookup(entry => entry.NebulaId, entry => entry.Share);
 
     private static IQueryable<T> Order<T, TKey>(IQueryable<T> rows, System.Linq.Expressions.Expression<Func<T, TKey>> key, bool descending) =>
         descending ? rows.OrderByDescending(key) : rows.OrderBy(key);

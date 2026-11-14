@@ -1,6 +1,6 @@
 # Задача 00063 — Рушій бою і симулятор бою
 
-> **Статус:** чернетка (чекає погодження автора)
+> **Статус:** ✅ ВИКОНАНО 14.11.2026
 > **Запит автора (12–13.11.2026):** серце бою: детермінований розрахунок відрізку без бази й мережі та консольний симулятор на тому самому коді.
 > **Логіка бою:** [game-design/06](../game-design/06-kosmichni-boi.md) §2–§8, [14 §5](../game-design/14-balans-i-formuly.md), симулятори [tech/06 §4](../tech/06-testuvannia-ta-symuliatory.md).
 > **Обов'язково прочитати:** `documentation/tech/08-pravyla-kodu-dlia-ahentiv.md`, `documentation/tech/09-zvedeni-pravyla-kodu-lohiky-ta-kodiv.md`, `documentation/tech/01-arkhitektura.md`.
@@ -160,4 +160,16 @@ public static class HoldSplitter { public static HoldSplit Split(FleetHold hold,
 
 ## 5. Результат виконання
 
-_(заповнює виконавець)_
+**Рушій.** Бібліотека `server/src/Aetheris.Combat.Engine` рахує відрізок без бази, мережі, годинника й `Random`. `SegmentSimulator.Run` не збільшує номер циклу. Кінець циклу робить `CycleEnd.Apply`. Є `HoldSplitter`, `SpatialGrid`, `Xoshiro256Rng`, `BattleJson`. `CombatSettings` не тримає стартових чисел балансу: їх задає виклик, межі перевіряються в конструкторі. Частка дистанції утримання 0.8, період сітки 4 і двосторонній запас клітини лежать в `EngineTune` як числа формули, не балансу.
+
+**Стан корабля.** `ShipStateBuilder` у `server/src/Aetheris.Combat` збирає `ShipState` двома пакетними запитами. Цей SQL на `aetheris_test` не виконувався. Таблиць `fleet_battle_*` немає. `target_rule` і `behavior` не створювались знову: вони з 00062.
+
+**Симулятор.** `server/tools/Aetheris.CombatSim`. Каталог `server/tools/balance/combat/designs.json` зібраний із `server/src/Aetheris.Production/Data/production-reference-seed.json`. Легкий лазер `sapsan-light-laser` коштує 3133, важкий `sapsan-heavy-laser` — 3213. Флоти по 3 кораблі: початки (1000, 4000) і (1040, 4000), крок 8. Команда з README прогнана з кореня репозиторію в Release і записала `server/tools/balance/combat/report-001.md` та CSV поруч. 200 прогонів, зерно 1, `approach` проти `keep_distance`: перемог A 0, B 0, нічиїх 200. Середні постріли 3 і 3, влучання 0.755 і 0.43, втрати 0 кораблів і 0 вартості. Усі 200 тривають 6 циклів при ліміті 6. На старті 9 пар, усі бачать одна одну, найбільша відстань 56, виявлення 66, дальність зброї 100 і 100. Після першого прогону найближчі кораблі різних сторін стоять на 72. `keep_distance` тримає центр на 0.8 дальності зброї, після залпу обидві сторони вже за виявленням, тож далі тиша до ліміту. Формули й розстановку не змінювали. Легкий лазер `part_m_13`: середня шкода 30.955, на одиницю вартості 0.043. Важкий `part_m_14`: 21.07 і 0.022. Матриця один на один — теж усі нічиї. Один відрізок після прогріву: 8.775 мс і 670760 байт. BenchmarkDotNet не додавався.
+
+**Тести** в `server/tests/Aetheris.Tests/Combat/`: `DeterminismTests`, `DamageTests`, `AccuracyTests`, `LineOfSightTests`, `ProjectileTests`, `PowerTests`, `DroneTests`, `RetreatTests`, `HoldSplitterTests`, `CycleEndTests`, `PerformanceTests`, `CombatSettingsTests`, `MovementTests`, `ShipStateBuilderTests`. Чистота рушія — `Architecture/EnginePurityTests`.
+
+**Команди (14.11.2026), з каталогу `server/`.**
+- `dotnet build -c Release`: 0 попереджень, 0 помилок.
+- `dotnet format --verify-no-changes --no-restore`: код виходу 0. Завантаження робочого простору написало попередження; файли формат не відхилив.
+- Повний `dotnet test -c Release`: 847 тестів, 835 зелених, 12 червоних, 0 пропущених, 19 хв 23 с. `Aetheris.Analyzers.Tests` зелені. Окремий фільтр `FullyQualifiedName~Aetheris.Tests.Combat`: 36 з 36 за 1.4 с, бюджет 200 мс і 5 МБ у цьому прогоні виконано. У повному прогоні `PerformanceTests.Two_lines_finish_a_segment_inside_the_budget` заміряв 523.764 мс стіни годинника, бо набір іде паралельно з іншими тестами. Решта 11 червоних — не бойові; перелік у `00063-pytannia.md`. Критерій 5 про повністю зелений набір через це не виконаний.
+- Клієнт ця задача не змінювала. Lint, build клієнта і браузер не запускались.

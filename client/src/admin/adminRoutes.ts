@@ -10,6 +10,7 @@ export const adminRoutes = {
   systems: '/admin/systems',
   objects: '/admin/objects',
   fields: '/admin/fields',
+  nebulae: '/admin/nebulae',
   objectTypes: '/admin/object-types',
   rules: '/admin/rules',
   resources: '/admin/resources',

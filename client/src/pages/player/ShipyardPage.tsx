@@ -168,7 +168,13 @@ export function ShipyardPage() {
       hull,
       name: design.name,
       hasRaceBonusSlot: design.hasRaceBonusSlot,
-      slots: design.slots.map((slot) => ({ slotIndex: slot.slotIndex, partTypeId: slot.partTypeId, markLevel: slot.markLevel, hasRaceBonus: slot.hasRaceBonus })),
+      slots: design.slots.map((slot) => ({
+        slotIndex: slot.slotIndex,
+        partTypeId: slot.partTypeId,
+        markLevel: slot.markLevel,
+        hasRaceBonus: slot.hasRaceBonus,
+        powerPriority: slot.powerPriority,
+      })),
     });
   }, [hulls]);
 
@@ -211,7 +217,13 @@ export function ShipyardPage() {
               ...current,
               slots: [
                 ...current.slots.filter((slot) => slot.slotIndex !== picking),
-                { slotIndex: picking, partTypeId: module.id, markLevel: module.markLevels[0] ?? 1, hasRaceBonus: false },
+                {
+                  slotIndex: picking,
+                  partTypeId: module.id,
+                  markLevel: module.markLevels[0] ?? 1,
+                  hasRaceBonus: false,
+                  powerPriority: module.defaultPowerPriority ?? 0,
+                },
               ].sort((left, right) => left.slotIndex - right.slotIndex),
             }
           : current,
@@ -356,6 +368,7 @@ export function ShipyardPage() {
           onName={(name) => setWorking((current) => (current ? { ...current, name } : current))}
           onPick={(slotIndex) => setPicking(slotIndex)}
           onRemove={removeModule}
+          onReorder={(slots) => setWorking((current) => (current ? { ...current, slots } : current))}
           onSave={() => void save()}
           slots={working.slots}
         />

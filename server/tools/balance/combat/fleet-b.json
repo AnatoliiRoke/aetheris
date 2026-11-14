@@ -1,0 +1,14 @@
+{
+  "ships": [
+    {
+      "designId": "sapsan-heavy-laser",
+      "count": 3
+    }
+  ],
+  "formation": {
+    "originX": 1040,
+    "originY": 4000,
+    "spacingX": 8,
+    "spacingY": 0
+  }
+}

@@ -11,7 +11,8 @@
         "uk": "Група «Двигуни».",
         "en": "Group Engines."
       },
-      "parent": "pg_19"
+      "parent": "pg_19",
+      "default_power_priority": 0
     },
     {
       "code": "pg_2",
@@ -24,7 +25,8 @@
         "uk": "Група «Реактори».",
         "en": "Group Reactors."
       },
-      "parent": "pg_19"
+      "parent": "pg_19",
+      "default_power_priority": 0
     },
     {
       "code": "pg_3",
@@ -37,7 +39,8 @@
         "uk": "Група «Енергетична зброя».",
         "en": "Group Energy weapons."
       },
-      "parent": "pg_22"
+      "parent": "pg_22",
+      "default_power_priority": 20
     },
     {
       "code": "pg_4",
@@ -50,7 +53,8 @@
         "uk": "Група «Кінетична зброя».",
         "en": "Group Kinetic weapons."
       },
-      "parent": "pg_22"
+      "parent": "pg_22",
+      "default_power_priority": 20
     },
     {
       "code": "pg_5",
@@ -63,7 +67,8 @@
         "uk": "Група «Броня».",
         "en": "Group Armor."
       },
-      "parent": "pg_19"
+      "parent": "pg_19",
+      "default_power_priority": 50
     },
     {
       "code": "pg_6",
@@ -76,7 +81,8 @@
         "uk": "Група «Щити».",
         "en": "Group Shields."
       },
-      "parent": "pg_19"
+      "parent": "pg_19",
+      "default_power_priority": 10
     },
     {
       "code": "pg_7",
@@ -89,7 +95,8 @@
         "uk": "Група «Боєприпаси».",
         "en": "Group Ammunition."
       },
-      "parent": "pg_22"
+      "parent": "pg_22",
+      "default_power_priority": 50
     },
     {
       "code": "pg_8",
@@ -102,7 +109,8 @@
         "uk": "Група «Видобуток».",
         "en": "Group Extraction."
       },
-      "parent": "pg_19"
+      "parent": "pg_19",
+      "default_power_priority": 50
     },
     {
       "code": "pg_9",
@@ -115,7 +123,8 @@
         "uk": "Група «Розвідка й маскування».",
         "en": "Group Recon and camouflage."
       },
-      "parent": "pg_19"
+      "parent": "pg_19",
+      "default_power_priority": 30
     },
     {
       "code": "pg_10",
@@ -128,7 +137,8 @@
         "uk": "Група «Інші модулі».",
         "en": "Group Other modules."
       },
-      "parent": "pg_19"
+      "parent": "pg_19",
+      "default_power_priority": 50
     },
     {
       "code": "pg_11",
@@ -141,7 +151,8 @@
         "uk": "Група «Модулі бази».",
         "en": "Group Base modules."
       },
-      "parent": "pg_21"
+      "parent": "pg_21",
+      "default_power_priority": 50
     },
     {
       "code": "pg_12",
@@ -155,7 +166,8 @@
         "en": "Group Light."
       },
       "parent": "pg_20",
-      "is_hull_group": true
+      "is_hull_group": true,
+      "default_power_priority": 50
     },
     {
       "code": "pg_13",
@@ -169,7 +181,8 @@
         "en": "Group Drones."
       },
       "parent": "pg_20",
-      "is_hull_group": true
+      "is_hull_group": true,
+      "default_power_priority": 50
     },
     {
       "code": "pg_14",
@@ -183,7 +196,8 @@
         "en": "Group Medium."
       },
       "parent": "pg_20",
-      "is_hull_group": true
+      "is_hull_group": true,
+      "default_power_priority": 50
     },
     {
       "code": "pg_15",
@@ -197,7 +211,8 @@
         "en": "Group Heavy."
       },
       "parent": "pg_20",
-      "is_hull_group": true
+      "is_hull_group": true,
+      "default_power_priority": 50
     },
     {
       "code": "pg_16",
@@ -211,7 +226,8 @@
         "en": "Group Super-heavy."
       },
       "parent": "pg_20",
-      "is_hull_group": true
+      "is_hull_group": true,
+      "default_power_priority": 50
     },
     {
       "code": "pg_17",
@@ -225,7 +241,8 @@
         "en": "Group Civilian."
       },
       "parent": "pg_20",
-      "is_hull_group": true
+      "is_hull_group": true,
+      "default_power_priority": 50
     },
     {
       "code": "pg_18",
@@ -239,7 +256,8 @@
         "en": "Group Structure hulls."
       },
       "parent": "pg_21",
-      "is_hull_group": true
+      "is_hull_group": true,
+      "default_power_priority": 50
     },
     {
       "code": "pg_19",
@@ -251,7 +269,8 @@
       "description": {
         "uk": "Група «Модулі кораблів».",
         "en": "Group Ship modules."
-      }
+      },
+      "default_power_priority": 50
     },
     {
       "code": "pg_20",
@@ -263,7 +282,8 @@
       "description": {
         "uk": "Група «Корпуси кораблів».",
         "en": "Group Ship hulls."
-      }
+      },
+      "default_power_priority": 50
     },
     {
       "code": "pg_21",
@@ -275,7 +295,8 @@
       "description": {
         "uk": "Група «Модулі бази».",
         "en": "Group Base modules."
-      }
+      },
+      "default_power_priority": 50
     },
     {
       "code": "pg_22",
@@ -288,7 +309,8 @@
         "uk": "Група «Зброя».",
         "en": "Group Weapons."
       },
-      "parent": "pg_19"
+      "parent": "pg_19",
+      "default_power_priority": 20
     }
   ],
   "parts": [
@@ -327,6 +349,9 @@
         },
         "char_energy_use": {
           "number": 12
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -365,6 +390,9 @@
         },
         "char_energy_use": {
           "number": 12
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -403,6 +431,9 @@
         },
         "char_energy_use": {
           "number": 36
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -441,6 +472,9 @@
         },
         "char_energy_use": {
           "number": 36
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -482,6 +516,9 @@
         },
         "char_energy_use": {
           "number": 72
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -526,6 +563,9 @@
         },
         "char_jump_prep": {
           "number": 900
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -555,6 +595,9 @@
       "characteristics": {
         "char_power": {
           "number": 60
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -584,6 +627,9 @@
       "characteristics": {
         "char_power": {
           "number": 130
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -613,6 +659,9 @@
       "characteristics": {
         "char_power": {
           "number": 200
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -642,6 +691,9 @@
       "characteristics": {
         "char_power": {
           "number": 350
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -671,6 +723,9 @@
       "characteristics": {
         "char_power": {
           "number": 550
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -700,6 +755,9 @@
       "characteristics": {
         "char_power": {
           "number": 900
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -737,6 +795,9 @@
           "number": 1
         },
         "char_range": {
+          "number": 100
+        },
+        "char_integrity": {
           "number": 100
         }
       }
@@ -776,6 +837,9 @@
         },
         "char_range": {
           "number": 100
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -813,6 +877,9 @@
           "number": 1
         },
         "char_range": {
+          "number": 100
+        },
+        "char_integrity": {
           "number": 100
         }
       }
@@ -852,6 +919,9 @@
         },
         "char_range": {
           "number": 300
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -890,6 +960,9 @@
         },
         "char_range": {
           "number": 300
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -928,6 +1001,9 @@
         },
         "char_range": {
           "number": 300
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -966,6 +1042,9 @@
         },
         "char_range": {
           "number": 600
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1004,6 +1083,9 @@
         },
         "char_range": {
           "number": 1000
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1041,6 +1123,9 @@
           "number": 300
         },
         "char_magazine": {
+          "number": 100
+        },
+        "char_integrity": {
           "number": 100
         }
       }
@@ -1080,6 +1165,9 @@
         },
         "char_magazine": {
           "number": 110
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1118,6 +1206,9 @@
         },
         "char_magazine": {
           "number": 121
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1159,6 +1250,9 @@
         },
         "char_launcher_size": {
           "number": 1
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1200,6 +1294,9 @@
         },
         "char_launcher_size": {
           "number": 2
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1241,6 +1338,9 @@
         },
         "char_launcher_size": {
           "number": 3
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1487,6 +1587,9 @@
         },
         "char_kinetic_block": {
           "number": 60
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1525,6 +1628,9 @@
         },
         "char_kinetic_block": {
           "number": 50
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1563,6 +1669,9 @@
         },
         "char_kinetic_block": {
           "number": 75
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1601,6 +1710,9 @@
         },
         "char_kinetic_block": {
           "number": 65
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1639,6 +1751,9 @@
         },
         "char_kinetic_block": {
           "number": 55
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1677,6 +1792,9 @@
         },
         "char_kinetic_block": {
           "number": 80
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1715,6 +1833,9 @@
         },
         "char_kinetic_block": {
           "number": 75
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -1753,6 +1874,9 @@
         },
         "char_kinetic_block": {
           "number": 65
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2165,6 +2289,9 @@
         },
         "char_yield": {
           "number": 1400
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2194,6 +2321,9 @@
         },
         "char_yield": {
           "number": 1400
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2223,6 +2353,9 @@
         },
         "char_yield": {
           "number": 150
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2252,6 +2385,9 @@
         },
         "char_yield": {
           "number": 1300
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2281,6 +2417,9 @@
         },
         "char_yield": {
           "number": 1100
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2322,6 +2461,9 @@
         },
         "char_detection": {
           "number": 100
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2360,6 +2502,9 @@
         },
         "char_detection": {
           "number": 110
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2392,6 +2537,9 @@
         },
         "char_dig_speed": {
           "number": 121
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2421,6 +2569,12 @@
         },
         "char_scan_radius": {
           "number": 15
+        },
+        "char_integrity": {
+          "number": 100
+        },
+        "char_signature_cut": {
+          "number": 0.35
         }
       }
     },
@@ -2450,6 +2604,9 @@
         },
         "char_scan_radius": {
           "number": 15
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2478,6 +2635,9 @@
           "number": 100
         },
         "char_shield_restore": {
+          "number": 100
+        },
+        "char_integrity": {
           "number": 100
         }
       }
@@ -2514,6 +2674,9 @@
         },
         "char_crew": {
           "number": 110
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2543,6 +2706,9 @@
         },
         "char_collect_speed": {
           "number": 121
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2572,6 +2738,9 @@
         },
         "char_cargo": {
           "number": 6750
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2601,6 +2770,9 @@
         },
         "char_cargo": {
           "number": 20250
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2633,6 +2805,9 @@
         },
         "char_missiles": {
           "number": 161.051
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -2665,6 +2840,9 @@
         },
         "char_transfer_volume": {
           "number": 2000
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     },
@@ -3167,6 +3345,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 0.6
+        },
+        "char_leash_radius": {
+          "number": 800
         }
       }
     },
@@ -3207,6 +3391,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 0.6
+        },
+        "char_leash_radius": {
+          "number": 800
         }
       }
     },
@@ -3247,6 +3437,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 0.6
+        },
+        "char_leash_radius": {
+          "number": 800
         }
       }
     },
@@ -3287,6 +3483,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 0.6
+        },
+        "char_leash_radius": {
+          "number": 800
         }
       }
     },
@@ -3324,6 +3526,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 0.2
+        },
+        "char_drone_speed": {
+          "number": 200
         }
       }
     },
@@ -3361,6 +3569,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 0.2
+        },
+        "char_drone_speed": {
+          "number": 200
         }
       }
     },
@@ -3398,6 +3612,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 0.2
+        },
+        "char_drone_speed": {
+          "number": 200
         }
       }
     },
@@ -3438,6 +3658,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.0
+        },
+        "char_leash_radius": {
+          "number": 1200
         }
       }
     },
@@ -3478,6 +3704,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.0
+        },
+        "char_leash_radius": {
+          "number": 1200
         }
       }
     },
@@ -3518,6 +3750,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.0
+        },
+        "char_leash_radius": {
+          "number": 1200
         }
       }
     },
@@ -3558,6 +3796,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.0
+        },
+        "char_leash_radius": {
+          "number": 1200
         }
       }
     },
@@ -3598,6 +3842,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.0
+        },
+        "char_leash_radius": {
+          "number": 1200
         }
       }
     },
@@ -3638,6 +3888,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.0
+        },
+        "char_leash_radius": {
+          "number": 1200
         }
       }
     },
@@ -3681,6 +3937,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.6
+        },
+        "char_leash_radius": {
+          "number": 1600
         }
       }
     },
@@ -3724,6 +3986,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.6
+        },
+        "char_leash_radius": {
+          "number": 1600
         }
       }
     },
@@ -3767,6 +4035,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.6
+        },
+        "char_leash_radius": {
+          "number": 1600
         }
       }
     },
@@ -3810,6 +4084,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.6
+        },
+        "char_leash_radius": {
+          "number": 1600
         }
       }
     },
@@ -3853,6 +4133,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 2.2
+        },
+        "char_leash_radius": {
+          "number": 2000
         }
       }
     },
@@ -3896,6 +4182,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 2.2
+        },
+        "char_leash_radius": {
+          "number": 2000
         }
       }
     },
@@ -3939,6 +4231,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 2.2
+        },
+        "char_leash_radius": {
+          "number": 2000
         }
       }
     },
@@ -3979,6 +4277,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.0
+        },
+        "char_leash_radius": {
+          "number": 1000
         }
       }
     },
@@ -4019,6 +4323,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.0
+        },
+        "char_leash_radius": {
+          "number": 1000
         }
       }
     },
@@ -4059,6 +4369,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.0
+        },
+        "char_leash_radius": {
+          "number": 1000
         }
       }
     },
@@ -4099,6 +4415,12 @@
         },
         "char_assembly_time": {
           "number": 300
+        },
+        "char_signature": {
+          "number": 1.0
+        },
+        "char_leash_radius": {
+          "number": 1000
         }
       }
     },
@@ -4251,6 +4573,9 @@
         },
         "char_launcher_size": {
           "number": 1
+        },
+        "char_integrity": {
+          "number": 100
         }
       }
     }
@@ -11932,6 +12257,79 @@
         "uk": "с",
         "en": "s"
       }
+    },
+    {
+      "code": "char_accuracy",
+      "kind": "accuracy",
+      "sort_order": 44,
+      "name": {
+        "uk": "Влучність",
+        "en": "Accuracy"
+      },
+      "description": {
+        "uk": "Влучність зброї по класу цілі, від 0 до 1. Значення лежить у таблиці влучності, а не одним числом деталі.",
+        "en": "Accuracy of a weapon against a target class, from 0 to 1. The value lives in the accuracy table, not as one number of the part."
+      }
+    },
+    {
+      "code": "char_signature",
+      "kind": "signature",
+      "sort_order": 45,
+      "name": {
+        "uk": "Сигнатура",
+        "en": "Signature"
+      },
+      "description": {
+        "uk": "Наскільки помітний корпус. Менша сигнатура важче виявляється.",
+        "en": "How visible a hull is. A smaller signature is harder to detect."
+      }
+    },
+    {
+      "code": "char_signature_cut",
+      "kind": "signature_cut",
+      "sort_order": 46,
+      "name": {
+        "uk": "Зниження сигнатури",
+        "en": "Signature cut"
+      },
+      "description": {
+        "uk": "Частка сигнатури корпусу, яку знімає модуль маскування, від 0 до 1.",
+        "en": "The share of the hull signature a camouflage module removes, from 0 to 1."
+      }
+    },
+    {
+      "code": "char_leash_radius",
+      "kind": "leash_radius",
+      "sort_order": 47,
+      "name": {
+        "uk": "Радіус повідця",
+        "en": "Leash radius"
+      },
+      "description": {
+        "uk": "Як далеко від носія може відійти дрон, в одиницях поля бою.",
+        "en": "How far a drone may fly from its carrier, in field units."
+      },
+      "unit": {
+        "uk": "од. поля",
+        "en": "field units"
+      }
+    },
+    {
+      "code": "char_drone_speed",
+      "kind": "drone_speed",
+      "sort_order": 48,
+      "name": {
+        "uk": "Швидкість дрона",
+        "en": "Drone speed"
+      },
+      "description": {
+        "uk": "Швидкість корпусу дрона на полі бою, в одиницях поля за секунду.",
+        "en": "The speed of a drone hull on the field, in field units per second."
+      },
+      "unit": {
+        "uk": "од. поля/с",
+        "en": "field units/s"
+      }
     }
   ],
   "group_characteristics": [
@@ -12575,6 +12973,144 @@
       "group": "pg_11",
       "characteristic": "char_cargo",
       "sort_order": 10,
+      "is_required": false
+    },
+    {
+      "group": "pg_3",
+      "characteristic": "char_accuracy",
+      "sort_order": 5,
+      "is_required": false
+    },
+    {
+      "group": "pg_4",
+      "characteristic": "char_accuracy",
+      "sort_order": 6,
+      "is_required": false
+    },
+    {
+      "group": "pg_12",
+      "characteristic": "char_signature",
+      "sort_order": 9,
+      "is_required": true
+    },
+    {
+      "group": "pg_13",
+      "characteristic": "char_signature",
+      "sort_order": 9,
+      "is_required": true
+    },
+    {
+      "group": "pg_14",
+      "characteristic": "char_signature",
+      "sort_order": 9,
+      "is_required": true
+    },
+    {
+      "group": "pg_15",
+      "characteristic": "char_signature",
+      "sort_order": 9,
+      "is_required": true
+    },
+    {
+      "group": "pg_16",
+      "characteristic": "char_signature",
+      "sort_order": 9,
+      "is_required": true
+    },
+    {
+      "group": "pg_17",
+      "characteristic": "char_signature",
+      "sort_order": 9,
+      "is_required": true
+    },
+    {
+      "group": "pg_9",
+      "characteristic": "char_signature_cut",
+      "sort_order": 6,
+      "is_required": false
+    },
+    {
+      "group": "pg_12",
+      "characteristic": "char_leash_radius",
+      "sort_order": 10,
+      "is_required": true
+    },
+    {
+      "group": "pg_14",
+      "characteristic": "char_leash_radius",
+      "sort_order": 10,
+      "is_required": true
+    },
+    {
+      "group": "pg_15",
+      "characteristic": "char_leash_radius",
+      "sort_order": 10,
+      "is_required": true
+    },
+    {
+      "group": "pg_16",
+      "characteristic": "char_leash_radius",
+      "sort_order": 10,
+      "is_required": true
+    },
+    {
+      "group": "pg_17",
+      "characteristic": "char_leash_radius",
+      "sort_order": 10,
+      "is_required": true
+    },
+    {
+      "group": "pg_13",
+      "characteristic": "char_drone_speed",
+      "sort_order": 10,
+      "is_required": true
+    },
+    {
+      "group": "pg_1",
+      "characteristic": "char_integrity",
+      "sort_order": 5,
+      "is_required": true
+    },
+    {
+      "group": "pg_2",
+      "characteristic": "char_integrity",
+      "sort_order": 2,
+      "is_required": true
+    },
+    {
+      "group": "pg_3",
+      "characteristic": "char_integrity",
+      "sort_order": 6,
+      "is_required": true
+    },
+    {
+      "group": "pg_4",
+      "characteristic": "char_integrity",
+      "sort_order": 7,
+      "is_required": true
+    },
+    {
+      "group": "pg_6",
+      "characteristic": "char_integrity",
+      "sort_order": 6,
+      "is_required": true
+    },
+    {
+      "group": "pg_8",
+      "characteristic": "char_integrity",
+      "sort_order": 5,
+      "is_required": true
+    },
+    {
+      "group": "pg_9",
+      "characteristic": "char_integrity",
+      "sort_order": 7,
+      "is_required": true
+    },
+    {
+      "group": "pg_10",
+      "characteristic": "char_integrity",
+      "sort_order": 15,
       "is_required": false
     }
   ],
@@ -14239,6 +14775,458 @@
       "part": "part_m_6",
       "resource": "resource_15",
       "share": 0.3
+    }
+  ],
+  "part_accuracies": [
+    {
+      "part": "part_m_13",
+      "target_group": "pg_13",
+      "value": 0.9
+    },
+    {
+      "part": "part_m_13",
+      "target_group": "pg_12",
+      "value": 0.8
+    },
+    {
+      "part": "part_m_13",
+      "target_group": "pg_14",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_13",
+      "target_group": "pg_15",
+      "value": 0.35
+    },
+    {
+      "part": "part_m_13",
+      "target_group": "pg_16",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_13",
+      "target_group": "pg_17",
+      "value": 0.8
+    },
+    {
+      "part": "part_m_15",
+      "target_group": "pg_13",
+      "value": 0.9
+    },
+    {
+      "part": "part_m_15",
+      "target_group": "pg_12",
+      "value": 0.8
+    },
+    {
+      "part": "part_m_15",
+      "target_group": "pg_14",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_15",
+      "target_group": "pg_15",
+      "value": 0.35
+    },
+    {
+      "part": "part_m_15",
+      "target_group": "pg_16",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_15",
+      "target_group": "pg_17",
+      "value": 0.8
+    },
+    {
+      "part": "part_m_22",
+      "target_group": "pg_13",
+      "value": 0.9
+    },
+    {
+      "part": "part_m_22",
+      "target_group": "pg_12",
+      "value": 0.8
+    },
+    {
+      "part": "part_m_22",
+      "target_group": "pg_14",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_22",
+      "target_group": "pg_15",
+      "value": 0.35
+    },
+    {
+      "part": "part_m_22",
+      "target_group": "pg_16",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_22",
+      "target_group": "pg_17",
+      "value": 0.8
+    },
+    {
+      "part": "part_m_14",
+      "target_group": "pg_13",
+      "value": 0.1
+    },
+    {
+      "part": "part_m_14",
+      "target_group": "pg_12",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_14",
+      "target_group": "pg_14",
+      "value": 0.5
+    },
+    {
+      "part": "part_m_14",
+      "target_group": "pg_15",
+      "value": 0.85
+    },
+    {
+      "part": "part_m_14",
+      "target_group": "pg_16",
+      "value": 0.95
+    },
+    {
+      "part": "part_m_14",
+      "target_group": "pg_17",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_19",
+      "target_group": "pg_13",
+      "value": 0.1
+    },
+    {
+      "part": "part_m_19",
+      "target_group": "pg_12",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_19",
+      "target_group": "pg_14",
+      "value": 0.5
+    },
+    {
+      "part": "part_m_19",
+      "target_group": "pg_15",
+      "value": 0.85
+    },
+    {
+      "part": "part_m_19",
+      "target_group": "pg_16",
+      "value": 0.95
+    },
+    {
+      "part": "part_m_19",
+      "target_group": "pg_17",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_20",
+      "target_group": "pg_13",
+      "value": 0.1
+    },
+    {
+      "part": "part_m_20",
+      "target_group": "pg_12",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_20",
+      "target_group": "pg_14",
+      "value": 0.5
+    },
+    {
+      "part": "part_m_20",
+      "target_group": "pg_15",
+      "value": 0.85
+    },
+    {
+      "part": "part_m_20",
+      "target_group": "pg_16",
+      "value": 0.95
+    },
+    {
+      "part": "part_m_20",
+      "target_group": "pg_17",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_23",
+      "target_group": "pg_13",
+      "value": 0.1
+    },
+    {
+      "part": "part_m_23",
+      "target_group": "pg_12",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_23",
+      "target_group": "pg_14",
+      "value": 0.5
+    },
+    {
+      "part": "part_m_23",
+      "target_group": "pg_15",
+      "value": 0.85
+    },
+    {
+      "part": "part_m_23",
+      "target_group": "pg_16",
+      "value": 0.95
+    },
+    {
+      "part": "part_m_23",
+      "target_group": "pg_17",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_24",
+      "target_group": "pg_13",
+      "value": 0.1
+    },
+    {
+      "part": "part_m_24",
+      "target_group": "pg_12",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_24",
+      "target_group": "pg_14",
+      "value": 0.5
+    },
+    {
+      "part": "part_m_24",
+      "target_group": "pg_15",
+      "value": 0.85
+    },
+    {
+      "part": "part_m_24",
+      "target_group": "pg_16",
+      "value": 0.95
+    },
+    {
+      "part": "part_m_24",
+      "target_group": "pg_17",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_25",
+      "target_group": "pg_13",
+      "value": 0.1
+    },
+    {
+      "part": "part_m_25",
+      "target_group": "pg_12",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_25",
+      "target_group": "pg_14",
+      "value": 0.5
+    },
+    {
+      "part": "part_m_25",
+      "target_group": "pg_15",
+      "value": 0.85
+    },
+    {
+      "part": "part_m_25",
+      "target_group": "pg_16",
+      "value": 0.95
+    },
+    {
+      "part": "part_m_25",
+      "target_group": "pg_17",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_26",
+      "target_group": "pg_13",
+      "value": 0.1
+    },
+    {
+      "part": "part_m_26",
+      "target_group": "pg_12",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_26",
+      "target_group": "pg_14",
+      "value": 0.5
+    },
+    {
+      "part": "part_m_26",
+      "target_group": "pg_15",
+      "value": 0.85
+    },
+    {
+      "part": "part_m_26",
+      "target_group": "pg_16",
+      "value": 0.95
+    },
+    {
+      "part": "part_m_26",
+      "target_group": "pg_17",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_84",
+      "target_group": "pg_13",
+      "value": 0.1
+    },
+    {
+      "part": "part_m_84",
+      "target_group": "pg_12",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_84",
+      "target_group": "pg_14",
+      "value": 0.5
+    },
+    {
+      "part": "part_m_84",
+      "target_group": "pg_15",
+      "value": 0.85
+    },
+    {
+      "part": "part_m_84",
+      "target_group": "pg_16",
+      "value": 0.95
+    },
+    {
+      "part": "part_m_84",
+      "target_group": "pg_17",
+      "value": 0.2
+    },
+    {
+      "part": "part_m_16",
+      "target_group": "pg_13",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_16",
+      "target_group": "pg_12",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_16",
+      "target_group": "pg_14",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_16",
+      "target_group": "pg_15",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_16",
+      "target_group": "pg_16",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_16",
+      "target_group": "pg_17",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_17",
+      "target_group": "pg_13",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_17",
+      "target_group": "pg_12",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_17",
+      "target_group": "pg_14",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_17",
+      "target_group": "pg_15",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_17",
+      "target_group": "pg_16",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_17",
+      "target_group": "pg_17",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_18",
+      "target_group": "pg_13",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_18",
+      "target_group": "pg_12",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_18",
+      "target_group": "pg_14",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_18",
+      "target_group": "pg_15",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_18",
+      "target_group": "pg_16",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_18",
+      "target_group": "pg_17",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_21",
+      "target_group": "pg_13",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_21",
+      "target_group": "pg_12",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_21",
+      "target_group": "pg_14",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_21",
+      "target_group": "pg_15",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_21",
+      "target_group": "pg_16",
+      "value": 0.6
+    },
+    {
+      "part": "part_m_21",
+      "target_group": "pg_17",
+      "value": 0.6
     }
   ]
 }

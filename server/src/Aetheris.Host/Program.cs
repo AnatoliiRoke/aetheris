@@ -1,5 +1,7 @@
 using Aetheris.Admin;
 using Aetheris.Chat;
+using Aetheris.Combat;
+using Aetheris.Combat.Data;
 using Aetheris.Core.Admin;
 using Aetheris.Core.Configuration;
 using Aetheris.Core.Data;
@@ -221,6 +223,9 @@ builder.Services.AddMarketModule();
 // The Fleet module reads the world, the bodies and the production, so it comes after them.
 builder.Services.AddFleetModule();
 
+// The Combat module keeps its own reference rows and reads only the core (task 00062).
+builder.Services.AddCombatModule();
+
 // The Mail module reads the world for the races of the players and writes the letters of the
 // game, so it comes after the world (task 00060).
 builder.Services.AddMailModule();
@@ -276,6 +281,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
     await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(EconomyDatabase), () => EconomyDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
     await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(MarketDatabase), () => MarketDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
     await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(FleetDatabase), () => FleetDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
+    await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(CombatDatabase), () => CombatDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
     await StartupTimer.RunAsync(startupLogger, "migrations:" + nameof(MailDatabase), () => MailDatabase.MigrateAsync(migrationConnectionString ?? mainContext.Database.GetConnectionString()!)).ConfigureAwait(false);
 
     startupLogger.LogInformation("Database migrations applied.");
@@ -328,6 +334,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
         // their own reference data, because a factory stands on a body (task 00013).
         await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IProductionModule), () => scope.ServiceProvider.GetRequiredService<IProductionModule>().EnsureAsync()).ConfigureAwait(false);
         await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(IFleetModule), () => scope.ServiceProvider.GetRequiredService<IFleetModule>().EnsureAsync()).ConfigureAwait(false);
+        await StartupTimer.RunAsync(startupLogger, "ensure:" + nameof(ICombatModule), () => scope.ServiceProvider.GetRequiredService<ICombatModule>().EnsureAsync()).ConfigureAwait(false);
 
         // The Processes module fills its tables once the bodies, the research and the production
         // modules have their own reference data, because a process runs on a body and works with

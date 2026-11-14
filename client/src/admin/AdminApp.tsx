@@ -20,7 +20,7 @@ import { ResourcesScreen } from './screens/ResourcesScreen';
 import { PlayersScreen } from './screens/PlayersScreen';
 import { AuditScreen, RunsScreen } from './screens/RunsAndAudit';
 import { TextsScreen } from './screens/TextsScreen';
-import { FieldsScreen, ObjectsScreen, SectorsScreen, SystemsScreen } from './screens/WorldTables';
+import { FieldsScreen, NebulaeScreen, ObjectsScreen, SectorsScreen, SystemsScreen } from './screens/WorldTables';
 import './admin.css';
 
 type AdminSession = { status: 'loading' } | { status: 'anonymous'; notice: AdminMessageKey | null } | { status: 'signed-in'; me: AdminMe };
@@ -43,6 +43,7 @@ const screens: Screen[] = [
   { path: adminRoutes.systems, label: 'admin.nav.systems', permission: 'admin.world_systems_read', render: () => <SystemsScreen /> },
   { path: adminRoutes.objects, label: 'admin.nav.objects', permission: 'admin.world_objects_read', render: () => <ObjectsScreen /> },
   { path: adminRoutes.fields, label: 'admin.nav.fields', permission: 'admin.world_fields_read', render: () => <FieldsScreen /> },
+  { path: adminRoutes.nebulae, label: 'admin.nav.nebulae', permission: 'admin.world_nebulae_read', render: () => <NebulaeScreen /> },
   { path: adminRoutes.objectTypes, label: 'admin.nav.objectTypes', permission: 'admin.world_object_types_read', render: () => <ObjectTypesScreen /> },
   { path: adminRoutes.rules, label: 'admin.nav.rules', permission: 'admin.world_generation_rules_read', render: () => <RulesScreen /> },
   { path: adminRoutes.reference, label: 'admin.nav.reference', permission: 'admin.reference_kinds_read', render: () => <ReferenceScreen />, nested: true },

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { ShipAmmunition, ShipDesign, ShipDesignSlotInput, ShipHull, ShipModule } from '../../../api/fleetApi';
 import { CardArt } from '../../../components/CardArt';
 import { useI18n } from '../../../i18n/useI18n';
@@ -24,6 +24,7 @@ import { factLabel, fittedCombat, fittedFacts, formatCombatDamage, formatFactAmo
  * @param onChangeHull What to do when the player wants another hull.
  * @param onPick What to do when the player picks the module of a slot.
  * @param onRemove What to do when the player takes a module out of a slot.
+ * @param onReorder What to do when the player changes the shutdown order. The slots keep their indexes.
  * @param onSave What to do when the player saves the design.
  * @param onClose What to do when the player closes the window.
  */
@@ -40,6 +41,7 @@ export function DesignWindow({
   onChangeHull,
   onPick,
   onRemove,
+  onReorder,
   onSave,
   onClose,
 }: {
@@ -55,11 +57,13 @@ export function DesignWindow({
   onChangeHull: () => void;
   onPick: (slotIndex: number) => void;
   onRemove: (slotIndex: number) => void;
+  onReorder: (slots: ShipDesignSlotInput[]) => void;
   onSave: () => void;
   onClose: () => void;
 }) {
   const { t, language } = useI18n();
   const { text } = useTexts();
+  const [dragFrom, setDragFrom] = useState<number | null>(null);
 
   const byId = useMemo(() => new Map(modules.map((module) => [module.id, module])), [modules]);
   const total = hull.slots + (hasRaceBonusSlot ? hull.raceBonusSlots : 0);
@@ -125,6 +129,33 @@ export function DesignWindow({
   // the constructor warns and marks the slots of those drives.
   const ftlSlots = useMemo(() => ftlSlotsWithoutNormalDrive(slots, byId), [byId, slots]);
   const facts = useMemo(() => fittedFacts(slots, byId), [byId, slots]);
+  const shutdownOrder = useMemo(() => {
+    const priorityOf = (slot: ShipDesignSlotInput) => {
+      if (typeof slot.powerPriority === 'number') {
+        return slot.powerPriority;
+      }
+
+      return byId.get(slot.partTypeId)?.defaultPowerPriority ?? 0;
+    };
+
+    return [...slots].sort((left, right) => {
+      const difference = priorityOf(right) - priorityOf(left);
+
+      return difference !== 0 ? difference : left.slotIndex - right.slotIndex;
+    });
+  }, [byId, slots]);
+
+  const moveShutdown = (from: number, to: number) => {
+    if (from === to || to < 0 || to >= shutdownOrder.length) {
+      return;
+    }
+
+    const next = [...shutdownOrder];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    const last = next.length - 1;
+    onReorder(next.map((slot, index) => ({ ...slot, powerPriority: last - index })));
+  };
   const damage = formatCombatDamage(energy.energyDamage, energy.kineticMin, energy.kineticMax, t, language);
 
   return (
@@ -212,6 +243,55 @@ export function DesignWindow({
         </div>
 
         <p className="sh-note">{t('shipyard.dronesNote')}</p>
+
+        <div className="sh-overline">
+          <span className="civ-label" id="sh-power-title">
+            {t('shipyard.powerOrder')}
+          </span>
+        </div>
+        <p className="sh-note">{t('shipyard.powerOrderNote')}</p>
+        {shutdownOrder.length === 0 ? (
+          <p className="sh-note">{t('shipyard.powerOrderEmpty')}</p>
+        ) : (
+          <ol aria-labelledby="sh-power-title" className="sh-order">
+            {shutdownOrder.map((slot, index) => {
+              const module = byId.get(slot.partTypeId);
+
+              return (
+                <li
+                  className="sh-order__row"
+                  draggable
+                  key={slot.slotIndex}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDragStart={() => setDragFrom(index)}
+                  onDrop={() => {
+                    if (dragFrom !== null) {
+                      moveShutdown(dragFrom, index);
+                    }
+
+                    setDragFrom(null);
+                  }}
+                >
+                  <p className="sh-order__name">{module ? text(module.nameKey) ?? module.nameKey : String(slot.partTypeId)}</p>
+                  <p className="sh-order__place">{t('shipyard.powerOrderPlace', { place: index + 1 })}</p>
+                  <div className="sh-order__move">
+                    <button className="btn btn--secondary" disabled={index === 0} onClick={() => moveShutdown(index, index - 1)} type="button">
+                      {t('shipyard.powerUp')}
+                    </button>
+                    <button
+                      className="btn btn--secondary"
+                      disabled={index === shutdownOrder.length - 1}
+                      onClick={() => moveShutdown(index, index + 1)}
+                      type="button"
+                    >
+                      {t('shipyard.powerDown')}
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        )}
       </section>
 
       <section aria-labelledby="sh-summary-title">

@@ -1,0 +1,26 @@
+{
+  "admin.reference.target_rule.title": {
+    "uk": "Правила вибору цілі",
+    "en": "Target rules"
+  },
+  "admin.reference.behavior.title": {
+    "uk": "Поведінки",
+    "en": "Behaviors"
+  },
+  "admin.reference.field.name": {
+    "uk": "Назва",
+    "en": "Name"
+  },
+  "admin.reference.field.description": {
+    "uk": "Опис",
+    "en": "Description"
+  },
+  "admin.reference.field.sort_order": {
+    "uk": "Порядок",
+    "en": "Sort order"
+  },
+  "admin.reference.field.logic_code": {
+    "uk": "Логічний код",
+    "en": "Logic code"
+  }
+}

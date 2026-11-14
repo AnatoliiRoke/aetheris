@@ -27,6 +27,7 @@ export interface Crumb {
  * @param subtitle The line under the heading.
  * @param actions What sits beside the heading, for example the way back.
  * @param breadcrumbs The steps from the planet to the page, for example "Planet / Nova".
+ * @param titleControl Replaces the heading, for example while the planet name is edited.
  */
 export function ScreenHead({
   title,
@@ -36,6 +37,7 @@ export function ScreenHead({
   subtitle,
   actions,
   breadcrumbs,
+  titleControl,
 }: {
   title: string;
   titlePrefix?: string;
@@ -44,6 +46,7 @@ export function ScreenHead({
   subtitle?: string;
   actions?: ReactNode;
   breadcrumbs?: Crumb[];
+  titleControl?: ReactNode;
 }) {
   const { t } = useI18n();
 
@@ -62,14 +65,18 @@ export function ScreenHead({
           </nav>
         ) : null}
         <div className="screen-head__title">
-          <h1
-            aria-label={titleNote ? `${title}: ${titleNote}` : titlePrefix ? `${titlePrefix} ${title}` : undefined}
-            className="player__title"
-          >
-            {title}
-            {titleNote ? <span className="screen-head__note"> {titleNote}</span> : null}
-          </h1>
-          {badge ? <span className="screen-head__badge">{badge}</span> : null}
+          {titleControl ?? (
+            <>
+              <h1
+                aria-label={titleNote ? `${title}: ${titleNote}` : titlePrefix ? `${titlePrefix} ${title}` : undefined}
+                className="player__title"
+              >
+                {title}
+                {titleNote ? <span className="screen-head__note"> {titleNote}</span> : null}
+              </h1>
+              {badge ? <span className="screen-head__badge">{badge}</span> : null}
+            </>
+          )}
         </div>
         {subtitle ? <p className="meta">{subtitle}</p> : null}
       </div>

@@ -46,6 +46,8 @@ export interface GameApi {
   publicRaces(): Promise<Race[]>;
   /** Creates the civilization: the race and the name of the home planet. */
   foundCivilization(raceId: number, planetName: string): Promise<Civilization>;
+  /** Renames a body the player owns. The server checks the same rules as the first name. */
+  renamePlanet(planetId: number, name: string): Promise<{ planetId: number; name: string }>;
 }
 
 const prefix = '/api/v1/world';
@@ -63,6 +65,11 @@ export function createGameApi(http: HttpClient): GameApi {
     },
     async foundCivilization(raceId, planetName) {
       return toCivilization(await http.command<CivilizationAnswer>(`${prefix}/civilization`, { race_id: raceId, planet_name: planetName }));
+    },
+    async renamePlanet(planetId, name) {
+      const answer = await http.command<{ planet_id: number; name: string }>(`${prefix}/planets/rename`, { planet_id: planetId, name });
+
+      return { planetId: answer.planet_id, name: answer.name };
     },
   };
 }

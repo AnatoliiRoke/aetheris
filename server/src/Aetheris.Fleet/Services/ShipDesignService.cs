@@ -402,7 +402,10 @@ public sealed class ShipDesignService
                     hull.Integrity,
                     hull.Weight,
                     hull.RaceBonusSlots,
-                    hull.Crew))
+                    hull.Crew,
+                    hull.Signature,
+                    hull.LeashRadius,
+                    hull.PartGroupId))
         ];
 
         List<ShipModuleViewDto> modules =
@@ -454,7 +457,11 @@ public sealed class ShipDesignService
                     ],
                     module.FlightOrder,
                     module.ScanTarget,
-                    module.EngineKind))
+                    module.EngineKind,
+                    module.Accuracy,
+                    module.Integrity,
+                    module.SignatureCut,
+                    module.DefaultPowerPriority))
         ];
 
         // The types of the modules that go into a ship: the counts are of the modules the builder
@@ -661,6 +668,28 @@ public sealed class ShipDesignService
     }
 
     /// <summary>
+    /// The shutdown order of a slot (task 00062). A missing number uses the order of the group.
+    /// A group that has none stays on until every numbered module is off, which is the lower bound.
+    /// </summary>
+    /// <param name="sent">The number the client sent, or <see langword="null"/>.</param>
+    /// <param name="groupDefault">The order of the group of the module, or <see langword="null"/>.</param>
+    /// <returns>The number to store.</returns>
+    /// <exception cref="GameException">The number is outside 0..1000.</exception>
+    private static short ShutdownOrder(int? sent, short? groupDefault)
+    {
+        int order = sent ?? groupDefault ?? PartPowerPriority.LowerBound;
+
+        if (order < PartPowerPriority.LowerBound || order > PartPowerPriority.UpperBound)
+        {
+            throw new GameException(
+                FleetErrorCodes.PowerPriorityInvalid,
+                "The shutdown order of the slot is outside its bounds.");
+        }
+
+        return (short)order;
+    }
+
+    /// <summary>
     /// Builds the rows of the slots of a project and refuses the ones the hull does not take.
     /// </summary>
     /// <param name="catalog">The catalog of the ships.</param>
@@ -712,6 +741,7 @@ public sealed class ShipDesignService
                 PartTypeId = module.Id,
                 MarkLevel = slot.MarkLevel,
                 HasRaceBonus = slot.HasRaceBonus,
+                PowerPriority = ShutdownOrder(slot.PowerPriority, module.DefaultPowerPriority),
             });
         }
 
@@ -746,6 +776,7 @@ public sealed class ShipDesignService
                 kept.PartTypeId = row.PartTypeId;
                 kept.MarkLevel = row.MarkLevel;
                 kept.HasRaceBonus = row.HasRaceBonus;
+                kept.PowerPriority = row.PowerPriority;
                 continue;
             }
 
@@ -1015,7 +1046,7 @@ public sealed class ShipDesignService
 
         List<ShipDesignSlotDto> slots =
         [
-            .. rows.Select(row => new ShipDesignSlotDto(row.SlotIndex, row.PartTypeId, row.MarkLevel, row.HasRaceBonus))
+            .. rows.Select(row => new ShipDesignSlotDto(row.SlotIndex, row.PartTypeId, row.MarkLevel, row.HasRaceBonus, row.PowerPriority))
         ];
 
         decimal energyUse = 0m;

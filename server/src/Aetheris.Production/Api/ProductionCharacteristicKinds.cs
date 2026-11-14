@@ -125,6 +125,24 @@ public static class CharacteristicKinds
     public const string AssemblyTime = "assembly_time";
 
     /// <summary>
+    /// The accuracy of a weapon against a target class (task 00062). The number lives in
+    /// <c>part_accuracy</c>, not as one value of the part.
+    /// </summary>
+    public const string Accuracy = "accuracy";
+
+    /// <summary>How visible a hull is (task 00062).</summary>
+    public const string Signature = "signature";
+
+    /// <summary>The share of the hull signature a camouflage module removes (task 00062).</summary>
+    public const string SignatureCut = "signature_cut";
+
+    /// <summary>How far a drone may fly from the ship that launched it, in field units (task 00062).</summary>
+    public const string LeashRadius = "leash_radius";
+
+    /// <summary>The speed of a drone hull on the field, in field units per second (task 00062).</summary>
+    public const string DroneSpeed = "drone_speed";
+
+    /// <summary>
     /// Gets every kind, in the order of the form of the admin panel.
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
@@ -166,6 +184,11 @@ public static class CharacteristicKinds
         JumpPrep,
         Upkeep,
         AssemblyTime,
+        Accuracy,
+        Signature,
+        SignatureCut,
+        LeashRadius,
+        DroneSpeed,
     ];
 
     /// <summary>

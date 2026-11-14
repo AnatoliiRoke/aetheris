@@ -219,7 +219,8 @@ public sealed class SaveShipDesignCommand : Command<SaveShipDesignCommand.Reques
                     slot.SlotIndex ?? 0,
                     slot.PartTypeId ?? 0,
                     slot.MarkLevel ?? 0,
-                    slot.HasRaceBonus ?? false))],
+                    slot.HasRaceBonus ?? false,
+                    slot.PowerPriority))],
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -246,11 +247,13 @@ public sealed class SaveShipDesignCommand : Command<SaveShipDesignCommand.Reques
     /// <param name="PartTypeId">The part in the slot.</param>
     /// <param name="MarkLevel">The mark of the part in the slot.</param>
     /// <param name="HasRaceBonus">Whether the part in the slot carries the bonus of the race that made it.</param>
+    /// <param name="PowerPriority">The shutdown order of the slot, or <see langword="null"/> for the order of the group.</param>
     public sealed record SlotRequest(
         [property: JsonPropertyName("slot_index")] int? SlotIndex,
         [property: JsonPropertyName("part_type_id")] int? PartTypeId,
         [property: JsonPropertyName("mark_level")] int? MarkLevel,
-        [property: JsonPropertyName("has_race_bonus")] bool? HasRaceBonus);
+        [property: JsonPropertyName("has_race_bonus")] bool? HasRaceBonus,
+        [property: JsonPropertyName("power_priority")] int? PowerPriority);
 }
 
 /// <summary>

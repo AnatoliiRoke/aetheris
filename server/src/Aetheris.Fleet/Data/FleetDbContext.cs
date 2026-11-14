@@ -47,6 +47,12 @@ public sealed class FleetDbContext : DbContext
     private const int SpeedScale = 6;
 
     /// <summary>
+    /// The shutdown order stored when a row is written without the column (task 00062).
+    /// A saved project sets its own number. The bounds of a sent number are 0 and 1000.
+    /// </summary>
+    private const short SlotPowerPriorityDefault = 100;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="FleetDbContext"/> class.
     /// </summary>
     /// <param name="options">The database options.</param>
@@ -137,6 +143,15 @@ public sealed class FleetDbContext : DbContext
             entity.HasIndex(e => e.DesignId);
             entity.HasIndex(e => new { e.DesignId, e.SlotIndex }).IsUnique();
             entity.HasOne<ShipDesignEntity>().WithMany().HasForeignKey(e => e.DesignId).OnDelete(DeleteBehavior.Cascade);
+            // Zero is a real order: that slot turns off last. The database default covers a row
+            // written without the column. EF must still store an explicit zero, so the column is
+            // not treated as generated.
+            entity.Property(e => e.PowerPriority)
+                .HasDefaultValue(SlotPowerPriorityDefault)
+                .ValueGeneratedNever();
+            entity.ToTable(table => table.HasCheckConstraint(
+                "ck_ship_design_slot_power_priority",
+                "power_priority >= 0 AND power_priority <= 1000"));
         });
 
         modelBuilder.Entity<ShipyardQueueStateEntity>(entity =>

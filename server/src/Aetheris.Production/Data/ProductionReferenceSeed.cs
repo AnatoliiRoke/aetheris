@@ -2,6 +2,7 @@ using System.Text.Json;
 using Aetheris.Core.Data;
 using Aetheris.Core.Text;
 using Aetheris.Planets;
+using Aetheris.Production.Api;
 using Aetheris.Production.Data;
 using Aetheris.Production.Data.Entities;
 using Aetheris.Production.Services;
@@ -62,6 +63,7 @@ public static class ProductionReferenceSeed
             ?? throw new InvalidOperationException($"The embedded starting data {ResourceName} is empty.");
 
         CheckFuelShares(data);
+        CheckAccuracies(data);
 
         return data;
     }
@@ -87,6 +89,46 @@ public static class ProductionReferenceSeed
             {
                 throw new InvalidOperationException(
                     $"The fuel shares of the drive {drive.Key} add up to {sum} instead of one.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks the accuracy of every weapon (task 00062): the target is a group of hulls, the
+    /// accuracy lies from zero to one, and a weapon names a group only once.
+    /// </summary>
+    /// <param name="seed">The starting data.</param>
+    /// <exception cref="InvalidOperationException">A row of the accuracy is not acceptable.</exception>
+    private static void CheckAccuracies(ProductionSeedData seed)
+    {
+        ArgumentNullException.ThrowIfNull(seed);
+
+        Dictionary<string, bool> hullGroups = seed.PartGroups.ToDictionary(
+            group => group.Code,
+            group => group.IsHullGroup,
+            StringComparer.Ordinal);
+        HashSet<(string Part, string Target)> seen = [];
+
+        foreach (SeedPartAccuracy row in seed.PartAccuracies ?? [])
+        {
+            if (!hullGroups.TryGetValue(row.TargetGroup, out bool isHullGroup))
+            {
+                throw new InvalidOperationException(
+                    $"The accuracy of '{row.Part}' names the group '{row.TargetGroup}', which does not exist.");
+            }
+
+            string? problem = PartAccuracyRules.Problem(row.Value, isHullGroup);
+
+            if (problem is not null)
+            {
+                throw new InvalidOperationException(
+                    $"The accuracy of '{row.Part}' against '{row.TargetGroup}' is refused ({problem}).");
+            }
+
+            if (!seen.Add((row.Part, row.TargetGroup)))
+            {
+                throw new InvalidOperationException(
+                    $"The accuracy of '{row.Part}' names the group '{row.TargetGroup}' twice.");
             }
         }
     }
@@ -203,6 +245,7 @@ public static class ProductionReferenceSeed
                 DescriptionKey = ProductionTextKeys.GroupDescription(code),
                 SortOrder = group.SortOrder,
                 IsHullGroup = group.IsHullGroup,
+                DefaultPowerPriority = group.DefaultPowerPriority,
             };
 
             dbContext.PartGroups.Add(entity);
@@ -392,7 +435,17 @@ public static class ProductionReferenceSeed
 
         CheckFuelShares(data);
 
-        if (data.PartHulls is { Count: > 0 } || data.PartRaces is { Count: > 0 } || data.PartAmmunition is { Count: > 0 } || data.PartExtractions is { Count: > 0 } || data.PartFuels is { Count: > 0 })
+        foreach (SeedPartAccuracy row in data.PartAccuracies ?? [])
+        {
+            dbContext.PartAccuracies.Add(new PartAccuracyEntity
+            {
+                PartTypeId = partTypeIds[row.Part],
+                TargetPartGroupId = partGroupIds[row.TargetGroup],
+                Value = row.Value,
+            });
+        }
+
+        if (data.PartHulls is { Count: > 0 } || data.PartRaces is { Count: > 0 } || data.PartAmmunition is { Count: > 0 } || data.PartExtractions is { Count: > 0 } || data.PartFuels is { Count: > 0 } || data.PartAccuracies is { Count: > 0 })
         {
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -564,6 +617,7 @@ public static class ProductionReferenceSeed
 /// <param name="PartAmmunition">The ammunition every weapon fires (task 00040).</param>
 /// <param name="PartExtractions">What every module of extraction takes and where (task 00055).</param>
 /// <param name="PartFuels">The fuel of every drive and the share of every resource in it (task 00072).</param>
+/// <param name="PartAccuracies">The accuracy of every weapon against each group of hulls (task 00062).</param>
 public sealed record ProductionSeedData(
     IReadOnlyList<SeedPartGroup> PartGroups,
     IReadOnlyList<SeedPart> Parts,
@@ -575,7 +629,8 @@ public sealed record ProductionSeedData(
     IReadOnlyList<SeedPartRace>? PartRaces = null,
     IReadOnlyList<SeedPartAmmunition>? PartAmmunition = null,
     IReadOnlyList<SeedPartExtraction>? PartExtractions = null,
-    IReadOnlyList<SeedPartFuel>? PartFuels = null);
+    IReadOnlyList<SeedPartFuel>? PartFuels = null,
+    IReadOnlyList<SeedPartAccuracy>? PartAccuracies = null);
 
 /// <summary>A characteristic of the starting data.</summary>
 /// <param name="Code">The neutral code of the characteristic.</param>
@@ -640,6 +695,15 @@ public sealed record SeedPartFuel(
     string Resource,
     double Share);
 
+/// <summary>The accuracy of a weapon of the starting data against one group of hulls (task 00062).</summary>
+/// <param name="Part">The code of the weapon of the file.</param>
+/// <param name="TargetGroup">The code of the group of hulls.</param>
+/// <param name="Value">The accuracy, from zero to one.</param>
+public sealed record SeedPartAccuracy(
+    string Part,
+    string TargetGroup,
+    double Value);
+
 /// <summary>The races a part of the starting data belongs to (task 00042).</summary>
 /// <param name="Part">The code of the part of the file.</param>
 /// <param name="Races">The codes of the races the part belongs to.</param>
@@ -659,7 +723,8 @@ public sealed record SeedPartGroup(
     IReadOnlyDictionary<string, string> Name,
     IReadOnlyDictionary<string, string> Description,
     string? Parent = null,
-    bool IsHullGroup = false);
+    bool IsHullGroup = false,
+    short? DefaultPowerPriority = null);
 
 /// <summary>A part of the starting data.</summary>
 /// <param name="Code">The neutral code of the part.</param>

@@ -228,6 +228,35 @@ public sealed record AdminFieldRow(
     DateTimeOffset? DepletedAt,
     IReadOnlyList<AdminShareDto> CompositionIds);
 
+/// <summary>A nebula row of the admin panel: one placed nebula.</summary>
+/// <param name="Id">The nebula.</param>
+/// <param name="CelestialObjectId">The celestial object at its centre.</param>
+/// <param name="Name">The name.</param>
+/// <param name="ObjectTypeId">The type.</param>
+/// <param name="ObjectTypeCode">The code of the type.</param>
+/// <param name="ObjectTypeNameKey">The localisation key of the type.</param>
+/// <param name="SectorId">The sector.</param>
+/// <param name="X">The x of the centre within the sector.</param>
+/// <param name="Y">The y of the centre within the sector.</param>
+/// <param name="Z">The z of the centre within the sector.</param>
+/// <param name="Radius">The radius.</param>
+/// <param name="BlocksJumpDrive">Whether the jump drive is forbidden inside.</param>
+/// <param name="CompositionIds">The composition. A nebula never loses it.</param>
+public sealed record AdminNebulaRow(
+    long Id,
+    long CelestialObjectId,
+    string Name,
+    int ObjectTypeId,
+    string ObjectTypeCode,
+    string ObjectTypeNameKey,
+    int SectorId,
+    double X,
+    double Y,
+    double Z,
+    double Radius,
+    bool BlocksJumpDrive,
+    IReadOnlyList<AdminShareDto> CompositionIds);
+
 /// <summary>The filters of the body table.</summary>
 /// <param name="SectorId">Only this sector.</param>
 /// <param name="SystemId">Only this star system.</param>
@@ -242,3 +271,9 @@ public sealed record AdminBodyFilter(int? SectorId, long? SystemId, int? ObjectT
 /// <param name="Free">Only the free fields or only the fields in systems.</param>
 /// <param name="Depleted">Only the used up or only the remaining fields.</param>
 public sealed record AdminFieldFilter(int? SectorId, long? SystemId, bool? Free, bool? Depleted);
+
+/// <summary>The filters of the nebula table.</summary>
+/// <param name="SectorId">Only this sector.</param>
+/// <param name="ObjectTypeId">Only this type.</param>
+/// <param name="BlocksJumpDrive">Only the nebulae that forbid the jump drive, or only the ones that allow it.</param>
+public sealed record AdminNebulaFilter(int? SectorId, int? ObjectTypeId, bool? BlocksJumpDrive);

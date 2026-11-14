@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Aetheris.Combat</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!--
+    The module keeps its own reference rows. It reads fleet rows and the production catalog
+    to build a state, and it calls the pure library for the count. The dependencies go one way.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\Aetheris.Core\Aetheris.Core.csproj" />
+    <ProjectReference Include="..\Aetheris.Fleet\Aetheris.Fleet.csproj" />
+    <ProjectReference Include="..\Aetheris.Production\Aetheris.Production.csproj" />
+    <ProjectReference Include="..\Aetheris.Combat.Engine\Aetheris.Combat.Engine.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\combat-reference-seed.json" LogicalName="Aetheris.Combat.combat-reference-seed.json" />
+    <EmbeddedResource Include="Data\admin-reference-texts.json" LogicalName="Aetheris.Combat.admin-reference-texts.json" />
+  </ItemGroup>
+
+</Project>

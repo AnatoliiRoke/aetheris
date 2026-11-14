@@ -1,10 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useState, useMemo, type FormEvent } from 'react';
+import { useApi } from '../../api/useApi';
 import { Alert } from '../../components/Alert';
+import { GameIcon } from '../../components/GameIcon';
 import { useDocumentTitle } from '../../components/useDocumentTitle';
+import { siteConfig } from '../../config/site';
+import type { MessageKey } from '../../i18n/uk';
 import { useI18n } from '../../i18n/useI18n';
 import { routes } from '../../router/context';
 import { Link } from '../../router/Router';
+import { useSession } from '../../session/useSession';
 import { useTexts } from '../../texts/useTexts';
+import { fieldRuleErrors, planetNameProblems } from '../auth/authErrors';
 import { BuildingQueue } from './BuildingQueue';
 import { FinancePanel } from './FinancePanel';
 import { EnergyPanel, ResourcesPanel, StoragePanel } from './PlanetPanels';
@@ -23,6 +29,7 @@ import { useResearchCommands } from './useResearchCommands';
 import { useResourceGroups } from './useResourceGroups';
 import { useResourceCodes, useResourceNames } from './useResourceNames';
 import { usePlanetScreen } from './usePlanetScreen';
+import { useShellActions } from './useShell';
 import { useWorldReference } from './useWorldReference';
 
 /**
@@ -69,9 +76,17 @@ export function PlanetPage() {
   return (
     <div className="civ-main__in">
       <ScreenHead
-        badge={planet ? typeName : undefined}
         subtitle={planet?.coordinates ? galaxyPlace(t, planet.coordinates) : undefined}
         title={planet?.name ?? civilization.planetName ?? ''}
+        titleControl={
+          <PlanetHeading
+            badge={planet ? typeName : undefined}
+            isHome={civilization.planetId === planetId}
+            name={planet?.name ?? civilization.planetName ?? ''}
+            planetId={planetId}
+            titlePrefix={t('planet.title', { name: '' }).trim()}
+          />
+        }
         titlePrefix={t('planet.title', { name: '' }).trim()}
       />
       {notice ? <Alert kind={notice.kind}>{notice.text}</Alert> : null}
@@ -226,5 +241,138 @@ function QueueLoading({
         </p>
       )}
     </section>
+  );
+}
+
+/**
+ * The name of the body and the pencil that makes it editable. The server checks the name again.
+ */
+function PlanetHeading({
+  planetId,
+  name,
+  isHome,
+  badge,
+  titlePrefix,
+}: {
+  planetId: number;
+  name: string;
+  isHome: boolean;
+  badge?: string;
+  titlePrefix: string;
+}) {
+  const { t } = useI18n();
+  const { game } = useApi();
+  const { refresh } = useSession();
+  const { setPlanetName } = useShellActions();
+  const [renaming, setRenaming] = useState(false);
+  const [draft, setDraft] = useState(name);
+  const [busy, setBusy] = useState(false);
+  const [nameErrors, setNameErrors] = useState<MessageKey[]>([]);
+  const limits = { min: siteConfig.planetNameMinLength, max: siteConfig.planetNameMaxLength };
+
+  const close = () => {
+    setRenaming(false);
+    setNameErrors([]);
+    setDraft(name);
+  };
+
+  const onSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+
+    const problems = planetNameProblems(draft);
+
+    setNameErrors(problems);
+
+    if (problems.length > 0) {
+      return;
+    }
+
+    const nextName = draft.trim();
+
+    if (nextName === name) {
+      close();
+      return;
+    }
+
+    setBusy(true);
+
+    try {
+      const saved = await game.renamePlanet(planetId, nextName);
+
+      setPlanetName(saved.planetId, saved.name);
+
+      if (isHome) {
+        await refresh();
+      }
+
+      setRenaming(false);
+      setNameErrors([]);
+    } catch (error) {
+      const fields = fieldRuleErrors(error, 'planet_name');
+
+      setNameErrors(fields.length > 0 ? fields : ['error.generic.text']);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!renaming) {
+    return (
+      <>
+        <h1 aria-label={titlePrefix ? `${titlePrefix} ${name}` : name} className="player__title">
+          {name}
+        </h1>
+        <button
+          aria-label={t('planet.rename')}
+          className="icon-btn"
+          onClick={() => {
+            setDraft(name);
+            setNameErrors([]);
+            setRenaming(true);
+          }}
+          title={t('planet.rename')}
+          type="button"
+        >
+          <GameIcon name="pencil" />
+        </button>
+        {badge ? <span className="screen-head__badge">{badge}</span> : null}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <form className="screen-head__rename" onSubmit={(event) => void onSubmit(event)}>
+        <label className="visually-hidden" htmlFor="planet-rename">
+          {t('planet.rename')}
+        </label>
+        <input
+          aria-invalid={nameErrors.length > 0}
+          autoFocus
+          className="input"
+          id="planet-rename"
+          maxLength={siteConfig.planetNameMaxLength}
+          onChange={(event) => {
+            setDraft(event.target.value);
+            setNameErrors([]);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              close();
+            }
+          }}
+          value={draft}
+        />
+        <button className="btn btn--primary" disabled={busy} type="submit">
+          {t('planet.renameSave')}
+        </button>
+        <button className="btn btn--secondary" disabled={busy} onClick={close} type="button">
+          {t('planet.renameCancel')}
+        </button>
+        {nameErrors.length > 0 ? <p className="error-text">{nameErrors.map((key) => t(key, limits)).join(' ')}</p> : null}
+      </form>
+      {badge ? <span className="screen-head__badge">{badge}</span> : null}
+    </>
   );
 }

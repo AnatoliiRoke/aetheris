@@ -48,6 +48,9 @@ public static class WorldAdminEndpoints
         secured.MapGet("/world/fields", ReadFieldsAsync)
             .WithName("admin.world_fields_read");
 
+        secured.MapGet("/world/nebulae", ReadNebulaeAsync)
+            .WithName("admin.world_nebulae_read");
+
         secured.MapGet("/world/fields/{fieldId:long}", ReadFieldAsync)
             .WithName("admin.world_field_read");
 
@@ -170,6 +173,24 @@ public static class WorldAdminEndpoints
             ? SearchTooLong()
             : Results.Json(
                 await queries.GetFieldsAsync(page, new AdminFieldFilter(sectorId, systemId, free, depleted), cancellationToken).ConfigureAwait(false),
+                WorldJson.Options);
+    }
+
+    private static async Task<IResult> ReadNebulaeAsync(
+        [AsParameters] PageQuery query,
+        [FromQuery(Name = "sector_id")] int? sectorId,
+        [FromQuery(Name = "object_type_id")] int? objectTypeId,
+        [FromQuery(Name = "blocks_jump_drive")] bool? blocksJumpDrive,
+        WorldAdminQueryService queries,
+        IAdminQueryLimits limits,
+        CancellationToken cancellationToken)
+    {
+        PageRequest? page = query.ToRequest(limits);
+
+        return page is null
+            ? SearchTooLong()
+            : Results.Json(
+                await queries.GetNebulaeAsync(page, new AdminNebulaFilter(sectorId, objectTypeId, blocksJumpDrive), cancellationToken).ConfigureAwait(false),
                 WorldJson.Options);
     }
 

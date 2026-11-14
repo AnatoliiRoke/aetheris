@@ -30,6 +30,7 @@ public sealed class ModuleIsolationTests
         "Aetheris.Production",
         "Aetheris.Processes",
         "Aetheris.Mail",
+        "Aetheris.Combat",
     ];
 
     /// <summary>
@@ -56,6 +57,7 @@ public sealed class ModuleIsolationTests
         ["Aetheris.Market"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Production", "Aetheris.Requirements", "Aetheris.Economy"],
         ["Aetheris.Fleet"] = ["Aetheris.World", "Aetheris.Planets", "Aetheris.Production", "Aetheris.Economy", "Aetheris.Research", "Aetheris.Requirements", "Aetheris.Mail"],
         ["Aetheris.Mail"] = ["Aetheris.World"],
+        ["Aetheris.Combat"] = ["Aetheris.Fleet", "Aetheris.Production"],
     };
 
     private readonly AetherisTestFactory _factory;
@@ -89,6 +91,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Production")]
     [InlineData("Aetheris.Processes")]
     [InlineData("Aetheris.Mail")]
+    [InlineData("Aetheris.Combat")]
     public void A_module_does_not_reference_another_module(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -124,6 +127,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Production")]
     [InlineData("Aetheris.Processes")]
     [InlineData("Aetheris.Mail")]
+    [InlineData("Aetheris.Combat")]
     public void A_module_exposes_exactly_one_public_contract(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -158,6 +162,7 @@ public sealed class ModuleIsolationTests
     [InlineData("Aetheris.Production")]
     [InlineData("Aetheris.Processes")]
     [InlineData("Aetheris.Mail")]
+    [InlineData("Aetheris.Combat")]
     public void The_public_contract_follows_the_naming_convention(string moduleName)
     {
         Assembly assembly = GetModuleAssembly(moduleName);
@@ -197,6 +202,7 @@ public sealed class ModuleIsolationTests
         Assert.NotNull(services.GetService<Aetheris.Production.IProductionModule>());
         Assert.NotNull(services.GetService<Aetheris.Processes.IProcessesModule>());
         Assert.NotNull(services.GetService<Aetheris.Mail.IMailModule>());
+        Assert.NotNull(services.GetService<Aetheris.Combat.ICombatModule>());
     }
 
     /// <summary>
@@ -236,9 +242,14 @@ public sealed class ModuleIsolationTests
         Aetheris.Fleet.IFleetModule first = firstScope.ServiceProvider.GetRequiredService<Aetheris.Fleet.IFleetModule>();
         Aetheris.Fleet.IFleetModule second = secondScope.ServiceProvider.GetRequiredService<Aetheris.Fleet.IFleetModule>();
         Aetheris.Fleet.IFleetModule sameScope = firstScope.ServiceProvider.GetRequiredService<Aetheris.Fleet.IFleetModule>();
+        Aetheris.Combat.ICombatModule combatFirst = firstScope.ServiceProvider.GetRequiredService<Aetheris.Combat.ICombatModule>();
+        Aetheris.Combat.ICombatModule combatSecond = secondScope.ServiceProvider.GetRequiredService<Aetheris.Combat.ICombatModule>();
+        Aetheris.Combat.ICombatModule combatSame = firstScope.ServiceProvider.GetRequiredService<Aetheris.Combat.ICombatModule>();
 
         Assert.NotSame(first, second);
         Assert.Same(first, sameScope);
+        Assert.NotSame(combatFirst, combatSecond);
+        Assert.Same(combatFirst, combatSame);
     }
 
     private static Assembly GetModuleAssembly(string moduleName)

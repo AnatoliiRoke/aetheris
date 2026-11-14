@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Data\hull-shipyard-levels.json" LogicalName="Aetheris.Fleet.hull-shipyard-levels.json" />
+    <EmbeddedResource Include="Data\power-priority-defaults.json" LogicalName="Aetheris.Fleet.power-priority-defaults.json" />
   </ItemGroup>
 
 </Project>

@@ -29,6 +29,15 @@ public sealed class ShipCatalogService
     /// <summary>The kind of the characteristic that holds the strength of a hull.</summary>
     public const string IntegrityCharacteristic = CharacteristicKinds.Integrity;
 
+    /// <summary>The kind of the signature of a hull (task 00062).</summary>
+    public const string SignatureCharacteristic = CharacteristicKinds.Signature;
+
+    /// <summary>The kind of the share of the signature a camouflage module removes (task 00062).</summary>
+    public const string SignatureCutCharacteristic = CharacteristicKinds.SignatureCut;
+
+    /// <summary>The kind of the leash of a ship that launches drones (task 00062).</summary>
+    public const string LeashRadiusCharacteristic = CharacteristicKinds.LeashRadius;
+
     /// <summary>The kind of the characteristic that holds the energy a module takes.</summary>
     public const string EnergyUseCharacteristic = CharacteristicKinds.EnergyUse;
 
@@ -70,6 +79,24 @@ public sealed class ShipCatalogService
 
     /// <summary>The kind of the characteristic that holds the assembly time of a hull, in game seconds.</summary>
     public const string AssemblyTimeCharacteristic = CharacteristicKinds.AssemblyTime;
+
+    /// <summary>The kind of the speed of a drone hull (task 00062).</summary>
+    public const string DroneSpeedCharacteristic = CharacteristicKinds.DroneSpeed;
+
+    /// <summary>The stable code of the range. The row has no kind, so the catalog reads the code.</summary>
+    public const string RangeCode = "char_range";
+
+    /// <summary>The stable code of the flight speed. The row has no kind.</summary>
+    public const string FlightSpeedCode = "char_flight_speed";
+
+    /// <summary>The stable code of the energy block. The row has no kind.</summary>
+    public const string EnergyBlockCode = "char_energy_block";
+
+    /// <summary>The stable code of the kinetic block. The row has no kind.</summary>
+    public const string KineticBlockCode = "char_kinetic_block";
+
+    /// <summary>The stable code of the magazine. The row has no kind.</summary>
+    public const string MagazineCode = "char_magazine";
 
     private readonly ProductionCatalogCache _catalog;
     private readonly ProductionDbContext _dbContext;
@@ -115,6 +142,12 @@ public sealed class ShipCatalogService
         Dictionary<string, int> characteristicIds = catalog.Characteristics
             .Where(characteristic => characteristic.Kind is not null)
             .GroupBy(characteristic => characteristic.Kind!, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.First().Id, StringComparer.Ordinal);
+
+        // Five combat characteristics have no kind. Their neutral code is the file code and
+        // does not change when the database assigns its own codes (task 00063).
+        Dictionary<string, int> characteristicCodes = catalog.Characteristics
+            .GroupBy(characteristic => characteristic.Code, StringComparer.Ordinal)
             .ToDictionary(group => group.Key, group => group.First().Id, StringComparer.Ordinal);
 
         HashSet<int> hullGroupIds = [.. catalog.Groups
@@ -169,7 +202,10 @@ public sealed class ShipCatalogService
                     part.IsArchived,
                     ValueOf(part, characteristicIds, UpkeepCharacteristic),
                     ValueOf(part, characteristicIds, CrewCharacteristic),
-                    AssemblySecondsOf(part, characteristicIds))),
+                    AssemblySecondsOf(part, characteristicIds),
+                    ValueOf(part, characteristicIds, SignatureCharacteristic),
+                    ValueOf(part, characteristicIds, LeashRadiusCharacteristic),
+                    ValueOf(part, characteristicIds, DroneSpeedCharacteristic))),
         ];
 
         List<ShipModuleDto> modules =
@@ -227,7 +263,16 @@ public sealed class ShipCatalogService
                         ? [.. part.Fuel.Select(row => new ShipModuleFuelDto(row.ResourceTypeId, row.Share))]
                         : null,
                     part.Attributes.ContainsKey(PartAttributeKeys.CargoOnly),
-                    RoleOf(part, PartAttributeKeys.CargoOrder))),
+                    RoleOf(part, PartAttributeKeys.CargoOrder),
+                    part.Accuracy is { Count: > 0 } ? part.Accuracy : null,
+                    ValueOf(part, characteristicIds, IntegrityCharacteristic),
+                    ValueOf(part, characteristicIds, SignatureCutCharacteristic),
+                    catalog.FindGroup(part.PartGroupId)?.DefaultPowerPriority,
+                    ValueByCode(part, characteristicCodes, RangeCode),
+                    ValueByCode(part, characteristicCodes, FlightSpeedCode),
+                    ValueByCode(part, characteristicCodes, EnergyBlockCode),
+                    ValueByCode(part, characteristicCodes, KineticBlockCode),
+                    ValueByCode(part, characteristicCodes, MagazineCode))),
         ];
 
         // The ammunition is not a module of a ship: the constructor does not offer it, and the
@@ -240,7 +285,9 @@ public sealed class ShipCatalogService
                     part.Id,
                     ValueOf(part, characteristicIds, DamageCharacteristic),
                     RoleOf(part, PartAttributeKeys.DamageKind),
-                    ValueOf(part, characteristicIds, LauncherSizeCharacteristic))),
+                    ValueOf(part, characteristicIds, LauncherSizeCharacteristic),
+                    ValueByCode(part, characteristicCodes, FlightSpeedCode),
+                    ValueByCode(part, characteristicCodes, RangeCode))),
         ];
 
         // The types of the modules: the groups of the parts are the types, so the picker of the
@@ -316,6 +363,21 @@ public sealed class ShipCatalogService
 
         return part.Characteristics.TryGetValue(characteristicId, out PartCharacteristicInfo? value)
             ? value.NumberValue
+            : 0m;
+    }
+
+    /// <summary>
+    /// Reads the value of a characteristic by its stable file code.
+    /// </summary>
+    private static decimal ValueByCode(PartTypeInfo part, IReadOnlyDictionary<string, int> characteristicCodes, string code)
+    {
+        if (!characteristicCodes.TryGetValue(code, out int characteristicId))
+        {
+            return 0m;
+        }
+
+        return part.Characteristics.TryGetValue(characteristicId, out PartCharacteristicInfo? entry)
+            ? entry.NumberValue
             : 0m;
     }
 

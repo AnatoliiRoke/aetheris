@@ -646,6 +646,11 @@ namespace Aetheris.Fleet.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("part_type_id");
 
+                    b.Property<short>("PowerPriority")
+                        .HasColumnType("smallint")
+                        .HasDefaultValue((short)100)
+                        .HasColumnName("power_priority");
+
                     b.Property<int>("SlotIndex")
                         .HasColumnType("integer")
                         .HasColumnName("slot_index");
@@ -660,7 +665,10 @@ namespace Aetheris.Fleet.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_ship_design_slot_design_id_slot_index");
 
-                    b.ToTable("ship_design_slot", (string)null);
+                    b.ToTable("ship_design_slot", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_ship_design_slot_power_priority", "power_priority >= 0 AND power_priority <= 1000");
+                        });
                 });
 
             modelBuilder.Entity("Aetheris.Fleet.Data.Entities.ShipEntity", b =>

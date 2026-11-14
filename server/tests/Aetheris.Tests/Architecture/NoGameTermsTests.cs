@@ -37,7 +37,7 @@ public sealed partial class NoGameTermsTests
     /// The prefixes that a seeded parameter key may have: the neutral test parameters, the
     /// parameters of the core mechanisms and those of the modules with their own definitions.
     /// </summary>
-    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world.", "admin.", "texts.", "planets.", "research.", "production.", "processes.", "economy.", "market.", "fleet.", "mail.", "observability."];
+    private static readonly string[] AllowedSeedPrefixes = ["test.", "security.", "scheduler.", "world.", "admin.", "texts.", "planets.", "research.", "production.", "processes.", "economy.", "market.", "fleet.", "mail.", "combat.", "observability."];
 
     /// <summary>
     /// The folders, relative to the server root, where the words of the game domain are
@@ -63,6 +63,9 @@ public sealed partial class NoGameTermsTests
         Path.Combine("tests", "Aetheris.Tests", "Market") + Path.DirectorySeparatorChar,
         Path.Combine("src", "Aetheris.Fleet") + Path.DirectorySeparatorChar,
         Path.Combine("tests", "Aetheris.Tests", "Fleet") + Path.DirectorySeparatorChar,
+        Path.Combine("src", "Aetheris.Combat") + Path.DirectorySeparatorChar,
+        Path.Combine("src", "Aetheris.Combat.Engine") + Path.DirectorySeparatorChar,
+        Path.Combine("tests", "Aetheris.Tests", "Combat") + Path.DirectorySeparatorChar,
         // The mail of task 00060 is a part of the game, so its tests need a civilization of the
         // game domain and name it.
         Path.Combine("tests", "Aetheris.Tests", "Mail") + Path.DirectorySeparatorChar,
