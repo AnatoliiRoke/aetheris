@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Logging, metrics, tracing">
-    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="11.0.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.20.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.20.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.20.1" />
